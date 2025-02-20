@@ -1,4 +1,3 @@
-# Use postgres/example user/password credentials
 version: "3.9"
 
 services:
@@ -13,4 +12,6 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - "/home/selab2/persistent/postgresql:/var/lib/postgresql/data"
+    ports:
+      - "2002:5432"
     restart: always
