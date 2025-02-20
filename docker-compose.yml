@@ -1,0 +1,16 @@
+# Use postgres/example user/password credentials
+version: "3.9"
+
+services:
+  postgres:
+    container_name: website-postgres
+    hostname: postgres
+    image: postgres
+    environment:
+      POSTGRES_DB: selab2
+      POSTGRES_USER: selab2
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - "/home/selab2/persistent/postgresql:/var/lib/postgresql/data"
+    restart: always
