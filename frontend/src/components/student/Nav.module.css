@@ -1,0 +1,71 @@
+/* Standaard Navigatie */
+.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    flex-wrap: wrap;
+    font-family: "Public Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+ }
+
+ .nav a{
+    align-self: center;
+ }
+ 
+ 
+ /* Hamburger Icon Styling */
+ .hamburger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+ }
+ 
+ .hamburger span {
+    background: #000;
+    display: block;
+    height: 4px;
+    margin: 4px 0;
+    border-radius: 10px;
+    width: 35px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+ }
+ 
+ /* Mobiele Navigatie */
+ .navLinks {
+    display: flex;
+    gap: 20px;
+ }
+ 
+ /* Hidden Mobile Menu */
+ @media (max-width: 768px) {
+    .hamburger {
+       display: flex;
+    }
+ 
+    .navLinks {
+       display: none;
+       flex-direction: column;
+       position: absolute;
+       top: 150px;
+       left: 0;
+       width: 100%;
+       background-color: #fff;
+       padding: 20px 40px;
+       z-index: 10;
+       border-radius: 0 0 30px 30px;
+       border-bottom: #00000027 solid 3px;
+    }
+ 
+    .navLinks.open {
+       display: flex;
+    }
+ 
+    .navLinks a {
+       color: #000;
+       text-decoration: none;
+       font-size: 18px;
+       padding: 10px 0;
+    }
+ }
