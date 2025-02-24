@@ -14,7 +14,7 @@ POSTGRES_PASSWORD=passwor
 DATABASE_URL="postgresql://selab2:passwor@localhost:2002/selab2?schema=public"
 ```
 
-(note: deze link bepaald of je de remote of lokale databank gebruikt, @sel2-4 is de remote dus pas de env file aan accordingly)
+(note: deze link bepaald of je de remote of lokale databank gebruikt, De link voor de remote databank kan je vinden in pinned messages in discord)
 
 6. Run `cp .env dwengo_backend`
 7. Run `cd dwengo_backend`
