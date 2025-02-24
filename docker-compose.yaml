@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  postgres:
+    container_name: website-postgres-local
+    hostname: postgres
+    image: postgres
+    environment:
+      POSTGRES_DB: selab2
+      POSTGRES_USER: selab2
+      POSTGRES_PASSWORD: selab2
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - "/home/selab2/persistent/postgresql:/var/lib/postgresql/data"
+    ports:
+      - "2002:5432"
+    restart: always
