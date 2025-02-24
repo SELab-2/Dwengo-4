@@ -1,33 +1,124 @@
+// Prisma schema voor het EER diagram
+
+datasource db {
+  provider = "postgresql" // Vervang door je database provider (bv. mysql, sqlite)
+  url      = env("DATABASE_URL")
+}
+
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+model User {
+  userId     Int      @id @default(autoincrement())
+  naam       String
+  email      String   @unique
+  paswoord   String
+  actief     Boolean  @default(true) // Standaard actief, dus zeker nuttig voor gebruikersbeheer
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  admin      Admin?
+  student    Student?
+  teacher    Teacher?
 }
 
-model Teacher {
-  id         String      @id @default(uuid())
-  email      String      @unique
-  password   String
-  createdAt  DateTime    @default(now())
-  classrooms Classroom[]
+model Admin {
+  userId Int   @id
+  user   User @relation(fields: [userId], references: [userId])
 }
 
 model Student {
-  id         String      @id @default(uuid())
-  email      String      @unique
-  password   String
-  createdAt  DateTime    @default(now())
-  classrooms Classroom[]
+  userId Int   @id
+  user   User @relation(fields: [userId], references: [userId])
 }
 
-model Classroom {
-  id        String    @id @default(uuid())
-  name      String
-  joinCode  String    @unique
-  teacher   Teacher   @relation(fields: [teacherId], references: [id])
-  teacherId String
-  students  Student[]
+model Teacher {
+  userId Int   @id
+  user   User @relation(fields: [userId], references: [userId])
+}
+
+model Class {
+  classId    Int      @id @default(autoincrement())
+  naam       String
+  code       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model LearningPath {
+  learningPathId Int      @id @default(autoincrement())
+  hruid          String
+  title          String
+  language       String
+  description    String?
+  image          String?
+  nodes          Json // "array: nodes -> samengesteld attribuut" wordt Json in Prisma
+  minItems       Int?
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+}
+
+model LearningObject {
+  learningObjectId  String   @id
+  uuid              String?
+  version           String?
+  language          String?
+  title             String?
+  description       String?
+  content_type      String?
+  keywords          String?
+  target_ages       String?
+  teacher_exclusive Boolean?
+  skos_concepts     String?
+  copyright         String?
+  licence           String?
+  difficulty        Int?
+  estimated_time    Int?
+  available         Boolean?
+  content_location  String?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  evaluations       Evaluation[]
+  educationalGoals  EducationalGoal[]
+  returnValues      ReturnValue[]
+}
+
+model Evaluation {
+  learningObjectId String         @id
+  learningObject   LearningObject @relation(fields: [learningObjectId], references: [learningObjectId])
+  multipleChoice   MultipleChoice?
+  openQuestion     OpenQuestion?
+}
+
+model MultipleChoice {
+  evaluationId String     @id
+  evaluation   Evaluation @relation(fields: [evaluationId], references: [learningObjectId]) // FK verwijst naar learningObjectId van Evaluation, correct?
+}
+
+model OpenQuestion {
+  evaluationId String     @id
+  evaluation   Evaluation @relation(fields: [evaluationId], references: [learningObjectId]) // FK verwijst naar learningObjectId van Evaluation, correct?
+}
+
+model EducationalGoal {
+  educationalGoalId String         @id
+  learningObjectId  String // Dit is de Foreign Key, behoud deze
+  learningObject    LearningObject @relation(fields: [learningObjectId], references: [learningObjectId]) // Correcte relatie definitie
+  source            String?
+  goal_id           String?
+}
+
+model ReturnValue {
+  returnValueId    Int            @id @default(autoincrement())
+  learningObjectId String // Dit is de Foreign Key, behoud deze
+  learningObject   LearningObject @relation(fields: [learningObjectId], references: [learningObjectId]) // Correcte relatie definitie
+  callback_url     String?
+  callback_schema  String?
+}
+
+
+enum ContentType {
+  VIDEO
+  ARTICLE
+  INTERACTIVE
 }
