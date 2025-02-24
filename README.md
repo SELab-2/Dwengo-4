@@ -6,7 +6,16 @@
 2. Zorg dat je in de root van het project zit.
 3. Run `sudo docker compose up -d`
 4. Maak een .env file in de root van het project
-5. in je .env file steek het volgende `DATABASE_URL="postgresql://selab2:selab2@localhost:2002/selab2?schema=public"` (note: deze link bepaald of je de remote of lokale databank gebruikt, @sel2-4 is de remote dus pas de env file aan accordingly)
+5. in je .env file steek het volgende
+
+```
+POSTGRES_PASSWORD=passwor
+
+DATABASE_URL="postgresql://selab2:passwor@localhost:2002/selab2?schema=public"
+```
+
+(note: deze link bepaald of je de remote of lokale databank gebruikt, @sel2-4 is de remote dus pas de env file aan accordingly)
+
 6. Run `cp .env dwengo_backend`
 7. Run `cd dwengo_backend`
 8. Run `prisma migrate dev`
