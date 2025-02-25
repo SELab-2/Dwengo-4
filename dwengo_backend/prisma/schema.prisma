@@ -7,7 +7,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 /// Enums: aanpassing bsporken: minder 1-1-relaties
 
 enum Role {
@@ -26,7 +25,6 @@ enum EvaluationType {
   OPEN
   MULTIPLE
 }
-
 
 /// Gebruiker – enkele tabel met rol (aangepast)
 
@@ -56,9 +54,25 @@ model User {
   // Door deze gebruiker (als teacher) aangemaakte leerpaden en leerobjecten
   createdLearningPaths   LearningPath[]    @relation("LearningPathCreator")
   createdLearningObjects LearningObject[]  @relation("LearningObjectCreator")
+  Admin                  Admin[]
+  Teacher                Teacher[]
+  Student                Student[]
 }
 
+model Admin {
+  userId Int  @id
+  user   User @relation(fields: [userId], references: [id])
+}
 
+model Teacher {
+  userId Int  @id
+  user   User @relation(fields: [userId], references: [id])
+}
+
+model Student {
+  userId Int  @id
+  user   User @relation(fields: [userId], references: [id])
+}
 
 model Class {
   id        Int      @id @default(autoincrement())
@@ -99,7 +113,6 @@ model JoinRequest {
   @@id([userId, classId])
 }
 
-
 model LearningPath {
   id          Int      @id @default(autoincrement())
   title       String   @unique
@@ -126,7 +139,6 @@ model LearningPathNode {
 
   @@id([learningPathId, nodeId])
 }
-
 
 model LearningObject {
   id               String   @id
@@ -174,7 +186,6 @@ model ReturnValue {
 
   learningObject LearningObject @relation(fields: [learningObjectId], references: [id])
 }
-
 
 model Evaluation {
   id             String         @id
@@ -240,7 +251,6 @@ model QuestionAnswer {
 
   @@id([studentQuestionId, teacherAnswerId])
 }
-
 
 model Assignment {
   id             Int      @id @default(autoincrement())
@@ -308,7 +318,6 @@ model TeamSubmission {
   @@id([teamId, submissionId])
 }
 
-
 model TeacherFeedback {
   id       Int    @id @default(autoincrement())
   userId   Int
@@ -328,7 +337,6 @@ model SubmissionFeedback {
 
   @@id([submissionId, feedbackId])
 }
-
 
 model LearningObjectProgress {
   id               Int     @id @default(autoincrement())
