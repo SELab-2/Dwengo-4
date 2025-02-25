@@ -39,16 +39,9 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relaties naar klassen (veel-op-veel)
-  classLinks       ClassUser[]
+  classLinks   ClassUser[]
   // Verzoeken om lid te worden van een klas
-  joinRequests     JoinRequest[]
-  // Vragen (voor studenten)
-  studentQuestions StudentQuestion[]
-
-  // Voortgang (voor studenten)
-  progress        StudentProgress[]
-  // Teamtoewijzingen (voor studenten)
-  teamAssignments TeamAssignment[]
+  joinRequests JoinRequest[]
 
   admin   Admin?
   teacher Teacher?
@@ -76,6 +69,14 @@ model Teacher {
 model Student {
   userId Int  @id
   user   User @relation(fields: [userId], references: [id])
+
+  // Vragen van studenten
+  studentQuestions StudentQuestion[]
+
+  // Voortgang van studenten
+  progress        StudentProgress[]
+  // Teamtoewijzingen van studenten
+  teamAssignments TeamAssignment[]
 }
 
 model Class {
@@ -229,11 +230,11 @@ model MultipleChoiceOption {
 
 model StudentQuestion {
   id          Int    @id @default(autoincrement())
-  userId      Int
+  studentId   Int
   title       String
   description String
 
-  user            User             @relation(fields: [userId], references: [id])
+  student         Student          @relation(fields: [studentId], references: [userId])
   questionAnswers QuestionAnswer[]
 }
 
@@ -294,7 +295,7 @@ model TeamAssignment {
 
   team            Team            @relation(fields: [teamId], references: [id])
   classAssignment ClassAssignment @relation(fields: [classAssignmentId], references: [id])
-  member          User            @relation(fields: [memberId], references: [id])
+  member          Student         @relation(fields: [memberId], references: [userId])
   Assignment      Assignment?     @relation(fields: [assignmentId], references: [id])
   assignmentId    Int?
 
@@ -355,7 +356,7 @@ model StudentProgress {
   studentId  Int
   progressId Int
 
-  student  User                   @relation(fields: [studentId], references: [id])
+  student  Student                @relation(fields: [studentId], references: [userId])
   progress LearningObjectProgress @relation(fields: [progressId], references: [id])
 
   @@id([studentId, progressId])
