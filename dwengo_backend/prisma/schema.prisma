@@ -7,7 +7,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
-/// Enums: aanpassing bsporken: minder 1-1-relaties
+/// Enums: aanpassing besproken: minder 1-1-relaties
 
 enum Role {
   ADMIN
@@ -125,7 +125,7 @@ model ClassTeacher {
 }
 
 ///
-/// JoinRequest – voor verzoeken om een klas te kjoinen
+/// JoinRequest – voor verzoeken om een klas te joinen
 
 model JoinRequest {
   studentId Int
@@ -257,7 +257,7 @@ model MultipleChoiceOption {
 }
 
 ///
-/// Vragen ehn antwoorden
+/// Vragen en antwoorden
 
 model StudentQuestion {
   id          Int    @id @default(autoincrement())
