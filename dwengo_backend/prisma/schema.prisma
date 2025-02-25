@@ -38,11 +38,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relaties naar klassen (veel-op-veel)
-  classLinks   ClassUser[]
-  // Verzoeken om lid te worden van een klas
-  joinRequests JoinRequest[]
-
   admin   Admin?
   teacher Teacher?
   student Student?
@@ -60,10 +55,14 @@ model Teacher {
   // Antwoorden en feedback
   teacherAnswers   TeacherAnswer[]
   teacherFeedbacks TeacherFeedback[]
+  // Uitnodigingen om een klas mee te beheren
+  invite           Invite[]
 
   // Door deze gebruiker (als teacher) aangemaakte leerpaden en leerobjecten
   createdLearningPaths   LearningPath[]   @relation("LearningPathCreator")
   createdLearningObjects LearningObject[] @relation("LearningObjectCreator")
+
+  teaches ClassTeacher[]
 }
 
 model Student {
@@ -77,6 +76,12 @@ model Student {
   progress        StudentProgress[]
   // Teamtoewijzingen van studenten
   teamAssignments TeamAssignment[]
+
+  // Verzoeken om lid te worden van een klas
+  joinRequests JoinRequest[]
+
+  // Relaties naar klassen (veel-op-veel)
+  classes ClassStudent[]
 }
 
 model Class {
@@ -86,36 +91,62 @@ model Class {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  classLinks   ClassUser[]
+  classLinks   ClassStudent[]
   joinRequests JoinRequest[]
   assignments  ClassAssignment[]
+  Invite       Invite[]
+  ClassTeacher ClassTeacher[]
 }
 
 ///
-/// Tussentabel om een User aan een Class te koppelen
+/// Tussentabel om een Student aan een Class te koppelen
 ///
-model ClassUser {
-  userId  Int
-  classId Int
+model ClassStudent {
+  studentId Int
+  classId   Int
 
-  user  User  @relation(fields: [userId], references: [id])
-  class Class @relation(fields: [classId], references: [id])
+  student Student @relation(fields: [studentId], references: [userId])
+  class   Class   @relation(fields: [classId], references: [id])
 
-  @@id([userId, classId])
+  @@id([studentId, classId])
+}
+
+///
+/// Tussentabel om een Teacher aan een Class te koppelen
+///
+model ClassTeacher {
+  teacherId Int
+  classId   Int
+
+  teacher Teacher @relation(fields: [teacherId], references: [userId])
+  class   Class   @relation(fields: [classId], references: [id])
+
+  @@id([teacherId, classId])
 }
 
 ///
 /// JoinRequest – voor verzoeken om een klas te kjoinen
 
 model JoinRequest {
-  userId  Int
-  classId Int
-  status  JoinRequestStatus
+  studentId Int
+  classId   Int
+  status    JoinRequestStatus
 
-  user  User  @relation(fields: [userId], references: [id])
-  class Class @relation(fields: [classId], references: [id])
+  student Student @relation(fields: [studentId], references: [userId])
+  class   Class   @relation(fields: [classId], references: [id])
 
-  @@id([userId, classId])
+  @@id([studentId, classId])
+}
+
+model Invite {
+  teacherId Int
+  classId   Int
+  status    JoinRequestStatus
+
+  teacher Teacher @relation(fields: [teacherId], references: [userId])
+  class   Class   @relation(fields: [classId], references: [id])
+
+  @@id([teacherId, classId])
 }
 
 model LearningPath {
