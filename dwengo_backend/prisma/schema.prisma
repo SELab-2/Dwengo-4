@@ -39,24 +39,20 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relaties naar klassen (veel-op-veel)
-  classLinks             ClassUser[]
+  classLinks       ClassUser[]
   // Verzoeken om lid te worden van een klas
-  joinRequests           JoinRequest[]
+  joinRequests     JoinRequest[]
   // Vragen (voor studenten)
-  studentQuestions       StudentQuestion[]
-  // Antwoorden en feedback (voor leerkrachten)
-  teacherAnswers         TeacherAnswer[]
-  teacherFeedbacks       TeacherFeedback[]
+  studentQuestions StudentQuestion[]
+
   // Voortgang (voor studenten)
-  progress               StudentProgress[]
+  progress        StudentProgress[]
   // Teamtoewijzingen (voor studenten)
-  teamAssignments        TeamAssignment[]
-  // Door deze gebruiker (als teacher) aangemaakte leerpaden en leerobjecten
-  createdLearningPaths   LearningPath[]    @relation("LearningPathCreator")
-  createdLearningObjects LearningObject[]  @relation("LearningObjectCreator")
-  Admin                  Admin[]
-  Teacher                Teacher[]
-  Student                Student[]
+  teamAssignments TeamAssignment[]
+
+  admin   Admin?
+  teacher Teacher?
+  student Student?
 }
 
 model Admin {
@@ -67,6 +63,14 @@ model Admin {
 model Teacher {
   userId Int  @id
   user   User @relation(fields: [userId], references: [id])
+
+  // Antwoorden en feedback
+  teacherAnswers   TeacherAnswer[]
+  teacherFeedbacks TeacherFeedback[]
+
+  // Door deze gebruiker (als teacher) aangemaakte leerpaden en leerobjecten
+  createdLearningPaths   LearningPath[]   @relation("LearningPathCreator")
+  createdLearningObjects LearningObject[] @relation("LearningObjectCreator")
 }
 
 model Student {
@@ -125,7 +129,7 @@ model LearningPath {
   updatedAt   DateTime @updatedAt
 
   creatorId Int
-  creator   User @relation(fields: [creatorId], references: [id], name: "LearningPathCreator")
+  creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator")
 
   assignments       Assignment[]
   learningPathNodes LearningPathNode[]
@@ -161,7 +165,7 @@ model LearningObject {
   updatedAt        DateTime @updatedAt
 
   creatorId Int
-  creator   User @relation(fields: [creatorId], references: [id], name: "LearningObjectCreator")
+  creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningObjectCreator")
 
   evaluations      Evaluation[]
   educationalGoals EducationalGoal[]
@@ -234,11 +238,11 @@ model StudentQuestion {
 }
 
 model TeacherAnswer {
-  id     Int    @id @default(autoincrement())
-  userId Int
-  answer String
+  id        Int    @id @default(autoincrement())
+  teacherId Int
+  answer    String
 
-  user            User             @relation(fields: [userId], references: [id])
+  teacher         Teacher          @relation(fields: [teacherId], references: [userId])
   questionAnswers QuestionAnswer[]
 }
 
@@ -319,11 +323,11 @@ model TeamSubmission {
 }
 
 model TeacherFeedback {
-  id       Int    @id @default(autoincrement())
-  userId   Int
-  feedback String
+  id        Int    @id @default(autoincrement())
+  teacherId Int
+  feedback  String
 
-  user                User                 @relation(fields: [userId], references: [id])
+  teacher             Teacher              @relation(fields: [teacherId], references: [userId])
   submissionFeedbacks SubmissionFeedback[]
 }
 
