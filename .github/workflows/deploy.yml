@@ -1,0 +1,41 @@
+name: Deploy Server
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        run: |
+          # Use existing Node.js on the server or ensure it's installed
+          # This step is optional if Node.js is already set up on your server
+          echo "Using Node.js $(node --version)"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build application
+        run: npm run build
+
+      - name: Deploy application
+        run: |
+          # Example: Copy built files to deployment directory
+          cp -r ./dist/* /path/to/your/deployment/directory/
+
+          # Example: Restart your application server
+          # systemctl restart your-service
+          # OR
+          # pm2 restart your-app-name
+
+          echo "Deployment completed successfully"
