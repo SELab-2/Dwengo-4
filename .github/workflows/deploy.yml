@@ -10,6 +10,12 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Pull repo
+        run: |
+          cd /home/selab2/Dwengo-4/
+          git pull
+
+    steps:
       - name: Deploy application
         run: |
           cd /home/selab2/Dwengo-4/dwengo_backend
