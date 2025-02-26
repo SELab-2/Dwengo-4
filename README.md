@@ -24,3 +24,4 @@ DATABASE_URL="postgresql://selab2:passwor@localhost:2002/selab2?schema=public"
 ![alt text](image.png)
 
 tesge
+nya
