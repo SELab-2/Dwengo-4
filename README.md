@@ -22,3 +22,5 @@ DATABASE_URL="postgresql://selab2:passwor@localhost:2002/selab2?schema=public"
 9. Run `npx prisma studio`. Dit zal je een link geven waar je prisma studio kunt raadplegen in je browser, Als je de tabellen ziet staan als volgt zit je goed :)
 
 ![alt text](image.png)
+
+tesge
