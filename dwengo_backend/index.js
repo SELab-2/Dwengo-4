@@ -10,23 +10,32 @@ const studentAuthRoutes = require("./routes/student/studentAuthRoutes.js");
 // Initialisatie
 const app = express();
 
-const bodyParser = require('body-parser');
+const bodyParser = require("body-parser");
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
-     "Access-Control-Allow-Methods",
-     "GET, POST, PUT, DELETE, OPTIONS"
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
   );
   res.setHeader(
-     "Access-Control-Allow-Headers",
-     "X-Requested-With,Content-Type,Authorization"
+    "Access-Control-Allow-Headers",
+    "X-Requested-With,Content-Type,Authorization"
   );
   next();
 });
 
 // Middleware
 app.use(express.json()); // Parse JSON-requests
+
+// Hello World route
+app.get("/", (req, res) => {
+  res.send("Hello, World!");
+});
+
+app.get("/login", (req, res) => {
+  res.send("Hello, World 3!");
+});
 
 // Routes voor Teacher
 app.use("/teacher/auth", teacherAuthRoutes);

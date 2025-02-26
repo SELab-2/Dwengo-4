@@ -1,0 +1,23 @@
+name: Deploy Server
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Pull repo
+        run: |
+          cd /home/selab2/Dwengo-4/
+          git pull
+
+      - name: Deploy application
+        run: |
+          cd /home/selab2/Dwengo-4/dwengo_backend
+          killall node
+          npx nodemon server.js > /dev/null 2>&1 &
+          echo "Deployment completed successfully"
