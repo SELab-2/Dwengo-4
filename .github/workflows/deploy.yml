@@ -13,6 +13,5 @@ jobs:
       - name: Deploy application
         run: |
           cd /home/selab2/Dwengo-4/dwengo_backend
-          sudo sudo npx nodemon server.js
-
+          npx nodemon server.js
           echo "Deployment completed successfully"
