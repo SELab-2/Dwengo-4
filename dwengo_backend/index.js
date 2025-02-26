@@ -33,6 +33,10 @@ app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
 
+app.get("/login", (req, res) => {
+  res.send("Hello, World!");
+});
+
 // Routes voor Teacher
 app.use("/teacher/auth", teacherAuthRoutes);
 
