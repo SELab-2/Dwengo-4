@@ -13,5 +13,6 @@ jobs:
       - name: Deploy application
         run: |
           cd /home/selab2/Dwengo-4/dwengo_backend
-          npx nodemon server.js
+          killall node
+          npx nodemon server.js > /dev/null 2>&1 &
           echo "Deployment completed successfully"
