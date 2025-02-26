@@ -34,7 +34,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  res.send("Hello, World!");
+  res.send("Hello, World 2!");
 });
 
 // Routes voor Teacher
