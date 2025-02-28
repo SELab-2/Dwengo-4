@@ -77,11 +77,11 @@ const loginTeacher = asyncHandler(async (req, res) => {
     throw new Error("Voer een geldig e-mailadres in");
   }
 
-  // Zoek de gebruiker en controleer of deze een leerkracht is
+  // Zoek eerst de gebruiker
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user || user.role !== "TEACHER") {
     res.status(401);
-    throw new Error("Ongeldig e-mailadres of wachtwoord");
+    throw new Error("Ongeldige gebruiker");
   }
 
   // Haal het gekoppelde Teacher-record op
@@ -90,19 +90,26 @@ const loginTeacher = asyncHandler(async (req, res) => {
     include: { user: true },
   });
 
-  // Vergelijk het opgegeven wachtwoord met de opgeslagen hash
-  if (teacher && (await bcrypt.compare(password, teacher.user.password))) {
-    res.json({
-      message: "Succesvol ingelogd",
-      token: generateToken(teacher.userId),
-    });
-  } else {
+  if (!teacher) {
     res.status(401);
-    throw new Error("Ongeldig e-mailadres of wachtwoord");
+    throw new Error("Ongeldige gebruiker");
   }
+
+  // Vergelijk het opgegeven wachtwoord met de opgeslagen hash
+  const passwordMatches = await bcrypt.compare(password, teacher.user.password);
+  if (!passwordMatches) {
+    res.status(401);
+    throw new Error("Ongeldig wachtwoord");
+  }
+
+  res.json({
+    message: "Succesvol ingelogd",
+    token: generateToken(teacher.userId),
+  });
 });
 
 module.exports = {
   registerTeacher,
   loginTeacher,
 };
+
