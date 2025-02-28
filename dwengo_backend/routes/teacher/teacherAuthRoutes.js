@@ -3,10 +3,10 @@ const { registerTeacher, loginTeacher } = require("../../controllers/teacher/tea
 
 const router = express.Router();
 
-// Registreren van een leerkracht
+// Route voor registratie van een leerkracht
 router.post("/register", registerTeacher);
 
-// Inloggen van een leerkracht
+// Route voor inloggen van een leerkracht
 router.post("/login", loginTeacher);
 
 module.exports = router;

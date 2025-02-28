@@ -1,0 +1,136 @@
+# Dwengo Backend Authentication Documentation
+
+Dit document beschrijft de basis API-endpoints voor het registreren en inloggen van zowel studenten als leerkrachten via de Dwengo backend. De server draait op poort 5000.
+
+------------------------------------------------------------
+1. Student Registratie
+
+Endpoint: POST /student/auth/register
+
+Omschrijving:
+Dit endpoint maakt het mogelijk voor een nieuwe student om zich te registreren. De vereiste velden zijn:
+- firstName
+- lastName
+- email
+- password
+
+Voorbeeld JSON-body:
+{
+  "firstName": "test_voornaams1",
+  "lastName": "test_achternaams1",
+  "email": "test1@example.com",
+  "password": "123456"
+}
+
+Voorbeeld cURL-commando:
+------------------------------------------------------------
+daan@daan-ROG-Strix-G513QY-G513QY:~$ curl -X POST http://localhost:5000/student/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "test_voornaams1",
+    "lastName": "test_achternaams1",
+    "email": "test1@example.com",
+    "password": "123456"
+  }'
+------------------------------------------------------------
+
+Verwacht antwoord:
+{"message":"Leerling succesvol geregistreerd"}
+
+------------------------------------------------------------
+2. Student Inloggen
+
+Endpoint: POST /student/auth/login
+
+Omschrijving:
+Met dit endpoint kunnen bestaande studenten inloggen. De vereiste velden zijn:
+- email
+- password
+
+Voorbeeld JSON-body:
+{
+  "email": "test1@example.com@example.com",
+  "password": "123456"
+}
+
+Voorbeeld cURL-commando:
+------------------------------------------------------------
+daan@daan-ROG-Strix-G513QY-G513QY:~$ curl -X POST http://localhost:5000/student/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test1@example.com",
+    "password": "123456"
+  }'
+------------------------------------------------------------
+
+Verwacht antwoord:
+{"message":"Succesvol ingelogd","token":"<JWT-token>"}
+
+------------------------------------------------------------
+3. Teacher Registratie
+
+Endpoint: POST /teacher/auth/register
+
+Omschrijving:
+Dit endpoint maakt het mogelijk voor een nieuwe leerkracht om zich te registreren. De vereiste velden zijn:
+- firstName
+- lastName
+- email
+- password
+
+Bij registratie wordt eerst een record aangemaakt in de algemene User‑tabel met role "TEACHER" en daarna het gekoppelde Teacher‑record.
+
+Voorbeeld JSON-body:
+{
+  "firstName": "Meester_voornaam1",
+  "lastName": "Meester1_achternaam",
+  "email": "meester1@example.com",
+  "password": "AAAAAA"
+}
+
+Voorbeeld cURL-commando:
+------------------------------------------------------------
+daan@daan-ROG-Strix-G513QY-G513QY:~$ curl -X POST http://localhost:5000/teacher/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "Meester_voornaam1",
+    "lastName": "Meester1_achternaam",
+    "email": "meester.1@example.com",
+    "password": "AAAAAA"
+  }'
+------------------------------------------------------------
+
+Verwacht antwoord:
+{"message":"Leerkracht succesvol geregistreerd"}
+
+------------------------------------------------------------
+4. Teacher Inloggen
+
+Endpoint: POST /teacher/auth/login
+
+Omschrijving:
+Met dit endpoint kunnen bestaande leerkrachten inloggen. De vereiste velden zijn:
+- email
+- password
+
+Voorbeeld JSON-body:
+{
+  "email": "meester.1@example.com",
+  "password": "AAAAAA"
+}
+
+Voorbeeld cURL-commando:
+------------------------------------------------------------
+daan@daan-ROG-Strix-G513QY-G513QY:~$ curl -X POST http://localhost:5000/teacher/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "meester.1@example.com",
+    "password": "AAAAAA"
+  }'
+------------------------------------------------------------
+
+Verwacht antwoord:
+{"message":"Succesvol ingelogd","token":"<JWT-token>"}
+
+------------------------------------------------------------
+Einde documentatie.
