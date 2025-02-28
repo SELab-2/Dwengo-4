@@ -5,77 +5,111 @@ const jwt = require("jsonwebtoken");
 
 const prisma = new PrismaClient();
 
-// JWT token genereren
+// Functie om een JWT-token te genereren
 const generateToken = (id) => {
-   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
 // @desc    Registreer een nieuwe leerkracht
 // @route   POST /teacher/auth/register
 // @access  Public
 const registerTeacher = asyncHandler(async (req, res) => {
-   const { email, password } = req.body;
+  const { firstName, lastName, email, password } = req.body;
 
-   if (!email || !password) {
-      res.status(400);
-      throw new Error("Vul alle velden in");
-   }
+  // Controleer of alle velden ingevuld zijn
+  if (!firstName || !lastName || !email || !password) {
+    res.status(400);
+    throw new Error("Vul alle velden in");
+  }
 
-   if (!/\S+@\S+\.\S+/.test(email)) {
-      res.status(400);
-      throw new Error("Voer een geldig e-mailadres in");
-   }
+  // Basisvalidatie voor e-mail
+  if (!/\S+@\S+\.\S+/.test(email)) {
+    res.status(400);
+    throw new Error("Voer een geldig e-mailadres in");
+  }
 
-   if (password.length < 6) {
-      res.status(400);
-      throw new Error("Het wachtwoord moet minstens 6 karakters lang zijn");
-   }
+  // Controleer of het wachtwoord lang genoeg is
+  if (password.length < 6) {
+    res.status(400);
+    throw new Error("Het wachtwoord moet minstens 6 karakters lang zijn");
+  }
 
-   const existingTeacher = await prisma.teacher.findUnique({ where: { email } });
-   if (existingTeacher) {
-      res.status(400);
-      throw new Error("Gebruiker bestaat al");
-   }
+  // Controleer of er al een gebruiker bestaat met dit e-mailadres
+  const existingUser = await prisma.user.findUnique({ where: { email } });
+  if (existingUser) {
+    res.status(400);
+    throw new Error("Gebruiker bestaat al");
+  }
 
-   const hashedPassword = await bcrypt.hash(password, 10);
+  // Hash het wachtwoord
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-   await prisma.teacher.create({
-      data: {
-         email,
-         password: hashedPassword,
-      },
-   });
+  // Maak eerst een User-record aan met role "TEACHER"
+  const newUser = await prisma.user.create({
+    data: {
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      role: "TEACHER",
+    },
+  });
 
-   res.status(201).json({ message: "Leerkracht succesvol geregistreerd" });
+  // Maak vervolgens het gekoppelde Teacher-record
+  await prisma.teacher.create({
+    data: {
+      userId: newUser.id,
+    },
+  });
+
+  res.status(201).json({ message: "Leerkracht succesvol geregistreerd" });
 });
 
 // @desc    Inloggen van een leerkracht
 // @route   POST /teacher/auth/login
 // @access  Public
 const loginTeacher = asyncHandler(async (req, res) => {
-   const { email, password } = req.body;
+  const { email, password } = req.body;
 
-   if (!/\S+@\S+\.\S+/.test(email)) {
-      res.status(400);
-      throw new Error("Voer een geldig e-mailadres in");
-   }
+  // Basisvalidatie voor e-mail
+  if (!/\S+@\S+\.\S+/.test(email)) {
+    res.status(400);
+    throw new Error("Voer een geldig e-mailadres in");
+  }
 
-   const teacher = await prisma.teacher.findUnique({ where: { email } });
+  // Zoek eerst de gebruiker
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || user.role !== "TEACHER") {
+    res.status(401);
+    throw new Error("Ongeldige gebruiker");
+  }
 
-   console.log(teacher)
+  // Haal het gekoppelde Teacher-record op
+  const teacher = await prisma.teacher.findUnique({
+    where: { userId: user.id },
+    include: { user: true },
+  });
 
-   if (teacher && (await bcrypt.compare(password, teacher.password))) {
-      res.json({
-         message: "Succesvol ingelogd",
-         token: generateToken(teacher.id),
-      });
-   } else {
-      res.status(401);
-      throw new Error("Ongeldig e-mailadres of wachtwoord");
-   }
+  if (!teacher) {
+    res.status(401);
+    throw new Error("Ongeldige gebruiker");
+  }
+
+  // Vergelijk het opgegeven wachtwoord met de opgeslagen hash
+  const passwordMatches = await bcrypt.compare(password, teacher.user.password);
+  if (!passwordMatches) {
+    res.status(401);
+    throw new Error("Ongeldig wachtwoord");
+  }
+
+  res.json({
+    message: "Succesvol ingelogd",
+    token: generateToken(teacher.userId),
+  });
 });
 
 module.exports = {
-   registerTeacher,
-   loginTeacher,
+  registerTeacher,
+  loginTeacher,
 };
+
