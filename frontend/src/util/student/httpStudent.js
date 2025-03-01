@@ -33,13 +33,13 @@ export async function loginStudent({ email, password }) {
 }
 
 // Registreren als student
-export async function signupStudent({ email, password }) {
+export async function signupStudent(formData) {
     const response = await fetch(`${BACKEND}/student/auth/register`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(formData),
     });
 
     if (!response.ok) {

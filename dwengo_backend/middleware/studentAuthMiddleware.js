@@ -15,8 +15,7 @@ const protectStudent = asyncHandler(async (req, res, next) => {
 
             // Zoek de gebruiker (Student) en stel deze in op req.user
             const student = await prisma.student.findUnique({
-                where: { id: decoded.id },
-                select: { id: true, email: true } // Exclude password
+                where: { userId: decoded.id }
             });
 
             if (!student) {

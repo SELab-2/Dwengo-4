@@ -15,6 +15,8 @@ import { signupTeacher } from "../../util/teacher/httpTeacher";
 import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
 
 const SignupTeacher = () => {
+  const firstNameRef = useRef(null);
+  const lastNameRef = useRef(null);
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
   const navigate = useNavigate();
@@ -29,11 +31,15 @@ const SignupTeacher = () => {
   const handleFormSubmit = (e) => {
     e.preventDefault();
 
+    const firstNameValid = firstNameRef.current?.validateInput();
+    const lastNameValid = lastNameRef.current?.validateInput();
     const emailValid = emailRef.current?.validateInput();
     const passwordValid = passwordRef.current?.validateInput();
 
-    if (emailValid && passwordValid) {
+    if (firstNameValid && lastNameValid && emailValid && passwordValid) {
       const formData = {
+        firstName: firstNameRef.current.getValue(),
+        lastName: lastNameRef.current.getValue(),
         email: emailRef.current.getValue(),
         password: passwordRef.current.getValue(),
       };
@@ -48,6 +54,20 @@ const SignupTeacher = () => {
         <BoxBorder extraClasses="mxw-700 m-a g-20">
           <h2>Leerkracht Registreren</h2>
           <form className="g-20" onSubmit={handleFormSubmit}>
+            <InputWithChecks
+              ref={firstNameRef}
+              label="Voornaam"
+              inputType="text"
+              validate={(value) => validateForm(value, [validateRequired])}
+              placeholder="Voer je voornaam in"
+            />
+            <InputWithChecks
+              ref={lastNameRef}
+              label="Achternaam"
+              inputType="text"
+              validate={(value) => validateForm(value, [validateRequired])}
+              placeholder="Voer je achternaam in"
+            />
             <InputWithChecks
               ref={emailRef}
               label="E-mailadres"
@@ -71,7 +91,8 @@ const SignupTeacher = () => {
             />
             {isError && (
               <div className="c-r">
-                {error.info?.message || "Er is iets fout gelopen tijdens het registreren"}
+                {error.info?.message ||
+                  "Er is iets fout gelopen tijdens het registreren"}
               </div>
             )}
             <div>

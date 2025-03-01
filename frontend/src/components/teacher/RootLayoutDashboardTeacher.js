@@ -27,7 +27,7 @@ function RootLayoutDashboardTeacher() {
    return (
       <div className={styles.wrapper}>
          <SideBarTeacher></SideBarTeacher>
-         <main>
+         <main className="px-20 py-20">
             {/* {navigation.state === 'loading' && <p>Loading...</p>} */}
             <Outlet />
          </main>

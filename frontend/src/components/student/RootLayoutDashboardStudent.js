@@ -27,7 +27,7 @@ function RootLayoutDashboardStudent() {
    return (
       <div className={styles.wrapper}>
          <SideBarStudent></SideBarStudent>
-         <main>
+         <main className="px-20 py-20">
             {/* {navigation.state === 'loading' && <p>Loading...</p>} */}
             <Outlet />
          </main>

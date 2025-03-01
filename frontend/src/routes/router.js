@@ -4,7 +4,7 @@ import { createBrowserRouter, Link } from "react-router-dom";
 
 // ==== TEACHER ROUTES ==== //
 import RootLayoutTeacher from "../components/teacher/RootLayoutTeacher";
-import HomeTeacher from "../pages/teacher/HomeTeacher";
+import ClassesTeacher from "../pages/teacher/ClassesTeacher";
 import LoginTeacher from "../pages/teacher/LoginTeacher";
 import SignupTeacher from "../pages/teacher/SignupTeacher";
 import RootLayoutDashboardTeacher from "../components/teacher/RootLayoutDashboardTeacher";
@@ -76,7 +76,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "klassen",
-            element: <h1>Klassen</h1>,
+            element: <ClassesTeacher />,
             loader: teacherCheckAuthLoader,
           },
         ],

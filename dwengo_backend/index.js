@@ -3,14 +3,15 @@ const dotenv = require("dotenv");
 dotenv.config();
 const errorHandler = require("./middleware/errorMiddleware");
 
-// Routes voor Teacher en Student
+// Routes voor Teacher
 const teacherAuthRoutes = require("./routes/teacher/teacherAuthRoutes");
+const teacherClassesRoutes = require("./routes/teacher/teacherClassesRoutes");
+
+// Routes voor students
 const studentAuthRoutes = require("./routes/student/studentAuthRoutes.js");
 
 // Initialisatie
 const app = express();
-
-const bodyParser = require("body-parser");
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -38,7 +39,9 @@ app.get("/login", (req, res) => {
 });
 
 // Routes voor Teacher
+
 app.use("/teacher/auth", teacherAuthRoutes);
+app.use("/teacher/classes", teacherClassesRoutes);
 
 // Routes voor Student
 app.use("/student/auth", studentAuthRoutes);
