@@ -1,12 +1,12 @@
 // src/services/class.service.js
-import {PrismaClient} from "@prisma/client";
+import {Class, ClassStudent, PrismaClient, Student} from "@prisma/client";
 import * as crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
-export const createClass = async (name: string, teacherId: number) => {
+export const createClass = async (name: string, teacherId: number): Promise<Class> => {
     // Generate a unique join code (e.g., an 8-digit hex string)
-    const joinCode = crypto.randomBytes(4).toString("hex");
+    const joinCode = await generateUniqueCode();
 
     const classroom = await prisma.class.create({
         data: {
@@ -29,7 +29,7 @@ export const createClass = async (name: string, teacherId: number) => {
 };
 
 // Delete a class by ID
-export const deleteClass = async (classId: number, teacherId: number) => {
+export const deleteClass = async (classId: number, teacherId: number): Promise<Class> => {
     // Check if the teacher is associated with the class
     const isTeacher = await isTeacherOfClass(classId, teacherId);
     if (!isTeacher) {
@@ -49,7 +49,7 @@ export const deleteClass = async (classId: number, teacherId: number) => {
 
 
 // Get all classes taught by a given teacher
-export const getClassesByTeacher = async (teacherId: number) => {
+export const getClassesByTeacher = async (teacherId: number): Promise<Class[]> => {
     // Fetch all classes where the teacher is assigned
     return prisma.class.findMany({
         where: {
@@ -63,7 +63,7 @@ export const getClassesByTeacher = async (teacherId: number) => {
 };
 
 // Get all classes a student is partaking in
-export const getClassesByStudent = async (studentId: number) => {
+export const getClassesByStudent = async (studentId: number): Promise<Class[]> => {
     // Fetch all classes where the student is enrolled
     return prisma.class.findMany({
         where: {
@@ -90,7 +90,7 @@ const isTeacherOfClass = async (classId: number, teacherId: number): Promise<boo
 };
 
 // Get all student from a given class
-export const getStudentsByClass = async (classId: number, teacherId: number) => {
+export const getStudentsByClass = async (classId: number, teacherId: number): Promise<Student[]> => {
     // Check if the teacher is associated with the class
     const isTeacher = await isTeacherOfClass(classId, teacherId);
     if (!isTeacher) {
@@ -108,13 +108,14 @@ export const getStudentsByClass = async (classId: number, teacherId: number) => 
         },
     });
 
-    if (!classWithStudents) return null;
+    // In case no students were found
+    if (!classWithStudents) return [];
 
     // Extract only student details
     return classWithStudents.classLinks.map((link) => link.student);
 };
 
-export const addStudentToClass = async (studentId: number, classId: number) => {
+export const addStudentToClass = async (studentId: number, classId: number): Promise<ClassStudent> => {
     return prisma.classStudent.create({
         data: {
             studentId,
@@ -125,11 +126,11 @@ export const addStudentToClass = async (studentId: number, classId: number) => {
 
 // Check if student is already in the class
 export const isStudentInClass = (classroom: any, studentId: number): boolean => {
-    return classroom.classLinks.some(link => link.studentId === studentId);
+    return classroom.classLinks.some((link: ClassStudent) => link.studentId === studentId);
 };
 
 
-export const removeStudentFromClass = async (studentId: number, classId: number) => {
+export const removeStudentFromClass = async (studentId: number, classId: number): Promise<ClassStudent> => {
     return prisma.classStudent.delete({
         where: {
             studentId_classId: {
@@ -141,19 +142,20 @@ export const removeStudentFromClass = async (studentId: number, classId: number)
 };
 
 // Return all classes
-export const getAllClasses = async () => {
+export const getAllClasses = async (): Promise<Class[]> => {
+    // Returns an empty array if nothing is found
     return prisma.class.findMany();
 };
 
 // Read a class by ID
-export const getClassById = async (id: number) => {
+export const getClassById = async (id: number): Promise<Class | null> => {
     return prisma.class.findUnique({
         where: {id: id},
     });
 };
 
 // Give the class a new name
-export const updateClassName = async (classId: number, newName: string) => {
+export const updateClassName = async (classId: number, newName: string): Promise<Class> => {
     return prisma.class.update({
         where: {id: classId},
         data: {name: newName},
@@ -161,7 +163,7 @@ export const updateClassName = async (classId: number, newName: string) => {
 };
 
 // Read a class by JoinCode
-export const getClassByJoinCode = async (joinCode: string) => {
+export const getClassByJoinCode = async (joinCode: string): Promise<Class | null> => {
     return prisma.class.findUnique({
         where: {code: joinCode},  // Search by the joinCode (which is 'code' in the schema)
         include: {
@@ -170,7 +172,7 @@ export const getClassByJoinCode = async (joinCode: string) => {
     });
 };
 
-export const getJoinCode = async (classId: number, teacherId: number) => {
+export const getJoinCode = async (classId: number, teacherId: number): Promise<string> => {
     // Check if the teacher is associated with the class
     const isTeacher = await isTeacherOfClass(classId, teacherId);
     if (!isTeacher) {
@@ -212,7 +214,7 @@ const generateUniqueCode = async (): Promise<string> => {
 };
 
 // Function to regenerate the join code for a class
-export const regenerateJoinCode = async (classId: number, teacherId: number) => {
+export const regenerateJoinCode = async (classId: number, teacherId: number): Promise<string> => {
     // Check if the teacher is associated with the class
     const isTeacher = await isTeacherOfClass(classId, teacherId);
     if (!isTeacher) {
