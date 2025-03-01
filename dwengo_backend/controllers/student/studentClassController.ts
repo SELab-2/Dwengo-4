@@ -1,12 +1,20 @@
-const { PrismaClient } = require('@prisma/client');
-const asyncHandler = require("express-async-handler");
+import { PrismaClient } from '@prisma/client';
+import asyncHandler from 'express-async-handler';
+import { Request, Response } from 'express';
 
 const prisma = new PrismaClient();
 
-// Een leerling joinen aan een klas via een join-code
-const joinClassroom = asyncHandler(async (req, res) => {
+// Breid het Request-type uit met een user-property
+interface AuthenticatedRequest extends Request {
+  user: {
+    id: number;
+    // Voeg hier extra properties toe indien nodig
+  };
+}
+
+export const joinClassroom = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   // De join-code kan zowel als queryparameter als in de body worden meegegeven
-  const joinCode = req.query.joinCode || req.body.joinCode;
+  const joinCode = (req.query.joinCode as string) || (req.body.joinCode as string);
   const studentId = req.user.id;
 
   if (!joinCode) {
@@ -48,7 +56,3 @@ const joinClassroom = asyncHandler(async (req, res) => {
 
   res.json({ message: "Succesvol toegetreden tot de klas" });
 });
-
-module.exports = {
-  joinClassroom
-};

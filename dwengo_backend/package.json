@@ -1,11 +1,11 @@
 {
   "name": "dwengo_backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon server.js",
-    "start": "NODE_ENV=production node index.js"
+    "dev": "nodemon --watch '**/*.ts' --exec ts-node index.ts",
+    "start": "NODE_ENV=production ts-node index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
@@ -21,7 +21,12 @@
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^22.13.8",
     "nodemon": "^3.1.9",
-    "prisma": "^6.3.1"
+    "prisma": "^6.3.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
   }
 }
