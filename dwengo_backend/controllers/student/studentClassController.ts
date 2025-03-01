@@ -1,8 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-import asyncHandler from 'express-async-handler';
 import { Request, Response } from 'express';
 
-const prisma = new PrismaClient();
 const asyncHandler = require("express-async-handler");
 import * as classService from "../../services/classService";
 

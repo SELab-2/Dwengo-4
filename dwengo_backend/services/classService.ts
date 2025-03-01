@@ -164,7 +164,7 @@ export const updateClassName = async (classId: number, newName: string): Promise
 };
 
 // Read a class by JoinCode
-export const getClassByJoinCode = async (joinCode: string): Promise<Class | null> => {
+export const getClassByJoinCode = async (joinCode: string): Promise<ClassWithLinks | null> => {
     return prisma.class.findUnique({
         where: {code: joinCode},  // Search by the joinCode (which is 'code' in the schema)
         include: {
