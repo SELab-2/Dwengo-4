@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken';
-import asyncHandler from 'express-async-handler';
+import * as jwt from 'jsonwebtoken';
+import * as asyncHandler from 'express-async-handler';
 import { PrismaClient } from '@prisma/client';
 import { Request, Response, NextFunction } from 'express';
 
@@ -34,25 +34,25 @@ export const protectStudent = asyncHandler(
 
         // Zoek de gebruiker (Student) en stel deze in op req.user
         const student = await prisma.student.findUnique({
-          where: { id: decoded.id },
-          select: { id: true, email: true } // Exclude password
+          where: { userId: decoded.id },  // Finding the student by userId
+          include: { user: { select: { id: true, email: true } } } // Fetching user details
         });
 
         if (!student) {
-          res.status(401);
-          throw new Error("Student niet gevonden.");
+          res.status(401).json({ error: "Student niet gevonden." });
+          return; // Ensure no further execution after sending the response
         }
 
-        req.user = student;
+        req.user = { id: student.userId, email: student.user.email };
         next();
       } catch (error) {
         console.error(error);
-        res.status(401);
-        throw new Error("Niet geautoriseerd, token mislukt.");
+        res.status(401).json({ error: "Niet geautoriseerd, token mislukt." });
+        return; // Ensure no further execution after sending the response
       }
     } else {
-      res.status(401);
-      throw new Error("Geen token, niet geautoriseerd.");
+      res.status(401).json({ error: "Geen token, niet geautoriseerd." });
+      return; // Ensure no further execution after sending the response
     }
   }
 );

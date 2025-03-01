@@ -1,4 +1,4 @@
-import express from 'express';
+import * as express from 'express';
 import { protectStudent } from '../../middleware/studentAuthMiddleware';
 import { joinClassroom } from '../../controllers/student/studentClassController';
 
