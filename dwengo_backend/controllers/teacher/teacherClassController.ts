@@ -1,12 +1,20 @@
-const { PrismaClient } = require('@prisma/client');
-const asyncHandler = require("express-async-handler");
-const crypto = require("crypto");
+import { PrismaClient } from '@prisma/client';
+import asyncHandler from 'express-async-handler';
+import crypto from 'crypto';
+import { Request, Response } from 'express';
 
 const prisma = new PrismaClient();
 const APP_URL = process.env.APP_URL || "http://localhost:5000";
 
-// Maak een nieuwe klas aan
-const createClassroom = asyncHandler(async (req, res) => {
+// Uitbreiding van het Express Request-type zodat we een user-property hebben
+interface AuthenticatedRequest extends Request {
+  user: {
+    id: number | string;
+    // Eventueel extra properties toevoegen indien nodig
+  };
+}
+
+export const createClassroom = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const { name } = req.body;
   const teacherId = req.user.id; // req.user wordt verondersteld door een auth-middleware
 
@@ -29,8 +37,7 @@ const createClassroom = asyncHandler(async (req, res) => {
   res.status(201).json({ message: "Klas aangemaakt", classroom });
 });
 
-// Verwijder een klas
-const deleteClassroom = asyncHandler(async (req, res) => {
+export const deleteClassroom = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const { classId } = req.params;
   const teacherId = req.user.id;
 
@@ -45,8 +52,7 @@ const deleteClassroom = asyncHandler(async (req, res) => {
   res.json({ message: "Klas verwijderd" });
 });
 
-// Haal de join-link op voor een klas
-const getJoinLink = asyncHandler(async (req, res) => {
+export const getJoinLink = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const { classId } = req.params;
   const teacherId = req.user.id;
 
@@ -61,8 +67,7 @@ const getJoinLink = asyncHandler(async (req, res) => {
   res.json({ joinLink });
 });
 
-// Vernieuw (regenerate) de join-link (join-code)
-const regenerateJoinLink = asyncHandler(async (req, res) => {
+export const regenerateJoinLink = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const { classId } = req.params;
   const teacherId = req.user.id;
 
@@ -84,8 +89,7 @@ const regenerateJoinLink = asyncHandler(async (req, res) => {
   res.json({ joinLink });
 });
 
-// Haal alle leerlingen op die aan een klas gekoppeld zijn
-const getClassroomStudents = asyncHandler(async (req, res) => {
+export const getClassroomStudents = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const { classId } = req.params;
   const teacherId = req.user.id;
 
@@ -100,11 +104,3 @@ const getClassroomStudents = asyncHandler(async (req, res) => {
 
   res.json({ students: classroom.students });
 });
-
-module.exports = {
-  createClassroom,
-  deleteClassroom,
-  getJoinLink,
-  regenerateJoinLink,
-  getClassroomStudents
-};
