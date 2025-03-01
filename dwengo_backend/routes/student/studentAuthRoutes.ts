@@ -1,5 +1,5 @@
-const express = require("express");
-const { registerStudent, loginStudent } = require("../../controllers/student/studentAuthController");
+import express from 'express';
+import { registerStudent, loginStudent } from '../../controllers/student/studentAuthController';
 
 const router = express.Router();
 
@@ -9,4 +9,5 @@ router.post("/register", registerStudent);
 // Inloggen van een leerling
 router.post("/login", loginStudent);
 
-module.exports = router;
+export default router;
+
