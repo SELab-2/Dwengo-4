@@ -124,11 +124,12 @@ export const addStudentToClass = async (studentId: number, classId: number): Pro
     });
 };
 
+type ClassWithLinks = Class & { classLinks: ClassStudent[] };
+
 // Check if student is already in the class
-export const isStudentInClass = (classroom: any, studentId: number): boolean => {
+export const isStudentInClass = (classroom: ClassWithLinks, studentId: number): boolean => {
     return classroom.classLinks.some((link: ClassStudent) => link.studentId === studentId);
 };
-
 
 export const removeStudentFromClass = async (studentId: number, classId: number): Promise<ClassStudent> => {
     return prisma.classStudent.delete({
