@@ -312,7 +312,7 @@ model ClassAssignment {
 
 model Team {
   id       Int    @id @default(autoincrement())
-  teamname String @unique
+  teamname String 
 
   // Een team bestaat uit studenten
   students Student[]
