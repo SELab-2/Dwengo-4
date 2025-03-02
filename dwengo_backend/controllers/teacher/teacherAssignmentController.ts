@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import * as assignmentService from "../../services/teacherAssignmentService";
 
 export class AssignmentTeacherController {
-    async createAssignment(req: Request, res: Response) {
+    async createAssignmentForClass(req: Request, res: Response) {
         try {
             const { teacherId, classId, learningPathId } = req.body;
             const assignment = await assignmentService.createAssignmentForClass(teacherId, classId, learningPathId);
@@ -16,7 +16,7 @@ export class AssignmentTeacherController {
         try {
             const classId = parseInt(req.params.classId);
             const assignments = await assignmentService.getAssignmentsByClass(classId);
-            res.json(assignments);
+            res.status(200).json(assignments);
         } catch (error) {
             res.status(500).json({ error: "Failed to retrieve assignments" });
         }
