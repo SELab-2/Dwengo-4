@@ -226,7 +226,6 @@ model ReturnValue {
 model Evaluation {
   id             String         @id
   nrOfQuestions  Int
-  deadline       DateTime
   evaluationType EvaluationType
 
   learningObject LearningObject         @relation(fields: [id], references: [id])
@@ -293,6 +292,7 @@ model Assignment {
   learningPathId Int
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  deadline       DateTime
 
   learningPath     LearningPath      @relation(fields: [learningPathId], references: [id])
   classAssignments ClassAssignment[]
