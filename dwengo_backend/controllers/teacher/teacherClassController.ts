@@ -2,8 +2,9 @@ import { PrismaClient } from '@prisma/client';
 import asyncHandler from 'express-async-handler';
 import crypto from 'crypto';
 import { Request, Response } from 'express';
+const asyncHandler = require("express-async-handler");
+import * as classService from "../../services/classService";
 
-const prisma = new PrismaClient();
 const APP_URL = process.env.APP_URL || "http://localhost:5000";
 
 // Uitbreiding van het Express Request-type zodat we een user-property hebben
@@ -23,17 +24,7 @@ export const createClassroom = asyncHandler(async (req: AuthenticatedRequest, re
     throw new Error("Vul een klasnaam in");
   }
 
-  // Genereer een unieke join-code (bijvoorbeeld een 8-cijferige hex-string)
-  const joinCode = crypto.randomBytes(4).toString("hex");
-
-  const classroom = await prisma.classroom.create({
-    data: {
-      name,
-      joinCode,
-      teacher: { connect: { id: teacherId } }
-    }
-  });
-
+  const classroom = createClassroom(name, teacherId);
   res.status(201).json({ message: "Klas aangemaakt", classroom });
 });
 
@@ -41,14 +32,7 @@ export const deleteClassroom = asyncHandler(async (req: AuthenticatedRequest, re
   const { classId } = req.params;
   const teacherId = req.user.id;
 
-  // Controleer of de klas bestaat en toebehoort aan de leerkracht
-  const classroom = await prisma.classroom.findUnique({ where: { id: classId } });
-  if (!classroom || classroom.teacherId !== teacherId) {
-    res.status(403);
-    throw new Error("Toegang geweigerd");
-  }
-
-  await prisma.classroom.delete({ where: { id: classId } });
+  await classService.deleteClass(Number(classId), Number(teacherId));
   res.json({ message: "Klas verwijderd" });
 });
 
@@ -56,51 +40,44 @@ export const getJoinLink = asyncHandler(async (req: AuthenticatedRequest, res: R
   const { classId } = req.params;
   const teacherId = req.user.id;
 
-  const classroom = await prisma.classroom.findUnique({ where: { id: classId } });
-  if (!classroom || classroom.teacherId !== teacherId) {
+  const joinCode = await classService.getJoinCode(Number(classId), Number(teacherId));
+
+  if (!joinCode) {
     res.status(403);
     throw new Error("Toegang geweigerd");
   }
 
   // Bouw de join-link op (bijv. http://localhost:5000/student/classes/join?joinCode=xxx)
-  const joinLink = `${APP_URL}/student/classes/join?joinCode=${classroom.joinCode}`;
+  const joinLink = `${APP_URL}/student/classes/join?joinCode=${joinCode}`;
   res.json({ joinLink });
 });
 
+// Vernieuw (regenerate) de join-link (join-code)
 export const regenerateJoinLink = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const { classId } = req.params;
   const teacherId = req.user.id;
 
-  const classroom = await prisma.classroom.findUnique({ where: { id: classId } });
-  if (!classroom || classroom.teacherId !== teacherId) {
+  try {
+    const newJoinCode = await classService.regenerateJoinCode(Number(classId), teacherId);
+    const joinLink = `${APP_URL}/student/classes/join?joinCode=${newJoinCode}`;
+    res.json({ joinLink });
+  } catch (error) {
     res.status(403);
-    throw new Error("Toegang geweigerd");
+    throw new Error(error.message);
   }
-
-  // Genereer een nieuwe join-code
-  const newJoinCode = crypto.randomBytes(4).toString("hex");
-
-  const updatedClassroom = await prisma.classroom.update({
-    where: { id: classId },
-    data: { joinCode: newJoinCode }
-  });
-
-  const joinLink = `${APP_URL}/student/classes/join?joinCode=${updatedClassroom.joinCode}`;
-  res.json({ joinLink });
 });
+
 
 export const getClassroomStudents = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const { classId } = req.params;
   const teacherId = req.user.id;
 
-  const classroom = await prisma.classroom.findUnique({
-    where: { id: classId },
-    include: { students: true }
-  });
-  if (!classroom || classroom.teacherId !== teacherId) {
+  const students = await classService.getStudentsByClass(Number(classId), Number(teacherId));
+
+  if (!students) {
     res.status(403);
     throw new Error("Toegang geweigerd");
   }
 
-  res.json({ students: classroom.students });
+  res.json({ students: students });
 });
