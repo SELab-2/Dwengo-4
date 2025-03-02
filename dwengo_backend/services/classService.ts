@@ -36,14 +36,25 @@ export const deleteClass = async (classId: number, teacherId: number): Promise<C
         throw new Error("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
     }
 
-    // Delete all related ClassTeacher records
-    await prisma.classTeacher.deleteMany({
-        where: { classId: classId },
-    });
+    // Start a transaction to delete related records
+    return prisma.$transaction(async (prisma) => {
+        // Delete class-student associations
+        await prisma.classStudent.deleteMany({ where: { classId } });
 
-    // Delete the class itself
-    return prisma.class.delete({
-        where: { id: classId },
+        // Delete class assignments
+        await prisma.classAssignment.deleteMany({ where: { classId } });
+
+        // Delete join requests
+        await prisma.joinRequest.deleteMany({ where: { classId } });
+
+        // Delete invites
+        await prisma.invite.deleteMany({ where: { classId } });
+
+        // Delete class-teacher associations
+        await prisma.classTeacher.deleteMany({ where: { classId } });
+
+        // Finally, delete the class itself
+        return prisma.class.delete({ where: { id: classId } });
     });
 };
 
@@ -195,7 +206,7 @@ export const getJoinCode = async (classId: number, teacherId: number): Promise<s
 // Function to generate a unique join code
 const generateUniqueCode = async (): Promise<string> => {
     let isUnique = false;
-    let newJoinCode: string;
+    let newJoinCode: string = "";
 
     while (!isUnique) {
         // Generate new join code
