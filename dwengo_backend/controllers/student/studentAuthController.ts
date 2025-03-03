@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-import * as asyncHandler from 'express-async-handler';
-import * as bcrypt from 'bcryptjs';
-import * as jwt from 'jsonwebtoken';
+import asyncHandler from 'express-async-handler';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 
 const prisma = new PrismaClient();

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import * as joinRequestService from "../../services/joinRequestService";
+import joinRequestService from "../../services/joinRequestService";
 import {JoinRequest} from "@prisma/client";
 
 // Higher-order function to handle errors and reduce duplication

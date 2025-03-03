@@ -1,6 +1,6 @@
 // src/services/class.service.js
 import {Class, ClassStudent, PrismaClient, Student} from "@prisma/client";
-import * as crypto from 'crypto';
+import crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -135,7 +135,7 @@ export const addStudentToClass = async (studentId: number, classId: number): Pro
     });
 };
 
-type ClassWithLinks = Class & { classLinks: ClassStudent[] };
+export type ClassWithLinks = Class & { classLinks: ClassStudent[] };
 
 // Check if student is already in the class
 export const isStudentInClass = (classroom: ClassWithLinks, studentId: number): boolean => {
