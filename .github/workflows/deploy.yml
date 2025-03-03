@@ -23,3 +23,13 @@ jobs:
           PORT=4000 npx nodemon server.js > /dev/null 2>&1 &
           sleep 3 #aapjes
           echo "Main branch deployment completed successfully on port $PORT"
+
+      - name: Deploy yolo branch
+        run: |
+          cd /home/selab2/Dwengo-4-yolo/Dwengo-4/
+          git pull
+          git checkout yolo
+          cd /home/selab2/Dwengo-4-yolo/Dwengo-4/dwengo_backend
+          PORT=3000 npx nodemon server.js > /dev/null 2>&1 &
+          sleep 3 #aapjes
+          echo "Yolo branch deployment completed successfully on port $PORT"
