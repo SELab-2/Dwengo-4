@@ -14,6 +14,16 @@ jobs:
       - name: Kill existing Node processes
         run: pkill -f "node.*server.js" || true
 
+      - name: Deploy main branch
+        run: |
+          cd /home/selab2/Dwengo-4/
+          git pull
+          git checkout main
+          cd /home/selab2/Dwengo-4/dwengo_backend/
+          PORT=4000 npx nodemon server.js > /dev/null 2>&1 &
+          sleep 3 #aapjes
+          echo "Main branch deployment completed successfully on port $PORT"
+
       - name: Deploy yolo branch
         run: |
           cd /home/selab2/Dwengo-4-yolo/Dwengo-4/
