@@ -15,6 +15,9 @@ jobs:
         run: pkill -f "node.*server.js" || true
 
       - name: Deploy main branch
+        env:
+          PORT: 4000
+          CI: false
         run: |
           cd /home/selab2/Dwengo-4/
           git pull
@@ -23,7 +26,7 @@ jobs:
           npm install
           npm run build
           cd /home/selab2/Dwengo-4/dwengo_backend/
-          CI=false PORT=4000 npx nodemon server.js > /dev/null 2>&1 &
+          PORT=4000 npx nodemon server.js > /dev/null 2>&1 &
           sleep 3 #aapjes
           echo "Main branch deployment completed successfully on port $PORT"
 
