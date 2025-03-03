@@ -1,5 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const path = require("path");
 dotenv.config();
 const errorHandler = require("./middleware/errorMiddleware");
 
@@ -11,6 +12,8 @@ const studentAuthRoutes = require("./routes/student/studentAuthRoutes.js");
 const app = express();
 
 const bodyParser = require("body-parser");
+
+app.use(express.static(path.join(__dirname, "../frontend/build")));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
