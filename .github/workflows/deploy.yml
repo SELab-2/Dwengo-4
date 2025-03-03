@@ -14,21 +14,21 @@ jobs:
       - name: Kill existing Node processes
         run: pkill -f "node.*server.js" || true
 
-      - name: Deploy main branch
-        env:
-          PORT: 4000
-          CI: false
-        run: |
-          cd /home/selab2/Dwengo-4/
-          git pull
-          git checkout main
-          cd /home/selab2/Dwengo-4/frontend
-          npm install
-          npm run build
-          cd /home/selab2/Dwengo-4/dwengo_backend/
-          PORT=4000 npx nodemon server.js > /dev/null 2>&1 &
-          sleep 3 #aapjes
-          echo "Main branch deployment completed successfully on port $PORT"
+      # - name: Deploy main branch
+      #   env:
+      #     PORT: 4000
+      #   run: |
+      #     cd /home/selab2/Dwengo-4/
+      #     git pull
+      #     git checkout main
+      #     cd /home/selab2/Dwengo-4/frontend
+      #     npm i
+      #     npm run build
+      #     cd /home/selab2/Dwengo-4/dwengo_backend/
+      #     npm i
+      #     PORT=4000 npx nodemon server.js > /dev/null 2>&1 &
+      #     sleep 3 #aapjes
+      #     echo "Main branch deployment completed successfully on port $PORT"
 
       - name: Deploy yolo branch
         run: |
@@ -36,9 +36,10 @@ jobs:
           git pull
           git checkout yolo
           cd /home/selab2/Dwengo-4-yolo/Dwengo-4/frontend
-          npm install
+          npm i
           npm run build
           cd /home/selab2/Dwengo-4-yolo/Dwengo-4/dwengo_backend
+          npm i
           PORT=3000 npx nodemon server.js > /dev/null 2>&1 &
           sleep 3 #aapjes 
           echo "Yolo branch deployment completed successfully on port $PORT"
