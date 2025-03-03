@@ -20,7 +20,7 @@ jobs:
         run: |
           cd /home/selab2/Dwengo-4/
           git pull
-          cd /home/selab2/Dwengo-4/dwengo-backend
+          cd /home/selab2/Dwengo-4/dwengo_backend/
           PORT=$PORT npx nodemon server.js > /dev/null 2>&1 &
           echo "Main branch deployment completed successfully on port $PORT"
 
