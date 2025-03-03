@@ -232,6 +232,7 @@ model Evaluation {
 
   learningObject LearningObject       @relation(fields: [id], references: [id])
   questions      EvaluationQuestion[]
+  // Een evaluatie kan meerdere inzendingen hebben
   submissions    Submission[]
 }
 
