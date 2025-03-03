@@ -54,7 +54,7 @@ model Teacher {
 
   // Antwoorden en feedback
   teacherAnswers   TeacherAnswer[]
-  teacherFeedbacks TeacherFeedback[]
+  teacherFeedbacks Feedback[]
   // Uitnodigingen om een klas mee te beheren
   invite           Invite[]
 
@@ -73,7 +73,7 @@ model Student {
   studentQuestions StudentQuestion[]
 
   // Voortgang van studenten
-  progress        StudentProgress[]
+  progress StudentProgress[]
 
   // Verzoeken om lid te worden van een klas
   joinRequests JoinRequest[]
@@ -230,7 +230,7 @@ model Evaluation {
   deadline       DateTime
   evaluationType EvaluationType
 
-  learningObject LearningObject         @relation(fields: [id], references: [id])
+  learningObject LearningObject       @relation(fields: [id], references: [id])
   questions      EvaluationQuestion[]
   submissions    Submission[]
 }
@@ -303,9 +303,8 @@ model Assignment {
 model ClassAssignment {
   classId      Int
   assignmentId Int
-
-  class           Class            @relation(fields: [classId], references: [id])
-  assignment      Assignment       @relation(fields: [assignmentId], references: [id])
+  class        Class      @relation(fields: [classId], references: [id])
+  assignment   Assignment @relation(fields: [assignmentId], references: [id])
 
   @@id([classId, assignmentId])
 }
@@ -315,61 +314,52 @@ model Team {
   teamname String
 
   // Een team bestaat uit studenten
-  students Student[]
+  students        Student[]
   // Een verwijzing naar de assignments van dit team
   teamAssignments TeamAssignment[]
+
   // De indieningen van een team
-  teamSubmissions TeamSubmission[]
+  submissions Submission[]
 }
 
 model TeamAssignment {
-  teamId            Int
-  assignmentId    Int
+  teamId       Int
+  assignmentId Int
 
-  team            Team            @relation(fields: [teamId], references: [id])
-  Assignment      Assignment     @relation(fields: [assignmentId], references: [id])
+  team       Team       @relation(fields: [teamId], references: [id])
+  Assignment Assignment @relation(fields: [assignmentId], references: [id])
 
   @@id([teamId, assignmentId])
 }
 
 model Submission {
-  submissionId Int @id @default(autoincrement())
+  submissionId Int       @id @default(autoincrement())
+  // Een inzending hoort bij een evaluatie
   evaluationId String
-  submitted    DateTime @default(now())
-
-  evaluation          Evaluation           @relation(fields: [evaluationId], references: [id])
-  teamSubmissions     TeamSubmission[]
-  submissionFeedbacks SubmissionFeedback[]
-}
-
-model TeamSubmission {
+  // Een inzending is van een team
   teamId       Int
-  submissionId Int
+  submitted    DateTime  @default(now())
+  // Er kan feedback komen op een inzending
+  feedback     Feedback?
 
-  team       Team                 @relation(fields: [teamId], references: [id])
-  submission Submission @relation(fields: [submissionId], references: [submissionId])
-
-  @@id([teamId, submissionId])
+  evaluation Evaluation @relation(fields: [evaluationId], references: [id])
+  team       Team       @relation(fields: [teamId], references: [id])
 }
 
-model TeacherFeedback {
-  id        Int    @id @default(autoincrement())
-  teacherId Int
-  feedback  String
+model Feedback {
+  // Feedback hoort bij een inzending
+  // Er kan maar 1 keer feedback gegeven worden op een inzending
+  submissionId Int @unique
+  // Feedback kan gegeven worden door een teacher
+  teacherId    Int
+  // De feedback zelf
+  description String
 
-  teacher             Teacher              @relation(fields: [teacherId], references: [userId])
-  submissionFeedbacks SubmissionFeedback[]
-}
-
-model SubmissionFeedback {
-  submissionId Int
-  feedbackId   Int
-  createdAt    DateTime @default(now())
-
+  teacher    Teacher    @relation(fields: [teacherId], references: [userId])
   submission Submission @relation(fields: [submissionId], references: [submissionId])
-  feedback   TeacherFeedback      @relation(fields: [feedbackId], references: [id])
 
-  @@id([submissionId, feedbackId])
+  // Feedback wordt uniek bepaald door deze attributen
+  @@id([submissionId, teacherId])
 }
 
 model LearningObjectProgress {
