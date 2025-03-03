@@ -1,14 +1,16 @@
-name: Deploy Server
+name: CI/CD Workflow
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - develop
   workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-main:
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: self-hosted
-
     steps:
       - name: Pull repo
         run: |
@@ -16,8 +18,28 @@ jobs:
           git pull
 
       - name: Deploy application
+        env:
+          PORT: 3000
         run: |
           cd /home/selab2/Dwengo-4/dwengo_backend
           killall node
-          npx nodemon server.js > /dev/null 2>&1 &
-          echo "Deployment completed successfully"
+          PORT=$PORT npx nodemon server.js > /dev/null 2>&1 &
+          echo "Deployment completed successfully on port $PORT"
+
+  deploy-yolo:
+    if: ${{ github.ref == 'refs/heads/yolo' }}
+    runs-on: self-hosted
+    steps:
+      - name: Pull repo
+        run: |
+          cd /home/selab2/Dwengo-4/
+          git pull
+
+      - name: Deploy application
+        env:
+          PORT: 4000
+        run: |
+          cd /home/selab2/Dwengo-4/dwengo_backend
+          killall node
+          PORT=$PORT npx nodemon server.js > /dev/null 2>&1 &
+          echo "Deployment completed successfully on port $PORT"
