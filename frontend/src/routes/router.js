@@ -4,7 +4,7 @@ import { createBrowserRouter, Link } from "react-router-dom";
 
 // ==== TEACHER ROUTES ==== //
 import RootLayoutTeacher from "../components/teacher/RootLayoutTeacher";
-import HomeTeacher from "../pages/teacher/HomeTeacher";
+//import HomeTeacher from "../pages/teacher/HomeTeacher";
 import LoginTeacher from "../pages/teacher/LoginTeacher";
 import SignupTeacher from "../pages/teacher/SignupTeacher";
 import RootLayoutDashboardTeacher from "../components/teacher/RootLayoutDashboardTeacher";
@@ -25,20 +25,19 @@ import {
 } from "../util/student/authStudent";
 import { action as studentLogoutAction } from "../pages/student/LogoutStudent";
 
-
 // Home-pagina waar de gebruiker zijn rol kiest
 const HomePage = () => (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h2>Kies een rol:</h2>
-      <Link to="/student" className="link mx-10">
-        Student
-      </Link>
-      <Link to="/teacher" className="link mx-10">
-        Teacher
-      </Link>
-    </div>
-  );
-  
+  <div style={{ textAlign: "center", marginTop: "50px" }}>
+    <h2>Kies een rol:</h2>
+    <Link to="/student" className="link mx-10">
+      Student
+    </Link>
+    <Link to="/teacher" className="link mx-10">
+      Teacher
+    </Link>
+  </div>
+);
+
 export const router = createBrowserRouter([
   {
     path: "/",
