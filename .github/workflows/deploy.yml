@@ -8,38 +8,30 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-main:
-    if: ${{ github.ref == 'refs/heads/main' }}
+  deploy:
     runs-on: self-hosted
     steps:
-      - name: Pull repo
-        run: |
-          cd /home/selab2/Dwengo-4/
-          git pull
+      - name: Kill existing Node processes
+        run: killall node || true
 
-      - name: Deploy application
+      - name: Deploy main branch
+        if: ${{ github.ref == 'refs/heads/main' }}
         env:
           PORT: 3000
         run: |
-          cd /home/selab2/Dwengo-4/dwengo_backend
-          killall node
-          PORT=$PORT npx nodemon server.js > /dev/null 2>&1 &
-          echo "Deployment completed successfully on port $PORT"
-
-  deploy-yolo:
-    if: ${{ github.ref == 'refs/heads/yolo' }}
-    runs-on: self-hosted
-    steps:
-      - name: Pull repo
-        run: |
           cd /home/selab2/Dwengo-4/
           git pull
+          cd dwengo_backend
+          PORT=$PORT npx nodemon server.js > /dev/null 2>&1 &
+          echo "Main branch deployment completed successfully on port $PORT"
 
-      - name: Deploy application
+      - name: Deploy yolo branch
+        if: ${{ github.ref == 'refs/heads/yolo' }}
         env:
           PORT: 4000
         run: |
-          cd /home/selab2/Dwengo-4/dwengo_backend
-          killall node
+          cd /home/selab2/Dwengo-4-yolo/Dwengo-4/
+          git pull
+          cd dwengo_backend
           PORT=$PORT npx nodemon server.js > /dev/null 2>&1 &
-          echo "Deployment completed successfully on port $PORT"
+          echo "Yolo branch deployment completed successfully on port $PORT"
