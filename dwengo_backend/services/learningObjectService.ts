@@ -33,7 +33,7 @@ function mapDwengoToLocal(dwengoObj: any): LearningObjectDto {
     // Probeer eerst _id (dwengo) of uuid. Als beiden ontbreken, vult hij een lege string in.
     id: dwengoObj._id ?? dwengoObj.uuid ?? "",
 
-    // Dwengo gebruikt soms int of string voor versie, wij forceren string
+    // Dwengo gebruikt soms int of string voor version, wij forceren string
     version: dwengoObj.version ? dwengoObj.version.toString() : "",
 
     language: dwengoObj.language ?? "",
@@ -46,13 +46,13 @@ function mapDwengoToLocal(dwengoObj: any): LearningObjectDto {
     // Dwengo keywords is array<string>, we plakken het hier samen in één string
     keywords: dwengoObj.keywords ? dwengoObj.keywords.join(", ") : "",
 
-    // Dwengo target_ages is array<number>, hier samenvoegen tot "14,15,16" etc.
+    // Dwengo target_ages is array<number>, samenvoegen tot "14,15,16" etc.
     targetAges: dwengoObj.target_ages ? dwengoObj.target_ages.join(",") : "",
 
     // teacher_exclusive -> teacherExclusive
     teacherExclusive: Boolean(dwengoObj.teacher_exclusive),
 
-    // Dwengo skos_concepts array -> samengevoegd in één string
+    // Dwengo skos_concepts is array<string>, samengevoegd tot één string
     skosConcepts: dwengoObj.skos_concepts ? dwengoObj.skos_concepts.join(", ") : "",
 
     copyright: dwengoObj.copyright ?? "",
@@ -78,21 +78,17 @@ function mapDwengoToLocal(dwengoObj: any): LearningObjectDto {
  */
 export async function getAllLearningObjects(isTeacher: boolean): Promise<LearningObjectDto[]> {
   try {
-    // Parametergestuurd filteren
     const params: Record<string, any> = {};
     if (!isTeacher) {
+      // Filter op niet-teacherExcl & available
       params.teacher_exclusive = false;
       params.available = true;
     }
-    // Zoek in Dwengo
+
     const response = await dwengoAPI.get("/api/learningObject/search", { params });
     const dwengoData = response.data; // array van leerobjecten
-
-    // Map elke Dwengo-object naar ons lokale model
     const mapped = dwengoData.map(mapDwengoToLocal);
 
-    // Extra check: normaliter zijn de teacher_exclusive/available al gefilterd in de params,
-    // maar we kunnen hier nog een extra filter doen als we willen.
     return mapped;
   } catch (error) {
     console.error("Fout bij getAllLearningObjects:", error);
@@ -101,16 +97,15 @@ export async function getAllLearningObjects(isTeacher: boolean): Promise<Learnin
 }
 
 /**
- * Haal één leerobject op (via Dwengo /getMetadata), op basis van _id of hruid/uuid
- * let op: we gebruiken hier param _id=id (dwengo).
+ * Haal één leerobject op (via Dwengo /getMetadata), op basis van _id
  */
 export async function getLearningObjectById(id: string, isTeacher: boolean): Promise<LearningObjectDto | null> {
   try {
+    // Dwengo interpreteert _id als "id" in de queryparam
     const params = { _id: id };
     const response = await dwengoAPI.get("/api/learningObject/getMetadata", { params });
-    const dwengoObj = response.data; // één enkel object
 
-    // Map naar ons lokale model
+    const dwengoObj = response.data;
     const mapped = mapDwengoToLocal(dwengoObj);
 
     // Check op exclusiviteit
@@ -141,9 +136,9 @@ export async function searchLearningObjects(isTeacher: boolean, searchTerm: stri
     if (searchTerm) {
       params.searchTerm = searchTerm;
     }
-    const response = await dwengoAPI.get("/api/learningObject/search", { params });
-    const dwengoData = response.data; // array
 
+    const response = await dwengoAPI.get("/api/learningObject/search", { params });
+    const dwengoData = response.data;
     const mapped = dwengoData.map(mapDwengoToLocal);
     return mapped;
   } catch (error) {
@@ -153,30 +148,34 @@ export async function searchLearningObjects(isTeacher: boolean, searchTerm: stri
 }
 
 /**
- * Haal leerobjecten op voor een gegeven leerpad (mock-versie). NOG GOED TE te TESTEN EN UITBREIDEN
- * 1) Haal leerpad op via Dwengo /api/learningPath/search
- * 2) Loop over nodes en haal metadata per node op
- * 3) Filter op teacher_exclusive / available indien nodig
+ * Haal leerobjecten op voor een gegeven leerpad (via Dwengo /api/learningPath/search).
+ * Let op: Dwengo gebruikt `_id` (of `hruid`) om het leerpad te identificeren.
+ * => We zoeken in het array van zoekresultaten naar `lp._id === pathId`.
  */
-export async function getLearningObjectsForPath(pathId: number, isTeacher: boolean): Promise<LearningObjectDto[]> {
+export async function getLearningObjectsForPath(pathId: string, isTeacher: boolean): Promise<LearningObjectDto[]> {
   try {
-    // 1) alle leerpaden ophalen
+    // 1) Haal alle leerpaden op via Dwengo
     const pathResp = await dwengoAPI.get("/api/learningPath/search", { params: { all: "" } });
-    const allPaths = pathResp.data;
-    // Vind het leerpad met id=pathId (dit is afhankelijk van je data)
-    const learningPath = allPaths.find((lp: any) => lp.id === pathId);
-    if (!learningPath) return [];
+    const allPaths = pathResp.data; // array van leerpaden
+
+    // 2) Vind het leerpad dat past bij pathId. Dwengo gebruikt meestal `_id`.
+    //    Als je in jouw data `hruid` wilt gebruiken, vervang je _id door hruid
+    const learningPath = allPaths.find((lp: any) => lp._id === pathId);
+    if (!learningPath) {
+      console.warn(`Leerpad met _id=${pathId} niet gevonden in Dwengo-API.`);
+      return [];
+    }
 
     const nodes = learningPath.nodes || [];
     const results: LearningObjectDto[] = [];
 
-    // Voor elke node: fetch het leerobjectmetadata
+    // 3) Voor elke node: haal het leerobject op via getMetadata
     for (const node of nodes) {
       try {
         const lo = await fetchMetadataForNode(node);
         if (!lo) continue;
 
-        // Filter op teacher_exclusive / available
+        // Filter op exclusiviteit
         if (!isTeacher && (lo.teacherExclusive || !lo.available)) {
           continue;
         }
@@ -193,8 +192,9 @@ export async function getLearningObjectsForPath(pathId: number, isTeacher: boole
 }
 
 /**
- * Hulpfunctie om 1 node te mappen naar getMetadata?
- * Hier gebruiken we hruid/version/language, etc. 
+ * Hulpfunctie om 1 node te mappen naar getMetadata.
+ * Dwengo: we gebruiken hruid, version, language om het leerobject op te vragen.
+ * Eventueel checken we ook of node._id bestaat.
  */
 async function fetchMetadataForNode(node: any): Promise<LearningObjectDto | null> {
   const params = {

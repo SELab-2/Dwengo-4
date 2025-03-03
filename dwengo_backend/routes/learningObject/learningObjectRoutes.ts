@@ -10,15 +10,22 @@ import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
 const router = express.Router();
 
 /**
- * We beschermen alle endpoints zodat je zeker user-rol hebt.
- * (Je kunt natuurlijk per endpoint bepalen of die publiek of
- *  alleen teacher of teacher+student is.)
+ * Bescherm alle endpoints zodat je zeker een user-rol hebt.
  */
 router.use(protectAnyUser);
 
-router.get("/", getAllLearningObjects);          
-router.get("/search", searchLearningObjects);    // GET /learningObjects/search?q=...
-router.get("/path/:pathId", getLearningObjectsForPath); 
-router.get("/:id", getLearningObject);           
+// GET /learningObjects
+router.get("/", getAllLearningObjects);
+
+// GET /learningObjects/search?q=...
+router.get("/search", searchLearningObjects);
+
+// GET /learningObjects/path/:pathId
+// pathId is string (bv. "67b4488c9dadb305c41043cc")
+router.get("/path/:pathId", getLearningObjectsForPath);
+
+// GET /learningObjects/:id
+router.get("/:id", getLearningObject);
 
 export default router;
+
