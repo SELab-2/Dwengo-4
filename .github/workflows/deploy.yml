@@ -40,6 +40,6 @@ jobs:
           npm run build
           cd /home/selab2/Dwengo-4-yolo/Dwengo-4/dwengo_backend
           npm i
-          PORT=3000 npx nodemon server.js > /dev/null 2>&1 &
+          PORT=4000 npx nodemon server.js > /dev/null 2>&1 &
           sleep 3 #aapjes 
           echo "Yolo branch deployment completed successfully on port $PORT"
