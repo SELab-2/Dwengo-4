@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import joinRequestService from "../../services/joinRequestService";
-import {JoinRequest} from "@prisma/client";
+import { JoinRequest } from "@prisma/client";
 
 // Higher-order function to handle errors and reduce duplication
 const handleRequest = (handler: (req: Request, res: Response) => Promise<void>) =>

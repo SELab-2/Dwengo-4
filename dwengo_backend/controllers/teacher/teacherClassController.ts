@@ -1,7 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import { Response } from 'express';
 import { AuthenticatedRequest } from "../../middleware/teacherAuthMiddleware"
-import * as classService from "../../services/classService";
+import classService from "../../services/classService";
 
 const APP_URL = process.env.APP_URL || "http://localhost:5000";
 

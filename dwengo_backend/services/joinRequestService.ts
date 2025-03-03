@@ -1,5 +1,5 @@
 import {PrismaClient, JoinRequestStatus, JoinRequest} from "@prisma/client";
-import * as classService from "./classService";
+import classService from "./classService";
 import {ClassWithLinks} from "./classService";
 
 const prisma = new PrismaClient();
