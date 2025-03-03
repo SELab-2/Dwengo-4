@@ -19,16 +19,21 @@ export const createJoinRequest = handleRequest(async (req: Request, res: Respons
     res.status(201).json(joinRequest);
 });
 
-export const approveJoinRequest = handleRequest(async (req: Request, res: Response): Promise<void> => {
+export const updateJoinRequestStatus = handleRequest(async (req: Request, res: Response): Promise<void> => {
     const { classId, studentId } = req.params;
-    await joinRequestService.approveRequestAndAddStudentToClass(Number(studentId), Number(classId));
-    res.status(200).json({ message: "Join request approved." });
-});
+    const { action } = req.body; // 'approve' or 'deny' from the request body
 
-export const denyJoinRequest = handleRequest(async (req: Request, res: Response): Promise<void> => {
-    const { classId, studentId } = req.params;
-    await joinRequestService.denyJoinRequest(Number(studentId), Number(classId));
-    res.status(200).json({ message: "Join request denied." });
+    if (!action || (action !== 'approve' && action !== 'deny')) {
+        res.status(400).json({ error: "Action must be 'approve' or 'deny'" });
+    }
+
+    if (action === 'approve') {
+        await joinRequestService.approveRequestAndAddStudentToClass(Number(studentId), Number(classId));
+        res.status(200).json({ message: "Join request approved." });
+    } else if (action === 'deny') {
+        await joinRequestService.denyJoinRequest(Number(studentId), Number(classId));
+        res.status(200).json({ message: "Join request denied." });
+    }
 });
 
 export const getJoinRequestsByClass = handleRequest(async (req: Request, res: Response): Promise<void> => {
