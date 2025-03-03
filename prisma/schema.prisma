@@ -74,14 +74,15 @@ model Student {
 
   // Voortgang van studenten
   progress        StudentProgress[]
-  // Teamtoewijzingen van studenten
-  teamAssignments TeamAssignment[]
 
   // Verzoeken om lid te worden van een klas
   joinRequests JoinRequest[]
 
   // Relaties naar klassen (veel-op-veel)
   classes ClassStudent[]
+
+  // Teams waarvan de student lid is
+  Team Team[]
 }
 
 model Class {
@@ -300,37 +301,35 @@ model Assignment {
 }
 
 model ClassAssignment {
-  id           Int @id @default(autoincrement())
   classId      Int
   assignmentId Int
 
   class           Class            @relation(fields: [classId], references: [id])
   assignment      Assignment       @relation(fields: [assignmentId], references: [id])
-  teamAssignments TeamAssignment[]
 
-  @@unique([classId, assignmentId])
+  @@id([classId, assignmentId])
 }
 
 model Team {
   id       Int    @id @default(autoincrement())
-  teamname String @unique
+  teamname String
 
+  // Een team bestaat uit studenten
+  students Student[]
+  // Een verwijzing naar de assignments van dit team
   teamAssignments TeamAssignment[]
+  // De indieningen van een team
   teamSubmissions TeamSubmission[]
 }
 
 model TeamAssignment {
   teamId            Int
-  classAssignmentId Int
-  memberId          Int
+  assignmentId    Int
 
   team            Team            @relation(fields: [teamId], references: [id])
-  classAssignment ClassAssignment @relation(fields: [classAssignmentId], references: [id])
-  member          Student         @relation(fields: [memberId], references: [userId])
-  Assignment      Assignment?     @relation(fields: [assignmentId], references: [id])
-  assignmentId    Int?
+  Assignment      Assignment     @relation(fields: [assignmentId], references: [id])
 
-  @@id([teamId, classAssignmentId, memberId])
+  @@id([teamId, assignmentId])
 }
 
 model EvaluationSubmission {
