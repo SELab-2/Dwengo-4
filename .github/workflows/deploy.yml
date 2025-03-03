@@ -12,7 +12,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Kill existing Node processes
-        run: killall node
+        run: pkill -f "node.*server.js" || true
 
       - name: Deploy main branch
         env:
@@ -23,6 +23,7 @@ jobs:
           git checkout main
           cd /home/selab2/Dwengo-4/dwengo_backend/
           PORT=$PORT npx nodemon server.js > /dev/null 2>&1 &
+          sleep 5 #aapjes
           echo "Main branch deployment completed successfully on port $PORT"
 
       - name: Deploy yolo branch
@@ -34,4 +35,5 @@ jobs:
           git checkout yolo
           cd /home/selab2/Dwengo-4-yolo/Dwengo-4/dwengo_backend
           PORT=$PORT npx nodemon server.js > /dev/null 2>&1 &
+          sleep 5 #aapjes
           echo "Yolo branch deployment completed successfully on port $PORT"
