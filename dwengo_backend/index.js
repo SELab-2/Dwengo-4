@@ -30,13 +30,8 @@ app.use(express.json()); // Parse JSON-requests
 
 // Hello World route
 app.get("/", (req, res) => {
-  res.send("Hello, World!");
+  res.send("Hello, World yolo!");
 });
-
-app.get("/login", (req, res) => {
-  res.send("Hello, World 35!");
-});
-
 // Routes voor Teacher
 app.use("/teacher/auth", teacherAuthRoutes);
 
