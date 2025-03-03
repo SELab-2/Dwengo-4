@@ -76,15 +76,13 @@ async function assignStudentsToTeam(teamId: number, studentIds: number[], classA
 }
 
 // Get all teams for a given assignment
-export const getTeamsForAssignment = async (assignmentId: string): Promise<Team[]> => {
-    const teams = await prisma.team.findMany({
-        where: { assignmentId: parseInt(assignmentId) },
+export const getTeamsForAssignment = async (assignmentId: number): Promise<Team[]> => {
+    return prisma.team.findMany({
+        where: {assignmentId: assignmentId},
         include: {
             students: true // Include the students associated with the team
         }
     });
-
-    return teams;
 };
 
 // Update teams in an assignment
