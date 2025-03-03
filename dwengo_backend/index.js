@@ -15,10 +15,6 @@ const bodyParser = require("body-parser");
 
 app.use(express.static(path.join(__dirname, "../frontend/build")));
 
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
-});
-
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -47,6 +43,10 @@ app.use("/student/auth", studentAuthRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+});
 
 // Start server
 const PORT = process.env.PORT || 5000;

@@ -1,6 +1,7 @@
 /* Fonts */
 @import url("https://fonts.googleapis.com/css2?family=Sen:wght@400..800&display=swap");
-@import url('https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap");
+@import "tailwindcss";
 
 :root {
   --primary-color-light: #f2f3ff;
@@ -154,7 +155,6 @@ section {
 }
 
 @media screen and (max-width: 768px) {
-
   .g-7-2,
   .g-3-2,
   .g-2-3,
@@ -1504,7 +1504,6 @@ input:active {
 input {
   position: relative;
 }
-
 
 .hide-desk {
   display: none;
