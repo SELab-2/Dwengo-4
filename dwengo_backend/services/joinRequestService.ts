@@ -28,20 +28,29 @@ export default class joinRequestService {
         }
     }
 
+    static async createJoinRequest(studentId: number, classId: number): Promise<JoinRequest> {
+        return prisma.joinRequest.create({
+            data: {
+                studentId,
+                classId: classId,
+                status: JoinRequestStatus.PENDING,
+            },
+        });
+    }
 
-    static async createJoinRequest(studentId: number, classCode: string): Promise<JoinRequest | undefined> {
+
+    static async createValidJoinRequest(studentId: number, classCode: string): Promise<JoinRequest> {
         try {
             const classroom: ClassWithLinks = await this.validateClassExists(classCode);
 
-            return await prisma.joinRequest.create({
-                data: {
-                    studentId,
-                    classId: classroom.id,
-                    status: JoinRequestStatus.PENDING,
-                },
-            });
+            return await this.createJoinRequest(studentId, classroom.id);
         } catch (error) {
             this.handleError(error, "Error creating join request");
+            // Without this Typescript does not accept the return type to just be Promise<JoinRequest>
+            // but also wants it to be optionally "undefined".
+            // Since I don't want that, I will just log the error here, and then pass the error to the
+            // JoinRequestController which will handle accordingly.
+            throw error;
         }
     };
 
@@ -64,7 +73,7 @@ export default class joinRequestService {
         }
     };
 
-    static async getJoinRequestsByClass(classId: number): Promise<JoinRequest[] | undefined> {
+    static async getJoinRequestsByClass(classId: number): Promise<JoinRequest[]> {
         try {
             return await prisma.joinRequest.findMany({
                 where: { classId },
@@ -72,6 +81,7 @@ export default class joinRequestService {
             });
         } catch (error) {
             this.handleError(error, `Error fetching join requests for class ${classId}`);
+            return [];
         }
     }
 

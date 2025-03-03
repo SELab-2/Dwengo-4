@@ -15,7 +15,7 @@ const handleRequest = (handler: (req: Request, res: Response) => Promise<void>) 
 
 export const createJoinRequest = handleRequest(async (req: Request, res: Response): Promise<void> => {
     const { studentId, classCode }: { studentId: number; classCode: string } = req.body;
-    const joinRequest: JoinRequest = await joinRequestService.createJoinRequest(studentId, classCode);
+    const joinRequest: JoinRequest | undefined = await joinRequestService.createValidJoinRequest(studentId, classCode);
     res.status(201).json(joinRequest);
 });
 
