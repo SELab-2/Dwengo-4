@@ -11,14 +11,14 @@ export const getAllTeachers = async (): Promise<Teacher[]> => {
 };
 
 export const getTeachersByClass = async (classId: number): Promise<Teacher[]> => {
-    const classTeachers = await prisma.classTeacher.findMany({
-        where: { classId },
-        include: {
-            teacher: {
-                include: { user: true }, // Inclusief gebruikersinformatie
+    return prisma.teacher.findMany({
+        where: {
+            teaches: {
+                some: {classId}, // Find teachers who are linked to this class
             },
         },
+        include: {
+            user: true // Includes full user data in each teacher object
+        },
     });
-
-    return classTeachers.map(ct => ct.teacher);
 }
