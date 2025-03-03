@@ -1,4 +1,5 @@
-import * as express from "express";
+import express from "express";
+// De "* as ..." is hier echt nodig, geloof mij.
 import * as joinRequestController from "../../controllers/joinrequest/joinRequestController"
 import { isTeacher } from "../../middleware/teacherAuthMiddleware"
 

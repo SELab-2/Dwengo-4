@@ -1,5 +1,5 @@
-import * as jwt from 'jsonwebtoken';
-import * as asyncHandler from 'express-async-handler';
+import jwt from 'jsonwebtoken';
+import asyncHandler from 'express-async-handler';
 import { PrismaClient } from '@prisma/client';
 import { Request, Response, NextFunction } from 'express';
 
