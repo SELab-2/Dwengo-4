@@ -53,7 +53,7 @@ model Teacher {
   user   User @relation(fields: [userId], references: [id])
 
   // Antwoorden en feedback
-  teacherAnswers   TeacherAnswer[]
+  teacherAnswers   Answer[]
   teacherFeedbacks TeacherFeedback[]
   // Uitnodigingen om een klas mee te beheren
   invite           Invite[]
@@ -69,11 +69,8 @@ model Student {
   userId Int  @id
   user   User @relation(fields: [userId], references: [id])
 
-  // Vragen van studenten
-  studentQuestions StudentQuestion[]
-
   // Voortgang van studenten
-  progress        StudentProgress[]
+  progress StudentProgress[]
 
   // Verzoeken om lid te worden van een klas
   joinRequests JoinRequest[]
@@ -166,6 +163,7 @@ model LearningPath {
 
   assignments       Assignment[]
   learningPathNodes LearningPathNode[]
+  generalQuestions  GeneralQuestion[]
 }
 
 model LearningPathNode {
@@ -200,10 +198,11 @@ model LearningObject {
   creatorId Int
   creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningObjectCreator")
 
-  evaluations      Evaluation[]
-  educationalGoals EducationalGoal[]
-  returnValue      ReturnValue?
-  progress         LearningObjectProgress[]
+  evaluations       Evaluation[]
+  educationalGoals  EducationalGoal[]
+  returnValue       ReturnValue?
+  progress          LearningObjectProgress[]
+  specificQuestions SpecificQuestion[]
 }
 
 model EducationalGoal {
@@ -260,35 +259,92 @@ model MultipleChoiceOption {
 ///
 /// Vragen en antwoorden
 
-model StudentQuestion {
-  id          Int    @id @default(autoincrement())
-  studentId   Int
-  title       String
+enum QuestionType {
+  // SPECIFIC representeert specifieke vragen die door studenten worden gesteld
+  // bij het overlopen van een leerobject (deel van een leerpad)
+  SPECIFIC
+  // GENERAL representeert algemene vragen die door studenten worden gesteld
+  // bij het doorlopen van een leerpad
+  GENERAL
+  // ADDITIONAL representeert vragen die door leerlingen als bijvragen worden
+  // gesteld. Dit zijn vragen bij een antwoord van een leerkracht
+  ADDITIONAL
+}
+
+model SpecificQuestion {
+  questionId       Int    @unique
+  learningObjectId String
+
+  // Een SpecificQuestion is een vraag
+  question       Question       @relation(fields: [questionId], references: [id])
+  // Er kunnen meerdere vragen over een leerobject worden gesteld
+  learningObject LearningObject @relation(fields: [learningObjectId], references: [id])
+
+  @@id([questionId, learningObjectId])
+}
+
+model GeneralQuestion {
+  questionId       Int @unique
+  learningObjectId Int
+
+  // Een SpecificQuestion is een vraag
+  question     Question     @relation(fields: [questionId], references: [id])
+  // Er kunnen meerdere vragen over een leerobject worden gesteld
+  learningPath LearningPath @relation(fields: [learningObjectId], references: [id])
+
+  @@id([questionId, learningObjectId])
+}
+
+model AdditionalQuestion {
+  questionId Int @unique
+  answerId   Int
+
+  // Een AdditionalQuestion is een vraag
+  question Question @relation(fields: [questionId], references: [id])
+  // Er kunnen meerdere bijvragen gesteld worden bij een antwoord
+  answer   Answer   @relation(fields: [answerId], references: [id])
+
+  @@id([questionId, answerId])
+}
+
+model Question {
+  id          Int          @id @default(autoincrement())
+  teamId      Int
+  // De vraag zelf
   description String
+  type        QuestionType
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
-  student         Student          @relation(fields: [studentId], references: [userId])
-  questionAnswers QuestionAnswer[]
+  // Een vraag is ofwel een specifieke vraag (bij leerobject),
+  // een algemene vraag (bij leerpad) of
+  // een bijvraag bij een antwoord
+  specific   SpecificQuestion?
+  general    GeneralQuestion?
+  additional AdditionalQuestion?
+  team       Team                @relation(fields: [teamId], references: [id])
+  // Een vraag kan meerdere antwoorden hebben
+  answers    Answer[]
 }
 
-model TeacherAnswer {
-  id        Int    @id @default(autoincrement())
-  teacherId Int
-  answer    String
+model Answer {
+  id         Int      @id @default(autoincrement())
+  questionId Int
+  teacherId  Int
+  answer     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  teacher         Teacher          @relation(fields: [teacherId], references: [userId])
-  questionAnswers QuestionAnswer[]
+  teacher Teacher @relation(fields: [teacherId], references: [userId])
+
+  // Een antwoord hoort bij 1 vraag
+  question            Question             @relation(fields: [questionId], references: [id])
+  // Een antwoord kan meerdere bijvragen hebben
+  additionalQuestions AdditionalQuestion[]
 }
 
-model QuestionAnswer {
-  studentQuestionId Int
-  teacherAnswerId   Int
-
-  studentQuestion StudentQuestion @relation(fields: [studentQuestionId], references: [id])
-  teacherAnswer   TeacherAnswer   @relation(fields: [teacherAnswerId], references: [id])
-
-  @@id([studentQuestionId, teacherAnswerId])
-}
-
+///
+/// Taken en indieningen
 model Assignment {
   id             Int      @id @default(autoincrement())
   learningPathId Int
@@ -304,8 +360,8 @@ model ClassAssignment {
   classId      Int
   assignmentId Int
 
-  class           Class            @relation(fields: [classId], references: [id])
-  assignment      Assignment       @relation(fields: [assignmentId], references: [id])
+  class      Class      @relation(fields: [classId], references: [id])
+  assignment Assignment @relation(fields: [assignmentId], references: [id])
 
   @@id([classId, assignmentId])
 }
@@ -315,19 +371,20 @@ model Team {
   teamname String
 
   // Een team bestaat uit studenten
-  students Student[]
+  students        Student[]
   // Een verwijzing naar de assignments van dit team
   teamAssignments TeamAssignment[]
   // De indieningen van een team
   teamSubmissions TeamSubmission[]
+  Questions       Question[]
 }
 
 model TeamAssignment {
-  teamId            Int
-  assignmentId    Int
+  teamId       Int
+  assignmentId Int
 
-  team            Team            @relation(fields: [teamId], references: [id])
-  Assignment      Assignment     @relation(fields: [assignmentId], references: [id])
+  team       Team       @relation(fields: [teamId], references: [id])
+  Assignment Assignment @relation(fields: [assignmentId], references: [id])
 
   @@id([teamId, assignmentId])
 }
