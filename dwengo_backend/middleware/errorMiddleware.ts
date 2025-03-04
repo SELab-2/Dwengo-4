@@ -1,9 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
+import { AppError } from '../errors/errors';
 
 const errorHandler = (err: any, req: Request, res: Response, next: NextFunction): void => {
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-  res.status(statusCode);
-
+  if (err instanceof AppError) {
+    res.status(err.statusCode)
+  } else {
+    const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+    res.status(statusCode);
+  }
+  
   res.json({
     message: err.message,
     // Alleen de stack weergeven als je niet in productie bent:
