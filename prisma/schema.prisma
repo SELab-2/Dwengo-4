@@ -317,19 +317,30 @@ model Question {
   type       QuestionType
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  // Een vraag is ofwel een specifieke vraag (bij leerobject) of een algemene vraag (bij leerpad)
+
+  // Een vraag is ofwel een specifieke vraag (bij leerobject),
+  // een algemene vraag (bij leerpad) of
+  // een bijvraag bij een antwoord
   specific   SpecificQuestion?
   general    GeneralQuestion?
   additional AdditionalQuestion?
   team         Team          @relation(fields: [teamId], references: [id])
+  // Een vraag kan meerdere antwoorden hebben
+  answers      Answer[]
 }
 
 model Answer {
   id        Int    @id @default(autoincrement())
-  teacherId Int
-  answer    String
+  questionId Int
+  teacherId  Int
+  answer String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   teacher         Teacher          @relation(fields: [teacherId], references: [userId])
+
+  // Een antwoord hoort bij 1 vraag
+  question      Question         @relation(fields: [questionId], references: [id])
   // Een antwoord kan meerdere bijvragen hebben
   additionalQuestions AdditionalQuestion[]
 }
