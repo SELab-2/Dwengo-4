@@ -53,7 +53,7 @@ model Teacher {
   user   User @relation(fields: [userId], references: [id])
 
   // Antwoorden en feedback
-  teacherAnswers   TeacherAnswer[]
+  teacherAnswers   Answer[]
   teacherFeedbacks TeacherFeedback[]
   // Uitnodigingen om een klas mee te beheren
   invite           Invite[]
@@ -306,16 +306,16 @@ model Question {
   specific   SpecificQuestion?
   general    GeneralQuestion?
   team         Team          @relation(fields: [teamId], references: [id])
-  questionAnswers QuestionAnswer[]
 }
 
-model TeacherAnswer {
+model Answer {
   id        Int    @id @default(autoincrement())
   teacherId Int
   answer    String
 
   teacher         Teacher          @relation(fields: [teacherId], references: [userId])
   questionAnswers QuestionAnswer[]
+	@@map("TeacherAnswer")
 }
 
 model QuestionAnswer {
@@ -323,7 +323,7 @@ model QuestionAnswer {
   teacherAnswerId   Int
 
   studentQuestion Question @relation(fields: [studentQuestionId], references: [id])
-  teacherAnswer   TeacherAnswer   @relation(fields: [teacherAnswerId], references: [id])
+  teacherAnswer   Answer   @relation(fields: [teacherAnswerId], references: [id])
 
   @@id([studentQuestionId, teacherAnswerId])
 }
