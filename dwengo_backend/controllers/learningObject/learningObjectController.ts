@@ -1,20 +1,42 @@
 import { Request, Response } from "express";
-import * as learningObjectService from "../../services/learningObjectService";
+import {
+  getAllLearningObjects,
+  getLearningObjectById,
+  searchLearningObjects,
+  getLearningObjectsForPath,
+  LearningObjectDto,
+} from "../../services/learningObjectService";
 
-function userIsTeacherOrAdmin(req: Request): boolean {
-  const role = (req as any).user?.role;
+/**
+ * Een type voor een Request met een getypeerde user-property.
+ */
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: number;
+    role: string;
+  };
+}
+
+/**
+ * Bepaalt of de ingelogde gebruiker TEACHER of ADMIN is.
+ */
+function userIsTeacherOrAdmin(req: AuthenticatedRequest): boolean {
+  const role: string | undefined = req.user?.role;
   return role === "TEACHER" || role === "ADMIN";
 }
 
 /**
- * Haalt alle leerobjecten op (via Dwengo-API, of eventueel lokale DB in de toekomst).
- * - Students zien enkel teacher_exclusive = false, available = true
- * - Teachers/Admins zien alles
+ * Haalt alle leerobjecten op via de Dwengo-API (of later lokale DB).
+ * Studenten zien enkel objecten met teacherExclusive = false en available = true.
+ * Teachers/Admins zien alle objecten.
  */
-export const getAllLearningObjects = async (req: Request, res: Response): Promise<void> => {
+export const getAllLearningObjectsController = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
   try {
-    const isTeacher = userIsTeacherOrAdmin(req);
-    const objects = await learningObjectService.getAllLearningObjects(isTeacher);
+    const isTeacher: boolean = userIsTeacherOrAdmin(req);
+    const objects: LearningObjectDto[] = await getAllLearningObjects(isTeacher);
     res.json(objects);
   } catch (error) {
     console.error(error);
@@ -23,20 +45,21 @@ export const getAllLearningObjects = async (req: Request, res: Response): Promis
 };
 
 /**
- * Haalt 1 leerobject op (op basis van ID => Dwengo '_id').
- * Als object teacher_exclusive is en user is geen teacher => 404.
+ * Haalt één leerobject op op basis van de Dwengo '_id'. 
+ * Als het object teacherExclusive is en de gebruiker geen teacher is, wordt null geretourneerd.
  */
-export const getLearningObject = async (req: Request, res: Response): Promise<void> => {
+export const getLearningObjectController = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
   try {
-    const { id } = req.params; // string
-    const isTeacher = userIsTeacherOrAdmin(req);
-
-    const lo = await learningObjectService.getLearningObjectById(id, isTeacher);
+    const { id } = req.params;
+    const isTeacher: boolean = userIsTeacherOrAdmin(req);
+    const lo: LearningObjectDto | null = await getLearningObjectById(id, isTeacher);
     if (!lo) {
       res.status(404).json({ error: "Leerobject niet gevonden of geen toegang" });
       return;
     }
-
     res.json(lo);
   } catch (error) {
     console.error(error);
@@ -45,15 +68,17 @@ export const getLearningObject = async (req: Request, res: Response): Promise<vo
 };
 
 /**
- * Zoekt leerobjecten via Dwengo /search
- * ?q=blabla => we geven 'searchTerm=blabla' mee in de service.
+ * Zoekt naar leerobjecten via de Dwengo-API.
+ * Queryparameter ?q= wordt als searchTerm doorgegeven.
  */
-export const searchLearningObjects = async (req: Request, res: Response): Promise<void> => {
+export const searchLearningObjectsController = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
   try {
-    const searchTerm = req.query.q?.toString() || "";
-    const isTeacher = userIsTeacherOrAdmin(req);
-
-    const results = await learningObjectService.searchLearningObjects(isTeacher, searchTerm);
+    const searchTerm: string = req.query.q?.toString() || "";
+    const isTeacher: boolean = userIsTeacherOrAdmin(req);
+    const results: LearningObjectDto[] = await searchLearningObjects(isTeacher, searchTerm);
     res.json(results);
   } catch (error) {
     console.error(error);
@@ -62,15 +87,16 @@ export const searchLearningObjects = async (req: Request, res: Response): Promis
 };
 
 /**
- * Haalt alle leerobjecten op die bij een leerpad (pathId) horen.
- * Gebruikt getLearningObjectsForPath uit de service.
+ * Haalt alle leerobjecten op die bij een leerpad horen (op basis van pathId).
  */
-export const getLearningObjectsForPath = async (req: Request, res: Response): Promise<void> => {
+export const getLearningObjectsForPathController = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
   try {
-    const { pathId } = req.params; // string
-    const isTeacher = userIsTeacherOrAdmin(req);
-
-    const objects = await learningObjectService.getLearningObjectsForPath(pathId, isTeacher);
+    const { pathId } = req.params;
+    const isTeacher: boolean = userIsTeacherOrAdmin(req);
+    const objects: LearningObjectDto[] = await getLearningObjectsForPath(pathId, isTeacher);
     res.json(objects);
   } catch (error) {
     console.error(error);
