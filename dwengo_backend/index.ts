@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import errorHandler from './middleware/errorMiddleware';
 import teacherAuthRoutes from './routes/teacher/teacherAuthRoutes';
 import studentAuthRoutes from './routes/student/studentAuthRoutes';
+import teacherClassRoutes from './routes/teacher/teacherClassRoutes';
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.get('/login', (req: Request, res: Response) => {
 
 // Routes voor Teacher
 app.use('/teacher/auth', teacherAuthRoutes);
+app.use("/teacher/classes", teacherClassRoutes);
 
 // Routes voor Student
 app.use('/student/auth', studentAuthRoutes);
@@ -42,3 +44,5 @@ app.use(errorHandler);
 // Start server
 const PORT: string | number = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server draait op poort ${PORT}`));
+
+export default app;
