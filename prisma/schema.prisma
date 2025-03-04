@@ -266,6 +266,9 @@ enum QuestionType {
   // GENERAL representeert algemene vragen die door studenten worden gesteld
   // bij het doorlopen van een leerpad
   GENERAL
+  // ADDITIONAL representeert vragen die door leerlingen als bijvragen worden
+  // gesteld. Dit zijn vragen bij een antwoord van een leerkracht
+  ADDITIONAL
 }
 
 
@@ -294,6 +297,16 @@ model GeneralQuestion {
   @@id([questionId, learningObjectId])
 }
 
+model AdditionalQuestion {
+  questionId Int @unique
+  answerId   Int
+
+  // Een AdditionalQuestion is een vraag
+  question Question @relation(fields: [questionId], references: [id])
+  // Er kunnen meerdere bijvragen gesteld worden bij een antwoord
+  answer   Answer   @relation(fields: [answerId], references: [id])
+}
+
 model Question {
   id          Int    @id @default(autoincrement())
   teamId   Int
@@ -305,6 +318,7 @@ model Question {
   // Een vraag is ofwel een specifieke vraag (bij leerobject) of een algemene vraag (bij leerpad)
   specific   SpecificQuestion?
   general    GeneralQuestion?
+  additional AdditionalQuestion?
   team         Team          @relation(fields: [teamId], references: [id])
 }
 
@@ -315,7 +329,8 @@ model Answer {
 
   teacher         Teacher          @relation(fields: [teacherId], references: [userId])
   questionAnswers QuestionAnswer[]
-	@@map("TeacherAnswer")
+  // Een antwoord kan meerdere bijvragen hebben
+  additionalQuestions AdditionalQuestion[]
 }
 
 model QuestionAnswer {
