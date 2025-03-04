@@ -70,7 +70,7 @@ model Student {
   user   User @relation(fields: [userId], references: [id])
 
   // Vragen van studenten
-  studentQuestions StudentQuestion[]
+  studentQuestions Question[]
 
   // Voortgang van studenten
   progress        StudentProgress[]
@@ -166,6 +166,7 @@ model LearningPath {
 
   assignments       Assignment[]
   learningPathNodes LearningPathNode[]
+  generalQuestions  GeneralQuestion[]
 }
 
 model LearningPathNode {
@@ -204,6 +205,7 @@ model LearningObject {
   educationalGoals EducationalGoal[]
   returnValue      ReturnValue?
   progress         LearningObjectProgress[]
+  specificQuestions SpecificQuestion[]
 }
 
 model EducationalGoal {
@@ -260,12 +262,52 @@ model MultipleChoiceOption {
 ///
 /// Vragen en antwoorden
 
-model StudentQuestion {
+enum QuestionType {
+  // SPECIFIC representeert specifieke vragen die door studenten worden gesteld
+  // bij het overlopen van een leerobject (deel van een leerpad)
+  SPECIFIC
+  // GENERAL representeert algemene vragen die door studenten worden gesteld
+  // bij het doorlopen van een leerpad
+  GENERAL
+}
+
+
+model SpecificQuestion {
+  questionId Int @unique
+  learningObjectId String
+
+  // Een SpecificQuestion is een vraag
+  question      Question       @relation(fields: [questionId], references: [id])
+  // Er kunnen meerdere vragen over een leerobject worden gesteld
+  learningObject LearningObject @relation(fields: [learningObjectId], references: [id])
+
+  @@id([questionId, learningObjectId])
+}
+
+
+model GeneralQuestion {
+  questionId Int @unique
+  learningObjectId Int
+
+  // Een SpecificQuestion is een vraag
+  question      Question       @relation(fields: [questionId], references: [id])
+  // Er kunnen meerdere vragen over een leerobject worden gesteld
+  learningPath LearningPath @relation(fields: [learningObjectId], references: [id])
+
+  @@id([questionId, learningObjectId])
+}
+
+model Question {
   id          Int    @id @default(autoincrement())
   studentId   Int
-  title       String
+  // De vraag zelf
   description String
-
+  type       QuestionType
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  // Een vraag is ofwel een specifieke vraag (bij leerobject) of een algemene vraag (bij leerpad)
+  specific   SpecificQuestion?
+  general    GeneralQuestion?
   student         Student          @relation(fields: [studentId], references: [userId])
   questionAnswers QuestionAnswer[]
 }
@@ -283,7 +325,7 @@ model QuestionAnswer {
   studentQuestionId Int
   teacherAnswerId   Int
 
-  studentQuestion StudentQuestion @relation(fields: [studentQuestionId], references: [id])
+  studentQuestion Question @relation(fields: [studentQuestionId], references: [id])
   teacherAnswer   TeacherAnswer   @relation(fields: [teacherAnswerId], references: [id])
 
   @@id([studentQuestionId, teacherAnswerId])
