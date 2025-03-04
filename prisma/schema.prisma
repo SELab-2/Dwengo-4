@@ -305,6 +305,8 @@ model AdditionalQuestion {
   question Question @relation(fields: [questionId], references: [id])
   // Er kunnen meerdere bijvragen gesteld worden bij een antwoord
   answer   Answer   @relation(fields: [answerId], references: [id])
+
+  @@id([questionId, answerId])
 }
 
 model Question {
@@ -328,21 +330,13 @@ model Answer {
   answer    String
 
   teacher         Teacher          @relation(fields: [teacherId], references: [userId])
-  questionAnswers QuestionAnswer[]
   // Een antwoord kan meerdere bijvragen hebben
   additionalQuestions AdditionalQuestion[]
 }
 
-model QuestionAnswer {
-  studentQuestionId Int
-  teacherAnswerId   Int
 
-  studentQuestion Question @relation(fields: [studentQuestionId], references: [id])
-  teacherAnswer   Answer   @relation(fields: [teacherAnswerId], references: [id])
-
-  @@id([studentQuestionId, teacherAnswerId])
-}
-
+///
+/// Taken en indieningen
 model Assignment {
   id             Int      @id @default(autoincrement())
   learningPathId Int
