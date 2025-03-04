@@ -3,7 +3,7 @@ import controller from "../../controllers/teacher/feedbackController";
 
 const router = express.Router();
 
-router.get('/', controller.getAllFeedback);
+router.get('/:evaluationId', controller.getAllFeedbackForEvaluation);
 
 
 

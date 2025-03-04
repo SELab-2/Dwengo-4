@@ -3,8 +3,16 @@ import {Feedback, PrismaClient} from '@prisma/client';
 const prisma = new PrismaClient();
 
 export default class FeedbackService {
-    static async getAllFeedback(): Promise<Feedback[]>  {
-        return prisma.feedback.findMany();
+    static async getAllFeedbackForEvaluation(evaluationId: string): Promise<Feedback[]> {
+        return prisma.feedback.findMany({
+            where: {
+                submission: {
+                    evaluationId: evaluationId,
+                },
+            },
+            include: {
+                submission: true,
+            },
+        });
     }
-
 }
