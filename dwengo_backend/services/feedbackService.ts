@@ -15,4 +15,14 @@ export default class FeedbackService {
             },
         });
     }
+
+    static async createFeedback(submissionId: number, teacherId: number, description: string): Promise<Feedback> {
+        return prisma.feedback.create({
+            data: {
+                submissionId: submissionId,
+                teacherId: teacherId,
+                description: description,
+            },
+        });
+    }
 }
