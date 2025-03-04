@@ -299,7 +299,7 @@ model GeneralQuestion {
 
 model Question {
   id          Int    @id @default(autoincrement())
-  studentId   Int
+  teamId   Int
   // De vraag zelf
   description String
   type       QuestionType
@@ -308,7 +308,7 @@ model Question {
   // Een vraag is ofwel een specifieke vraag (bij leerobject) of een algemene vraag (bij leerpad)
   specific   SpecificQuestion?
   general    GeneralQuestion?
-  student         Student          @relation(fields: [studentId], references: [userId])
+  team         Team          @relation(fields: [teamId], references: [id])
   questionAnswers QuestionAnswer[]
 }
 
@@ -362,6 +362,7 @@ model Team {
   teamAssignments TeamAssignment[]
   // De indieningen van een team
   teamSubmissions TeamSubmission[]
+  Questions       Question[]
 }
 
 model TeamAssignment {
