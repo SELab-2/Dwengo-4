@@ -20,6 +20,11 @@ interface SignupFormData {
   password: string;
 }
 
+// ✅ Definieer het type voor de API response (moet overeenkomen met `signupTeacher`)
+interface AuthResponse {
+  token: string;
+}
+
 // ✅ Definieer het type voor de ref van InputWithChecks
 interface InputWithChecksHandle {
   validateInput: () => boolean;
@@ -34,11 +39,11 @@ const SignupTeacher: React.FC = () => {
 
   // ✅ Gebruik useMutation met juiste types
   const { mutate, isPending, isError, error } = useMutation<
-    void,
+    AuthResponse, // ✅ `signupTeacher` retourneert een `Promise<AuthResponse>`, dus we zetten dit correct in `useMutation`
     Error,
     SignupFormData
   >({
-    mutationFn: signupTeacher,
+    mutationFn: signupTeacher, // ✅ Nu correct getypeerd
     onSuccess: () => {
       navigate("/teacher/inloggen");
     },
