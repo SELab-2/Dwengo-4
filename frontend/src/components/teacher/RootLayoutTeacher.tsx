@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Nav from "./NavTeacher";
+import React from "react";
 
 function RootLayoutTeacher() {
     return (
