@@ -304,8 +304,9 @@ model ClassAssignment {
   classId      Int
   assignmentId Int
 
-  class           Class            @relation(fields: [classId], references: [id])
-  assignment      Assignment       @relation(fields: [assignmentId], references: [id])
+  // Het verwijderen van een class/assigment verwijdert nu automatisch ook het ClassAssignment object
+  class           Class            @relation(fields: [classId], references: [id], onDelete: Cascade)
+  assignment      Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
   teamAssignments TeamAssignment[]
 
   @@unique([classId, assignmentId])
@@ -324,10 +325,11 @@ model TeamAssignment {
   classAssignmentId Int
   memberId          Int
 
-  team            Team            @relation(fields: [teamId], references: [id])
-  classAssignment ClassAssignment @relation(fields: [classAssignmentId], references: [id])
-  member          Student         @relation(fields: [memberId], references: [userId])
-  Assignment      Assignment?     @relation(fields: [assignmentId], references: [id])
+  // team, classAssignment, member of Assignemnt verwijderen verwijdert nu ook automatisch het TeamAssignment object
+  team            Team            @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  classAssignment ClassAssignment @relation(fields: [classAssignmentId], references: [id], onDelete: Cascade)
+  member          Student         @relation(fields: [memberId], references: [userId], onDelete: Cascade)
+  Assignment      Assignment?     @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
   assignmentId    Int?
 
   @@id([teamId, classAssignmentId, memberId])
