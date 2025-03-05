@@ -13,6 +13,7 @@ const app = express();
 
 const bodyParser = require("body-parser");
 
+app.use(express.static(path.join(__dirname, "./img")));
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
 app.use((req, res, next) => {
