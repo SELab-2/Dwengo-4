@@ -1,5 +1,4 @@
 import { QueryClient } from "@tanstack/react-query";
-//import { getAuthToken } from "./authTeacher";
 
 // API backend URL (pas aan indien nodig)
 const BACKEND = "http://localhost:5000";
@@ -12,8 +11,28 @@ export const queryClient = new QueryClient({
   },
 });
 
-// Inloggen als leerkracht
-export async function loginTeacher({ email, password }) {
+// ✅ Type-definities voor login- en signup-gegevens
+interface AuthCredentials {
+  email: string;
+  password: string;
+}
+
+// ✅ Type-definitie voor de API response
+interface AuthResponse {
+  token: string;
+}
+
+// ✅ Type-definitie voor API-fouten
+interface APIError extends Error {
+  code?: number;
+  info?: any;
+}
+
+// ✅ Inloggen als leerkracht
+export async function loginTeacher({
+  email,
+  password,
+}: AuthCredentials): Promise<AuthResponse> {
   const response = await fetch(`${BACKEND}/teacher/auth/login`, {
     method: "POST",
     headers: {
@@ -23,7 +42,7 @@ export async function loginTeacher({ email, password }) {
   });
 
   if (!response.ok) {
-    const error = new Error("Er is iets misgegaan tijdens het inloggen.");
+    const error: APIError = new Error("Er is iets misgegaan tijdens het inloggen.");
     error.code = response.status;
     error.info = await response.json();
     throw error;
@@ -32,8 +51,11 @@ export async function loginTeacher({ email, password }) {
   return await response.json();
 }
 
-// Registreren als leerkracht
-export async function signupTeacher({ email, password }) {
+// ✅ Registreren als leerkracht
+export async function signupTeacher({
+  email,
+  password,
+}: AuthCredentials): Promise<AuthResponse> {
   const response = await fetch(`${BACKEND}/teacher/auth/register`, {
     method: "POST",
     headers: {
@@ -43,7 +65,7 @@ export async function signupTeacher({ email, password }) {
   });
 
   if (!response.ok) {
-    const error = new Error("Er is iets misgegaan tijdens het registreren.");
+    const error: APIError = new Error("Er is iets misgegaan tijdens het registreren.");
     error.code = response.status;
     error.info = await response.json();
     throw error;
