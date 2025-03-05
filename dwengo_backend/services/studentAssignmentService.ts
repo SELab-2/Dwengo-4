@@ -5,8 +5,16 @@ const prisma = new PrismaClient();
 export const getAssignmentsForStudent = async (studentId: number, sortFields: string[], order: "asc" | "desc", limit: number): Promise<Assignment[]> => {
     return prisma.assignment.findMany({
         where: {
-            teamAssignments: {
-                some: { memberId: studentId }
+            classAssignments: {
+                some: {
+                    class: {
+                        classLinks: {
+                            some: {
+                                studentId: studentId
+                            }
+                        }
+                    }
+                }
             }
         },
         // Sort by multiple fields
