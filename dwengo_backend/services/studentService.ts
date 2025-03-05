@@ -3,18 +3,16 @@ import {PrismaClient, Student} from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const getStudentsByClass = async (classId: number): Promise<Student[]> => {
-    return prisma.student.findMany({
-        where: {
-            classes: {
-                some: {
-                    classId: classId,
-                },
-            },
-        },
-        include: {
-            user: true, // Inclusief gebruikersinformatie
-        },
+    const classWithStudents = await prisma.class.findUnique({
+        where: { id: classId },
+        include: { classLinks: { include: { student: { include: { user: true } } } } },
     });
+
+    if (!classWithStudents) {
+        throw new Error(`Class with ID: ${classId} not found`);
+    }
+
+    return classWithStudents.classLinks.map(cs => cs.student);
 };
 
 
