@@ -1,17 +1,19 @@
-import express from "express";
-import { searchLearningPaths, getLearningPathById } from "../../controllers/learningPath/learningPathController";
+import express, { Router } from "express";
+import { 
+  searchLearningPathsController, 
+  getLearningPathByIdController 
+} from "../../controllers/learningPath/learningPathController";
 import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
 
-const router = express.Router();
+const router: Router = express.Router();
 
-// We beschermen de endpoints zodat enkel ingelogde gebruikers (student/teacher/admin) 
-// leerpaden kunnen doorzoeken. Wil je het openbaar? Dan kun je protectAnyUser weglaten.
+// Bescherm alle endpoints zodat een user (met role) aanwezig is.
 router.use(protectAnyUser);
 
 // GET /learningPaths?language=nl&hruid=...&title=...&description=...&all=
-router.get("/", searchLearningPaths);
+router.get("/", searchLearningPathsController);
 
-// GET /learningPaths/:pathId  (zoekt in Dwengo-API op _id of hruid)
-router.get("/:pathId", getLearningPathById);
+// GET /learningPaths/:pathId
+router.get("/:pathId", getLearningPathByIdController);
 
 export default router;

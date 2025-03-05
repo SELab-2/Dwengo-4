@@ -1,8 +1,16 @@
 import { Request, Response } from "express";
-import * as learningPathService from "../../services/learningPathService";
+import { searchLearningPaths, getLearningPathByIdOrHruid, LearningPathDto } from "../../services/learningPathService";
+
+interface LearningPathFilters {
+  language?: string;
+  hruid?: string;
+  title?: string;
+  description?: string;
+  all?: string;
+}
 
 /**
- * Zoekt leerpaden via Dwengo-API. 
+ * Zoekt leerpaden via Dwengo-API.
  * Mogelijke queryparams:
  *  ?language=nl
  *  ?hruid=...
@@ -10,18 +18,17 @@ import * as learningPathService from "../../services/learningPathService";
  *  ?description=...
  *  ?all=  (leeg om alles op te halen)
  */
-export const searchLearningPaths = async (req: Request, res: Response): Promise<void> => {
+export const searchLearningPathsController = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Haal filters uit req.query
-    const filters = {
+    const filters: LearningPathFilters = {
       language: req.query.language?.toString(),
       hruid: req.query.hruid?.toString(),
       title: req.query.title?.toString(),
       description: req.query.description?.toString(),
-      all: req.query.all?.toString() // bijv. "" of undefined
+      all: req.query.all?.toString(),
     };
 
-    const results = await learningPathService.searchLearningPaths(filters);
+    const results: LearningPathDto[] = await searchLearningPaths(filters);
     res.json(results);
   } catch (error) {
     console.error(error);
@@ -33,10 +40,10 @@ export const searchLearningPaths = async (req: Request, res: Response): Promise<
  * Haalt 1 leerpad op (op basis van _id of hruid).
  * We gebruiken de service getLearningPathByIdOrHruid voor 'idOrHruid'
  */
-export const getLearningPathById = async (req: Request, res: Response): Promise<void> => {
+export const getLearningPathByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { pathId } = req.params; // string
-    const path = await learningPathService.getLearningPathByIdOrHruid(pathId);
+    const { pathId } = req.params; // pathId is een string
+    const path: LearningPathDto | null = await getLearningPathByIdOrHruid(pathId);
 
     if (!path) {
       res.status(404).json({ error: "Leerpad niet gevonden" });

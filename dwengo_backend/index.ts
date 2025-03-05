@@ -35,7 +35,7 @@ app.use("/student/auth", studentAuthRoutes);
 
 // Nieuwe routes voor leerobjecten
 app.use("/learningObjects", learningObjectRoutes);
-
+app.use("/learningPaths", learningPathRoutes);
 // Error Handler
 app.use(errorHandler);
 
