@@ -1,6 +1,6 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 
-export const dwengoAPI = axios.create({
+export const dwengoAPI: AxiosInstance = axios.create({
   baseURL: process.env.DWENGO_BASE_URL || "https://dwengo.org/backend",
-  // Je kunt hier headers, timeouts, etc. instellen
+  // Je kunt hier global headers, timeouts, etc. instellen
 });
