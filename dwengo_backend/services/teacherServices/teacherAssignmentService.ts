@@ -1,5 +1,5 @@
 import {Assignment, PrismaClient, Role} from "@prisma/client";
-import {isAuthorized} from "./authorizationService";
+import {isAuthorized} from "../authorizationService";
 
 const prisma = new PrismaClient();
 
