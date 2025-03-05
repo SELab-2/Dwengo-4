@@ -13,7 +13,7 @@ const app = express();
 
 const bodyParser = require("body-parser");
 
-app.use(express.static(path.join(__dirname, "./img")));
+app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
 app.use((req, res, next) => {
@@ -46,7 +46,7 @@ app.use("/student/auth", studentAuthRoutes);
 app.use(errorHandler);
 
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+  res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
 });
 
 // Start server
