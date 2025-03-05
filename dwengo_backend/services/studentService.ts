@@ -1,22 +1,20 @@
-import { PrismaClient, Student } from "@prisma/client";
+import {PrismaClient, Student} from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 export const getStudentsByClass = async (classId: number): Promise<Student[]> => {
-    const classData = await prisma.class.findUnique({
-        where: { id: classId },
-        include: {
-            classLinks: {
-                include: {
-                    student: {
-                        include: { user: true }, // Inclusief gebruikersinformatie
-                    },
+    return prisma.student.findMany({
+        where: {
+            classes: {
+                some: {
+                    classId: classId,
                 },
             },
         },
+        include: {
+            user: true, // Inclusief gebruikersinformatie
+        },
     });
-
-    return classData?.classLinks.map(cs => cs.student) || [];
 };
 
 
