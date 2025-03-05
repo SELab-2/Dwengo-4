@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { getAssignmentsForStudent } from "../../services/studentAssignmentService";
-import {Assignment} from "@prisma/client";
+import { Assignment } from "@prisma/client";
 
 export const getStudentAssignments = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { studentId } = req.body;
+        const { studentId }: { studentId: number } = req.body;
 
         // Een URL van volgend formaat wordt verwacht
         // GET /assignments?sort=deadline&order=desc&limit=5
