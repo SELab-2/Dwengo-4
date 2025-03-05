@@ -1,10 +1,12 @@
-// router.js
 import React from "react";
-import { createBrowserRouter, Link } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Link,
+  RouteObject,
+} from "react-router-dom";
 
 // ==== TEACHER ROUTES ==== //
 import RootLayoutTeacher from "../components/teacher/RootLayoutTeacher";
-//import HomeTeacher from "../pages/teacher/HomeTeacher";
 import LoginTeacher from "../pages/teacher/LoginTeacher";
 import SignupTeacher from "../pages/teacher/SignupTeacher";
 import RootLayoutDashboardTeacher from "../components/teacher/RootLayoutDashboardTeacher";
@@ -26,8 +28,8 @@ import {
 import { action as studentLogoutAction } from "../pages/student/LogoutStudent";
 import StudentIndex from "../pages/student";
 
-// Home-pagina waar de gebruiker zijn rol kiest
-const HomePage = () => (
+// ✅ **Home-pagina waar de gebruiker zijn rol kiest**
+const HomePage: React.FC = () => (
   <div style={{ textAlign: "center", marginTop: "50px" }}>
     <h2>Kies een rol:</h2>
     <Link to="/student" className="link mx-10">
@@ -39,6 +41,7 @@ const HomePage = () => (
   </div>
 );
 
+// ✅ **Routeconfiguratie met TypeScript ondersteuning**
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -89,7 +92,6 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        // Je kunt hier eventueel een aparte HomeStudent-component gebruiken
         element: <StudentIndex />,
       },
       {
@@ -118,4 +120,4 @@ export const router = createBrowserRouter([
       },
     ],
   },
-]);
+] as RouteObject[]);
