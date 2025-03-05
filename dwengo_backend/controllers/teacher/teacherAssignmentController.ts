@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import * as assignmentService from "../../services/teacherAssignmentService";
+import teacherAssignmentService from "../../services/teacherAssignmentService";
 
 export class AssignmentTeacherController {
     async createAssignmentForClass(req: Request, res: Response) {
         try {
             const { teacherId, classId, learningPathId } = req.body;
-            const assignment = await assignmentService.createAssignmentForClass(teacherId, classId, learningPathId);
+            const assignment = await teacherAssignmentService.createAssignmentForClass(teacherId, classId, learningPathId);
             res.status(201).json(assignment);
         } catch (error) {
             res.status(500).json({ error: "Failed to create assignment" });
@@ -14,8 +14,9 @@ export class AssignmentTeacherController {
 
     async getAssignmentsByClass(req: Request, res: Response) {
         try {
-            const classId = parseInt(req.params.classId);
-            const assignments = await assignmentService.getAssignmentsByClass(classId);
+            const classId: number = parseInt(req.params.classId);
+            const { teacherId } = req.body;
+            const assignments = await teacherAssignmentService.getAssignmentsByClass(classId, teacherId);
             res.status(200).json(assignments);
         } catch (error) {
             res.status(500).json({ error: "Failed to retrieve assignments" });
@@ -24,9 +25,9 @@ export class AssignmentTeacherController {
 
     async updateAssignment(req: Request, res: Response) {
         try {
-            const assignmentId = parseInt(req.params.assignmentId);
-            const { learningPathId } = req.body;
-            const updatedAssignment = await assignmentService.updateAssignment(assignmentId, learningPathId);
+            const assignmentId: number = parseInt(req.params.assignmentId);
+            const { learningPathId, teacherId } = req.body;
+            const updatedAssignment = await teacherAssignmentService.updateAssignment(assignmentId, learningPathId, teacherId);
             res.json(updatedAssignment);
         } catch (error) {
             res.status(500).json({ error: "Failed to update assignment" });
@@ -35,8 +36,9 @@ export class AssignmentTeacherController {
 
     async deleteAssignment(req: Request, res: Response) {
         try {
-            const assignmentId = parseInt(req.params.assignmentId);
-            await assignmentService.deleteAssignment(assignmentId);
+            const assignmentId: number = parseInt(req.params.assignmentId);
+            const { teacherId } = req.body;
+            await teacherAssignmentService.deleteAssignment(assignmentId, teacherId);
             res.status(204).send();
         } catch (error) {
             res.status(500).json({ error: "Failed to delete assignment" });
