@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Outlet, useLoaderData, useSubmit } from "react-router-dom";
 import { getTokenDuration } from "../../util/teacher/authTeacher.js";
 import styles from "./RootLayoutDashboardTeacher.module.css";
-import SideBarTeacher from "./SideBarTeacher";
+import SideBarTeacher from "./SideBarTeacher.js";
 
 function RootLayoutDashboardTeacher() {
    const token = useLoaderData();
