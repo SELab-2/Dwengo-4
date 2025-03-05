@@ -1,4 +1,4 @@
-// ✅ Vereiste veldvalidatie
+
 export const validateRequired = (value: string): string => {
    if (!value || value.trim() === "") {
      return "Dit veld is verplicht";
@@ -6,7 +6,6 @@ export const validateRequired = (value: string): string => {
    return "";
  };
  
- // ✅ E-mailvalidatie
  export const validateEmail = (value: string): string => {
    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
    if (!emailRegex.test(value)) {
@@ -15,7 +14,7 @@ export const validateRequired = (value: string): string => {
    return "";
  };
  
- // ✅ Minimumlengtevalidatie
+
  export const validateMinLength = (value: string, minLength: number = 6): string => {
    if (value.length < minLength) {
      return `Moet ten minste ${minLength} tekens lang zijn`;
@@ -23,7 +22,7 @@ export const validateRequired = (value: string): string => {
    return "";
  };
  
- // ✅ Combineren van validaties
+
  type ValidationRule = (value: string) => string;
  
  export const validateForm = (value: string, rules: ValidationRule[] = []): string => {
@@ -36,7 +35,7 @@ export const validateRequired = (value: string): string => {
    return "";
  };
  
- // ✅ Positief getal validatie
+
  export const validatePositiveNumber = (value: string | number): string => {
    const numValue = typeof value === "number" ? value : parseFloat(value);
    if (isNaN(numValue) || numValue <= 0) {

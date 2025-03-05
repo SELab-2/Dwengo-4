@@ -7,11 +7,10 @@ import React, {
  } from "react";
  import "./InputWithChecks.css";
  
- // Definieer de types voor de props
  interface InputWithChecksProps {
    label?: string;
    inputType?: string;
-   validate?: (value: string) => string | null;  // Functie die een foutmelding retourneert, of null als er geen fout is
+   validate?: (value: string) => string | null;  
    info?: string;
    value?: string;
    placeholder?: string;

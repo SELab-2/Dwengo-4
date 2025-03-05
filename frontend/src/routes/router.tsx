@@ -28,7 +28,7 @@ import {
 import { action as studentLogoutAction } from "../pages/student/LogoutStudent";
 import StudentIndex from "../pages/student";
 
-// ✅ **Home-pagina waar de gebruiker zijn rol kiest**
+
 const HomePage: React.FC = () => (
   <div style={{ textAlign: "center", marginTop: "50px" }}>
     <h2>Kies een rol:</h2>
@@ -41,7 +41,6 @@ const HomePage: React.FC = () => (
   </div>
 );
 
-// ✅ **Routeconfiguratie met TypeScript ondersteuning**
 export const router = createBrowserRouter([
   {
     path: "/",

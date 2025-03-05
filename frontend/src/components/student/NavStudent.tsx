@@ -6,7 +6,6 @@ import styles from "./Nav.module.css";
 const NavAdmin: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
-  // Functie om menu te openen/sluiten
   const toggleMenu = () => {
     setMenuOpen((prev) => !prev);
   };

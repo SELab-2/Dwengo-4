@@ -14,30 +14,26 @@ import BoxBorder from "../../components/shared/BoxBorder";
 import { loginTeacher } from "../../util/teacher/httpTeacher";
 import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
 
-// ✅ Definieer het type voor de login gegevens
 interface LoginFormData {
   email: string;
   password: string;
 }
 
-// ✅ Definieer het type voor de API response
 interface LoginResponse {
   token: string;
 }
 
-// ✅ Definieer het type voor de ref van InputWithChecks
+
 interface InputWithChecksHandle {
   validateInput: () => boolean;
   getValue: () => string;
 }
 
 const LoginTeacher: React.FC = () => {
-  // ✅ Typing voor useRef met InputWithChecks-handle functies
   const emailRef = useRef<InputWithChecksHandle | null>(null);
   const passwordRef = useRef<InputWithChecksHandle | null>(null);
   const navigate = useNavigate();
 
-  // ✅ Gebruik useMutation met juiste types
   const { mutate, isPending, isError, error } = useMutation<
     LoginResponse,
     Error,
@@ -55,7 +51,6 @@ const LoginTeacher: React.FC = () => {
     },
   });
 
-  // ✅ TypeScript fix voor form event en null-checks
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 

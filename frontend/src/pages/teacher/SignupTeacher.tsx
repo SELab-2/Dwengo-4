@@ -14,42 +14,42 @@ import BoxBorder from "../../components/shared/BoxBorder";
 import { signupTeacher } from "../../util/teacher/httpTeacher";
 import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
 
-// ✅ Definieer het type voor de registratiegegevens
+
 interface SignupFormData {
   email: string;
   password: string;
 }
 
-// ✅ Definieer het type voor de API response (moet overeenkomen met `signupTeacher`)
+
 interface AuthResponse {
   token: string;
 }
 
-// ✅ Definieer het type voor de ref van InputWithChecks
+
 interface InputWithChecksHandle {
   validateInput: () => boolean;
   getValue: () => string;
 }
 
 const SignupTeacher: React.FC = () => {
-  // ✅ Typing voor useRef met InputWithChecks-handle functies
+
   const emailRef = useRef<InputWithChecksHandle | null>(null);
   const passwordRef = useRef<InputWithChecksHandle | null>(null);
   const navigate = useNavigate();
 
-  // ✅ Gebruik useMutation met juiste types
+
   const { mutate, isPending, isError, error } = useMutation<
-    AuthResponse, // ✅ `signupTeacher` retourneert een `Promise<AuthResponse>`, dus we zetten dit correct in `useMutation`
+    AuthResponse, 
     Error,
     SignupFormData
   >({
-    mutationFn: signupTeacher, // ✅ Nu correct getypeerd
+    mutationFn: signupTeacher,
     onSuccess: () => {
       navigate("/teacher/inloggen");
     },
   });
 
-  // ✅ TypeScript fix voor form event en null-checks
+
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 

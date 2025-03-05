@@ -1,6 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 
-// API backend URL (pas aan indien nodig)
+
 const BACKEND = "http://localhost:5000";
 
 export const queryClient = new QueryClient({
@@ -11,24 +11,21 @@ export const queryClient = new QueryClient({
   },
 });
 
-// ✅ Type-definities voor login- en signup-gegevens
 interface AuthCredentials {
   email: string;
   password: string;
 }
 
-// ✅ Type-definitie voor de API response
 interface AuthResponse {
   token: string;
 }
 
-// ✅ Type-definitie voor API-fouten
 interface APIError extends Error {
   code?: number;
   info?: any;
 }
 
-// ✅ Inloggen als leerkracht
+
 export async function loginTeacher({
   email,
   password,
@@ -51,7 +48,6 @@ export async function loginTeacher({
   return await response.json();
 }
 
-// ✅ Registreren als leerkracht
 export async function signupTeacher({
   email,
   password,

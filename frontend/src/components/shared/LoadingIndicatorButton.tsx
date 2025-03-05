@@ -1,7 +1,7 @@
 import React from "react";
 
 interface LoadingIndicatorButtonProps {
-  dark?: boolean; // de 'dark' prop is optioneel
+  dark?: boolean; 
 }
 
 const LoadingIndicatorButton: React.FC<LoadingIndicatorButtonProps> = ({ dark }) => {

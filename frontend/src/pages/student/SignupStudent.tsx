@@ -14,27 +14,27 @@ import BoxBorder from "../../components/shared/BoxBorder";
 import { signupStudent } from "../../util/student/httpStudent";
 import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
 
-// ✅ Definieer het type voor de registratiegegevens
 interface SignupFormData {
   email: string;
   password: string;
 }
 
-// ✅ Definieer het type voor de ref van InputWithChecks
+interface AuthResponse {
+  token: string;
+}
+
 interface InputWithChecksHandle {
   validateInput: () => boolean;
   getValue: () => string;
 }
 
 const SignupStudent: React.FC = () => {
-  // ✅ Typing voor useRef met InputWithChecks-handle functies
   const emailRef = useRef<InputWithChecksHandle | null>(null);
   const passwordRef = useRef<InputWithChecksHandle | null>(null);
   const navigate = useNavigate();
 
-  // ✅ Gebruik useMutation met juiste types
   const { mutate, isPending, isError, error } = useMutation<
-    void,
+    AuthResponse,
     Error,
     SignupFormData
   >({
@@ -44,7 +44,6 @@ const SignupStudent: React.FC = () => {
     },
   });
 
-  // ✅ TypeScript fix voor form event en null-checks
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 

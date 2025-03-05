@@ -14,30 +14,25 @@ import BoxBorder from "../../components/shared/BoxBorder";
 import { loginStudent } from "../../util/student/httpStudent";
 import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
 
-// ✅ Definieer het type voor de login gegevens
 interface LoginFormData {
   email: string;
   password: string;
 }
 
-// ✅ Definieer het type voor de API response
 interface LoginResponse {
   token: string;
 }
 
-// ✅ Definieer het type voor de ref van InputWithChecks
 interface InputWithChecksHandle {
   validateInput: () => boolean;
   getValue: () => string;
 }
 
 const LoginStudent: React.FC = () => {
-  // ✅ Typing voor useRef met InputWithChecks-handle functies
   const emailRef = useRef<InputWithChecksHandle | null>(null);
   const passwordRef = useRef<InputWithChecksHandle | null>(null);
   const navigate = useNavigate();
 
-  // ✅ Gebruik useMutation met juiste types
   const { mutate, isPending, isError, error } = useMutation<
     LoginResponse,
     Error,
@@ -55,7 +50,6 @@ const LoginStudent: React.FC = () => {
     },
   });
 
-  // ✅ TypeScript fix voor form event en null-checks
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -85,7 +79,7 @@ const LoginStudent: React.FC = () => {
               validate={(value) =>
                 validateForm(value, [validateRequired, validateEmail])
               }
-              placeholder="Voer je e-mailadres in" // ✅ Zorg dat InputWithChecks deze prop ondersteunt
+              placeholder="Voer je e-mailadres in"
             />
             <InputWithChecks
               ref={passwordRef}
@@ -97,7 +91,7 @@ const LoginStudent: React.FC = () => {
                   (v: string) => validateMinLength(v, 6),
                 ])
               }
-              placeholder="Voer je wachtwoord in" // ✅ Zorg dat InputWithChecks deze prop ondersteunt
+              placeholder="Voer je wachtwoord in" 
             />
             {isError && (
               <div className="c-r">

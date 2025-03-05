@@ -1,9 +1,8 @@
-// App.js
 import React from "react";
 import { RouterProvider } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./util/student/httpStudent";
-import { router } from "./routes/router.jsx";
+import { router } from "./routes/router";
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
