@@ -35,12 +35,15 @@ export default class TeacherAssignmentService {
             throw new Error("The teacher is unauthorized to request the assignments");
         }
 
-        const classAssignments = await prisma.classAssignment.findMany({
-            where: { classId },
-            include: { assignment: true },
+        return prisma.assignment.findMany({
+            where: {
+                classAssignments: {
+                    some: {
+                        classId: classId,  // This ensures we are looking for assignments related to this class
+                    },
+                },
+            },
         });
-
-        return classAssignments.map(ca => ca.assignment);
     }
 
     // Static method to update an assignment
