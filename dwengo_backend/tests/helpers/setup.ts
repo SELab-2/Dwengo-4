@@ -1,6 +1,5 @@
-import resetDb from './reset-db'
 import { beforeEach } from 'vitest'
 
 beforeEach(async () => {
-  await resetDb()
+  // hier kan je code plaatsen die voor elke test moet worden uitgevoerd 
 })

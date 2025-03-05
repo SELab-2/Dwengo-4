@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../errors/errors';
 
-const errorHandler = (err: any, req: Request, res: Response, next: NextFunction): void => {
+const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction): void => {
   if (err instanceof AppError) {
     res.status(err.statusCode)
   } else {

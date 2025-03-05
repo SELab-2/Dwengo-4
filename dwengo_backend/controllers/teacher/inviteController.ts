@@ -43,13 +43,28 @@ export const updateInviteStatus = asyncHandler(async (req: AuthenticatedRequest,
     const teacherId: number = req.body.user?.id as number;
 
     if (action == "accept") {
-        const invite = await inviteService.acceptInviteAndJoinClass(teacherId, classId);
+        const invite: Invite = await inviteService.acceptInviteAndJoinClass(teacherId, classId);
         res.status(200).json({ invite });
     } else if (action == "decline") {
-        const invite = await inviteService.declineInvite(teacherId, classId);
+        const invite: Invite = await inviteService.declineInvite(teacherId, classId);
         res.status(200).json({ invite });
     } else {
         res.status(400).json({ error: "Action must be 'accept' or 'decline'" });
     }
 });
 
+
+/**
+ * Delete an invite
+ * @route DELETE /teacher/classes/:classId/invite/:teacherId
+ * @param classId - id of the class for which the invite is deleted 
+ * @param teacherId - id of the teacher for which the invite is deleted (otherTeacherId in this function)
+ * returns the deleted invite in the response body
+ */
+export const deleteInvite = asyncHandler(async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    const { otherTeacherId, classId }: { otherTeacherId: number, classId: number } = req.body;
+    const classTeacherId: number = req.body.user?.id as number;
+
+    const invite: Invite = await inviteService.deleteInvite(classTeacherId, otherTeacherId, classId);
+    res.status(200).json({ invite: invite, message: "invite was succesfully deleted" });
+});

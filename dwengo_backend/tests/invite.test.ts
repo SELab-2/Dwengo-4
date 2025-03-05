@@ -18,6 +18,15 @@ describe('invite tests', async () => {
     let teacherUser2: User & { teacher: Teacher };
     let classroom: Class;
     beforeEach(async () => {
+        // clear the database
+        await prisma.$transaction([
+            prisma.invite.deleteMany(),
+            prisma.classTeacher.deleteMany(),
+            prisma.class.deleteMany(),
+            prisma.student.deleteMany(),
+            prisma.teacher.deleteMany(),
+            prisma.user.deleteMany()
+        ]);
         // create two teachers
         teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
         teacherUser2 = await createTeacher("John", "Doe", "john.doe@gmail.com");
@@ -282,6 +291,59 @@ describe('invite tests', async () => {
                 }
             });
             expect(classTeacher2).toBeNull();
+        });
+    });
+    describe('[DELETE] /teacher/classes/:classId/invite/:teacherId', async () => {
+        it('should respond with a `200` status code and the deleted invite', async () => {
+            // set up scenario with a valid invite
+            await addTeacherToClass(teacherUser1.teacher.userId, classroom.id);
+            const invite: Invite = await createInvite(teacherUser2.teacher.userId, classroom.id);
+
+            // test deleting the invite
+            const { status, body } = await request(app)
+                .delete(`/teacher/classes/${classroom.id}/invite/${teacherUser2.id}`)
+                .send({
+                    user: teacherUser1,
+                    otherTeacherId: teacherUser2.id,
+                    classId: classroom.id
+                });
+
+            expect(status).toBe(200);
+            expect(body.invite).toStrictEqual(invite);
+            expect(body.message).toBe("invite was succesfully deleted");
+            // verify that the invite was deleted
+            const deletedInvite = await prisma.invite.findUnique({
+                where: {
+                    teacherId_classId: {
+                        teacherId: teacherUser2.id,
+                        classId: classroom.id
+                    }
+                }
+            });
+            expect(deletedInvite).toBeNull();
+        });
+        it('should respond with a `403` status code when the teacher trying to delete the invite is not part of the class', async () => {
+            const invite: Invite = await createInvite(teacherUser2.teacher.userId, classroom.id);
+            const { status, body } = await request(app)
+                .delete(`/teacher/classes/${classroom.id}/invite/${teacherUser2.id}`)
+                .send({
+                    user: teacherUser1,
+                    otherTeacherId: teacherUser2.id,
+                    classId: classroom.id
+                });
+
+            expect(status).toBe(403);
+            expect(body.message).toBe("Leerkracht is geen beheerder van de klas");
+            // verify that the invite was not deleted   
+            const checkInvite = await prisma.invite.findUnique({
+                where: {
+                    teacherId_classId: {
+                        teacherId: teacherUser2.id,
+                        classId: classroom.id
+                    }
+                }
+            });
+            expect(checkInvite).toStrictEqual(invite);
         });
     });
 });

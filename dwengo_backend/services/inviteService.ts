@@ -116,5 +116,21 @@ export default class inviteService {
         });
     }
 
+    static async deleteInvite(classTeacherId: number, otherTeacherId: number, classId: number): Promise<Invite> {
+        // check if teacher is a teacher of the class
+        const isTeacher: boolean = await classService.isTeacherOfClass(classId, classTeacherId);
+        if (!isTeacher) {
+            throw new AccesDeniedError("Leerkracht is geen beheerder van de klas");
+        }
+        return await prisma.invite.delete({
+            where: {
+                teacherId_classId: {
+                    teacherId: otherTeacherId,
+                    classId,
+                },
+            },
+        });
+    }
+
 }
 
