@@ -4,8 +4,11 @@ import teacherAssignmentService from "../../services/teacherServices/teacherAssi
 export class AssignmentTeacherController {
     async createAssignmentForClass(req: Request, res: Response): Promise<void> {
         try {
-            const { teacherId, classId, learningPathId }: { teacherId: number, classId: number, learningPathId: number } = req.body;
-            const assignment = await teacherAssignmentService.createAssignmentForClass(teacherId, classId, learningPathId);
+            const { teacherId, classId, learningPathId, deadline }: { teacherId: number, classId: number, learningPathId: number, deadline: string } = req.body;
+
+            const parsedDeadline = new Date(deadline);
+
+            const assignment = await teacherAssignmentService.createAssignmentForClass(teacherId, classId, learningPathId, parsedDeadline);
             res.status(201).json(assignment);
         } catch (error) {
             res.status(500).json({ error: "Failed to create assignment" });
