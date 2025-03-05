@@ -8,6 +8,9 @@ export default defineConfig({
           singleFork: true
         }
     },
-    setupFiles: ['./tests/helpers/setup.ts']
+    setupFiles: ['./tests/helpers/setup.ts'],
+    coverage: {
+      provider: 'v8'
+    }
   }
 });
