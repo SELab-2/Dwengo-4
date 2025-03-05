@@ -4,8 +4,8 @@ export default defineConfig({
   test: {
     include: ['./tests/**/*.test.ts'],
     poolOptions: {
-        threads: {
-          maxThreads: 1
+        forks: {
+          singleFork: true
         }
     },
     setupFiles: ['./tests/helpers/setup.ts']

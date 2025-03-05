@@ -1,5 +1,6 @@
-There's only integration tests so far.
-To run the integration tests, first make sure you're running the database locally as explained in the README.md file at the project root.
-Then you can use the command `npm run test:int` to run all the tests in this folder.
+Er zijn tot nu toe enkel integratie testen.
+Om ze te runnen, zorg eerst dat je de database lokaal bent aan het runnen zoals uitgelegd in de README.md in de project root.
+Dan kan je met `npm run test:int` alle testen in deze folder runnen.
+Met `npm run test:int:ui` kan je ook gebruik maken van de gui van vitest. Het handigste hieraan is dat je gemakkelijk een bepaalde test in een test file kan aanduiden om te runnen.
 
-You can learn more about how the test framework works at https://www.prisma.io/blog/testing-series-3-aBUyF8nxAn.
+Op https://www.prisma.io/blog/testing-series-3-aBUyF8nxAn is er een goede tutorial voor integratie testen.

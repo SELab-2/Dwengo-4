@@ -7,7 +7,7 @@ import {
   regenerateJoinLink,
   getClassroomStudents,
 } from '../../controllers/teacher/teacherClassController';
-import { createInvite } from '../../controllers/teacher/inviteController';
+import { createInvite, getPendingInvitesForTeacher, updateInviteStatus } from '../../controllers/teacher/inviteController';
 
 const router = express.Router();
 
@@ -20,5 +20,7 @@ router.get("/:classId/students", protectTeacher, getClassroomStudents);
 
 // routes for invites
 router.post("/:classId/invite", protectTeacher, createInvite);
+router.get("/invites", protectTeacher, getPendingInvitesForTeacher);
+router.patch("/:classId/invite", protectTeacher, updateInviteStatus);
 
 export default router;

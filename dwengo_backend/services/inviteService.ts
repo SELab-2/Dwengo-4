@@ -6,7 +6,21 @@ import { AccesDeniedError, BadRequestError, ConflictError, NotFoundError } from 
 const prisma = new PrismaClient();
 
 export default class inviteService {
-    
+
+    private static async validateInvitePending(teacherId: number, classId: number): Promise<Invite> {
+        let invite: Invite | null = await prisma.invite.findFirst({
+            where: {
+                teacherId,
+                classId,
+                status: JoinRequestStatus.PENDING,
+            },
+        });
+        if (!invite) {
+            throw new NotFoundError("Geen pending uitnodiging gevonden voor deze leerkracht en klas");
+        }
+        return invite;
+    }
+
     static async createInvite(classTeacherId: number, otherTeacherId: number, classId: number): Promise<Invite> {
         // check if class exists
         const classroom: Class | null = await classService.getClassById(classId);
@@ -42,6 +56,64 @@ export default class inviteService {
             }
             throw error;
         }
+    }
+
+    static async getPendingInvitesForTeacher(teacherId: number): Promise<Invite[]> {
+        return prisma.invite.findMany({
+            where: {
+                teacherId,
+                status: JoinRequestStatus.PENDING   // i don't think a teacher would ever really need to see invites that they already accepted or declined
+            },
+        });
+    }
+
+    static async acceptInviteAndJoinClass(teacherId: number, classId: number): Promise<Invite> {
+        // check if invite is pending
+        await this.validateInvitePending(teacherId, classId);
+        // check if the teacher is already a member of the class
+        const isAlreadyTeacher: boolean = await classService.isTeacherOfClass(classId, teacherId);
+        if (isAlreadyTeacher) {
+            throw new BadRequestError("Leerkracht is al lid van de klas");
+        }
+
+        // accept the invite
+        const invite = await prisma.invite.update({
+            where: {
+                teacherId_classId: {
+                    teacherId,
+                    classId,
+                },
+            },
+            data: {
+                status: JoinRequestStatus.APPROVED,
+            },
+        });
+        // add the teacher to the class
+        await prisma.classTeacher.create({
+            data: {
+                teacherId,
+                classId,
+            }
+        });
+        return invite;
+    }
+
+    static async declineInvite(teacherId: number, classId: number): Promise<Invite> {
+        // check if invite is pending
+        await this.validateInvitePending(teacherId, classId);
+
+        // decline the invite
+        return prisma.invite.update({
+            where: {
+                teacherId_classId: {
+                    teacherId,
+                    classId,
+                },
+            },
+            data: {
+                status: JoinRequestStatus.DENIED,
+            }
+        });
     }
 
 }

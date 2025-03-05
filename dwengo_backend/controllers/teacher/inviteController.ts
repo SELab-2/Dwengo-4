@@ -8,7 +8,7 @@ import { AuthenticatedRequest } from "../../middleware/teacherAuthMiddleware";
  * Create an invite for a teacher to join a class
  * @route POST /teacher/classes/:classId/invite
  * @param classId - id of the class to which the teacher is invited
- * @returns invite - the created invite
+ * returns the created invite in the response body
  */
 export const createInvite = asyncHandler(async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     const { otherTeacherId, classId }: { otherTeacherId: number, classId: number } = req.body;
@@ -17,4 +17,39 @@ export const createInvite = asyncHandler(async (req: AuthenticatedRequest, res: 
     const invite: Invite = await inviteService.createInvite(classTeacherId, otherTeacherId, classId);
     res.status(201).json({ invite });
 }); 
+
+
+/**
+ * Get all invites for a teacher
+ * @route GET /teacher/invites
+ * returns a list of all invites for the teacher in the response body
+ */
+export const getPendingInvitesForTeacher = asyncHandler(async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    const teacherId: number = req.body.user?.id as number;
+
+    const invites: Invite[] = await inviteService.getPendingInvitesForTeacher(teacherId);
+    res.status(200).json({ invites });
+});
+
+
+/**
+ * Update the status of an invite
+ * @route PATCH /teacher/classes/:classId/invite
+ * @param classId - id of the class for which the invite status is updated
+ * returns the updated invite in the response body
+ */
+export const updateInviteStatus = asyncHandler(async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    const { action, classId }: { action: string, classId: number } = req.body;
+    const teacherId: number = req.body.user?.id as number;
+
+    if (action == "accept") {
+        const invite = await inviteService.acceptInviteAndJoinClass(teacherId, classId);
+        res.status(200).json({ invite });
+    } else if (action == "decline") {
+        const invite = await inviteService.declineInvite(teacherId, classId);
+        res.status(200).json({ invite });
+    } else {
+        res.status(400).json({ error: "Action must be 'accept' or 'decline'" });
+    }
+});
 
