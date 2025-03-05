@@ -14,6 +14,7 @@ import React, {
    validate?: (value: string) => string | null;  // Functie die een foutmelding retourneert, of null als er geen fout is
    info?: string;
    value?: string;
+   placeholder?: string;
  }
  
  interface InputWithChecksHandle {

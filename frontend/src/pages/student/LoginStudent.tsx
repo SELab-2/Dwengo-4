@@ -14,12 +14,35 @@ import BoxBorder from "../../components/shared/BoxBorder";
 import { loginStudent } from "../../util/student/httpStudent";
 import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
 
-const LoginStudent = () => {
-  const emailRef = useRef(null);
-  const passwordRef = useRef(null);
+// ✅ Definieer het type voor de login gegevens
+interface LoginFormData {
+  email: string;
+  password: string;
+}
+
+// ✅ Definieer het type voor de API response
+interface LoginResponse {
+  token: string;
+}
+
+// ✅ Definieer het type voor de ref van InputWithChecks
+interface InputWithChecksHandle {
+  validateInput: () => boolean;
+  getValue: () => string;
+}
+
+const LoginStudent: React.FC = () => {
+  // ✅ Typing voor useRef met InputWithChecks-handle functies
+  const emailRef = useRef<InputWithChecksHandle | null>(null);
+  const passwordRef = useRef<InputWithChecksHandle | null>(null);
   const navigate = useNavigate();
 
-  const { mutate, isPending, isError, error } = useMutation({
+  // ✅ Gebruik useMutation met juiste types
+  const { mutate, isPending, isError, error } = useMutation<
+    LoginResponse,
+    Error,
+    LoginFormData
+  >({
     mutationFn: loginStudent,
     onSuccess: (data) => {
       const token = data.token;
@@ -32,14 +55,15 @@ const LoginStudent = () => {
     },
   });
 
-  const handleFormSubmit = (e) => {
+  // ✅ TypeScript fix voor form event en null-checks
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const emailValid = emailRef.current?.validateInput();
-    const passwordValid = passwordRef.current?.validateInput();
+    const emailValid = emailRef.current?.validateInput() ?? false;
+    const passwordValid = passwordRef.current?.validateInput() ?? false;
 
-    if (emailValid && passwordValid) {
-      const formData = {
+    if (emailValid && passwordValid && emailRef.current && passwordRef.current) {
+      const formData: LoginFormData = {
         email: emailRef.current.getValue(),
         password: passwordRef.current.getValue(),
       };
@@ -61,7 +85,7 @@ const LoginStudent = () => {
               validate={(value) =>
                 validateForm(value, [validateRequired, validateEmail])
               }
-              placeholder="Voer je e-mailadres in"
+              placeholder="Voer je e-mailadres in" // ✅ Zorg dat InputWithChecks deze prop ondersteunt
             />
             <InputWithChecks
               ref={passwordRef}
@@ -70,14 +94,14 @@ const LoginStudent = () => {
               validate={(value) =>
                 validateForm(value, [
                   validateRequired,
-                  (v) => validateMinLength(v, 6),
+                  (v: string) => validateMinLength(v, 6),
                 ])
               }
-              placeholder="Voer je wachtwoord in"
+              placeholder="Voer je wachtwoord in" // ✅ Zorg dat InputWithChecks deze prop ondersteunt
             />
             {isError && (
               <div className="c-r">
-                {error.info?.message ||
+                {(error as any)?.info?.message ||
                   "Er is iets fout gelopen tijdens het inloggen"}
               </div>
             )}
