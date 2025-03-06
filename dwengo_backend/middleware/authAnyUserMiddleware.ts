@@ -49,7 +49,6 @@ export const protectAnyUser = asyncHandler(
           const teacher: Teacher | null = await prisma.teacher.findUnique({
             where: { userId: user.id },
             include: {
-              teacherAnswers: true,
               teacherFeedbacks: true,
               invite: true,
               createdLearningPaths: true,
@@ -66,9 +65,7 @@ export const protectAnyUser = asyncHandler(
           const student: Student | null = await prisma.student.findUnique({
             where: { userId: user.id },
             include: {
-              studentQuestions: true,
               progress: true,
-              teamAssignments: true,
               joinRequests: true,
               classes: true,
             },
