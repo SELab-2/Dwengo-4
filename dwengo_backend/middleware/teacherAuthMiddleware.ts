@@ -1,11 +1,11 @@
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import asyncHandler from 'express-async-handler';
 import { PrismaClient } from '@prisma/client';
 import { Request, Response, NextFunction } from 'express';
 
 const prisma = new PrismaClient();
 
-interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest extends Request {
   user?: {
     id: number;
     email: string;
@@ -15,6 +15,22 @@ interface AuthenticatedRequest extends Request {
 interface JwtPayload {
   id: number;
 }
+
+export const isTeacher = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ error: "Unauthorized" });
+    return; // Ensure the function exits after sending a response
+  }
+
+  const teacher = await prisma.teacher.findUnique({ where: { userId } });
+  if (!teacher) {
+    res.status(403).json({ error: "Access denied. Only teachers can perform this action." });
+    return; // Prevent next() from running
+  }
+
+  next(); // Ensure next() is only called when valid
+};
 
 export const protectTeacher = asyncHandler(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -30,25 +46,28 @@ export const protectTeacher = asyncHandler(
 
         // Zoek de gebruiker (Teacher) en stel deze in op req.user
         const teacher = await prisma.teacher.findUnique({
-          where: { id: decoded.id },
-          select: { id: true, email: true } // Exclude password
+          where: { userId: decoded.id },
+          include: { user: { select: { id: true, email: true } } } // Exclude password
         });
 
         if (!teacher) {
-          res.status(401);
-          throw new Error("Leerkracht niet gevonden.");
+          // Directly return the error response instead of throwing
+          res.status(401).json({ error: "Leerkracht niet gevonden." });
+          return;
         }
 
-        req.user = teacher;
+        req.user = { id: teacher.userId, email: teacher.user.email };
         next();
       } catch (error) {
         console.error(error);
-        res.status(401);
-        throw new Error("Niet geautoriseerd, token mislukt.");
+        // Return the error response directly
+        res.status(401).json({ error: "Niet geautoriseerd, token mislukt." });
+        return;
       }
     } else {
-      res.status(401);
-      throw new Error("Geen token, niet geautoriseerd.");
+      // Return the error response directly
+      res.status(401).json({ error: "Geen token, niet geautoriseerd." });
+      return;
     }
   }
 );

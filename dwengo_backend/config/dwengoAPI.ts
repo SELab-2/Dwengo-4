@@ -7,4 +7,4 @@ export const dwengoAPI: AxiosInstance = axios.create({
     Accept: "application/json",
   },
   timeout: 5000,
-})
+});
