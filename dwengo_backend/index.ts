@@ -21,17 +21,12 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // JSON-parser middleware
 app.use(express.json());
 
-// Hello World routes
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello, World!");
-});
-app.get("/login", (req: Request, res: Response) => {
-  res.send("Hello, World 3!");
-});
 
-// Auth routes
+// Routes voor Teacher (Auth)
 app.use("/teacher/auth", teacherAuthRoutes);
-app.use("/student/auth", studentAuthRoutes);
+
+// Routes voor Student (Auth)
+app.use("/student/auth", studentAuthRoutes)
 
 // Routes voor leerobjecten
 app.use("/learningObjects", learningObjectRoutes);
