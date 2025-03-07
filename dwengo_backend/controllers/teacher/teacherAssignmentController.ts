@@ -1,10 +1,12 @@
-import { Request, Response } from "express";
+import { Response } from "express";
+import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import teacherAssignmentService from "../../services/teacherServices/teacherAssignmentService";
 
 export class AssignmentTeacherController {
-    async createAssignmentForClass(req: Request, res: Response): Promise<void> {
+    async createAssignmentForClass(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            const { teacherId, classId, learningPathId, deadline }: { teacherId: number, classId: number, learningPathId: number, deadline: string } = req.body;
+            const { classId, learningPathId, deadline }: { classId: number, learningPathId: number, deadline: string } = req.body;
+            const teacherId: number = Number(req.user.id);
 
             const parsedDeadline = new Date(deadline);
 
@@ -15,10 +17,10 @@ export class AssignmentTeacherController {
         }
     }
 
-    async getAssignmentsByClass(req: Request, res: Response): Promise<void> {
+    async getAssignmentsByClass(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const classId: number = parseInt(req.params.classId);
-            const { teacherId }: { teacherId: number } = req.body;
+            const teacherId: number = Number(req.user.id);
             const assignments = await teacherAssignmentService.getAssignmentsByClass(classId, teacherId);
             res.status(200).json(assignments);
         } catch (error) {
@@ -26,10 +28,11 @@ export class AssignmentTeacherController {
         }
     }
 
-    async updateAssignment(req: Request, res: Response): Promise<void> {
+    async updateAssignment(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const assignmentId: number = parseInt(req.params.assignmentId);
-            const { learningPathId, teacherId }: { learningPathId: number, teacherId: number } = req.body;
+            const learningPathId: number = req.body;
+            const teacherId: number = Number(req.user.id);
             const updatedAssignment = await teacherAssignmentService.updateAssignment(assignmentId, learningPathId, teacherId);
             res.json(updatedAssignment);
         } catch (error) {
@@ -37,10 +40,10 @@ export class AssignmentTeacherController {
         }
     }
 
-    async deleteAssignment(req: Request, res: Response): Promise<void> {
+    async deleteAssignment(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const assignmentId: number = parseInt(req.params.assignmentId);
-            const { teacherId }: { teacherId: number } = req.body;
+            const teacherId: number = Number(req.user.id);
             await teacherAssignmentService.deleteAssignment(assignmentId, teacherId);
             res.status(204).send();
         } catch (error) {
