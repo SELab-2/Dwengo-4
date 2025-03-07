@@ -4,7 +4,7 @@ import errorHandler from "./middleware/errorMiddleware";
 import teacherAuthRoutes from "./routes/teacher/teacherAuthRoutes";
 import studentAuthRoutes from "./routes/student/studentAuthRoutes";
 import learningObjectRoutes from "./routes/learningObject/learningObjectRoutes";
-// import learningPathRoutes from "./routes/learningPath/learningPathRoutes"; // Uncomment indien beschikbaar
+import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
 
 dotenv.config();
 
@@ -12,9 +12,13 @@ const app = express();
 
 // Stel CORS-headers in
 app.use((req: Request, res: Response, next: NextFunction) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  const allowedOrigins = ["https://dwengo.org", "http://localhost:3000"];
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "X-Requested-With,Content-Type,Authorization");
+  res.setHeader("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Authorization");
   next();
 });
 
@@ -28,11 +32,10 @@ app.use("/teacher/auth", teacherAuthRoutes);
 // Routes voor Student (Auth)
 app.use("/student/auth", studentAuthRoutes)
 
-// Routes voor leerobjecten
+// Nieuwe routes voor leerobjecten
 app.use("/learningObjects", learningObjectRoutes);
-// app.use("/learningPaths", learningPathRoutes); // Uncomment indien beschikbaar
-
-// Error handling middleware
+app.use("/learningPaths", learningPathRoutes);
+// Error Handler
 app.use(errorHandler);
 
 const PORT: string | number = process.env.PORT || 5000;
