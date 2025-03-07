@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 const asyncHandler = require("express-async-handler");
-import * as classService from "../../services/classService";
+import classService from "../../services/classService";
 
 // Breid het Request-type uit met een user-property
 interface AuthenticatedRequest extends Request {
@@ -29,7 +29,7 @@ export const joinClassroom = asyncHandler(async (req: AuthenticatedRequest, res:
   }
 
   // Check if the student is already in the class
-  if (classService.isStudentInClass(classroom, studentId)) {
+  if (await classService.isStudentInClass(classroom, studentId)) {
     res.status(400);
     throw new Error("Je bent al lid van deze klas");
   }

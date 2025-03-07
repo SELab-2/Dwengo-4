@@ -1,246 +1,247 @@
 // src/services/class.service.js
-import {Class, ClassStudent, PrismaClient, Student} from "@prisma/client";
-import * as crypto from 'crypto';
+import {Class, ClassStudent, ClassTeacher, PrismaClient, Student} from "@prisma/client";
+import crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
-export const createClass = async (name: string, teacherId: number): Promise<Class> => {
-    // Generate a unique join code (e.g., an 8-digit hex string)
-    const joinCode = await generateUniqueCode();
+export type ClassWithLinks = Class & { classLinks: ClassStudent[] };
 
-    const classroom = await prisma.class.create({
-        data: {
-            name: name, // name field matches the Class schema
-            code: joinCode, // code field matches the Class schema
+export default class ClassService {
+    static async createClass (name: string, teacherId: number): Promise<Class> {
+        // Generate a unique join code (e.g., an 8-digit hex string)
+        const joinCode = await this.generateUniqueCode();
+
+        const classroom = await prisma.class.create({
+            data: {
+                name: name, // name field matches the Class schema
+                code: joinCode, // code field matches the Class schema
+            }
+        });
+
+        // Now that you have the class id, create the ClassTeacher record
+        await prisma.classTeacher.create({
+            data: {
+                teacherId: teacherId, // teacherId links to the teacher record
+                classId: classroom.id, // Use the id of the newly created class
+            }
+        });
+
+        console.log("Class and ClassTeacher created successfully:", classroom);
+
+        return classroom;
+    };
+
+    // Delete a class by ID
+    static async deleteClass (classId: number, teacherId: number): Promise<Class> {
+        // Check if the teacher is associated with the class
+        const isTeacher = await this.isTeacherOfClass(classId, teacherId);
+        if (!isTeacher) {
+            throw new Error("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
         }
-    });
 
-    // Now that you have the class id, create the ClassTeacher record
-    await prisma.classTeacher.create({
-        data: {
-            teacherId: teacherId, // teacherId links to the teacher record
-            classId: classroom.id, // Use the id of the newly created class
-        }
-    });
+        // Start a transaction to delete related records
+        return prisma.$transaction(async (prisma) => {
+            // Delete class-student associations
+            await prisma.classStudent.deleteMany({ where: { classId } });
 
-    console.log("Class and ClassTeacher created successfully:", classroom);
+            // Delete class assignments
+            await prisma.classAssignment.deleteMany({ where: { classId } });
 
-    return classroom;
-};
+            // Delete join requests
+            await prisma.joinRequest.deleteMany({ where: { classId } });
 
-// Delete a class by ID
-export const deleteClass = async (classId: number, teacherId: number): Promise<Class> => {
-    // Check if the teacher is associated with the class
-    const isTeacher = await isTeacherOfClass(classId, teacherId);
-    if (!isTeacher) {
-        throw new Error("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
-    }
+            // Delete invites
+            await prisma.invite.deleteMany({ where: { classId } });
 
-    // Start a transaction to delete related records
-    return prisma.$transaction(async (prisma) => {
-        // Delete class-student associations
-        await prisma.classStudent.deleteMany({ where: { classId } });
+            // Delete class-teacher associations
+            await prisma.classTeacher.deleteMany({ where: { classId } });
 
-        // Delete class assignments
-        await prisma.classAssignment.deleteMany({ where: { classId } });
+            // Finally, delete the class itself
+            return prisma.class.delete({ where: { id: classId } });
+        });
+    };
 
-        // Delete join requests
-        await prisma.joinRequest.deleteMany({ where: { classId } });
+    // Get all classes taught by a given teacher
+    static async getClassesByTeacher (teacherId: number): Promise<Class[]> {
+        // Fetch all classes where the teacher is assigned
+        return prisma.class.findMany({
+            where: {
+                ClassTeacher: {
+                    some: {
+                        teacherId: teacherId, // Filter for the given teacherId
+                    },
+                },
+            }
+        });
+    };
 
-        // Delete invites
-        await prisma.invite.deleteMany({ where: { classId } });
+    // Get all classes a student is partaking in
+    static async getClassesByStudent (studentId: number): Promise<Class[]> {
+        // Fetch all classes where the student is enrolled
+        return prisma.class.findMany({
+            where: {
+                classLinks: {
+                    some: {
+                        studentId: studentId, // Filter for the given studentId
+                    },
+                },
+            }
+        });
+    };
 
-        // Delete class-teacher associations
-        await prisma.classTeacher.deleteMany({ where: { classId } });
-
-        // Finally, delete the class itself
-        return prisma.class.delete({ where: { id: classId } });
-    });
-};
-
-
-// Get all classes taught by a given teacher
-export const getClassesByTeacher = async (teacherId: number): Promise<Class[]> => {
-    // Fetch all classes where the teacher is assigned
-    return prisma.class.findMany({
-        where: {
-            ClassTeacher: {
-                some: {
-                    teacherId: teacherId, // Filter for the given teacherId
+    // Function to check if the requester is the teacher of the class
+    static async isTeacherOfClass(classId: number, teacherId: number): Promise<boolean> {
+        const classTeacher: ClassTeacher | null = await prisma.classTeacher.findUnique({
+            where: {
+                teacherId_classId: {
+                    teacherId: teacherId,
+                    classId: classId,
                 },
             },
-        }
-    });
-};
+        });
+        return classTeacher !== null;
+    };
 
-// Get all classes a student is partaking in
-export const getClassesByStudent = async (studentId: number): Promise<Class[]> => {
-    // Fetch all classes where the student is enrolled
-    return prisma.class.findMany({
-        where: {
-            classLinks: {
-                some: {
-                    studentId: studentId, // Filter for the given studentId
+    // Get all student from a given class
+    static async getStudentsByClass(classId: number, teacherId: number): Promise<Student[]> {
+        // Check if the teacher is associated with the class
+        const isTeacher = await this.isTeacherOfClass(classId, teacherId);
+        if (!isTeacher) {
+            throw new Error("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
+        }
+
+        const classWithStudents = await prisma.class.findUnique({
+            where: { id: classId },
+            include: {
+                classLinks: {
+                    include: {
+                        student: true, // Fetch student details from the ClassStudent relationship
+                    },
                 },
             },
-        }
-    });
-};
+        });
 
-// Function to check if the requester is the teacher of the class
-const isTeacherOfClass = async (classId: number, teacherId: number): Promise<boolean> => {
-    const classTeacher = await prisma.classTeacher.findUnique({
-        where: {
-            teacherId_classId: {
-                teacherId: teacherId,
-                classId: classId,
-            },
-        },
-    });
-    return classTeacher !== null;
-};
+        // In case no students were found
+        if (!classWithStudents) return [];
 
-// Get all student from a given class
-export const getStudentsByClass = async (classId: number, teacherId: number): Promise<Student[]> => {
-    // Check if the teacher is associated with the class
-    const isTeacher = await isTeacherOfClass(classId, teacherId);
-    if (!isTeacher) {
-        throw new Error("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
-    }
+        // Extract only student details
+        return classWithStudents.classLinks.map((link) => link.student);
+    };
 
-    const classWithStudents = await prisma.class.findUnique({
-        where: { id: classId },
-        include: {
-            classLinks: {
-                include: {
-                    student: true, // Fetch student details from the ClassStudent relationship
-                },
-            },
-        },
-    });
-
-    // In case no students were found
-    if (!classWithStudents) return [];
-
-    // Extract only student details
-    return classWithStudents.classLinks.map((link) => link.student);
-};
-
-export const addStudentToClass = async (studentId: number, classId: number): Promise<ClassStudent> => {
-    return prisma.classStudent.create({
-        data: {
-            studentId,
-            classId,
-        },
-    });
-};
-
-type ClassWithLinks = Class & { classLinks: ClassStudent[] };
-
-// Check if student is already in the class
-export const isStudentInClass = (classroom: ClassWithLinks, studentId: number): boolean => {
-    return classroom.classLinks.some((link: ClassStudent) => link.studentId === studentId);
-};
-
-export const removeStudentFromClass = async (studentId: number, classId: number): Promise<ClassStudent> => {
-    return prisma.classStudent.delete({
-        where: {
-            studentId_classId: {
+    static async addStudentToClass(studentId: number, classId: number): Promise<ClassStudent> {
+        return prisma.classStudent.create({
+            data: {
                 studentId,
                 classId,
             },
-        },
-    });
-};
+        });
+    };
 
-// Return all classes
-export const getAllClasses = async (): Promise<Class[]> => {
-    // Returns an empty array if nothing is found
-    return prisma.class.findMany();
-};
+    // Check if student is already in the class
+    static async isStudentInClass(classroom: ClassWithLinks, studentId: number): Promise<boolean> {
+        return classroom.classLinks.some((link: ClassStudent) => link.studentId === studentId);
+    };
 
-// Read a class by ID
-export const getClassById = async (id: number): Promise<Class | null> => {
-    return prisma.class.findUnique({
-        where: {id: id},
-    });
-};
+    static async removeStudentFromClass(studentId: number, classId: number): Promise<ClassStudent> {
+        return prisma.classStudent.delete({
+            where: {
+                studentId_classId: {
+                    studentId,
+                    classId,
+                },
+            },
+        });
+    };
 
-// Give the class a new name
-export const updateClassName = async (classId: number, newName: string): Promise<Class> => {
-    return prisma.class.update({
-        where: {id: classId},
-        data: {name: newName},
-    });
-};
+    // Return all classes
+    static async getAllClasses(): Promise<Class[]> {
+        // Returns an empty array if nothing is found
+        return prisma.class.findMany();
+    };
 
-// Read a class by JoinCode
-export const getClassByJoinCode = async (joinCode: string): Promise<ClassWithLinks | null> => {
-    return prisma.class.findUnique({
-        where: {code: joinCode},  // Search by the joinCode (which is 'code' in the schema)
-        include: {
-            classLinks: true,
+    // Read a class by ID
+    static async getClassById(id: number): Promise<Class | null> {
+        return prisma.class.findUnique({
+            where: {id: id},
+        });
+    };
+
+    // Give the class a new name
+    static async updateClassName(classId: number, newName: string): Promise<Class> {
+        return prisma.class.update({
+            where: {id: classId},
+            data: {name: newName},
+        });
+    };
+
+    // Read a class by JoinCode
+    static async getClassByJoinCode(joinCode: string): Promise<ClassWithLinks | null> {
+        return prisma.class.findUnique({
+            where: {code: joinCode},  // Search by the joinCode (which is 'code' in the schema)
+            include: {
+                classLinks: true,
+            }
+        });
+    };
+
+    static async getJoinCode(classId: number, teacherId: number): Promise<string> {
+        // Check if the teacher is associated with the class
+        const isTeacher = await this.isTeacherOfClass(classId, teacherId);
+        if (!isTeacher) {
+            throw new Error("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
         }
-    });
-};
 
-export const getJoinCode = async (classId: number, teacherId: number): Promise<string> => {
-    // Check if the teacher is associated with the class
-    const isTeacher = await isTeacherOfClass(classId, teacherId);
-    if (!isTeacher) {
-        throw new Error("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
-    }
-
-    const classroom = await prisma.class.findUnique({
-        where: { id: classId },
-        select: { code: true }, // Only fetch the join code
-    });
-
-    if (!classroom) {
-        throw new Error("Klas niet gevonden");
-    }
-
-    return classroom.code;
-};
-
-// Function to generate a unique join code
-const generateUniqueCode = async (): Promise<string> => {
-    let isUnique: boolean = false;
-    let newJoinCode: string = "";
-
-    while (!isUnique) {
-        // Generate new join code
-        newJoinCode = crypto.randomBytes(4).toString("hex");
-
-        // Check if the code is unique in the database
-        const existingClass = await prisma.class.findUnique({
-            where: { code: newJoinCode },
+        const classroom = await prisma.class.findUnique({
+            where: { id: classId },
+            select: { code: true }, // Only fetch the join code
         });
 
-        if (!existingClass) {
-            isUnique = true;
+        if (!classroom) {
+            throw new Error("Klas niet gevonden");
         }
-    }
 
-    return newJoinCode;
-};
+        return classroom.code;
+    };
 
-// Function to regenerate the join code for a class
-export const regenerateJoinCode = async (classId: number, teacherId: number): Promise<string> => {
-    // Check if the teacher is associated with the class
-    const isTeacher = await isTeacherOfClass(classId, teacherId);
-    if (!isTeacher) {
-        throw new Error("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
-    }
+    // Function to generate a unique join code
+    static async generateUniqueCode(): Promise<string> {
+        let isUnique = false;
+        let newJoinCode: string = "";
 
-    // Generate a unique join code
-    const newJoinCode = await generateUniqueCode();
+        while (!isUnique) {
+            // Generate new join code
+            newJoinCode = crypto.randomBytes(4).toString("hex");
 
-    // Update class with the new join code
-    const updatedClass = await prisma.class.update({
-        where: { id: classId },
-        data: { code: newJoinCode },
-    });
+            // Check if the code is unique in the database
+            const existingClass = await prisma.class.findUnique({
+                where: { code: newJoinCode },
+            });
 
-    return updatedClass.code;
-};
+            if (!existingClass) {
+                isUnique = true;
+            }
+        }
+
+        return newJoinCode;
+    };
+
+    // Function to regenerate the join code for a class
+    static async regenerateJoinCode(classId: number, teacherId: number): Promise<string> {
+        // Check if the teacher is associated with the class
+        const isTeacher = await this.isTeacherOfClass(classId, teacherId);
+        if (!isTeacher) {
+            throw new Error("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
+        }
+
+        // Generate a unique join code
+        const newJoinCode = await this.generateUniqueCode();
+
+        // Update class with the new join code
+        const updatedClass = await prisma.class.update({
+            where: { id: classId },
+            data: { code: newJoinCode },
+        });
+
+        return updatedClass.code;
+    };
+}
