@@ -68,7 +68,6 @@ export const protectAnyUser = asyncHandler(
             include: {
               studentQuestions: true,
               progress: true,
-              teamAssignments: true,
               joinRequests: true,
               classes: true,
             },

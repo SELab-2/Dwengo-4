@@ -26,9 +26,8 @@ function userIsTeacherOrAdmin(req: AuthenticatedRequest): boolean {
 }
 
 /**
- * Haalt alle leerobjecten op via de Dwengo-API (of later lokale DB).
- * Studenten zien enkel objecten met teacherExclusive = false en available = true.
- * Teachers/Admins zien alle objecten.
+ * Haalt alle leerobjecten op (Dwengo + Lokaal)
+ * Studenten zien enkel teacherExclusive=false + available=true (zowel Dwengo als lokaal).
  */
 export const getAllLearningObjectsController = async (
   req: AuthenticatedRequest,
@@ -40,13 +39,15 @@ export const getAllLearningObjectsController = async (
     res.json(objects);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Fout bij ophalen leerobjecten (Dwengo)" });
+    res.status(500).json({ error: "Fout bij ophalen leerobjecten (combi Dwengo + local)" });
   }
 };
 
 /**
- * Haalt één leerobject op op basis van de Dwengo '_id'. 
- * Als het object teacherExclusive is en de gebruiker geen teacher is, wordt null geretourneerd.
+ * Haalt één leerobject op op basis van het ID.
+ * - Probeert eerst Dwengo
+ * - Als niet gevonden, zoekt in de lokale DB.
+ * - Filtert teacherExclusive/available als req.user geen teacher is.
  */
 export const getLearningObjectController = async (
   req: AuthenticatedRequest,
@@ -63,12 +64,12 @@ export const getLearningObjectController = async (
     res.json(lo);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Fout bij ophalen leerobject (Dwengo)" });
+    res.status(500).json({ error: "Fout bij ophalen leerobject (combi Dwengo + local)" });
   }
 };
 
 /**
- * Zoekt naar leerobjecten via de Dwengo-API.
+ * Zoekt naar leerobjecten (Dwengo + Lokaal).
  * Queryparameter ?q= wordt als searchTerm doorgegeven.
  */
 export const searchLearningObjectsController = async (
@@ -82,12 +83,14 @@ export const searchLearningObjectsController = async (
     res.json(results);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Fout bij zoeken naar leerobjecten (Dwengo)" });
+    res.status(500).json({ error: "Fout bij zoeken naar leerobjecten (combi Dwengo + local)" });
   }
 };
 
 /**
- * Haalt alle leerobjecten op die bij een leerpad horen (op basis van pathId).
+ * Haalt alle leerobjecten op die bij een leerpad (Dwengo) horen.
+ * (Voorlopig alleen Dwengo-nodes. Als je eigen leerpaden hebt, kun je
+ *  soortgelijke logica toevoegen in de service.)
  */
 export const getLearningObjectsForPathController = async (
   req: AuthenticatedRequest,

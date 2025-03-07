@@ -5,6 +5,8 @@ import teacherAuthRoutes from "./routes/teacher/teacherAuthRoutes";
 import studentAuthRoutes from "./routes/student/studentAuthRoutes";
 import learningObjectRoutes from "./routes/learningObject/learningObjectRoutes";
 import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
+import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearningObjectRoutes";
+
 
 dotenv.config();
 
@@ -28,6 +30,7 @@ app.use(express.json());
 
 // Routes voor Teacher (Auth)
 app.use("/teacher/auth", teacherAuthRoutes);
+app.use("/teacher/learningObjects", teacherLocalLearningObjectRoutes);
 
 // Routes voor Student (Auth)
 app.use("/student/auth", studentAuthRoutes)
@@ -35,6 +38,7 @@ app.use("/student/auth", studentAuthRoutes)
 // Nieuwe routes voor leerobjecten
 app.use("/learningObjects", learningObjectRoutes);
 app.use("/learningPaths", learningPathRoutes);
+
 // Error Handler
 app.use(errorHandler);
 
