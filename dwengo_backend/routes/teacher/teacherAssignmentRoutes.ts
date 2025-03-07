@@ -1,12 +1,13 @@
 import express, {Router} from 'express';
 import { AssignmentTeacherController } from "../../controllers/teacher/teacherAssignmentController";
+import {protectTeacher} from "../../middleware/teacherAuthMiddleware";
 
 const router: Router = express.Router();
 const controller = new AssignmentTeacherController();
 
-router.post("/assignments", controller.createAssignmentForClass);
-router.get("/assignments/class/:classId", controller.getAssignmentsByClass);
-router.patch("/assignments/:assignmentId", controller.updateAssignment);
-router.delete("/assignments/:assignmentId", controller.deleteAssignment);
+router.post("/", protectTeacher, controller.createAssignmentForClass);
+router.get("/class/:classId", protectTeacher, controller.getAssignmentsByClass);
+router.patch("/:assignmentId", protectTeacher, controller.updateAssignment);
+router.delete("/:assignmentId", protectTeacher, controller.deleteAssignment);
 
 export default router;

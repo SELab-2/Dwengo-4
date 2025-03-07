@@ -4,6 +4,7 @@ import {AssignmentController} from "../controllers/assignmentController";
 const router: Router = express.Router();
 const controller = new AssignmentController();
 
-router.get("/assignments/:assignmentId", controller.getAssignmentsById);
+// Geen protectTeacher nodig want teacherId is niet verwacht, iedereen mag de assignments opvragen
+router.get("/:assignmentId", controller.getAssignmentsById);
 
 export default router;

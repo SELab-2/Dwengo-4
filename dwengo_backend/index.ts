@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 import errorHandler from './middleware/errorMiddleware';
 import teacherAuthRoutes from './routes/teacher/teacherAuthRoutes';
 import studentAuthRoutes from './routes/student/studentAuthRoutes';
+import assignmentRoutes from "./routes/assignmentRoutes";
+import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
 
 dotenv.config();
 
@@ -35,6 +37,12 @@ app.use('/teacher/auth', teacherAuthRoutes);
 
 // Routes voor Student
 app.use('/student/auth', studentAuthRoutes);
+
+// Routes voor de Assignments
+app.use('/assignments', assignmentRoutes);
+
+// Routes voor de aanpassingen op Assignments door teachers
+app.use('/teacher/assignments', teacherAssignmentRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
