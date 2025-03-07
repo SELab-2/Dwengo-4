@@ -1,8 +1,7 @@
-import { PrismaClient } from '@prisma/client';
-import asyncHandler from 'express-async-handler';
 import { Request, Response } from 'express';
 
-const prisma = new PrismaClient();
+const asyncHandler = require("express-async-handler");
+import classService from "../../services/classService";
 
 // Breid het Request-type uit met een user-property
 interface AuthenticatedRequest extends Request {
@@ -23,36 +22,20 @@ export const joinClassroom = asyncHandler(async (req: AuthenticatedRequest, res:
   }
 
   // Zoek de klas op basis van de join-code
-  const classroom = await prisma.classroom.findUnique({ where: { joinCode } });
+  const classroom = await classService.getClassByJoinCode(joinCode);
   if (!classroom) {
     res.status(404);
     throw new Error("Klas niet gevonden");
   }
 
-  // Controleer of de leerling al lid is van de klas
-  const alreadyJoined = await prisma.classroom.findFirst({
-    where: {
-      id: classroom.id,
-      students: {
-        some: { id: studentId }
-      }
-    }
-  });
-
-  if (alreadyJoined) {
+  // Check if the student is already in the class
+  if (await classService.isStudentInClass(classroom, studentId)) {
     res.status(400);
     throw new Error("Je bent al lid van deze klas");
   }
 
-  // Koppel de leerling aan de klas
-  await prisma.classroom.update({
-    where: { id: classroom.id },
-    data: {
-      students: {
-        connect: { id: studentId }
-      }
-    }
-  });
+  // Add the student to the class using the service
+  await classService.addStudentToClass(classroom.id, studentId);
 
   res.json({ message: "Succesvol toegetreden tot de klas" });
 });
