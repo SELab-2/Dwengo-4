@@ -181,13 +181,17 @@ model LearningPath {
 
 model LearningPathNode {
   // _id bij Dwengo API
-  nodeId         String   @id @default(uuid())
-  learningPathId String
+  nodeId           String   @id @default(uuid())
+  learningPathId   String
+  // Bij een node hoort een leerobject
+  learningObjectId String
   // Duid aan of dit de eerste node van een leerpad is
   // Standaard op false, meer nodes die niet het begin gaan zijn, dan moet dit niet door de gebruiker steeds ingegeven worden.
-  start_node     Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  start_node       Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  learningObject LearningObject @relation(fields: [learningObjectId], references: [id])
 
   // Een node kan meerdere transities hebben. Dit duidt aan wat de volgende node is en of er een eventuele conditie aan deze node vasthangt.
   transitions LearningPathTransition[] @relation("TransitionNode")
@@ -270,6 +274,9 @@ model LearningObject {
   returnValue       ReturnValue?
   progress          LearningObjectProgress[]
   specificQuestions SpecificQuestion[]
+
+  // Een leerobject kan voorkomen in verschillende nodes van verschillende leerpaden
+  nodes LearningPathNode[]
 }
 
 model EducationalGoal {
