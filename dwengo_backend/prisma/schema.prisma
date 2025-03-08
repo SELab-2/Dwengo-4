@@ -73,7 +73,7 @@ model Student {
   studentQuestions StudentQuestion[]
 
   // Voortgang van studenten
-  progress        StudentProgress[]
+  progress StudentProgress[]
 
   // Verzoeken om lid te worden van een klas
   joinRequests JoinRequest[]
@@ -156,57 +156,56 @@ model LearningPath {
   ///
 
   // _id bij Dwengo API
-  id          String      @id @default(uuid())
-  hruid       String      @unique
-  title       String
-  language    String
-  description String
+  id             String             @id @default(uuid())
+  hruid          String             @unique
+  title          String
+  language       String
+  description    String
   // Base 64 encoding van de cover afbeelding
-  image       String?
+  image          String?
   // Aantal nodes in het leerpad
-  num_nodes   Int?
+  num_nodes      Int?
   // Ik ga ervan uit dat dit is hoeveel nodes een leerling nog moet doorlopen? Hier kunnen we misschien iets mee doen om de progressie bij te houden?
   num_nodes_left Int?
   // In de Dwengo API is dit gewoon 1 enkele string. Ik heb hier nu gekozen voor een lijst van strings, lijkt mij overzichtelijker, maar kan nog steeds veranderd worden.
-  keywords    String[]  @default([])
+  keywords       String[]           @default([])
   // targetAges is eigenlijk wat redundant. Dit is een lijst van alle getallen tussen min_age en max_age. Ik heb dit nu zo gelaten, maar misschien kunnen we dit nog veranderen.
   // Persoonlijk zou ik het wel weglaten.
-  targetAges  Int[]
-  min_age     Int
-  max_age     Int
-  nodes       LearningPathNode[]
-  
+  targetAges     Int[]
+  min_age        Int
+  max_age        Int
+  nodes          LearningPathNode[]
+
   ///
   /// Custom velden
   ///
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  creatorId Int
-  creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator")
-  assignments       Assignment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  creatorId   Int
+  creator     Teacher      @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator")
+  assignments Assignment[]
 }
 
 model LearningPathNode {
   // _id bij Dwengo API
-  nodeId       String  @id @default(uuid())
+  nodeId         String   @id @default(uuid())
   learningPathId String
   // Duid aan of dit de eerste node van een leerpad is
   // Standaard op false, meer nodes die niet het begin gaan zijn, dan moet dit niet door de gebruiker steeds ingegeven worden.
-  start_node  Boolean @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  start_node     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   // Een node kan meerdere transities hebben. Dit duidt aan wat de volgende node is en of er een eventuele conditie aan deze node vasthangt.
   transitions LearningPathTransition[] @relation("TransitionNode")
 
   // Een node hoort bij een leerpad
   learningPath LearningPath @relation(fields: [learningPathId], references: [id])
-  
+
   // Dit is om de relatie tussen een transitie en een node vast te leggen.
   // Een transitie kan maar naar 1 volgende node gaan. 
   // Dit is wat rare syntax, maar het is de enige manier om het in prisma werkende te krijgen.
   nextTransitions LearningPathTransition[] @relation("NextNode")
-  
 }
 
 model LearningPathTransition {
@@ -216,38 +215,59 @@ model LearningPathTransition {
   // Er wordt dus standaard naar de volgende node gegaan.
   default      Boolean @default(true)
   // Een eventuele conditie die aan deze transitie vasthangt.
-  condition    String? 
+  condition    String?
 
   // Een transitie hoort bij een node
-  nodeId String 
-  node LearningPathNode @relation(fields: [nodeId], references: [nodeId], name: "TransitionNode")
-
+  nodeId String
+  node   LearningPathNode @relation(fields: [nodeId], references: [nodeId], name: "TransitionNode")
 
   // Next wijst in de Dwengo API naar de volgende node. 
   // Als next leeg is, betekent dit dat de laatste node van het leerpad bereikt is.
   nextNodeId String?
-  nextNode    LearningPathNode? @relation(fields: [nextNodeId], references: [nodeId], name: "NextNode")
+  nextNode   LearningPathNode? @relation(fields: [nextNodeId], references: [nodeId], name: "NextNode")
+}
+
+///
+/// Content types van leerobjecten; kan altijd nog uitgebreid worden
+enum ContentType {
+  // Dwengo API
+  TEXT_PLAIN
+  TEXT_MARKDOWN
+  IMAGE_IMAGE_BLOCK
+  IMAGE_IMAGE
+  AUDO_MPEG
+  // Eigen toevoegingen
+  VIDEO
+  EVAL_MULTIPLE_CHOICE
+  EVAL_OPEN_QUESTION
 }
 
 model LearningObject {
-  id               String   @id
-  version          String
+  // _id bij Dwengo APi
+  id               String      @id @default(uuid())
+  uuid             String      @unique @default(cuid())
+  // In de Dwengo API wordt er nog met een hruid gewerkt ook. Ik zou voorstellen om anders de titel van een leerobject uniek te maken.
+  // Op die manier kan de hruid ingesteld worden op de titel van het leerobject. 
+  // Ik ga dit voorlopig laten staan, maar misschien dat we dit nog moeten aanpassen.
+  hruid            String      @unique
+  title            String      @unique
+  version          Int
   language         String
-  title            String   @unique
   description      String
-  contentType      String
-  keywords         String
-  targetAges       String
+  contentType      ContentType
+  estimatedTime    Int // In minuten
+  keywords         String[]    @default([])
+  targetAges       Int[]
   teacherExclusive Boolean
-  skosConcepts     String
-  copyright        String?
-  licence          String
+  skosConcepts     String[]    @default([])
+  copyright        String      @default("CC BY Dwengo")
+  licence          String      @default("dwengo")
   difficulty       Int
-  estimatedTime    Int
-  available        Boolean
-  contentLocation  String
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  available        Boolean     @default(true)
+  // Link to external content
+  contentLocation  String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
   creatorId Int
   creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningObjectCreator")
@@ -356,18 +376,18 @@ model ClassAssignment {
   classId      Int
   assignmentId Int
 
-  class           Class            @relation(fields: [classId], references: [id])
-  assignment      Assignment       @relation(fields: [assignmentId], references: [id])
+  class      Class      @relation(fields: [classId], references: [id])
+  assignment Assignment @relation(fields: [assignmentId], references: [id])
 
   @@id([classId, assignmentId])
 }
 
 model Team {
   id       Int    @id @default(autoincrement())
-  teamname String 
+  teamname String
 
   // Een team bestaat uit studenten
-  students Student[]
+  students        Student[]
   // Een verwijzing naar de assignments van dit team
   teamAssignments TeamAssignment[]
   // De indieningen van een team
@@ -375,11 +395,11 @@ model Team {
 }
 
 model TeamAssignment {
-  teamId            Int
-  assignmentId    Int
+  teamId       Int
+  assignmentId Int
 
-  team            Team            @relation(fields: [teamId], references: [id])
-  Assignment      Assignment     @relation(fields: [assignmentId], references: [id])
+  team       Team       @relation(fields: [teamId], references: [id])
+  Assignment Assignment @relation(fields: [assignmentId], references: [id])
 
   @@id([teamId, assignmentId])
 }
