@@ -198,6 +198,7 @@ model LearningObject {
   creatorId Int
   creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningObjectCreator")
 
+  // Binnen een leerobject kunnen er meerdere evaluaties zitten
   evaluations       Evaluation[]
   educationalGoals  EducationalGoal[]
   returnValue       ReturnValue?
@@ -377,7 +378,7 @@ model Team {
 
   // De indieningen van een team
   submissions Submission[]
-  Questions       Question[]
+  Questions   Question[]
 }
 
 model TeamAssignment {
@@ -407,11 +408,11 @@ model Submission {
 model Feedback {
   // Feedback hoort bij een inzending
   // Er kan maar 1 keer feedback gegeven worden op een inzending
-  submissionId Int @unique
+  submissionId Int    @unique
   // Feedback kan gegeven worden door een teacher
   teacherId    Int
   // De feedback zelf
-  description String
+  description  String
 
   teacher    Teacher    @relation(fields: [teacherId], references: [userId])
   submission Submission @relation(fields: [submissionId], references: [submissionId])
