@@ -2,7 +2,7 @@ import { Response } from "express";
 import asyncHandler from 'express-async-handler';
 import { Invite } from "@prisma/client";
 import inviteService from "../../services/inviteService";
-import { AuthenticatedRequest } from "../../middleware/teacherAuthMiddleware";
+import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 
 /**
  * Create an invite for a teacher to join a class

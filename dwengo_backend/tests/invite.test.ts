@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import request from 'supertest';
 import prisma from './helpers/prisma'
 import app from '../index';
-import { AuthenticatedRequest } from '../middleware/teacherAuthMiddleware';
+import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
 import { Response, NextFunction } from 'express';
 import { Class, Invite, JoinRequestStatus, Teacher, User } from '@prisma/client';
 import { addTeacherToClass, createClass, createInvite, createTeacher } from './helpers/testDataCreation';
