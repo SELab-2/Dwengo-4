@@ -33,14 +33,14 @@ describe('invite tests', async () => {
         // create a class
         classroom = await createClass("5A", "ABCD");
     });
-    describe('[POST] /teacher/classes/:classId/invite', async () => {
+    describe('[POST] /teacher/classes/:classId/invites', async () => {
         it('should respond with a `201` status code and an invite', async () => {
             // set up scenario where there's two teachers and a class, the first one being a teacher of the class
             await addTeacherToClass(teacherUser1.id, classroom.id);
 
             // now we can test the invite creation
             const { status, body } = await request(app)
-                .post(`/teacher/classes/${classroom.id}/invite`)
+                .post(`/teacher/classes/${classroom.id}/invites`)
                 .send({
                     user: teacherUser1,
                     otherTeacherId: teacherUser2.id,
@@ -48,13 +48,13 @@ describe('invite tests', async () => {
                 });
 
             expect(status).toBe(201)
-            // double check that data was created
-            const invite = await prisma.invite.findUnique({
+            // double check that the invite was created
+            const invite = await prisma.invite.findFirst({
                 where: {
-                    teacherId_classId: {
-                        teacherId: teacherUser2.id,
-                        classId: classroom.id
-                    }
+                    otherTeacherId: teacherUser2.id,
+                    classTeacherId: teacherUser1.id,
+                    classId: classroom.id,
+                    status: JoinRequestStatus.PENDING
                 }
             });
             expect(invite).not.toBeNull();
@@ -71,7 +71,7 @@ describe('invite tests', async () => {
             const invalidClassId = (maxClass?.id ?? 0) + 1;
             // try to create invite for non-existent class
             const { status, body } = await request(app)
-                .post(`/teacher/classes/${invalidClassId}/invite`)
+                .post(`/teacher/classes/${invalidClassId}/invites`)
                 .send({
                     user: teacherUser1,
                     otherTeacherId: teacherUser2.id,
@@ -89,7 +89,7 @@ describe('invite tests', async () => {
             // we can use the existing scenarion with two valid teachers and a class, but none of them are a teacher of the class
             // try to create invite for class where teacher1 is not a teacher
             const { status, body } = await request(app)
-                .post(`/teacher/classes/${classroom.id}/invite`)
+                .post(`/teacher/classes/${classroom.id}/invites`)
                 .send({
                     user: teacherUser1,
                     otherTeacherId: teacherUser2.id,
@@ -105,12 +105,12 @@ describe('invite tests', async () => {
         });
         it('should respond with a `400` status code when the teacher receiving the invite is already a teacher of the class', async () => {
             // set up scenario where there's two valid teachers and a class, both are teachers of the class
-            await addTeacherToClass(teacherUser1.teacher.userId, classroom.id);
-            await addTeacherToClass(teacherUser2.teacher.userId, classroom.id);
+            await addTeacherToClass(teacherUser1.id, classroom.id);
+            await addTeacherToClass(teacherUser2.id, classroom.id);
             
             // try to create the invite
             const { status, body } = await request(app)
-                .post(`/teacher/classes/${classroom.id}/invite`)
+                .post(`/teacher/classes/${classroom.id}/invites`)
                 .send({
                     user: teacherUser1,
                     otherTeacherId: teacherUser2.id,
@@ -126,10 +126,10 @@ describe('invite tests', async () => {
         });
         it('should respond with a `409` status code when the teacher has already received an invite', async () => {
             // set up scenario where there's two valid teachers and a class, the first one being a teacher of the class, and the second one has already received an invite
-            await addTeacherToClass(teacherUser1.teacher.userId, classroom.id);
+            await addTeacherToClass(teacherUser1.id, classroom.id);
             // send a first invite
             await request(app)
-                .post(`/teacher/classes/${classroom.id}/invite`)
+                .post(`/teacher/classes/${classroom.id}/invites`)
                 .send({
                     user: teacherUser1,
                     otherTeacherId: teacherUser2.id,
@@ -143,7 +143,7 @@ describe('invite tests', async () => {
             
             // try to create another invite for the same class and teacher
             const { status, body } = await request(app)
-                .post(`/teacher/classes/${classroom.id}/invite`)
+                .post(`/teacher/classes/${classroom.id}/invites`)
                 .send({
                     user: teacherUser1,
                     otherTeacherId: teacherUser2.id,
@@ -154,22 +154,18 @@ describe('invite tests', async () => {
                 expect(invites.length).toBe(1);
             });
 
-            expect(body.message).toBe("Er bestaat al een uitnodiging voor deze leerkracht en klas.");
+            expect(body.message).toBe("Er bestaat al een pending uitnodiging voor deze leerkracht en klas");
             expect(status).toBe(409);
-            // verify that no additional invite was created
-            await prisma.invite.findMany().then((invites) => {
-                expect(invites.length).toBe(1);
-            });
         });
     });
-    describe('[GET] /teacher/invites', async () => {
+    describe('[GET] /teacher/classes/invites', async () => {
         it('should respond with a `200` status code and a list of invites', async () => {
             // set up scenario where a teacher has received a few invites
-            await addTeacherToClass(teacherUser1.teacher.userId, classroom.id);
+            await addTeacherToClass(teacherUser1.id, classroom.id);
             const classroom2: Class = await createClass("6A", "EFGH");
-            await addTeacherToClass(teacherUser1.teacher.userId, classroom2.id);
-            const invite1: Invite = await createInvite(teacherUser2.teacher.userId, classroom.id);
-            const invite2: Invite = await createInvite(teacherUser2.teacher.userId, classroom2.id);
+            await addTeacherToClass(teacherUser1.id, classroom2.id);
+            const invite1: Invite = await createInvite(teacherUser1.id, teacherUser2.id, classroom.id);
+            const invite2: Invite = await createInvite(teacherUser1.id, teacherUser2.id, classroom2.id);
 
             const { status, body } = await request(app)
                 .get('/teacher/classes/invites')
@@ -181,21 +177,21 @@ describe('invite tests', async () => {
             expect(body.invites).toStrictEqual([invite1, invite2]);
         });
     });
-    describe('[PATCH] /teacher/classes/:classId/invite', async () => {
+    describe('[PATCH] /teacher/classes/invites/:inviteId', async () => {
         let invite: Invite;
         beforeEach(async () => {
             // set up scenario with a valid pending invite
-            await addTeacherToClass(teacherUser1.teacher.userId, classroom.id);
-            invite = await createInvite(teacherUser2.teacher.userId, classroom.id);
+            await addTeacherToClass(teacherUser1.id, classroom.id);
+            invite = await createInvite(teacherUser1.id, teacherUser2.id, classroom.id);
         });
         it('should respond with a `200` status code and an updated invite when the action is `accept`', async () => {
             // we've got a scenario with a valid pending invite, test accepting it
             const { status, body } = await request(app)
-                .patch(`/teacher/classes/${classroom.id}/invite`)
+                .patch(`/teacher/classes/invites/${invite.inviteId}`)
                 .send({
                     user: teacherUser2,
                     action: "accept",
-                    classId: classroom.id
+                    inviteId: invite.inviteId
                 });
 
             expect(status).toBe(200);
@@ -214,11 +210,11 @@ describe('invite tests', async () => {
         it('should respond with a `200` status code and an updated invite when the action is `decline`', async () => {
             // we've got a scenario with a valid pending invite, test declining it
             const { status, body } = await request(app)
-                .patch(`/teacher/classes/${classroom.id}/invite`)
+                .patch(`/teacher/classes/invites/${invite.inviteId}`)
                 .send({
                     user: teacherUser2,
                     action: "decline",
-                    classId: classroom.id
+                    inviteId: invite.inviteId
                 });
 
             expect(status).toBe(200);
@@ -235,11 +231,11 @@ describe('invite tests', async () => {
         it('should respond with a `400` status code when the action is neither `accept` nor `decline`', async () => {
             // we've got a scenario with a valid pending invite, test invalid action
             const { status, body } = await request(app)
-                .patch(`/teacher/classes/${classroom.id}/invite`)
+                .patch(`/teacher/classes/invites/${invite.inviteId}`)
                 .send({
                     user: teacherUser2,
                     action: "invalidaction",
-                    classId: classroom.id
+                    inviteId: invite.inviteId
                 });
 
             expect(status).toBe(400);
@@ -247,8 +243,7 @@ describe('invite tests', async () => {
             // verify that the invite was not updated
             const updatedInvite = await prisma.invite.findFirst({
                 where: {
-                    teacherId: teacherUser2.id,
-                    classId: classroom.id
+                    inviteId: invite.inviteId
                 }
             });
             expect(updatedInvite).not.toBeNull();
@@ -263,26 +258,23 @@ describe('invite tests', async () => {
             });
             expect(classTeacher2).toBeNull();
         });
-        it('should respond with a `404` status code when the invite does not exist', async () => {
+        it('should respond with a `400` status code when the invite does not exist', async () => {
             // delete the existing invite
             await prisma.invite.delete({
                 where: {
-                    teacherId_classId: {
-                        teacherId: teacherUser2.id,
-                        classId: classroom.id
-                    }
+                    inviteId: invite.inviteId
                 }
             });
             // now let's try to accept the non-existent invite
             const { status, body } = await request(app)
-                .patch(`/teacher/classes/${classroom.id}/invite`)
+                .patch(`/teacher/classes/invites/${invite.inviteId}`)
                 .send({
                     user: teacherUser2,
                     action: "accept",
-                    classId: classroom.id
+                    inviteId: invite.inviteId
                 });
-            expect(status).toBe(404);
-            expect(body.message).toBe("Geen pending uitnodiging gevonden voor deze leerkracht en klas");
+            expect(status).toBe(400);
+            expect(body.message).toBe("Uitnodiging is niet pending of bestaat niet");
             // verify that the teacher was not added to the class
             const classTeacher2 = await prisma.classTeacher.findFirst({
                 where: {
@@ -293,18 +285,18 @@ describe('invite tests', async () => {
             expect(classTeacher2).toBeNull();
         });
     });
-    describe('[DELETE] /teacher/classes/:classId/invite/:teacherId', async () => {
+    describe('[DELETE] /teacher/classes/:classId/invites/:inviteId', async () => {
         it('should respond with a `200` status code and the deleted invite', async () => {
             // set up scenario with a valid invite
-            await addTeacherToClass(teacherUser1.teacher.userId, classroom.id);
-            const invite: Invite = await createInvite(teacherUser2.teacher.userId, classroom.id);
+            await addTeacherToClass(teacherUser1.id, classroom.id);
+            const invite: Invite = await createInvite(teacherUser1.id, teacherUser2.id, classroom.id);
 
             // test deleting the invite
             const { status, body } = await request(app)
-                .delete(`/teacher/classes/${classroom.id}/invite/${teacherUser2.id}`)
+                .delete(`/teacher/classes/${classroom.id}/invites/${invite.inviteId}`)
                 .send({
                     user: teacherUser1,
-                    otherTeacherId: teacherUser2.id,
+                    inviteId: invite.inviteId,
                     classId: classroom.id
                 });
 
@@ -314,21 +306,20 @@ describe('invite tests', async () => {
             // verify that the invite was deleted
             const deletedInvite = await prisma.invite.findUnique({
                 where: {
-                    teacherId_classId: {
-                        teacherId: teacherUser2.id,
-                        classId: classroom.id
-                    }
+                    inviteId: invite.inviteId
                 }
             });
             expect(deletedInvite).toBeNull();
         });
         it('should respond with a `403` status code when the teacher trying to delete the invite is not part of the class', async () => {
-            const invite: Invite = await createInvite(teacherUser2.teacher.userId, classroom.id);
+            await addTeacherToClass(teacherUser1.id, classroom.id);
+            const invite: Invite = await createInvite(teacherUser1.id, teacherUser2.id, classroom.id);
+            const teacherUser3: User & { teacher: Teacher } = await createTeacher("Jane", "Doe", "jane.doe@gmail.com");
             const { status, body } = await request(app)
-                .delete(`/teacher/classes/${classroom.id}/invite/${teacherUser2.id}`)
+                .delete(`/teacher/classes/${classroom.id}/invites/${invite.inviteId}`)
                 .send({
-                    user: teacherUser1,
-                    otherTeacherId: teacherUser2.id,
+                    user: teacherUser3,
+                    inviteId: invite.inviteId,
                     classId: classroom.id
                 });
 
@@ -337,10 +328,7 @@ describe('invite tests', async () => {
             // verify that the invite was not deleted   
             const checkInvite = await prisma.invite.findUnique({
                 where: {
-                    teacherId_classId: {
-                        teacherId: teacherUser2.id,
-                        classId: classroom.id
-                    }
+                    inviteId: invite.inviteId
                 }
             });
             expect(checkInvite).toStrictEqual(invite);

@@ -31,10 +31,11 @@ export async function createClass(name: string, code: string): Promise<Class> {
     });
 }
 
-export async function createInvite(teacherId: number, classId: number): Promise<Invite> {
+export async function createInvite(classTeacherId: number, otherTeacherId: number, classId: number): Promise<Invite> {
     return prisma.invite.create({
         data: {
-            teacherId,
+            otherTeacherId,
+            classTeacherId,
             classId,
             status: JoinRequestStatus.PENDING
         }
