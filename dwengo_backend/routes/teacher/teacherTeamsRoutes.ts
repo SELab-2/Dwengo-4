@@ -8,7 +8,8 @@ import {
 import {
     makeAssignmentIdParamValid,
     makeTeamIdParamValid,
-    ensureTeamsParamValidTeamDivision, ensureTeamParamValidIdentifiableTeamDivision
+    ensureTeamsParamValidTeamDivision,
+    ensureTeamParamValidIdentifiableTeamDivision
 } from "../../middleware/teamValidationMiddleware";
 import {protectTeacher} from "../../middleware/teacherAuthMiddleware";
 
