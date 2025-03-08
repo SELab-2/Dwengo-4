@@ -1,6 +1,6 @@
 import {Feedback, PrismaClient} from '@prisma/client';
-import {AuthenticatedRequest} from "../middleware/teacherAuthMiddleware";
 import {Response} from "express";
+import {AuthenticatedRequest} from "../interfaces/extendedTypeInterfaces";
 
 
 const prisma = new PrismaClient();

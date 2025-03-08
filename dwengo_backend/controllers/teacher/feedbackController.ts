@@ -1,7 +1,7 @@
 import {Response} from "express";
 import service from "../../services/feedbackService";
 import {Feedback} from "@prisma/client";
-import {AuthenticatedRequest} from "../../middleware/teacherAuthMiddleware";
+import {AuthenticatedRequest} from "../../interfaces/extendedTypeInterfaces";
 
 export default class FeedbackController {
     static async getAllFeedbackForEvaluation(req: AuthenticatedRequest, res: Response) {
