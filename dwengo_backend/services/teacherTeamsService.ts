@@ -1,4 +1,4 @@
-import {ClassStudent, PrismaClient, Team} from "@prisma/client";
+import {ClassStudent, PrismaClient, Student, Team} from "@prisma/client";
 import {IdentifiableTeamDivision, TeamDivision} from "../interfaces/extendedTypeInterfaces"
 import _ from "lodash";
 
@@ -64,8 +64,8 @@ async function giveAssignmentToTeam(teamId: number, assignmentId: number): Promi
 async function assignStudentsToTeam(teamId: number, studentIds: number[]): Promise<void> {
     for (const studentId of studentIds) {
         // Ga eerst na of deze student en dit team zelfs bestaan
-        const student = await prisma.student.findUnique({ where: { userId: studentId } });
-        const team = await prisma.team.findUnique({ where: { id: teamId } });
+        const student: Student | null = await prisma.student.findUnique({ where: { userId: studentId } });
+        const team: Team | null = await prisma.team.findUnique({ where: { id: teamId } });
 
         if (student && team) {
             await prisma.team.update({
@@ -96,7 +96,7 @@ async function divideClassIntoTeams(teamSize: number, classId: number): Promise<
         throw new Error(`No students found for ${classId}`);
     }
 
-    const studentIds: number[] = students.map(st => st.studentId);
+    const studentIds: number[] = students.map((st: ClassStudent): number => st.studentId);
 
     // Shuffle the list of studentIds using Lodash
     const shuffledStudents: number[] = _.shuffle(studentIds);
@@ -116,15 +116,15 @@ async function divideClassIntoTeams(teamSize: number, classId: number): Promise<
 // Check if the students exists or not
 const validateStudentIds = async (studentIds: number[]): Promise<void> => {
     // Fetch all valid students from the database
-    const validStudents = await prisma.student.findMany({
+    const validStudents: Student[] = await prisma.student.findMany({
         where: { userId: { in: studentIds } },
         select: { userId: true }
     });
 
-    const validStudentIds = new Set(validStudents.map(student => student.userId));
+    const validStudentIds = new Set(validStudents.map((student: Student): number => student.userId));
 
     // Find any invalid students
-    const invalidStudentIds = studentIds.filter(studentId => !validStudentIds.has(studentId));
+    const invalidStudentIds: number[] = studentIds.filter((studentId: number): boolean => !validStudentIds.has(studentId));
 
     if (invalidStudentIds.length > 0) {
         throw new Error(`Invalid student IDs: ${invalidStudentIds.join(", ")}`);
@@ -150,13 +150,13 @@ export const updateTeamsForAssignment = async (
         await validateStudentIds(team.studentIds);
 
         // Update team name and students
-        const updatedTeam = await prisma.team.update({
+        const updatedTeam: Team = await prisma.team.update({
             where: { id: team.id },
             data: {
                 teamname: team.teamName,
                 students: {
                     // The set operation removes all existing students from the team and replaces them with the new list of students (team.studentIds).
-                    set: team.studentIds.map((studentId: number) => ({ userId: studentId }))
+                    set: team.studentIds.map((studentId: number): {userId: number} => ({ userId: studentId }))
                 },
                 teamAssignments: {
                     connectOrCreate: {
