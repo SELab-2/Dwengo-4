@@ -156,8 +156,8 @@ model LearningPath {
   ///
 
   // _id bij Dwengo API
-  id             String             @id @default(uuid())
-  hruid          String             @unique
+  id             String  @id @default(uuid())
+  hruid          String  @unique
   title          String
   language       String
   description    String
@@ -167,14 +167,9 @@ model LearningPath {
   num_nodes      Int?
   // Ik ga ervan uit dat dit is hoeveel nodes een leerling nog moet doorlopen? Hier kunnen we misschien iets mee doen om de progressie bij te houden?
   num_nodes_left Int?
-  // In de Dwengo API is dit gewoon 1 enkele string. Ik heb hier nu gekozen voor een lijst van strings, lijkt mij overzichtelijker, maar kan nog steeds veranderd worden.
-  keywords       String[]           @default([])
-  // targetAges is eigenlijk wat redundant. Dit is een lijst van alle getallen tussen min_age en max_age. Ik heb dit nu zo gelaten, maar misschien kunnen we dit nog veranderen.
-  // Persoonlijk zou ik het wel weglaten.
-  targetAges     Int[]
-  min_age        Int
-  max_age        Int
-  nodes          LearningPathNode[]
+
+  // De nodes van het leerpad
+  nodes LearningPathNode[]
 
   ///
   /// Custom velden
