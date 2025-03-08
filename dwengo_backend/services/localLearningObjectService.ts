@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { ContentType, PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 
 const prisma = new PrismaClient();
@@ -7,11 +7,11 @@ export interface LocalLearningObjectData {
   // De data die een teacher kan opgeven bij het aanmaken of updaten
   title: string;
   description: string;
-  contentType: string;       // bv. "text/markdown", "interactive/quiz", ...
-  keywords?: string;         // komma-gescheiden of JSON
-  targetAges?: string;       // idem
+  contentType: ContentType; // bv. "text/markdown", "interactive/quiz", ...
+  keywords?: Array<string>; // komma-gescheiden of JSON
+  targetAges?: Array<number>; // idem
   teacherExclusive?: boolean;
-  skosConcepts?: string;
+  skosConcepts?: Array<string>;
   copyright?: string;
   licence?: string;
   difficulty?: number;
@@ -21,13 +21,12 @@ export interface LocalLearningObjectData {
 }
 
 export default class LocalLearningObjectService {
-  
   /**
    * Maakt een nieuw leerobject aan in onze eigen databank.
    * Genereert een UUID voor het veld 'id' (Prisma-model heeft id: String @id).
    */
   static async createLearningObject(
-    teacherId: number, 
+    teacherId: number,
     data: LocalLearningObjectData
   ) {
     const newId = uuidv4(); // random UUID
@@ -35,18 +34,22 @@ export default class LocalLearningObjectService {
     // Prisma create
     const newObject = await prisma.learningObject.create({
       data: {
-        id: newId,
-        version: "1", // Standaard, kan je indien gewenst dynamisch bepalen
+        // id wordt gegenereerd door prisma zelf
+        // id: newId,
+        // Staat als standaard geconfigureerd in het prisma schema
+        // version: 1, // Standaard, kan je indien gewenst dynamisch bepalen
+        // Moeten we nog bespreken wat er met hruid gaat gebeuren
+        hruid: data.title.toLowerCase(),
         language: "nl", // Kan ook dynamisch
         title: data.title,
         description: data.description,
         contentType: data.contentType,
-        keywords: data.keywords ?? "",
-        targetAges: data.targetAges ?? "",
+        keywords: data.keywords ?? [],
+        targetAges: data.targetAges ?? [],
         teacherExclusive: data.teacherExclusive ?? false,
-        skosConcepts: data.skosConcepts ?? "",
+        skosConcepts: data.skosConcepts ?? [],
         copyright: data.copyright ?? "",
-        licence: data.licence ?? "CC BY",
+        licence: data.licence ?? "CC BY Dwengo",
         difficulty: data.difficulty ?? 1,
         estimatedTime: data.estimatedTime ?? 0,
         available: data.available ?? true,
@@ -81,7 +84,7 @@ export default class LocalLearningObjectService {
   }
 
   /**
-   * Update van een bestaand leerobject. We gaan ervan uit dat je al 
+   * Update van een bestaand leerobject. We gaan ervan uit dat je al
    * gecontroleerd hebt of de teacher mag updaten (bv. of teacherId === creatorId).
    */
   static async updateLearningObject(
@@ -92,6 +95,8 @@ export default class LocalLearningObjectService {
     return prisma.learningObject.update({
       where: { id },
       data: {
+        // Als we hruid gelijk stellen aan de titel, dan zal hruid hier ook moeten aangepast worden.
+
         title: data.title,
         description: data.description,
         contentType: data.contentType,
