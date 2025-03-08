@@ -189,9 +189,46 @@ model LearningPath {
 }
 
 model LearningPathNode {
+  // _id bij Dwengo API
   nodeId       String  @id @default(uuid())
   learningPathId String
-  start_nodex  Boolean
+  // Duid aan of dit de eerste node van een leerpad is
+  // Standaard op false, meer nodes die niet het begin gaan zijn, dan moet dit niet door de gebruiker steeds ingegeven worden.
+  start_node  Boolean @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  // Een node kan meerdere transities hebben. Dit duidt aan wat de volgende node is en of er een eventuele conditie aan deze node vasthangt.
+  transitions LearningPathTransition[] @relation("TransitionNode")
+
+  // Een node hoort bij een leerpad
+  learningPath LearningPath @relation(fields: [learningPathId], references: [id])
+  
+  // Dit is om de relatie tussen een transitie en een node vast te leggen.
+  // Een transitie kan maar naar 1 node gaan. 
+  // Dit is wat rare syntax, maar het is de enige manier om het in prisma werkende te krijgen.
+  nextTransitions LearningPathTransition[] @relation("NextNode")
+  
+}
+
+model LearningPathTransition {
+  // _id bij Dwengo API
+  transitionId String  @id @default(uuid())
+  // Ik ben niet 100% zeker waarvoor default staat in de Dwengo API, maar ik denk dat het betekent dat er geen conditie is.
+  // Er wordt dus standaard naar de volgende node gegaan.
+  default      Boolean @default(true)
+  // Een eventuele conditie die aan deze transitie vasthangt.
+  condition    String? 
+
+  // Een transitie hoort bij een node
+  nodeId String 
+  node LearningPathNode @relation(fields: [nodeId], references: [nodeId], name: "TransitionNode")
+
+
+  // Next wijst in de Dwengo API naar de volgende node. 
+  // Als next leeg is, betekent dit dat de laatste node van het leerpad bereikt is.
+  nextNodeId String?
+  nextNode    LearningPathNode? @relation(fields: [nextNodeId], references: [nodeId], name: "NextNode")
+
 
 }
 
@@ -309,7 +346,7 @@ model QuestionAnswer {
 
 model Assignment {
   id             Int      @id @default(autoincrement())
-  learningPathId Int
+  learningPathId String
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
