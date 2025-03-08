@@ -1,23 +1,72 @@
 import express from "express";
-// De "* as ..." is hier echt nodig, geloof mij.
 import * as questionController from "../../controllers/question/questionController";
-import { protectStudent } from "../../middleware/studentAuthMiddleware"
+import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
+import * as questionsAuthMiddleware from "../../middleware/questionsAuthMiddleware";
 
 const router = express.Router();
-//router.use(protectStudent);
+router.use(protectAnyUser);
 
-router.post("/assignment/:assignmentId/learningPath/:learningPathId/question", questionController.createQuestionGeneral);
-router.post("/assignment/:assignmentId/learningPath/:learningPathId/learningObject/:learningObjectId/question", questionController.createQuestionSpecific);
-router.post("/question/:questionId", questionController.createQuestionConversation);
+// Routes for creating questions
+router.post(
+    "/assignment/:assignmentId/learningPath/:learningPathId/question",
+    questionsAuthMiddleware.authorizeStudentInTeamWithAssignment,
+    questionController.createQuestionGeneral
+);
+router.post(
+    "/assignment/:assignmentId/learningPath/:learningPathId/learningObject/:learningObjectId/question",
+    questionsAuthMiddleware.authorizeStudentInTeamWithAssignment,
+    questionController.createQuestionSpecific
+);
+router.post(
+    "/question/:questionId",
+    questionsAuthMiddleware.authorizeQuestion,
+    questionController.createQuestionConversation
+);
 
-router.patch("/question/:questionId/conversation/:questionConversationId", questionController.updateQuestionConversation);
+// Routes for updating questions
+router.patch(
+    "/question/:questionId/conversation/:questionConversationId",
+    questionsAuthMiddleware.authorizeOwnerOfQuestionConversation,
+    questionController.updateQuestionConversation
+);
 
-router.get("/question/:questionId", questionController.getQuestion);
-router.get("/team/:teamId/questions", questionController.getQuestionsTeam);
-router.get("/class/:classId/questions", questionController.getQuestionsClass);
-router.get("/assignment/:assignmentId/class/:classId/questions", questionController.getQuestionsAssignment);
-router.get("/question/:questionId/conversations", questionController.getQuestionConversations);
+// Routes for retrieving questions
+router.get(
+    "/question/:questionId",
+    questionsAuthMiddleware.authorizeQuestion,
+    questionController.getQuestion
+);
+router.get(
+    "/team/:teamId/questions",
+    questionsAuthMiddleware.authorizeStudentInTeamThatCreatedQuestion,
+    questionController.getQuestionsTeam
+);
+router.get(
+    "/class/:classId/questions",
+    questionsAuthMiddleware.authorizeTeacherOfClass,
+    questionController.getQuestionsClass
+);
+router.get(
+    "/assignment/:assignmentId/class/:classId/questions",
+    questionsAuthMiddleware.authorizeStudentInTeamWithAssignment,
+    questionController.getQuestionsAssignment
+);
+router.get(
+    "/question/:questionId/conversations",
+    questionsAuthMiddleware.authorizeQuestion,
+    questionController.getQuestionConversations
+);
 
-router.delete("/question/:questionId", questionController.deleteQuestion);
-router.delete("/question/:questionId/conversation/:questionConversationId", questionController.deleteQuestionConversation);
+// Routes for deleting questions
+router.delete(
+    "/question/:questionId",
+    questionsAuthMiddleware.authorizeQuestion,
+    questionController.deleteQuestion
+);
+router.delete(
+    "/question/:questionId/conversation/:questionConversationId",
+    questionsAuthMiddleware.authorizeOwnerOfQuestionConversation,
+    questionController.deleteQuestionConversation
+);
+
 export default router;
