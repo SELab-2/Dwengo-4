@@ -57,10 +57,10 @@ export const makeTeamsParamValid = asyncHandler(async (req: AuthenticatedRequest
         }
 
         // Convert studentIds to numbers
-        const studentIds = team.studentIds.map((id: any) => Number(id));  // Convert all values to numbers
+        const studentIds: number[] = team.studentIds.map((id: any): number => Number(id));  // Convert all values to numbers
 
         // Check if any studentId is invalid
-        if (studentIds.some((id: number) => isNaN(id))) {
+        if (studentIds.some((id: number): boolean => isNaN(id))) {
             res.status(400).json({ error: "Each team must have valid 'studentIds' as an array of numbers." });
             return;
         }
