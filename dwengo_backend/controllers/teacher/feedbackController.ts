@@ -1,9 +1,10 @@
-import {Request, Response} from "express";
+import {Response} from "express";
 import service from "../../services/feedbackService";
 import {Feedback} from "@prisma/client";
+import {AuthenticatedRequest} from "../../middleware/teacherAuthMiddleware";
 
 export default class FeedbackController {
-    static async getAllFeedbackForEvaluation(req: Request, res: Response) {
+    static async getAllFeedbackForEvaluation(req: AuthenticatedRequest, res: Response) {
         try {
             //TODO hoe teacher checken?
             const evaluationId: string = req.params.evaluationId;
@@ -14,18 +15,58 @@ export default class FeedbackController {
         }
     }
 
-    static async createFeedback(req: Request, res: Response) {
+    static async createFeedback(req: AuthenticatedRequest, res: Response) {
         try {
-            const {submissionId, teacherId, description}: {
+            const teacherId: number | undefined = req.user?.id;
+            // TODO Is dit sowieso defined of hoe ga ik hier het beste met de undefined om?
+
+            const {submissionId, description}: {
                 submissionId: number,
-                teacherId: number,
                 description: string
             } = req.body;
             // TODO check if teacher has rights on evaluation
-            const feedback: Feedback = await service.createFeedback(submissionId, teacherId, description);
+            // TODO check of deadline al voorbij is
+
+            const feedback: Feedback = await service.createFeedback(submissionId, Number(teacherId), description);
+            res.status(201).json(feedback);
         } catch (error) {
             res.status(500).json({error: "Failed to create feedback"});
         }
 
+    }
+
+    static async getFeedbackForSubmission(req: AuthenticatedRequest, res: Response) {
+        try {
+            const submissionId: number = Number(req.params.submissionId);
+            // TODO check if teacher has rights on evaluation
+            const feedback: Feedback = await service.getFeedbackForSubmission(submissionId);
+            res.json(feedback);
+        } catch (error) {
+            res.status(500).json({error: "Failed to retrieve feedback"});
+        }
+
+    }
+
+    static async updateFeedbackForSubmission(req: AuthenticatedRequest, res: Response) {
+        try {
+            const submissionId: number = Number(req.params.submissionId);
+            // TODO check if teacher has rights on evaluation
+            const {description}: { description: string } = req.body;
+            const feedback: Feedback = await service.updateFeedbackForSubmission(submissionId, description);
+            res.json(feedback)
+        } catch (error) {
+            res.status(500).json({error: "Failed to update feedback"});
+        }
+    }
+
+    static deleteFeedbackForSubmission(req: AuthenticatedRequest, res: Response) {
+        try {
+            const submissionId: number = Number(req.params.submissionId);
+            // TODO check if teacher has rights on evaluation
+            service.deleteFeedbackForSubmission(submissionId);
+            res.json({message: "Feedback deleted"});
+        } catch (error) {
+            res.status(500).json({error: "Failed to delete feedback"});
+        }
     }
 }

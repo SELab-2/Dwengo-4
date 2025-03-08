@@ -25,4 +25,32 @@ export default class FeedbackService {
             },
         });
     }
+
+    static getFeedbackForSubmission(submissionId: number): Promise<Feedback> {
+        return prisma.feedback.findUnique({
+            where: {
+                submissionId: submissionId,
+            }
+        });
+    }
+
+    static updateFeedbackForSubmission(submissionId: number, description: string): Promise<Feedback> {
+        return prisma.feedback.update({
+            where: {
+                submissionId: submissionId,
+            },
+            data: {
+                description: description,
+            },
+        });
+    }
+
+    static deleteFeedbackForSubmission(submissionId: number): Promise<Feedback> {
+        return prisma.feedback.delete({
+            where: {
+                submissionId: submissionId,
+            },
+        });
+
+    }
 }
