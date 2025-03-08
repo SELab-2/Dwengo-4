@@ -1,12 +1,14 @@
 import {Feedback, PrismaClient} from '@prisma/client';
-import {Response} from "express";
-import {AuthenticatedRequest} from "../interfaces/extendedTypeInterfaces";
 
 
 const prisma = new PrismaClient();
 
 export default class FeedbackService {
-    static async getAllFeedbackForEvaluation(evaluationId: string): Promise<Feedback[]> {
+    static async getAllFeedbackForEvaluation(evaluationId: string, teacherId: number): Promise<Feedback[]> {
+        if (!await this.hasEvaluationRights(teacherId, evaluationId)) {
+            throw new Error("The teacher is unauthorized to perform this action");
+        }
+
         return prisma.feedback.findMany({
             where: {
                 submission: {
@@ -20,6 +22,29 @@ export default class FeedbackService {
     }
 
     static async createFeedback(submissionId: number, teacherId: number, description: string): Promise<Feedback> {
+        if (!await this.hasSubmissionRights(teacherId, submissionId)) {
+            throw new Error("The teacher is unauthorized to perform this action");
+        }
+
+        // aantal evaluaties met deadline in de toekomst
+        const deadline: number = await prisma.evaluation.count({
+            where: {
+                submissions: {
+                    some: {
+                        submissionId: submissionId,
+                    },
+                },
+                deadline: {
+                    gte: new Date()
+                }
+            }
+        });
+
+        // Als deadline in de toekomst ligt: error
+        if (deadline > 0) {
+            throw new Error("Deadline in toekomst");
+        }
+
         return prisma.feedback.create({
             data: {
                 submissionId: submissionId,
@@ -29,7 +54,11 @@ export default class FeedbackService {
         });
     }
 
-    static getFeedbackForSubmission(submissionId: number): Promise<Feedback> {
+    static async getFeedbackForSubmission(submissionId: number, teacherId: number): Promise<Feedback> {
+        if (!await this.hasSubmissionRights(teacherId, submissionId)) {
+            throw new Error("The teacher is unauthorized to perform this action");
+        }
+
         return prisma.feedback.findUnique({
             where: {
                 submissionId: submissionId,
@@ -37,7 +66,11 @@ export default class FeedbackService {
         });
     }
 
-    static updateFeedbackForSubmission(submissionId: number, description: string): Promise<Feedback> {
+    static async updateFeedbackForSubmission(submissionId: number, description: string, teacherId: number): Promise<Feedback> {
+        if (!await this.hasSubmissionRights(teacherId, submissionId)) {
+            throw new Error("The teacher is unauthorized to perform this action");
+        }
+
         return prisma.feedback.update({
             where: {
                 submissionId: submissionId,
@@ -48,7 +81,11 @@ export default class FeedbackService {
         });
     }
 
-    static deleteFeedbackForSubmission(submissionId: number): Promise<Feedback> {
+    static async deleteFeedbackForSubmission(submissionId: number, teacherId: number): Promise<Feedback> {
+        if (!await this.hasSubmissionRights(teacherId, submissionId)) {
+            throw new Error("The teacher is unauthorized to perform this action");
+        }
+
         return prisma.feedback.delete({
             where: {
                 submissionId: submissionId,
@@ -57,14 +94,13 @@ export default class FeedbackService {
 
     }
 
-    static hasEvaluationRights(evaluationId: string, req: AuthenticatedRequest, res: Response) {
-        const teacherId: number | undefined = req.user?.id;
+    static hasEvaluationRights(teacherId: number, evaluationId: string) {
         //TODO check if teacher has rights on evaluation
         // Hoe moet dit in de databank?
         return true;
     }
 
-    static async hasSubmissionRights(submissionId: number, req: AuthenticatedRequest, res: Response) {
+    static async hasSubmissionRights(teacherId: number, submissionId: number) {
         //TODO problemen met type
         const evaluation = await prisma.evaluation.findFirst({
             where: {
@@ -75,6 +111,6 @@ export default class FeedbackService {
                 },
             },
         });
-        return this.hasEvaluationRights(evaluation.id, req, res);
+        return this.hasEvaluationRights(teacherId, evaluation.id);
     }
 }

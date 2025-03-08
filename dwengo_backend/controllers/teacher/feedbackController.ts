@@ -7,9 +7,9 @@ export default class FeedbackController {
     static async getAllFeedbackForEvaluation(req: AuthenticatedRequest, res: Response) {
         try {
             const evaluationId: string = req.params.evaluationId;
-            if (!service.hasEvaluationRights(evaluationId, req, res)) return;
+            const teacherId: number = Number(req.user?.id);
 
-            const feedback: Feedback[] = await service.getAllFeedbackForEvaluation(evaluationId);
+            const feedback: Feedback[] = await service.getAllFeedbackForEvaluation(evaluationId, teacherId);
             res.json(feedback);
         } catch (error) {
             res.status(500).json({error: "Failed to retrieve feedback"});
@@ -25,9 +25,6 @@ export default class FeedbackController {
                 submissionId: number,
                 description: string
             } = req.body;
-            // TODO check of deadline al voorbij is
-            if (!await service.hasSubmissionRights(submissionId, req, res)) return;
-
 
             const feedback: Feedback = await service.createFeedback(submissionId, Number(teacherId), description);
             res.status(201).json(feedback);
@@ -40,9 +37,9 @@ export default class FeedbackController {
     static async getFeedbackForSubmission(req: AuthenticatedRequest, res: Response) {
         try {
             const submissionId: number = Number(req.params.submissionId);
-            if (!await service.hasSubmissionRights(submissionId, req, res)) return;
+            const teacherId: number = Number(req.user?.id);
 
-            const feedback: Feedback = await service.getFeedbackForSubmission(submissionId);
+            const feedback: Feedback = await service.getFeedbackForSubmission(submissionId, teacherId);
             res.json(feedback);
         } catch (error) {
             res.status(500).json({error: "Failed to retrieve feedback"});
@@ -53,22 +50,22 @@ export default class FeedbackController {
     static async updateFeedbackForSubmission(req: AuthenticatedRequest, res: Response) {
         try {
             const submissionId: number = Number(req.params.submissionId);
-            if (!await service.hasSubmissionRights(submissionId, req, res)) return;
+            const teacherId: number = Number(req.user?.id);
 
             const {description}: { description: string } = req.body;
-            const feedback: Feedback = await service.updateFeedbackForSubmission(submissionId, description);
+            const feedback: Feedback = await service.updateFeedbackForSubmission(submissionId, description, teacherId);
             res.json(feedback)
         } catch (error) {
             res.status(500).json({error: "Failed to update feedback"});
         }
     }
 
-    static deleteFeedbackForSubmission(req: AuthenticatedRequest, res: Response) {
+    static async deleteFeedbackForSubmission(req: AuthenticatedRequest, res: Response) {
         try {
             const submissionId: number = Number(req.params.submissionId);
-            if (!service.hasSubmissionRights(submissionId, req, res)) return;
+            const teacherId: number = Number(req.user?.id);
 
-            service.deleteFeedbackForSubmission(submissionId);
+            await service.deleteFeedbackForSubmission(submissionId, teacherId);
             res.json({message: "Feedback deleted"});
         } catch (error) {
             res.status(500).json({error: "Failed to delete feedback"});
