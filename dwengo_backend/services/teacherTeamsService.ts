@@ -131,7 +131,7 @@ const validateStudentIds = async (studentIds: number[]): Promise<void> => {
     }
 };
 
-// Update teams in an assignment
+// Update the given list of teams that have a given assignment
 export const updateTeamsForAssignment = async (
     assignmentId: number,
     teams: IdentifiableTeamDivision[]
@@ -156,7 +156,7 @@ export const updateTeamsForAssignment = async (
                 teamname: team.teamName,
                 students: {
                     // The set operation removes all existing students from the team and replaces them with the new list of students (team.studentIds).
-                    set: team.studentIds.map(studentId => ({ userId: studentId }))
+                    set: team.studentIds.map((studentId: number) => ({ userId: studentId }))
                 },
                 teamAssignments: {
                     connectOrCreate: {
@@ -188,10 +188,11 @@ export const getTeamsThatHaveAssignment = async (assignmentId: number): Promise<
 };
 
 // Delete a team from an assignment
-export const deleteTeamFromAssignment = async (teamId: string): Promise<void> => {
+// The TeamAssignment record will be deleted is either the team or assignment are deleted because of onDelete: Cascade
+export const deleteTeam = async (teamId: number): Promise<void> => {
     await prisma.team.delete({
         where: {
-            id: parseInt(teamId)
+            id: teamId
         }
     });
 };

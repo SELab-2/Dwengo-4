@@ -3,14 +3,25 @@ import {AuthenticatedRequest, TeamDivision} from "../interfaces/extendedTypeInte
 import asyncHandler from 'express-async-handler';
 
 export const makeAssignmentIdParamValid = asyncHandler(async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
-    const assignmentId = Number(req.params.assignmentId);
+    const assignmentId: number = Number(req.params.assignmentId);
 
     if (isNaN(assignmentId)) {
         res.status(400).json({ error: "Invalid assignment ID. It must be a number." });
         return;
     }
 
-    next();  // Proceed to the next middleware or controller
+    next();
+});
+
+export const makeTeamIdParamValid = asyncHandler(async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    const teamIdNumber: number = Number(req.params.teamId);
+
+    if (isNaN(teamIdNumber)) {
+        res.status(400).json({ error: "Invalid team ID. It must be a number." });
+        return;
+    }
+
+    next();
 });
 
 export const makeTeamsParamValid = asyncHandler(async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {

@@ -383,8 +383,8 @@ model TeamAssignment {
   teamId       Int
   assignmentId Int
 
-  team       Team       @relation(fields: [teamId], references: [id])
-  Assignment Assignment @relation(fields: [assignmentId], references: [id])
+  team       Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  Assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 
   @@id([teamId, assignmentId])
 }
