@@ -1,4 +1,7 @@
 import {Feedback, PrismaClient} from '@prisma/client';
+import {AuthenticatedRequest} from "../middleware/teacherAuthMiddleware";
+import {Response} from "express";
+
 
 const prisma = new PrismaClient();
 
@@ -52,5 +55,26 @@ export default class FeedbackService {
             },
         });
 
+    }
+
+    static hasEvaluationRights(evaluationId: string, req: AuthenticatedRequest, res: Response) {
+        const teacherId: number | undefined = req.user?.id;
+        //TODO check if teacher has rights on evaluation
+        // Hoe moet dit in de databank?
+        return true;
+    }
+
+    static async hasSubmissionRights(submissionId: number, req: AuthenticatedRequest, res: Response) {
+        //TODO problemen met type
+        const evaluation = await prisma.evaluation.findFirst({
+            where: {
+                submissions: {
+                    some: {
+                        submissionId: submissionId,
+                    },
+                },
+            },
+        });
+        return this.hasEvaluationRights(evaluation.id, req, res);
     }
 }

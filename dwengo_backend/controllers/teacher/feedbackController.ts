@@ -6,8 +6,9 @@ import {AuthenticatedRequest} from "../../middleware/teacherAuthMiddleware";
 export default class FeedbackController {
     static async getAllFeedbackForEvaluation(req: AuthenticatedRequest, res: Response) {
         try {
-            //TODO hoe teacher checken?
             const evaluationId: string = req.params.evaluationId;
+            if (!service.hasEvaluationRights(evaluationId, req, res)) return;
+
             const feedback: Feedback[] = await service.getAllFeedbackForEvaluation(evaluationId);
             res.json(feedback);
         } catch (error) {
@@ -24,8 +25,9 @@ export default class FeedbackController {
                 submissionId: number,
                 description: string
             } = req.body;
-            // TODO check if teacher has rights on evaluation
             // TODO check of deadline al voorbij is
+            if (!await service.hasSubmissionRights(submissionId, req, res)) return;
+
 
             const feedback: Feedback = await service.createFeedback(submissionId, Number(teacherId), description);
             res.status(201).json(feedback);
@@ -38,7 +40,8 @@ export default class FeedbackController {
     static async getFeedbackForSubmission(req: AuthenticatedRequest, res: Response) {
         try {
             const submissionId: number = Number(req.params.submissionId);
-            // TODO check if teacher has rights on evaluation
+            if (!await service.hasSubmissionRights(submissionId, req, res)) return;
+
             const feedback: Feedback = await service.getFeedbackForSubmission(submissionId);
             res.json(feedback);
         } catch (error) {
@@ -50,7 +53,8 @@ export default class FeedbackController {
     static async updateFeedbackForSubmission(req: AuthenticatedRequest, res: Response) {
         try {
             const submissionId: number = Number(req.params.submissionId);
-            // TODO check if teacher has rights on evaluation
+            if (!await service.hasSubmissionRights(submissionId, req, res)) return;
+
             const {description}: { description: string } = req.body;
             const feedback: Feedback = await service.updateFeedbackForSubmission(submissionId, description);
             res.json(feedback)
@@ -62,7 +66,8 @@ export default class FeedbackController {
     static deleteFeedbackForSubmission(req: AuthenticatedRequest, res: Response) {
         try {
             const submissionId: number = Number(req.params.submissionId);
-            // TODO check if teacher has rights on evaluation
+            if (!service.hasSubmissionRights(submissionId, req, res)) return;
+
             service.deleteFeedbackForSubmission(submissionId);
             res.json({message: "Feedback deleted"});
         } catch (error) {
