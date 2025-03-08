@@ -244,7 +244,7 @@ model LearningObject {
   // Ik ga dit voorlopig laten staan, maar misschien dat we dit nog moeten aanpassen.
   hruid            String      @unique
   title            String      @unique
-  version          Int
+  version          Int         @default(1)
   language         String
   description      String
   contentType      ContentType

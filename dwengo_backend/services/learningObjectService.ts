@@ -1,28 +1,51 @@
 import { dwengoAPI } from "../config/dwengoAPI";
-import { PrismaClient } from "@prisma/client";
-import { v4 as uuidv4 } from "uuid";
+import { LearningObject, PrismaClient } from "@prisma/client";
 
 // ============= [ Types voor Dwengo vs Local ] ============= //
+
+enum ContentType {
+  TEXT_PLAIN = "text/plain",
+  TEXT_MARKDOWN = "text/markdown",
+  IMAGE_IMAGE_BLOCK = "image/image-block",
+  IMAGE_IMAGE = "image/image",
+  AUDIO_MPEG = "audio/mpeg",
+  VIDEO = "video",
+  EVAL_MULTIPLE_CHOICE = "evaluation/multiple-choice",
+  EVAL_OPEN_QUESTION = "evaluation/open-question",
+}
+
+const permittedContentTypes = {
+  "text/plain": ContentType.TEXT_PLAIN,
+  "text/markdown": ContentType.TEXT_MARKDOWN,
+  "image/image-block": ContentType.IMAGE_IMAGE_BLOCK,
+  "image/image": ContentType.IMAGE_IMAGE,
+  "audio/mpeg": ContentType.AUDIO_MPEG,
+  video: ContentType.VIDEO,
+  "evaluation/multiple-choice": ContentType.EVAL_MULTIPLE_CHOICE,
+  "evaluation/open-question": ContentType.EVAL_OPEN_QUESTION,
+};
 
 export interface LearningObjectDto {
   // Gebruiken we als "universeel" DTO voor de frontend
   // of controllers (Dwengo + Local)
-  id: string;              // _id (Dwengo) of UUID (Local)
-  version: string;
+  id: string; // _id (Dwengo) of UUID (Local)
+  uuid: string;
+  hruid: string;
+  version: number;
   language: string;
   title: string;
   description: string;
   contentType: string;
-  keywords: string;
-  targetAges: string;
+  keywords: Array<string>;
+  targetAges: Array<number>;
   teacherExclusive: boolean;
-  skosConcepts: string;
-  copyright?: string;
+  skosConcepts: Array<string>;
+  copyright: string;
   licence: string;
   difficulty: number;
   estimatedTime: number;
   available: boolean;
-  contentLocation: string;
+  contentLocation?: string;
   createdAt: string;
   updatedAt: string;
   // We kunnen een extra "origin" toevoegen om te weten of het van Dwengo of local komt
@@ -33,7 +56,8 @@ export interface LearningObjectDto {
 interface DwengoLearningObject {
   _id?: string;
   uuid?: string;
-  version?: number | string;
+  hruid?: string;
+  version?: number;
   language?: string;
   title?: string;
   description?: string;
@@ -58,16 +82,22 @@ const prisma = new PrismaClient();
 // ============= [ Helper: Dwengo => Local DTO ] ============= //
 function mapDwengoToLocal(dwengoObj: DwengoLearningObject): LearningObjectDto {
   return {
-    id: dwengoObj._id ?? dwengoObj.uuid ?? "", 
-    version: dwengoObj.version ? dwengoObj.version.toString() : "",
+    id: dwengoObj._id ?? "",
+    uuid: dwengoObj.uuid ?? "",
+    hruid: dwengoObj.hruid ?? "",
+    version: dwengoObj.version ?? 1,
     language: dwengoObj.language ?? "",
     title: dwengoObj.title ?? "",
     description: dwengoObj.description ?? "",
-    contentType: dwengoObj.content_type ?? "",
-    keywords: dwengoObj.keywords ? dwengoObj.keywords.join(", ") : "",
-    targetAges: dwengoObj.target_ages ? dwengoObj.target_ages.join(",") : "",
+    // Check of content_type een bekende ContentType is, anders TEXT_PLAIN
+    contentType:
+      permittedContentTypes[
+        (dwengoObj.content_type as keyof typeof permittedContentTypes) ?? ""
+      ] ?? ContentType.TEXT_PLAIN,
+    keywords: dwengoObj.keywords ?? [],
+    targetAges: dwengoObj.target_ages ?? [],
     teacherExclusive: Boolean(dwengoObj.teacher_exclusive),
-    skosConcepts: dwengoObj.skos_concepts ? dwengoObj.skos_concepts.join(", ") : "",
+    skosConcepts: dwengoObj.skos_concepts ?? [],
     copyright: dwengoObj.copyright ?? "",
     licence: dwengoObj.licence ?? "",
     difficulty: dwengoObj.difficulty ?? 0,
@@ -81,14 +111,18 @@ function mapDwengoToLocal(dwengoObj: DwengoLearningObject): LearningObjectDto {
 }
 
 // ============= [ DWENGO-FUNCTIES (ongewijzigd behalve naam) ] ============= //
-async function fetchAllDwengoObjects(isTeacher: boolean): Promise<LearningObjectDto[]> {
+async function fetchAllDwengoObjects(
+  isTeacher: boolean
+): Promise<LearningObjectDto[]> {
   try {
     const params: Record<string, any> = {};
     if (!isTeacher) {
       params.teacher_exclusive = false;
       params.available = true;
     }
-    const response = await dwengoAPI.get("/api/learningObject/search", { params });
+    const response = await dwengoAPI.get("/api/learningObject/search", {
+      params,
+    });
     const dwengoData: DwengoLearningObject[] = response.data;
     return dwengoData.map(mapDwengoToLocal);
   } catch (error) {
@@ -97,11 +131,16 @@ async function fetchAllDwengoObjects(isTeacher: boolean): Promise<LearningObject
   }
 }
 
-async function fetchDwengoObjectById(id: string, isTeacher: boolean): Promise<LearningObjectDto | null> {
+async function fetchDwengoObjectById(
+  id: string,
+  isTeacher: boolean
+): Promise<LearningObjectDto | null> {
   try {
     // Dwengo herkent ID via _id param
     const params = { _id: id };
-    const response = await dwengoAPI.get("/api/learningObject/getMetadata", { params });
+    const response = await dwengoAPI.get("/api/learningObject/getMetadata", {
+      params,
+    });
     const dwengoObj: DwengoLearningObject = response.data;
     const mapped = mapDwengoToLocal(dwengoObj);
 
@@ -118,7 +157,10 @@ async function fetchDwengoObjectById(id: string, isTeacher: boolean): Promise<Le
   }
 }
 
-async function searchDwengoObjects(isTeacher: boolean, searchTerm: string): Promise<LearningObjectDto[]> {
+async function searchDwengoObjects(
+  isTeacher: boolean,
+  searchTerm: string
+): Promise<LearningObjectDto[]> {
   try {
     const params: Record<string, any> = {};
     if (!isTeacher) {
@@ -128,7 +170,9 @@ async function searchDwengoObjects(isTeacher: boolean, searchTerm: string): Prom
     if (searchTerm) {
       params.searchTerm = searchTerm;
     }
-    const response = await dwengoAPI.get("/api/learningObject/search", { params });
+    const response = await dwengoAPI.get("/api/learningObject/search", {
+      params,
+    });
     const dwengoData: DwengoLearningObject[] = response.data;
     return dwengoData.map(mapDwengoToLocal);
   } catch (error) {
@@ -140,9 +184,14 @@ async function searchDwengoObjects(isTeacher: boolean, searchTerm: string): Prom
 // ============= [ LOKALE-FUNCTIES (NEW) ] ============= //
 
 // Helper om Prisma-object => LearningObjectDto te mappen
-function mapLocalToDto(localObj: any, isTeacher: boolean): LearningObjectDto {
+function mapLocalToDto(
+  localObj: LearningObject,
+  isTeacher: boolean
+): LearningObjectDto {
   return {
     id: localObj.id,
+    uuid: localObj.uuid,
+    hruid: localObj.hruid, // kan ook nog localObj.title worden
     version: localObj.version,
     language: localObj.language,
     title: localObj.title,
@@ -157,18 +206,20 @@ function mapLocalToDto(localObj: any, isTeacher: boolean): LearningObjectDto {
     difficulty: localObj.difficulty,
     estimatedTime: localObj.estimatedTime,
     available: localObj.available,
-    contentLocation: localObj.contentLocation,
-    createdAt: localObj.createdAt.toISOString(), 
+    contentLocation: localObj.contentLocation ?? "",
+    createdAt: localObj.createdAt.toISOString(),
     updatedAt: localObj.updatedAt.toISOString(),
     origin: "local",
   };
 }
 
 /**
- * Haal alle lokale leerobjecten op. 
+ * Haal alle lokale leerobjecten op.
  * Filter voor studenten: enkel teacherExclusive=false en available=true.
  */
-async function getLocalLearningObjects(isTeacher: boolean): Promise<LearningObjectDto[]> {
+async function getLocalLearningObjects(
+  isTeacher: boolean
+): Promise<LearningObjectDto[]> {
   const whereClause = isTeacher
     ? {} // Als teacher: geen beperkingen
     : { teacherExclusive: false, available: true };
@@ -184,7 +235,10 @@ async function getLocalLearningObjects(isTeacher: boolean): Promise<LearningObje
 /**
  * Haal 1 lokaal leerobject op (check of student dit mag zien).
  */
-async function getLocalLearningObjectById(id: string, isTeacher: boolean): Promise<LearningObjectDto | null> {
+async function getLocalLearningObjectById(
+  id: string,
+  isTeacher: boolean
+): Promise<LearningObjectDto | null> {
   const localObj = await prisma.learningObject.findUnique({
     where: { id },
   });
@@ -202,7 +256,10 @@ async function getLocalLearningObjectById(id: string, isTeacher: boolean): Promi
  * Doorzoeken van de lokale DB op basis van 'searchTerm' in de title/description/keywords, etc.
  * (Simpel voorbeeld: we filteren in de DB op title & description.)
  */
-async function searchLocalLearningObjects(isTeacher: boolean, searchTerm: string): Promise<LearningObjectDto[]> {
+async function searchLocalLearningObjects(
+  isTeacher: boolean,
+  searchTerm: string
+): Promise<LearningObjectDto[]> {
   const whereClause: any = {
     OR: [
       { title: { contains: searchTerm, mode: "insensitive" } },
@@ -213,10 +270,7 @@ async function searchLocalLearningObjects(isTeacher: boolean, searchTerm: string
 
   if (!isTeacher) {
     // student => mag alleen teacherExclusive=false en available=true ZIEN
-    whereClause.AND = [
-      { teacherExclusive: false },
-      { available: true },
-    ];
+    whereClause.AND = [{ teacherExclusive: false }, { available: true }];
   }
 
   const localObjects = await prisma.learningObject.findMany({
@@ -232,7 +286,9 @@ async function searchLocalLearningObjects(isTeacher: boolean, searchTerm: string
 /**
  * Haalt ALLE leerobjecten op: Dwengo + lokaal.
  */
-export async function getAllLearningObjects(isTeacher: boolean): Promise<LearningObjectDto[]> {
+export async function getAllLearningObjects(
+  isTeacher: boolean
+): Promise<LearningObjectDto[]> {
   // 1) Dwengo
   const dwengoObjs = await fetchAllDwengoObjects(isTeacher);
   // 2) Lokaal
@@ -244,7 +300,10 @@ export async function getAllLearningObjects(isTeacher: boolean): Promise<Learnin
 /**
  * Zoeken (Dwengo + Lokaal)
  */
-export async function searchLearningObjects(isTeacher: boolean, searchTerm: string): Promise<LearningObjectDto[]> {
+export async function searchLearningObjects(
+  isTeacher: boolean,
+  searchTerm: string
+): Promise<LearningObjectDto[]> {
   const dwengoResults = await searchDwengoObjects(isTeacher, searchTerm);
   const localResults = await searchLocalLearningObjects(isTeacher, searchTerm);
   return [...dwengoResults, ...localResults];
@@ -253,7 +312,10 @@ export async function searchLearningObjects(isTeacher: boolean, searchTerm: stri
 /**
  * Haal 1 leerobject op: eerst checken bij Dwengo, zo niet gevonden => check local DB.
  */
-export async function getLearningObjectById(id: string, isTeacher: boolean): Promise<LearningObjectDto | null> {
+export async function getLearningObjectById(
+  id: string,
+  isTeacher: boolean
+): Promise<LearningObjectDto | null> {
   // 1) Dwengo
   const fromDwengo = await fetchDwengoObjectById(id, isTeacher);
   if (fromDwengo) return fromDwengo;
@@ -270,7 +332,10 @@ export async function getLearningObjectById(id: string, isTeacher: boolean): Pro
  * Haalt alle leerobjecten op die bij een leerpad (Dwengo) horen (ongewijzigd).
  * (Mocht je ook "lokale" leerpaden willen ondersteunen, voeg je eigen logica toe.)
  */
-export async function getLearningObjectsForPath(pathId: string, isTeacher: boolean): Promise<LearningObjectDto[]> {
+export async function getLearningObjectsForPath(
+  pathId: string,
+  isTeacher: boolean
+): Promise<LearningObjectDto[]> {
   try {
     const pathResp = await dwengoAPI.get("/api/learningPath/search", {
       params: { all: "" },
@@ -293,7 +358,10 @@ export async function getLearningObjectsForPath(pathId: string, isTeacher: boole
           version: node.version,
           language: node.language,
         };
-        const response = await dwengoAPI.get("/api/learningObject/getMetadata", { params });
+        const response = await dwengoAPI.get(
+          "/api/learningObject/getMetadata",
+          { params }
+        );
         const dwengoObj: DwengoLearningObject = response.data;
         const mapped = mapDwengoToLocal(dwengoObj);
 
