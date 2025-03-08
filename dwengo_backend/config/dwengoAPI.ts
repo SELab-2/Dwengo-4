@@ -8,4 +8,3 @@ export const dwengoAPI: AxiosInstance = axios.create({
   },
   timeout: 5000,
 });
-

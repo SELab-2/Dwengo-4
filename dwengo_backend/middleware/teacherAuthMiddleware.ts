@@ -1,16 +1,10 @@
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import asyncHandler from 'express-async-handler';
 import { PrismaClient } from '@prisma/client';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import {AuthenticatedRequest} from "../interfaces/extendedTypeInterfaces";
 
 const prisma = new PrismaClient();
-
-export interface AuthenticatedRequest extends Request {
-  user?: {
-    id: number;
-    email: string;
-  };
-}
 
 interface JwtPayload {
   id: number;
