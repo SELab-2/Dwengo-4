@@ -36,12 +36,17 @@ export const authorizeStudentInTeamWithAssignment = asyncHandler(
             return;
         }
 
-        const assignmentId = req.body.assignmentId;
+        const assignmentId = Number(req.params.assignmentId);
         if (!assignmentId) {
             res.status(400).json({ error: "Assignment ID is vereist." });
             return;
         }
 
+        // Als het geen GET-request is, controleer of de studentId in de request overeenkomt met de studentId van de gebruiker in de body
+        if (req.method !== "GET" && student.userId != req.body.studentId) {
+            res.status(403).json({ error: "Studentgegevens komen niet overeen." });
+            return;
+        }
         const team = await prisma.team.findFirst({
             where: {
                 students: {
@@ -72,6 +77,13 @@ export const authorizeQuestion = asyncHandler(
 
         if (!req.user) {
             res.status(401).json({ error: "Niet geautoriseerd." });
+            return;
+        }
+
+        if (req.method === "POST" && req.user.id != req.body.userId) {
+            console.log(req.user.id);
+            console.log(req.body.userId);
+            res.status(403).json({ error: "Gebruiker komt niet overeen." });
             return;
         }
 
@@ -118,6 +130,11 @@ export const authorizeOwnerOfQuestionConversation = asyncHandler(
             return;
         }
 
+        if (req.method === "PATCH" && req.user.id != req.body.userId) {
+            res.status(403).json({ error: "Gebruiker komt niet overeen." });
+            return;
+        }
+
         const questionConversation = await prisma.questionConversation.findUnique({
             where: { id: Number(questionConversationId) },
         });
@@ -138,36 +155,37 @@ export const authorizeOwnerOfQuestionConversation = asyncHandler(
 
 export const authorizeStudentInTeamThatCreatedQuestion = asyncHandler(
     async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
-        const { questionId } = req.params;
+        const { teamId } = req.params;
 
         if (!req.user || req.user.role !== "STUDENT") {
             res.status(401).json({ error: "Niet geautoriseerd." });
             return;
         }
 
-        const questionHead = await prisma.questionHead.findUnique({
-            where: { id: Number(questionId) },
+        const student = req.user.student;
+        if (!student) {
+            res.status(403).json({ error: "Studentgegevens niet gevonden." });
+            return;
+        }
+
+        const team = await prisma.team.findUnique({
+            where: { id: Number(teamId) },
             include: {
-                team: {
-                    include: {
-                        students: true,
-                    },
-                },
+                students: true,
             },
         });
 
-        if (!questionHead) {
-            res.status(404).json({ error: "Vraag niet gevonden." });
+        if (!team) {
+            res.status(404).json({ error: "Team niet gevonden." });
             return;
         }
 
-        const isStudentInTeam = questionHead.team.students.some(student => student.userId === req.user?.id);
+        const isStudentInTeam = team.students.some(student => student.userId === req.user?.id);
 
         if (!isStudentInTeam) {
-            res.status(403).json({ error: "Toegang geweigerd. Student is niet in het team dat de vraag heeft gemaakt." });
+            res.status(403).json({ error: "Toegang geweigerd. Student is niet in dit team." });
             return;
         }
-
         next();
     }
 );
@@ -235,3 +253,5 @@ export const authorizeTeacherOfAssignmentClass = asyncHandler(
         next();
     }
 );
+
+

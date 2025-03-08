@@ -48,7 +48,7 @@ router.get(
 );
 router.get(
     "/assignment/:assignmentId/class/:classId/questions",
-    questionsAuthMiddleware.authorizeStudentInTeamWithAssignment,
+    questionsAuthMiddleware.authorizeTeacherOfAssignmentClass,
     questionController.getQuestionsAssignment
 );
 router.get(

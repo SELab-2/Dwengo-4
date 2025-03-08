@@ -19,6 +19,7 @@ const handleRequest = (handler: (req: Request, res: Response) => Promise<void>) 
         } catch (error) {
             const message: string = error instanceof Error ? error.message : "An unknown error occurred";
             res.status(400).json({ error: message });
+            return;
         }
     };
 
