@@ -167,8 +167,6 @@ model LearningPath {
   num_nodes   Int?
   // Ik ga ervan uit dat dit is hoeveel nodes een leerling nog moet doorlopen? Hier kunnen we misschien iets mee doen om de progressie bij te houden?
   num_nodes_left Int?
-  // Ik weet niet wat dit moet voorstellen, het wordt ook niet echt gebruikt in de Dwengo API zelf, misschien zelf gewoon weglaten?
-  minItems    Int?
   // In de Dwengo API is dit gewoon 1 enkele string. Ik heb hier nu gekozen voor een lijst van strings, lijkt mij overzichtelijker, maar kan nog steeds veranderd worden.
   keywords    String[]  @default([])
   // targetAges is eigenlijk wat redundant. Dit is een lijst van alle getallen tussen min_age en max_age. Ik heb dit nu zo gelaten, maar misschien kunnen we dit nog veranderen.
