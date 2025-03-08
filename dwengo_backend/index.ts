@@ -25,14 +25,14 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use(express.json());
 
 
+// Routes voor Teacher (Classes)
+app.use("/teacher/classes", teacherClassRoutes);
+
 // Routes voor Teacher (Auth)
 app.use("/teacher/auth", teacherAuthRoutes);
 
 // Routes voor Student (Auth)
 app.use("/student/auth", studentAuthRoutes)
-
-// Routes voor Teacher (Classes)
-app.use("/teacher/classes", teacherClassRoutes);
 
 // Error Handler
 app.use(errorHandler);

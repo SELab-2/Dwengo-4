@@ -96,8 +96,7 @@ export default class inviteService {
                 classId: invite.classId
             }
         });
-        // change invite status (what if something goes wrong here due to some internal error; then the teacher is 
-        // added to the class but the invite status is not updated)
+        // change invite status
         invite = await prisma.invite.update({
             where: {
                 inviteId: invite.inviteId
