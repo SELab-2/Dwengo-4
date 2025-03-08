@@ -7,3 +7,8 @@ export interface AuthenticatedRequest extends Request {
         email: string;
     };
 }
+
+export interface TeamDivision {
+    teamName: string;         // The name of the team (e.g., "Team 1")
+    studentIds: number[];     // Array of student IDs that belong to this team
+}

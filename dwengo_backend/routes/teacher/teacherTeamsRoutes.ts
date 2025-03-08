@@ -5,11 +5,12 @@ import {
     updateTeamsInAssignment,
     deleteTeamInAssignment
 } from "../../controllers/teacher/teacherTeamsController";
+import {makeAssignmentIdParamValid, makeTeamsParamValid} from "../../middleware/teamValidationMiddleware";
 
 const router = express.Router();
 
 // Route to create teams in an assignment
-router.post("/:assignmentId", createTeamInAssignment);
+router.post("/:assignmentId", makeAssignmentIdParamValid, makeTeamsParamValid, createTeamInAssignment);
 
 // Route to get all teams in an assignment
 router.get("/:assignmentId", getTeamsInAssignment);

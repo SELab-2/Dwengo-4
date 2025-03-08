@@ -1,14 +1,21 @@
 import { Request, Response } from "express";
 import {
     createTeamsInAssignment,
-    getTeamsForAssignment,
+    getTeamsThatHaveAssignment,
     updateTeamsForAssignment,
     deleteTeamFromAssignment
 } from "../../services/teacherTeamsService";
 
+// Validate that the assignmentId is a valid number
+const isAssignmentIdValid = (req: Request, res: Response): boolean => {
+    const id = Number(req.params.assignmentId);
+    return !isNaN(id);
+};
+
 export const createTeamInAssignment = async (req: Request, res: Response) => {
     try {
-        const { assignmentId } = req.params;
+        // This is guaranteed to be possible by "makeAssignmentIdParamValid" in middleware/teamValidationMiddleware.ts
+        const assignmentId = Number(req.params.assignmentId);
         const { teams } = req.body;  // An array of teams to be created
 
         const createdTeams = await createTeamsInAssignment(assignmentId, teams);
@@ -20,8 +27,11 @@ export const createTeamInAssignment = async (req: Request, res: Response) => {
 
 export const getTeamsInAssignment = async (req: Request, res: Response) => {
     try {
-        const { assignmentId } = req.params;
-        const teams = await getTeamsForAssignment(assignmentId);
+        const assignmentId = Number(req.params.assignmentId);
+        if (isNaN(assignmentId)) {
+            return res.status(400).json({ error: "Invalid assignment ID." });
+        }
+        const teams = await getTeamsThatHaveAssignment(assignmentId);
         res.status(200).json(teams);
     } catch (error) {
         res.status(500).json({ error: "Error fetching teams for assignment." });
@@ -30,7 +40,10 @@ export const getTeamsInAssignment = async (req: Request, res: Response) => {
 
 export const updateTeamsInAssignment = async (req: Request, res: Response) => {
     try {
-        const { assignmentId } = req.params;
+        const assignmentId = Number(req.params.assignmentId);
+        if (isNaN(assignmentId)) {
+            return res.status(400).json({ error: "Invalid assignment ID." });
+        }
         const { teams } = req.body;  // An array of updated teams
 
         const updatedTeams = await updateTeamsForAssignment(assignmentId, teams);
