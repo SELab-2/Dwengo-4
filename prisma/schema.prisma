@@ -93,6 +93,7 @@ model Class {
   assignments  ClassAssignment[]
   Invite       Invite[]
   ClassTeacher ClassTeacher[]
+  teams        Team[]
 }
 
 ///
@@ -294,8 +295,7 @@ model QuestionGeneral {
 model QuestionHead {
   id          Int          @id @default(autoincrement())
   teamId      Int
-  // De vraag zelf
-  description String
+  assignmentId Int
   type        QuestionType
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
@@ -306,7 +306,9 @@ model QuestionHead {
   specific   QuestionSpecific?
   general    QuestionGeneral?
   
+  assignment Assignment          @relation(fields: [assignmentId], references: [id])
   team       Team                @relation(fields: [teamId], references: [id])
+  questionConversation QuestionConversation[]
 }
 
 model QuestionConversation{
@@ -318,6 +320,7 @@ model QuestionConversation{
   text        String
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  questionHeads QuestionHead @relation(fields: [questionId], references: [id])
 
 }
 
@@ -331,6 +334,7 @@ model Assignment {
   updatedAt      DateTime @updatedAt
 
   learningPath     LearningPath      @relation(fields: [learningPathId], references: [id])
+  questionHeads QuestionHead[]
   classAssignments ClassAssignment[]
   teamAssignments  TeamAssignment[]
 }
@@ -348,6 +352,7 @@ model ClassAssignment {
 model Team {
   id       Int    @id @default(autoincrement())
   teamname String
+  classId  Int
 
   // Een team bestaat uit studenten
   students        Student[]
@@ -356,6 +361,8 @@ model Team {
   // De indieningen van een team
   teamSubmissions TeamSubmission[]
   Questions       QuestionHead[]
+
+  class Class @relation(fields: [classId], references: [id])  
 }
 
 model TeamAssignment {

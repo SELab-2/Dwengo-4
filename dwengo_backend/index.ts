@@ -4,6 +4,7 @@ import errorHandler from "./middleware/errorMiddleware";
 import teacherAuthRoutes from "./routes/teacher/teacherAuthRoutes";
 import studentAuthRoutes from "./routes/student/studentAuthRoutes";
 import learningObjectRoutes from "./routes/learningObject/learningObjectRoutes";
+import QuestionService from "./routes/questions/questionsRoutes";
 // import learningPathRoutes from "./routes/learningPath/learningPathRoutes"; // Uncomment indien beschikbaar
 
 dotenv.config();
@@ -30,6 +31,8 @@ app.use("/student/auth", studentAuthRoutes)
 
 // Routes voor leerobjecten
 app.use("/learningObjects", learningObjectRoutes);
+
+app.use("/", QuestionService);
 // app.use("/learningPaths", learningPathRoutes); // Uncomment indien beschikbaar
 
 // Error handling middleware
