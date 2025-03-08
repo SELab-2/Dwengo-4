@@ -28,9 +28,6 @@ export const createTeamInAssignment = async (req: Request, res: Response) => {
 export const getTeamsInAssignment = async (req: Request, res: Response) => {
     try {
         const assignmentId = Number(req.params.assignmentId);
-        if (isNaN(assignmentId)) {
-            return res.status(400).json({ error: "Invalid assignment ID." });
-        }
         const teams = await getTeamsThatHaveAssignment(assignmentId);
         res.status(200).json(teams);
     } catch (error) {
@@ -41,9 +38,6 @@ export const getTeamsInAssignment = async (req: Request, res: Response) => {
 export const updateTeamsInAssignment = async (req: Request, res: Response) => {
     try {
         const assignmentId = Number(req.params.assignmentId);
-        if (isNaN(assignmentId)) {
-            return res.status(400).json({ error: "Invalid assignment ID." });
-        }
         const { teams } = req.body;  // An array of updated teams
 
         const updatedTeams = await updateTeamsForAssignment(assignmentId, teams);
@@ -55,7 +49,8 @@ export const updateTeamsInAssignment = async (req: Request, res: Response) => {
 
 export const deleteTeamInAssignment = async (req: Request, res: Response) => {
     try {
-        const { assignmentId, teamId } = req.params;
+        const assignmentId = Number(req.params.assignmentId);
+        const { nteamId } = req.params;
 
         await deleteTeamFromAssignment(assignmentId, teamId);
         res.status(200).json({ message: "Team successfully deleted." });

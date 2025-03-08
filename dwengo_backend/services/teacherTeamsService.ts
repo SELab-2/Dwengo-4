@@ -1,5 +1,6 @@
 import {ClassStudent, PrismaClient, Team} from "@prisma/client";
-import {TeamDivision} from "../interfaces/extendedTypeInterfaces"
+import {IdentifiableTeamDivision, TeamDivision} from "../interfaces/extendedTypeInterfaces"
+import _ from "lodash";
 
 const prisma = new PrismaClient();
 
@@ -79,8 +80,11 @@ async function assignStudentsToTeam(teamId: number, studentIds: number[]): Promi
     }
 }
 
-async function
-
+//* Zoals ik het zie kan een leerkracht eerst deze functie lokaal gebruiken om een teamindeling te maken.
+// Als deze hier dan mee akkoord gaat kan de leerkracht het resultaat van deze functie geven aan
+// createTeamsInAssignment. Want createTeamsInAssignment verwacht al een geldige indeling, daar wordt ook
+// door middleware op gecontroleerd.
+// *//
 async function divideClassIntoTeams(teamSize: number, classId: number): Promise<TeamDivision[]> {
 
     const students: ClassStudent[] = await prisma.classStudent.findMany({
@@ -94,20 +98,71 @@ async function divideClassIntoTeams(teamSize: number, classId: number): Promise<
 
     const studentIds: number[] = students.map(st => st.studentId);
 
-    return [];
+    // Shuffle the list of studentIds using Lodash
+    const shuffledStudents: number[] = _.shuffle(studentIds);
+
+    const teams: TeamDivision[] = [];
+
+    for (let i: number = 0; i < shuffledStudents.length; i += teamSize) {
+        teams.push({
+            teamName: `Team ${i+1}`,
+            studentIds: shuffledStudents.slice(i, i + teamSize),
+        });
+    }
+
+    return teams;
 }
 
+// Check if the students exists or not
+const validateStudentIds = async (studentIds: number[]): Promise<void> => {
+    // Fetch all valid students from the database
+    const validStudents = await prisma.student.findMany({
+        where: { userId: { in: studentIds } },
+        select: { userId: true }
+    });
+
+    const validStudentIds = new Set(validStudents.map(student => student.userId));
+
+    // Find any invalid students
+    const invalidStudentIds = studentIds.filter(studentId => !validStudentIds.has(studentId));
+
+    if (invalidStudentIds.length > 0) {
+        throw new Error(`Invalid student IDs: ${invalidStudentIds.join(", ")}`);
+    }
+};
+
 // Update teams in an assignment
-export const updateTeamsForAssignment = async (teams: any[]): Promise<Team[]> => {
+export const updateTeamsForAssignment = async (
+    assignmentId: number,
+    teams: IdentifiableTeamDivision[]
+): Promise<Team[]> => {
     const updatedTeams: Team[] = [];
 
     for (const team of teams) {
+        // Check if the team exists
+        const existingTeam: Team | null = await prisma.team.findUnique({ where: { id: team.id } });
+
+        if (!existingTeam) {
+            throw new Error(`Team with ID ${team.id} not found.`);
+        }
+
+        // Validate students before updating
+        await validateStudentIds(team.studentIds);
+
+        // Update team name and students
         const updatedTeam = await prisma.team.update({
-            where: { id: parseInt(team.id) },
+            where: { id: team.id },
             data: {
-                teamname: team.teamname,
+                teamname: team.teamName,
                 students: {
-                    set: team.studentIds.map((id: string) => ({ id: parseInt(id) })) // Update students
+                    // The set operation removes all existing students from the team and replaces them with the new list of students (team.studentIds).
+                    set: team.studentIds.map(studentId => ({ userId: studentId }))
+                },
+                teamAssignments: {
+                    connectOrCreate: {
+                        where: { teamId_assignmentId: {  teamId: team.id, assignmentId } },
+                        create: { assignmentId: assignmentId }
+                    }
                 }
             }
         });
@@ -117,6 +172,7 @@ export const updateTeamsForAssignment = async (teams: any[]): Promise<Team[]> =>
 
     return updatedTeams;
 };
+
 
 // Get all teams for a given assignment
 export const getTeamsThatHaveAssignment = async (assignmentId: number): Promise<Team[]> => {

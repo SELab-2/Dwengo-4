@@ -13,12 +13,12 @@ const router = express.Router();
 router.post("/:assignmentId", makeAssignmentIdParamValid, makeTeamsParamValid, createTeamInAssignment);
 
 // Route to get all teams in an assignment
-router.get("/:assignmentId", getTeamsInAssignment);
+router.get("/:assignmentId", makeAssignmentIdParamValid, getTeamsInAssignment);
 
 // Route to update teams in an assignment
-router.put("/:assignmentId", updateTeamsInAssignment);
+router.put("/:assignmentId", makeAssignmentIdParamValid, updateTeamsInAssignment);
 
 // Route to delete a team in an assignment
-router.delete("/:assignmentId/:teamId", deleteTeamInAssignment);
+router.delete("/:assignmentId/:teamId", makeAssignmentIdParamValid, deleteTeamInAssignment);
 
 export default router;

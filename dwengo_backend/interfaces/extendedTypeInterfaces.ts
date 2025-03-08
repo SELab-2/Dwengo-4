@@ -12,3 +12,9 @@ export interface TeamDivision {
     teamName: string;         // The name of the team (e.g., "Team 1")
     studentIds: number[];     // Array of student IDs that belong to this team
 }
+
+export interface IdentifiableTeamDivision {
+    id: number;
+    teamName: string;         // The name of the team (e.g., "Team 1")
+    studentIds: number[];     // Array of student IDs that belong to this team
+}
