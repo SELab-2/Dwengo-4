@@ -11,7 +11,8 @@ import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
  * returns the created invite in the response body
  */
 export const createInvite = asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { otherTeacherId, classId }: { otherTeacherId: number, classId: number } = req.body;
+    const classId: number = parseInt(req.params.classId);
+    const { otherTeacherId }: { otherTeacherId: number } = req.body;
     const classTeacherId: number = req.body.user?.id as number;  // teacherAuthMiddleware ensures that req.user is defined
 
     const invite: Invite = await inviteService.createInvite(classTeacherId, otherTeacherId, classId);
@@ -26,7 +27,7 @@ export const createInvite = asyncHandler(async (req: AuthenticatedRequest, res: 
  * returns a list of all invites for the class in the response body
  */
 export const getPendingInvitesForClass = asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { classId } : { classId: number} = req.body;
+    const classId: number = parseInt(req.params.classId);
     const classTeacherId: number = req.body.user?.id as number;
 
     const invites: Invite[] = await inviteService.getPendingInvitesForClass(classTeacherId, classId);
@@ -54,7 +55,8 @@ export const getPendingInvitesForTeacher = asyncHandler(async (req: Authenticate
  * returns the updated invite in the response body
  */
 export const updateInviteStatus = asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { action, inviteId }: { action: string, inviteId: number } = req.body;
+    const inviteId: number = parseInt(req.params.inviteId);
+    const { action }: { action: string } = req.body;
     const teacherId: number = req.body.user?.id as number;
 
     if (action == "accept") {
@@ -79,7 +81,8 @@ export const updateInviteStatus = asyncHandler(async (req: AuthenticatedRequest,
  * Any teacher of the class can delete the invite (not just the teacher who created the invite).
  */
 export const deleteInvite = asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { inviteId, classId }: { inviteId: number, classId: number } = req.body;
+    const inviteId: number = parseInt(req.params.inviteId);
+    const classId: number = parseInt(req.params.classId);
     const classTeacherId: number = req.body.user?.id as number;
 
     const invite: Invite = await inviteService.deleteInvite(classTeacherId, inviteId, classId);

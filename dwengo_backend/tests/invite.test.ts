@@ -43,8 +43,7 @@ describe('invite tests', async () => {
                 .post(`/teacher/classes/${classroom.id}/invites`)
                 .send({
                     user: teacherUser1,
-                    otherTeacherId: teacherUser2.id,
-                    classId: classroom.id
+                    otherTeacherId: teacherUser2.id
                 });
 
             expect(status).toBe(201)
@@ -80,8 +79,7 @@ describe('invite tests', async () => {
                 .post(`/teacher/classes/${classroom.id}/invites`)
                 .send({
                     user: teacherUser1,
-                    otherTeacherId: teacherUser2.id,
-                    classId: classroom.id
+                    otherTeacherId: teacherUser2.id
                 });
             expect(status).toBe(201)
             const newInvite = await prisma.invite.findFirst({
@@ -108,8 +106,7 @@ describe('invite tests', async () => {
                 .post(`/teacher/classes/${invalidClassId}/invites`)
                 .send({
                     user: teacherUser1,
-                    otherTeacherId: teacherUser2.id,
-                    classId: invalidClassId
+                    otherTeacherId: teacherUser2.id
                 })
 
             expect(body.message).toBe("Klas niet gevonden");
@@ -126,8 +123,7 @@ describe('invite tests', async () => {
                 .post(`/teacher/classes/${classroom.id}/invites`)
                 .send({
                     user: teacherUser1,
-                    otherTeacherId: teacherUser2.id,
-                    classId: classroom.id
+                    otherTeacherId: teacherUser2.id
                 })
 
             expect(body.message).toBe("Leerkracht is geen beheerder van de klas");
@@ -147,8 +143,7 @@ describe('invite tests', async () => {
                 .post(`/teacher/classes/${classroom.id}/invites`)
                 .send({
                     user: teacherUser1,
-                    otherTeacherId: teacherUser2.id,
-                    classId: classroom.id
+                    otherTeacherId: teacherUser2.id
                 })
 
             expect(body.message).toBe("Leerkracht is al lid van de klas");
@@ -166,8 +161,7 @@ describe('invite tests', async () => {
                 .post(`/teacher/classes/${classroom.id}/invites`)
                 .send({
                     user: teacherUser1,
-                    otherTeacherId: teacherUser2.id,
-                    classId: classroom.id
+                    otherTeacherId: teacherUser2.id
                 });
             
             // verify an invite was created
@@ -180,8 +174,7 @@ describe('invite tests', async () => {
                 .post(`/teacher/classes/${classroom.id}/invites`)
                 .send({
                     user: teacherUser1,
-                    otherTeacherId: teacherUser2.id,
-                    classId: classroom.id
+                    otherTeacherId: teacherUser2.id
                 })
             // no new invite should have been created
             await prisma.invite.findMany().then((invites) => {
@@ -224,8 +217,7 @@ describe('invite tests', async () => {
                 .patch(`/teacher/classes/invites/${invite.inviteId}`)
                 .send({
                     user: teacherUser2,
-                    action: "accept",
-                    inviteId: invite.inviteId
+                    action: "accept"
                 });
 
             expect(status).toBe(200);
@@ -247,8 +239,7 @@ describe('invite tests', async () => {
                 .patch(`/teacher/classes/invites/${invite.inviteId}`)
                 .send({
                     user: teacherUser2,
-                    action: "decline",
-                    inviteId: invite.inviteId
+                    action: "decline"
                 });
 
             expect(status).toBe(200);
@@ -268,8 +259,7 @@ describe('invite tests', async () => {
                 .patch(`/teacher/classes/invites/${invite.inviteId}`)
                 .send({
                     user: teacherUser2,
-                    action: "invalidaction",
-                    inviteId: invite.inviteId
+                    action: "invalidaction"
                 });
 
             expect(status).toBe(400);
@@ -304,8 +294,7 @@ describe('invite tests', async () => {
                 .patch(`/teacher/classes/invites/${invite.inviteId}`)
                 .send({
                     user: teacherUser2,
-                    action: "accept",
-                    inviteId: invite.inviteId
+                    action: "accept"
                 });
             expect(status).toBe(400);
             expect(body.message).toBe("Uitnodiging is niet pending of bestaat niet");
@@ -333,8 +322,7 @@ describe('invite tests', async () => {
                 .patch(`/teacher/classes/invites/${invite.inviteId}`)
                 .send({
                     user: teacherUser2,
-                    action: "accept",
-                    inviteId: invite.inviteId
+                    action: "accept"
                 });
             expect(status).toBe(400);
             expect(body.message).toBe("Uitnodiging is niet pending of bestaat niet");
@@ -358,9 +346,7 @@ describe('invite tests', async () => {
             const { status, body } = await request(app)
                 .delete(`/teacher/classes/${classroom.id}/invites/${invite.inviteId}`)
                 .send({
-                    user: teacherUser1,
-                    inviteId: invite.inviteId,
-                    classId: classroom.id
+                    user: teacherUser1
                 });
 
             expect(status).toBe(200);
@@ -381,9 +367,7 @@ describe('invite tests', async () => {
             const { status, body } = await request(app)
                 .delete(`/teacher/classes/${classroom.id}/invites/${invite.inviteId}`)
                 .send({
-                    user: teacherUser3,
-                    inviteId: invite.inviteId,
-                    classId: classroom.id
+                    user: teacherUser3
                 });
 
             expect(status).toBe(403);
@@ -409,8 +393,7 @@ describe('invite tests', async () => {
             const { status, body } = await request(app)
                 .get(`/teacher/classes/${classroom.id}/invites`)
                 .send({
-                    user: teacherUser1,
-                    classId: classroom.id
+                    user: teacherUser1
                 });
 
             expect(status).toBe(200);
@@ -421,8 +404,7 @@ describe('invite tests', async () => {
            const { status, body } = await request(app)
                 .get(`/teacher/classes/${classroom.id}/invites`)
                 .send({
-                    user: teacherUser1,
-                    classId: classroom.id
+                    user: teacherUser1
                 });
 
             expect(status).toBe(403);
