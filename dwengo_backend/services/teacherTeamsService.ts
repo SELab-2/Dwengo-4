@@ -1,4 +1,4 @@
-import {ClassStudent, PrismaClient, Student, Team} from "@prisma/client";
+import {ClassAssignment, ClassStudent, PrismaClient, Student, Team} from "@prisma/client";
 import {IdentifiableTeamDivision, TeamDivision} from "../interfaces/extendedTypeInterfaces"
 import _ from "lodash";
 
@@ -16,7 +16,7 @@ export const createTeamsInAssignment = async (
     const createdTeams: Team[] = [];
 
     // Fetch class assignments and the class with its students
-    const classAssignments = await prisma.classAssignment.findMany({
+    const classAssignments: ClassAssignment[] = await prisma.classAssignment.findMany({
         where: { assignmentId: assignmentId }
     });
 

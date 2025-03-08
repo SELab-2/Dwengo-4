@@ -8,20 +8,20 @@ import {
 import {
     makeAssignmentIdParamValid,
     makeTeamIdParamValid,
-    makeTeamsParamValid
+    ensureTeamsParamValidTeamDivision, ensureTeamParamValidIdentifiableTeamDivision
 } from "../../middleware/teamValidationMiddleware";
 import {protectTeacher} from "../../middleware/teacherAuthMiddleware";
 
 const router: Router = express.Router();
 
 // Route to create teams in an assignment
-router.post("/", protectTeacher, makeAssignmentIdParamValid, makeTeamsParamValid, createTeamInAssignment);
+router.post("/", protectTeacher, makeAssignmentIdParamValid, ensureTeamsParamValidTeamDivision, createTeamInAssignment);
 
 // Route to get all teams in an assignment
 router.get("/", protectTeacher, makeAssignmentIdParamValid, getTeamsInAssignment);
 
 // Route to update teams in an assignment
-router.put("/", protectTeacher, makeAssignmentIdParamValid, updateTeamsInAssignment);
+router.patch("/", protectTeacher, makeAssignmentIdParamValid, ensureTeamParamValidIdentifiableTeamDivision, updateTeamsInAssignment);
 
 // Route to delete a team in an assignment
 router.delete("/:teamId", protectTeacher, makeTeamIdParamValid, deleteTeamInAssignment);
