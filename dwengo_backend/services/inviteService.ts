@@ -89,22 +89,24 @@ export default class inviteService {
         // check if invite is pending
         let invite: Invite = await this.validateInvitePending(inviteId, teacherId);
         
-        // add the teacher to the class
-        await prisma.classTeacher.create({
-            data: {
-                teacherId,
-                classId: invite.classId
-            }
-        });
-        // change invite status
-        invite = await prisma.invite.update({
-            where: {
-                inviteId: invite.inviteId
-            },
-            data: {
-                status: JoinRequestStatus.APPROVED,
-            },
-        });
+        [ invite ] = await prisma.$transaction([
+            // accept invite
+            prisma.invite.update({
+                where: {
+                    inviteId: invite.inviteId
+                },
+                data: {
+                    status: JoinRequestStatus.APPROVED,
+                },
+            }),
+            // add the teacher to the class
+            prisma.classTeacher.create({
+                data: {
+                    teacherId,
+                    classId: invite.classId
+                }
+            })
+        ]);
         return invite;
     }
 

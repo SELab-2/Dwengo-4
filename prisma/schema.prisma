@@ -144,9 +144,9 @@ model Invite {
   classId        Int
   status         JoinRequestStatus
 
-  otherTeacher Teacher      @relation(fields: [otherTeacherId], references: [userId])
-  classTeacher ClassTeacher @relation(fields: [classTeacherId, classId], references: [teacherId, classId])
-  class        Class        @relation(fields: [classId], references: [id])
+  otherTeacher Teacher      @relation(fields: [otherTeacherId], references: [userId], onDelete: Cascade)
+  classTeacher ClassTeacher @relation(fields: [classTeacherId, classId], references: [teacherId, classId], onDelete: Cascade)
+  class        Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
 }
 
 model LearningPath {
