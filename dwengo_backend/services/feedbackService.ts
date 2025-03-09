@@ -13,6 +13,7 @@ export default class FeedbackService {
             where: {
                 submission: {
                     evaluationId: evaluationId,
+                    assignmentId: assignmentId
                 },
             },
             include: {
@@ -94,12 +95,34 @@ export default class FeedbackService {
 
     }
 
-    static hasEvaluationRights(assignmentId: number, teacherId: number, evaluationId: string) {
-        //TODO check if teacher has rights on evaluation
-        // Hoe moet dit in de databank?
+    static async hasEvaluationRights(assignmentId: number, teacherId: number, evaluationId: string) {
+        // Tel aantal leerkrachten die rechten hebben op de evaluatie
+        const teacherWithRights: number = await prisma.teacher.count({
+                where: {
+                    userId: teacherId,
+                    teaches: {
+                        some: {
+                            class: {
+                                assignments: {
+                                    some: {
+                                        assignment: {
+                                            submissions: {
+                                                some: {
+                                                    evaluationId: evaluationId,
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        );
 
-
-        return true;
+        // Return true als teacher rechten heeft
+        return teacherWithRights > 0;
     }
 
     static async hasSubmissionRights(teacherId: number, submissionId: number) {
