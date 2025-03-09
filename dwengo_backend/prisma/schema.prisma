@@ -169,9 +169,10 @@ model LearningPath {
   creatorId Int
   creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator")
 
-  assignments       Assignment[]
-  learningPathNodes LearningPathNode[]
-  generalQuestions  GeneralQuestion[]
+  assignments          Assignment[]
+  learningPathNodes    LearningPathNode[]
+  // Bij een leerpad kunnen er meerdere conversaties tussen teams en leerkrachten plaatsvinden
+  generalConversations GeneralConversation[]
 }
 
 model LearningPathNode {
@@ -207,11 +208,12 @@ model LearningObject {
   creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningObjectCreator")
 
   // Binnen een leerobject kunnen er meerdere evaluaties zitten
-  evaluations       Evaluation[]
-  educationalGoals  EducationalGoal[]
-  returnValue       ReturnValue?
-  progress          LearningObjectProgress[]
-  specificQuestions SpecificQuestion[]
+  evaluations           Evaluation[]
+  educationalGoals      EducationalGoal[]
+  returnValue           ReturnValue?
+  progress              LearningObjectProgress[]
+  // Bij een leerobject kunnen er meerdere conversaties tussen teams en leerkrachten plaatsvinden
+  specificConversations SpecificConversation[]
 }
 
 model EducationalGoal {
@@ -269,55 +271,26 @@ model MultipleChoiceOption {
 ///
 /// Vragen en antwoorden
 
-enum QuestionType {
-  // SPECIFIC representeert specifieke vragen die door studenten worden gesteld
+enum ConversationType {
+  // SPECIFIC representeert een conversatie, die specifieke vragen die door studenten worden gesteld, bevat
   // bij het overlopen van een leerobject (deel van een leerpad)
   SPECIFIC
-  // GENERAL representeert algemene vragen die door studenten worden gesteld
+  // GENERAL representeert een conversatie, die algemene vragen die door studenten worden gesteld, bevat
   // bij het doorlopen van een leerpad
   GENERAL
 }
 
-model SpecificQuestion {
-  questionId       Int    @unique
-  learningObjectId String
-
-  // Een SpecificQuestion is een vraag
-  question       Question       @relation(fields: [questionId], references: [id])
-  // Er kunnen meerdere vragen over een leerobject worden gesteld
-  learningObject LearningObject @relation(fields: [learningObjectId], references: [id])
-
-  @@id([questionId, learningObjectId])
-}
-
-model GeneralQuestion {
-  questionId       Int @unique
-  learningObjectId Int
-
-  // Een SpecificQuestion is een vraag
-  question     Question     @relation(fields: [questionId], references: [id])
-  // Er kunnen meerdere vragen over een leerobject worden gesteld
-  learningPath LearningPath @relation(fields: [learningObjectId], references: [id])
-
-  @@id([questionId, learningObjectId])
-}
-
 model Question {
-  id          Int          @id @default(autoincrement())
+  id          Int              @id @default(autoincrement())
   // De vraagsteller
   studentId   Int
   // De vraag zelf
   description String
-  type        QuestionType
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  type        ConversationType
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
-  // Een vraag is ofwel een specifieke vraag (bij leerobject),
-  // een algemene vraag (bij leerpad) of
-  // een bijvraag bij een antwoord
-  specific SpecificQuestion?
-  general  GeneralQuestion?
-  student  Student           @relation(fields: [studentId], references: [userId])
+  student Student @relation(fields: [studentId], references: [userId])
 
   // Een vraag is deel van 1 conversatie
   conversation   Conversation @relation(fields: [conversationId], references: [id])
@@ -354,7 +327,32 @@ model Conversation {
 
   // Een conversatie heeft een soort type vragen. Op die manier kan er snel gezien worden
   // of deze conversatie bij een leerpad of een leerobject hoort
-  type QuestionType
+  SpecificConversation SpecificConversation?
+  GeneralConversation  GeneralConversation?
+}
+
+model GeneralConversation {
+  conversationId Int @unique
+  learningPathId Int
+
+  // Een GeneralConversation is een conversatie
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  // Er kunnen meerdere vragen over een leerobject worden gesteld
+  learningPath LearningPath @relation(fields: [learningPathId], references: [id])
+
+  @@id([conversationId, learningPathId])
+}
+
+model SpecificConversation {
+  conversationId   Int    @unique
+  learningObjectId String
+
+  // Een SpecificConversation is een conversatie
+  conversation   Conversation   @relation(fields: [conversationId], references: [id])
+  // Er kunnen meerdere vragen over een leerobject worden gesteld
+  learningObject LearningObject @relation(fields: [learningObjectId], references: [id])
+
+  @@id([conversationId, learningObjectId])
 }
 
 ///
