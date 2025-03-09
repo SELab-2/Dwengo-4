@@ -355,6 +355,8 @@ model Assignment {
   learningPath     LearningPath      @relation(fields: [learningPathId], references: [id])
   classAssignments ClassAssignment[]
   teamAssignments  TeamAssignment[]
+
+  submissions Submission[]
 }
 
 model ClassAssignment {
@@ -399,6 +401,9 @@ model Submission {
   submitted    DateTime  @default(now())
   // Er kan feedback komen op een inzending
   feedback     Feedback?
+
+  assignmentId Int
+  assignement  Assignment @relation(fields: [assignmentId], references: [id])
 
   evaluation Evaluation @relation(fields: [evaluationId], references: [id])
   team       Team       @relation(fields: [teamId], references: [id])
