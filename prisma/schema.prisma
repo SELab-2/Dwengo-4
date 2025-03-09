@@ -63,6 +63,11 @@ model Teacher {
   createdLearningObjects LearningObject[] @relation("LearningObjectCreator")
 
   teaches ClassTeacher[]
+
+  // Een leerkracht kan deel uitmaken van meerdere conversaties
+  // Dit is een impliciete many-to-many relatie
+  // Zie: https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/many-to-many-relations?utm_source=docs&utm_medium=sidebar-promo&utm_campaign=faster-db-queries#implicit-many-to-many-relations
+  conversations Conversation[]
 }
 
 model Student {
@@ -80,6 +85,9 @@ model Student {
 
   // Teams waarvan de student lid is
   Team Team[]
+
+  // Een student kan vragen stellen
+  questions Question[]
 }
 
 model Class {
@@ -268,9 +276,6 @@ enum QuestionType {
   // GENERAL representeert algemene vragen die door studenten worden gesteld
   // bij het doorlopen van een leerpad
   GENERAL
-  // ADDITIONAL representeert vragen die door leerlingen als bijvragen worden
-  // gesteld. Dit zijn vragen bij een antwoord van een leerkracht
-  ADDITIONAL
 }
 
 model SpecificQuestion {
@@ -297,21 +302,10 @@ model GeneralQuestion {
   @@id([questionId, learningObjectId])
 }
 
-model AdditionalQuestion {
-  questionId Int @unique
-  answerId   Int
-
-  // Een AdditionalQuestion is een vraag
-  question Question @relation(fields: [questionId], references: [id])
-  // Er kunnen meerdere bijvragen gesteld worden bij een antwoord
-  answer   Answer   @relation(fields: [answerId], references: [id])
-
-  @@id([questionId, answerId])
-}
-
 model Question {
   id          Int          @id @default(autoincrement())
-  teamId      Int
+  // De vraagsteller
+  studentId   Int
   // De vraag zelf
   description String
   type        QuestionType
@@ -321,28 +315,42 @@ model Question {
   // Een vraag is ofwel een specifieke vraag (bij leerobject),
   // een algemene vraag (bij leerpad) of
   // een bijvraag bij een antwoord
-  specific   SpecificQuestion?
-  general    GeneralQuestion?
-  additional AdditionalQuestion?
-  team       Team                @relation(fields: [teamId], references: [id])
-  // Een vraag kan meerdere antwoorden hebben
-  answers    Answer[]
+  specific SpecificQuestion?
+  general  GeneralQuestion?
+  student  Student           @relation(fields: [studentId], references: [userId])
+
+  // Een vraag is deel van 1 conversatie
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  conversationId Int
 }
 
 model Answer {
-  id         Int      @id @default(autoincrement())
-  questionId Int
-  teacherId  Int
-  answer     String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  teacherId Int
+  answer    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   teacher Teacher @relation(fields: [teacherId], references: [userId])
 
-  // Een antwoord hoort bij 1 vraag
-  question            Question             @relation(fields: [questionId], references: [id])
-  // Een antwoord kan meerdere bijvragen hebben
-  additionalQuestions AdditionalQuestion[]
+  // Een antwoord is deel van 1 conversatie
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  conversationId Int
+}
+
+model Conversation {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Een conversatie gebeurt tussen een team en een of meerdere teachers
+  teamId    Int
+  team      Team       @relation(fields: [teamId], references: [id])
+  teachers  Teacher[]
+  // Een conversatie bestaat uit meerdere vragen van een student
+  questions Question[]
+  // Een conversatie bestaat uit meerdere antwoorden van een teacher
+  answers   Answer[]
 }
 
 ///
@@ -378,7 +386,9 @@ model Team {
 
   // De indieningen van een team
   submissions Submission[]
-  Questions   Question[]
+
+  // Een team kan meerdere conversaties met leerkrachten hebben
+  conversations Conversation[]
 }
 
 model TeamAssignment {
