@@ -65,3 +65,5 @@ export const protectTeacher = asyncHandler(
     }
   }
 );
+
+export { AuthenticatedRequest };
