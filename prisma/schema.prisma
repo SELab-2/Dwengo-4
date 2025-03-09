@@ -351,6 +351,10 @@ model Conversation {
   questions Question[]
   // Een conversatie bestaat uit meerdere antwoorden van een teacher
   answers   Answer[]
+
+  // Een conversatie heeft een soort type vragen. Op die manier kan er snel gezien worden
+  // of deze conversatie bij een leerpad of een leerobject hoort
+  type QuestionType
 }
 
 ///
