@@ -7,6 +7,7 @@ import learningObjectRoutes from "./routes/learningObject/learningObjectRoutes";
 import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
 import assignmentRoutes from "./routes/assignmentRoutes";
 import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
+import studentTeamRoutes from "./routes/student/studentTeamRoutes";
 
 dotenv.config();
 
@@ -43,6 +44,8 @@ app.use('/teacher/assignments', teacherAssignmentRoutes);
 // Nieuwe routes voor leerobjecten
 app.use("/learningObjects", learningObjectRoutes);
 app.use("/learningPaths", learningPathRoutes);
+
+app.use("/student/teams", studentTeamRoutes);
 
 // Error Handler
 app.use(errorHandler);

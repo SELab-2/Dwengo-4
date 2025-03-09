@@ -81,8 +81,7 @@ model Student {
   // Relaties naar klassen (veel-op-veel)
   classes ClassStudent[]
 
-  // Teams waarvan de student lid is
-  Team Team[]
+  teams  Team[] // Impliciete many-to-many relatie met Team
 }
 
 model Class {
