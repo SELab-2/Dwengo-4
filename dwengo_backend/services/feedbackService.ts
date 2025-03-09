@@ -97,20 +97,38 @@ export default class FeedbackService {
     static hasEvaluationRights(teacherId: number, evaluationId: string) {
         //TODO check if teacher has rights on evaluation
         // Hoe moet dit in de databank?
+
+
         return true;
     }
 
     static async hasSubmissionRights(teacherId: number, submissionId: number) {
-        //TODO problemen met type
-        const evaluation = await prisma.evaluation.findFirst({
-            where: {
-                submissions: {
-                    some: {
-                        submissionId: submissionId,
-                    },
-                },
-            },
-        });
-        return this.hasEvaluationRights(teacherId, evaluation.id);
+        // Tel aantal leerkrachten die rechten hebben op de submission
+        const teacherWithRights: number = await prisma.teacher.count({
+                where: {
+                    userId: teacherId,
+                    teaches: {
+                        some: {
+                            class: {
+                                assignments: {
+                                    some: {
+                                        assignment: {
+                                            submissions: {
+                                                some: {
+                                                    submissionId: submissionId,
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        );
+
+        // Return true als teacher rechten heeft
+        return teacherWithRights > 0;
     }
 }
