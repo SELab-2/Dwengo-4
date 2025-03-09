@@ -4,8 +4,8 @@ import {Feedback, PrismaClient} from '@prisma/client';
 const prisma = new PrismaClient();
 
 export default class FeedbackService {
-    static async getAllFeedbackForEvaluation(evaluationId: string, teacherId: number): Promise<Feedback[]> {
-        if (!await this.hasEvaluationRights(teacherId, evaluationId)) {
+    static async getAllFeedbackForEvaluation(assignmentId: number, evaluationId: string, teacherId: number): Promise<Feedback[]> {
+        if (!await this.hasEvaluationRights(assignmentId, teacherId, evaluationId)) {
             throw new Error("The teacher is unauthorized to perform this action");
         }
 
@@ -94,7 +94,7 @@ export default class FeedbackService {
 
     }
 
-    static hasEvaluationRights(teacherId: number, evaluationId: string) {
+    static hasEvaluationRights(assignmentId: number, teacherId: number, evaluationId: string) {
         //TODO check if teacher has rights on evaluation
         // Hoe moet dit in de databank?
 

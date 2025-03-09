@@ -4,7 +4,7 @@ import {protectTeacher} from "../../middleware/teacherAuthMiddleware";
 
 const router = express.Router();
 
-router.get('evaluation/:evaluationId', protectTeacher, controller.getAllFeedbackForEvaluation);
+router.get('assignment/:assignmentId/evaluation/:evaluationId', protectTeacher, controller.getAllFeedbackForEvaluation);
 router.get('submission/:submissionId', protectTeacher, controller.getFeedbackForSubmission);
 router.patch('submission/:submissionId', protectTeacher, controller.updateFeedbackForSubmission);
 router.delete('submission/:submissionId', protectTeacher, controller.deleteFeedbackForSubmission);
