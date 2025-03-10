@@ -52,7 +52,6 @@ model Teacher {
   userId Int  @id
   user   User @relation(fields: [userId], references: [id])
 
-  // feedback
   teacherFeedbacks Feedback[]
   // Uitnodigingen om een klas mee te beheren
   invite           Invite[]
@@ -200,6 +199,7 @@ model LearningObject {
   creatorId Int
   creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningObjectCreator")
 
+  // Binnen een leerobject kunnen er meerdere evaluaties zitten
   evaluations       Evaluation[]
   educationalGoals  EducationalGoal[]
   returnValue       ReturnValue?
@@ -228,7 +228,6 @@ model ReturnValue {
 model Evaluation {
   id             String         @id
   nrOfQuestions  Int
-  deadline       DateTime
   evaluationType EvaluationType
 
   learningObject LearningObject       @relation(fields: [id], references: [id])
@@ -329,7 +328,6 @@ model QuestionMessage {
 }
 
 
-
 ///
 /// Taken en indieningen
 model Assignment {
@@ -337,7 +335,7 @@ model Assignment {
   learningPathId Int
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-
+  deadline  DateTime
   learningPath     LearningPath      @relation(fields: [learningPathId], references: [id])
   Questions Question[]
   classAssignments ClassAssignment[]
@@ -347,7 +345,6 @@ model Assignment {
 model ClassAssignment {
   classId      Int
   assignmentId Int
-
   class        Class      @relation(fields: [classId], references: [id])
   assignment   Assignment @relation(fields: [assignmentId], references: [id])
 
@@ -359,17 +356,16 @@ model Team {
   teamname String
   classId  Int
 
-
   // Een team bestaat uit studenten
   students        Student[]
   // Een verwijzing naar de assignments van dit team
   teamAssignments TeamAssignment[]
 
   // De indieningen van een team
-
   class Class @relation(fields: [classId], references: [id])  
   submissions Submission[]
   Questions   Question[]
+
 }
 
 model TeamAssignment {

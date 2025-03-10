@@ -15,10 +15,12 @@ export class AssignmentTeacherController {
     async createAssignmentForClass(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             if (!this.isUserValid(req, res)) return;
-            const { classId, learningPathId }: { classId: number, learningPathId: number } = req.body;
+            const { classId, learningPathId, deadline }: { classId: number, learningPathId: number, deadline: string } = req.body;
             const teacherId: number = Number(req.user!.id);
 
-            const assignment = await teacherAssignmentService.createAssignmentForClass(teacherId, classId, learningPathId);
+            const parsedDeadline = new Date(deadline);
+
+            const assignment = await teacherAssignmentService.createAssignmentForClass(teacherId, classId, learningPathId, parsedDeadline);
             res.status(201).json(assignment);
         } catch (error) {
             res.status(500).json({ error: "Failed to create assignment" });
