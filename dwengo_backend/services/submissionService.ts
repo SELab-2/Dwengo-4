@@ -41,34 +41,44 @@ export default class submissionService {
     }
 
     static async getSubmissionsForAssignment(assignmentId: number, studentId: number): Promise<Submission[]> {
-        // Team waar student in zit voor deze assignment
-        const team = await prisma.team.findFirst({
-            where: {
-                students: {
-                    some: {
-                        userId: studentId,
-                    }
-                },
-                teamAssignments: {
-                    some: {
-                        assignmentId: assignmentId,
-                    }
-                },
-            },
-            select: {
-                id: true,
-            }
-        });
-        if (!team) {
-            throw new AccesDeniedError("Student is not in a team for this assignment");
-        }
-
         return prisma.submission.findMany({
             where: {
-                teamId: team.id,
+                team: {
+                    students: {
+                        some: {
+                            userId: studentId,
+                        }
+                    },
+                    teamAssignments: {
+                        some: {
+                            assignmentId: assignmentId,
+                        }
+                    }
+                },
                 assignmentId: assignmentId,
             }
         });
 
+    }
+
+    static getSubmissionsForEvaluation(assignmentId: number, evaluationId: string, studentId: number): Promise<Submission[]> {
+        return prisma.submission.findMany({
+            where: {
+                assignmentId: assignmentId,
+                evaluationId: evaluationId,
+                team: {
+                    students: {
+                        some: {
+                            userId: studentId,
+                        }
+                    },
+                    teamAssignments: {
+                        some: {
+                            assignmentId: assignmentId,
+                        }
+                    }
+                }
+            }
+        });
     }
 }

@@ -19,4 +19,13 @@ export default class FeedbackController {
 
         res.json(submissions);
     }
+
+    static async getSubmissionsForEvaluation(req: AuthenticatedRequest, res: Response) {
+        const {assignmentId, evaluationId}: { assignmentId: number, evaluationId: string } = req.params;
+        const studentId: number = Number(req.user?.id);
+
+        const submissions: Submission[] = await service.getSubmissionsForEvaluation(assignmentId, evaluationId, studentId);
+
+        res.json(submissions);
+    }
 }
