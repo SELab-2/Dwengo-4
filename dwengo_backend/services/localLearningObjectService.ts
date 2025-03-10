@@ -1,5 +1,4 @@
 import { ContentType, PrismaClient } from "@prisma/client";
-import { v4 as uuidv4 } from "uuid";
 
 const prisma = new PrismaClient();
 
@@ -29,17 +28,10 @@ export default class LocalLearningObjectService {
     teacherId: number,
     data: LocalLearningObjectData
   ) {
-    const newId = uuidv4(); // random UUID
-
     // Prisma create
     const newObject = await prisma.learningObject.create({
       data: {
-        // id wordt gegenereerd door prisma zelf
-        // id: newId,
-        // Staat als standaard geconfigureerd in het prisma schema
-        // version: 1, // Standaard, kan je indien gewenst dynamisch bepalen
-        // Moeten we nog bespreken wat er met hruid gaat gebeuren
-        hruid: data.title.toLowerCase(),
+        hruid: `${data.title.toLowerCase()}-${Date.now()}`,
         language: "nl", // Kan ook dynamisch
         title: data.title,
         description: data.description,
