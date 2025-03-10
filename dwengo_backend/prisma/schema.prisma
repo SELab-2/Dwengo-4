@@ -116,9 +116,9 @@ model ClassTeacher {
   teacherId Int
   classId   Int
 
-  teacher Teacher @relation(fields: [teacherId], references: [userId])
-  class   Class   @relation(fields: [classId], references: [id])
-  invites Invite[]  // the invites that the teacher has sent
+  teacher Teacher  @relation(fields: [teacherId], references: [userId])
+  class   Class    @relation(fields: [classId], references: [id])
+  invites Invite[] // the invites that the teacher has sent
 
   @@id([teacherId, classId])
 }
@@ -127,19 +127,19 @@ model ClassTeacher {
 /// JoinRequest – voor verzoeken om een klas te joinen
 
 model JoinRequest {
+  // Op deze manier kan een leerling meer dan 1 keer een verzoek sturen naar een klas
+  requestId Int               @id @default(autoincrement())
   studentId Int
   classId   Int
   status    JoinRequestStatus
 
   student Student @relation(fields: [studentId], references: [userId])
   class   Class   @relation(fields: [classId], references: [id])
-
-  @@id([studentId, classId])
 }
 
 model Invite {
-  inviteId       Int   @id @default(autoincrement())
-  otherTeacherId Int  
+  inviteId       Int               @id @default(autoincrement())
+  otherTeacherId Int
   classTeacherId Int
   classId        Int
   status         JoinRequestStatus
@@ -200,6 +200,7 @@ model LearningObject {
   creatorId Int
   creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningObjectCreator")
 
+  // Binnen een leerobject kunnen er meerdere evaluaties zitten
   evaluations       Evaluation[]
   educationalGoals  EducationalGoal[]
   returnValue       ReturnValue?
