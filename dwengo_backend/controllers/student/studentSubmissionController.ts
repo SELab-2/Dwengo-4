@@ -10,4 +10,13 @@ export default class FeedbackController {
         const submission: Submission = await service.createSubmission(studentId, evaluationId, assignmentId);
         res.status(201).json(submission);
     }
+
+    static async getSubmissionsForAssignment(req: AuthenticatedRequest, res: Response) {
+        const assignmentId: number = Number(req.params.assignmentId);
+        const studentId: number = Number(req.user?.id);
+
+        const submissions: Submission[] = await service.getSubmissionsForAssignment(assignmentId, studentId);
+
+        res.json(submissions);
+    }
 }
