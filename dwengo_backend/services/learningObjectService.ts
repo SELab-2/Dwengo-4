@@ -262,6 +262,13 @@ async function searchLocalLearningObjects(
 ): Promise<LearningObjectDto[]> {
   const whereClause: any = {
     OR: [
+      
+      { title: { contains: searchTerm, mode: "insensitive" } },
+      
+      { description: { contains: searchTerm, mode: "insensitive" } },
+      // keywords - nu als array
+      { keywords: { has: searchTerm } }
+    ],
       { title: { contains: searchTerm, mode: "insensitive" } },
       { description: { contains: searchTerm, mode: "insensitive" } },
       { keywords: { contains: searchTerm, mode: "insensitive" } },
