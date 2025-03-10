@@ -81,13 +81,11 @@ export const authorizeQuestion = asyncHandler(
         }
 
         if (req.method === "POST" && req.user.id != req.body.userId) {
-            console.log(req.user.id);
-            console.log(req.body.userId);
             res.status(403).json({ error: "Gebruiker komt niet overeen." });
             return;
         }
 
-        const questionHead = await prisma.questionHead.findUnique({
+        const question = await prisma.question.findUnique({
             where: { id: Number(questionId) },
             include: {
                 team: {
@@ -99,16 +97,16 @@ export const authorizeQuestion = asyncHandler(
             }
         });
 
-        if (!questionHead) {
+        if (!question) {
             res.status(404).json({ error: "Vraag niet gevonden." });
             return;
         }
 
-        const isStudentInTeam = questionHead.team.students.some(student => student.userId === req.user?.id);
-        const isTeacherInClass = questionHead.team.class.ClassTeacher.some(teacher => teacher.teacherId === req.user?.id);
+        const isStudentInTeam = question.team.students.some(student => student.userId === req.user?.id);
+        const isTeacherInClass = question.team.class.ClassTeacher.some(teacher => teacher.teacherId === req.user?.id);
 
         if (req.user.role === "STUDENT" && !isStudentInTeam) {
-            res.status(403).json({ error: "Toegang geweigerd. Student is niet in het team." });
+            res.status(403).json({ error: "Toegang geweigerd. Student zit niet in het team." });
             return;
         }
 
@@ -121,9 +119,9 @@ export const authorizeQuestion = asyncHandler(
     }
 );
 
-export const authorizeOwnerOfQuestionConversation = asyncHandler(
+export const authorizeOwnerOfQuestionMessage = asyncHandler(
     async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
-        const { questionConversationId } = req.params;
+        const { questionMessageId } = req.params;
 
         if (!req.user) {
             res.status(401).json({ error: "Niet geautoriseerd." });
@@ -135,16 +133,16 @@ export const authorizeOwnerOfQuestionConversation = asyncHandler(
             return;
         }
 
-        const questionConversation = await prisma.questionConversation.findUnique({
-            where: { id: Number(questionConversationId) },
+        const questionMessage = await prisma.questionMessage.findUnique({
+            where: { id: Number(questionMessageId) },
         });
 
-        if (!questionConversation) {
+        if (!questionMessage) {
             res.status(404).json({ error: "Vraaggesprek niet gevonden." });
             return;
         }
 
-        if (questionConversation.userId !== req.user.id) {
+        if (questionMessage.userId !== req.user.id) {
             res.status(403).json({ error: "Toegang geweigerd. Gebruiker is niet de eigenaar van dit vraaggesprek." });
             return;
         }
@@ -235,6 +233,7 @@ export const authorizeTeacherOfAssignmentClass = asyncHandler(
             where: { id: Number(classId) },
             include: {
                 ClassTeacher: true,
+                assignments: true
             },
         });
 
@@ -244,9 +243,14 @@ export const authorizeTeacherOfAssignmentClass = asyncHandler(
         }
 
         const isTeacherOfClass = classData.ClassTeacher.some(teacher => teacher.teacherId === req.user?.id);
-
+        const isAssignmentOfClass = classData.assignments.some(assignment => assignment.assignmentId === Number(req.params.assignmentId));
         if (!isTeacherOfClass) {
             res.status(403).json({ error: "Toegang geweigerd. Leerkracht behoort niet tot deze klas." });
+            return;
+        }
+
+        if (!isAssignmentOfClass) {
+            res.status(403).json({ error: "Toegang geweigerd. Opdracht behoort niet tot deze klas." });
             return;
         }
 

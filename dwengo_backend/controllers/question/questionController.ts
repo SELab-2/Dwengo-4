@@ -25,10 +25,9 @@ const handleRequest = (handler: (req: Request, res: Response) => Promise<void>) 
 
 
 export const createQuestionGeneral = handleRequest(async (req: Request, res: Response): Promise<void> => {
-    //print something in ts
-    const { assignmentId, learningPathId } = req.params as any;
-    const { text, teamId, studentId }: { text: string, teamId: number, studentId: number } = req.body;
-    const questionGeneral = await QuestionService.createQuestionGeneral(Number(assignmentId), text, teamId, studentId, "GENERAL", Number(learningPathId));
+    const { assignmentId, learningPathId } = req.params;
+    const { title, text, teamId, studentId }: { title: string, text: string, teamId: number, studentId: number } = req.body;
+    const questionGeneral = await QuestionService.createQuestionGeneral(Number(assignmentId), title, text, teamId, studentId, "GENERAL", Number(learningPathId));
     res.status(201).json(questionGeneral);
 });
 
@@ -36,23 +35,30 @@ export const createQuestionGeneral = handleRequest(async (req: Request, res: Res
 
 export const createQuestionSpecific = handleRequest(async (req: Request, res: Response): Promise<void> => {
     const { assignmentId, learningPathId, learningObjectId } = req.params;
-    const { text, teamId, studentId }: { text: string, teamId: number, studentId: number } = req.body;
-    const questionSpecific = await QuestionService.createQuestionSpecific(Number(assignmentId), Number(learningPathId), text, teamId, studentId, "SPECIFIC", learningObjectId);
+    const { title, text, teamId, studentId }: { title: string, text: string, teamId: number, studentId: number } = req.body;
+    const questionSpecific = await QuestionService.createQuestionSpecific(Number(assignmentId), title, Number(learningPathId), text, teamId, studentId, "SPECIFIC", learningObjectId);
     res.status(201).json(questionSpecific);
 });
 
-export const createQuestionConversation = handleRequest(async (req: Request, res: Response): Promise<void> => {
+export const createQuestionMessage = handleRequest(async (req: Request, res: Response): Promise<void> => {
     const { questionId } = req.params;
     const { text, userId } = req.body;
-    const questionConversation = await QuestionService.createQuestionConversation(Number(questionId), text, Number(userId));
-    res.status(201).json(questionConversation);
+    const questionMessage = await QuestionService.createQuestionMessage(Number(questionId), text, Number(userId));
+    res.status(201).json(questionMessage);
 });
 
-export const updateQuestionConversation = handleRequest(async (req: Request, res: Response): Promise<void> => {
-    const { questionId, questionConversationId } = req.params;
+export const updateQuestion = handleRequest(async (req: Request, res: Response): Promise<void> => {
+    const { questionId } = req.params;
+    const { title } = req.body;
+    const question = await QuestionService.updateQuestion(Number(questionId), title);
+    res.status(201).json(question);
+});
+
+export const updateQuestionMessage = handleRequest(async (req: Request, res: Response): Promise<void> => {
+    const { questionId, questionMessageId } = req.params;
     const { text, userId } = req.body;
-    const questionConversation = await QuestionService.updateQuestionConversation(Number(questionId), Number(questionConversationId), text, userId);
-    res.status(201).json(questionConversation);
+    const questionMessage = await QuestionService.updateQuestionMessage(Number(questionId), Number(questionMessageId), text, userId);
+    res.status(201).json(questionMessage);
 });
 
 export const getQuestion = handleRequest(async (req: Request, res: Response): Promise<void> => {
@@ -79,10 +85,10 @@ export const getQuestionsAssignment = handleRequest(async (req: AuthenticatedReq
     res.status(200).json(questions);
 });
 
-export const getQuestionConversations = handleRequest(async (req: Request, res: Response): Promise<void> => {
+export const getQuestionMessages = handleRequest(async (req: Request, res: Response): Promise<void> => {
     const { questionId } = req.params;
-    const conversations = await QuestionService.getQuestionConversations(Number(questionId));
-    res.status(200).json(conversations);
+    const messages = await QuestionService.getQuestionMessages(Number(questionId));
+    res.status(200).json(messages);
 });
 
 export const deleteQuestion = handleRequest(async (req: Request, res: Response): Promise<void> => {
@@ -91,9 +97,9 @@ export const deleteQuestion = handleRequest(async (req: Request, res: Response):
     res.status(204).end();
 });
 
-export const deleteQuestionConversation = handleRequest(async (req: Request, res: Response): Promise<void> => {
-    const { questionId, questionConversationId } = req.params;
-    await QuestionService.deleteQuestionConversation(Number(questionId), Number(questionConversationId));
+export const deleteQuestionMessage = handleRequest(async (req: Request, res: Response): Promise<void> => {
+    const { questionId, questionMessageId } = req.params;
+    await QuestionService.deleteQuestionMessage(Number(questionId), Number(questionMessageId));
     res.status(204).end();
 });
 

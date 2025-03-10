@@ -1,0 +1,152 @@
+# ============================================================
+# TEST SCRIPT: CURL-commando’s voor questions, en Authorization
+# Server draait op poort 5000
+# ============================================================
+
+##############################
+# Vragen
+##############################
+
+OPMERKING: Bij elke curl gaat er staan wie deze functies mogen uitvoeren:
+- STUDENT : S
+- TEACHER : T
+
+OPMERKING: om de Authorization te testen, voer een typfout in de token
+
+HOU hier wel rekening mee dat er wel nog steeds gekeken wordt of de teacher/student zelf persoonlijk ook deze operatie mag uitvoeren
+bv. 
+- Owner van de vraag
+- leerkracht is de leerkracht van de team die vraag heeft gemaakt
+- leerkracht is de leerkracht van een klas
+...
+
++ eenmaal je je token hebt van de login van een leerkracht/student -> doe ctr-f op de oude token, en van daar kan je dan alle tokens in deze file 
+in 1 keer aanpassen (pas op, leerkracht en student hebben een andere token als je van beide inlogged)
+
+# 1. Registreer een nieuwe student
+curl -X POST http://localhost:5000/student/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+        "firstName": "Jan",
+        "lastName": "Jansen",
+        "email": "student1@example.com",
+        "password": "password123"
+      }'
+
+#2. Registreer een nieuwe leerkracht
+curl -X POST http://localhost:5000/teacher/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+        "firstName": "Piet",
+        "lastName": "Pietersen",
+        "email": "teacher1@example.com",
+        "password": "password123"
+      }'
+
+
+#3. Maak een klas aan, klasteacher aan, klasstudent, leerpad, leerobject, assignment, learningpadNode, team en TeamAssignment
+(ik gebruikte hiervoor pgAdmin4 om data in de db te steken en "npx prisma studio" om sommige relaties vast te zetten)
++ BELANGRIJK: bij het aanmaken heb ik de id's van alles zoveel mogelijk op 1 gelaten zodat testen eenvoudiger gaat, dus telkens overal ook de id's aanpassen
+als nodig (bv als je bezig bent met vraag met id 2: "http://localhost:5000/question/2"), deze id's kan je ook via "npx prisma studio" vinden
+
+
+#4. Log in en hou de token bij voor te testen
+curl -X POST http://localhost:5000/student/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+        "firstName": "Jan",
+        "lastName": "Jansen",
+        "email": "student1@example.com",
+        "password": "password123"
+      }'
+
+vanaf nu, steek de token in de auth header van de curl commando’s:
+
+S
+#5. Een vraag bij een leerpad door een student
+curl -X POST http://localhost:5000/assignment/1/learningPath/1/question \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzQxNjIyMDY5LCJleHAiOjE3NDIyMjY4Njl9.wN60MrkZqRFka5_17xzOakhezFSQ_qjj0Ky9BnAsZMo" \
+  -d '{
+        "title": "Vraag over algemeen onderwerp",
+        "text": "Kan iemand dit uitleggen?",
+        "teamId": 1,
+        "studentId": 1
+      }'
+
+S
+#6. Een vraag bij een leerobject
+curl -X POST http://localhost:5000/assignment/1/learningPath/1/learningObject/1/question \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzQxNjIyMDY5LCJleHAiOjE3NDIyMjY4Njl9.wN60MrkZqRFka5_17xzOakhezFSQ_qjj0Ky9BnAsZMo" \
+  -d '{
+        "title": "Vraag over specifiek leerobject",
+        "text": "Hoe werkt dit onderdeel?",
+        "teamId": 1,
+        "studentId": 1
+      }'
+
+S + T
+#7. Een bericht toevoegen aan een vraag
+curl -X POST http://localhost:5000/question/1 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzQxNjIzODAzLCJleHAiOjE3NDIyMjg2MDN9.mPdjC7_Ht99pfZDF5pBeH5Qpa-9k1NVJ7GZmWEj9bvs" \
+  -d '{
+        "text": "Extra informatie nodig over dit onderwerp",
+        "userId": 1
+      }'
+
+S + T
+#8. Een vraag bijwerken
+curl -X PATCH http://localhost:5000/question/1 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzQxNjIzODAzLCJleHAiOjE3NDIyMjg2MDN9.mPdjC7_Ht99pfZDF5pBeH5Qpa-9k1NVJ7GZmWEj9bvs" \
+  -d '{
+        "title": "Bijgewerkte titel van de vraag"
+      }'
+
+S + T
+#9. Een vraagmssg bijwerken
+curl -X PATCH http://localhost:5000/question/1/conversation/1 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzQxNjIzODAzLCJleHAiOjE3NDIyMjg2MDN9.mPdjC7_Ht99pfZDF5pBeH5Qpa-9k1NVJ7GZmWEj9bvs" \
+  -d '{
+        "text": "Bijgewerkte informatie in bericht",
+        "userId": 1
+      }'
+
+S + T
+#10. Een specifieke vraag opvragen
+curl -X GET http://localhost:5000/question/1 \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzQxNjIzODAzLCJleHAiOjE3NDIyMjg2MDN9.mPdjC7_Ht99pfZDF5pBeH5Qpa-9k1NVJ7GZmWEj9bvs"
+
+S
+#11. Vragen van een team ophalen
+curl -X GET http://localhost:5000/team/1/questions \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzQxNjIyMDY5LCJleHAiOjE3NDIyMjY4Njl9.wN60MrkZqRFka5_17xzOakhezFSQ_qjj0Ky9BnAsZMo"
+
+T
+#12. Vragen van een klas ophalen
+curl -X GET http://localhost:5000/class/1/questions \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzQxNjIzODAzLCJleHAiOjE3NDIyMjg2MDN9.mPdjC7_Ht99pfZDF5pBeH5Qpa-9k1NVJ7GZmWEj9bvs"
+
+T
+#13. Vragen bij een opdracht ophalen
+curl -X GET http://localhost:5000/assignment/1/class/1/questions \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzQxNjIzODAzLCJleHAiOjE3NDIyMjg2MDN9.mPdjC7_Ht99pfZDF5pBeH5Qpa-9k1NVJ7GZmWEj9bvs"
+
+S + T
+#14. Alle berichten bij een vraag opaheln
+curl -X GET http://localhost:5000/question/1/conversations \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzQxNjIzODAzLCJleHAiOjE3NDIyMjg2MDN9.mPdjC7_Ht99pfZDF5pBeH5Qpa-9k1NVJ7GZmWEj9bvs"
+
+S + T
+#15. Een vraag verwijderen
+curl -X DELETE http://localhost:5000/question/1 \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzQxNjIzODAzLCJleHAiOjE3NDIyMjg2MDN9.mPdjC7_Ht99pfZDF5pBeH5Qpa-9k1NVJ7GZmWEj9bvs"
+
+S + T
+#16. Een vraagmssg verwijderen
+curl -X DELETE http://localhost:5000/question/1/message/1 \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzQxNjIzODAzLCJleHAiOjE3NDIyMjg2MDN9.mPdjC7_Ht99pfZDF5pBeH5Qpa-9k1NVJ7GZmWEj9bvs"
+

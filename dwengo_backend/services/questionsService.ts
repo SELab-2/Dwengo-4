@@ -1,13 +1,13 @@
 // src/services/class.service.js
-import { Class, ClassTeacher, QuestionConversation, PrismaClient, Student, QuestionHead, QuestionType, QuestionSpecific, QuestionGeneral } from "@prisma/client";
+import { Class, ClassTeacher, QuestionMessage, PrismaClient, Student, Question, QuestionType, QuestionSpecific, QuestionGeneral } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 export default class QuestionService {
 
-    static async createQuestion(assignmentId: number, text: string, teamId: number, studentId: number, type: QuestionType): Promise<QuestionHead> {
+    static async createQuestion(assignmentId: number, title: string, text: string, teamId: number, studentId: number, type: QuestionType): Promise<Question> {
         //check if input is valid
-        if (!text || !teamId || !studentId || !type) {
+        if (!text || !teamId || !studentId || !type || !title) {
             throw new Error("Invalid input");
         }
         //is student in team
@@ -20,15 +20,16 @@ export default class QuestionService {
             throw new Error("Assignment not found in team");
         }
 
-        const question = await prisma.questionHead.create({
+        const question = await prisma.question.create({
             data: {
                 assignmentId,
                 teamId,
+                title,
                 type
             }
         });
 
-        const QuestionConversation = await prisma.questionConversation.create({
+        await prisma.questionMessage.create({
             data: {
                 questionId: question.id,
                 userId: studentId,
@@ -39,14 +40,14 @@ export default class QuestionService {
         return question;
     }
 
-    static async createQuestionConversation(questionId: number, text: string, userId: number): Promise<QuestionConversation> {
+    static async createQuestionMessage(questionId: number, text: string, userId: number): Promise<QuestionMessage> {
         //check if input is valid
         if (!text || !userId) {
             throw new Error("Invalid input");
         }
 
-        //check if user is in team or teacher in the questionHead
-        const questionHead = await prisma.questionHead.findUnique({
+        //check if user is in team or teacher in the question
+        const question = await prisma.question.findUnique({
             where: { id: questionId },
             include: {
                 team: {
@@ -59,39 +60,60 @@ export default class QuestionService {
 
         });
 
-        if (!questionHead) {
+        if (!question) {
             throw new Error("Question not found");
         }
-        const isUserInTeam = questionHead.team.students.some(student => student.userId === userId);
-        const isUserTeacher = questionHead.team.class.ClassTeacher.some(teacher => teacher.teacherId === userId);
+        const isUserInTeam = question.team.students.some(student => student.userId === userId);
+        const isUserTeacher = question.team.class.ClassTeacher.some(teacher => teacher.teacherId === userId);
         if (!isUserInTeam && !isUserTeacher) {
-            throw new Error("User is not in team or not a teacher of the questionHead");
+            throw new Error("User is not in team or not a teacher of the question");
         }
 
-        const question = await prisma.questionConversation.create({
+        const questionConv = await prisma.questionMessage.create({
             data: {
                 questionId,
                 userId,
                 text
             }
         });
+        return questionConv;
+    }
+
+    //update question by id, userId and questionId
+    static async updateQuestion(questionId: number, title: string): Promise<Question> {
+        //check if input is valid
+        if (!title) {
+            throw new Error("Invalid input");
+        }
+
+        //Valid edit of question by id, userId and questionId
+        if (!await prisma.question.findUnique({ where: { id: questionId } })) {
+            throw new Error("Question not found or user is not in the team of the question");
+        }
+
+        const question = await prisma.question.update({
+            where: { id: questionId },
+            data: {
+                title
+            }
+        });
         return question;
     }
 
-    //update questionConversation by id, userId and questionId
-    static async updateQuestionConversation(questionId: number, questionConversationId: number, text: string, userId: number): Promise<QuestionConversation> {
+    //update questionMessage  by id, userId and questionId
+    static async updateQuestionMessage(questionId: number, questionMessageId: number, text: string, userId: number): Promise<QuestionMessage> {
         //check if input is valid
         if (!userId || !text) {
             throw new Error("Invalid input");
         }
 
-        //Valid edit of questionConversation by id, userId and questionId
-        if (!await prisma.questionConversation.findUnique({ where: { id: questionConversationId, userId: userId, questionId: questionId } })) {
-            throw new Error("Question not found or user is not the author of the question");
+        //Valid edit of questionMessage  by id, userId and questionId
+        if (!await prisma.questionMessage.findUnique({ where: { id: questionMessageId, userId: userId, questionId: questionId } })) {
+            throw new Error("Question message not found or user is not the author of the question message");
         }
 
-        const question = await prisma.questionConversation.update({
-            where: { id: questionConversationId },
+        const question = await prisma.questionMessage.update({
+            where: { id: questionMessageId },
             data: {
                 text
             }
@@ -99,7 +121,7 @@ export default class QuestionService {
         return question;
     }
 
-    static async createQuestionSpecific(assignmentId: number, learningPathId: number, text: string, teamId: number, studentId: number,
+    static async createQuestionSpecific(assignmentId: number, title: string, learningPathId: number, text: string, teamId: number, studentId: number,
         type: QuestionType, learningObjectId: string): Promise<QuestionSpecific> {
         if (!await prisma.learningObject.findUnique({ where: { id: learningObjectId } })) {
             throw new Error("Learning object not found");
@@ -128,7 +150,7 @@ export default class QuestionService {
 
         //transaction: rollbacks the changes if one of the queries fails
         return prisma.$transaction(async (prisma) => {
-            const question = await this.createQuestion(assignmentId, text, teamId, studentId, type);
+            const question = await this.createQuestion(assignmentId, title, text, teamId, studentId, type);
             const questionGeneral = await prisma.questionSpecific.create({
                 data: {
                     questionId: question.id,
@@ -139,7 +161,7 @@ export default class QuestionService {
         });
     }
 
-    static async createQuestionGeneral(assignmentId: number, text: string, teamId: number,
+    static async createQuestionGeneral(assignmentId: number, title: string, text: string, teamId: number,
         studentId: number, type: QuestionType, learningPathId: number):
         Promise<QuestionGeneral> {
         if (!await prisma.assignment.findUnique({ where: { id: assignmentId } })) {
@@ -152,7 +174,7 @@ export default class QuestionService {
 
         //transaction: rollbacks the changes if one of the queries fails
         return prisma.$transaction(async (prisma) => {
-            const question = await this.createQuestion(assignmentId, text, teamId, studentId, type);
+            const question = await this.createQuestion(assignmentId, title, text, teamId, studentId, type);
             const questionGeneral = await prisma.questionGeneral.create({
                 data: {
                     questionId: question.id,
@@ -163,15 +185,15 @@ export default class QuestionService {
         });
     }
 
-    //gets all questionHeads from a team
-    static async getQuestionsTeam(teamId: number): Promise<QuestionHead[]> {
+    //gets all questions from a team
+    static async getQuestionsTeam(teamId: number): Promise<Question[]> {
 
         if (!await prisma.team.findUnique({ where: { id: teamId } })) {
             throw new Error("Team not found");
         }
 
 
-        const questions = await prisma.questionHead.findMany({
+        const questions = await prisma.question.findMany({
             where: {
                 teamId: teamId
             }
@@ -181,13 +203,13 @@ export default class QuestionService {
     }
 
     //get questions from same class
-    static async getQuestionsClass(classId: number): Promise<QuestionHead[]> {
+    static async getQuestionsClass(classId: number): Promise<Question[]> {
 
         if (!await prisma.class.findUnique({ where: { id: classId } })) {
             throw new Error("Class not found");
         }
 
-        const questions = await prisma.questionHead.findMany({
+        const questions = await prisma.question.findMany({
             where: {
                 team: {
                     classId: classId
@@ -199,7 +221,7 @@ export default class QuestionService {
     }
 
     //get questions from same assignment in a class
-    static async getQuestionsAssignment(assignmentId: number, classId: number): Promise<QuestionHead[]> {
+    static async getQuestionsAssignment(assignmentId: number, classId: number): Promise<Question[]> {
         //check if assignment, class and teacher exist
         const [assignment, classEntity] = await Promise.all([
             prisma.assignment.findUnique({ where: { id: assignmentId } }),
@@ -215,7 +237,7 @@ export default class QuestionService {
         }
 
 
-        const questions = await prisma.questionHead.findMany({
+        const questions = await prisma.question.findMany({
             where: {
                 assignmentId: assignmentId,
                 team: {
@@ -227,25 +249,26 @@ export default class QuestionService {
         return questions;
     }
 
-    //get spefici question by id
-    static async getQuestion(questionId: number): Promise<QuestionSpecific> {
-        const question = await prisma.questionSpecific.findUnique({
-            where: { questionId }
+    //get speficif question by id
+    static async getQuestion(questionId: number): Promise<Question> {
+        const question = await prisma.question.findUnique({
+            where: { id: questionId }
         });
 
         if (!question) {
             throw new Error("Question not found");
         }
 
+
         return question;
     }
 
-    //get questions from same QuestionHead
-    static async getQuestionConversations(questionId: number): Promise<QuestionConversation[]> {
-        if (!await prisma.questionHead.findUnique({ where: { id: questionId } })) {
+    //get questions from same Question
+    static async getQuestionMessages(questionId: number): Promise<QuestionMessage[]> {
+        if (!await prisma.question.findUnique({ where: { id: questionId } })) {
             throw new Error("Question not found");
         }
-        const questionConv = await prisma.questionConversation.findMany({
+        const questionConv = await prisma.questionMessage.findMany({
             where: {
                 questionId: questionId
             }
@@ -259,14 +282,14 @@ export default class QuestionService {
     }
 
     //delete question by id
-    static async deleteQuestion(questionId: number): Promise<QuestionHead> {
-        if (!await prisma.questionHead.findUnique({ where: { id: questionId } })) {
+    static async deleteQuestion(questionId: number): Promise<Question> {
+        if (!await prisma.question.findUnique({ where: { id: questionId } })) {
             throw new Error("Question not found");
         }
         // Execute deletion within a transaction
         return prisma.$transaction(async (prisma) => {
             // Delete all related question conversations first
-            await prisma.questionConversation.deleteMany({
+            await prisma.questionMessage.deleteMany({
                 where: { questionId: questionId }
             });
             //delete question specific or general
@@ -278,7 +301,7 @@ export default class QuestionService {
             });
 
             // Then delete the question head
-            const question = await prisma.questionHead.delete({
+            const question = await prisma.question.delete({
                 where: { id: questionId }
             });
 
@@ -286,9 +309,9 @@ export default class QuestionService {
         });
     }
 
-    static async deleteQuestionConversation(questionId: number, questionConversationId: number): Promise<QuestionConversation> {
-        const question = await prisma.questionConversation.delete({
-            where: { id: questionConversationId, questionId: questionId }
+    static async deleteQuestionMessage(questionId: number, questionMessageId: number): Promise<QuestionMessage> {
+        const question = await prisma.questionMessage.delete({
+            where: { id: questionMessageId, questionId: questionId }
         });
         return question;
     }

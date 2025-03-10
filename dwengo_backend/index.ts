@@ -4,7 +4,7 @@ import errorHandler from "./middleware/errorMiddleware";
 import teacherAuthRoutes from "./routes/teacher/teacherAuthRoutes";
 import studentAuthRoutes from "./routes/student/studentAuthRoutes";
 import learningObjectRoutes from "./routes/learningObject/learningObjectRoutes";
-import QuestionService from "./routes/questions/questionsRoutes";
+import QuestionService from "./routes/questions/questionRoutes";
 // import learningPathRoutes from "./routes/learningPath/learningPathRoutes"; // Uncomment indien beschikbaar
 
 dotenv.config();

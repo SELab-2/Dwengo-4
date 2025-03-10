@@ -273,7 +273,7 @@ model QuestionSpecific {
   learningObjectId String
 
   // Een QuestionSpecific is een vraag
-  question       QuestionHead       @relation(fields: [questionId], references: [id])
+  question       Question       @relation(fields: [questionId], references: [id])
   // Er kunnen meerdere vragen over een leerobject worden gesteld
   learningObject LearningObject @relation(fields: [learningObjectId], references: [id])
 
@@ -285,16 +285,17 @@ model QuestionGeneral {
   learningPathId Int
 
   // Een QuestionSpecific is een vraag
-  question     QuestionHead     @relation(fields: [questionId], references: [id])
+  question     Question     @relation(fields: [questionId], references: [id])
   // Er kunnen meerdere vragen over een leerobject worden gesteld
   learningPath LearningPath @relation(fields: [learningPathId], references: [id])
 
   @@id([questionId, learningPathId])
 }
 
-model QuestionHead {
+model Question {
   id          Int          @id @default(autoincrement())
   teamId      Int
+  title       String
   assignmentId Int
   type        QuestionType
   createdAt   DateTime     @default(now())
@@ -308,10 +309,10 @@ model QuestionHead {
   
   assignment Assignment          @relation(fields: [assignmentId], references: [id])
   team       Team                @relation(fields: [teamId], references: [id])
-  questionConversation QuestionConversation[]
+  questionConversation QuestionMessage []
 }
 
-model QuestionConversation{
+model QuestionMessage {
   id          Int @id @default(autoincrement())
   questionId  Int 
   //leerkracht of student
@@ -320,7 +321,7 @@ model QuestionConversation{
   text        String
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  questionHeads QuestionHead @relation(fields: [questionId], references: [id])
+  Questions Question @relation(fields: [questionId], references: [id])
 
 }
 
@@ -334,7 +335,7 @@ model Assignment {
   updatedAt      DateTime @updatedAt
 
   learningPath     LearningPath      @relation(fields: [learningPathId], references: [id])
-  questionHeads QuestionHead[]
+  Questions Question[]
   classAssignments ClassAssignment[]
   teamAssignments  TeamAssignment[]
 }
@@ -360,7 +361,7 @@ model Team {
   teamAssignments TeamAssignment[]
   // De indieningen van een team
   teamSubmissions TeamSubmission[]
-  Questions       QuestionHead[]
+  Questions       Question[]
 
   class Class @relation(fields: [classId], references: [id])  
 }
