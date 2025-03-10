@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export default class TeacherAssignmentService {
     // Static method to create an assignment for a class
-    static async createAssignmentForClass(teacherId: number, classId: number, learningPathId: number, deadline: Date): Promise<Assignment> {
+    static async createAssignmentForClass(teacherId: number, classId: number, learningPathId: number): Promise<Assignment> {
         if (!await isAuthorized(teacherId, Role.TEACHER, classId)) {
             throw new Error("The teacher is unauthorized to perform this action");
         }
@@ -13,7 +13,6 @@ export default class TeacherAssignmentService {
         return prisma.assignment.create({
             data: {
                 learningPathId,
-                deadline: deadline,
                 classAssignments: {
                     create: {
                         classId,  // This will automatically link to the created Assignment

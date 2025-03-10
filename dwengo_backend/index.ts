@@ -4,8 +4,7 @@ import errorHandler from "./middleware/errorMiddleware";
 import teacherAuthRoutes from "./routes/teacher/teacherAuthRoutes";
 import studentAuthRoutes from "./routes/student/studentAuthRoutes";
 import learningObjectRoutes from "./routes/learningObject/learningObjectRoutes";
-import QuestionService from "./routes/questions/questionRoutes";
-
+import QuestionRoutes from "./routes/question/questionRoutes";
 import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
 import assignmentRoutes from "./routes/assignmentRoutes";
 import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
@@ -49,7 +48,7 @@ app.use('/teacher/assignments', teacherAssignmentRoutes);
 // Nieuwe routes voor leerobjecten
 app.use("/learningObjects", learningObjectRoutes);
 
-app.use("/", QuestionService);
+app.use("/", QuestionRoutes);
 
 app.use("/learningPaths", learningPathRoutes);
 
