@@ -8,6 +8,7 @@ import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
 import assignmentRoutes from "./routes/assignmentRoutes";
 import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
 import feedbackRoutes from "./routes/teacher/feedbackRoutes";
+import teacherClassRoutes from './routes/teacher/teacherClassRoutes';
 
 dotenv.config();
 
@@ -28,6 +29,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // JSON-parser middleware
 app.use(express.json());
 
+
+// Routes voor Teacher (Classes)
+app.use("/teacher/classes", teacherClassRoutes);
 
 // Routes voor Teacher (Auth)
 app.use("/teacher/auth", teacherAuthRoutes);
@@ -52,3 +56,5 @@ app.use(errorHandler);
 
 const PORT: string | number = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server draait op poort ${PORT}`));
+
+export default app;

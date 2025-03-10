@@ -118,6 +118,7 @@ model ClassTeacher {
 
   teacher Teacher @relation(fields: [teacherId], references: [userId])
   class   Class   @relation(fields: [classId], references: [id])
+  invites Invite[]  // the invites that the teacher has sent
 
   @@id([teacherId, classId])
 }
@@ -137,14 +138,15 @@ model JoinRequest {
 }
 
 model Invite {
-  teacherId Int
-  classId   Int
-  status    JoinRequestStatus
+  inviteId       Int   @id @default(autoincrement())
+  otherTeacherId Int  
+  classTeacherId Int
+  classId        Int
+  status         JoinRequestStatus
 
-  teacher Teacher @relation(fields: [teacherId], references: [userId])
-  class   Class   @relation(fields: [classId], references: [id])
-
-  @@id([teacherId, classId])
+  otherTeacher Teacher      @relation(fields: [otherTeacherId], references: [userId], onDelete: Cascade)
+  classTeacher ClassTeacher @relation(fields: [classTeacherId, classId], references: [teacherId, classId], onDelete: Cascade)
+  class        Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
 }
 
 model LearningPath {
