@@ -232,7 +232,7 @@ enum ContentType {
   TEXT_MARKDOWN
   IMAGE_IMAGE_BLOCK
   IMAGE_IMAGE
-  AUDO_MPEG
+  AUDIO_MPEG
   // Eigen toevoegingen
   VIDEO
   EVAL_MULTIPLE_CHOICE
