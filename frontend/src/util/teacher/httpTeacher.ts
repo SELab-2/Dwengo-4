@@ -40,7 +40,9 @@ export async function loginTeacher({
   });
 
   if (!response.ok) {
-    const error: APIError = new Error("Er is iets misgegaan tijdens het inloggen.");
+    const error: APIError = new Error(
+      "Er is iets misgegaan tijdens het inloggen."
+    );
     error.code = response.status;
     error.info = await response.json();
     throw error;
@@ -64,7 +66,9 @@ export async function signupTeacher({
   });
 
   if (!response.ok) {
-    const error: APIError = new Error("Er is iets misgegaan tijdens het registreren.");
+    const error: APIError = new Error(
+      "Er is iets misgegaan tijdens het registreren."
+    );
     error.code = response.status;
     error.info = await response.json();
     throw error;
@@ -97,9 +101,7 @@ export async function fetchClasses(): Promise<ClassItem[]> {
     throw error;
   }
 
-
   return await response.json();
-
 }
 
 interface CreateClassPayload {
@@ -145,17 +147,24 @@ export interface Invite {
  * @param classId - id van de klas waarvoor de invites worden opgehaald
  * @returns Een lijst met alle invites voor de klas
  */
-export async function getPendingInvitesForClass(classId: string): Promise<Invite[]> {
-  const response = await fetch(`${BACKEND}/teacher/classes/${classId}/invites`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
-  });
+export async function getPendingInvitesForClass(
+  classId: string
+): Promise<Invite[]> {
+  const response = await fetch(
+    `${BACKEND}/teacher/classes/${classId}/invites`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+    }
+  );
 
   if (!response.ok) {
-    const error: APIError = new Error("Er is iets misgegaan bij het ophalen van de invites.");
+    const error: APIError = new Error(
+      "Er is iets misgegaan bij het ophalen van de invites."
+    );
     error.code = response.status;
     error.info = await response.json();
     throw error;
@@ -177,17 +186,22 @@ export async function createInvite({
   classId: string;
   otherTeacherEmail: string;
 }): Promise<Invite> {
-  const response = await fetch(`${BACKEND}/teacher/classes/${classId}/invites`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
-    body: JSON.stringify({ otherTeacherEmail }),
-  });
+  const response = await fetch(
+    `${BACKEND}/teacher/classes/${classId}/invites`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+      body: JSON.stringify({ otherTeacherEmail }),
+    }
+  );
 
   if (!response.ok) {
-    const error: APIError = new Error("Er is iets misgegaan tijdens het uitnodigen.");
+    const error: APIError = new Error(
+      "Er is iets misgegaan tijdens het uitnodigen."
+    );
     error.code = response.status;
     error.info = await response.json();
     throw error;
@@ -202,15 +216,20 @@ export async function createInvite({
  * @returns Een lijst met join requests
  */
 export async function fetchJoinRequests(classId: string): Promise<any> {
-  const response = await fetch(`${BACKEND}/teacher/classes/${classId}/join-requests`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
-  });
+  const response = await fetch(
+    `${BACKEND}/teacher/classes/${classId}/join-requests`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+    }
+  );
   if (!response.ok) {
-    const error = new Error("Er is iets misgegaan bij het ophalen van de join requests.");
+    const error = new Error(
+      "Er is iets misgegaan bij het ophalen van de join requests."
+    );
     throw error;
   }
   return await response.json();
@@ -228,16 +247,21 @@ export async function approveJoinRequest({
   classId: string;
   requestId: number;
 }): Promise<any> {
-  const response = await fetch(`${BACKEND}/teacher/classes/${classId}/join-requests/${requestId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
-    body: JSON.stringify({ action: "approve" }),
-  });
+  const response = await fetch(
+    `${BACKEND}/teacher/classes/${classId}/join-requests/${requestId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+      body: JSON.stringify({ action: "approve" }),
+    }
+  );
   if (!response.ok) {
-    const error: APIError = new Error("Er is iets misgegaan bij het approven van de join request.");
+    const error: APIError = new Error(
+      "Er is iets misgegaan bij het approven van de join request."
+    );
     error.code = response.status;
     error.info = await response.json();
     throw error;
@@ -257,16 +281,21 @@ export async function denyJoinRequest({
   classId: string;
   requestId: number;
 }): Promise<any> {
-  const response = await fetch(`${BACKEND}/teacher/classes/${classId}/join-requests/${requestId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
-    body: JSON.stringify({ action: "deny" }),
-  });
+  const response = await fetch(
+    `${BACKEND}/teacher/classes/${classId}/join-requests/${requestId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+      body: JSON.stringify({ action: "deny" }),
+    }
+  );
   if (!response.ok) {
-    const error: APIError = new Error("Er is iets misgegaan bij het denyen van de join request.");
+    const error: APIError = new Error(
+      "Er is iets misgegaan bij het denyen van de join request."
+    );
     error.code = response.status;
     error.info = await response.json();
     throw error;

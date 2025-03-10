@@ -31,14 +31,11 @@ import {
 const router = express.Router();
 
 // Alleen leerkrachten mogen deze routes gebruiken
-router.use(protectTeacher);
-
-// routes for classes
 router.post("/", protectTeacher, createClassroom);
 router.get("/", protectTeacher, getClassrooms);
 router.delete("/:classId", protectTeacher, deleteClassroom);
 router.get("/:classId/join-link", protectTeacher, getJoinLink);
-router.patch(
+router.post(
   "/:classId/regenerate-join-link",
   protectTeacher,
   regenerateJoinLink

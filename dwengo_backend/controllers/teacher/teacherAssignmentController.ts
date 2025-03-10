@@ -16,12 +16,16 @@ export class AssignmentTeacherController {
         pathLanguage,
         isExternal,
         deadline,
+        title,
+        description,
       }: {
         classId: number;
         pathRef: string;
         pathLanguage: string;
         isExternal: boolean;
         deadline: string;
+        title: string;
+        description: string;
       } = req.body;
 
       const parsedDeadline = new Date(deadline);
@@ -33,7 +37,9 @@ export class AssignmentTeacherController {
           pathRef,
           pathLanguage,
           isExternal,
-          parsedDeadline
+          parsedDeadline,
+          title,
+          description
         );
       res.status(201).json(assignment);
     } catch (error) {
@@ -64,14 +70,16 @@ export class AssignmentTeacherController {
   ): Promise<void> => {
     try {
       const assignmentId: number = parseInt(req.params.assignmentId);
-      const { pathRef, isExternal } = req.body;
+      const { pathRef, isExternal, title, description } = req.body;
       const teacherId: number = getUserFromAuthRequest(req).id;
 
       const updatedAssignment = await teacherAssignmentService.updateAssignment(
         assignmentId,
         pathRef,
         isExternal,
-        teacherId
+        teacherId,
+        title,
+        description
       );
       res.json(updatedAssignment);
     } catch (error) {

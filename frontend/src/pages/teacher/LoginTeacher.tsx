@@ -9,7 +9,7 @@ import {
   validateMinLength,
 } from "../../util/shared/validation";
 import Container from "../../components/shared/Container";
-import PrimaryButton from "../../components/shared/PrimaryButton";
+import { PrimaryButton } from "../../components/shared/PrimaryButton";
 import BoxBorder from "../../components/shared/BoxBorder";
 import { loginTeacher } from "../../util/teacher/httpTeacher";
 import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
@@ -24,7 +24,6 @@ interface LoginResponse {
   lastName : string;
   token: string;
 }
-
 
 interface InputWithChecksHandle {
   validateInput: () => boolean;
@@ -61,7 +60,12 @@ const LoginTeacher: React.FC = () => {
     const emailValid = emailRef.current?.validateInput() ?? false;
     const passwordValid = passwordRef.current?.validateInput() ?? false;
 
-    if (emailValid && passwordValid && emailRef.current && passwordRef.current) {
+    if (
+      emailValid &&
+      passwordValid &&
+      emailRef.current &&
+      passwordRef.current
+    ) {
       const formData: LoginFormData = {
         email: emailRef.current.getValue(),
         password: passwordRef.current.getValue(),

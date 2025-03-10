@@ -1,3 +1,4 @@
+// router.js
 import React from "react";
 import {
   createBrowserRouter,
@@ -8,6 +9,7 @@ import {
 
 // ==== TEACHER ROUTES ==== //
 import RootLayoutTeacher from "../components/teacher/RootLayoutTeacher";
+import HomeTeacher from "../pages/teacher/HomeTeacher";
 import LoginTeacher from "../pages/teacher/LoginTeacher";
 import ClassesPageTeacher from "../pages/teacher/ClassesTeacher";
 import SignupTeacher from "../pages/teacher/SignupTeacher";
@@ -30,9 +32,9 @@ import {
   tokenLoader as studentTokenLoader,
 } from "../util/student/authStudent";
 import { action as studentLogoutAction } from "../pages/student/LogoutStudent";
-import StudentIndex from "../pages/student";
 
-const HomePage: React.FC = () => (
+// Home-pagina waar de gebruiker zijn rol kiest
+const HomePage = () => (
   <div style={{ textAlign: "center", marginTop: "50px" }}>
     <h2>Kies een rol:</h2>
     <Link to="/student" className="link mx-10">
@@ -99,11 +101,7 @@ export const router = createBrowserRouter([
       {
         index: true,
         // Je kunt hier eventueel een aparte HomeStudent-component gebruiken
-        element: <StudentIndex />,
-      },
-      {
-        path: "join-link-example",
-        element: <p>Join Link Example</p>,
+        element: <h1>Home Student</h1>,
       },
       {
         path: "inloggen",
@@ -136,4 +134,4 @@ export const router = createBrowserRouter([
       },
     ],
   },
-] as RouteObject[]);
+]);

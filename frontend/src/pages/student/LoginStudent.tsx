@@ -9,7 +9,7 @@ import {
   validateMinLength,
 } from "../../util/shared/validation";
 import Container from "../../components/shared/Container";
-import PrimaryButton from "../../components/shared/PrimaryButton";
+import { PrimaryButton } from "../../components/shared/PrimaryButton";
 import BoxBorder from "../../components/shared/BoxBorder";
 import { loginStudent } from "../../util/student/httpStudent";
 import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
@@ -60,7 +60,12 @@ const LoginStudent: React.FC = () => {
     const emailValid = emailRef.current?.validateInput() ?? false;
     const passwordValid = passwordRef.current?.validateInput() ?? false;
 
-    if (emailValid && passwordValid && emailRef.current && passwordRef.current) {
+    if (
+      emailValid &&
+      passwordValid &&
+      emailRef.current &&
+      passwordRef.current
+    ) {
       const formData: LoginFormData = {
         email: emailRef.current.getValue(),
         password: passwordRef.current.getValue(),
@@ -95,7 +100,7 @@ const LoginStudent: React.FC = () => {
                   (v: string) => validateMinLength(v, 6),
                 ])
               }
-              placeholder="Voer je wachtwoord in" 
+              placeholder="Voer je wachtwoord in"
             />
             {isError && (
               <div className="c-r">
