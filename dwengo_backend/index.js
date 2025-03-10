@@ -45,8 +45,12 @@ app.use("/student/auth", studentAuthRoutes);
 // Error handling middleware
 app.use(errorHandler);
 
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
+app.use((req, res, next) => {
+  if (req.accepts("html")) {
+    res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
+  } else {
+    res.status(404).json({ error: "Route not found" });
+  }
 });
 
 // Start server
