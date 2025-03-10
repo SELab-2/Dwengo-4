@@ -1,9 +1,13 @@
 import prisma from './prisma';
-import { User, Class, Invite, Teacher, JoinRequestStatus } from '@prisma/client';
+import { User, Class, Invite, Teacher, JoinRequestStatus, Student } from '@prisma/client';
+import * as jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // helper functions to create test data in the database for tests to avoid code duplication in the tests themselves
 
-export async function createTeacher(firstName: string, lastName: string, email: string): Promise<User & { teacher: Teacher }> {
+export async function createTeacher(firstName: string, lastName: string, email: string): Promise<User & { teacher: Teacher, token: string }> {
     const user = await prisma.user.create({
         data: {
             firstName,
@@ -19,7 +23,32 @@ export async function createTeacher(firstName: string, lastName: string, email: 
             teacher: true
         }
     });
-    return { ...user, teacher: user.teacher! };
+    const token: string = jwt.sign({ id: user.id }, process.env.JWT_SECRET as string, {
+        expiresIn: '1h',
+      });
+    return { ...user, teacher: user.teacher!, token };
+}
+
+export async function createStudent(firstName: string, lastName: string, email: string): Promise<User & { student: Student, token: string }> {
+    const user = await prisma.user.create({
+        data: {
+            firstName,
+            lastName,
+            email,
+            password: "testpassword",
+            role: "STUDENT",
+            student: {
+                create: {}
+            }
+        },
+        include: {
+            student: true
+        }
+    });
+    const token: string = jwt.sign({ id: user.id }, process.env.JWT_SECRET as string, {
+        expiresIn: '1h',
+      });
+    return { ...user, student: user.student!, token };
 }
 
 export async function createClass(name: string, code: string): Promise<Class> {

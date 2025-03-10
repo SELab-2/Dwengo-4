@@ -11,6 +11,7 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
+// this function will be deleted
 export const joinClassroom = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   // De join-code kan zowel als queryparameter als in de body worden meegegeven
   const joinCode = (req.query.joinCode as string) || (req.body.joinCode as string);
@@ -34,6 +35,7 @@ export const joinClassroom = asyncHandler(async (req: AuthenticatedRequest, res:
     throw new Error("Je bent al lid van deze klas");
   }
 
+  // this isn't right: the request still has to be approved by the teacher
   // Add the student to the class using the service
   await classService.addStudentToClass(classroom.id, studentId);
 

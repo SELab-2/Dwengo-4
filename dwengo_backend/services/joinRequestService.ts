@@ -2,6 +2,7 @@ import {PrismaClient, JoinRequestStatus, JoinRequest} from "@prisma/client";
 import classService from "./classService";
 import {ClassWithLinks} from "./classService";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { NotFoundError } from "../errors/errors";
 
 const prisma = new PrismaClient();
 
@@ -11,21 +12,22 @@ export default class joinRequestService {
     private static async validateClassExists(classCode: string): Promise<ClassWithLinks> {
         const classroom: ClassWithLinks | null = await classService.getClassByJoinCode(classCode);
         if (!classroom) {
-            throw new Error(`Class with code ${classCode} not found.`);
+            throw new NotFoundError(`Class with code ${classCode} not found.`);
         }
         return classroom;
     }
 
-    private static async updateAndValidateRequest(studentId: number, classId: number, status: JoinRequestStatus): Promise<void> {
+    private static async updateAndValidateRequest(requestId: number, classId: number, status: JoinRequestStatus): Promise<JoinRequest> {
         // Update the join request status
         const updatedRequest = await prisma.joinRequest.update({
-            where: { studentId_classId: { studentId, classId } },
+            where: { requestId, classId },
             data: { status: status },
         });
 
         if (!updatedRequest) {
-            throw new Error(`Join request for student ${studentId} and class ${classId} not found.`);
+            throw new NotFoundError(`Join request ${requestId} for class ${classId} not found.`);
         }
+        return updatedRequest;
     }
 
     static async createJoinRequest(studentId: number, classId: number): Promise<JoinRequest> {
@@ -38,10 +40,23 @@ export default class joinRequestService {
         });
     }
 
-
     static async createValidJoinRequest(studentId: number, classCode: string): Promise<JoinRequest> {
         try {
             const classroom: ClassWithLinks = await this.validateClassExists(classCode);
+
+            // check if the student is already a member of the class (TODO)
+
+            // check if there's already a pending join request for this student and class
+            const existingRequest: JoinRequest | null = await prisma.joinRequest.findFirst({
+                where: {
+                    studentId,
+                    classId: classroom.id,
+                    status: JoinRequestStatus.PENDING,
+                },
+            });
+            if (existingRequest) {
+                throw new Error(`There's already a pending join request for student ${studentId} and class ${classroom.id}`);
+            }
 
             return await this.createJoinRequest(studentId, classroom.id);
         } catch (error) {
@@ -54,22 +69,22 @@ export default class joinRequestService {
         }
     };
 
-    static async approveRequestAndAddStudentToClass (studentId: number, classId: number): Promise<void> {
+    static async approveRequestAndAddStudentToClass(requestId: number, classId: number): Promise<void> {
         try {
-            await this.updateAndValidateRequest(studentId, classId, JoinRequestStatus.APPROVED);
+            const updatedRequest: JoinRequest = await this.updateAndValidateRequest(requestId, classId, JoinRequestStatus.APPROVED);
 
             // Add the student to the class
-            await classService.addStudentToClass(studentId, classId);
+            await classService.addStudentToClass(updatedRequest.studentId, classId);
         } catch (error) {
-            this.handleError(error, `Error approving join request for student ${studentId} and class ${classId}`);
+            this.handleError(error, `Error approving join request ${requestId} for class ${classId}`);
         }
     };
 
-    static async denyJoinRequest(studentId: number, classId: number): Promise<void> {
+    static async denyJoinRequest(requestId: number, classId: number): Promise<void> {
         try {
-            await this.updateAndValidateRequest(studentId, classId, JoinRequestStatus.DENIED);
+            await this.updateAndValidateRequest(requestId, classId, JoinRequestStatus.DENIED);
         } catch (error) {
-            this.handleError(error, `Error denying join request for student ${studentId} and class ${classId}`);
+            this.handleError(error, `Error denying join request ${requestId} for class ${classId}`);
         }
     };
 

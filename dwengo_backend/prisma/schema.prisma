@@ -133,8 +133,8 @@ model JoinRequest {
   classId   Int
   status    JoinRequestStatus
 
-  student Student @relation(fields: [studentId], references: [userId])
-  class   Class   @relation(fields: [classId], references: [id])
+  student Student @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
 }
 
 model Invite {

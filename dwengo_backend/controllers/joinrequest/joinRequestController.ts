@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import joinRequestService from "../../services/joinRequestService";
 import { JoinRequest } from "@prisma/client";
+import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 
 // Higher-order function to handle errors and reduce duplication
 const handleRequest = (handler: (req: Request, res: Response) => Promise<void>) =>
@@ -13,32 +14,46 @@ const handleRequest = (handler: (req: Request, res: Response) => Promise<void>) 
         }
     };
 
-export const createJoinRequest = handleRequest(async (req: Request, res: Response): Promise<void> => {
-    const { studentId, classCode }: { studentId: number; classCode: string } = req.body;
+
+/**
+ * @route POST /student/classes/join
+ */
+export const createJoinRequest = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { classCode }: {classCode: string } = req.body;
+    const studentId: number = req.user!.id as number;
     const joinRequest: JoinRequest | undefined = await joinRequestService.createValidJoinRequest(studentId, classCode);
-    res.status(201).json(joinRequest);
+    res.status(201).json({ joinRequest });
 });
 
-export const updateJoinRequestStatus = handleRequest(async (req: Request, res: Response): Promise<void> => {
-    const { classId, studentId } = req.params;
-    const { action } = req.body; // 'approve' or 'deny' from the request body
+/**
+ * @route PATCH /teacher/classes/:classId/join-requests/:requestId
+ */
+export const updateJoinRequestStatus = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const classId: number = parseInt(req.params.classId);
+    const requestId: number = parseInt(req.params.requestId);
+    const { action }: { action: string } = req.body; // 'approve' or 'deny' from the request body
 
     if (!action || (action !== 'approve' && action !== 'deny')) {
         res.status(400).json({ error: "Action must be 'approve' or 'deny'" });
     }
 
+    // TODO: check if the teacher is allowed to approve/deny the request (see what happens in the tests)
+
     if (action === 'approve') {
-        await joinRequestService.approveRequestAndAddStudentToClass(Number(studentId), Number(classId));
+        await joinRequestService.approveRequestAndAddStudentToClass(requestId, classId);
         res.status(200).json({ message: "Join request approved." });
     } else if (action === 'deny') {
-        await joinRequestService.denyJoinRequest(Number(studentId), Number(classId));
+        await joinRequestService.denyJoinRequest(requestId, classId);
         res.status(200).json({ message: "Join request denied." });
     }
 });
 
-export const getJoinRequestsByClass = handleRequest(async (req: Request, res: Response): Promise<void> => {
-    const { classId } = req.params;
-    const joinRequests: JoinRequest[] = await joinRequestService.getJoinRequestsByClass(Number(classId));
+/**
+ * @route GET /teacher/classes/:classId/join-requests
+ */
+export const getJoinRequestsByClass = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const classId: number = parseInt(req.params.classId);
+    const joinRequests: JoinRequest[] = await joinRequestService.getJoinRequestsByClass(classId);
     res.status(200).json(joinRequests);
 });
 
