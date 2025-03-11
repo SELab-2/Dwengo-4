@@ -1,4 +1,4 @@
-import {PrismaClient, Submission} from "@prisma/client";
+import {Prisma, PrismaClient, Submission} from "@prisma/client";
 import {AccesDeniedError} from "../errors/errors";
 
 const prisma = new PrismaClient();
@@ -83,7 +83,7 @@ export default class submissionService {
         });
     }
 
-    static teacherGetSubmissionsForStudent(studentId: number, teacherId: number): Promise<Submission[]> {
+    static teacherGetSubmissionsForStudent(studentId: number, teacherId: number, assignmentId?: number): Promise<Submission[]> {
         return prisma.submission.findMany({
             where: {
                 team: {
@@ -94,6 +94,7 @@ export default class submissionService {
                     }
                 },
                 assignment: {
+                    assignmentId: assignmentId ?? Prisma.skip,
                     classAssignments: {
                         some: {
                             class: {
@@ -110,13 +111,14 @@ export default class submissionService {
         });
     }
 
-    static async teacherGetSubmissionsForTeam(teamId: number, teacherId: number) {
+    static async teacherGetSubmissionsForTeam(teamId: number, teacherId: number, assignmentId?: number) {
         return prisma.submission.findMany({
             where: {
                 team: {
                     id: teamId,
                 },
                 assignment: {
+                    assignmentId: assignmentId ?? Prisma.skip,
                     classAssignments: {
                         some: {
                             class: {
