@@ -82,4 +82,31 @@ export default class submissionService {
             }
         });
     }
+
+    static teacherGetSubmissionsForStudent(studentId: number, teacherId: number): Promise<Submission[]> {
+        return prisma.submission.findMany({
+            where: {
+                team: {
+                    students: {
+                        some: {
+                            userId: studentId,
+                        }
+                    }
+                },
+                assignment: {
+                    classAssignments: {
+                        some: {
+                            class: {
+                                ClassTeacher: {
+                                    some: {
+                                        teacherId: teacherId,
+                                    }
+                                }
+                            }
+                        }
+                    },
+                }
+            }
+        });
+    }
 }

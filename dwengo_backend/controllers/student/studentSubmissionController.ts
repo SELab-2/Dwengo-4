@@ -3,7 +3,7 @@ import service from "../../services/submissionService";
 import {Submission} from "@prisma/client";
 import {AuthenticatedRequest} from "../../interfaces/extendedTypeInterfaces";
 
-export default class FeedbackController {
+export default class StudentSubmissionController {
     static async createSubmission(req: AuthenticatedRequest, res: Response) {
         const {assignmentId, evaluationId}: { assignmentId: number, evaluationId: string } = req.params;
         const studentId: number = Number(req.user?.id);
