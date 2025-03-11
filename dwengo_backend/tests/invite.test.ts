@@ -23,6 +23,7 @@ describe('invite tests', async () => {
         // clear the database
         await prisma.$transaction([
             prisma.invite.deleteMany(),
+            prisma.classStudent.deleteMany(),
             prisma.classTeacher.deleteMany(),
             prisma.class.deleteMany(),
             prisma.student.deleteMany(),

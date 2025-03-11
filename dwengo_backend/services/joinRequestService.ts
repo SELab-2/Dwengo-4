@@ -2,7 +2,7 @@ import {PrismaClient, JoinRequestStatus, JoinRequest} from "@prisma/client";
 import classService from "./classService";
 import {ClassWithLinks} from "./classService";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { NotFoundError } from "../errors/errors";
+import { BadRequestError, NotFoundError } from "../errors/errors";
 
 const prisma = new PrismaClient();
 
@@ -44,7 +44,10 @@ export default class joinRequestService {
         try {
             const classroom: ClassWithLinks = await this.validateClassExists(classCode);
 
-            // check if the student is already a member of the class (TODO)
+            // check if the student is already a member of the class
+            if (await classService.isStudentInClass(classroom, studentId)) {
+                throw new BadRequestError(`Student ${studentId} is already a member of class ${classroom.id}`);
+            }
 
             // check if there's already a pending join request for this student and class
             const existingRequest: JoinRequest | null = await prisma.joinRequest.findFirst({
@@ -55,7 +58,7 @@ export default class joinRequestService {
                 },
             });
             if (existingRequest) {
-                throw new Error(`There's already a pending join request for student ${studentId} and class ${classroom.id}`);
+                throw new BadRequestError(`There's already a pending join request for student ${studentId} and class ${classroom.id}`);
             }
 
             return await this.createJoinRequest(studentId, classroom.id);
@@ -104,7 +107,8 @@ export default class joinRequestService {
         if (error instanceof PrismaClientKnownRequestError) {
             throw new Error(`Prisma error occurred: ${error.message}`);
         } else if (error instanceof Error) {
-            throw new Error(`${message}: ${error.message}`);
+            error.message = `${message}: ${error.message}`;
+            throw error;
         }
         throw new Error(`${message}: Unknown error occurred.`);
     }

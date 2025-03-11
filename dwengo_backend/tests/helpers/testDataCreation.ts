@@ -79,3 +79,12 @@ export async function addTeacherToClass(teacherId: number, classId: number): Pro
         }
     });
 }
+
+export async function addStudentToClass(studentId: number, classId: number): Promise<void> {
+    await prisma.classStudent.create({
+        data: {
+            studentId,
+            classId
+        }
+    });
+}

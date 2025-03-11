@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import joinRequestService from "../../services/joinRequestService";
 import { JoinRequest } from "@prisma/client";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
+import { AppError } from "../../errors/errors";
 
 // Higher-order function to handle errors and reduce duplication
 const handleRequest = (handler: (req: Request, res: Response) => Promise<void>) =>
@@ -10,7 +11,7 @@ const handleRequest = (handler: (req: Request, res: Response) => Promise<void>) 
             await handler(req, res);
         } catch (error) {
             const message: string = error instanceof Error ? error.message : "An unknown error occurred";
-            res.status(400).json({ error: message });
+            res.status(error instanceof AppError ? error.statusCode : 400).json({ error: message });
         }
     };
 
