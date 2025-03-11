@@ -175,11 +175,13 @@ const validateStudentIds = async (studentIds: number[]): Promise<void> => {
         select: { userId: true }
     });
 
+    // Extract the StudentIds
     const validStudentIds = new Set(validStudents.map((student: Student): number => student.userId));
 
-    // Find any invalid students
+    // Check if all the given StudentIds where found in the Database
     const invalidStudentIds: number[] = studentIds.filter((studentId: number): boolean => !validStudentIds.has(studentId));
 
+    // If any ID was not found this means that it isn't part of our Database and is therefore invalid
     if (invalidStudentIds.length > 0) {
         throw new Error(`Invalid student IDs: ${invalidStudentIds.join(", ")}`);
     }
