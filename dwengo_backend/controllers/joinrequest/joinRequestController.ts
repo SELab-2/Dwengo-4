@@ -17,7 +17,9 @@ const handleRequest = (handler: (req: Request, res: Response) => Promise<void>) 
 
 
 /**
+ * Creates a join request for a student to join a class (class code in request body)
  * @route POST /student/classes/join
+ * returns the created join request in the response body
  */
 export const createJoinRequest = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { classCode }: {classCode: string } = req.body;
@@ -27,7 +29,11 @@ export const createJoinRequest = handleRequest(async (req: AuthenticatedRequest,
 });
 
 /**
+ * Updates the status of a join request (approve or deny)
  * @route PATCH /teacher/classes/:classId/join-requests/:requestId
+ * @param classId - id of the class for which the join request was sent
+ * @param requestId - id of the join request to be updated
+ * returns the updated join request in the response body
  */
 export const updateJoinRequestStatus = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const classId: number = parseInt(req.params.classId);
@@ -50,11 +56,13 @@ export const updateJoinRequestStatus = handleRequest(async (req: AuthenticatedRe
 
 /**
  * @route GET /teacher/classes/:classId/join-requests
+ * @param classId - id of the class for which the join requests are fetched
+ * returns a list of all join requests for the class in the response body
  */
 export const getJoinRequestsByClass = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const classId: number = parseInt(req.params.classId);
     const teacherId: number = req.user!.id as number;
     const joinRequests: JoinRequest[] = await joinRequestService.getJoinRequestsByClass(teacherId, classId);
-    res.status(200).json(joinRequests);
+    res.status(200).json({ joinRequests });
 });
 

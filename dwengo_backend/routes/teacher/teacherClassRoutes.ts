@@ -21,9 +21,9 @@ import {
 
 const router = express.Router();
 
+// Alleen leerkrachten mogen deze routes gebruiken
 router.use(protectTeacher);
 
-// Alleen leerkrachten mogen deze routes gebruiken
 router.post("/", createClassroom);
 router.delete("/:classId", deleteClassroom);
 router.get("/:classId/join-link", getJoinLink);

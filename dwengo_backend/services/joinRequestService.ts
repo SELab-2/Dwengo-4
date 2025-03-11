@@ -104,12 +104,14 @@ export default class joinRequestService {
         }
     };
 
-    // TODO: only teacher of class should be able to see the join requests for the class
     static async getJoinRequestsByClass(teacherId: number, classId: number): Promise<JoinRequest[]> {
         try {
+            const isTeacher: boolean = await classService.isTeacherOfClass(classId, teacherId);
+            if (!isTeacher) {
+                throw new AccesDeniedError(`Teacher ${teacherId} is not a teacher of class ${classId}`);
+            }
             return await prisma.joinRequest.findMany({
-                where: { classId },
-                include: { student: true },
+                where: { classId }
             });
         } catch (error) {
             this.handleError(error, `Error fetching join requests for class ${classId}`);

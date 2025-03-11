@@ -307,8 +307,35 @@ describe('join request tests', async() => {
         });
     });
     describe('[GET] /teacher/classes/:classId/join-requests', async() => {
-        it('todo', async() => {
-            
+        let joinRequest1: JoinRequest;
+        let joinRequest2: JoinRequest;
+        let studentUser2: User & { student: Student, token: string };
+        beforeEach(async() => {
+            joinRequest1 = await createJoinRequest(studentUser1.id, classroom.id);
+            studentUser2 = await createStudent("Meep", "Moop", "meep.moop@gmail.com");
+            joinRequest2 = await createJoinRequest(studentUser2.id, classroom.id);
+        });
+        it('should respond with a `200` status code and a list of join requests', async() => {
+            // test getting the join requests
+            const { status, body } = await request(app)
+                .get(`/teacher/classes/${classroom.id}/join-requests`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`)   // teacherUser1 is a teacher of the class
+
+            expect(status).toBe(200);
+            expect(body).toHaveProperty('joinRequests');
+            expect(body.joinRequests).toStrictEqual(expect.arrayContaining([joinRequest1, joinRequest2]));
+        });
+        it('should respond with a `403` status code when the teacher is not allowed to view the join requests', async() => {
+            // create teacher that's not part of the class
+            const teacherUser2: User & { teacher: Teacher, token: string } = await createTeacher("Hi", "Ho", "hiho@gmail.com");
+            // try having teacherUser2 view the join requests
+            const { status, body } = await request(app)
+                .get(`/teacher/classes/${classroom.id}/join-requests`)
+                .set('Authorization', `Bearer ${teacherUser2.token}`)   // teacherUser2 is not a teacher of the class
+
+            expect(status).toBe(403);
+            expect(body.error).toBe(`Error fetching join requests for class ${classroom.id}: Teacher ${teacherUser2.id} is not a teacher of class ${classroom.id}`);
+            expect(body.joinRequests).toBeUndefined();
         });
     });
 });
