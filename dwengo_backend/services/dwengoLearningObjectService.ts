@@ -34,9 +34,6 @@ const permittedContentTypes = {
   "evaluation/open-question": ContentType.EVAL_OPEN_QUESTION,
 };
 
-/**
- * Interface van Dwengo's leerobject, zoals uit je oorspronkelijke code.
- */
 interface DwengoLearningObject {
   _id?: string;
   uuid?: string;
@@ -60,11 +57,8 @@ interface DwengoLearningObject {
   updatedAt?: string;
 }
 
-/**
- * DTO voor onze eigen representatie, gebruikt door controller/combined
- */
 export interface LearningObjectDto {
-  id: string;           // _id (Dwengo) of ID (lokaal)
+  id: string;
   uuid: string;
   hruid: string;
   version: number;
@@ -88,7 +82,7 @@ export interface LearningObjectDto {
 }
 
 /**
- * Converteert Dwengo-object naar onze LearningObjectDto
+ * Converteer Dwengo-object naar onze LearningObjectDto
  */
 function mapDwengoToLocal(dwengoObj: DwengoLearningObject): LearningObjectDto {
   return {
@@ -119,9 +113,7 @@ function mapDwengoToLocal(dwengoObj: DwengoLearningObject): LearningObjectDto {
   };
 }
 
-/**
- * Haalt alle Dwengo-objects op (optioneel filter op teacherExclusive, available).
- */
+// Alle Dwengo-objects
 export async function fetchAllDwengoObjects(isTeacher: boolean): Promise<LearningObjectDto[]> {
   try {
     const params: Record<string, any> = {};
@@ -138,43 +130,60 @@ export async function fetchAllDwengoObjects(isTeacher: boolean): Promise<Learnin
   }
 }
 
-/**
- * Haalt één Dwengo-object op via /getMetadata.
- */
+// Eén Dwengo-object op basis van _id
 export async function fetchDwengoObjectById(
-    id: string,
-    isTeacher: boolean
-  ): Promise<LearningObjectDto | null> {
-    try {
-      const params = { _id: id };
-      const response = await dwengoAPI.get("/api/learningObject/getMetadata", { params });
-      const dwengoObj: DwengoLearningObject = response.data;
-      const mapped = mapDwengoToLocal(dwengoObj);
-  
-      // Extra check: als Dwengo niet exact het object met de gevraagde id teruggeeft,
-      // beschouwen we dat als "niet gevonden"
-      //if (mapped.id !== id) {
-      //  console.warn(`Dwengo returned a different id (${mapped.id}) than requested (${id}).`);
-      //  return null;
-      //}
-  
-      // Rol-check voor teacherExclusive + available
-      if (!isTeacher && (mapped.teacherExclusive || !mapped.available)) {
-        return null;
-      }
-      return mapped;
-    } catch (error: any) {
-      if (error.response && error.response.status === 404) {
-        return null;
-      }
-      console.error("Fout bij fetchDwengoObjectById:", error);
+  id: string,
+  isTeacher: boolean
+): Promise<LearningObjectDto | null> {
+  try {
+    const params = { _id: id };
+    const response = await dwengoAPI.get("/api/learningObject/getMetadata", { params });
+    const dwengoObj: DwengoLearningObject = response.data;
+    const mapped = mapDwengoToLocal(dwengoObj);
+
+    if (!isTeacher && (mapped.teacherExclusive || !mapped.available)) {
       return null;
     }
+    return mapped;
+  } catch (error: any) {
+    if (error.response && error.response.status === 404) {
+      return null;
+    }
+    console.error("Fout bij fetchDwengoObjectById:", error);
+    return null;
   }
+}
 
-/**
- * Zoekt Dwengo-objects op basis van een searchTerm.
- */
+// [NIEUW] Dwengo-object op basis van hruid, language, version
+export async function fetchDwengoObjectByHruidLangVersion(
+  hruid: string,
+  language: string,
+  version: number,
+  isTeacher: boolean
+): Promise<LearningObjectDto | null> {
+  try {
+    // Dwengo-API: /api/learningObject/getMetadata?hruid=...&language=...&version=...
+    const params = { hruid, language, version };
+    console.log("Dwengo params:", params);
+
+    const response = await dwengoAPI.get("/api/learningObject/getMetadata", { params });
+    const dwengoObj: DwengoLearningObject = response.data;
+    const mapped = mapDwengoToLocal(dwengoObj);
+
+    if (!isTeacher && (mapped.teacherExclusive || !mapped.available)) {
+      return null;
+    }
+    return mapped;
+  } catch (error: any) {
+    if (error.response && error.response.status === 404) {
+      return null;
+    }
+    console.error("Fout bij fetchDwengoObjectByHruidLangVersion:", error);
+    return null;
+  }
+}
+
+// Zoeken Dwengo-objects
 export async function searchDwengoObjects(
   isTeacher: boolean,
   searchTerm: string
@@ -197,10 +206,7 @@ export async function searchDwengoObjects(
   }
 }
 
-/**
- * Haal leerobjecten op voor een leerpad (Dwengo),
- * alleen Dwengo-logica hier.
- */
+// Haal leerobjecten op voor een leerpad (Dwengo)
 export async function getDwengoObjectsForPath(
   pathId: string,
   isTeacher: boolean

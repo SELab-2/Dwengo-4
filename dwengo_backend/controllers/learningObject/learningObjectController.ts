@@ -4,7 +4,8 @@ import {
   getLearningObjectById,
   searchLearningObjects,
   getLearningObjectsForPath,
-
+  // [NIEUW] importeer de nieuwe service-functie:
+  getLearningObjectByHruidLangVersion,
 } from "../../services/combinedLearningObjectService";
 import { LearningObjectDto } from "../../services/dwengoLearningObjectService";
 
@@ -20,6 +21,7 @@ function userIsTeacherOrAdmin(req: AuthenticatedRequest): boolean {
   return role === "TEACHER" || role === "ADMIN";
 }
 
+// Haal alle leerobjecten (Dwengo + lokaal)
 export const getAllLearningObjectsController = async (
   req: AuthenticatedRequest,
   res: Response
@@ -34,6 +36,7 @@ export const getAllLearningObjectsController = async (
   }
 };
 
+// Haal één leerobject op (via :id)
 export const getLearningObjectController = async (
   req: AuthenticatedRequest,
   res: Response
@@ -53,6 +56,7 @@ export const getLearningObjectController = async (
   }
 };
 
+// Zoeken naar leerobjecten (Dwengo + lokaal)
 export const searchLearningObjectsController = async (
   req: AuthenticatedRequest,
   res: Response
@@ -68,6 +72,7 @@ export const searchLearningObjectsController = async (
   }
 };
 
+// Haal alle leerobjecten op die horen bij een specifiek leerpad (op basis van pathId)
 export const getLearningObjectsForPathController = async (
   req: AuthenticatedRequest,
   res: Response
@@ -80,5 +85,49 @@ export const getLearningObjectsForPathController = async (
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Fout bij ophalen leerobjecten voor leerpad (Dwengo)" });
+  }
+};
+
+// [NIEUW] Haal één leerobject op basis van hruid + language + version
+export const getLearningObjectByHruidLangVersionController = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  
+  try {
+    const { hruid, language, version } = req.query;
+    if (!hruid || !language || !version) {
+      res.status(400).json({
+        error: "Geef hruid, language en version op als queryparameters, bv. ?hruid=xxx&language=nl&version=2",
+      });
+      return;
+    }
+
+    const isTeacher: boolean = userIsTeacherOrAdmin(req);
+    const verNum = parseInt(version.toString(), 10);
+    if (isNaN(verNum)) {
+      res.status(400).json({ error: "Version moet een getal zijn." });
+      return;
+    }
+
+    // Servicecall
+    const lo = await getLearningObjectByHruidLangVersion(
+      hruid.toString(),
+      language.toString(),
+      verNum,
+      isTeacher
+    );
+
+    if (!lo) {
+      res.status(404).json({
+        error: "Geen leerobject gevonden (of je hebt geen toegang) met deze hruid-language-version",
+      });
+      return;
+    }
+
+    res.json(lo);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Fout bij ophalen leerobject op basis van hruid-language-version" });
   }
 };

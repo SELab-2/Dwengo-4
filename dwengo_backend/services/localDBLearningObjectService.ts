@@ -4,11 +4,6 @@
  */
 
 import { PrismaClient, LearningObject } from "@prisma/client";
-
-/**
- * Interface die overeenkomt met je “universele” leerobject DTO,
- * importeer dezelfde definitie als in dwengoLearningObjectService.ts
- */
 import { LearningObjectDto } from "./dwengoLearningObjectService";
 
 const prisma = new PrismaClient();
@@ -94,7 +89,6 @@ export async function searchLocalLearningObjects(
   };
 
   if (!isTeacher) {
-    // student => filter
     whereClause.AND = [{ teacherExclusive: false }, { available: true }];
   }
 
@@ -104,4 +98,30 @@ export async function searchLocalLearningObjects(
   });
 
   return localObjects.map((obj) => mapLocalToDto(obj, isTeacher));
+}
+
+// [NIEUW] Haal lokaal leerobject op via hruid+language+version
+export async function getLocalLearningObjectByHruidLangVersion(
+  hruid: string,
+  language: string,
+  version: number,
+  isTeacher: boolean
+): Promise<LearningObjectDto | null> {
+  const localObj = await prisma.learningObject.findUnique({
+    
+
+  
+     where: {
+       hruid,
+       language,
+       version,
+     },
+   });
+
+  if (!localObj) return null;
+
+  if (!isTeacher && (localObj.teacherExclusive || !localObj.available)) {
+    return null;
+  }
+  return mapLocalToDto(localObj, isTeacher);
 }
