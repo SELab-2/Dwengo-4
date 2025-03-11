@@ -21,13 +21,13 @@ const handleRequest = (handler: (req: AuthenticatedRequest, res: Response) => Pr
 
 export const createQuestionGeneral = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { assignmentId, learningPathId } = req.params;
-    const { title, text, teamId }: { title: string, text: string, teamId: number, studentId: number } = req.body;
+    const { title, text, teamId }: { title: string, text: string, teamId: number } = req.body;
     const studentId = req.user?.id;
     if (studentId === undefined) {
         res.status(400).json({ error: "Student ID is required" });
         return;
     }
-    const questionGeneral = await QuestionService.createQuestionGeneral(Number(assignmentId), title, text, teamId, studentId, "GENERAL", Number(learningPathId));
+    const questionGeneral = await QuestionService.createQuestionGeneral(Number(assignmentId), title, text, teamId, studentId, "GENERAL", learningPathId);
     res.status(201).json(questionGeneral);
 });
 
@@ -41,7 +41,7 @@ export const createQuestionSpecific = handleRequest(async (req: AuthenticatedReq
         res.status(400).json({ error: "Student ID is required" });
         return;
     }
-    const questionSpecific = await QuestionService.createQuestionSpecific(Number(assignmentId), title, Number(learningPathId), text, teamId, studentId, "SPECIFIC", learningObjectId);
+    const questionSpecific = await QuestionService.createQuestionSpecific(Number(assignmentId), title, learningPathId, text, teamId, studentId, "SPECIFIC", learningObjectId);
     res.status(201).json(questionSpecific);
 });
 

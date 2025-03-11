@@ -10,16 +10,11 @@ export default class QuestionService {
         if (!text || !teamId || !studentId || !type || !title) {
             throw new Error("Invalid input");
         }
-        //is student in team
-        if (!await prisma.team.findFirst({ where: { id: teamId, students: { some: { userId: studentId } } } })) {
-            throw new Error("Student is not in team");
-        }
 
-        //check if team has this assignment
-        if (!await prisma.teamAssignment.findFirst({ where: { teamId: teamId, assignmentId: assignmentId } })) {
-            throw new Error("Assignment not found in team");
-        }
-
+        await Promise.all([
+            prisma.assignment.findUniqueOrThrow({ where: { id: assignmentId } }),
+            prisma.team.findFirstOrThrow({ where: { id: teamId, students: { some: { userId: studentId } } } })
+        ]);
 
         return prisma.$transaction(async (prisma) => {
             const question = await prisma.question.create({
@@ -49,7 +44,7 @@ export default class QuestionService {
         }
 
         //check if user is in team or teacher in the question
-        const question = await prisma.question.findUnique({
+        const question = await prisma.question.findUniqueOrThrow({
             where: { id: questionId },
             include: {
                 team: {
@@ -62,9 +57,6 @@ export default class QuestionService {
 
         });
 
-        if (!question) {
-            throw new Error("Question not found");
-        }
         const isUserInTeam = question.team.students.some(student => student.userId === userId);
         const isUserTeacher = question.team.class.ClassTeacher.some(teacher => teacher.teacherId === userId);
         if (!isUserInTeam && !isUserTeacher) {
@@ -89,9 +81,7 @@ export default class QuestionService {
         }
 
         //Valid edit of question by id, userId and questionId
-        if (!await prisma.question.findUnique({ where: { id: questionId } })) {
-            throw new Error("Question not found or user is not in the team of the question");
-        }
+        await prisma.question.findUniqueOrThrow({ where: { id: questionId } })
 
         const question = await prisma.question.update({
             where: { id: questionId },
@@ -110,9 +100,7 @@ export default class QuestionService {
         }
 
         //Valid edit of questionMessage  by id, userId and questionId
-        if (!await prisma.questionMessage.findUnique({ where: { id: questionMessageId, userId: userId, questionId: questionId } })) {
-            throw new Error("Question message not found or user is not the author of the question message");
-        }
+        await prisma.questionMessage.findUniqueOrThrow({ where: { id: questionMessageId, userId: userId, questionId: questionId } });
 
         const question = await prisma.questionMessage.update({
             where: { id: questionMessageId },
@@ -123,31 +111,22 @@ export default class QuestionService {
         return question;
     }
 
-    static async createQuestionSpecific(assignmentId: number, title: string, learningPathId: number, text: string, teamId: number, studentId: number,
+    static async createQuestionSpecific(assignmentId: number, title: string, learningPathId: string, text: string, teamId: number, studentId: number,
         type: QuestionType, learningObjectId: string): Promise<QuestionSpecific> {
-        if (!await prisma.learningObject.findUnique({ where: { id: learningObjectId } })) {
-            throw new Error("Learning object not found");
-        }
 
-        if (!await prisma.assignment.findUnique({ where: { id: assignmentId } })) {
-            throw new Error("Assignment not found");
-        }
-        //get learning path id from learning object
-        const learningPathIdDb = (await prisma.learningPathNode.findFirst({
-            where: {
-                nodeId: parseInt(learningObjectId)
-            },
-            include: {
-                learningPath: true  // Dit haalt de gekoppelde LearningPath op
-            }
-        }))?.learningPath?.id ?? null;
+        //checks if learning object, assignment, learning path exist
+        const [, , learningPathNode,] = await Promise.all([
+            prisma.learningObject.findUniqueOrThrow({ where: { id: learningObjectId } }),
+            prisma.assignment.findUniqueOrThrow({ where: { id: assignmentId } }),
+            prisma.learningPathNode.findFirstOrThrow({ where: { learningPathId: learningPathId, learningObjectId: learningObjectId } }),
+            prisma.assignment.findFirstOrThrow({ where: { id: assignmentId, learningPathId: learningPathId } })
+        ]);
+
+        const learningPathIdDb = learningPathNode?.learningPathId ?? null;
+
         //check if learning path exists
-        if (!learningPathId || learningPathId !== learningPathIdDb) {
+        if (learningPathId !== learningPathIdDb) {
             throw new Error("Learning path not found");
-        }
-        //check if learning path is in assignment
-        if (!await prisma.assignment.findFirst({ where: { id: assignmentId, learningPathId: learningPathId } })) {
-            throw new Error("Learning path not found in assignment");
         }
 
         //transaction: rollbacks the changes if one of the queries fails
@@ -164,15 +143,12 @@ export default class QuestionService {
     }
 
     static async createQuestionGeneral(assignmentId: number, title: string, text: string, teamId: number,
-        studentId: number, type: QuestionType, learningPathId: number):
+        studentId: number, type: QuestionType, learningPathId: string):
         Promise<QuestionGeneral> {
-        if (!await prisma.assignment.findUnique({ where: { id: assignmentId } })) {
-            throw new Error("Assignment not found");
-        }
 
-        if (!await prisma.assignment.findFirst({ where: { id: assignmentId, learningPathId: learningPathId } })) {
-            throw new Error("Learning path not found in assignment");
-        }
+        //checks if assignment, learning path exist
+        await prisma.assignment.findFirstOrThrow({ where: { id: assignmentId, learningPathId: learningPathId } })
+
 
         //transaction: rollbacks the changes if one of the queries fails
         return prisma.$transaction(async (prisma) => {
@@ -190,9 +166,7 @@ export default class QuestionService {
     //gets all questions from a team
     static async getQuestionsTeam(teamId: number): Promise<Question[]> {
 
-        if (!await prisma.team.findUnique({ where: { id: teamId } })) {
-            throw new Error("Team not found");
-        }
+        await prisma.team.findUniqueOrThrow({ where: { id: teamId } })
 
 
         const questions = await prisma.question.findMany({
@@ -207,9 +181,7 @@ export default class QuestionService {
     //get questions from same class
     static async getQuestionsClass(classId: number): Promise<Question[]> {
 
-        if (!await prisma.class.findUnique({ where: { id: classId } })) {
-            throw new Error("Class not found");
-        }
+        await prisma.class.findUniqueOrThrow({ where: { id: classId } })
 
         const questions = await prisma.question.findMany({
             where: {
@@ -226,8 +198,8 @@ export default class QuestionService {
     static async getQuestionsAssignment(assignmentId: number, classId: number): Promise<Question[]> {
         //check if assignment, class and teacher exist
         const [assignment, classEntity] = await Promise.all([
-            prisma.assignment.findUnique({ where: { id: assignmentId } }),
-            prisma.class.findUnique({ where: { id: classId } }),
+            prisma.assignment.findUniqueOrThrow({ where: { id: assignmentId } }),
+            prisma.class.findUniqueOrThrow({ where: { id: classId } }),
         ]);
 
         if (!assignment) {
@@ -253,23 +225,17 @@ export default class QuestionService {
 
     //get speficif question by id
     static async getQuestion(questionId: number): Promise<Question> {
-        const question = await prisma.question.findUnique({
+        const question = await prisma.question.findUniqueOrThrow({
             where: { id: questionId }
         });
-
-        if (!question) {
-            throw new Error("Question not found");
-        }
-
 
         return question;
     }
 
     //get questions from same Question
     static async getQuestionMessages(questionId: number): Promise<QuestionMessage[]> {
-        if (!await prisma.question.findUnique({ where: { id: questionId } })) {
-            throw new Error("Question not found");
-        }
+        await prisma.question.findUniqueOrThrow({ where: { id: questionId } })
+
         const questionConv = await prisma.questionMessage.findMany({
             where: {
                 questionId: questionId
@@ -285,9 +251,7 @@ export default class QuestionService {
 
     //delete question by id
     static async deleteQuestion(questionId: number): Promise<Question> {
-        if (!await prisma.question.findUnique({ where: { id: questionId } })) {
-            throw new Error("Question not found");
-        }
+        await prisma.question.findUniqueOrThrow({ where: { id: questionId } })
         // Then delete the question head
         const question = await prisma.question.delete({
             where: { id: questionId }

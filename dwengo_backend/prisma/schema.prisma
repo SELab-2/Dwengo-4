@@ -177,7 +177,7 @@ model LearningPath {
   creatorId       Int
   creator         Teacher           @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator")
   assignments     Assignment[]
-  GeneralQuestion GeneralQuestion[]
+  questionGeneral QuestionGeneral[]
 }
 
 model LearningPathNode {
@@ -357,8 +357,8 @@ model QuestionSpecific {
 }
 
 model QuestionGeneral {
-  questionId       Int @unique
-  learningPathId Int
+  questionId     Int @unique
+  learningPathId String
 
   // Een QuestionSpecific is een vraag
   question     Question     @relation(fields: [questionId], references: [id])

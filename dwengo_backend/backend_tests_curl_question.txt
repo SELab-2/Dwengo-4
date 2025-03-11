@@ -64,7 +64,7 @@ vanaf nu, steek de token in de auth header van de curl commando’s:
 
 S
 #5. Een vraag bij een leerpad door een student
-curl -X POST http://localhost:5000/assignment/1/learningPath/1/question \
+curl -X POST http://localhost:5000/question/assignment/1/learningPath/1/ \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzQxNjIyMDY5LCJleHAiOjE3NDIyMjY4Njl9.wN60MrkZqRFka5_17xzOakhezFSQ_qjj0Ky9BnAsZMo" \
   -d '{
@@ -76,7 +76,7 @@ curl -X POST http://localhost:5000/assignment/1/learningPath/1/question \
 
 S
 #6. Een vraag bij een leerobject
-curl -X POST http://localhost:5000/assignment/1/learningPath/1/learningObject/1/question \
+curl -X POST http://localhost:5000/question/assignment/1/learningPath/1/learningObject/1 \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzQxNjIyMDY5LCJleHAiOjE3NDIyMjY4Njl9.wN60MrkZqRFka5_17xzOakhezFSQ_qjj0Ky9BnAsZMo" \
   -d '{
@@ -107,7 +107,7 @@ curl -X PATCH http://localhost:5000/question/1 \
 
 S + T
 #9. Een vraagmssg bijwerken
-curl -X PATCH http://localhost:5000/question/1/conversation/1 \
+curl -X PATCH http://localhost:5000/question/1/message/1 \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzQxNjIzODAzLCJleHAiOjE3NDIyMjg2MDN9.mPdjC7_Ht99pfZDF5pBeH5Qpa-9k1NVJ7GZmWEj9bvs" \
   -d '{
@@ -122,17 +122,17 @@ curl -X GET http://localhost:5000/question/1 \
 
 S
 #11. Vragen van een team ophalen
-curl -X GET http://localhost:5000/team/1/questions \
+curl -X GET http://localhost:5000/question/team/1 \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzQxNjIyMDY5LCJleHAiOjE3NDIyMjY4Njl9.wN60MrkZqRFka5_17xzOakhezFSQ_qjj0Ky9BnAsZMo"
 
 T
 #12. Vragen van een klas ophalen
-curl -X GET http://localhost:5000/class/1/questions \
+curl -X GET http://localhost:5000/question/class/1 \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzQxNjIzODAzLCJleHAiOjE3NDIyMjg2MDN9.mPdjC7_Ht99pfZDF5pBeH5Qpa-9k1NVJ7GZmWEj9bvs"
 
 T
 #13. Vragen bij een opdracht ophalen
-curl -X GET http://localhost:5000/assignment/1/class/1/questions \
+curl -X GET http://localhost:5000/question/assignment/1/class/1/ \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzQxNjIzODAzLCJleHAiOjE3NDIyMjg2MDN9.mPdjC7_Ht99pfZDF5pBeH5Qpa-9k1NVJ7GZmWEj9bvs"
 
 S + T

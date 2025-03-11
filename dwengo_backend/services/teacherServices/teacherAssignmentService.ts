@@ -21,9 +21,11 @@ export default class TeacherAssignmentService {
         learningPathId,
         classAssignments: {
           create: {
-            classId, // This will automatically link to the created Assignment
+            classId // This will automatically link to the created Assignment
+
           },
         },
+        deadline
       },
     });
   }

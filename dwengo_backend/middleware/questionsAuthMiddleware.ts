@@ -1,27 +1,9 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
-import jwt from "jsonwebtoken";
-import { PrismaClient, Role, Teacher, Student, User } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
 
 const prisma = new PrismaClient();
-
-interface JwtPayload {
-    id: number;
-}
-
-// Definieer een interface voor de geauthenticeerde gebruiker,
-// met optionele velden voor teacher en student
-interface AuthenticatedUser {
-    id: number;
-    role: Role;
-    teacher?: Teacher;
-    student?: Student;
-}
-
-// Breid het Express Request-type uit zodat we een getypeerde user-property hebben
-interface AuthenticatedRequest extends Request {
-    user?: AuthenticatedUser;
-}
 
 export const authorizeStudentInTeamWithAssignment = asyncHandler(
     async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
@@ -42,11 +24,6 @@ export const authorizeStudentInTeamWithAssignment = asyncHandler(
             return;
         }
 
-        // Als het geen GET-request is, controleer of de studentId in de request overeenkomt met de studentId van de gebruiker in de body
-        if (req.method !== "GET" && student.userId != req.body.studentId) {
-            res.status(403).json({ error: "Studentgegevens komen niet overeen." });
-            return;
-        }
         const team = await prisma.team.findFirst({
             where: {
                 students: {
@@ -77,11 +54,6 @@ export const authorizeQuestion = asyncHandler(
 
         if (!req.user) {
             res.status(401).json({ error: "Niet geautoriseerd." });
-            return;
-        }
-
-        if (req.method === "POST" && req.user.id != req.body.userId) {
-            res.status(403).json({ error: "Gebruiker komt niet overeen." });
             return;
         }
 
@@ -125,11 +97,6 @@ export const authorizeOwnerOfQuestionMessage = asyncHandler(
 
         if (!req.user) {
             res.status(401).json({ error: "Niet geautoriseerd." });
-            return;
-        }
-
-        if (req.method === "PATCH" && req.user.id != req.body.userId) {
-            res.status(403).json({ error: "Gebruiker komt niet overeen." });
             return;
         }
 
