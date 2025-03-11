@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import LocalLearningObjectService, { LocalLearningObjectData } from "../../services/localLearningObjectService";
-import { AuthenticatedRequest } from "../../middleware/teacherAuthMiddleware";
+import LocalLearningObjectService, {
+  LocalLearningObjectData,
+} from "../../services/localLearningObjectService";
+import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 
 /**
  * Maak een nieuw leerobject.
@@ -18,7 +20,10 @@ export const createLocalLearningObject = asyncHandler(
     const data: LocalLearningObjectData = req.body;
     // Eventuele extra validatie (bv. velden checken) kan hier
 
-    const createdLO = await LocalLearningObjectService.createLearningObject(teacherId, data);
+    const createdLO = await LocalLearningObjectService.createLearningObject(
+      teacherId,
+      data
+    );
     res.status(201).json({
       message: "Leerobject aangemaakt",
       learningObject: createdLO,
@@ -38,7 +43,10 @@ export const getLocalLearningObjects = asyncHandler(
       throw new Error("Geen geldige teacher-gebruiker.");
     }
 
-    const objects = await LocalLearningObjectService.getAllLearningObjectsByTeacher(teacherId);
+    const objects =
+      await LocalLearningObjectService.getAllLearningObjectsByTeacher(
+        teacherId
+      );
     res.json(objects);
   }
 );
@@ -99,7 +107,10 @@ export const updateLocalLearningObject = asyncHandler(
       throw new Error("Je bent niet de eigenaar van dit leerobject");
     }
 
-    const updated = await LocalLearningObjectService.updateLearningObject(id, data);
+    const updated = await LocalLearningObjectService.updateLearningObject(
+      id,
+      data
+    );
     res.json({
       message: "Leerobject bijgewerkt",
       learningObject: updated,
