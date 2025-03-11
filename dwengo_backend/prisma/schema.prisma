@@ -78,7 +78,8 @@ model Student {
   // Relaties naar klassen (veel-op-veel)
   classes ClassStudent[]
 
-  teams  Team[] // Impliciete many-to-many relatie met Team
+  // Teams waarvan de student lid is
+  Team Team[]
 }
 
 model Class {
@@ -448,8 +449,8 @@ model Team {
 
   // Een team bestaat uit studenten
   students        Student[]
-  // Een verwijzing naar de assignments van dit team
-  teamAssignments TeamAssignment[]
+  // Een verwijzing naar de assignment van dit team
+  teamAssignment TeamAssignment?
 
   // De indieningen van een team
   submissions Submission[]
@@ -457,7 +458,7 @@ model Team {
 }
 
 model TeamAssignment {
-  teamId       Int
+  teamId       Int  @unique
   assignmentId Int
 
   team       Team       @relation(fields: [teamId], references: [id])
