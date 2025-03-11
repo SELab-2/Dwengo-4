@@ -9,5 +9,4 @@ router.get('assignment/:assignmentId/', protectStudent, controller.getSubmission
 router.post('assignment/:assignmentId/evaluation/:evaluationId', protectStudent, controller.createSubmission)
 router.get('assignment/:assignmentId/evaluation/:evaluationId', protectStudent, controller.getSubmissionsForEvaluation)
 
-
 export default router;
