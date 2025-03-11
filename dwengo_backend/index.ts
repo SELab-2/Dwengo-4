@@ -5,6 +5,8 @@ import teacherAuthRoutes from "./routes/teacher/teacherAuthRoutes";
 import studentAuthRoutes from "./routes/student/studentAuthRoutes";
 import learningObjectRoutes from "./routes/learningObject/learningObjectRoutes";
 import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
+import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearningObjectRoutes";
+
 import assignmentRoutes from "./routes/assignmentRoutes";
 import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
 import studentTeamRoutes from "./routes/student/studentTeamRoutes";
@@ -36,6 +38,7 @@ app.use("/teacher/classes", teacherClassRoutes);
 
 // Routes voor Teacher (Auth)
 app.use("/teacher/auth", teacherAuthRoutes);
+app.use("/teacher/learningObjects", teacherLocalLearningObjectRoutes);
 
 // Routes voor Student (Auth)
 app.use("/student/auth", studentAuthRoutes)
