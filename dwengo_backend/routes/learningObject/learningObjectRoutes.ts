@@ -4,25 +4,26 @@ import {
   getLearningObjectController,
   searchLearningObjectsController,
   getLearningObjectsForPathController,
+  // [NIEUW] importeer de extra controller-functie:
+  getLearningObjectByHruidLangVersionController,
 } from "../../controllers/learningObject/learningObjectController";
 import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
 
 const router = express.Router();
 
-// Bescherm alle endpoints zodat een user (met role) aanwezig is.
+// Bescherm alle endpoints, user moet ingelogd zijn (student/teacher/admin)
 router.use(protectAnyUser);
 
-// GET /learningObjects – Haal alle leerobjecten op.
 router.get("/", getAllLearningObjectsController);
-
-// GET /learningObjects/search?q=blabla – Zoek leerobjecten.
 router.get("/search", searchLearningObjectsController);
-
-// GET /learningObjects/path/:pathId – Haal leerobjecten op voor een specifiek leerpad.
 router.get("/path/:pathId", getLearningObjectsForPathController);
+// [NIEUW] Extra endpoint om op hruid+language+version te zoeken
+// Voorbeeld:
+//   GET /learningObjects/lookup?hruid=opdracht_leds&language=nl&version=2
+router.get("/lookup", getLearningObjectByHruidLangVersionController);
 
-// GET /learningObjects/:id – Haal een specifiek leerobject op.
 router.get("/:id", getLearningObjectController);
 
-export default router;
 
+
+export default router;
