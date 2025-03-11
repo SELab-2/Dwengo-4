@@ -45,7 +45,7 @@ export const protectTeacher = asyncHandler(
         });
 
         if (!teacher) {
-          // Directly return the error response instead of throwing
+          // Directly return the error response instead of throwingcd
           res.status(401).json({ error: "Leerkracht niet gevonden." });
           return;
         }
