@@ -109,4 +109,27 @@ export default class submissionService {
             }
         });
     }
+
+    static async teacherGetSubmissionsForTeam(teamId: number, teacherId: number) {
+        return prisma.submission.findMany({
+            where: {
+                team: {
+                    id: teamId,
+                },
+                assignment: {
+                    classAssignments: {
+                        some: {
+                            class: {
+                                ClassTeacher: {
+                                    some: {
+                                        teacherId: teacherId,
+                                    }
+                                }
+                            }
+                        }
+                    },
+                }
+            }
+        });
+    }
 }

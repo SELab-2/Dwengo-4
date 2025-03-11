@@ -12,4 +12,13 @@ export default class TeacherSubmissionController {
 
         res.json(submissions);
     }
+
+    static async getSubmissionsForTeam(req: AuthenticatedRequest, res: Response) {
+        const teamId: number = Number(req.params.teamId);
+        const teacherId: number = Number(req.user?.id);
+
+        const submissions: Submission[] = await service.teacherGetSubmissionsForTeam(teamId, teacherId);
+
+        res.json(submissions);
+    }
 }
