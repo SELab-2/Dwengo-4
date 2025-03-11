@@ -33,19 +33,18 @@ export const updateJoinRequestStatus = handleRequest(async (req: AuthenticatedRe
     const classId: number = parseInt(req.params.classId);
     const requestId: number = parseInt(req.params.requestId);
     const { action }: { action: string } = req.body; // 'approve' or 'deny' from the request body
+    const teacherId: number = req.user!.id as number;
 
     if (!action || (action !== 'approve' && action !== 'deny')) {
         res.status(400).json({ error: "Action must be 'approve' or 'deny'" });
     }
 
-    // TODO: check if the teacher is allowed to approve/deny the request (see what happens in the tests)
-
     if (action === 'approve') {
-        await joinRequestService.approveRequestAndAddStudentToClass(requestId, classId);
-        res.status(200).json({ message: "Join request approved." });
+        const joinRequest: JoinRequest = await joinRequestService.approveRequestAndAddStudentToClass(requestId, teacherId, classId);
+        res.status(200).json({ joinRequest, message: "Join request approved." });
     } else if (action === 'deny') {
-        await joinRequestService.denyJoinRequest(requestId, classId);
-        res.status(200).json({ message: "Join request denied." });
+        const joinRequest: JoinRequest = await joinRequestService.denyJoinRequest(requestId, teacherId, classId);
+        res.status(200).json({ joinRequest, message: "Join request denied." });
     }
 });
 
@@ -54,7 +53,8 @@ export const updateJoinRequestStatus = handleRequest(async (req: AuthenticatedRe
  */
 export const getJoinRequestsByClass = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const classId: number = parseInt(req.params.classId);
-    const joinRequests: JoinRequest[] = await joinRequestService.getJoinRequestsByClass(classId);
+    const teacherId: number = req.user!.id as number;
+    const joinRequests: JoinRequest[] = await joinRequestService.getJoinRequestsByClass(teacherId, classId);
     res.status(200).json(joinRequests);
 });
 

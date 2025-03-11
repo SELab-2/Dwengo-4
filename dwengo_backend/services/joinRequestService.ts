@@ -2,7 +2,7 @@ import {PrismaClient, JoinRequestStatus, JoinRequest} from "@prisma/client";
 import classService from "./classService";
 import {ClassWithLinks} from "./classService";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { BadRequestError, NotFoundError } from "../errors/errors";
+import { AccesDeniedError, BadRequestError, NotFoundError } from "../errors/errors";
 
 const prisma = new PrismaClient();
 
@@ -17,16 +17,26 @@ export default class joinRequestService {
         return classroom;
     }
 
-    private static async updateAndValidateRequest(requestId: number, classId: number, status: JoinRequestStatus): Promise<JoinRequest> {
+    private static async updateAndValidateRequest(requestId: number, teacherId: number, classId: number, status: JoinRequestStatus): Promise<JoinRequest> {
+        // check if teacher is allowed to approve/deny the request
+        const isTeacher: boolean = await classService.isTeacherOfClass(classId, teacherId);
+        if (!isTeacher) {
+            throw new AccesDeniedError(`Teacher ${teacherId} is not a teacher of class ${classId}`);
+        }
+
+        const joinRequest: JoinRequest | null = await prisma.joinRequest.findFirst({
+            where: { requestId, classId, status: JoinRequestStatus.PENDING },
+        });
+        if (!joinRequest) {
+            throw new NotFoundError(`Join request ${requestId} for class ${classId} not found/not pending.`);
+        }
+        
         // Update the join request status
         const updatedRequest = await prisma.joinRequest.update({
-            where: { requestId, classId },
+            where: { requestId },
             data: { status: status },
         });
 
-        if (!updatedRequest) {
-            throw new NotFoundError(`Join request ${requestId} for class ${classId} not found.`);
-        }
         return updatedRequest;
     }
 
@@ -72,26 +82,30 @@ export default class joinRequestService {
         }
     };
 
-    static async approveRequestAndAddStudentToClass(requestId: number, classId: number): Promise<void> {
+    static async approveRequestAndAddStudentToClass(requestId: number, teacherId: number, classId: number): Promise<JoinRequest> {
         try {
-            const updatedRequest: JoinRequest = await this.updateAndValidateRequest(requestId, classId, JoinRequestStatus.APPROVED);
+            const updatedRequest: JoinRequest = await this.updateAndValidateRequest(requestId, teacherId, classId, JoinRequestStatus.APPROVED);
 
             // Add the student to the class
             await classService.addStudentToClass(updatedRequest.studentId, classId);
+            return updatedRequest;
         } catch (error) {
             this.handleError(error, `Error approving join request ${requestId} for class ${classId}`);
+            throw error;
         }
     };
 
-    static async denyJoinRequest(requestId: number, classId: number): Promise<void> {
+    static async denyJoinRequest(requestId: number, teacherId: number, classId: number): Promise<JoinRequest> {
         try {
-            await this.updateAndValidateRequest(requestId, classId, JoinRequestStatus.DENIED);
+            return await this.updateAndValidateRequest(requestId, teacherId, classId, JoinRequestStatus.DENIED);
         } catch (error) {
             this.handleError(error, `Error denying join request ${requestId} for class ${classId}`);
+            throw error;
         }
     };
 
-    static async getJoinRequestsByClass(classId: number): Promise<JoinRequest[]> {
+    // TODO: only teacher of class should be able to see the join requests for the class
+    static async getJoinRequestsByClass(teacherId: number, classId: number): Promise<JoinRequest[]> {
         try {
             return await prisma.joinRequest.findMany({
                 where: { classId },

@@ -1,5 +1,5 @@
 import prisma from './prisma';
-import { User, Class, Invite, Teacher, JoinRequestStatus, Student } from '@prisma/client';
+import { User, Class, Invite, Teacher, JoinRequestStatus, Student, JoinRequest } from '@prisma/client';
 import * as jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
@@ -85,6 +85,16 @@ export async function addStudentToClass(studentId: number, classId: number): Pro
         data: {
             studentId,
             classId
+        }
+    });
+}
+
+export async function createJoinRequest(studentId: number, classId: number): Promise<JoinRequest> {
+    return await prisma.joinRequest.create({
+        data: {
+            studentId,
+            classId,
+            status: JoinRequestStatus.PENDING
         }
     });
 }
