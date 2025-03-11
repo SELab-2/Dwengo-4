@@ -4,12 +4,10 @@ import {
   getLearningObjectById,
   searchLearningObjects,
   getLearningObjectsForPath,
-  LearningObjectDto,
-} from "../../services/learningObjectService";
 
-/**
- * Een type voor een Request met een getypeerde user-property.
- */
+} from "../../services/combinedLearningObjectService";
+import { LearningObjectDto } from "../../services/dwengoLearningObjectService";
+
 interface AuthenticatedRequest extends Request {
   user?: {
     id: number;
@@ -17,18 +15,11 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
-/**
- * Bepaalt of de ingelogde gebruiker TEACHER of ADMIN is.
- */
 function userIsTeacherOrAdmin(req: AuthenticatedRequest): boolean {
   const role: string | undefined = req.user?.role;
   return role === "TEACHER" || role === "ADMIN";
 }
 
-/**
- * Haalt alle leerobjecten op (Dwengo + Lokaal)
- * Studenten zien enkel teacherExclusive=false + available=true (zowel Dwengo als lokaal).
- */
 export const getAllLearningObjectsController = async (
   req: AuthenticatedRequest,
   res: Response
@@ -43,12 +34,6 @@ export const getAllLearningObjectsController = async (
   }
 };
 
-/**
- * Haalt één leerobject op op basis van het ID.
- * - Probeert eerst Dwengo
- * - Als niet gevonden, zoekt in de lokale DB.
- * - Filtert teacherExclusive/available als req.user geen teacher is.
- */
 export const getLearningObjectController = async (
   req: AuthenticatedRequest,
   res: Response
@@ -68,10 +53,6 @@ export const getLearningObjectController = async (
   }
 };
 
-/**
- * Zoekt naar leerobjecten (Dwengo + Lokaal).
- * Queryparameter ?q= wordt als searchTerm doorgegeven.
- */
 export const searchLearningObjectsController = async (
   req: AuthenticatedRequest,
   res: Response
@@ -87,11 +68,6 @@ export const searchLearningObjectsController = async (
   }
 };
 
-/**
- * Haalt alle leerobjecten op die bij een leerpad (Dwengo) horen.
- * (Voorlopig alleen Dwengo-nodes. Als je eigen leerpaden hebt, kun je
- *  soortgelijke logica toevoegen in de service.)
- */
 export const getLearningObjectsForPathController = async (
   req: AuthenticatedRequest,
   res: Response

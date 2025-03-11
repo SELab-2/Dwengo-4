@@ -24,13 +24,13 @@ router
 
 /**
  * GET    /teacher/learningObjects/:id -> 1 leerobject ophalen
- * PUT    /teacher/learningObjects/:id -> updaten
+ * PATCh   /teacher/learningObjects/:id -> updaten (gedeeltelijk)
  * DELETE /teacher/learningObjects/:id -> verwijderen
  */
 router
   .route("/:id")
   .get(getLocalLearningObjectById)
-  .put(updateLocalLearningObject)
+  .patch(updateLocalLearningObject)
   .delete(deleteLocalLearningObject);
 
 export default router;

@@ -1,0 +1,107 @@
+/**
+ * localDBLearningObjectService.ts
+ * Logica om leerobjecten uit de lokale database (via Prisma) op te halen, aan te maken, te updaten, etc.
+ */
+
+import { PrismaClient, LearningObject } from "@prisma/client";
+
+/**
+ * Interface die overeenkomt met je “universele” leerobject DTO,
+ * importeer dezelfde definitie als in dwengoLearningObjectService.ts
+ */
+import { LearningObjectDto } from "./dwengoLearningObjectService";
+
+const prisma = new PrismaClient();
+
+/**
+ * Converteert een Prisma LearningObject record naar ons LearningObjectDto
+ * (origin = "local")
+ */
+function mapLocalToDto(localObj: LearningObject, isTeacher: boolean): LearningObjectDto {
+  return {
+    id: localObj.id,
+    uuid: localObj.uuid,
+    hruid: localObj.hruid,
+    version: localObj.version,
+    language: localObj.language,
+    title: localObj.title,
+    description: localObj.description,
+    contentType: localObj.contentType,
+    keywords: localObj.keywords,
+    targetAges: localObj.targetAges,
+    teacherExclusive: localObj.teacherExclusive,
+    skosConcepts: localObj.skosConcepts,
+    copyright: localObj.copyright,
+    licence: localObj.licence,
+    difficulty: localObj.difficulty,
+    estimatedTime: localObj.estimatedTime,
+    available: localObj.available,
+    contentLocation: localObj.contentLocation ?? "",
+    createdAt: localObj.createdAt.toISOString(),
+    updatedAt: localObj.updatedAt.toISOString(),
+    origin: "local",
+  };
+}
+
+/**
+ * Haal alle lokale leerobjecten op,
+ * filter op teacherExclusive/available als de gebruiker geen teacher is.
+ */
+export async function getLocalLearningObjects(
+  isTeacher: boolean
+): Promise<LearningObjectDto[]> {
+  const whereClause = isTeacher
+    ? {}
+    : { teacherExclusive: false, available: true };
+
+  const localObjects = await prisma.learningObject.findMany({
+    where: whereClause,
+    orderBy: { createdAt: "desc" },
+  });
+
+  return localObjects.map((obj) => mapLocalToDto(obj, isTeacher));
+}
+
+/**
+ * Haal 1 lokaal leerobject op (check of user het mag zien).
+ */
+export async function getLocalLearningObjectById(
+  id: string,
+  isTeacher: boolean
+): Promise<LearningObjectDto | null> {
+  const localObj = await prisma.learningObject.findUnique({ where: { id } });
+  if (!localObj) return null;
+
+  if (!isTeacher && (localObj.teacherExclusive || !localObj.available)) {
+    return null;
+  }
+  return mapLocalToDto(localObj, isTeacher);
+}
+
+/**
+ * Doorzoeken van de lokale DB op basis van searchTerm in de title/description/keywords.
+ */
+export async function searchLocalLearningObjects(
+  isTeacher: boolean,
+  searchTerm: string
+): Promise<LearningObjectDto[]> {
+  const whereClause: any = {
+    OR: [
+      { title: { contains: searchTerm, mode: "insensitive" } },
+      { description: { contains: searchTerm, mode: "insensitive" } },
+      { keywords: { has: searchTerm } },
+    ],
+  };
+
+  if (!isTeacher) {
+    // student => filter
+    whereClause.AND = [{ teacherExclusive: false }, { available: true }];
+  }
+
+  const localObjects = await prisma.learningObject.findMany({
+    where: whereClause,
+    orderBy: { createdAt: "desc" },
+  });
+
+  return localObjects.map((obj) => mapLocalToDto(obj, isTeacher));
+}
