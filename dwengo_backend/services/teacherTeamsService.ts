@@ -1,4 +1,4 @@
-import {ClassAssignment, ClassStudent, PrismaClient, Student, Team} from "@prisma/client";
+import {ClassAssignment, ClassStudent, PrismaClient, Student, Team, User} from "@prisma/client";
 import {IdentifiableTeamDivision, TeamDivision} from "../interfaces/extendedTypeInterfaces"
 import _ from "lodash";
 
@@ -37,6 +37,7 @@ export const createTeamsInAssignment = async (
 };
 
 // Helper function for createTeamsInAssignment
+// This function creates a Team with a given teamname
 async function createTeam(teamName: string): Promise<Team> {
     return prisma.team.create({
         data: {
@@ -46,6 +47,7 @@ async function createTeam(teamName: string): Promise<Team> {
 }
 
 // Helper function for createTeamsInAssignment
+// This function assigns an Assignment to a Team
 async function giveAssignmentToTeam(teamId: number, assignmentId: number): Promise<Team> {
     return prisma.team.update({
         where: { id: teamId },
@@ -61,6 +63,7 @@ async function giveAssignmentToTeam(teamId: number, assignmentId: number): Promi
 }
 
 // Helper function for createTeamsInAssignment
+// This function updates the list of students in a Team
 async function assignStudentsToTeam(teamId: number, studentIds: number[]): Promise<void> {
     for (const studentId of studentIds) {
         // Ga eerst na of deze student en dit team zelfs bestaan
@@ -85,7 +88,7 @@ async function assignStudentsToTeam(teamId: number, studentIds: number[]): Promi
 // createTeamsInAssignment. Want createTeamsInAssignment verwacht al een geldige indeling, daar wordt ook
 // door middleware op gecontroleerd.
 // *//
-async function divideClassIntoTeams(teamSize: number, classId: number): Promise<TeamDivision[]> {
+async function randomlyDivideClassIntoTeams(teamSize: number, classId: number): Promise<TeamDivision[]> {
 
     const students: ClassStudent[] = await prisma.classStudent.findMany({
         where: {classId: classId},
@@ -106,7 +109,58 @@ async function divideClassIntoTeams(teamSize: number, classId: number): Promise<
     for (let i: number = 0; i < shuffledStudents.length; i += teamSize) {
         teams.push({
             teamName: `Team ${i+1}`,
+            // Select "teamSize" amount of students via slicing
             studentIds: shuffledStudents.slice(i, i + teamSize),
+        });
+    }
+
+    return teams;
+}
+
+
+// Does the same as "randomlyDivideClassIntoTeams" but sorts the students alphabetically
+async function divideClassIntoAlphabeticalTeams(teamSize: number, classId: number): Promise<TeamDivision[]> {
+    // This lets TypeScript know what is happening when assigning types to the variables in the sort function
+    interface StudentWithUser extends Student {
+        user: User;
+    }
+
+    // First fetch all the students in the given class
+    const students: (Student & { user: User })[] = await prisma.student.findMany({
+        where: {
+            classes: {
+                some: {
+                    classId: classId,
+                },
+            },
+        },
+        include: { user: true },
+    });
+
+    // Check if the class is not empty
+    if (!students || students.length === 0) {
+        throw new Error(`No students found for ${classId}`);
+    }
+
+    // Sort students alphabetically by name
+    const sortedStudents: StudentWithUser[] = students.sort((a: StudentWithUser, b: StudentWithUser): number => {
+        // Sort alphabetically based on the user's last name
+        const lastNameComparison: number = a.user.lastName.localeCompare(b.user.lastName);
+
+        // If last names are the same, compare by first name
+        return lastNameComparison !== 0 ? lastNameComparison : a.user.firstName.localeCompare(b.user.firstName);
+    });
+
+    // Extract sorted student IDs
+    const studentIds: number[] = sortedStudents.map((st: Student): number => st.userId);
+
+    const teams: TeamDivision[] = [];
+
+    for (let i: number = 0; i < studentIds.length; i += teamSize) {
+        teams.push({
+            teamName: `Team ${Math.floor(i / teamSize) + 1}`,
+            // Select "teamSize" amount of students via slicing
+            studentIds: studentIds.slice(i, i + teamSize),
         });
     }
 
