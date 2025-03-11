@@ -53,9 +53,8 @@ model Teacher {
   user   User @relation(fields: [userId], references: [id])
 
   // Antwoorden en feedback
-  teacherAnswers   Answer[]
   teacherFeedbacks Feedback[]
-
+  teacherAnswers   Answer[]
   // Uitnodigingen om een klas mee te beheren
   invite           Invite[]
 
@@ -117,9 +116,9 @@ model ClassTeacher {
   teacherId Int
   classId   Int
 
-  teacher Teacher @relation(fields: [teacherId], references: [userId])
-  class   Class   @relation(fields: [classId], references: [id])
-  invites Invite[]  // the invites that the teacher has sent
+  teacher Teacher  @relation(fields: [teacherId], references: [userId])
+  class   Class    @relation(fields: [classId], references: [id])
+  invites Invite[] // the invites that the teacher has sent
 
   @@id([teacherId, classId])
 }
@@ -139,8 +138,8 @@ model JoinRequest {
 }
 
 model Invite {
-  inviteId       Int   @id @default(autoincrement())
-  otherTeacherId Int  
+  inviteId       Int               @id @default(autoincrement())
+  otherTeacherId Int
   classTeacherId Int
   classId        Int
   status         JoinRequestStatus
@@ -235,7 +234,7 @@ enum ContentType {
   TEXT_MARKDOWN
   IMAGE_IMAGE_BLOCK
   IMAGE_IMAGE
-  AUDIO_MPEG
+  AUDO_MPEG
   // Eigen toevoegingen
   VIDEO
   EVAL_MULTIPLE_CHOICE
@@ -250,7 +249,7 @@ model LearningObject {
   // Op die manier kan de hruid ingesteld worden op de titel van het leerobject. 
   // Ik ga dit voorlopig laten staan, maar misschien dat we dit nog moeten aanpassen.
   hruid            String      @unique
-  title            String      @unique
+  title            String
   version          Int         @default(1)
   language         String
   description      String
@@ -272,6 +271,7 @@ model LearningObject {
   creatorId Int
   creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningObjectCreator")
 
+  // Binnen een leerobject kunnen er meerdere evaluaties zitten
   evaluations       Evaluation[]
   educationalGoals  EducationalGoal[]
   returnValue       ReturnValue?
@@ -362,7 +362,7 @@ model SpecificQuestion {
 }
 
 model GeneralQuestion {
-  questionId       Int    @unique
+  questionId     Int    @unique
   learningPathId String
 
   // Een SpecificQuestion is een vraag
@@ -370,7 +370,7 @@ model GeneralQuestion {
   // Er kunnen meerdere vragen over een leerobject worden gesteld
   learningPath LearningPath @relation(fields: [learningPathId], references: [id])
 
-  @@id([questionId, learningObjectId])
+  @@id([questionId, learningPathId])
 }
 
 model AdditionalQuestion {
@@ -437,9 +437,8 @@ model Assignment {
 model ClassAssignment {
   classId      Int
   assignmentId Int
-
-  class      Class      @relation(fields: [classId], references: [id])
-  assignment Assignment @relation(fields: [assignmentId], references: [id])
+  class        Class      @relation(fields: [classId], references: [id])
+  assignment   Assignment @relation(fields: [assignmentId], references: [id])
 
   @@id([classId, assignmentId])
 }

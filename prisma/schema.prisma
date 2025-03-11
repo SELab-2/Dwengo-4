@@ -116,9 +116,9 @@ model ClassTeacher {
   teacherId Int
   classId   Int
 
-  teacher Teacher @relation(fields: [teacherId], references: [userId])
-  class   Class   @relation(fields: [classId], references: [id])
-  invites Invite[]  // the invites that the teacher has sent
+  teacher Teacher  @relation(fields: [teacherId], references: [userId])
+  class   Class    @relation(fields: [classId], references: [id])
+  invites Invite[] // the invites that the teacher has sent
 
   @@id([teacherId, classId])
 }
@@ -138,8 +138,8 @@ model JoinRequest {
 }
 
 model Invite {
-  inviteId       Int   @id @default(autoincrement())
-  otherTeacherId Int  
+  inviteId       Int               @id @default(autoincrement())
+  otherTeacherId Int
   classTeacherId Int
   classId        Int
   status         JoinRequestStatus
@@ -362,15 +362,15 @@ model SpecificQuestion {
 }
 
 model GeneralQuestion {
-  questionId       Int    @unique
-  learningObjectId String
+  questionId     Int    @unique
+  learningPathId String
 
   // Een SpecificQuestion is een vraag
   question     Question     @relation(fields: [questionId], references: [id])
   // Er kunnen meerdere vragen over een leerobject worden gesteld
-  learningPath LearningPath @relation(fields: [learningObjectId], references: [id])
+  learningPath LearningPath @relation(fields: [learningPathId], references: [id])
 
-  @@id([questionId, learningObjectId])
+  @@id([questionId, learningPathId])
 }
 
 model AdditionalQuestion {
