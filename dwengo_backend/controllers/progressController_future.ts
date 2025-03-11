@@ -22,7 +22,7 @@
 //   // Vind de start-node
 //   let current = nodes.find((n) => n.start_node);
 //   const ordered: T[] = [];
-  
+
 //   while (current) {
 //     ordered.push(current);
 //     // Ga ervan uit dat er één nextTransition is met een nextNodeId
@@ -41,30 +41,42 @@
 //  * Start een leerobject → maak progressie aan.
 //  */
 // export const createProgress = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-//   try {
-//     if (!req.user) {
-//       res.status(401).json({ error: "Niet ingelogd." });
-//       return;
+//     try {
+//         if (!req.user) {
+//             res.status(401).json({ error: "Niet ingelogd." });
+//             return;
+//         }
+
+//         const learningObjectId = req.params.learningObjectId; // learningObjectId is een string
+
+//         // Gebruik een Prisma-transactie om beide operaties in één atomaire actie te verpakken
+//         const result = await prisma.$transaction(async (prisma) => {
+//             // Maak een progressie-record (aanvankelijk niet voltooid)
+//             const progress = await prisma.learningObjectProgress.create({
+//                 data: {
+//                     learningObjectId,
+//                     done: false,
+//                 },
+//             });
+
+//             // Koppel deze progressie aan de leerling
+//             const studentProgress = await prisma.studentProgress.create({
+//                 data: {
+//                     studentId: req.user.id,
+//                     progressId: progress.id,
+//                 },
+//             });
+
+//             return { progress, studentProgress };
+//         });
+
+//         res.status(201).json({ message: "Progressie aangemaakt.", progress: result.progress });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ error: "Er is iets misgegaan bij het aanmaken van progressie." });
 //     }
-//     const learningObjectId = req.params.learningObjectId;
-//     const progress = await prisma.learningObjectProgress.create({
-//       data: {
-//         learningObjectId,
-//         done: false,
-//       },
-//     });
-//     await prisma.studentProgress.create({
-//       data: {
-//         studentId: req.user.id,
-//         progressId: progress.id,
-//       },
-//     });
-//     res.status(201).json({ message: "Progressie aangemaakt.", progress });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Er is iets misgegaan bij het aanmaken van progressie." });
-//   }
 // };
+
 
 // /**
 //  * GET /progress/:learningObjectId
@@ -182,7 +194,7 @@
 //     const progressRecords = await prisma.studentProgress.findMany({
 //       where: {
 //         studentId: req.user.id,
-//         progress: { 
+//         progress: {
 //           learningObjectId: { in: nodes.map(n => n.learningObjectId) },
 //           done: true,
 //         },

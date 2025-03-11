@@ -16,7 +16,7 @@ const router: Router = express.Router();
 // Student endpoints
 router.post("/:learningObjectId", protectStudent, createProgress);
 router.get("/:learningObjectId", protectStudent, getStudentProgress);
-router.put("/:learningObjectId", protectStudent, updateProgress);
+router.patch("/:learningObjectId", protectStudent, updateProgress);
 router.get("/student/:teamid", protectStudent, getTeamProgressStudent);
 router.get("/student/assignment/:assignmentId", protectStudent, getStudentAssignmentProgress);
 

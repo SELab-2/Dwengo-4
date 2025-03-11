@@ -14,22 +14,31 @@ export const createProgress = async (req: AuthenticatedRequest, res: Response): 
       res.status(401).json({ error: "Niet ingelogd." });
       return;
     }
+
     const learningObjectId = req.params.learningObjectId; // learningObjectId is een string
-    // Maak een progressie-record (aanvankelijk niet voltooid)
-    const progress = await prisma.learningObjectProgress.create({
-      data: {
-        learningObjectId,
-        done: false,
-      },
+
+    // Gebruik een Prisma-transactie om beide operaties in één atomaire actie te verpakken
+    const result = await prisma.$transaction(async (prisma) => {
+      // Maak een progressie-record (aanvankelijk niet voltooid)
+      const progress = await prisma.learningObjectProgress.create({
+        data: {
+          learningObjectId,
+          done: false,
+        },
+      });
+
+      // Koppel deze progressie aan de leerling
+      const studentProgress = await prisma.studentProgress.create({
+        data: {
+          studentId: req.user.id,
+          progressId: progress.id,
+        },
+      });
+
+      return { progress, studentProgress };
     });
-    // Koppel deze progressie aan de leerling
-    await prisma.studentProgress.create({
-      data: {
-        studentId: req.user.id,
-        progressId: progress.id,
-      },
-    });
-    res.status(201).json({ message: "Progressie aangemaakt.", progress });
+
+    res.status(201).json({ message: "Progressie aangemaakt.", progress: result.progress });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Er is iets misgegaan bij het aanmaken van progressie." });
