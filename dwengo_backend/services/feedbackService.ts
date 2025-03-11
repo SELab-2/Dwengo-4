@@ -28,7 +28,7 @@ export default class FeedbackService {
         }
 
         // aantal evaluaties met deadline in de toekomst
-        const deadline: number = await prisma.evaluation.count({
+        const deadline = await prisma.evaluation.findFirst({
             where: {
                 submissions: {
                     some: {
@@ -42,7 +42,7 @@ export default class FeedbackService {
         });
 
         // Als deadline in de toekomst ligt: error
-        if (deadline > 0) {
+        if (deadline !== null) {
             throw new Error("Deadline in toekomst");
         }
 
