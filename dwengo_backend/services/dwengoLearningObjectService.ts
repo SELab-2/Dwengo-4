@@ -1,8 +1,3 @@
-/**
- * dwengoLearningObjectService.ts
- * Logica om leerobjecten van de Dwengo-API op te halen
- */
-
 import { dwengoAPI } from "../config/dwengoAPI";
 import axios from "axios";
 

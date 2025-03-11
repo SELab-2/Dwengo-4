@@ -1,7 +1,4 @@
-/**
- * combinedLearningObjectService.ts
- * Logica die Dwengo + lokale DB combineert.
- */
+
 import {
     fetchAllDwengoObjects,
     fetchDwengoObjectById,

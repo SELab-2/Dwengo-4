@@ -1,7 +1,4 @@
-/**
- * localDBLearningObjectService.ts
- * Logica om leerobjecten uit de lokale database (via Prisma) op te halen, aan te maken, te updaten, etc.
- */
+
 
 import { PrismaClient, LearningObject } from "@prisma/client";
 import { LearningObjectDto } from "./dwengoLearningObjectService";
