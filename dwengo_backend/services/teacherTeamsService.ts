@@ -140,10 +140,10 @@ export const updateTeamsForAssignment = async (
 
     for (const team of teams) {
         // Check if the team exists
-        const existingTeam: Team | null = await prisma.team.findUnique({ where: { id: team.id } });
+        const existingTeam: Team | null = await prisma.team.findUnique({ where: { id: team.teamId } });
 
         if (!existingTeam) {
-            throw new Error(`Team with ID ${team.id} not found.`);
+            throw new Error(`Team with ID ${team.teamId} not found.`);
         }
 
         // Validate students before updating
@@ -151,7 +151,7 @@ export const updateTeamsForAssignment = async (
 
         // Update team name and students
         const updatedTeam: Team = await prisma.team.update({
-            where: { id: team.id },
+            where: { id: team.teamId },
             data: {
                 teamname: team.teamName,
                 students: {
@@ -160,7 +160,7 @@ export const updateTeamsForAssignment = async (
                 },
                 teamAssignments: {
                     connectOrCreate: {
-                        where: { teamId_assignmentId: {  teamId: team.id, assignmentId } },
+                        where: { teamId_assignmentId: {  teamId: team.teamId, assignmentId } },
                         create: { assignmentId: assignmentId }
                     }
                 }
