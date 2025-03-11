@@ -28,67 +28,67 @@ router.use(protectAnyUser);
 
 // Routes for creating questions
 router.post(
-    "/assignment/:assignmentId/learningPath/:learningPathId/question",
+    "/assignment/:assignmentId/learningPath/:learningPathId/",
     authorizeStudentInTeamWithAssignment,
     createQuestionGeneral
 );
 router.post(
-    "/assignment/:assignmentId/learningPath/:learningPathId/learningObject/:learningObjectId/question",
+    "/assignment/:assignmentId/learningPath/:learningPathId/learningObject/:learningObjectId/",
     authorizeStudentInTeamWithAssignment,
     createQuestionSpecific
 );
 router.post(
-    "/question/:questionId",
+    "/:questionId/message",
     authorizeQuestion,
     createQuestionMessage
 );
 
 // Routes for updating questions
 router.patch(
-    "/question/:questionId",
+    "/:questionId",
     authorizeQuestion,
     updateQuestion);
 
 router.patch(
-    "/question/:questionId/message/:questionMessageId",
+    "/:questionId/message/:questionMessageId",
     authorizeOwnerOfQuestionMessage,
     updateQuestionMessage);
 
 // Routes for retrieving questions
 router.get(
-    "/question/:questionId",
+    "/:questionId",
     authorizeQuestion,
     getQuestion
 );
 router.get(
-    "/team/:teamId/questions",
+    "/team/:teamId/",
     authorizeStudentInTeamThatCreatedQuestion,
     getQuestionsTeam
 );
 router.get(
-    "/class/:classId/questions",
+    "/class/:classId",
     authorizeTeacherOfClass,
     getQuestionsClass
 );
 router.get(
-    "/assignment/:assignmentId/class/:classId/questions",
+    "/assignment/:assignmentId/class/:classId",
     authorizeTeacherOfAssignmentClass,
     getQuestionsAssignment
 );
 router.get(
-    "/question/:questionId/messages",
+    "/:questionId/messages",
     authorizeQuestion,
     getQuestionMessages
 );
 
 // Routes for deleting questions
 router.delete(
-    "/question/:questionId",
+    "/:questionId",
     authorizeQuestion,
     deleteQuestion
 );
 router.delete(
-    "/question/:questionId/message/:questionMessageId",
+    "/:questionId/message/:questionMessageId",
     authorizeOwnerOfQuestionMessage,
     deleteQuestionMessage
 );

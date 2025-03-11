@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import asyncHandler from 'express-async-handler';
 import { PrismaClient } from '@prisma/client';
 import { Response, NextFunction } from 'express';
-import {AuthenticatedRequest} from "../interfaces/extendedTypeInterfaces";
+import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
 
 const prisma = new PrismaClient();
 
@@ -50,7 +50,7 @@ export const protectTeacher = asyncHandler(
           return;
         }
 
-        req.user = { id: teacher.userId, email: teacher.user.email };
+        req.user = { id: teacher.userId, email: teacher.user.email, role: 'TEACHER' };
         next();
       } catch (error) {
         console.error(error);

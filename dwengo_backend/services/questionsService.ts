@@ -20,24 +20,26 @@ export default class QuestionService {
             throw new Error("Assignment not found in team");
         }
 
-        const question = await prisma.question.create({
-            data: {
-                assignmentId,
-                teamId,
-                title,
-                type
-            }
-        });
 
-        await prisma.questionMessage.create({
-            data: {
-                questionId: question.id,
-                userId: studentId,
-                text: text
-            }
-        });
+        return prisma.$transaction(async (prisma) => {
+            const question = await prisma.question.create({
+                data: {
+                    assignmentId,
+                    teamId,
+                    title,
+                    type
+                }
+            });
 
-        return question;
+            await prisma.questionMessage.create({
+                data: {
+                    questionId: question.id,
+                    userId: studentId,
+                    text: text
+                }
+            });
+            return question;
+        });
     }
 
     static async createQuestionMessage(questionId: number, text: string, userId: number): Promise<QuestionMessage> {
@@ -286,27 +288,12 @@ export default class QuestionService {
         if (!await prisma.question.findUnique({ where: { id: questionId } })) {
             throw new Error("Question not found");
         }
-        // Execute deletion within a transaction
-        return prisma.$transaction(async (prisma) => {
-            // Delete all related question conversations first
-            await prisma.questionMessage.deleteMany({
-                where: { questionId: questionId }
-            });
-            //delete question specific or general
-            await prisma.questionSpecific.deleteMany({
-                where: { questionId: questionId }
-            });
-            await prisma.questionGeneral.deleteMany({
-                where: { questionId: questionId }
-            });
-
-            // Then delete the question head
-            const question = await prisma.question.delete({
-                where: { id: questionId }
-            });
-
-            return question;
+        // Then delete the question head
+        const question = await prisma.question.delete({
+            where: { id: questionId }
         });
+
+        return question;
     }
 
     static async deleteQuestionMessage(questionId: number, questionMessageId: number): Promise<QuestionMessage> {

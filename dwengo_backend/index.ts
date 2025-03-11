@@ -48,7 +48,7 @@ app.use('/teacher/assignments', teacherAssignmentRoutes);
 // Nieuwe routes voor leerobjecten
 app.use("/learningObjects", learningObjectRoutes);
 
-app.use("/", QuestionRoutes);
+app.use("/question", QuestionRoutes);
 
 app.use("/learningPaths", learningPathRoutes);
 

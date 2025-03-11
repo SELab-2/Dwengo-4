@@ -277,7 +277,7 @@ model QuestionSpecific {
   // Een QuestionSpecific is een vraag
   question       Question       @relation(fields: [questionId], references: [id])
   // Er kunnen meerdere vragen over een leerobject worden gesteld
-  learningObject LearningObject @relation(fields: [learningObjectId], references: [id])
+  learningObject LearningObject @relation(fields: [learningObjectId], references: [id], onDelete: Cascade)
 
   @@id([questionId, learningObjectId])
 }
@@ -289,7 +289,7 @@ model QuestionGeneral {
   // Een QuestionSpecific is een vraag
   question     Question     @relation(fields: [questionId], references: [id])
   // Er kunnen meerdere vragen over een leerobject worden gesteld
-  learningPath LearningPath @relation(fields: [learningPathId], references: [id])
+  learningPath LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
 
   @@id([questionId, learningPathId])
 }
@@ -311,7 +311,7 @@ model Question {
   
   assignment Assignment          @relation(fields: [assignmentId], references: [id])
   team       Team                @relation(fields: [teamId], references: [id])
-  questionConversation QuestionMessage []
+  questionConversation QuestionMessage [] 
 }
 
 model QuestionMessage {
@@ -323,7 +323,7 @@ model QuestionMessage {
   text        String
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  Questions Question @relation(fields: [questionId], references: [id])
+  Questions Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
 }
 
