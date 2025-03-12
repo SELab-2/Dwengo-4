@@ -159,8 +159,7 @@ export async function createJoinRequest(
   });
 }
 
-export async function createAssignmentForClass(
-  teacherId: number,
+export async function createAssignment(
   classId: number,
   learningPathId: string,
   deadline: Date
@@ -175,5 +174,18 @@ export async function createAssignmentForClass(
         },
       },
     },
+    include: {
+      learningPath: true,
+    },
   });
+}
+
+export function stringToDate(body: any) {
+  for (let i = 0; i < 2; i += 1) {
+    body[i].createdAt = new Date(body[i].createdAt);
+    body[i].updatedAt = new Date(body[i].updatedAt);
+    body[i].deadline = new Date(body[i].deadline);
+    body[i].learningPath.createdAt = new Date(body[i].learningPath.createdAt);
+    body[i].learningPath.updatedAt = new Date(body[i].learningPath.updatedAt);
+  }
 }

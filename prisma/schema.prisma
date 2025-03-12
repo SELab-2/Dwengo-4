@@ -176,7 +176,7 @@ model LearningPath {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   creatorId       Int
-  creator         Teacher           @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator")
+  creator         Teacher           @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator", onDelete: Cascade)
   assignments     Assignment[]
   GeneralQuestion GeneralQuestion[]
 }
