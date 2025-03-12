@@ -12,6 +12,8 @@ import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
 import feedbackRoutes from "./routes/teacher/feedbackRoutes";
 import teacherClassRoutes from './routes/teacher/teacherClassRoutes';
 import studentClassRoutes from "./routes/student/studentClassRoutes";
+import teacherSubmissionRoute from "./routes/teacher/teacherSubmissionRoute";
+import studentSubmissionRoute from "./routes/student/studentSubmissionRoute";
 
 dotenv.config();
 
@@ -52,11 +54,17 @@ app.use('/assignments', assignmentRoutes);
 // Routes voor de aanpassingen op Assignments door teachers
 app.use('/teacher/assignments', teacherAssignmentRoutes);
 
+// Routes om feedback te geven
 app.use('/teacher/feedback', feedbackRoutes);
 
 // Nieuwe routes voor leerobjecten
 app.use("/learningObjects", learningObjectRoutes);
 app.use("/learningPaths", learningPathRoutes);
+
+// Routes voor indieningen
+app.use('/teacher/submissions', teacherSubmissionRoute);
+app.use('/student/submissions', studentSubmissionRoute);
+
 
 // Error Handler
 app.use(errorHandler);
