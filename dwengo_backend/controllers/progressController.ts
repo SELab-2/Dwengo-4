@@ -5,20 +5,21 @@ import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
 const prisma = new PrismaClient();
 
 /**
- * Een nieuwe progressie aanmaken voor een student bij een leerobject.
- * Dit wordt gebruikt wanneer een student een nieuw leerobject start.
+ * Creëert een nieuw progressie-record voor een student bij een leerobject.
+ * Dit gebeurt wanneer een student een leerobject start.
  */
 export const createProgress = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
+    // Controleer of de student is ingelogd
     if (!req.user) {
       res.status(401).json({ error: "Niet ingelogd." });
       return;
     }
-    const learningObjectId = req.params.learningObjectId; // learningObjectId is een string
+    const learningObjectId = req.params.learningObjectId; // Het ID van het leerobject
 
-    // Gebruik een Prisma-transactie om beide operaties in één atomaire actie te verpakken
+    // Gebruik een transactie om de progressie en de koppeling aan de student in één atomaire actie uit te voeren
     const result = await prisma.$transaction(async (prisma) => {
-      // Maak een progressie-record (aanvankelijk niet voltooid)
+      // Maak een nieuw progressie-record (aanvankelijk niet voltooid)
       const progress = await prisma.learningObjectProgress.create({
         data: {
           learningObjectId,
@@ -26,7 +27,7 @@ export const createProgress = async (req: AuthenticatedRequest, res: Response): 
         },
       });
 
-      // Koppel deze progressie aan de leerling
+      // Koppel de progressie aan de ingelogde student
       await prisma.studentProgress.create({
         data: {
           studentId: req.user.id,
@@ -45,15 +46,17 @@ export const createProgress = async (req: AuthenticatedRequest, res: Response): 
 };
 
 /**
- * Haal de huidige progressie op van een student voor een specifiek leerobject.
+ * Haalt het progressie-record op van een student voor een specifiek leerobject.
  */
 export const getStudentProgress = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
+    // Controleer of de student is ingelogd
     if (!req.user) {
       res.status(401).json({ error: "Niet ingelogd." });
       return;
     }
     const { learningObjectId } = req.params;
+    // Zoek het progressie-record gekoppeld aan de student en het leerobject
     const studentProgress = await prisma.studentProgress.findFirst({
       where: {
         studentId: req.user.id,
@@ -73,17 +76,18 @@ export const getStudentProgress = async (req: AuthenticatedRequest, res: Respons
 };
 
 /**
- * Werk de progressie van een student bij voor een leerobject.
+ * Update het progressie-record van een student voor een leerobject.
  * Bijvoorbeeld: markeer een leerobject als voltooid.
  */
 export const updateProgress = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
+    // Zorg dat de student is ingelogd
     if (!req.user) {
       res.status(401).json({ error: "Niet ingelogd." });
       return;
     }
     const { learningObjectId } = req.params;
-    // Zoek het progressierecord voor de ingelogde student en dit leerobject
+    // Zoek het relevante progressie-record
     const studentProgress = await prisma.studentProgress.findFirst({
       where: {
         studentId: req.user.id,
@@ -95,7 +99,7 @@ export const updateProgress = async (req: AuthenticatedRequest, res: Response): 
       res.status(404).json({ error: "Progressie niet gevonden." });
       return;
     }
-    // Update de progressie (bijvoorbeeld: markeer als voltooid)
+    // Update het record, bv. door 'done' op true te zetten
     const updatedProgress = await prisma.learningObjectProgress.update({
       where: { id: studentProgress.progress.id },
       data: { done: true }
@@ -108,12 +112,12 @@ export const updateProgress = async (req: AuthenticatedRequest, res: Response): 
 };
 
 /**
- * Haal de voortgang van een team op voor een specifieke opdracht (student-versie).
- * Hierbij wordt de progressie berekend als het hoogste percentage afgeronde leerobjecten
- * van de teamleden, op basis van het leerpad dat gekoppeld is aan de (enige) assignment van het team.
+ * Bereken de voortgang van een team voor een opdracht (student-versie).
+ * De voortgang wordt bepaald als het hoogste percentage afgeronde leerobjecten van de teamleden.
  */
 export const getTeamProgressStudent = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
+    // Controleer of de student is ingelogd
     if (!req.user) {
       res.status(401).json({ error: "Niet ingelogd." });
       return;
@@ -123,7 +127,7 @@ export const getTeamProgressStudent = async (req: AuthenticatedRequest, res: Res
       res.status(400).json({ error: "Ongeldig team ID." });
       return;
     }
-    // Haal het team op met de gekoppelde studenten en de assignment via teamAssignment
+    // Haal het team op met de studenten en de gekoppelde assignment (via teamAssignment)
     const team = await prisma.team.findUnique({
       where: { id: teamId },
       include: {
@@ -135,12 +139,13 @@ export const getTeamProgressStudent = async (req: AuthenticatedRequest, res: Res
       res.status(404).json({ error: "Team niet gevonden." });
       return;
     }
-    // Omdat een team maar één assignment kan hebben, halen we deze direct op
+    // Zorg dat er een assignment is gekoppeld aan het team
     const teamAssignment = team.teamAssignment;
     if (!teamAssignment) {
       res.status(404).json({ error: "Geen assignment gekoppeld aan dit team." });
       return;
     }
+    // Haal de opdracht op op basis van de assignment ID
     const assignment = await prisma.assignment.findUnique({
       where: { id: teamAssignment.assignmentId }
     });
@@ -149,7 +154,7 @@ export const getTeamProgressStudent = async (req: AuthenticatedRequest, res: Res
       return;
     }
     const { learningPathId } = assignment;
-    // Bepaal het totaal aantal nodes binnen het leerpad
+    // Bepaal het aantal nodes in het leerpad
     const totalNodes = await prisma.learningPathNode.count({
       where: { learningPathId }
     });
@@ -157,18 +162,18 @@ export const getTeamProgressStudent = async (req: AuthenticatedRequest, res: Res
       res.status(404).json({ error: "Geen leerpad nodes gevonden." });
       return;
     }
-    // Haal alle leerobject-id's op die horen bij het leerpad
+    // Haal de leerobjecten op die bij het leerpad horen
     const nodes = await prisma.learningPathNode.findMany({
       where: { learningPathId },
       select: { learningObjectId: true }
     });
     const learningObjectIds = nodes.map(n => n.learningObjectId);
-    // Bereken voor elk teamlid het percentage afgeronde leerobjecten
+    // Bepaal per teamlid het percentage afgeronde leerobjecten en neem het maximum
     let maxPercentage = 0;
     for (const student of team.students) {
       const doneCount = await prisma.studentProgress.count({
         where: {
-          studentId: student.userId, // In het Student-model is userId de primaire sleutel
+          studentId: student.userId, // 'userId' is de primaire sleutel in het Student-model
           progress: {
             done: true,
             learningObjectId: { in: learningObjectIds }
@@ -188,8 +193,8 @@ export const getTeamProgressStudent = async (req: AuthenticatedRequest, res: Res
 };
 
 /**
- * Haal de voortgang op van de ingelogde student voor een specifieke opdracht.
- * De voortgang wordt berekend als percentage afgeronde leerobjecten binnen het leerpad.
+ * Bereken de voortgang van de ingelogde student voor een specifieke opdracht.
+ * Het percentage wordt berekend op basis van het aantal afgeronde leerobjecten binnen het leerpad.
  */
 export const getStudentAssignmentProgress = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
@@ -210,6 +215,7 @@ export const getStudentAssignmentProgress = async (req: AuthenticatedRequest, re
       return;
     }
     const { learningPathId } = assignment;
+    // Tellen van het totaal aantal nodes in het leerpad
     const totalNodes = await prisma.learningPathNode.count({
       where: { learningPathId }
     });
@@ -217,11 +223,13 @@ export const getStudentAssignmentProgress = async (req: AuthenticatedRequest, re
       res.status(404).json({ error: "Geen leerpad nodes gevonden." });
       return;
     }
+    // Haal de leerobjecten op die bij het leerpad horen
     const nodes = await prisma.learningPathNode.findMany({
       where: { learningPathId },
       select: { learningObjectId: true }
     });
     const learningObjectIds = nodes.map(n => n.learningObjectId);
+    // Bepaal hoeveel leerobjecten de student heeft afgerond
     const doneCount = await prisma.studentProgress.count({
       where: {
         studentId: req.user.id,
@@ -240,8 +248,8 @@ export const getStudentAssignmentProgress = async (req: AuthenticatedRequest, re
 };
 
 /**
- * Haal de voortgang op van de ingelogde student voor een specifiek leerpad.
- * De voortgang wordt berekend als percentage afgeronde leerobjecten binnen dat leerpad.
+ * Bereken de voortgang van de ingelogde student voor een volledig leerpad.
+ * Het resultaat is het percentage afgeronde leerobjecten.
  */
 export const getStudentLearningPathProgress = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
@@ -254,6 +262,7 @@ export const getStudentLearningPathProgress = async (req: AuthenticatedRequest, 
       res.status(400).json({ error: "Ongeldig leerpad ID." });
       return;
     }
+    // Tel het aantal nodes in het leerpad
     const totalNodes = await prisma.learningPathNode.count({
       where: { learningPathId }
     });
@@ -261,11 +270,13 @@ export const getStudentLearningPathProgress = async (req: AuthenticatedRequest, 
       res.status(404).json({ error: "Geen nodes gevonden voor dit leerpad." });
       return;
     }
+    // Haal de leerobjecten op
     const nodes = await prisma.learningPathNode.findMany({
       where: { learningPathId },
       select: { learningObjectId: true }
     });
     const learningObjectIds = nodes.map(n => n.learningObjectId);
+    // Tel hoeveel leerobjecten de student heeft afgerond
     const doneCount = await prisma.studentProgress.count({
       where: {
         studentId: req.user.id,
@@ -284,9 +295,8 @@ export const getStudentLearningPathProgress = async (req: AuthenticatedRequest, 
 };
 
 /**
- * Haal de voortgang van een team op voor een specifieke opdracht (docent-versie).
- * De berekening is vergelijkbaar met de student-versie, maar hierbij hoeft de docent niet
- * lid te zijn van het team.
+ * Bereken de teamvoortgang voor een opdracht (docent-versie).
+ * Hierbij wordt per team de hoogste voortgang van de teamleden berekend.
  */
 export const getTeamProgressTeacher = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
@@ -299,7 +309,7 @@ export const getTeamProgressTeacher = async (req: AuthenticatedRequest, res: Res
       res.status(400).json({ error: "Ongeldig team ID." });
       return;
     }
-    // Haal het team op met de gekoppelde studenten en de assignment via teamAssignment
+    // Haal het team met studenten en gekoppelde assignment op
     const team = await prisma.team.findUnique({
       where: { id: teamId },
       include: {
@@ -316,6 +326,7 @@ export const getTeamProgressTeacher = async (req: AuthenticatedRequest, res: Res
       res.status(404).json({ error: "Geen assignment gekoppeld aan dit team." });
       return;
     }
+    // Haal de opdracht op
     const assignment = await prisma.assignment.findUnique({
       where: { id: teamAssignment.assignmentId }
     });
@@ -324,6 +335,7 @@ export const getTeamProgressTeacher = async (req: AuthenticatedRequest, res: Res
       return;
     }
     const { learningPathId } = assignment;
+    // Bepaal het totaal aantal nodes
     const totalNodes = await prisma.learningPathNode.count({
       where: { learningPathId }
     });
@@ -331,11 +343,13 @@ export const getTeamProgressTeacher = async (req: AuthenticatedRequest, res: Res
       res.status(404).json({ error: "Geen leerpad nodes gevonden." });
       return;
     }
+    // Haal de leerobjecten op
     const nodes = await prisma.learningPathNode.findMany({
       where: { learningPathId },
       select: { learningObjectId: true }
     });
     const learningObjectIds = nodes.map(n => n.learningObjectId);
+    // Bepaal de maximale voortgang binnen het team
     let maxPercentage = 0;
     for (const student of team.students) {
       const doneCount = await prisma.studentProgress.count({
@@ -360,9 +374,8 @@ export const getTeamProgressTeacher = async (req: AuthenticatedRequest, res: Res
 };
 
 /**
- * Bereken de gemiddelde voortgang van een klas bij een opdracht.
- * Voor elk team wordt de verste voortgang (het hoogste percentage afgeronde leerobjecten)
- * berekend en vervolgens wordt het gemiddelde over alle teams berekend.
+ * Bereken de gemiddelde voortgang van een klas voor een opdracht.
+ * Per team wordt de hoogste voortgang bepaald en daarna het gemiddelde berekend.
  */
 export const getAssignmentAverageProgress = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
@@ -383,6 +396,7 @@ export const getAssignmentAverageProgress = async (req: AuthenticatedRequest, re
       return;
     }
     const { learningPathId } = assignment;
+    // Tel het aantal nodes in het leerpad
     const totalNodes = await prisma.learningPathNode.count({
       where: { learningPathId }
     });
@@ -390,6 +404,7 @@ export const getAssignmentAverageProgress = async (req: AuthenticatedRequest, re
       res.status(404).json({ error: "Geen leerpad nodes gevonden." });
       return;
     }
+    // Haal de leerobjecten op
     const nodes = await prisma.learningPathNode.findMany({
       where: { learningPathId },
       select: { learningObjectId: true }
@@ -408,7 +423,7 @@ export const getAssignmentAverageProgress = async (req: AuthenticatedRequest, re
     }
     let totalProgress = 0;
     let teamCount = 0;
-    // Voor elk team: bepaal de verste voortgang (het hoogste percentage afgeronde leerobjecten van de teamleden)
+    // Voor elk team: bepaal de hoogste voortgang binnen het team
     for (const ta of teamAssignments) {
       const team = ta.team;
       let teamMax = 0;
