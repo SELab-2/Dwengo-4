@@ -20,7 +20,7 @@ import {
   stringToDate,
 } from "./helpers/testDataCreation";
 
-describe("Tests for studentAssigment", async () => {
+describe("[GET] /student/assignments", async () => {
   let student1: User & { student: Student; token: string };
   let student2: User & { student: Student; token: string };
   let student3: User & { student: Student; token: string };
@@ -115,7 +115,6 @@ describe("Tests for studentAssigment", async () => {
     ]);
   });
 
-  // describe("[GET] /student/assignments", async () => {
   it("should respond with a `200` status code and a list of assignments,\
       this list will be empty because student doesn't have any assignments", async () => {
     // set up scenario where student has no assignments
