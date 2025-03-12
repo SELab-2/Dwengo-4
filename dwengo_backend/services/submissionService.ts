@@ -30,7 +30,6 @@ export default class submissionService {
             throw new AccesDeniedError("Student is not in a team for this assignment");
         }
         // TODO hoe controleren of assignment bij evaluation hoort?
-        // TODO controleren of deadline al voor bij is? Of laten we dit gewoon toe zoals Dodona
 
         return prisma.submission.create({
             data: {

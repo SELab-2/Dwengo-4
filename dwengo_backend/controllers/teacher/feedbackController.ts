@@ -19,7 +19,6 @@ export default class FeedbackController {
     static async createFeedback(req: AuthenticatedRequest, res: Response) {
         try {
             const teacherId: number | undefined = req.user?.id;
-            // TODO Is dit sowieso defined of hoe ga ik hier het beste met de undefined om?
 
             const {submissionId, description}: {
                 submissionId: number,
