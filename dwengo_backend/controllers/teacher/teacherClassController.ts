@@ -2,7 +2,7 @@ import asyncHandler from "express-async-handler";
 import { Response } from "express";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import classService from "../../services/classService";
-import { Student } from "@prisma/client";
+import { Student, User } from "@prisma/client";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 import { BadRequestError } from "../../errors/errors";
 
@@ -71,7 +71,7 @@ export const getJoinLink = asyncHandler(
 
 /**
  * Regenerate join link
- * @route POST /teacher/classes/:classId/regenerate-join-link
+ * @route PATCH /teacher/classes/:classId/regenerate-join-link
  * @param classId - id of the class for which the join link is regenerated
  * returns the new join link in the response body
  */
@@ -85,7 +85,7 @@ export const regenerateJoinLink = asyncHandler(
       teacherId
     );
     const joinLink = `${APP_URL}/student/classes/join?joinCode=${newJoinCode}`;
-    res.json({ joinLink });
+    res.status(200).json({ joinLink });
   }
 );
 
@@ -100,16 +100,8 @@ export const getClassroomStudents = asyncHandler(
     const classId: number = parseInt(req.params.classId);
     const teacherId: number = getUserFromAuthRequest(req).id;
 
-    const students: Student[] = await classService.getStudentsByClass(
-      classId,
-      teacherId
-    );
-
-    if (!students) {
-      res.status(403).json({ message: "Toegang geweigerd" });
-      return;
-    }
-
+    // include user details of the students
+    const students: (Student & {user: User})[] = await classService.getStudentsByClass(classId, teacherId);
     res.status(200).json({ students });
   }
 );

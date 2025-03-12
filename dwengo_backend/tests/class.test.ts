@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import request from 'supertest';
 import prisma from './helpers/prisma'
 import app from '../index';
@@ -9,6 +9,7 @@ const APP_URL = process.env.APP_URL || "http://localhost:5000";
 
 describe('classroom tests', () => {
     let teacherUser1: User & { teacher: Teacher, token: string };
+    let classroom: Class;
     beforeEach(async () => {
         // clear database before each test
         await prisma.$transaction([
@@ -22,21 +23,23 @@ describe('classroom tests', () => {
         ]);
         // create a teacher
         teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
+        // create a class
+        classroom = await createClass("5A", "ABCD");
     });
     describe('POST /teacher/classes', () => {
         it('should respond with a `201` status code and a created class', async () => {
             const { status, body } = await request(app)
                 .post('/teacher/classes')
                 .set('Authorization', `Bearer ${teacherUser1.token}`)
-                .send({ name: "5A" });
+                .send({ name: "6A" });
 
             expect(status).toBe(201);
             expect(body.message).toBe("Klas aangemaakt");
             expect(body.classroom).toBeDefined();
             // verify that class was created
-            const classroom = await prisma.class.findFirst({ where: { name: "5A"}, include: { ClassTeacher: true}  });
-            expect(classroom).toBeDefined();
-            expect(classroom!.ClassTeacher[0].teacherId).toBe(teacherUser1.id);
+            const createdClassroom = await prisma.class.findFirst({ where: { name: "6A"}, include: { ClassTeacher: true}  });
+            expect(createdClassroom).toBeDefined();
+            expect(createdClassroom!.ClassTeacher[0].teacherId).toBe(teacherUser1.id);
         });
         it('should respond with a `400` status code and a message when no valid class name is provided', async () => {
             const { status, body } = await request(app)
@@ -52,18 +55,13 @@ describe('classroom tests', () => {
             const { status, body } = await request(app)
                 .post('/teacher/classes')
                 .set('Authorization', `Bearer ${studentUser.token}`)
-                .send({ name: "5A" });
+                .send({ name: "6A" });
 
             expect(status).toBe(401);
             expect(body.error).toBe("Leerkracht niet gevonden.");
         });
     });
     describe('DELETE /teacher/classes/:classId', () => {
-        let classroom: Class;
-        beforeEach(async () => {
-            // create a class
-            classroom = await createClass("5A", "ABCD");
-        });
         it('should respond with a `200` status code and a message when the class is deleted', async () => {
             // add teacherUser1 to class, so we can test deleting it
             await addTeacherToClass(teacherUser1.id, classroom.id);
@@ -128,10 +126,6 @@ describe('classroom tests', () => {
         });
     });
     describe('GET /teacher/classes/:classId/join-link', () => {
-        let classroom: Class;
-        beforeEach(async () => {
-            classroom = await createClass("5A", "ABCD");
-        });
         it('should respond with a `200` status code and a join link', async () => {
             // add teacherUser1 to class, so we can test getting the join link
             await addTeacherToClass(teacherUser1.id, classroom.id);
@@ -170,22 +164,111 @@ describe('classroom tests', () => {
             expect(body.joinLink).toBeUndefined();
         });
     });
-    describe('POST /teacher/classes/:classId/regenerate-join-link', () => {
+    describe('PATCH /teacher/classes/:classId/regenerate-join-link', () => {
         it('should respond with a `200` status code and a new join link', async () => {
+            // add teacherUser1 to class, so we can test regenerating the join link
+            await addTeacherToClass(teacherUser1.id, classroom.id);
+            const { status, body } = await request(app)
+                .patch(`/teacher/classes/${classroom.id}/regenerate-join-link`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`);
+
+            expect(status).toBe(200);
+            // verify that join code was updated in database
+            const updatedClass = await prisma.class.findUnique({ where: { id: classroom.id } });
+            expect(updatedClass).toBeDefined();
+            expect(updatedClass!.code).not.toBe(classroom.code); 
+            expect(body.joinLink).toStrictEqual(`${APP_URL}/student/classes/join?joinCode=${updatedClass!.code}`);
         });
         it('should respond with a `403` status code and a message when the teacher is not associated with the class', async () => {
+            const { status, body } = await request(app)
+                .patch(`/teacher/classes/${classroom.id}/regenerate-join-link`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`);  // teacherUser1 is not associated with the class
+
+            expect(status).toBe(403);
+            expect(body.message).toBe(`Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`);
         });
         it('should respond with a `404` status code if the class does not exist', async () => {
+            // get an id that isn't used for any existing class in the database
+            const maxClass = await prisma.class.findFirst({
+                orderBy: {
+                    id: 'desc'
+                }
+            });
+            const invalidClassId = (maxClass?.id ?? 0) + 1;
+
+            const { status, body } = await request(app)
+                .patch(`/teacher/classes/${invalidClassId}/regenerate-join-link`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`);
+
+            expect(status).toBe(404);
+            expect(body.message).toBe(`Class with id ${invalidClassId} not found`);
         });
     });
     describe('GET /teacher/classes/:classId/students', () => {
         it('should respond with a `200` status code and a list of students', async () => {
+            await addTeacherToClass(teacherUser1.id, classroom.id);
+            // add some students to the class
+            const studentUser1 = await createStudent("Steven", "Mcclure", "velit.dui@hotmail.edu");
+            const studentUser2 = await createStudent("Omar", "Hawkins", "lobortis.quam@yahoo.couk");
+            await addStudentToClass(studentUser1.id, classroom.id);
+            await addStudentToClass(studentUser2.id, classroom.id);
+
+            // now test getting the students
+            const { status, body } = await request(app)
+                .get(`/teacher/classes/${classroom.id}/students`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`); // teacherUser1 is associated with the class
+
+            // verify the response
+            expect(status).toBe(200);
+            expect(body.students).toBeDefined();
+            expect(body.students.length).toBe(2);
+            expect(body.students).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        userId: studentUser1.id,
+                        user: expect.objectContaining({
+                            firstName: studentUser1.firstName,
+                            lastName: studentUser1.lastName,
+                            email: studentUser1.email
+                        })
+                    }),
+                    expect.objectContaining({
+                        userId: studentUser2.id,
+                        user: expect.objectContaining({
+                            firstName: studentUser2.firstName,
+                            lastName: studentUser2.lastName,
+                            email: studentUser2.email
+                        })
+                    })
+                ])
+            );
         });
         it('should respond with a `403` status code when the teacher is not associated with the class', async () => {
+            // try getting the students for a class the teacher is not associated with
+            const { status, body } = await request(app)
+                .get(`/teacher/classes/${classroom.id}/students`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`);  // teacherUser1 is not associated with the class
+
+            expect(status).toBe(403);
+            expect(body.message).toBe(`Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`);
+            expect(body.students).toBeUndefined();
         });
         it('should respond with a `404` status code when the class does not exist', async () => {
+            // try getting the students for a class that doesn't exist
+            const maxClass = await prisma.class.findFirst({
+                orderBy: {
+                    id: 'desc'
+                }
+            });
+            const invalidClassId = (maxClass?.id ?? 0) + 1;
+
+            const { status, body } = await request(app)
+                .get(`/teacher/classes/${invalidClassId}/students`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`);
+
+            expect(status).toBe(404);
+            expect(body.message).toBe(`Class with id ${invalidClassId} not found`);
+            expect(body.students).toBeUndefined();
         });
     });
-
-    
 });
