@@ -136,11 +136,25 @@ describe("Tests for teacherAssignment", async () => {
           learningPathId: lp1.id,
           deadline: "2026-10-23",
         });
-      console.log(body);
 
       expect(status).toBe(201);
-      console.log(body);
-      expect(body).toStrictEqual([]);
+      expect(body.deadline).toStrictEqual(new Date("2026-10-23").toISOString());
+      expect(body.learningPathId).toBe(lp1.id);
+    });
+
+    it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
+      // class3 has no assignments
+      const { status, body } = await request(app)
+        .post("/teacher/assignments/")
+        .set("Authorization", `Bearer ${teacher2.token}`)
+        .send({
+          classId: class3.id,
+          learningPathId: lp1.id,
+          deadline: "2026-10-23",
+        });
+
+      expect(status).toBe(500);
+      expect(body.error).toBe("Failed to create assignment");
     });
 
     //   it("should respond with a `200` status code and a list of 2 assignments", async () => {
