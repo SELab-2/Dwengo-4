@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import request from 'supertest';
 import prisma from './helpers/prisma'
 import app from '../index';
-import { Teacher, User } from '@prisma/client';
-import { createStudent, createTeacher } from './helpers/testDataCreation';
+import { Class, Teacher, User } from '@prisma/client';
+import { addStudentToClass, addTeacherToClass, createClass, createInvite, createJoinRequest, createStudent, createTeacher } from './helpers/testDataCreation';
 
 describe('classroom tests', () => {
     let teacherUser1: User & { teacher: Teacher, token: string };
@@ -46,12 +46,83 @@ describe('classroom tests', () => {
             expect(body.message).toBe("Vul een geldige klasnaam in");
         });
         it('should not allow a student to create a class', async () => {
+            const studentUser = await createStudent("Alice", "Anderson", "aaaaa@gmail.com");
+            const { status, body } = await request(app)
+                .post('/teacher/classes')
+                .set('Authorization', `Bearer ${studentUser.token}`)
+                .send({ name: "5A" });
+
+            expect(status).toBe(401);
+            expect(body.error).toBe("Leerkracht niet gevonden.");
         });
     });
     describe('DELETE /teacher/classes/:classId', () => {
+        let classroom: Class;
+        beforeEach(async () => {
+            // create a class
+            classroom = await createClass("5A", "ABCD");
+        });
         it('should respond with a `200` status code and a message when the class is deleted', async () => {
+            // add teacherUser1 to class, so we can test deleting it
+            await addTeacherToClass(teacherUser1.id, classroom.id);
+
+            // also add some records related to the class, so we can test if they all get deleted when the class is deleted
+            const studentUser1 = await createStudent("Alice", "Anderson", "aaaaa@gmail.com");
+            await addStudentToClass(studentUser1.id, classroom.id);
+            await prisma.classStudent.findMany({ where: { classId: classroom.id } }).then((classStudents) => {
+                expect(classStudents.length).toBe(1);
+            });
+            const studentUser2 = await createStudent("Bob", "Baker", "bobbaker@gmail.com");
+            await createJoinRequest(studentUser2.id, classroom.id);
+            await prisma.joinRequest.findMany({ where: { classId: classroom.id } }).then((joinRequests) => {
+                expect(joinRequests.length).toBe(1);
+            });
+            const teacherUser2 = await createTeacher("Charlie", "Chaplin", "char.ch@gmail.com");
+            await createInvite(teacherUser1.id, teacherUser2.id, classroom.id);
+            await prisma.invite.findMany({ where: { classId: classroom.id } }).then((invites) => {
+                expect(invites.length).toBe(1);
+            });
+
+            // now test deleting the class
+            const { status, body } = await request(app)
+                .delete(`/teacher/classes/${classroom.id}`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`);
+
+            expect(status).toBe(200);
+            expect(body.message).toBe(`Klas met id ${classroom.id} verwijderd`);
+            // verify that class was deleted
+            const deletedClass = await prisma.class.findFirst({ where: { id: classroom.id } });
+            expect(deletedClass).toBeNull();
+
+            // verify that all associated records were also deleted
+            await prisma.classTeacher.findMany({ where: { classId: classroom.id } }).then((classTeachers) => {
+                expect(classTeachers.length).toBe(0);
+            });
+            await prisma.classStudent.findMany({ where: { classId: classroom.id } }).then((classStudents) => {
+                expect(classStudents.length).toBe(0);
+            });
+            await prisma.invite.findMany({ where: { classId: classroom.id } }).then((invites) => {
+                expect(invites.length).toBe(0);
+            });
+            await prisma.joinRequest.findMany({ where: { classId: classroom.id } }).then((joinRequests) => {
+                expect(joinRequests.length).toBe(0);
+            });
+            await prisma.classAssignment.findMany({ where: { classId: classroom.id } }).then((classAssignments) => {
+                expect(classAssignments.length).toBe(0);
+            });
         });
         it('should respond with a `403` status code and a message when the teacher is not associated with the class', async () => {
+            // try having a teacher delete a class they are not associated with
+            const { status, body } = await request(app)
+                .delete(`/teacher/classes/${classroom.id}`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`);  // teacherUser1 is not associated with the class
+
+            expect(status).toBe(403);
+            expect(body.message).toBe(`Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`);
+            // verfiy that class not deleted
+            await prisma.class.findUnique({ where: { id: classroom.id } }).then((classroom) => {
+                expect(classroom).toBeDefined();
+            });
         });
     });
     describe('GET /teacher/classes/:classId/join-link', () => {

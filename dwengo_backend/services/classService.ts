@@ -37,29 +37,10 @@ export default class ClassService {
         // Check if the teacher is associated with the class
         const isTeacher = await this.isTeacherOfClass(classId, teacherId);
         if (!isTeacher) {
-            throw new AccesDeniedError("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
+            throw new AccesDeniedError(`Acces denied: Teacher ${teacherId} is not part of class ${classId}`);
         }
 
-        // Start a transaction to delete related records
-        return prisma.$transaction(async (prisma) => {
-            // Delete class-student associations
-            await prisma.classStudent.deleteMany({ where: { classId } });
-
-            // Delete class assignments
-            await prisma.classAssignment.deleteMany({ where: { classId } });
-
-            // Delete join requests
-            await prisma.joinRequest.deleteMany({ where: { classId } });
-
-            // Delete invites
-            await prisma.invite.deleteMany({ where: { classId } });
-
-            // Delete class-teacher associations
-            await prisma.classTeacher.deleteMany({ where: { classId } });
-
-            // Finally, delete the class itself
-            return prisma.class.delete({ where: { id: classId } });
-        });
+        return await prisma.class.delete({ where: { id: classId } });   // onDelete: Cascade in the prisma schema makes sure that all related records are also deleted
     };
 
     // Get all classes taught by a given teacher
