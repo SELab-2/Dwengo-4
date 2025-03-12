@@ -22,16 +22,6 @@ import {
   createTeacher,
 } from "./helpers/testDataCreation";
 
-// mock the protectTeacher middleware, as it's not relevant for these tests
-// (protectTeacher should be tested seperately though, TODO)
-vi.mock("../middleware/teacherAuthMiddleware", () => ({
-  protectTeacher: async (
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) => next(),
-}));
-
 describe("Tests for studentAssigment", async () => {
   let student1: User & { student: Student; token: string };
   let student2: User & { student: Student; token: string };
@@ -67,7 +57,6 @@ describe("Tests for studentAssigment", async () => {
     class3 = await createClass("5LAWI", "IJKL");
     // create a teacher
     teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
-    console.log(teacherUser1.id);
     // create some learning paths
     lp1 = await createLearningPath(
       "LP1",
@@ -92,10 +81,8 @@ describe("Tests for studentAssigment", async () => {
       // set up scenario where student has no assignments
       const { status, body } = await request(app)
         .get("/student/assignments")
-        .set("Authorization", `Bearer ${student1.token}`)
-        .send({
-          user: student1,
-        });
+        .set("Authorization", `Bearer ${student1.token}`);
+
       expect(status).toBe(200);
       expect(body).toStrictEqual([]);
     });
