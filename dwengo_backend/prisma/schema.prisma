@@ -432,6 +432,8 @@ model Assignment {
   learningPath     LearningPath      @relation(fields: [learningPathId], references: [id])
   classAssignments ClassAssignment[]
   teamAssignments  TeamAssignment[]
+
+  submissions Submission[]
 }
 
 model ClassAssignment {
@@ -477,6 +479,9 @@ model Submission {
   // Er kan feedback komen op een inzending
   feedback     Feedback?
 
+  assignmentId Int
+  assignement  Assignment @relation(fields: [assignmentId], references: [id])
+
   evaluation Evaluation @relation(fields: [evaluationId], references: [id])
   team       Team       @relation(fields: [teamId], references: [id])
 }
@@ -490,8 +495,8 @@ model Feedback {
   // De feedback zelf
   description  String
 
-  teacher    Teacher    @relation(fields: [teacherId], references: [userId])
-  submission Submission @relation(fields: [submissionId], references: [submissionId])
+  teacher    Teacher    @relation(fields: [teacherId], references: [userId], onDelete: Cascade)
+  submission Submission @relation(fields: [submissionId], references: [submissionId], onDelete: Cascade)
 
   // Feedback wordt uniek bepaald door deze attributen
   @@id([submissionId, teacherId])
