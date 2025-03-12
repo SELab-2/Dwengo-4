@@ -138,7 +138,7 @@ model JoinRequest {
 }
 
 model Invite {
-  inviteId       Int   @id @default(autoincrement())
+  inviteId       Int               @id @default(autoincrement())
   otherTeacherId Int
   classTeacherId Int
   classId        Int
@@ -302,6 +302,7 @@ model ReturnValue {
 model Evaluation {
   id             String         @id
   nrOfQuestions  Int
+  deadline       DateTime
   evaluationType EvaluationType
 
   learningObject LearningObject       @relation(fields: [id], references: [id])

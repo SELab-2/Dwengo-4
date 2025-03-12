@@ -271,7 +271,6 @@ model LearningObject {
   creatorId Int
   creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningObjectCreator")
 
-  // Binnen een leerobject kunnen er meerdere evaluaties zitten
   evaluations       Evaluation[]
   educationalGoals  EducationalGoal[]
   returnValue       ReturnValue?
@@ -303,6 +302,7 @@ model ReturnValue {
 model Evaluation {
   id             String         @id
   nrOfQuestions  Int
+  deadline       DateTime
   evaluationType EvaluationType
 
   learningObject LearningObject       @relation(fields: [id], references: [id])
