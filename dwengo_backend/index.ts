@@ -11,6 +11,7 @@ import assignmentRoutes from "./routes/assignmentRoutes";
 import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
 import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
 import studentAssignmentRoutes from "./routes/student/studentAssignmentRoutes";
+import studentClassRoutes from "./routes/student/studentClassRoutes";
 
 dotenv.config();
 
@@ -40,6 +41,9 @@ app.use(express.json());
 // Routes voor Teacher (Classes)
 app.use("/teacher/classes", teacherClassRoutes);
 
+// Routes voor student (Classes)
+app.use("/student/classes", studentClassRoutes);
+
 // Routes voor Teacher (Auth)
 app.use("/teacher/auth", teacherAuthRoutes);
 app.use("/teacher/learningObjects", teacherLocalLearningObjectRoutes);
@@ -62,7 +66,11 @@ app.use("/learningPaths", learningPathRoutes);
 // Error Handler
 app.use(errorHandler);
 
-const PORT: string | number = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server draait op poort ${PORT}`));
+
+if (process.env.NODE_ENV !== "test") {
+  console.log(process.env.NODE_ENV);
+  const PORT: string | number = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`Server draait op poort ${PORT}`));
+}
 
 export default app;
