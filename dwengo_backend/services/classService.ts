@@ -1,6 +1,6 @@
 import {Class, ClassStudent, ClassTeacher, PrismaClient, Student, User} from "@prisma/client";
 import crypto from 'crypto';
-import { AccesDeniedError, NotFoundError } from "../errors/errors";
+import { AccesDeniedError, BadRequestError, NotFoundError } from "../errors/errors";
 
 const prisma = new PrismaClient();
 
@@ -158,6 +158,9 @@ export default class ClassService {
 
     // Read a class by JoinCode
     static async getClassByJoinCode(joinCode: string): Promise<ClassWithLinks | null> {
+        if (!joinCode) {
+            throw new BadRequestError(`Invalid join code: ${joinCode}`);
+        }
         return prisma.class.findUnique({
             where: {code: joinCode},  // Search by the joinCode (which is 'code' in the schema)
             include: {

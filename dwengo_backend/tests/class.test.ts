@@ -135,6 +135,17 @@ describe('classroom tests', () => {
 
             expect(status).toBe(200);
             expect(body.joinLink).toStrictEqual(`${APP_URL}/student/classes/join?joinCode=${classroom.code}`);
+
+            // also test if the join link works
+            const studentUser = await createStudent("Alice", "Anderson", "aaaaa@gmail.com");
+            const joinLinkResponse = await request(app)
+                .post(`/student/classes/join?joinCode=${classroom.code}`) // can't use body.joinLink here, because the APP_URL is different in the test environment
+                .set('Authorization', `Bearer ${studentUser.token}`);
+
+            expect(joinLinkResponse.status).toBe(201);
+            expect(joinLinkResponse.body).toHaveProperty('joinRequest');
+            expect(joinLinkResponse.body.joinRequest).toHaveProperty('classId', classroom.id);
+            expect(joinLinkResponse.body.joinRequest).toHaveProperty('studentId', studentUser.id);
         });
         it('should respond with a `403` status code and a message when the teacher is not associated with the class', async () => {
             // try getting the join link for a class the teacher is not associated with

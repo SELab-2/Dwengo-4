@@ -33,7 +33,7 @@ describe('join request tests', async() => {
                 .post('/student/classes/join')
                 .set('Authorization', `Bearer ${studentUser1.token}`)
                 .send({
-                    classCode: classroom.code
+                    joinCode: classroom.code
                 }) 
 
             expect(status).toBe(201);
@@ -65,7 +65,7 @@ describe('join request tests', async() => {
                 .post('/student/classes/join')
                 .set('Authorization', `Bearer ${studentUser1.token}`)
                 .send({
-                    classCode: classroom.code
+                    joinCode: classroom.code
                 })
             expect(status).toBe(201);
             expect(body).toHaveProperty('joinRequest');
@@ -88,7 +88,7 @@ describe('join request tests', async() => {
                 .post('/student/classes/join')
                 .set('Authorization', `Bearer ${studentUser1.token}`)
                 .send({
-                    classCode: "BLABLA" // non-existent class code
+                    joinCode: "BLABLA" // non-existent class code
                 })
 
             expect(status).toBe(404);
@@ -104,7 +104,7 @@ describe('join request tests', async() => {
                 .post('/student/classes/join')
                 .set('Authorization', `Bearer ${studentUser1.token}`)
                 .send({
-                    classCode: classroom.code
+                    joinCode: classroom.code
                 })
             expect(status).toBe(400);
             expect(body.error).toBe(`Error creating join request: Student ${studentUser1.id} is already a member of class ${classroom.id}`);
@@ -115,7 +115,7 @@ describe('join request tests', async() => {
                 .post('/student/classes/join')
                 .set('Authorization', `Bearer ${studentUser1.token}`)
                 .send({
-                    classCode: classroom.code
+                    joinCode: classroom.code
                 })
             // verify that the join request was created
             await prisma.joinRequest.findMany().then((joinRequests) => {
@@ -126,7 +126,7 @@ describe('join request tests', async() => {
                 .post('/student/classes/join')
                 .set('Authorization', `Bearer ${studentUser1.token}`)
                 .send({
-                    classCode: classroom.code
+                    joinCode: classroom.code
                 })
             expect(status).toBe(400);
             expect(body.error).toBe(`Error creating join request: There's already a pending join request for student ${studentUser1.id} and class ${classroom.id}`);
