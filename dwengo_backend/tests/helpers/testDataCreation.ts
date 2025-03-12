@@ -8,6 +8,7 @@ import {
   Student,
   JoinRequest,
   LearningPath,
+  Assignment,
 } from "@prisma/client";
 import * as jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -154,6 +155,25 @@ export async function createJoinRequest(
       studentId,
       classId,
       status: JoinRequestStatus.PENDING,
+    },
+  });
+}
+
+export async function createAssignmentForClass(
+  teacherId: number,
+  classId: number,
+  learningPathId: string,
+  deadline: Date
+): Promise<Assignment> {
+  return prisma.assignment.create({
+    data: {
+      learningPathId,
+      deadline,
+      classAssignments: {
+        create: {
+          classId, // This will automatically link to the created Assignment
+        },
+      },
     },
   });
 }

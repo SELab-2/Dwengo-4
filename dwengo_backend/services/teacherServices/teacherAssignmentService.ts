@@ -18,6 +18,7 @@ export default class TeacherAssignmentService {
     return prisma.assignment.create({
       data: {
         learningPathId,
+        deadline,
         classAssignments: {
           create: {
             classId, // This will automatically link to the created Assignment
