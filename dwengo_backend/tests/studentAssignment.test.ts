@@ -1,4 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import request from "supertest";
 import prisma from "./helpers/prisma";
 import app from "../index";
@@ -23,6 +31,7 @@ import {
   createLearningPath,
   createStudent,
   createTeacher,
+  stringToDate,
 } from "./helpers/testDataCreation";
 import { AssignmentController } from "../controllers/assignmentController";
 
@@ -31,6 +40,7 @@ describe("Tests for studentAssigment", async () => {
   let student2: User & { student: Student; token: string };
   let student3: User & { student: Student; token: string };
   let student4: User & { student: Student; token: string };
+  let student5: User & { student: Student; token: string };
   let teacherUser1: User & { teacher: Teacher; token: string };
 
   let class1: Class;
@@ -45,24 +55,20 @@ describe("Tests for studentAssigment", async () => {
   let assignment2: Assignment;
   let assignment3: Assignment;
 
+  let assignment4: Assignment;
+  let assignment5: Assignment;
+
   beforeEach(async () => {
-    // clear the database
-    await prisma.$transaction([
-      prisma.classAssignment.deleteMany(),
-      prisma.assignment.deleteMany(),
-      prisma.learningPath.deleteMany(),
-      prisma.classTeacher.deleteMany(),
-      prisma.classStudent.deleteMany(),
-      prisma.class.deleteMany(),
-      prisma.student.deleteMany(),
-      prisma.teacher.deleteMany(),
-      prisma.user.deleteMany(),
-    ]);
     // create some students
     student1 = await createStudent("Phret", "Pret", "phret.pret@gmail.com");
     student2 = await createStudent("Bleep", "Bloop", "bleep.bloop@gmail.com");
     student3 = await createStudent("Gerda", "Gerd", "gerda.gerd@gmail.com");
     student4 = await createStudent("Klaas", "Sinter", "klaas.sinter@gmail.com");
+    student5 = await createStudent(
+      "Gertrude",
+      "Truede",
+      "truede.gertrude@gmail.com"
+    );
     // create some classes
     class1 = await createClass("1LA", "ABCD");
     class2 = await createClass("3LAWI", "EFGH");
@@ -90,11 +96,38 @@ describe("Tests for studentAssigment", async () => {
     addStudentToClass(student2.id, class1.id);
     addStudentToClass(student3.id, class1.id);
     addStudentToClass(student4.id, class2.id);
+    addStudentToClass(student5.id, class3.id);
 
     // Create assignments
     assignment1 = await createAssignment(class1.id, lp1.id, new Date());
     assignment2 = await createAssignment(class1.id, lp2.id, new Date());
     assignment3 = await createAssignment(class2.id, lp3.id, new Date());
+
+    assignment4 = await createAssignment(
+      class3.id,
+      lp2.id,
+      new Date("2026-10-17")
+    );
+    assignment5 = await createAssignment(
+      class3.id,
+      lp3.id,
+      new Date("2025-05-28")
+    );
+  });
+
+  afterEach(async () => {
+    // clear the database
+    await prisma.$transaction([
+      prisma.classAssignment.deleteMany(),
+      prisma.assignment.deleteMany(),
+      prisma.learningPath.deleteMany(),
+      prisma.classTeacher.deleteMany(),
+      prisma.classStudent.deleteMany(),
+      prisma.class.deleteMany(),
+      prisma.student.deleteMany(),
+      prisma.teacher.deleteMany(),
+      prisma.user.deleteMany(),
+    ]);
   });
 
   // describe("[GET] /student/assignments", async () => {
@@ -177,4 +210,119 @@ describe("Tests for studentAssigment", async () => {
     expect(b1).toHaveLength(1);
     expect(b1 !== b);
   });
+
+  it("should return a sorted list of assignments in descending order based on the deadline", async () => {
+    const { status, body } = await request(app)
+      .get("/student/assignments")
+      .query({ sort: "deadline", order: "desc" })
+      .set("Authorization", `Bearer ${student5.token}`);
+
+    stringToDate(body, 2);
+
+    expect(status).toBe(200);
+    expect(body).toHaveLength(2);
+    expect(body[0].deadline > body[1].deadline);
+  });
+
+  it("should return a sorted list of assignments in ascending order based on the deadline", async () => {
+    const { status, body } = await request(app)
+      .get("/student/assignments")
+      .query({ sort: "deadline", order: "asc" })
+      .set("Authorization", `Bearer ${student5.token}`);
+
+    stringToDate(body, 2);
+
+    expect(status).toBe(200);
+    expect(body).toHaveLength(2);
+    expect(body[0].deadline < body[1].deadline);
+  });
+
+  it("should return a sorted list of assignments in descending order based on createdAt", async () => {
+    const { status, body } = await request(app)
+      .get("/student/assignments")
+      .query({ sort: "createdAt", order: "desc" })
+      .set("Authorization", `Bearer ${student5.token}`);
+
+    stringToDate(body, 2);
+
+    expect(status).toBe(200);
+    expect(body).toHaveLength(2);
+    expect(body[0].createdAt > body[1].createdAt);
+  });
+
+  it("should return a sorted list of assignments in ascending order based on createdAt", async () => {
+    const { status, body } = await request(app)
+      .get("/student/assignments")
+      .query({ sort: "createdAt", order: "asc" })
+      .set("Authorization", `Bearer ${student5.token}`);
+
+    stringToDate(body, 2);
+
+    expect(status).toBe(200);
+    expect(body).toHaveLength(2);
+    expect(body[0].createdAt > body[1].createdAt);
+  });
+
+  it("should return a sorted list of assignments in descending order based on updatedAt", async () => {
+    const { status, body } = await request(app)
+      .get("/student/assignments")
+      .query({ sort: "updatedAt", order: "desc" })
+      .set("Authorization", `Bearer ${student5.token}`);
+
+    stringToDate(body, 2);
+
+    expect(status).toBe(200);
+    expect(body).toHaveLength(2);
+    expect(body[0].updatedAt > body[1].updatedAt);
+  });
+
+  it("should return a sorted list of assignments in ascending order based on updatedAt", async () => {
+    const { status, body } = await request(app)
+      .get("/student/assignments")
+      .query({ sort: "updatedAt", order: "asc" })
+      .set("Authorization", `Bearer ${student5.token}`);
+
+    stringToDate(body, 2);
+
+    expect(status).toBe(200);
+    expect(body).toHaveLength(2);
+    expect(body[0].updatedAt < body[1].updatedAt);
+  });
+
+  it("should return a sorted list of 1 assignment due to limit", async () => {
+    const { status, body } = await request(app)
+      .get("/student/assignments")
+      .query({ limit: 1 })
+      .set("Authorization", `Bearer ${student5.token}`);
+
+    stringToDate(body, 1);
+
+    expect(status).toBe(200);
+    expect(body).toHaveLength(1);
+  });
+
+  it("should only return 2 assignments even though limit is higher", async () => {
+    const { status, body } = await request(app)
+      .get("/student/assignments")
+      .query({ limit: 10 })
+      .set("Authorization", `Bearer ${student5.token}`);
+
+    stringToDate(body, 2);
+
+    expect(status).toBe(200);
+    expect(body).toHaveLength(2);
+  });
+
+  // clear the database
+  await prisma.$transaction([
+    prisma.classAssignment.deleteMany(),
+    prisma.assignment.deleteMany(),
+    prisma.learningPath.deleteMany(),
+    prisma.classTeacher.deleteMany(),
+    prisma.classStudent.deleteMany(),
+    prisma.class.deleteMany(),
+    prisma.student.deleteMany(),
+    prisma.teacher.deleteMany(),
+    prisma.user.deleteMany(),
+  ]);
 });

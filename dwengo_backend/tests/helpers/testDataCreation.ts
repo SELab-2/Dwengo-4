@@ -120,7 +120,10 @@ export async function createLearningPath(
 ): Promise<LearningPath> {
   const lp = await prisma.learningPath.create({
     data: {
-      hruid: `${Date.now()}`,
+      // Random string generator that generates a string of numbers and lowercase letters
+      hruid: Math.random()
+        .toString(36)
+        .substring(2, 2 + 12),
       title,
       description,
       language: "nl",
@@ -180,8 +183,8 @@ export async function createAssignment(
   });
 }
 
-export function stringToDate(body: any) {
-  for (let i = 0; i < 2; i += 1) {
+export function stringToDate(body: any, length: number) {
+  for (let i = 0; i < length; i += 1) {
     body[i].createdAt = new Date(body[i].createdAt);
     body[i].updatedAt = new Date(body[i].updatedAt);
     body[i].deadline = new Date(body[i].deadline);
