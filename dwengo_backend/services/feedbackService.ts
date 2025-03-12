@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export default class FeedbackService {
     static async getAllFeedbackForEvaluation(assignmentId: number, evaluationId: string, teacherId: number): Promise<Feedback[]> {
-        if (!await this.hasEvaluationRights(assignmentId, teacherId, evaluationId)) {
+        if (!await this.hasAssignmentRights(assignmentId, teacherId)) {
             throw new Error("The teacher is unauthorized to perform this action");
         }
 
@@ -28,7 +28,7 @@ export default class FeedbackService {
         }
 
         // aantal evaluaties met deadline in de toekomst
-        const deadline: number = await prisma.evaluation.count({
+        const deadline = await prisma.evaluation.findFirst({
             where: {
                 submissions: {
                     some: {
@@ -42,7 +42,7 @@ export default class FeedbackService {
         });
 
         // Als deadline in de toekomst ligt: error
-        if (deadline > 0) {
+        if (deadline !== null) {
             throw new Error("Deadline in toekomst");
         }
 
@@ -95,9 +95,9 @@ export default class FeedbackService {
 
     }
 
-    static async hasEvaluationRights(assignmentId: number, teacherId: number, evaluationId: string) {
+    static async hasAssignmentRights(assignmentId: number, teacherId: number) {
         // Tel aantal leerkrachten die rechten hebben op de evaluatie
-        const teacherWithRights: number = await prisma.teacher.count({
+        const teacherWithRights = await prisma.teacher.findFirst({
                 where: {
                     userId: teacherId,
                     teaches: {
@@ -106,11 +106,7 @@ export default class FeedbackService {
                                 assignments: {
                                     some: {
                                         assignment: {
-                                            submissions: {
-                                                some: {
-                                                    evaluationId: evaluationId,
-                                                }
-                                            }
+                                            id: assignmentId,
                                         }
                                     }
                                 }
@@ -121,8 +117,7 @@ export default class FeedbackService {
             }
         );
 
-        // Return true als teacher rechten heeft
-        return teacherWithRights > 0;
+        return teacherWithRights !== null;
     }
 
     static async hasSubmissionRights(teacherId: number, submissionId: number) {

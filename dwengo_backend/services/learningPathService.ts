@@ -1,15 +1,17 @@
 import { dwengoAPI } from "../config/dwengoAPI";
 
 export interface LearningPathDto {
-  _id: string;            // Dwengo gebruikt _id
-  hruid: string;          // Human readable unique id
+  _id: string; // Dwengo gebruikt _id
+  hruid: string; // Human readable unique id
   language: string;
   title: string;
   description: string;
   image?: string;
-  nodes: any[];           // Array van nodes (zie Dwengo docs), elk met transitions, etc.
-  createdAt?: string;     // Als Dwengo 'created_at' meegeeft
-  updatedAt?: string;     // Als Dwengo 'updatedAt' meegeeft
+  num_nodes?: number; // Aantal nodes in het pad
+  num_nodes_left: number;
+  nodes: any[]; // Array van nodes (zie Dwengo docs), elk met transitions, etc.
+  createdAt?: string; // Als Dwengo 'created_at' meegeeft
+  updatedAt?: string; // Als Dwengo 'updatedAt' meegeeft
 }
 
 /**
@@ -23,6 +25,8 @@ function mapDwengoPathToLocal(dwengoPath: any): LearningPathDto {
     title: dwengoPath.title ?? "",
     description: dwengoPath.description ?? "",
     image: dwengoPath.image ?? "",
+    num_nodes: dwengoPath.num_nodes ?? 0,
+    num_nodes_left: dwengoPath.num_nodes_left ?? 0,
     nodes: dwengoPath.nodes ?? [],
     createdAt: dwengoPath.created_at ?? "",
     updatedAt: dwengoPath.updatedAt ?? "",
@@ -35,13 +39,15 @@ function mapDwengoPathToLocal(dwengoPath: any): LearningPathDto {
  *   (zie Dwengo docs)
  * @param filters Object met mogelijke zoekfilters
  */
-export async function searchLearningPaths(filters: {
-  language?: string;
-  hruid?: string;
-  title?: string;
-  description?: string;
-  all?: string; // leeg string => alles
-} = {}): Promise<LearningPathDto[]> {
+export async function searchLearningPaths(
+  filters: {
+    language?: string;
+    hruid?: string;
+    title?: string;
+    description?: string;
+    all?: string; // leeg string => alles
+  } = {}
+): Promise<LearningPathDto[]> {
   try {
     // Zet de filters om naar Dwengo queryparams
     const params: Record<string, any> = {};
@@ -60,7 +66,9 @@ export async function searchLearningPaths(filters: {
     }
 
     // GET call
-    const response = await dwengoAPI.get("/api/learningPath/search", { params });
+    const response = await dwengoAPI.get("/api/learningPath/search", {
+      params,
+    });
     const dwengoData = response.data; // array van leerpaden
 
     // Map elk item naar LearningPathDto
@@ -73,9 +81,9 @@ export async function searchLearningPaths(filters: {
 }
 
 /**
- * Haalt 1 leerpad op (niet voorzien in Dwengo met /getMetadata, 
+ * Haalt 1 leerpad op (niet voorzien in Dwengo met /getMetadata,
  * maar je kunt filteren in search op bijv. hruid of _id).
- * 
+ *
  * Let op: Dwengo heeft geen dedicated "getLearningPathById" route;
  * je zoekt typically via search + hruid=... of all=...
  */
@@ -85,7 +93,9 @@ export async function getLearningPathByIdOrHruid(
   try {
     // Probeer te zoeken met hruid=... of als je _id hebt, moet je 'all=' gebruiken en local filteren
     const params = { all: "" };
-    const response = await dwengoAPI.get("/api/learningPath/search", { params });
+    const response = await dwengoAPI.get("/api/learningPath/search", {
+      params,
+    });
     const allPaths = response.data;
 
     // Zoeken in array op basis van _id of hruid
