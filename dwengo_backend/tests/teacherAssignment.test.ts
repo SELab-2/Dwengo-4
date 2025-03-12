@@ -129,13 +129,14 @@ describe("Tests for teacherAssignment", async () => {
     it("should respond with a `201` status code and the newly created assignment", async () => {
       // class3 has no assignments
       const { status, body } = await request(app)
-        .post("/teacher/assignments")
+        .post("/teacher/assignments/")
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
           learningPathId: lp1.id,
           deadline: "2026-10-23",
         });
+      console.log(body);
 
       expect(status).toBe(201);
       console.log(body);

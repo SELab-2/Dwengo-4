@@ -3,18 +3,18 @@ import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import teacherAssignmentService from "../../services/teacherServices/teacherAssignmentService";
 
 export class AssignmentTeacherController {
-  private isUserValid(req: AuthenticatedRequest, res: Response): boolean {
+  private isUserValid = (req: AuthenticatedRequest, res: Response): boolean => {
     if (!req.user) {
       res.status(401).json({ error: "Unauthorized: No user found" });
       return false;
     }
     return true;
-  }
+  };
 
-  async createAssignmentForClass(
+  createAssignmentForClass = async (
     req: AuthenticatedRequest,
     res: Response
-  ): Promise<void> {
+  ): Promise<void> => {
     try {
       if (!this.isUserValid(req, res)) return;
       const {
@@ -36,14 +36,15 @@ export class AssignmentTeacherController {
         );
       res.status(201).json(assignment);
     } catch (error) {
+      console.log(error);
       res.status(500).json({ error: "Failed to create assignment" });
     }
-  }
+  };
 
-  async getAssignmentsByClass(
+  getAssignmentsByClass = async (
     req: AuthenticatedRequest,
     res: Response
-  ): Promise<void> {
+  ): Promise<void> => {
     try {
       if (!this.isUserValid(req, res)) return;
       const classId: number = parseInt(req.params.classId);
@@ -56,12 +57,12 @@ export class AssignmentTeacherController {
     } catch (error) {
       res.status(500).json({ error: "Failed to retrieve assignments" });
     }
-  }
+  };
 
-  async updateAssignment(
+  updateAssignment = async (
     req: AuthenticatedRequest,
     res: Response
-  ): Promise<void> {
+  ): Promise<void> => {
     try {
       if (!this.isUserValid(req, res)) return;
       const assignmentId: number = parseInt(req.params.assignmentId);
@@ -76,12 +77,12 @@ export class AssignmentTeacherController {
     } catch (error) {
       res.status(500).json({ error: "Failed to update assignment" });
     }
-  }
+  };
 
-  async deleteAssignment(
+  deleteAssignment = async (
     req: AuthenticatedRequest,
     res: Response
-  ): Promise<void> {
+  ): Promise<void> => {
     try {
       if (!this.isUserValid(req, res)) return;
       const assignmentId: number = parseInt(req.params.assignmentId);
@@ -91,5 +92,5 @@ export class AssignmentTeacherController {
     } catch (error) {
       res.status(500).json({ error: "Failed to delete assignment" });
     }
-  }
+  };
 }
