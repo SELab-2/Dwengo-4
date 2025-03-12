@@ -127,14 +127,14 @@ model ClassTeacher {
 /// JoinRequest – voor verzoeken om een klas te joinen
 
 model JoinRequest {
+  // Op deze manier kan een leerling meer dan 1 keer een verzoek sturen naar een klas
+  requestId Int               @id @default(autoincrement())
   studentId Int
   classId   Int
   status    JoinRequestStatus
 
-  student Student @relation(fields: [studentId], references: [userId])
-  class   Class   @relation(fields: [classId], references: [id])
-
-  @@id([studentId, classId])
+  student Student @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
 }
 
 model Invite {
