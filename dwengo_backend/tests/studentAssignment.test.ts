@@ -32,14 +32,6 @@ vi.mock("../middleware/teacherAuthMiddleware", () => ({
   ) => next(),
 }));
 
-vi.mock("../middleware/studentAuthMiddleware", () => ({
-  protectStudent: async (
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) => next(),
-}));
-
 describe("Tests for studentAssigment", async () => {
   let student1: User & { student: Student };
   let student2: User & { student: Student };
