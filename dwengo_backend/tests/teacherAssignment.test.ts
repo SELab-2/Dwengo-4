@@ -12,6 +12,7 @@ import {
 } from "@prisma/client";
 import {
   addStudentToClass,
+  addTeacherToClass,
   createAssignment,
   createClass,
   createLearningPath,
@@ -19,84 +20,90 @@ import {
   createTeacher,
   stringToDate,
 } from "./helpers/testDataCreation";
-import { AssignmentController } from "../controllers/assignmentController";
 
-describe("Tests for studentAssigment", async () => {
-  let student1: User & { student: Student; token: string };
-  let student2: User & { student: Student; token: string };
-  let student3: User & { student: Student; token: string };
-  let student4: User & { student: Student; token: string };
-  let student5: User & { student: Student; token: string };
-  let teacherUser1: User & { teacher: Teacher; token: string };
+describe("Tests for teacherAssignment", async () => {
+  let teacher1: User & { teacher: Teacher; token: string };
+  let teacher2: User & { teacher: Teacher; token: string };
+  let teacher3: User & { teacher: Teacher; token: string };
 
   let class1: Class;
   let class2: Class;
-  let class3: Class;
 
   let lp1: LearningPath;
   let lp2: LearningPath;
   let lp3: LearningPath;
+  let lp4: LearningPath;
 
   let assignment1: Assignment;
   let assignment2: Assignment;
   let assignment3: Assignment;
-
   let assignment4: Assignment;
   let assignment5: Assignment;
 
   beforeEach(async () => {
-    // create some students
-    student1 = await createStudent("Phret", "Pret", "phret.pret@gmail.com");
-    student2 = await createStudent("Bleep", "Bloop", "bleep.bloop@gmail.com");
-    student3 = await createStudent("Gerda", "Gerd", "gerda.gerd@gmail.com");
-    student4 = await createStudent("Klaas", "Sinter", "klaas.sinter@gmail.com");
-    student5 = await createStudent(
-      "Gertrude",
-      "Truede",
-      "truede.gertrude@gmail.com"
-    );
     // create some classes
     class1 = await createClass("1LA", "ABCD");
     class2 = await createClass("3LAWI", "EFGH");
-    class3 = await createClass("5LAWI", "IJKL");
     // create a teacher
-    teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
+    teacher1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
+    teacher2 = await createTeacher("Alice", "Aerts", "alice.aerts@gmail.com");
+    teacher3 = await createTeacher(
+      "Charlie",
+      "Ceulemans",
+      "charlie.ceulemans@gmail.com"
+    );
     // create some learning paths
     lp1 = await createLearningPath(
       "LP1",
       "Learning Path 1",
-      teacherUser1.teacher.userId
+      teacher1.teacher.userId
     );
     lp2 = await createLearningPath(
       "LP2",
       "Learning Path 2",
-      teacherUser1.teacher.userId
+      teacher2.teacher.userId
     );
     lp3 = await createLearningPath(
       "LP3",
       "Learning Path 3",
-      teacherUser1.teacher.userId
+      teacher2.teacher.userId
+    );
+    lp4 = await createLearningPath(
+      "LP4",
+      "Learning Path 4",
+      teacher3.teacher.userId
     );
 
-    // Add students to classes
-    addStudentToClass(student2.id, class1.id);
-    addStudentToClass(student3.id, class1.id);
-    addStudentToClass(student4.id, class2.id);
-    addStudentToClass(student5.id, class3.id);
+    // Add teacher to classes
+    addTeacherToClass(teacher1.id, class1.id);
+    addTeacherToClass(teacher2.id, class1.id);
+    addTeacherToClass(teacher3.id, class2.id);
 
     // Create assignments
-    assignment1 = await createAssignment(class1.id, lp1.id, new Date());
-    assignment2 = await createAssignment(class1.id, lp2.id, new Date());
-    assignment3 = await createAssignment(class2.id, lp3.id, new Date());
+    assignment1 = await createAssignment(
+      class1.id,
+      lp1.id,
+      new Date("2026-10-23")
+    );
+    assignment2 = await createAssignment(
+      class1.id,
+      lp2.id,
+      new Date("2026-04-17")
+    );
+    assignment3 = await createAssignment(
+      class2.id,
+      lp3.id,
+      new Date("2026-10-19")
+    );
 
     assignment4 = await createAssignment(
-      class3.id,
-      lp2.id,
+      class2.id,
+      lp4.id,
       new Date("2026-10-17")
     );
     assignment5 = await createAssignment(
-      class3.id,
-      lp3.id,
+      class2.id,
+      lp1.id,
       new Date("2025-05-28")
     );
   });
