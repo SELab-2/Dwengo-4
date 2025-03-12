@@ -1,22 +1,10 @@
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import prisma from "./helpers/prisma";
 import app from "../index";
-import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
-import { Response, NextFunction } from "express";
 import {
   Assignment,
   Class,
-  Invite,
-  JoinRequestStatus,
   LearningPath,
   Student,
   Teacher,
@@ -24,16 +12,13 @@ import {
 } from "@prisma/client";
 import {
   addStudentToClass,
-  addTeacherToClass,
   createAssignment,
   createClass,
-  createInvite,
   createLearningPath,
   createStudent,
   createTeacher,
   stringToDate,
 } from "./helpers/testDataCreation";
-import { AssignmentController } from "../controllers/assignmentController";
 
 describe("Tests for studentAssigment", async () => {
   let student1: User & { student: Student; token: string };
