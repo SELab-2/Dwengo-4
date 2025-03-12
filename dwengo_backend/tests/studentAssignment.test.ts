@@ -296,17 +296,4 @@ describe("[GET] /student/assignments", async () => {
     expect(status).toBe(200);
     expect(body).toHaveLength(2);
   });
-
-  // clear the database
-  await prisma.$transaction([
-    prisma.classAssignment.deleteMany(),
-    prisma.assignment.deleteMany(),
-    prisma.learningPath.deleteMany(),
-    prisma.classTeacher.deleteMany(),
-    prisma.classStudent.deleteMany(),
-    prisma.class.deleteMany(),
-    prisma.student.deleteMany(),
-    prisma.teacher.deleteMany(),
-    prisma.user.deleteMany(),
-  ]);
 });
