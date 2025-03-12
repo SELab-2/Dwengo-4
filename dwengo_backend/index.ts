@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from "express";
+import express, {NextFunction, Request, Response} from "express";
 import dotenv from "dotenv";
 import errorHandler from "./middleware/errorMiddleware";
 import teacherAuthRoutes from "./routes/teacher/teacherAuthRoutes";
@@ -11,6 +11,7 @@ import assignmentRoutes from "./routes/assignmentRoutes";
 import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
 import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
 import studentAssignmentRoutes from "./routes/student/studentAssignmentRoutes";
+import feedbackRoutes from "./routes/teacher/feedbackRoutes";
 import studentClassRoutes from "./routes/student/studentClassRoutes";
 
 dotenv.config();
@@ -58,6 +59,8 @@ app.use("/assignments", assignmentRoutes);
 app.use("/teacher/assignments", teacherAssignmentRoutes);
 // Routes voor het opvragen van de Assignments door students
 app.use("/student/assignments", studentAssignmentRoutes);
+
+app.use('/teacher/feedback', feedbackRoutes);
 
 // Nieuwe routes voor leerobjecten
 app.use("/learningObjects", learningObjectRoutes);
