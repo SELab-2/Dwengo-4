@@ -33,11 +33,11 @@ vi.mock("../middleware/teacherAuthMiddleware", () => ({
 }));
 
 describe("Tests for studentAssigment", async () => {
-  let student1: User & { student: Student };
-  let student2: User & { student: Student };
-  let student3: User & { student: Student };
-  let student4: User & { student: Student };
-  let teacherUser1: User & { teacher: Teacher };
+  let student1: User & { student: Student; token: string };
+  let student2: User & { student: Student; token: string };
+  let student3: User & { student: Student; token: string };
+  let student4: User & { student: Student; token: string };
+  let teacherUser1: User & { teacher: Teacher; token: string };
 
   let class1: Class;
   let class2: Class;
@@ -92,6 +92,7 @@ describe("Tests for studentAssigment", async () => {
       // set up scenario where student has no assignments
       const { status, body } = await request(app)
         .get("/student/assignments")
+        .set("Authorization", `Bearer ${student1.token}`)
         .send({
           user: student1,
         });
