@@ -32,10 +32,15 @@ export const protectAnyUser = asyncHandler(
     ) {
       try {
         token = req.headers.authorization.split(" ")[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
+        const decoded = jwt.verify(
+          token,
+          process.env.JWT_SECRET as string
+        ) as JwtPayload;
 
         // Zoek de gebruiker in de database
-        const user: User | null = await prisma.user.findUnique({ where: { id: decoded.id } });
+        const user: User | null = await prisma.user.findUnique({
+          where: { id: decoded.id },
+        });
         if (!user) {
           res.status(401).json({ error: "Gebruiker niet gevonden." });
           return;
@@ -66,9 +71,9 @@ export const protectAnyUser = asyncHandler(
           const student: Student | null = await prisma.student.findUnique({
             where: { userId: user.id },
             include: {
-              studentQuestions: true,
+              //studentQuestions: true,
               progress: true,
-              teamAssignments: true,
+              //teamAssignments: true,
               joinRequests: true,
               classes: true,
             },
@@ -89,4 +94,3 @@ export const protectAnyUser = asyncHandler(
     }
   }
 );
-

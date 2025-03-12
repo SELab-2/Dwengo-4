@@ -7,7 +7,7 @@ import learningObjectRoutes from "./routes/learningObject/learningObjectRoutes";
 import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
 import assignmentRoutes from "./routes/assignmentRoutes";
 import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
-import teacherClassRoutes from './routes/teacher/teacherClassRoutes';
+import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
 import studentClassRoutes from "./routes/student/studentClassRoutes";
 
 dotenv.config();
@@ -21,14 +21,19 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   if (origin && allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Authorization");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "X-Requested-With, Content-Type, Authorization"
+  );
   next();
 });
 
 // JSON-parser middleware
 app.use(express.json());
-
 
 // Routes voor Teacher (Classes)
 app.use("/teacher/classes", teacherClassRoutes);
@@ -40,13 +45,13 @@ app.use("/student/classes", studentClassRoutes);
 app.use("/teacher/auth", teacherAuthRoutes);
 
 // Routes voor Student (Auth)
-app.use("/student/auth", studentAuthRoutes)
+app.use("/student/auth", studentAuthRoutes);
 
 // Routes voor de Assignments
-app.use('/assignments', assignmentRoutes);
+app.use("/assignments", assignmentRoutes);
 
 // Routes voor de aanpassingen op Assignments door teachers
-app.use('/teacher/assignments', teacherAssignmentRoutes);
+app.use("/teacher/assignments", teacherAssignmentRoutes);
 
 // Nieuwe routes voor leerobjecten
 app.use("/learningObjects", learningObjectRoutes);
@@ -55,11 +60,10 @@ app.use("/learningPaths", learningPathRoutes);
 // Error Handler
 app.use(errorHandler);
 
-
-if (process.env.NODE_ENV !== "test") {
-  console.log(process.env.NODE_ENV);
-  const PORT: string | number = process.env.PORT || 5000;
-  app.listen(PORT, () => console.log(`Server draait op poort ${PORT}`));
-}
+//if (process.env.NODE_ENV !== "test") { //TEMP! CHANGE BACK UNCOMMENT
+console.log(process.env.NODE_ENV);
+const PORT: string | number = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server draait op poort ${PORT}`));
+//}
 
 export default app;
