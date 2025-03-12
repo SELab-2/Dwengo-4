@@ -1,6 +1,7 @@
 // src/services/class.service.js
 import {Class, ClassStudent, ClassTeacher, PrismaClient, Student} from "@prisma/client";
 import crypto from 'crypto';
+import { AccesDeniedError, NotFoundError } from "../errors/errors";
 
 const prisma = new PrismaClient();
 
@@ -36,7 +37,7 @@ export default class ClassService {
         // Check if the teacher is associated with the class
         const isTeacher = await this.isTeacherOfClass(classId, teacherId);
         if (!isTeacher) {
-            throw new Error("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
+            throw new AccesDeniedError("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
         }
 
         // Start a transaction to delete related records
@@ -107,7 +108,7 @@ export default class ClassService {
         // Check if the teacher is associated with the class
         const isTeacher = await this.isTeacherOfClass(classId, teacherId);
         if (!isTeacher) {
-            throw new Error("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
+            throw new AccesDeniedError("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
         }
 
         const classWithStudents = await prisma.class.findUnique({
@@ -197,7 +198,7 @@ export default class ClassService {
         });
 
         if (!classroom) {
-            throw new Error("Klas niet gevonden");
+            throw new NotFoundError("Klas niet gevonden");
         }
 
         return classroom.code;
@@ -230,7 +231,7 @@ export default class ClassService {
         // Check if the teacher is associated with the class
         const isTeacher = await this.isTeacherOfClass(classId, teacherId);
         if (!isTeacher) {
-            throw new Error("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
+            throw new AccesDeniedError("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
         }
 
         // Generate a unique join code
