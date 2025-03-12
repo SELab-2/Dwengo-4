@@ -1,52 +1,115 @@
-import prisma from './prisma';
-import { User, Class, Invite, Teacher, JoinRequestStatus } from '@prisma/client';
+import prisma from "./prisma";
+import {
+  User,
+  Class,
+  Invite,
+  Teacher,
+  JoinRequestStatus,
+  Student,
+  LearningPath,
+} from "@prisma/client";
 
 // helper functions to create test data in the database for tests to avoid code duplication in the tests themselves
 
-export async function createTeacher(firstName: string, lastName: string, email: string): Promise<User & { teacher: Teacher }> {
-    const user = await prisma.user.create({
-        data: {
-            firstName,
-            lastName,
-            email,
-            password: "testpassword",
-            role: "TEACHER",
-            teacher: {
-                create: {}
-            }
-        },
-        include: {
-            teacher: true
-        }
-    });
-    return { ...user, teacher: user.teacher! };
+export async function createTeacher(
+  firstName: string,
+  lastName: string,
+  email: string
+): Promise<User & { teacher: Teacher }> {
+  const user = await prisma.user.create({
+    data: {
+      firstName,
+      lastName,
+      email,
+      password: "testpassword",
+      role: "TEACHER",
+      teacher: {
+        create: {},
+      },
+    },
+    include: {
+      teacher: true,
+    },
+  });
+  return { ...user, teacher: user.teacher! };
 }
 
 export async function createClass(name: string, code: string): Promise<Class> {
-    return prisma.class.create({
-        data: {
-            name,
-            code
-        }
-    });
+  return prisma.class.create({
+    data: {
+      name,
+      code,
+    },
+  });
 }
 
-export async function createInvite(classTeacherId: number, otherTeacherId: number, classId: number): Promise<Invite> {
-    return prisma.invite.create({
-        data: {
-            otherTeacherId,
-            classTeacherId,
-            classId,
-            status: JoinRequestStatus.PENDING
-        }
-    });
+export async function createInvite(
+  classTeacherId: number,
+  otherTeacherId: number,
+  classId: number
+): Promise<Invite> {
+  return prisma.invite.create({
+    data: {
+      otherTeacherId,
+      classTeacherId,
+      classId,
+      status: JoinRequestStatus.PENDING,
+    },
+  });
 }
 
-export async function addTeacherToClass(teacherId: number, classId: number): Promise<void> {
-    await prisma.classTeacher.create({
-        data: {
-            teacherId,
-            classId
-        }
-    });
+export async function addTeacherToClass(
+  teacherId: number,
+  classId: number
+): Promise<void> {
+  await prisma.classTeacher.create({
+    data: {
+      teacherId,
+      classId,
+    },
+  });
+}
+
+export async function createStudent(
+  firstName: string,
+  lastName: string,
+  email: string
+): Promise<User & { student: Student }> {
+  const user = await prisma.user.create({
+    data: {
+      firstName,
+      lastName,
+      email,
+      password: "testpassword",
+      role: "STUDENT",
+      student: {
+        create: {},
+      },
+    },
+    include: {
+      student: true,
+    },
+  });
+  return { ...user, student: user.student! };
+}
+
+export async function createLearningPath(
+  title: string,
+  description: string,
+  creatorId: number
+): Promise<LearningPath> {
+  const lp = await prisma.learningPath.create({
+    data: {
+      hruid: `${Date.now()}`,
+      title,
+      description,
+      language: "nl",
+      creator: {
+        connect: {
+          userId: creatorId,
+        },
+      },
+    },
+  });
+  return lp;
 }
