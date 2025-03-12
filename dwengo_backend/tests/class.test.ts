@@ -5,6 +5,8 @@ import app from '../index';
 import { Class, Teacher, User } from '@prisma/client';
 import { addStudentToClass, addTeacherToClass, createClass, createInvite, createJoinRequest, createStudent, createTeacher } from './helpers/testDataCreation';
 
+const APP_URL = process.env.APP_URL || "http://localhost:5000";
+
 describe('classroom tests', () => {
     let teacherUser1: User & { teacher: Teacher, token: string };
     beforeEach(async () => {
@@ -126,11 +128,46 @@ describe('classroom tests', () => {
         });
     });
     describe('GET /teacher/classes/:classId/join-link', () => {
+        let classroom: Class;
+        beforeEach(async () => {
+            classroom = await createClass("5A", "ABCD");
+        });
         it('should respond with a `200` status code and a join link', async () => {
+            // add teacherUser1 to class, so we can test getting the join link
+            await addTeacherToClass(teacherUser1.id, classroom.id);
+            const { status, body } = await request(app)
+                .get(`/teacher/classes/${classroom.id}/join-link`)  
+                .set('Authorization', `Bearer ${teacherUser1.token}`);
+
+            expect(status).toBe(200);
+            expect(body.joinLink).toStrictEqual(`${APP_URL}/student/classes/join?joinCode=${classroom.code}`);
         });
         it('should respond with a `403` status code and a message when the teacher is not associated with the class', async () => {
+            // try getting the join link for a class the teacher is not associated with
+            const { status, body } = await request(app)
+                .get(`/teacher/classes/${classroom.id}/join-link`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`);  // teacherUser1 is not associated with the class
+
+            expect(status).toBe(403);
+            expect(body.message).toBe(`Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`);
+            expect(body.joinLink).toBeUndefined();
         });
         it('should respond with a `404` status code if the class does not exist', async () => {
+            // get an id that isn't used for any existing class in the database
+            const maxClass = await prisma.class.findFirst({
+                orderBy: {
+                    id: 'desc'
+                }
+            });
+            const invalidClassId = (maxClass?.id ?? 0) + 1;
+
+            const { status, body } = await request(app)
+                .get(`/teacher/classes/${invalidClassId}/join-link`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`);
+
+            expect(status).toBe(404);
+            expect(body.message).toBe(`Class with id ${invalidClassId} not found`);
+            expect(body.joinLink).toBeUndefined();
         });
     });
     describe('POST /teacher/classes/:classId/regenerate-join-link', () => {

@@ -167,19 +167,18 @@ export default class ClassService {
     };
 
     static async getJoinCode(classId: number, teacherId: number): Promise<string> {
-        // Check if the teacher is associated with the class
-        const isTeacher = await this.isTeacherOfClass(classId, teacherId);
-        if (!isTeacher) {
-            throw new Error("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
-        }
-
         const classroom = await prisma.class.findUnique({
             where: { id: classId },
             select: { code: true }, // Only fetch the join code
         });
-
         if (!classroom) {
-            throw new NotFoundError("Klas niet gevonden");
+            throw new NotFoundError(`Class with id ${classId} not found`);
+        }
+
+        // Check if the teacher is associated with the class
+        const isTeacher = await this.isTeacherOfClass(classId, teacherId);
+        if (!isTeacher) {
+            throw new AccesDeniedError(`Acces denied: Teacher ${teacherId} is not part of class ${classId}`);
         }
 
         return classroom.code;

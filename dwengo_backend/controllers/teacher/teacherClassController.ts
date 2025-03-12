@@ -64,13 +64,8 @@ export const getJoinLink = asyncHandler(
 
     const joinCode = await classService.getJoinCode(classId, teacherId);
 
-    if (!joinCode) {
-      res.status(403);
-      throw new Error("Toegang geweigerd");
-    }
-
     const joinLink = `${APP_URL}/student/classes/join?joinCode=${joinCode}`;
-    res.json({ joinLink });
+    res.status(200).json({ joinLink });
   }
 );
 
