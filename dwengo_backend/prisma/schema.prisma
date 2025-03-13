@@ -175,7 +175,7 @@ model LearningPath {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   creatorId       Int
-  creator         Teacher           @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator")
+  creator         Teacher           @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator", onDelete: Cascade)
   assignments     Assignment[]
   questionGeneral QuestionGeneral[]
 }
@@ -357,61 +357,59 @@ model QuestionSpecific {
 }
 
 model QuestionGeneral {
-  questionId     Int @unique
+  questionId     Int    @unique
   learningPathId String
 
   // Een QuestionSpecific is een vraag
   question     Question     @relation(fields: [questionId], references: [id])
   // Er kunnen meerdere vragen over een leerobject worden gesteld
   learningPath LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
-  
+
   @@id([questionId, learningPathId])
 }
 
 model Question {
-  id          Int          @id @default(autoincrement())
-  teamId      Int
-  title       String
+  id           Int          @id @default(autoincrement())
+  teamId       Int
+  title        String
   assignmentId Int
-  type        QuestionType
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  type         QuestionType
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
   // Een vraag is ofwel een specifieke vraag (bij leerobject),
   // een algemene vraag (bij leerpad) of
   // een bijvraag bij een antwoord
-  specific   QuestionSpecific?
-  general    QuestionGeneral?
-  
-  assignment Assignment          @relation(fields: [assignmentId], references: [id])
-  team       Team                @relation(fields: [teamId], references: [id])
-  questionConversation QuestionMessage [] 
+  specific QuestionSpecific?
+  general  QuestionGeneral?
+
+  assignment           Assignment        @relation(fields: [assignmentId], references: [id])
+  team                 Team              @relation(fields: [teamId], references: [id])
+  questionConversation QuestionMessage[]
 }
 
 model QuestionMessage {
-  id          Int @id @default(autoincrement())
-  questionId  Int 
+  id         Int      @id @default(autoincrement())
+  questionId Int
   //leerkracht of student
-  userId Int
+  userId     Int
   //de inhoud van de vraag dus
-  text        String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  Questions Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-
+  text       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  Questions  Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
-
 
 ///
 /// Taken en indieningen
 model Assignment {
-  id             Int      @id @default(autoincrement())
-  learningPathId String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  deadline  DateTime
-  learningPath     LearningPath      @relation(fields: [learningPathId], references: [id])
-  Questions Question[]
+  id               Int               @id @default(autoincrement())
+  learningPathId   String
+  deadline         DateTime
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  learningPath     LearningPath      @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  Questions        Question[]
   classAssignments ClassAssignment[]
   teamAssignments  TeamAssignment[]
 
@@ -438,10 +436,9 @@ model Team {
   teamAssignments TeamAssignment[]
 
   // De indieningen van een team
-  class Class @relation(fields: [classId], references: [id])  
+  class       Class        @relation(fields: [classId], references: [id])
   submissions Submission[]
   Questions   Question[]
-
 }
 
 model TeamAssignment {
@@ -449,7 +446,7 @@ model TeamAssignment {
   assignmentId Int
 
   team       Team       @relation(fields: [teamId], references: [id])
-  Assignment Assignment @relation(fields: [assignmentId], references: [id])
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 
   @@id([teamId, assignmentId])
 }
@@ -465,7 +462,7 @@ model Submission {
   feedback     Feedback?
 
   assignmentId Int
-  assignment  Assignment @relation(fields: [assignmentId], references: [id])
+  assignement  Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 
   evaluation Evaluation @relation(fields: [evaluationId], references: [id])
   team       Team       @relation(fields: [teamId], references: [id])

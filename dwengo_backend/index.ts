@@ -10,8 +10,9 @@ import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearn
 
 import assignmentRoutes from "./routes/assignmentRoutes";
 import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
+import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
+import studentAssignmentRoutes from "./routes/student/studentAssignmentRoutes";
 import feedbackRoutes from "./routes/teacher/feedbackRoutes";
-import teacherClassRoutes from './routes/teacher/teacherClassRoutes';
 import studentClassRoutes from "./routes/student/studentClassRoutes";
 
 import swaggerUi from 'swagger-ui-express';
@@ -29,14 +30,19 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   if (origin && allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Authorization");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "X-Requested-With, Content-Type, Authorization"
+  );
   next();
 });
 
 // JSON-parser middleware
 app.use(express.json());
-
 
 // Routes voor Teacher (Classes)
 app.use("/teacher/classes", teacherClassRoutes);
@@ -49,13 +55,15 @@ app.use("/teacher/auth", teacherAuthRoutes);
 app.use("/teacher/learningObjects", teacherLocalLearningObjectRoutes);
 
 // Routes voor Student (Auth)
-app.use("/student/auth", studentAuthRoutes)
+app.use("/student/auth", studentAuthRoutes);
 
 // Routes voor de Assignments
-app.use('/assignments', assignmentRoutes);
+app.use("/assignments", assignmentRoutes);
 
 // Routes voor de aanpassingen op Assignments door teachers
-app.use('/teacher/assignments', teacherAssignmentRoutes);
+app.use("/teacher/assignments", teacherAssignmentRoutes);
+// Routes voor het opvragen van de Assignments door students
+app.use("/student/assignments", studentAssignmentRoutes);
 
 app.use('/teacher/feedback', feedbackRoutes);
 
