@@ -1,22 +1,9 @@
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
-import prisma from "./helpers/prisma";
 import app from "../index";
-import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
-import { Response, NextFunction } from "express";
 import {
   Assignment,
   Class,
-  Invite,
-  JoinRequestStatus,
   LearningPath,
   Student,
   Teacher,
@@ -24,18 +11,15 @@ import {
 } from "@prisma/client";
 import {
   addStudentToClass,
-  addTeacherToClass,
   createAssignment,
   createClass,
-  createInvite,
   createLearningPath,
   createStudent,
   createTeacher,
   stringToDateWithLP,
 } from "./helpers/testDataCreation";
-import { AssignmentController } from "../controllers/assignmentController";
 
-describe("Tests for studentAssigment", async () => {
+describe("[GET] /student/assignments", async () => {
   let student1: User & { student: Student; token: string };
   let student2: User & { student: Student; token: string };
   let student3: User & { student: Student; token: string };
@@ -115,22 +99,6 @@ describe("Tests for studentAssigment", async () => {
     );
   });
 
-  afterEach(async () => {
-    // clear the database
-    await prisma.$transaction([
-      prisma.classAssignment.deleteMany(),
-      prisma.assignment.deleteMany(),
-      prisma.learningPath.deleteMany(),
-      prisma.classTeacher.deleteMany(),
-      prisma.classStudent.deleteMany(),
-      prisma.class.deleteMany(),
-      prisma.student.deleteMany(),
-      prisma.teacher.deleteMany(),
-      prisma.user.deleteMany(),
-    ]);
-  });
-
-  // describe("[GET] /student/assignments", async () => {
   it("should respond with a `200` status code and a list of assignments,\
       this list will be empty because student doesn't have any assignments", async () => {
     // set up scenario where student has no assignments
@@ -312,17 +280,4 @@ describe("Tests for studentAssigment", async () => {
     expect(status).toBe(200);
     expect(body).toHaveLength(2);
   });
-
-  // clear the database
-  await prisma.$transaction([
-    prisma.classAssignment.deleteMany(),
-    prisma.assignment.deleteMany(),
-    prisma.learningPath.deleteMany(),
-    prisma.classTeacher.deleteMany(),
-    prisma.classStudent.deleteMany(),
-    prisma.class.deleteMany(),
-    prisma.student.deleteMany(),
-    prisma.teacher.deleteMany(),
-    prisma.user.deleteMany(),
-  ]);
 });

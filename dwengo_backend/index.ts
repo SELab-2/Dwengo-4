@@ -4,6 +4,7 @@ import errorHandler from "./middleware/errorMiddleware";
 import teacherAuthRoutes from "./routes/teacher/teacherAuthRoutes";
 import studentAuthRoutes from "./routes/student/studentAuthRoutes";
 import learningObjectRoutes from "./routes/learningObject/learningObjectRoutes";
+import QuestionRoutes from "./routes/question/questionRoutes";
 import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
 import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearningObjectRoutes";
 
@@ -14,9 +15,13 @@ import studentAssignmentRoutes from "./routes/student/studentAssignmentRoutes";
 import feedbackRoutes from "./routes/teacher/feedbackRoutes";
 import studentClassRoutes from "./routes/student/studentClassRoutes";
 
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+
 dotenv.config();
 
 const app = express();
+const swaggerDocument = YAML.load('./openapi3_0.yaml');
 
 // Stel CORS-headers in
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -64,7 +69,12 @@ app.use('/teacher/feedback', feedbackRoutes);
 
 // Nieuwe routes voor leerobjecten
 app.use("/learningObjects", learningObjectRoutes);
+
+app.use("/question", QuestionRoutes);
+
 app.use("/learningPaths", learningPathRoutes);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Error Handler
 app.use(errorHandler);

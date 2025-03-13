@@ -26,40 +26,18 @@ import {
 //     };
 // });
 
-describe("invite tests", async () => {
-  let teacherUser1: User & { teacher: Teacher; token: string };
-  let teacherUser2: User & { teacher: Teacher; token: string };
-  let classroom: Class;
-  beforeEach(async () => {
-    // clear the database
-    await prisma.$transaction([
-      prisma.invite.deleteMany(),
-      prisma.classStudent.deleteMany(),
-      prisma.classTeacher.deleteMany(),
-      prisma.class.deleteMany(),
-      prisma.student.deleteMany(),
-      prisma.teacher.deleteMany(),
-      prisma.user.deleteMany(),
-    ]);
-    // create two teachers
-    teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
-    teacherUser2 = await createTeacher("John", "Doe", "john.doe@gmail.com");
-    // create a class
-    classroom = await createClass("5A", "ABCD");
-  });
+describe('invite tests', async () => {
+    let teacherUser1: User & { teacher: Teacher, token: string };
+    let teacherUser2: User & { teacher: Teacher, token: string };
+    let classroom: Class;
+    beforeEach(async () => {
+        // create two teachers
+        teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
+        teacherUser2 = await createTeacher("John", "Doe", "john.doe@gmail.com");
+        // create a class
+        classroom = await createClass("5A", "ABCD");
+    });
 
-  afterAll(async () => {
-    // Make sure that the database is left clean
-    await prisma.$transaction([
-      prisma.invite.deleteMany(),
-      prisma.classStudent.deleteMany(),
-      prisma.classTeacher.deleteMany(),
-      prisma.class.deleteMany(),
-      prisma.student.deleteMany(),
-      prisma.teacher.deleteMany(),
-      prisma.user.deleteMany(),
-    ]);
-  });
   describe("[POST] /teacher/classes/:classId/invites", async () => {
     it("should respond with a `201` status code and an invite", async () => {
       // set up scenario where there's two teachers and a class, the first one being a teacher of the class
