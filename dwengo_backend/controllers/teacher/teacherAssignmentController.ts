@@ -1,29 +1,21 @@
 import { Response } from "express";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import teacherAssignmentService from "../../services/teacherServices/teacherAssignmentService";
+import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 export class AssignmentTeacherController {
-  private isUserValid = (req: AuthenticatedRequest, res: Response): boolean => {
-    if (!req.user) {
-      res.status(401).json({ error: "Unauthorized: No user found" });
-      return false;
-    }
-    return true;
-  };
-
   createAssignmentForClass = async (
     req: AuthenticatedRequest,
     res: Response
   ): Promise<void> => {
     try {
-      if (!this.isUserValid(req, res)) return;
+      const teacherId: number = getUserFromAuthRequest(req).id;
       const {
         classId,
         learningPathId,
         deadline,
       }: { classId: number; learningPathId: string; deadline: string } =
         req.body;
-      const teacherId: number = Number(req.user!.id);
 
       const parsedDeadline = new Date(deadline);
 
@@ -45,9 +37,8 @@ export class AssignmentTeacherController {
     res: Response
   ): Promise<void> => {
     try {
-      if (!this.isUserValid(req, res)) return;
       const classId: number = parseInt(req.params.classId);
-      const teacherId: number = Number(req.user!.id);
+      const teacherId: number = getUserFromAuthRequest(req).id;
       const assignments = await teacherAssignmentService.getAssignmentsByClass(
         classId,
         teacherId
@@ -63,10 +54,9 @@ export class AssignmentTeacherController {
     res: Response
   ): Promise<void> => {
     try {
-      if (!this.isUserValid(req, res)) return;
       const assignmentId: number = parseInt(req.params.assignmentId);
       const { learningPathId }: { learningPathId: string } = req.body;
-      const teacherId: number = Number(req.user!.id);
+      const teacherId: number = getUserFromAuthRequest(req).id;
       const updatedAssignment = await teacherAssignmentService.updateAssignment(
         assignmentId,
         learningPathId,
@@ -83,9 +73,8 @@ export class AssignmentTeacherController {
     res: Response
   ): Promise<void> => {
     try {
-      if (!this.isUserValid(req, res)) return;
       const assignmentId: number = parseInt(req.params.assignmentId);
-      const teacherId: number = Number(req.user!.id);
+      const teacherId: number = getUserFromAuthRequest(req).id;
       await teacherAssignmentService.deleteAssignment(assignmentId, teacherId);
       res.status(204).send();
     } catch (error) {
