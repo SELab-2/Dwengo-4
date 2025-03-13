@@ -3,6 +3,7 @@ import joinRequestService from "../../services/joinRequestService";
 import { JoinRequest } from "@prisma/client";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import { AppError } from "../../errors/errors";
+import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 // Higher-order function to handle errors and reduce duplication
 const handleRequest = (handler: (req: Request, res: Response) => Promise<void>) =>
@@ -22,9 +23,9 @@ const handleRequest = (handler: (req: Request, res: Response) => Promise<void>) 
  * returns the created join request in the response body
  */
 export const createJoinRequest = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { classCode }: {classCode: string } = req.body;
-    const studentId: number = req.user!.id as number;
-    const joinRequest: JoinRequest | undefined = await joinRequestService.createValidJoinRequest(studentId, classCode);
+    const joinCode = req.body.joinCode || req.query.joinCode as string;
+    const studentId: number = getUserFromAuthRequest(req).id;
+    const joinRequest: JoinRequest | undefined = await joinRequestService.createValidJoinRequest(studentId, joinCode);
     res.status(201).json({ joinRequest });
 });
 
@@ -39,7 +40,7 @@ export const updateJoinRequestStatus = handleRequest(async (req: AuthenticatedRe
     const classId: number = parseInt(req.params.classId);
     const requestId: number = parseInt(req.params.requestId);
     const { action }: { action: string } = req.body; // 'approve' or 'deny' from the request body
-    const teacherId: number = req.user!.id as number;
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
     if (!action || (action !== 'approve' && action !== 'deny')) {
         res.status(400).json({ error: "Action must be 'approve' or 'deny'" });
@@ -61,8 +62,7 @@ export const updateJoinRequestStatus = handleRequest(async (req: AuthenticatedRe
  */
 export const getJoinRequestsByClass = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const classId: number = parseInt(req.params.classId);
-    const teacherId: number = req.user!.id as number;
+    const teacherId: number = getUserFromAuthRequest(req).id;
     const joinRequests: JoinRequest[] = await joinRequestService.getJoinRequestsByClass(teacherId, classId);
     res.status(200).json({ joinRequests });
 });
-

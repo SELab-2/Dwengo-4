@@ -3,6 +3,7 @@ import asyncHandler from 'express-async-handler';
 import { Invite } from "@prisma/client";
 import inviteService from "../../services/inviteService";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
+import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 /**
  * Create an invite for a teacher to join a class
@@ -13,7 +14,7 @@ import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 export const createInvite = asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const classId: number = parseInt(req.params.classId);
     const { otherTeacherId }: { otherTeacherId: number } = req.body;
-    const classTeacherId: number = req.user!.id as number;  // teacherAuthMiddleware ensures that req.user is defined
+    const classTeacherId: number = getUserFromAuthRequest(req).id;
 
     const invite: Invite = await inviteService.createInvite(classTeacherId, otherTeacherId, classId);
     res.status(201).json({ invite });
@@ -28,7 +29,7 @@ export const createInvite = asyncHandler(async (req: AuthenticatedRequest, res: 
  */
 export const getPendingInvitesForClass = asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const classId: number = parseInt(req.params.classId);
-    const classTeacherId: number = req.user!.id as number;
+    const classTeacherId: number = getUserFromAuthRequest(req).id;
 
     const invites: Invite[] = await inviteService.getPendingInvitesForClass(classTeacherId, classId);
     res.status(200).json({ invites });
@@ -41,7 +42,7 @@ export const getPendingInvitesForClass = asyncHandler(async (req: AuthenticatedR
  * returns a list of all invites for the teacher in the response body
  */
 export const getPendingInvitesForTeacher = asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const teacherId: number = req.user!.id as number;
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
     const invites: Invite[] = await inviteService.getPendingInvitesForTeacher(teacherId);
     res.status(200).json({ invites });
@@ -57,7 +58,7 @@ export const getPendingInvitesForTeacher = asyncHandler(async (req: Authenticate
 export const updateInviteStatus = asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const inviteId: number = parseInt(req.params.inviteId);
     const { action }: { action: string } = req.body;
-    const teacherId: number = req.user!.id as number;
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
     if (action == "accept") {
         const invite: Invite = await inviteService.acceptInviteAndJoinClass(teacherId, inviteId);
@@ -83,7 +84,7 @@ export const updateInviteStatus = asyncHandler(async (req: AuthenticatedRequest,
 export const deleteInvite = asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const inviteId: number = parseInt(req.params.inviteId);
     const classId: number = parseInt(req.params.classId);
-    const classTeacherId: number = req.user!.id as number;
+    const classTeacherId: number = getUserFromAuthRequest(req).id;
 
     const invite: Invite = await inviteService.deleteInvite(classTeacherId, inviteId, classId);
     res.status(200).json({ invite: invite, message: "invite was succesfully deleted" });

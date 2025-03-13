@@ -9,10 +9,10 @@ const prisma = new PrismaClient();
 export default class joinRequestService {
 
     // Validate whether the class exists before proceeding
-    private static async validateClassExists(classCode: string): Promise<ClassWithLinks> {
-        const classroom: ClassWithLinks | null = await classService.getClassByJoinCode(classCode);
+    private static async validateClassExists(joinCode: string): Promise<ClassWithLinks> {
+        const classroom: ClassWithLinks | null = await classService.getClassByJoinCode(joinCode);
         if (!classroom) {
-            throw new NotFoundError(`Class with code ${classCode} not found.`);
+            throw new NotFoundError(`Class with code ${joinCode} not found.`);
         }
         return classroom;
     }
@@ -50,9 +50,9 @@ export default class joinRequestService {
         });
     }
 
-    static async createValidJoinRequest(studentId: number, classCode: string): Promise<JoinRequest> {
+    static async createValidJoinRequest(studentId: number, joinCode: string): Promise<JoinRequest> {
         try {
-            const classroom: ClassWithLinks = await this.validateClassExists(classCode);
+            const classroom: ClassWithLinks = await this.validateClassExists(joinCode);
 
             // check if the student is already a member of the class
             if (await classService.isStudentInClass(classroom, studentId)) {

@@ -2,25 +2,11 @@ import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
 import { PrismaClient, Role, Teacher, Student, User } from "@prisma/client";
-
+import { AuthenticatedRequest, AuthenticatedUser } from "../interfaces/extendedTypeInterfaces";
 const prisma = new PrismaClient();
 
 interface JwtPayload {
   id: number;
-}
-
-// Definieer een interface voor de geauthenticeerde gebruiker,
-// met optionele velden voor teacher en student
-interface AuthenticatedUser {
-  id: number;
-  role: Role;
-  teacher?: Teacher;
-  student?: Student;
-}
-
-// Breid het Express Request-type uit zodat we een getypeerde user-property hebben
-interface AuthenticatedRequest extends Request {
-  user?: AuthenticatedUser;
 }
 
 export const protectAnyUser = asyncHandler(
@@ -47,14 +33,13 @@ export const protectAnyUser = asyncHandler(
         }
 
         // Bouw het authUser object op met basisgegevens
-        const authUser: AuthenticatedUser = { id: user.id, role: user.role };
+        const authUser: AuthenticatedUser = { id: user.id, role: user.role , email: user.email };
 
         // Als de gebruiker een teacher is, haal dan de teacher-specifieke data op
         if (user.role === "TEACHER") {
           const teacher: Teacher | null = await prisma.teacher.findUnique({
             where: { userId: user.id },
             include: {
-              teacherAnswers: true,
               teacherFeedbacks: true,
               invite: true,
               createdLearningPaths: true,
@@ -71,9 +56,7 @@ export const protectAnyUser = asyncHandler(
           const student: Student | null = await prisma.student.findUnique({
             where: { userId: user.id },
             include: {
-              //studentQuestions: true,
               progress: true,
-              //teamAssignments: true,
               joinRequests: true,
               classes: true,
             },
