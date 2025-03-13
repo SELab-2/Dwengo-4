@@ -1,6 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
-import prisma from "./helpers/prisma";
 import app from "../index";
 import {
   Assignment,
@@ -98,21 +97,6 @@ describe("[GET] /student/assignments", async () => {
       lp3.id,
       new Date("2025-05-28")
     );
-  });
-
-  afterEach(async () => {
-    // clear the database
-    await prisma.$transaction([
-      prisma.classAssignment.deleteMany(),
-      prisma.assignment.deleteMany(),
-      prisma.learningPath.deleteMany(),
-      prisma.classTeacher.deleteMany(),
-      prisma.classStudent.deleteMany(),
-      prisma.class.deleteMany(),
-      prisma.student.deleteMany(),
-      prisma.teacher.deleteMany(),
-      prisma.user.deleteMany(),
-    ]);
   });
 
   it("should respond with a `200` status code and a list of assignments,\
