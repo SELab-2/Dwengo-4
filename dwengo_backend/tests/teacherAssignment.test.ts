@@ -237,6 +237,12 @@ describe("Tests for teacherAssignment", async () => {
         .set("Authorization", `Bearer ${teacher2.token}`);
 
       expect(status).toBe(204);
+
+      // Check if assignment is actually gone from database
+      const assignment = await prisma.assignment.findUnique({
+        where: { id: assignment4.id },
+      });
+      expect(assignment).toBeNull();
     });
 
     it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
