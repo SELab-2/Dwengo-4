@@ -1,6 +1,7 @@
 import { Response } from "express";
 import QuestionService from "../../services/questionsService";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
+import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 /**
  * Een type voor een AuthenticatedRequest met een getypeerde user-property.
  */
@@ -19,14 +20,16 @@ const handleRequest = (handler: (req: AuthenticatedRequest, res: Response) => Pr
     };
 
 
+
 export const createQuestionGeneral = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { assignmentId, learningPathId } = req.params;
     const { title, text, teamId }: { title: string, text: string, teamId: number } = req.body;
-    const studentId = req.user?.id;
+    const studentId = getUserFromAuthRequest(req).id;
     if (studentId === undefined) {
         res.status(400).json({ error: "Student ID is required" });
         return;
     }
+
     const questionGeneral = await QuestionService.createQuestionGeneral(Number(assignmentId), title, text, teamId, studentId, "GENERAL", learningPathId);
     res.status(201).json(questionGeneral);
 });
@@ -36,7 +39,7 @@ export const createQuestionGeneral = handleRequest(async (req: AuthenticatedRequ
 export const createQuestionSpecific = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { assignmentId, learningPathId, learningObjectId } = req.params;
     const { title, text, teamId }: { title: string, text: string, teamId: number } = req.body;
-    const studentId = req.user?.id;
+    const studentId = getUserFromAuthRequest(req).id;
     if (studentId === undefined) {
         res.status(400).json({ error: "Student ID is required" });
         return;
@@ -48,7 +51,7 @@ export const createQuestionSpecific = handleRequest(async (req: AuthenticatedReq
 export const createQuestionMessage = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { questionId } = req.params;
     const { text } = req.body;
-    const userId = req.user?.id;
+    const userId = getUserFromAuthRequest(req).id;
     if (userId === undefined) {
         res.status(400).json({ error: "Student ID is required" });
         return;
@@ -67,7 +70,7 @@ export const updateQuestion = handleRequest(async (req: AuthenticatedRequest, re
 export const updateQuestionMessage = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { questionId, questionMessageId } = req.params;
     const { text } = req.body;
-    const userId = req.user?.id;
+    const userId = getUserFromAuthRequest(req).id;
     if (userId === undefined) {
         res.status(400).json({ error: "Student ID is required" });
         return;

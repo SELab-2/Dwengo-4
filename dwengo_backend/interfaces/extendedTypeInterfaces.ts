@@ -2,9 +2,9 @@ import { Role, Student, Teacher } from '@prisma/client';
 import { Request } from 'express';
 
 
-interface AuthenticatedUser {
+export interface AuthenticatedUser {
     id: number;
-    role: Role;
+    role?: Role;
     teacher?: Teacher;
     student?: Student;
     email: string;
