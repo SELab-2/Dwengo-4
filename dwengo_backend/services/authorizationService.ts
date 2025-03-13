@@ -39,7 +39,7 @@ export const isAuthorized = async (
   return true;
 };
 
-export const canUpdate = async (
+export const canUpdateOrDelete = async (
   userId: number,
   assignmentId: number
 ): Promise<boolean> => {

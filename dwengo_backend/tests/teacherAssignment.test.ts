@@ -241,4 +241,23 @@ describe("Tests for teacherAssignment", async () => {
       expect(body.error).toBe("Failed to update assignment");
     });
   });
+
+  describe("[DELETE] /teacher/assignments/:assignmentId", async () => {
+    it("should respond with a `204` status code and delete the assignment", async () => {
+      const { status, body } = await request(app)
+        .delete(`/teacher/assignments/${assignment4.id}`)
+        .set("Authorization", `Bearer ${teacher2.token}`);
+
+      expect(status).toBe(204);
+    });
+
+    // it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
+    //   const { status, body } = await request(app)
+    //     .delete(`/teacher/assignments/${assignment1.id}`)
+    //     .set("Authorization", `Bearer ${teacher3.token}`);
+
+    //   expect(status).toBe(500);
+    //   expect(body.error).toBe("Failed to delete assignment");
+    // });
+  });
 });

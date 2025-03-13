@@ -1,5 +1,5 @@
 import { Assignment, PrismaClient, Role } from "@prisma/client";
-import { canUpdate, isAuthorized } from "../authorizationService";
+import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
 
 const prisma = new PrismaClient();
 
@@ -53,7 +53,7 @@ export default class TeacherAssignmentService {
     learningPathId: string,
     teacherId: number
   ): Promise<Assignment> {
-    if (!(await canUpdate(teacherId, assignmentId))) {
+    if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
       throw new Error("The teacher is unauthorized to update the assignment");
     }
 
