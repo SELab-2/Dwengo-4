@@ -1,5 +1,11 @@
 # Dwengo-4
 
+## Informatie project
+
+- Mock-up op [Figma](https://www.figma.com/design/A8yBKOe1BxgrV3vTWLLOms/Dwengo?node-id=0-1&t=Blc6awHrRmzETtLX-1)
+- [UML](docs/uml.md) + [use-cases](docs/use_cases.md)
+- [Groepsindeling](docs/groepsindeling.md)
+
 ## Instructies voor lokale databank/prisma running te krijgen
 
 1. installeer docker engine (https://docs.docker.com/engine/install/)
@@ -22,7 +28,3 @@ DATABASE_URL="postgresql://selab2:passwor@localhost:2002/selab2?schema=public"
 9. Run `npx prisma studio`. Dit zal je een link geven waar je prisma studio kunt raadplegen in je browser, Als je de tabellen ziet staan als volgt zit je goed :)
 
 ![alt text](image.png)
-
-tesge
-nya
-nya

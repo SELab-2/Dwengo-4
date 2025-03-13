@@ -5,9 +5,8 @@ const prisma = new PrismaClient();
 export default async function resetDb() {
     await prisma.$transaction([
         prisma.studentProgress.deleteMany(),
-        prisma.additionalQuestion.deleteMany(),
-        prisma.generalQuestion.deleteMany(),
-        prisma.specificQuestion.deleteMany(),
+        prisma.questionGeneral.deleteMany(),
+        prisma.questionSpecific.deleteMany(),
         prisma.feedback.deleteMany(),
         prisma.classStudent.deleteMany(),
         prisma.teamAssignment.deleteMany(),
@@ -19,10 +18,10 @@ export default async function resetDb() {
         prisma.multipleChoiceOption.deleteMany(),
         prisma.educationalGoal.deleteMany(),
         prisma.submission.deleteMany(),
-        prisma.answer.deleteMany(),
         prisma.evaluationQuestion.deleteMany(),
         prisma.returnValue.deleteMany(),
         prisma.learningObjectProgress.deleteMany(),
+        prisma.questionMessage.deleteMany(),
         prisma.question.deleteMany(),
         prisma.learningPathNode.deleteMany(),
         prisma.evaluation.deleteMany(),

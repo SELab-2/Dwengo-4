@@ -1,10 +1,9 @@
 import { Assignment, PrismaClient, Role } from "@prisma/client";
-import { isAuthorized } from "../authorizationService";
+import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
 
 const prisma = new PrismaClient();
 
 export default class TeacherAssignmentService {
-
   // Static method to create an assignment for a class
   static async createAssignmentForClass(
     teacherId: number,
@@ -19,13 +18,12 @@ export default class TeacherAssignmentService {
     return prisma.assignment.create({
       data: {
         learningPathId,
+        deadline,
         classAssignments: {
           create: {
-            classId // This will automatically link to the created Assignment
-
+            classId, // This will automatically link to the created Assignment
           },
         },
-        deadline
       },
     });
   }
@@ -35,10 +33,9 @@ export default class TeacherAssignmentService {
     classId: number,
     teacherId: number
   ): Promise<Assignment[]> {
-    if (!(await isAuthorized(teacherId, Role.TEACHER))) {
+    if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
       throw new Error("The teacher is unauthorized to request the assignments");
     }
-
     return prisma.assignment.findMany({
       where: {
         classAssignments: {
@@ -56,7 +53,7 @@ export default class TeacherAssignmentService {
     learningPathId: string,
     teacherId: number
   ): Promise<Assignment> {
-    if (!(await isAuthorized(teacherId, Role.TEACHER))) {
+    if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
       throw new Error("The teacher is unauthorized to update the assignment");
     }
 
@@ -71,7 +68,7 @@ export default class TeacherAssignmentService {
     assignmentId: number,
     teacherId: number
   ): Promise<Assignment> {
-    if (!(await isAuthorized(teacherId, Role.TEACHER))) {
+    if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
       throw new Error("The teacher is unauthorized to delete the assignment");
     }
 
