@@ -410,7 +410,7 @@ model Assignment {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   deadline  DateTime
-  learningPath     LearningPath      @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  learningPath     LearningPath      @relation(fields: [learningPathId], references: [id])
   Questions Question[]
   classAssignments ClassAssignment[]
   teamAssignments  TeamAssignment[]
@@ -449,7 +449,7 @@ model TeamAssignment {
   assignmentId Int
 
   team       Team       @relation(fields: [teamId], references: [id])
-  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  Assignment Assignment @relation(fields: [assignmentId], references: [id])
 
   @@id([teamId, assignmentId])
 }
@@ -465,7 +465,7 @@ model Submission {
   feedback     Feedback?
 
   assignmentId Int
-  assignement  Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  assignment  Assignment @relation(fields: [assignmentId], references: [id])
 
   evaluation Evaluation @relation(fields: [evaluationId], references: [id])
   team       Team       @relation(fields: [teamId], references: [id])

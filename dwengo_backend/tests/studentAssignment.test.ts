@@ -16,7 +16,7 @@ import {
   createLearningPath,
   createStudent,
   createTeacher,
-  stringToDateWithLP,
+  stringToDate,
 } from "./helpers/testDataCreation";
 
 describe("[GET] /student/assignments", async () => {
@@ -185,7 +185,7 @@ describe("[GET] /student/assignments", async () => {
       .query({ sort: "deadline", order: "desc" })
       .set("Authorization", `Bearer ${student5.token}`);
 
-    stringToDateWithLP(body, 2);
+    stringToDate(body, 2);
 
     expect(status).toBe(200);
     expect(body).toHaveLength(2);
@@ -198,7 +198,7 @@ describe("[GET] /student/assignments", async () => {
       .query({ sort: "deadline", order: "asc" })
       .set("Authorization", `Bearer ${student5.token}`);
 
-    stringToDateWithLP(body, 2);
+    stringToDate(body, 2);
 
     expect(status).toBe(200);
     expect(body).toHaveLength(2);
@@ -211,7 +211,7 @@ describe("[GET] /student/assignments", async () => {
       .query({ sort: "createdAt", order: "desc" })
       .set("Authorization", `Bearer ${student5.token}`);
 
-    stringToDateWithLP(body, 2);
+    stringToDate(body, 2);
 
     expect(status).toBe(200);
     expect(body).toHaveLength(2);
@@ -224,7 +224,7 @@ describe("[GET] /student/assignments", async () => {
       .query({ sort: "createdAt", order: "asc" })
       .set("Authorization", `Bearer ${student5.token}`);
 
-    stringToDateWithLP(body, 2);
+    stringToDate(body, 2);
 
     expect(status).toBe(200);
     expect(body).toHaveLength(2);
@@ -237,7 +237,7 @@ describe("[GET] /student/assignments", async () => {
       .query({ sort: "updatedAt", order: "desc" })
       .set("Authorization", `Bearer ${student5.token}`);
 
-    stringToDateWithLP(body, 2);
+    stringToDate(body, 2);
 
     expect(status).toBe(200);
     expect(body).toHaveLength(2);
@@ -250,7 +250,7 @@ describe("[GET] /student/assignments", async () => {
       .query({ sort: "updatedAt", order: "asc" })
       .set("Authorization", `Bearer ${student5.token}`);
 
-    stringToDateWithLP(body, 2);
+    stringToDate(body, 2);
 
     expect(status).toBe(200);
     expect(body).toHaveLength(2);
@@ -263,7 +263,7 @@ describe("[GET] /student/assignments", async () => {
       .query({ limit: 1 })
       .set("Authorization", `Bearer ${student5.token}`);
 
-    stringToDateWithLP(body, 1);
+    stringToDate(body, 1);
 
     expect(status).toBe(200);
     expect(body).toHaveLength(1);
@@ -275,7 +275,7 @@ describe("[GET] /student/assignments", async () => {
       .query({ limit: 10 })
       .set("Authorization", `Bearer ${student5.token}`);
 
-    stringToDateWithLP(body, 2);
+    stringToDate(body, 2);
 
     expect(status).toBe(200);
     expect(body).toHaveLength(2);

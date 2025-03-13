@@ -1,5 +1,5 @@
 import { Assignment, PrismaClient, Role } from "@prisma/client";
-import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
+import { isAuthorized } from "../authorizationService";
 
 const prisma = new PrismaClient();
 
@@ -36,9 +36,10 @@ export default class TeacherAssignmentService {
     classId: number,
     teacherId: number
   ): Promise<Assignment[]> {
-    if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
+    if (!(await isAuthorized(teacherId, Role.TEACHER))) {
       throw new Error("The teacher is unauthorized to request the assignments");
     }
+
     return prisma.assignment.findMany({
       where: {
         classAssignments: {
@@ -56,7 +57,7 @@ export default class TeacherAssignmentService {
     learningPathId: string,
     teacherId: number
   ): Promise<Assignment> {
-    if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
+    if (!(await isAuthorized(teacherId, Role.TEACHER))) {
       throw new Error("The teacher is unauthorized to update the assignment");
     }
 
@@ -71,7 +72,7 @@ export default class TeacherAssignmentService {
     assignmentId: number,
     teacherId: number
   ): Promise<Assignment> {
-    if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
+    if (!(await isAuthorized(teacherId, Role.TEACHER))) {
       throw new Error("The teacher is unauthorized to delete the assignment");
     }
 

@@ -2,63 +2,35 @@ import { PrismaClient, Role } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export const isAuthorized = async (
-  userId: number,
-  requiredRole: Role,
-  classId?: number
-): Promise<boolean> => {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { role: true, teacher: true, student: true },
-  });
-
-  if (!user) throw new Error("User not found");
-
-  // Admins are always authorized
-  if (user.role === Role.ADMIN) return true;
-
-  if (requiredRole === Role.TEACHER && user.role !== Role.TEACHER) return false;
-  if (requiredRole === Role.STUDENT && user.role !== Role.STUDENT) return false;
-
-  // Extra check for teachers: ensure they teach this class
-  if (requiredRole === Role.TEACHER && classId) {
-    const teachesClass = await prisma.classTeacher.findFirst({
-      where: { teacherId: userId, classId },
-    });
-    return teachesClass !== null;
-  }
-
-  // Extra check for students: ensure they are part of this class
-  if (requiredRole === Role.STUDENT && classId) {
-    const enrolled = await prisma.classStudent.findFirst({
-      where: { studentId: userId, classId },
-    });
-    return enrolled !== null;
-  }
-
-  return true;
-};
-
-export const canUpdateOrDelete = async (
-  userId: number,
-  assignmentId: number
-): Promise<boolean> => {
-  if (!(await isAuthorized(userId, Role.TEACHER))) return false;
-
-  // The teacher is authorized
-  // Now there needs to be checked if the teacher has classes that have this assignment
-  const allClassesTeacher: { classId: number }[] =
-    await prisma.classTeacher.findMany({
-      where: { teacherId: userId },
-      select: { classId: true },
+export const isAuthorized = async (userId: number, requiredRole: Role, classId?: number): Promise<boolean> => {
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true, teacher: true, student: true }
     });
 
-  // Check if at least one of the classes of the teacher has the assignment
-  const hasAssignment = await prisma.classAssignment.findFirst({
-    where: {
-      assignmentId,
-      classId: { in: allClassesTeacher.map((c) => c.classId) },
-    },
-  });
-  return hasAssignment !== null;
+    if (!user) throw new Error("User not found");
+
+    // Admins are always authorized
+    if (user.role === Role.ADMIN) return true;
+
+    if (requiredRole === Role.TEACHER && user.role !== Role.TEACHER) return false;
+    if (requiredRole === Role.STUDENT && user.role !== Role.STUDENT) return false;
+
+    // Extra check for teachers: ensure they teach this class
+    if (requiredRole === Role.TEACHER && classId) {
+        const teachesClass = await prisma.classTeacher.findFirst({
+            where: { teacherId: userId, classId }
+        });
+        return teachesClass !== null;
+    }
+
+    // Extra check for students: ensure they are part of this class
+    if (requiredRole === Role.STUDENT && classId) {
+        const enrolled = await prisma.classStudent.findFirst({
+            where: { studentId: userId, classId }
+        });
+        return enrolled !== null;
+    }
+
+    return true;
 };
