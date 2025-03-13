@@ -10,16 +10,6 @@ describe('join request tests', async() => {
     let teacherUser1: User & { teacher: Teacher, token: string };
     let studentUser1: User & { student: Student, token: string };
     beforeEach(async() => {
-        // clear relevant records from the database
-        await prisma.$transaction([
-            prisma.joinRequest.deleteMany(),
-            prisma.classStudent.deleteMany(),
-            prisma.classTeacher.deleteMany(),
-            prisma.class.deleteMany(),
-            prisma.student.deleteMany(),
-            prisma.teacher.deleteMany(),
-            prisma.user.deleteMany()
-        ]);
         // create test data
         classroom = await createClass("5A", "ABCDE");
         teacherUser1 = await createTeacher("Jan", "Janssens", "jan.janssens@gmail.com");

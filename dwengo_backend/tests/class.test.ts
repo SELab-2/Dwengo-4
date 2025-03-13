@@ -11,16 +11,6 @@ describe('classroom tests', () => {
     let teacherUser1: User & { teacher: Teacher, token: string };
     let classroom: Class;
     beforeEach(async () => {
-        // clear database before each test
-        await prisma.$transaction([
-            prisma.invite.deleteMany(),
-            prisma.classTeacher.deleteMany(),
-            prisma.classStudent.deleteMany(),
-            prisma.class.deleteMany(),
-            prisma.student.deleteMany(),
-            prisma.teacher.deleteMany(),
-            prisma.user.deleteMany()
-        ]);
         // create a teacher
         teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
         // create a class
