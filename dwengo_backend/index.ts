@@ -12,9 +12,13 @@ import assignmentRoutes from "./routes/assignmentRoutes";
 import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
 import teacherClassRoutes from './routes/teacher/teacherClassRoutes';
 
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+
 dotenv.config();
 
 const app = express();
+const swaggerDocument = YAML.load('./openapi3_0.yaml');
 
 // Stel CORS-headers in
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -54,6 +58,8 @@ app.use("/learningObjects", learningObjectRoutes);
 app.use("/question", QuestionRoutes);
 
 app.use("/learningPaths", learningPathRoutes);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Error Handler
 app.use(errorHandler);
