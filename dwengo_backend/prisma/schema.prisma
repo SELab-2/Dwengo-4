@@ -408,7 +408,7 @@ model Assignment {
   deadline         DateTime
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
-  learningPath     LearningPath      @relation(fields: [learningPathId], references: [id])
+  learningPath     LearningPath      @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
   Questions        Question[]
   classAssignments ClassAssignment[]
   teamAssignments  TeamAssignment[]
