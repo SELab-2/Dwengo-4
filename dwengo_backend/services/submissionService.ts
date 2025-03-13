@@ -18,7 +18,22 @@ export default class submissionService {
                 },
                 teamAssignments: {
                     some: {
-                        assignmentId: assignmentId,
+                        assignment: {
+                            id: assignmentId,
+                            learningPath: {
+                                nodes: {
+                                    some: {
+                                        learningObject: {
+                                            evaluations: {
+                                                some: {
+                                                    id: evaluationId,
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                        }
                     }
                 },
             },
@@ -29,7 +44,6 @@ export default class submissionService {
         if (!team) {
             throw new AccesDeniedError("Student is not in a team for this assignment");
         }
-        // TODO hoe controleren of assignment bij evaluation hoort?
 
         return prisma.submission.create({
             data: {
