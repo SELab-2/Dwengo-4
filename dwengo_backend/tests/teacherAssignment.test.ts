@@ -205,6 +205,13 @@ describe("Tests for teacherAssignment", async () => {
         new Date("2026-10-23").toISOString()
       );
       expect(req.body.updatedAt).not.toStrictEqual(body.updatedAt);
+
+      // Check if assignment is actually updated in database
+      const assignment = await prisma.assignment.findUnique({
+        where: { id: assignmentId },
+      });
+      expect(assignment).not.toBeNull();
+      expect(assignment!.learningPathId).toBe(lp2.id);
     });
 
     it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
@@ -227,6 +234,14 @@ describe("Tests for teacherAssignment", async () => {
 
       expect(status).toBe(500);
       expect(body.error).toBe("Failed to update assignment");
+
+      // Check if assignment is not updated in database
+      const assignment = await prisma.assignment.findUnique({
+        where: { id: assignment1.id },
+      });
+
+      expect(assignment).not.toBeNull();
+      expect(assignment!.learningPathId).toBe(lp1.id);
     });
   });
 
@@ -252,6 +267,12 @@ describe("Tests for teacherAssignment", async () => {
 
       expect(status).toBe(500);
       expect(body.error).toBe("Failed to delete assignment");
+
+      // Check if assignment is not gone from database
+      const assignment = await prisma.assignment.findUnique({
+        where: { id: assignment4.id },
+      });
+      expect(assignment).not.toBeNull();
     });
   });
 });
