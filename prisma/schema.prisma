@@ -138,7 +138,7 @@ model JoinRequest {
 }
 
 model Invite {
-  inviteId       Int   @id @default(autoincrement())
+  inviteId Int @id @default(autoincrement())
   otherTeacherId Int
   classTeacherId Int
   classId        Int
@@ -202,7 +202,7 @@ model LearningPathNode {
   learningPath LearningPath @relation(fields: [learningPathId], references: [id])
 
   // Dit is om de relatie tussen een transitie en een node vast te leggen.
-  // Een transitie kan maar naar 1 volgende node gaan. 
+  // Een transitie kan maar naar 1 volgende node gaan.
   // Dit is wat rare syntax, maar het is de enige manier om het in prisma werkende te krijgen.
   nextTransitions LearningPathTransition[] @relation("NextNode")
 }
@@ -220,7 +220,7 @@ model LearningPathTransition {
   nodeId String
   node   LearningPathNode @relation(fields: [nodeId], references: [nodeId], name: "TransitionNode")
 
-  // Next wijst in de Dwengo API naar de volgende node. 
+  // Next wijst in de Dwengo API naar de volgende node.
   // Als next leeg is, betekent dit dat de laatste node van het leerpad bereikt is.
   nextNodeId String?
   nextNode   LearningPathNode? @relation(fields: [nextNodeId], references: [nodeId], name: "NextNode")
@@ -246,7 +246,7 @@ model LearningObject {
   id               String      @id @default(uuid())
   uuid             String      @unique @default(cuid())
   // In de Dwengo API wordt er nog met een hruid gewerkt ook. Ik zou voorstellen om anders de titel van een leerobject uniek te maken.
-  // Op die manier kan de hruid ingesteld worden op de titel van het leerobject. 
+  // Op die manier kan de hruid ingesteld worden op de titel van het leerobject.
   // Ik ga dit voorlopig laten staan, maar misschien dat we dit nog moeten aanpassen.
   hruid            String      @unique
   title            String
@@ -271,6 +271,7 @@ model LearningObject {
   creatorId Int
   creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningObjectCreator")
 
+  // Binnen een leerobject kunnen er meerdere evaluaties zitten
   evaluations       Evaluation[]
   educationalGoals  EducationalGoal[]
   returnValue       ReturnValue?
@@ -479,7 +480,7 @@ model Submission {
   feedback     Feedback?
 
   assignmentId Int
-  assignement  Assignment @relation(fields: [assignmentId], references: [id])
+  assignment Assignment @relation(fields: [assignmentId], references: [id])
 
   evaluation Evaluation @relation(fields: [evaluationId], references: [id])
   team       Team       @relation(fields: [teamId], references: [id])

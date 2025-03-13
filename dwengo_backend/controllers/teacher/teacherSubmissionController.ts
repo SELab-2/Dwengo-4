@@ -17,25 +17,25 @@ export default class TeacherSubmissionController {
         const teamId: number = Number(req.params.teamId);
         const teacherId: number = Number(req.user?.id);
 
-        const submissions: Submission[] = await service.teacherGetSubmissionsForTeam(teamId, teacherId, assignmentId);
+        const submissions: Submission[] = await service.teacherGetSubmissionsForTeam(teamId, teacherId);
 
         res.json(submissions);
     }
 
     static async getAssignmentSubmissionsForStudent(req: AuthenticatedRequest, res: Response) {
-        const {studentId, assignmentId}: { studentId: number, assignmentId: number } = req.params;
+        const {studentId, assignmentId} = req.params;
         const teacherId: number = Number(req.user?.id);
 
-        const submissions: Submission[] = await service.teacherGetSubmissionsForStudent(studentId, teacherId, assignmentId);
+        const submissions: Submission[] = await service.teacherGetSubmissionsForStudent(Number(studentId), teacherId, Number(assignmentId));
 
         res.json(submissions);
     }
 
     static async getAssignmentSubmissionsForTeam(req: AuthenticatedRequest, res: Response) {
-        const {teamId, assignmentId}: { teamId: number, assignmentId: number } = req.params;
+        const {teamId, assignmentId} = req.params;
         const teacherId: number = Number(req.user?.id);
 
-        const submissions: Submission[] = await service.teacherGetSubmissionsForTeam(teamId, teacherId, assignmentId);
+        const submissions: Submission[] = await service.teacherGetSubmissionsForTeam(Number(teamId), teacherId, Number(assignmentId));
 
         res.json(submissions);
     }

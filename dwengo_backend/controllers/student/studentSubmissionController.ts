@@ -5,9 +5,9 @@ import {AuthenticatedRequest} from "../../interfaces/extendedTypeInterfaces";
 
 export default class StudentSubmissionController {
     static async createSubmission(req: AuthenticatedRequest, res: Response) {
-        const {assignmentId, evaluationId}: { assignmentId: number, evaluationId: string } = req.params;
+        const {assignmentId, evaluationId} = req.params;
         const studentId: number = Number(req.user?.id);
-        const submission: Submission = await service.createSubmission(studentId, evaluationId, assignmentId);
+        const submission: Submission = await service.createSubmission(studentId, evaluationId, Number(assignmentId));
         res.status(201).json(submission);
     }
 
@@ -21,10 +21,10 @@ export default class StudentSubmissionController {
     }
 
     static async getSubmissionsForEvaluation(req: AuthenticatedRequest, res: Response) {
-        const {assignmentId, evaluationId}: { assignmentId: number, evaluationId: string } = req.params;
+        const {assignmentId, evaluationId} = req.params;
         const studentId: number = Number(req.user?.id);
 
-        const submissions: Submission[] = await service.getSubmissionsForEvaluation(assignmentId, evaluationId, studentId);
+        const submissions: Submission[] = await service.getSubmissionsForEvaluation(Number(assignmentId), evaluationId, studentId);
 
         res.json(submissions);
     }

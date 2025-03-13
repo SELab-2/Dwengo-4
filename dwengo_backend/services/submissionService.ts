@@ -1,4 +1,4 @@
-import {Prisma, PrismaClient, Submission} from "@prisma/client";
+import {PrismaClient, Submission} from "@prisma/client";
 import {AccesDeniedError} from "../errors/errors";
 
 const prisma = new PrismaClient();
@@ -107,7 +107,7 @@ export default class submissionService {
                     }
                 },
                 assignment: {
-                    assignmentId: assignmentId ?? Prisma.skip,
+                    id: assignmentId,
                     classAssignments: {
                         some: {
                             class: {
@@ -131,7 +131,7 @@ export default class submissionService {
                     id: teamId,
                 },
                 assignment: {
-                    assignmentId: assignmentId ?? Prisma.skip,
+                    id: assignmentId,
                     classAssignments: {
                         some: {
                             class: {
