@@ -1,5 +1,5 @@
-import { beforeEach } from 'vitest'
-import resetDb from './reset-db'
+import { afterAll, beforeEach } from "vitest";
+import resetDb from "./reset-db";
 
 beforeEach(async () => {
   await resetDb();
@@ -8,5 +8,3 @@ beforeEach(async () => {
 afterAll(async () => {
   await resetDb();
 });
-  await resetDb()
-})
