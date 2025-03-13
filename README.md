@@ -1,5 +1,11 @@
 # Dwengo-4
 
+## Informatie project
+
+- Mock-up op [Figma](https://www.figma.com/design/A8yBKOe1BxgrV3vTWLLOms/Dwengo?node-id=0-1&t=Blc6awHrRmzETtLX-1)
+- [UML](docs/prisma-uml.svg) + use-cases
+- [Groepsindeling](docs/groepsindeling.md)
+
 ## Instructies voor lokale databank/prisma running te krijgen
 
 1. installeer docker engine (https://docs.docker.com/engine/install/)
