@@ -71,6 +71,7 @@ describe("Tests for teacherAssignment", async () => {
     // Add teacher to classes
     addTeacherToClass(teacher1.id, class1.id);
     addTeacherToClass(teacher2.id, class1.id);
+    addTeacherToClass(teacher2.id, class2.id);
     addTeacherToClass(teacher3.id, class2.id);
 
     addTeacherToClass(teacher1.id, class3.id);
@@ -251,13 +252,13 @@ describe("Tests for teacherAssignment", async () => {
       expect(status).toBe(204);
     });
 
-    // it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
-    //   const { status, body } = await request(app)
-    //     .delete(`/teacher/assignments/${assignment1.id}`)
-    //     .set("Authorization", `Bearer ${teacher3.token}`);
+    it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
+      const { status, body } = await request(app)
+        .delete(`/teacher/assignments/${assignment1.id}`)
+        .set("Authorization", `Bearer ${teacher3.token}`);
 
-    //   expect(status).toBe(500);
-    //   expect(body.error).toBe("Failed to delete assignment");
-    // });
+      expect(status).toBe(500);
+      expect(body.error).toBe("Failed to delete assignment");
+    });
   });
 });

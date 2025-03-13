@@ -68,7 +68,7 @@ export default class TeacherAssignmentService {
     assignmentId: number,
     teacherId: number
   ): Promise<Assignment> {
-    if (!(await isAuthorized(teacherId, Role.TEACHER))) {
+    if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
       throw new Error("The teacher is unauthorized to delete the assignment");
     }
 
