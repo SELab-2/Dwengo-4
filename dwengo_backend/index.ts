@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from "express";
+import express, {NextFunction, Request, Response} from "express";
 import dotenv from "dotenv";
 import errorHandler from "./middleware/errorMiddleware";
 import teacherAuthRoutes from "./routes/teacher/teacherAuthRoutes";
@@ -10,7 +10,9 @@ import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearn
 
 import assignmentRoutes from "./routes/assignmentRoutes";
 import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
+import feedbackRoutes from "./routes/teacher/feedbackRoutes";
 import teacherClassRoutes from './routes/teacher/teacherClassRoutes';
+import studentClassRoutes from "./routes/student/studentClassRoutes";
 
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
@@ -39,6 +41,9 @@ app.use(express.json());
 // Routes voor Teacher (Classes)
 app.use("/teacher/classes", teacherClassRoutes);
 
+// Routes voor student (Classes)
+app.use("/student/classes", studentClassRoutes);
+
 // Routes voor Teacher (Auth)
 app.use("/teacher/auth", teacherAuthRoutes);
 app.use("/teacher/learningObjects", teacherLocalLearningObjectRoutes);
@@ -52,6 +57,8 @@ app.use('/assignments', assignmentRoutes);
 // Routes voor de aanpassingen op Assignments door teachers
 app.use('/teacher/assignments', teacherAssignmentRoutes);
 
+app.use('/teacher/feedback', feedbackRoutes);
+
 // Nieuwe routes voor leerobjecten
 app.use("/learningObjects", learningObjectRoutes);
 
@@ -64,7 +71,11 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 // Error Handler
 app.use(errorHandler);
 
-const PORT: string | number = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server draait op poort ${PORT}`));
+
+if (process.env.NODE_ENV !== "test") {
+  console.log(process.env.NODE_ENV);
+  const PORT: string | number = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`Server draait op poort ${PORT}`));
+}
 
 export default app;

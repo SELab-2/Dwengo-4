@@ -1,26 +1,29 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import request from 'supertest';
 import prisma from './helpers/prisma'
 import app from '../index';
-import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
-import { Response, NextFunction } from 'express';
 import { Class, Invite, JoinRequestStatus, Teacher, User } from '@prisma/client';
 import { addTeacherToClass, createClass, createInvite, createTeacher } from './helpers/testDataCreation';
 
 // mock the protectTeacher middleware, as it's not relevant for these tests
 // (protectTeacher should be tested seperately though, TODO)
-vi.mock('../middleware/teacherAuthMiddleware', () => ({
-    protectTeacher: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => next()
-}));
+// vi.mock('../middleware/teacherAuthMiddleware', async () => {
+//     const actual = await vi.importActual("../middleware/teacherAuthMiddleware");
+//     return {
+//         ...actual,
+//         protectTeacher: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => next()
+//     };
+// });
 
 describe('invite tests', async () => {
-    let teacherUser1: User & { teacher: Teacher };
-    let teacherUser2: User & { teacher: Teacher };
+    let teacherUser1: User & { teacher: Teacher, token: string };
+    let teacherUser2: User & { teacher: Teacher, token: string };
     let classroom: Class;
     beforeEach(async () => {
         // clear the database
         await prisma.$transaction([
             prisma.invite.deleteMany(),
+            prisma.classStudent.deleteMany(),
             prisma.classTeacher.deleteMany(),
             prisma.class.deleteMany(),
             prisma.student.deleteMany(),
@@ -41,8 +44,8 @@ describe('invite tests', async () => {
             // now we can test the invite creation
             const { status, body } = await request(app)
                 .post(`/teacher/classes/${classroom.id}/invites`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`)
                 .send({
-                    user: teacherUser1,
                     otherTeacherId: teacherUser2.id
                 });
 
@@ -77,8 +80,8 @@ describe('invite tests', async () => {
             // it should be possible to send another invite
             const { status, body } = await request(app)
                 .post(`/teacher/classes/${classroom.id}/invites`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`)
                 .send({
-                    user: teacherUser1,
                     otherTeacherId: teacherUser2.id
                 });
             expect(status).toBe(201)
@@ -104,8 +107,8 @@ describe('invite tests', async () => {
             // try to create invite for non-existent class
             const { status, body } = await request(app)
                 .post(`/teacher/classes/${invalidClassId}/invites`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`)
                 .send({
-                    user: teacherUser1,
                     otherTeacherId: teacherUser2.id
                 })
 
@@ -121,8 +124,8 @@ describe('invite tests', async () => {
             // try to create invite for class where teacher1 is not a teacher
             const { status, body } = await request(app)
                 .post(`/teacher/classes/${classroom.id}/invites`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`)
                 .send({
-                    user: teacherUser1,
                     otherTeacherId: teacherUser2.id
                 })
 
@@ -141,8 +144,8 @@ describe('invite tests', async () => {
             // try to create the invite
             const { status, body } = await request(app)
                 .post(`/teacher/classes/${classroom.id}/invites`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`)
                 .send({
-                    user: teacherUser1,
                     otherTeacherId: teacherUser2.id
                 })
 
@@ -159,8 +162,8 @@ describe('invite tests', async () => {
             // send a first invite
             await request(app)
                 .post(`/teacher/classes/${classroom.id}/invites`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`)
                 .send({
-                    user: teacherUser1,
                     otherTeacherId: teacherUser2.id
                 });
             
@@ -172,8 +175,8 @@ describe('invite tests', async () => {
             // try to create another invite for the same class and teacher
             const { status, body } = await request(app)
                 .post(`/teacher/classes/${classroom.id}/invites`)
+                .set('Authorization', `Bearer ${teacherUser1.token}`)
                 .send({
-                    user: teacherUser1,
                     otherTeacherId: teacherUser2.id
                 })
             // no new invite should have been created
@@ -196,9 +199,7 @@ describe('invite tests', async () => {
 
             const { status, body } = await request(app)
                 .get('/teacher/classes/invites')
-                .send({
-                    user: teacherUser2
-                });
+                .set('Authorization', `Bearer ${teacherUser2.token}`)
 
             expect(status).toBe(200);
             expect(body.invites).toStrictEqual([invite1, invite2]);
@@ -215,8 +216,8 @@ describe('invite tests', async () => {
             // we've got a scenario with a valid pending invite, test accepting it
             const { status, body } = await request(app)
                 .patch(`/teacher/classes/invites/${invite.inviteId}`)
+                .set('Authorization', `Bearer ${teacherUser2.token}`)
                 .send({
-                    user: teacherUser2,
                     action: "accept"
                 });
 
@@ -237,8 +238,8 @@ describe('invite tests', async () => {
             // we've got a scenario with a valid pending invite, test declining it
             const { status, body } = await request(app)
                 .patch(`/teacher/classes/invites/${invite.inviteId}`)
+                .set('Authorization', `Bearer ${teacherUser2.token}`)
                 .send({
-                    user: teacherUser2,
                     action: "decline"
                 });
 
@@ -257,8 +258,8 @@ describe('invite tests', async () => {
             // we've got a scenario with a valid pending invite, test invalid action
             const { status, body } = await request(app)
                 .patch(`/teacher/classes/invites/${invite.inviteId}`)
+                .set('Authorization', `Bearer ${teacherUser2.token}`)
                 .send({
-                    user: teacherUser2,
                     action: "invalidaction"
                 });
 
@@ -292,8 +293,8 @@ describe('invite tests', async () => {
             // now let's try to accept the non-existent invite
             const { status, body } = await request(app)
                 .patch(`/teacher/classes/invites/${invite.inviteId}`)
+                .set('Authorization', `Bearer ${teacherUser2.token}`)
                 .send({
-                    user: teacherUser2,
                     action: "accept"
                 });
             expect(status).toBe(400);
@@ -320,8 +321,8 @@ describe('invite tests', async () => {
             // now let's try to accept the invite
             const { status, body } = await request(app)
                 .patch(`/teacher/classes/invites/${invite.inviteId}`)
+                .set('Authorization', `Bearer ${teacherUser2.token}`)
                 .send({
-                    user: teacherUser2,
                     action: "accept"
                 });
             expect(status).toBe(400);
@@ -345,9 +346,7 @@ describe('invite tests', async () => {
             // test deleting the invite
             const { status, body } = await request(app)
                 .delete(`/teacher/classes/${classroom.id}/invites/${invite.inviteId}`)
-                .send({
-                    user: teacherUser1
-                });
+                .set('Authorization', `Bearer ${teacherUser1.token}`)
 
             expect(status).toBe(200);
             expect(body.invite).toStrictEqual(invite);
@@ -363,12 +362,10 @@ describe('invite tests', async () => {
         it('should respond with a `403` status code when the teacher trying to delete the invite is not part of the class', async () => {
             await addTeacherToClass(teacherUser1.id, classroom.id);
             const invite: Invite = await createInvite(teacherUser1.id, teacherUser2.id, classroom.id);
-            const teacherUser3: User & { teacher: Teacher } = await createTeacher("Jane", "Doe", "jane.doe@gmail.com");
+            const teacherUser3: User & { teacher: Teacher, token: string } = await createTeacher("Jane", "Doe", "jane.doe@gmail.com");
             const { status, body } = await request(app)
                 .delete(`/teacher/classes/${classroom.id}/invites/${invite.inviteId}`)
-                .send({
-                    user: teacherUser3
-                });
+                .set('Authorization', `Bearer ${teacherUser3.token}`)
 
             expect(status).toBe(403);
             expect(body.message).toBe("Leerkracht is geen beheerder van de klas");
@@ -392,9 +389,7 @@ describe('invite tests', async () => {
             // test getting the invites
             const { status, body } = await request(app)
                 .get(`/teacher/classes/${classroom.id}/invites`)
-                .send({
-                    user: teacherUser1
-                });
+                .set('Authorization', `Bearer ${teacherUser1.token}`)
 
             expect(status).toBe(200);
             expect(body.invites).toStrictEqual([invite1, invite2]);
@@ -403,9 +398,7 @@ describe('invite tests', async () => {
             // try to get invites for a class where the teacher is part of the class
            const { status, body } = await request(app)
                 .get(`/teacher/classes/${classroom.id}/invites`)
-                .send({
-                    user: teacherUser1
-                });
+                .set('Authorization', `Bearer ${teacherUser1.token}`)
 
             expect(status).toBe(403);
             expect(body.message).toBe("Leerkracht is geen beheerder van de klas"); 
