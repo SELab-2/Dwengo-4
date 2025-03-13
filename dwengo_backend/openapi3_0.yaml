@@ -920,7 +920,7 @@ paths:
         '401':
           description: Ongeldige gebruiker of wachtwoord 
 
-  /student/class/join:
+  /student/classes/join:
     post:
       tags:
         - Student Class Operations
@@ -1122,6 +1122,83 @@ paths:
           description: Toegang geweigerd
         '500':
           description: Serverfout bij het ophalen van studenten
+  /teacher/classes/{classId}/join-requests:
+    get:
+      tags:
+        - Teacher Class Operations
+      summary: Haal de join requests voor een klas op
+      description: Geeft een lijst van alle join requests voor de gegeven klas terug.
+      operationId: getJoinRequestsByClass
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: De ID van de klas waarvoor de join requests worden opgehaald
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lijst van join requests opgehaald
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  joinRequests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/JoinRequest'
+        '401':
+          description: Niet geautoriseerd
+        '403':
+          description: Toegang geweigerd
+        '500':
+          description: Serverfout bij het ophalen van join requests
+  /teacher/classes/{classId}/join-requests/{requestId}:
+    patch:
+      tags:
+        - Teacher Class Operations
+      summary: Update de status van een join request
+      description: Accepteer of weiger een join request voor een klas.
+      operationId: updateJoinRequestStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: De ID van de klas waarvoor de join request wordt geüpdatet
+          schema:
+            type: integer
+        - name: requestId
+          in: path
+          required: true
+          description: De ID van de join request die wordt geüpdatet
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Join request geupdatet
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  joinRequest:
+                    type: object
+                    $ref: '#/components/schemas/JoinRequest'
+        '400':
+          description: Ongeldige actie meegegeven
+        '404':
+          description: Join request niet gevonden
+        '401':
+          description: Niet geautoriseerd
+        '403':
+          description: Toegang geweigerd
+        '500':
+          description: Serverfout bij het updaten van de join request
 
   /teacher/classes/{classId}/invites:
     get:
@@ -1425,6 +1502,8 @@ components:
     JoinRequest:
       type: object
       properties:
+        id:
+          type: integer
         studentId:
           type: integer
         classId:
