@@ -4,6 +4,7 @@ import { isAuthorized } from "../authorizationService";
 const prisma = new PrismaClient();
 
 export default class TeacherAssignmentService {
+
   // Static method to create an assignment for a class
   static async createAssignmentForClass(
     teacherId: number,
@@ -20,9 +21,11 @@ export default class TeacherAssignmentService {
         learningPathId,
         classAssignments: {
           create: {
-            classId, // This will automatically link to the created Assignment
+            classId // This will automatically link to the created Assignment
+
           },
         },
+        deadline
       },
     });
   }

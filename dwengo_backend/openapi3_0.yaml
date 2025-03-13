@@ -1,0 +1,1827 @@
+openapi: 3.0.0
+info:
+  title: Learning Platform API
+  version: "1.0"
+servers:
+  - url: http://localhost:5000
+
+tags:
+- name: Questions
+- name: Assignment
+- name: Log In and Register
+
+paths:
+  /learningObjects:
+    get:
+      tags:
+        - learning Object
+      summary: Haal alle leerobjecten op
+      operationId: getAllLearningObjects
+      responses:
+        '200':
+          description: Een lijst van leerobjecten
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LearningObject'
+        '500':
+          description: Serverfout bij het ophalen van leerobjecten
+      security:
+        - BearerAuth: []
+    post:
+      tags:
+        - learning Object
+      summary: Creëer een nieuw leerobject
+      operationId: createLearningObject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LearningObject'
+      responses:
+        '201':
+          description: Leerobject succesvol aangemaakt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningObject'
+        '400':
+          description: Foutieve data verstrekt
+      security:
+        - BearerAuth: []
+
+  /learningObjects/{id}:
+    get:
+      tags:
+        - learning Object
+      summary: Haal een specifiek leerobject op
+      operationId: getLearningObject
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: De ID van het leerobject
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Details van een specifiek leerobject
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningObject'
+        '404':
+          description: Leerobject niet gevonden of geen toegang
+        '500':
+          description: Serverfout bij het ophalen van een leerobject
+      security:
+        - BearerAuth: []
+
+  /learningObjects/search:
+    get:
+      tags:
+        - learning Object
+      summary: Zoek leerobjecten op basis van een zoekterm
+      operationId: searchLearningObjects
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: De zoekterm
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Een lijst van leerobjecten die voldoen aan de zoekcriteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LearningObject'
+        '500':
+          description: Serverfout bij het zoeken naar leerobjecten
+      security:
+        - BearerAuth: []
+
+  /learningObjects/path/{pathId}:
+    get:
+      tags:
+        - learning Object
+      summary: Haal leerobjecten op voor een specifiek leerpad
+      operationId: getLearningObjectsForPath
+      parameters:
+        - name: pathId
+          in: path
+          required: true
+          description: De ID van het leerpad
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Een lijst van leerobjecten voor het opgegeven leerpad
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LearningObject'
+        '500':
+          description: Serverfout bij het ophalen van leerobjecten voor een leerpad
+      security:
+        - BearerAuth: []
+
+  /learningPaths:
+    get:
+      tags:
+        - learning Path
+      summary: Zoekt leerpaden op basis van verschillende criteria
+      operationId: searchLearningPaths
+      parameters:
+        - name: language
+          in: query
+          description: Filter leerpaden op taal
+          schema:
+            type: string
+        - name: hruid
+          in: query
+          description: Filter leerpaden op hruid
+          schema:
+            type: string
+        - name: title
+          in: query
+          description: Filter leerpaden op titel
+          schema:
+            type: string
+        - name: description
+          in: query
+          description: Filter leerpaden op beschrijving
+          schema:
+            type: string
+        - name: all
+          in: query
+          description: Haal alle leerpaden op als deze parameter is ingesteld
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Een lijst van leerpaden die aan de zoekcriteria voldoen
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LearningPath'
+        '500':
+          description: Serverfout bij het zoeken naar leerpaden
+      security:
+        - BearerAuth: []
+
+  /learningPaths/{pathId}:
+    get:
+      tags:
+        - learning Path
+      summary: Haalt een specifiek leerpad op op basis van de pathId
+      operationId: getLearningPathById
+      parameters:
+        - name: pathId
+          in: path
+          required: true
+          description: De unieke identifier voor het leerpad
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Details van het opgevraagde leerpad
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningPath'
+        '404':
+          description: Leerpad niet gevonden
+        '500':
+          description: Serverfout bij het ophalen van het leerpad
+      security:
+        - BearerAuth: []
+
+
+
+  /question/{questionId}:
+    get:
+      tags:
+        - Questions
+      summary: Haal een specifieke vraag op
+      operationId: getQuestion
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Details van een specifieke vraag
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        '404':
+          description: Vraag niet gevonden
+        '403':
+          description: Toegang geweigerd
+      security:
+        - BearerAuth: []
+
+    patch:
+      summary: Update de titel van een specifieke vraag
+      operationId: updateQuestion
+      tags:
+        - Questions
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          description: De ID van de vraag die geüpdatet moet worden
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: Nieuwe titel voor de vraag
+      responses:
+        '201':
+          description: Vraag succesvol bijgewerkt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        '400':
+          description: Verkeerde aanvraagparameters
+        '403':
+          description: Gebruiker is niet geautoriseerd om deze vraag te wijzigen
+        '404':
+          description: Vraag niet gevonden
+      security:
+        - BearerAuth: []
+    
+    delete:
+      summary: Verwijder een specifieke vraag
+      operationId: deleteQuestion
+      tags:
+        - Questions
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          description: De ID van de vraag die verwijderd moet worden
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Vraag succesvol verwijderd
+        '403':
+          description: Gebruiker heeft geen rechten om deze vraag te verwijderen
+        '404':
+          description: Vraag niet gevonden
+      security:
+        - BearerAuth: []
+
+
+  /question/team/{teamId}:
+    get:
+      tags:
+        - Questions
+      summary: Haal vragen op voor een specifiek team
+      operationId: getQuestionsTeam
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Een lijst van vragen voor het team
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Question'
+        '404':
+          description: Team niet gevonden
+        '403':
+          description: Toegang geweigerd
+      security:
+        - BearerAuth: []
+
+  /question/class/{classId}:
+    get:
+      tags:
+        - Questions
+      summary: Haal vragen op voor een specifieke klas
+      operationId: getQuestionsClass
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Een lijst van vragen voor de klas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Question'
+        '404':
+          description: Klas niet gevonden
+        '403':
+          description: Toegang geweigerd
+      security:
+        - BearerAuth: []
+
+  /question/assignment/{assignmentId}/class/{classId}:
+    get:
+      tags:
+        - Questions
+      summary: Haal vragen op voor een specifieke opdracht binnen een klas
+      operationId: getQuestionsAssignment
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: classId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Een lijst van vragen voor de opdracht binnen de klas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Question'
+        '404':
+          description: Opdracht of klas niet gevonden
+        '403':
+          description: Toegang geweigerd
+      security:
+        - BearerAuth: []
+
+  /question/{questionId}/message:
+    get:
+      tags:
+        - Questions
+      summary: Haal berichten op voor een specifieke vraag
+      operationId: getQuestionMessages
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Een lijst van berichten voor de vraag
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuestionMessage'
+        '404':
+          description: Vraag niet gevonden
+        '403':
+          description: Toegang geweigerd
+      security:
+        - BearerAuth: []
+    
+    post:
+      summary: Voeg een bericht toe aan een bestaande vraag.
+      operationId: createQuestionMessage
+      tags:
+        - Questions
+      parameters:
+        - in: path
+          name: questionId
+          required: true
+          schema:
+            type: integer
+          description: Het ID van de vraag.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+      responses:
+        '201':
+          description: Bericht succesvol toegevoegd aan de vraag.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionMessage'
+        '400':
+          description: Ongeldige invoer of ontbrekende gegevens.
+        '403':
+          description: Gebruiker niet geautoriseerd om deze actie uit te voeren.
+        '404':
+          description: Vraag niet gevonden.
+        '500':
+          description: Serverfout
+      security:
+        - BearerAuth: []
+  
+  /question/{questionId}/message/{questionMessageId}:
+    patch:
+      summary: Update een bericht binnen een specifieke vraag
+      tags:
+        - Questions
+      operationId: updateQuestionMessage
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          description: De ID van de vraag
+          schema:
+            type: integer
+        - name: questionMessageId
+          in: path
+          required: true
+          description: De ID van het bericht dat moet worden bijgewerkt
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  description: Bijgewerkte tekst van het bericht
+      responses:
+        '201':
+          description: Bericht succesvol bijgewerkt
+        '400':
+          description: Verkeerde aanvraagparameters
+        '403':
+          description: Gebruiker heeft geen rechten om dit bericht te wijzigen
+        '404':
+          description: Vraag of bericht niet gevonden
+      security:
+        - BearerAuth: []
+
+    delete:
+      summary: Verwijder een bericht binnen een specifieke vraag
+      operationId: deleteQuestionMessage
+      tags:
+        - Questions
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          description: De ID van de vraag
+          schema:
+            type: integer
+        - name: questionMessageId
+          in: path
+          required: true
+          description: De ID van het bericht dat verwijderd moet worden
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Bericht succesvol verwijderd
+        '403':
+          description: Gebruiker heeft geen rechten om dit bericht te verwijderen
+        '404':
+          description: Bericht niet gevonden
+      security:
+        - BearerAuth: []
+
+  /question/assignment/{assignmentId}/learningPath/{learningPathId}/:
+    post:
+      summary: Creëer een algemene vraag voor een leerpad binnen een opdracht.
+      operationId: createQuestionGeneral
+      tags:
+        - Questions
+      parameters:
+        - in: path
+          name: assignmentId
+          required: true
+          schema:
+            type: integer
+          description: Het ID van de opdracht.
+        - in: path
+          name: learningPathId
+          required: true
+          schema:
+            type: integer
+          description: Het ID van het leerpad.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                text:
+                  type: string
+                teamId:
+                  type: integer
+      responses:
+        '201':
+          description: Algemene vraag succesvol aangemaakt.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionGeneral'
+        '400':
+          description: Ongeldige invoer of ontbrekende gegevens.
+        '403':
+          description: Gebruiker niet geautoriseerd om deze actie uit te voeren.
+        '500':
+          description: Serverfout
+      security:
+        - BearerAuth: []
+
+  /question/assignment/{assignmentId}/learningPath/{learningPathId}/learningObject/{learningObjectId}/:
+    post:
+      summary: Creëer een specifieke vraag gekoppeld aan een leerobject binnen een leerpad.
+      operationId: createQuestionSpecific
+      tags:
+        - Questions
+      parameters:
+        - in: path
+          name: assignmentId
+          required: true
+          schema:
+            type: integer
+          description: Het ID van de opdracht.
+        - in: path
+          name: learningPathId
+          required: true
+          schema:
+            type: integer
+          description: Het ID van het leerpad.
+        - in: path
+          name: learningObjectId
+          required: true
+          schema:
+            type: string
+          description: Het ID van het leerobject.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                text:
+                  type: string
+                teamId:
+                  type: integer
+      responses:
+        '201':
+          description: Specifieke vraag succesvol aangemaakt.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionSpecific'
+        '400':
+          description: Ongeldige invoer of ontbrekende gegevens.
+        '403':
+          description: Gebruiker niet geautoriseerd om deze actie uit te voeren.
+        '500':
+          description: Serverfout
+      security:
+        - BearerAuth: []
+
+  /student/assignment:
+    get:
+      tags:
+        - Assignment
+      summary: Haal opdrachten op voor een ingelogde student
+      operationId: getStudentAssignments
+      parameters:
+        - name: sort
+          in: query
+          description: Veld(en) om de resultaten op te sorteren (bijv. 'deadline')
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: Sorteervolgorde, 'asc' voor oplopend, 'desc' voor aflopend
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+        - name: limit
+          in: query
+          description: Maximum aantal opdrachten om op te halen
+          schema:
+            type: integer
+            default: 5
+      responses:
+        '200':
+          description: Een lijst van opdrachten voor de student
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Assignment'
+        '400':
+          description: Ongeldige limiet of sorteerveld opgegeven
+        '401':
+          description: Gebruiker niet geautoriseerd of geen geldige token
+        '500':
+          description: Fout bij het verwerken van het verzoek
+      security:
+        - BearerAuth: []
+  
+  /assignments/{assignmentId}:
+    get:
+      tags:
+        - Assignment
+      summary: Haalt een specifieke opdracht op op basis van het assignment ID
+      operationId: getAssignmentsById
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          description: De unieke identifier van de opdracht
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Details van de opdracht
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+        '400':
+          description: Ongeldige invoer, assignment ID is vereist
+        '500':
+          description: Serverfout bij het ophalen van de opdracht
+  
+  /teacher/assignments:
+    post:
+      tags:
+        - Assignment
+      summary: Creëer een nieuwe opdracht voor een klas
+      description: Staats een leerkracht toe om een nieuwe opdracht te creëren.
+      operationId: createAssignmentForClass
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [classId, learningPathId, deadline]
+              properties:
+                classId:
+                  type: integer
+                learningPathId:
+                  type: integer
+                deadline:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Opdracht succesvol bijgewerkt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+        '400':
+          description: Ongeldige invoer
+        '401':
+          description: Ongeautoriseerd
+        '500':
+          description: Serverfout
+
+  /teacher/assignments/class/{classId}:
+    get:
+      tags:
+        - Assignment
+      summary: Haal opdrachten op per klas
+      description: Geeft alle opdrachten terug die aan een specifieke klas zijn gekoppeld.
+      operationId: getAssignmentsByClass
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lijst van opdrachten
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Assignment'
+        '401':
+          description: Ongeautoriseerd
+        '500':
+          description: Serverfout
+
+  /teacher/assignments/{assignmentId}:
+    patch:
+      tags:
+        - Assignment
+      summary: Werk een bestaande opdracht bij
+      description: Staats een leerkracht toe om een bestaande opdracht te wijzigen.
+      operationId: updateAssignment
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                learningPathId:
+                  type: integer
+      responses:
+        '200':
+          description: Opdracht succesvol bijgewerkt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+        '400':
+          description: Ongeldige invoer
+        '401':
+          description: Ongeautoriseerd
+        '500':
+          description: Serverfout
+
+    delete:
+      tags:
+        - Assignment
+      summary: Verwijder een bestaande opdracht
+      description: Staats een leerkracht toe om een bestaande opdracht te verwijderen.
+      operationId: deleteAssignment
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Opdracht succesvol verwijderd
+        '401':
+          description: Ongeautoriseerd
+        '500':
+          description: Serverfout
+
+  /student/auth/register:
+    post:
+      tags:
+        - Log In and Register
+      summary: Registreer een nieuwe leerling
+      description: Maakt een nieuwe gebruiker aan met de rol van student.
+      operationId: registerStudent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterBody'
+      responses:
+        '201':
+          description: Leerling succesvol geregistreerd
+        '400':
+          description: Verplichte velden ontbreken of wachtwoord is te kort
+        '409':
+          description: Gebruiker bestaat al
+
+  /student/auth/login:
+    post:
+      tags:
+        - Log In and Register
+      summary: Inloggen van een leerling
+      description: Verifieert de e-mail en het wachtwoord van de gebruiker en geeft een JWT-token terug.
+      operationId: loginStudent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginBody'
+      responses:
+        '200':
+          description: Succesvol ingelogd
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+        '400':
+          description: Onjuiste e-mail ingevoerd
+        '401':
+          description: Ongeldige gebruiker of wachtwoord
+
+  /teacher/auth/register:
+    post:
+      tags:
+        - Log In and Register
+      summary: Registreer een nieuwe leerkracht
+      description: Maakt een nieuwe gebruiker aan met de rol van leerkracht.
+      operationId: registerTeacher
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterBody'
+      responses:
+        '201':
+          description: Leerkracht succesvol geregistreerd
+        '400':
+          description: Verplichte velden ontbreken of wachtwoord is te kort
+        '409':
+          description: Gebruiker bestaat al
+
+  /teacher/auth/login:
+    post:
+      tags:
+        - Log In and Register
+      summary: Inloggen van een leerkracht
+      description: Verifieert de e-mail en het wachtwoord van de leerkracht en geeft een JWT-token terug.
+      operationId: loginTeacher
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginBody'
+      responses:
+        '200':
+          description: Succesvol ingelogd
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+        '400':
+          description: Onjuiste e-mail ingevoerd
+        '401':
+          description: Ongeldige gebruiker of wachtwoord 
+
+  /student/classes/join:
+    post:
+      tags:
+        - Student Class Operations
+      summary: Toetreden tot een klas
+      description: Laat een student toe om een klas te joinen door een join code te verstrekken.
+      operationId: joinclass
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                joinCode:
+                  type: string
+                  description: De join code die nodig is om een klas te joinen.
+      responses:
+        '200':
+          description: Succesvol toegetreden tot de klas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Ongeldig verzoek, join code ontbreekt of de student is al lid van de klas
+        '404':
+          description: Klas niet gevonden
+        '401':
+          description: Niet geautoriseerd, geen geldige token
+  
+  /teacher/classes:
+    post:
+      tags:
+        - Teacher Class Operations
+      summary: Creëer een nieuwe klas
+      description: Sta een leerkracht toe om een nieuwe klas aan te maken.
+      operationId: createclass
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: De naam van de nieuwe klas.
+      responses:
+        '201':
+          description: Klas aangemaakt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Class'
+                    
+        '400':
+          description: Onvolledige gegevens aangeleverd
+        '401':
+          description: Niet geautoriseerd
+        '500':
+          description: Serverfout bij het aanmaken van de klas
+  /teacher/classes/{classId}:
+    delete:
+      tags:
+        - Teacher Class Operations
+      summary: Verwijder een klas
+      description: Sta een leerkracht toe om een bestaande klas te verwijderen.
+      operationId: deleteclass
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: De ID van de klas die verwijderd moet worden
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Klas verwijderd
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Klas verwijderd"
+        '401':
+          description: Niet geautoriseerd
+        '403':
+          description: Toegang geweigerd
+        '500':
+          description: Serverfout bij het verwijderen van de klas
+  /teacher/classes/{classId}/join-link:
+    get:
+      tags:
+        - Teacher Class Operations
+      summary: Haal de join link van een klas op
+      description: Geeft de join link voor studenten om deel te nemen aan de klas.
+      operationId: getJoinLink
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: De ID van de klas waarvoor de join link opgehaald wordt
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Join link opgehaald
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  joinLink:
+                    type: string
+        '401':
+          description: Niet geautoriseerd
+        '403':
+          description: Toegang geweigerd
+        '500':
+          description: Serverfout bij het ophalen van de join link
+  /teacher/classes/{classId}/regenerate-join-link:
+    post:
+      tags:
+        - Teacher Class Operations
+      summary: Regenereer de join link van een klas
+      description: Genereert een nieuwe join link voor de klas.
+      operationId: regenerateJoinLink
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: De ID van de klas waarvoor de join link opnieuw gegenereerd wordt
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Nieuwe join link gegenereerd
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  joinLink:
+                    type: string
+        '401':
+          description: Niet geautoriseerd
+        '403':
+          description: Toegang geweigerd
+        '500':
+          description: Serverfout bij het regenereren van de join link
+  /teacher/classes/{classId}/students:
+    get:
+      tags:
+        - Teacher Class Operations
+      summary: Haal studenten van een klas op
+      description: Geeft een lijst van alle studenten die zijn ingeschreven in de gespecificeerde klas.
+      operationId: getclassStudents
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: De ID van de klas waarvoor de studenten worden opgehaald
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lijst van studenten opgehaald
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  students:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Student'
+        '401':
+          description: Niet geautoriseerd
+        '403':
+          description: Toegang geweigerd
+        '500':
+          description: Serverfout bij het ophalen van studenten
+  /teacher/classes/{classId}/join-requests:
+    get:
+      tags:
+        - Teacher Class Operations
+      summary: Haal de join requests voor een klas op
+      description: Geeft een lijst van alle join requests voor de gegeven klas terug.
+      operationId: getJoinRequestsByClass
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: De ID van de klas waarvoor de join requests worden opgehaald
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lijst van join requests opgehaald
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  joinRequests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/JoinRequest'
+        '401':
+          description: Niet geautoriseerd
+        '403':
+          description: Toegang geweigerd
+        '500':
+          description: Serverfout bij het ophalen van join requests
+  /teacher/classes/{classId}/join-requests/{requestId}:
+    patch:
+      tags:
+        - Teacher Class Operations
+      summary: Update de status van een join request
+      description: Accepteer of weiger een join request voor een klas.
+      operationId: updateJoinRequestStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: De ID van de klas waarvoor de join request wordt geüpdatet
+          schema:
+            type: integer
+        - name: requestId
+          in: path
+          required: true
+          description: De ID van de join request die wordt geüpdatet
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Join request geupdatet
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  joinRequest:
+                    type: object
+                    $ref: '#/components/schemas/JoinRequest'
+        '400':
+          description: Ongeldige actie meegegeven
+        '404':
+          description: Join request niet gevonden
+        '401':
+          description: Niet geautoriseerd
+        '403':
+          description: Toegang geweigerd
+        '500':
+          description: Serverfout bij het updaten van de join request
+
+  /teacher/classes/{classId}/invites:
+    get:
+      tags:
+        - Teacher Invite Operations
+      summary: Haal alle uitstaande uitnodigingen voor een klas op
+      description: Geeft een lijst van alle uitstaande uitnodigingen voor de gespecificeerde klas.
+      operationId: getPendingInvitesForClass
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: De ID van de klas waarvoor uitnodigingen worden opgehaald
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lijst van uitnodigingen opgehaald
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invites:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Invite'
+        '401':
+          description: Niet geautoriseerd
+        '403':
+          description: Toegang geweigerd
+        '500':
+          description: Serverfout bij het ophalen van uitnodigingen
+    post:
+      tags:
+        - Teacher Invite Operations
+      summary: Nodig een andere leerkracht uit voor een klas
+      description: Creëert een uitnodiging voor een andere leerkracht om deel te nemen aan de klas.
+      operationId: createInvite
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: De ID van de klas waarvoor een uitnodiging wordt gemaakt
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - otherTeacherId
+              properties:
+                otherTeacherId:
+                  type: integer
+                  description: De ID van de leerkracht die wordt uitgenodigd
+      responses:
+        '201':
+          description: Uitnodiging gecreëerd
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invite:
+                    $ref: '#/components/schemas/Invite'
+        '400':
+          description: Ongeldige gegevens aangeleverd
+        '401':
+          description: Niet geautoriseerd
+        '403':
+          description: Toegang geweigerd
+        '500':
+          description: Serverfout bij het aanmaken van de uitnodiging
+      
+  /teacher/invites:
+    get:
+      tags:
+        - Teacher Invite Operations
+      summary: Haal alle uitstaande uitnodigingen voor een leerkracht op
+      description: Geeft een lijst van alle uitstaande uitnodigingen voor de ingelogde leerkracht.
+      operationId: getPendingInvitesForTeacher
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lijst van uitnodigingen opgehaald
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invites:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Invite'
+        '401':
+          description: Niet geautoriseerd
+        '403':
+          description: Toegang geweigerd
+        '500':
+          description: Serverfout bij het ophalen van uitnodigingen
+  /teacher/invites/{inviteId}:
+    patch:
+      tags:
+        - Teacher Invite Operations
+      summary: Update de status van een uitnodiging
+      description: Update de status van een uitnodiging voor een leerkracht om deel te nemen aan een klas.
+      operationId: updateInviteStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: inviteId
+          in: path
+          required: true
+          description: De ID van de uitnodiging die geüpdatet wordt
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - action
+              properties:
+                action:
+                  type: string
+                  description: 'De actie die uitgevoerd moet worden, bijvoorbeeld "accept" of "decline"'
+      responses:
+        '200':
+          description: Status van uitnodiging geüpdatet
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invite:
+                    $ref: '#/components/schemas/Invite'
+        '400':
+          description: Onvolledige gegevens aangeleverd
+        '401':
+          description: Niet geautoriseerd
+        '403':
+          description: Toegang geweigerd
+        '500':
+          description: Serverfout bij het updaten van de uitnodiging
+  /teacher/classes/{classId}/invites/{inviteId}:
+    delete:
+      tags:
+        - Teacher Invite Operations
+      summary: Verwijder een uitnodiging
+      description: Verwijdert een uitnodiging voor een leerkracht om deel te nemen aan een klas.
+      operationId: deleteInvite
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: De ID van de klas waarvoor een uitnodiging wordt verwijderd
+          schema:
+            type: integer
+        - name: inviteId
+          in: path
+          required: true
+          description: De ID van de uitnodiging die verwijderd wordt
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Uitnodiging verwijderd
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Uitnodiging succesvol verwijderd"
+        '401':
+          description: Niet geautoriseerd
+        '403':
+          description: Toegang geweigerd
+        '500':
+          description: Serverfout bij het verwijderen van de uitnodiging
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          $ref: '#/components/schemas/Role'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Role:
+      type: string
+      enum: [ADMIN, TEACHER, STUDENT]
+
+    Admin:
+      type: object
+      properties:
+        userId:
+          type: integer
+
+    Teacher:
+      type: object
+      properties:
+        userId:
+          type: integer
+        teacherFeedbacks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Feedback'
+
+    Student:
+      type: object
+      properties:
+        userId:
+          type: integer
+        progress:
+          type: array
+          items:
+            $ref: '#/components/schemas/StudentProgress'
+        joinRequests:
+          type: array
+          items:
+            $ref: '#/components/schemas/JoinRequest'
+        classes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClassStudent'
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/Team'
+
+    Class:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        assignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClassAssignment'
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/Team'
+
+    ClassStudent:
+      type: object
+      properties:
+        studentId:
+          type: integer
+        classId:
+          type: integer
+
+    ClassTeacher:
+      type: object
+      properties:
+        teacherId:
+          type: integer
+        classId:
+          type: integer
+
+    JoinRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+        studentId:
+          type: integer
+        classId:
+          type: integer
+        status:
+          $ref: '#/components/schemas/JoinRequestStatus'
+
+    JoinRequestStatus:
+      type: string
+      enum: [PENDING, APPROVED, DENIED]
+
+    LearningPath:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        language:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+        minItems:
+          type: integer
+        nodes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    LearningObject:
+      type: object
+      properties:
+        id:
+          type: string
+        version:
+          type: string
+        language:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        contentType:
+          type: string
+        keywords:
+          type: string
+        targetAges:
+          type: string
+        teacherExclusive:
+          type: boolean
+        skosConcepts:
+          type: string
+        copyright:
+          type: string
+        licence:
+          type: string
+        difficulty:
+          type: integer
+        estimatedTime:
+          type: integer
+        available:
+          type: boolean
+        contentLocation:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+        evaluations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Evaluation'
+
+    Evaluation:
+      type: object
+      properties:
+        id:
+          type: string
+        nrOfQuestions:
+          type: integer
+        evaluationType:
+          $ref: '#/components/schemas/EvaluationType'
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvaluationQuestion'
+
+    EvaluationType:
+      type: string
+      enum: [OPEN, MULTIPLE]
+
+    EvaluationQuestion:
+      type: object
+      properties:
+        id:
+          type: integer
+        evaluationId:
+          type: string
+        questionId:
+          type: integer
+        question:
+          type: string
+
+    Question:
+      type: object
+      properties:
+        id:
+          type: integer
+        teamId:
+          type: integer
+        title:
+          type: string
+        assignmentId:
+          type: integer
+        type:
+          $ref: '#/components/schemas/QuestionType'
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    QuestionType:
+      type: string
+      enum: [SPECIFIC, GENERAL]
+
+    QuestionSpecific:
+      type: object
+      properties:
+        questionId:
+          type: integer
+        learningObjectId:
+          type: string
+
+    QuestionGeneral:
+      type: object
+      properties:
+        questionId:
+          type: integer
+        learningPathId:
+          type: integer
+
+    QuestionMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        questionId:
+          type: integer
+        userId:
+          type: integer
+        text:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    Assignment:
+      type: object
+      properties:
+        id:
+          type: integer
+        learningPathId:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        deadline:
+          type: string
+        learningPath:
+          $ref: '#/components/schemas/LearningPath'
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+        classAssignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClassAssignment'
+        teamAssignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamAssignment'
+
+    ClassAssignment:
+      type: object
+      properties:
+        classId:
+          type: integer
+        assignmentId:
+          type: integer
+
+    TeamAssignment:
+      type: object
+      properties:
+        teamId:
+          type: integer
+        assignmentId:
+          type: integer
+
+    Team:
+      type: object
+      properties:
+        id:
+          type: integer
+        teamname:
+          type: string
+        classId:
+          type: integer
+        students:
+          type: array
+          items:
+            $ref: '#/components/schemas/Student'
+        submissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Submission'
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+
+    Submission:
+      type: object
+      properties:
+        submissionId:
+          type: integer
+        evaluationId:
+          type: string
+        teamId:
+          type: integer
+        submitted:
+          type: string
+        feedback:
+          $ref: '#/components/schemas/Feedback'
+
+    Feedback:
+      type: object
+      properties:
+        submissionId:
+          type: integer
+        teacherId:
+          type: integer
+        description:
+          type: string
+
+    StudentProgress:
+      type: object
+      properties:
+        studentId:
+          type: integer
+        progressId:
+          type: integer
+
+    LearningObjectProgress:
+      type: object
+      properties:
+        id:
+          type: integer
+        learningObjectId:
+          type: string
+        done:
+          type: boolean
+
+    RegisterBody:
+      type: object
+      required: [firstName, lastName, email, password]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+
+    LoginBody:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    
+    Invite:
+      type: object
+      properties:
+        id:
+          type: integer
+        classId:
+          type: integer
+        otherTeacherId:
+          type: integer
+        status:
+          type: string
+          enum:
+            - pending
+            - accepted
+            - declined
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
