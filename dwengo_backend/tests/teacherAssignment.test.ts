@@ -104,19 +104,6 @@ describe("Tests for teacherAssignment", async () => {
     );
   });
 
-  afterEach(async () => {
-    // clear the database
-    await prisma.$transaction([
-      prisma.classAssignment.deleteMany(),
-      prisma.assignment.deleteMany(),
-      prisma.learningPath.deleteMany(),
-      prisma.classTeacher.deleteMany(),
-      prisma.class.deleteMany(),
-      prisma.teacher.deleteMany(),
-      prisma.user.deleteMany(),
-    ]);
-  });
-
   describe("[POST] /teacher/assignments", async () => {
     it("should respond with a `201` status code and the newly created assignment", async () => {
       // class3 has no assignments
