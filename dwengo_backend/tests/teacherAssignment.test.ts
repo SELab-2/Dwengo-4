@@ -2,21 +2,12 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import prisma from "./helpers/prisma";
 import app from "../index";
+import { Assignment, Class, LearningPath, Teacher, User } from "@prisma/client";
 import {
-  Assignment,
-  Class,
-  LearningPath,
-  Student,
-  Teacher,
-  User,
-} from "@prisma/client";
-import {
-  addStudentToClass,
   addTeacherToClass,
   createAssignment,
   createClass,
   createLearningPath,
-  createStudent,
   createTeacher,
   stringToDate,
 } from "./helpers/testDataCreation";
@@ -136,12 +127,10 @@ describe("Tests for teacherAssignment", async () => {
           learningPathId: lp1.id,
           deadline: "2026-10-23",
         });
-
       expect(status).toBe(201);
       expect(body.deadline).toStrictEqual(new Date("2026-10-23").toISOString());
       expect(body.learningPathId).toBe(lp1.id);
     });
-
     it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
       // class3 has no assignments
       const { status, body } = await request(app)
@@ -152,180 +141,51 @@ describe("Tests for teacherAssignment", async () => {
           learningPathId: lp1.id,
           deadline: "2026-10-23",
         });
-
       expect(status).toBe(500);
       expect(body.error).toBe("Failed to create assignment");
     });
+  });
 
-    //   it("should respond with a `200` status code and a list of 2 assignments", async () => {
-    //     const { status, body } = await request(app)
-    //       .get("/student/assignments")
-    //       .set("Authorization", `Bearer ${student2.token}`);
+  describe("[GET] /teacher/assignments/class/:classId", async () => {
+    it("should respond with a `200` status code and a list of assignments for that class", async () => {
+      const { status, body } = await request(app)
+        .get(`/teacher/assignments/class/${class1.id}`)
+        .set("Authorization", `Bearer ${teacher1.token}`);
 
-    //     expect(status).toBe(200);
-    //     expect(body).toHaveLength(2);
-    //     for (let i = 0; i < 2; i += 1) {
-    //       body[i].createdAt = new Date(body[i].createdAt);
-    //       body[i].updatedAt = new Date(body[i].updatedAt);
-    //       body[i].deadline = new Date(body[i].deadline);
-    //       body[i].learningPath.createdAt = new Date(body[i].learningPath.createdAt);
-    //       body[i].learningPath.updatedAt = new Date(body[i].learningPath.updatedAt);
-    //     }
-    //     expect(body[0]).toStrictEqual(assignment1);
-    //     expect(body[1]).toStrictEqual(assignment2);
-    //   });
+      expect(status).toBe(200);
+      expect(body).toHaveLength(2);
+      stringToDate(body, 2);
 
-    //   it("should return the same array of assignments for all students in the same class", async () => {
-    //     let req = await request(app)
-    //       .get("/student/assignments")
-    //       .set("Authorization", `Bearer ${student2.token}`);
+      expect(body[0].id).toStrictEqual(assignment1.id);
+      expect(body[0].deadline).toStrictEqual(assignment1.deadline);
+      expect(body[1].id).toStrictEqual(assignment2.id);
+      expect(body[1].deadline).toStrictEqual(assignment2.deadline);
+    });
 
-    //     const s = req.status;
-    //     const b = req.body;
+    it("should respond with the same assignments for teachers that are members of the same class", async () => {
+      let req = await request(app)
+        .get(`/teacher/assignments/class/${class1.id}`)
+        .set("Authorization", `Bearer ${teacher1.token}`);
 
-    //     expect(s).toBe(200);
-    //     expect(b).toHaveLength(2);
+      let req2 = await request(app)
+        .get(`/teacher/assignments/class/${class1.id}`)
+        .set("Authorization", `Bearer ${teacher2.token}`);
 
-    //     req = await request(app)
-    //       .get("/student/assignments")
-    //       .set("Authorization", `Bearer ${student3.token}`);
+      expect(req.status).toBe(200);
+      expect(req2.status).toBe(200);
 
-    //     const s1 = req.status;
-    //     const b1 = req.body;
+      expect(req.body).toHaveLength(2);
+      expect(req2.body).toHaveLength(2);
 
-    //     b1.sort((o1: LearningPath, o2: LearningPath) => o1.id < o2.id);
-    //     b.sort((o1: LearningPath, o2: LearningPath) => o1.id < o2.id);
+      expect(req.body).toStrictEqual(req2.body);
+    });
 
-    //     expect(s1).toBe(200);
-    //     expect(b1).toStrictEqual(b);
-    //   });
-
-    //   it("should not return the same array of assignments for students in other classes", async () => {
-    //     let req = await request(app)
-    //       .get("/student/assignments")
-    //       .set("Authorization", `Bearer ${student2.token}`);
-
-    //     const s = req.status;
-    //     const b = req.body;
-
-    //     expect(s).toBe(200);
-    //     expect(b).toHaveLength(2);
-
-    //     req = await request(app)
-    //       .get("/student/assignments")
-    //       .set("Authorization", `Bearer ${student4.token}`);
-
-    //     const s1 = req.status;
-    //     const b1 = req.body;
-
-    //     b.sort((o1: LearningPath, o2: LearningPath) => o1.id < o2.id);
-    //     b1.sort((o1: LearningPath, o2: LearningPath) => o1.id < o2.id);
-
-    //     expect(s1).toBe(200);
-    //     expect(b1).toHaveLength(1);
-    //     expect(b1 !== b);
-    //   });
-
-    //   it("should return a sorted list of assignments in descending order based on the deadline", async () => {
-    //     const { status, body } = await request(app)
-    //       .get("/student/assignments")
-    //       .query({ sort: "deadline", order: "desc" })
-    //       .set("Authorization", `Bearer ${student5.token}`);
-
-    //     stringToDate(body, 2);
-
-    //     expect(status).toBe(200);
-    //     expect(body).toHaveLength(2);
-    //     expect(body[0].deadline > body[1].deadline);
-    //   });
-
-    //   it("should return a sorted list of assignments in ascending order based on the deadline", async () => {
-    //     const { status, body } = await request(app)
-    //       .get("/student/assignments")
-    //       .query({ sort: "deadline", order: "asc" })
-    //       .set("Authorization", `Bearer ${student5.token}`);
-
-    //     stringToDate(body, 2);
-
-    //     expect(status).toBe(200);
-    //     expect(body).toHaveLength(2);
-    //     expect(body[0].deadline < body[1].deadline);
-    //   });
-
-    //   it("should return a sorted list of assignments in descending order based on createdAt", async () => {
-    //     const { status, body } = await request(app)
-    //       .get("/student/assignments")
-    //       .query({ sort: "createdAt", order: "desc" })
-    //       .set("Authorization", `Bearer ${student5.token}`);
-
-    //     stringToDate(body, 2);
-
-    //     expect(status).toBe(200);
-    //     expect(body).toHaveLength(2);
-    //     expect(body[0].createdAt > body[1].createdAt);
-    //   });
-
-    //   it("should return a sorted list of assignments in ascending order based on createdAt", async () => {
-    //     const { status, body } = await request(app)
-    //       .get("/student/assignments")
-    //       .query({ sort: "createdAt", order: "asc" })
-    //       .set("Authorization", `Bearer ${student5.token}`);
-
-    //     stringToDate(body, 2);
-
-    //     expect(status).toBe(200);
-    //     expect(body).toHaveLength(2);
-    //     expect(body[0].createdAt > body[1].createdAt);
-    //   });
-
-    //   it("should return a sorted list of assignments in descending order based on updatedAt", async () => {
-    //     const { status, body } = await request(app)
-    //       .get("/student/assignments")
-    //       .query({ sort: "updatedAt", order: "desc" })
-    //       .set("Authorization", `Bearer ${student5.token}`);
-
-    //     stringToDate(body, 2);
-
-    //     expect(status).toBe(200);
-    //     expect(body).toHaveLength(2);
-    //     expect(body[0].updatedAt > body[1].updatedAt);
-    //   });
-
-    //   it("should return a sorted list of assignments in ascending order based on updatedAt", async () => {
-    //     const { status, body } = await request(app)
-    //       .get("/student/assignments")
-    //       .query({ sort: "updatedAt", order: "asc" })
-    //       .set("Authorization", `Bearer ${student5.token}`);
-
-    //     stringToDate(body, 2);
-
-    //     expect(status).toBe(200);
-    //     expect(body).toHaveLength(2);
-    //     expect(body[0].updatedAt < body[1].updatedAt);
-    //   });
-
-    //   it("should return a sorted list of 1 assignment due to limit", async () => {
-    //     const { status, body } = await request(app)
-    //       .get("/student/assignments")
-    //       .query({ limit: 1 })
-    //       .set("Authorization", `Bearer ${student5.token}`);
-
-    //     stringToDate(body, 1);
-
-    //     expect(status).toBe(200);
-    //     expect(body).toHaveLength(1);
-    //   });
-
-    //   it("should only return 2 assignments even though limit is higher", async () => {
-    //     const { status, body } = await request(app)
-    //       .get("/student/assignments")
-    //       .query({ limit: 10 })
-    //       .set("Authorization", `Bearer ${student5.token}`);
-
-    //     stringToDate(body, 2);
-
-    //     expect(status).toBe(200);
-    //     expect(body).toHaveLength(2);
-    //   });
+    it("should respond with an error because the teacher is not part of the class", async () => {
+      const { status, body } = await request(app)
+        .get(`/teacher/assignments/class/${class1.id}`)
+        .set("Authorization", `Bearer ${teacher3.token}`);
+      expect(status).toBe(500);
+      expect(body.error).toBe("Failed to retrieve assignments");
+    });
   });
 });

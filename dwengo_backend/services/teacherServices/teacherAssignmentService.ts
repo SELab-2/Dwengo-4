@@ -33,10 +33,9 @@ export default class TeacherAssignmentService {
     classId: number,
     teacherId: number
   ): Promise<Assignment[]> {
-    if (!(await isAuthorized(teacherId, Role.TEACHER))) {
+    if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
       throw new Error("The teacher is unauthorized to request the assignments");
     }
-
     return prisma.assignment.findMany({
       where: {
         classAssignments: {
