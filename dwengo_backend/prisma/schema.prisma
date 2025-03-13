@@ -103,8 +103,8 @@ model ClassStudent {
   studentId Int
   classId   Int
 
-  student Student @relation(fields: [studentId], references: [userId])
-  class   Class   @relation(fields: [classId], references: [id])
+  student Student @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
 
   @@id([studentId, classId])
 }
@@ -116,8 +116,8 @@ model ClassTeacher {
   teacherId Int
   classId   Int
 
-  teacher Teacher  @relation(fields: [teacherId], references: [userId])
-  class   Class    @relation(fields: [classId], references: [id])
+  teacher Teacher  @relation(fields: [teacherId], references: [userId], onDelete: Cascade)
+  class   Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
   invites Invite[] // the invites that the teacher has sent
 
   @@id([teacherId, classId])
@@ -439,8 +439,8 @@ model Assignment {
 model ClassAssignment {
   classId      Int
   assignmentId Int
-  class        Class      @relation(fields: [classId], references: [id])
-  assignment   Assignment @relation(fields: [assignmentId], references: [id])
+  class        Class      @relation(fields: [classId], references: [id], onDelete: Cascade)
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 
   @@id([classId, assignmentId])
 }

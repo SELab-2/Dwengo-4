@@ -1,6 +1,6 @@
-// src/services/class.service.js
-import {Class, ClassStudent, ClassTeacher, PrismaClient, Student} from "@prisma/client";
+import {Class, ClassStudent, ClassTeacher, PrismaClient, Student, User} from "@prisma/client";
 import crypto from 'crypto';
+import { AccesDeniedError, BadRequestError, NotFoundError } from "../errors/errors";
 
 const prisma = new PrismaClient();
 
@@ -26,39 +26,32 @@ export default class ClassService {
             }
         });
 
-        console.log("Class and ClassTeacher created successfully:", classroom);
-
         return classroom;
     };
 
-    // Delete a class by ID
-    static async deleteClass (classId: number, teacherId: number): Promise<Class> {
+    // this function checks if the class exists and if the teacher is associated with the class
+    // if either of these conditions are not met, an error is thrown
+    private static async verifyClassAndTeacher(classId: number, teacherId: number): Promise<void> {
+        // Check if the class exists
+        const classroom = await prisma.class.findUnique({
+            where: { id: classId },
+        });
+        if (!classroom) {
+            throw new NotFoundError(`Class with id ${classId} not found`);
+        }
+
         // Check if the teacher is associated with the class
         const isTeacher = await this.isTeacherOfClass(classId, teacherId);
         if (!isTeacher) {
-            throw new Error("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
+            throw new AccesDeniedError(`Acces denied: Teacher ${teacherId} is not part of class ${classId}`);
         }
+        return;
+    }
 
-        // Start a transaction to delete related records
-        return prisma.$transaction(async (prisma) => {
-            // Delete class-student associations
-            await prisma.classStudent.deleteMany({ where: { classId } });
-
-            // Delete class assignments
-            await prisma.classAssignment.deleteMany({ where: { classId } });
-
-            // Delete join requests
-            await prisma.joinRequest.deleteMany({ where: { classId } });
-
-            // Delete invites
-            await prisma.invite.deleteMany({ where: { classId } });
-
-            // Delete class-teacher associations
-            await prisma.classTeacher.deleteMany({ where: { classId } });
-
-            // Finally, delete the class itself
-            return prisma.class.delete({ where: { id: classId } });
-        });
+    // Delete a class by ID
+    static async deleteClass (classId: number, teacherId: number): Promise<Class> {
+        await this.verifyClassAndTeacher(classId, teacherId);
+        return await prisma.class.delete({ where: { id: classId } });   // onDelete: Cascade in the prisma schema makes sure that all related records are also deleted
     };
 
     // Get all classes taught by a given teacher
@@ -102,30 +95,19 @@ export default class ClassService {
         return classTeacher !== null;
     };
 
-    // Get all student from a given class
-    static async getStudentsByClass(classId: number, teacherId: number): Promise<Student[]> {
-        // Check if the teacher is associated with the class
-        const isTeacher = await this.isTeacherOfClass(classId, teacherId);
-        if (!isTeacher) {
-            throw new Error("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
-        }
+    // Get all students from a given class
+    static async getStudentsByClass(classId: number, teacherId: number): Promise<(Student & {user: User})[]> { 
+        await this.verifyClassAndTeacher(classId, teacherId);
 
-        const classWithStudents = await prisma.class.findUnique({
-            where: { id: classId },
+        const classStudents = await prisma.classStudent.findMany({
+            where: { classId },
             include: {
-                classLinks: {
-                    include: {
-                        student: true, // Fetch student details from the ClassStudent relationship
-                    },
-                },
-            },
+                student: {
+                    include: { user: true }, // include user details
+                }
+            }
         });
-
-        // In case no students were found
-        if (!classWithStudents) return [];
-
-        // Extract only student details
-        return classWithStudents.classLinks.map((link) => link.student);
+        return classStudents.map((cs) => cs.student);
     };
 
     static async addStudentToClass(studentId: number, classId: number): Promise<ClassStudent> {
@@ -176,6 +158,9 @@ export default class ClassService {
 
     // Read a class by JoinCode
     static async getClassByJoinCode(joinCode: string): Promise<ClassWithLinks | null> {
+        if (!joinCode) {
+            throw new BadRequestError(`Invalid join code: ${joinCode}`);
+        }
         return prisma.class.findUnique({
             where: {code: joinCode},  // Search by the joinCode (which is 'code' in the schema)
             include: {
@@ -185,19 +170,18 @@ export default class ClassService {
     };
 
     static async getJoinCode(classId: number, teacherId: number): Promise<string> {
-        // Check if the teacher is associated with the class
-        const isTeacher = await this.isTeacherOfClass(classId, teacherId);
-        if (!isTeacher) {
-            throw new Error("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
-        }
-
         const classroom = await prisma.class.findUnique({
             where: { id: classId },
             select: { code: true }, // Only fetch the join code
         });
-
         if (!classroom) {
-            throw new Error("Klas niet gevonden");
+            throw new NotFoundError(`Class with id ${classId} not found`);
+        }
+
+        // Check if the teacher is associated with the class
+        const isTeacher = await this.isTeacherOfClass(classId, teacherId);
+        if (!isTeacher) {
+            throw new AccesDeniedError(`Acces denied: Teacher ${teacherId} is not part of class ${classId}`);
         }
 
         return classroom.code;
@@ -227,11 +211,7 @@ export default class ClassService {
 
     // Function to regenerate the join code for a class
     static async regenerateJoinCode(classId: number, teacherId: number): Promise<string> {
-        // Check if the teacher is associated with the class
-        const isTeacher = await this.isTeacherOfClass(classId, teacherId);
-        if (!isTeacher) {
-            throw new Error("Toegang geweigerd"); // Access denied if the teacher is not associated with the class
-        }
+        await this.verifyClassAndTeacher(classId, teacherId);
 
         // Generate a unique join code
         const newJoinCode = await this.generateUniqueCode();

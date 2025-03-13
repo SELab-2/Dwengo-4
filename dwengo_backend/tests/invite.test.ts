@@ -20,16 +20,6 @@ describe('invite tests', async () => {
     let teacherUser2: User & { teacher: Teacher, token: string };
     let classroom: Class;
     beforeEach(async () => {
-        // clear the database
-        await prisma.$transaction([
-            prisma.invite.deleteMany(),
-            prisma.classStudent.deleteMany(),
-            prisma.classTeacher.deleteMany(),
-            prisma.class.deleteMany(),
-            prisma.student.deleteMany(),
-            prisma.teacher.deleteMany(),
-            prisma.user.deleteMany()
-        ]);
         // create two teachers
         teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
         teacherUser2 = await createTeacher("John", "Doe", "john.doe@gmail.com");
