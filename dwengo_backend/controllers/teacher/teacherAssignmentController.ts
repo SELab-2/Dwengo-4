@@ -65,7 +65,7 @@ export class AssignmentTeacherController {
     try {
       if (!this.isUserValid(req, res)) return;
       const assignmentId: number = parseInt(req.params.assignmentId);
-      const learningPathId: string = req.body;
+      const { learningPathId }: { learningPathId: string } = req.body;
       const teacherId: number = Number(req.user!.id);
       const updatedAssignment = await teacherAssignmentService.updateAssignment(
         assignmentId,

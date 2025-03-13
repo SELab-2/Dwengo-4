@@ -188,4 +188,57 @@ describe("Tests for teacherAssignment", async () => {
       expect(body.error).toBe("Failed to retrieve assignments");
     });
   });
+
+  describe("[PATCH] /teacher/assignments/:assignmentId", async () => {
+    it("should respond with a `200` status code and the updated assignment", async () => {
+      // First create assignment for class3
+      const { status, body } = await request(app)
+        .post("/teacher/assignments/")
+        .set("Authorization", `Bearer ${teacher1.token}`)
+        .send({
+          classId: class3.id,
+          learningPathId: lp1.id,
+          deadline: "2026-10-23",
+        });
+
+      expect(status).toBe(201);
+      const assignmentId = body.id;
+
+      let req = await request(app)
+        .patch(`/teacher/assignments/${assignmentId}`)
+        .set("Authorization", `Bearer ${teacher1.token}`)
+        .send({
+          learningPathId: lp2.id,
+        });
+
+      expect(req.status).toBe(200);
+      expect(req.body.learningPathId).toBe(lp2.id);
+      expect(req.body.deadline).toStrictEqual(
+        new Date("2026-10-23").toISOString()
+      );
+      expect(req.body.updatedAt).not.toStrictEqual(body.updatedAt);
+    });
+
+    it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
+      // First create assignment for class3
+      await request(app)
+        .post("/teacher/assignments/")
+        .set("Authorization", `Bearer ${teacher1.token}`)
+        .send({
+          classId: class3.id,
+          learningPathId: lp1.id,
+          deadline: "2026-10-23",
+        });
+
+      const { status, body } = await request(app)
+        .patch(`/teacher/assignments/${assignment1.id}`)
+        .set("Authorization", `Bearer ${teacher3.token}`)
+        .send({
+          learningPathId: lp2.id,
+        });
+
+      expect(status).toBe(500);
+      expect(body.error).toBe("Failed to update assignment");
+    });
+  });
 });
