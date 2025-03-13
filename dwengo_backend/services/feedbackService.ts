@@ -55,7 +55,7 @@ export default class FeedbackService {
         });
     }
 
-    static async getFeedbackForSubmission(submissionId: number, teacherId: number): Promise<Feedback> {
+    static async getFeedbackForSubmission(submissionId: number, teacherId: number): Promise<Feedback | null> {
         if (!await this.hasSubmissionRights(teacherId, submissionId)) {
             throw new Error("The teacher is unauthorized to perform this action");
         }

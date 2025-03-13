@@ -6,10 +6,10 @@ import {AuthenticatedRequest} from "../../interfaces/extendedTypeInterfaces";
 export default class FeedbackController {
     static async getAllFeedbackForEvaluation(req: AuthenticatedRequest, res: Response) {
         try {
-            const {assignmentId, evaluationId}: { assignmentId: number, evaluationId: string } = req.params;
+            const {assignmentId, evaluationId} = req.params;
             const teacherId: number = Number(req.user?.id);
 
-            const feedback: Feedback[] = await service.getAllFeedbackForEvaluation(assignmentId, evaluationId, teacherId);
+            const feedback: Feedback[] = await service.getAllFeedbackForEvaluation(Number(assignmentId), evaluationId, teacherId);
             res.json(feedback);
         } catch (error) {
             res.status(500).json({error: "Failed to retrieve feedback"});
@@ -38,7 +38,7 @@ export default class FeedbackController {
             const submissionId: number = Number(req.params.submissionId);
             const teacherId: number = Number(req.user?.id);
 
-            const feedback: Feedback = await service.getFeedbackForSubmission(submissionId, teacherId);
+            const feedback: Feedback | null = await service.getFeedbackForSubmission(submissionId, teacherId);
             res.json(feedback);
         } catch (error) {
             res.status(500).json({error: "Failed to retrieve feedback"});
