@@ -1,4 +1,4 @@
-import {Feedback, PrismaClient} from '@prisma/client';
+import { Feedback, PrismaClient } from '@prisma/client';
 
 
 const prisma = new PrismaClient();
@@ -34,10 +34,13 @@ export default class FeedbackService {
                     some: {
                         submissionId: submissionId,
                     },
-                },
+                }
+
+                /*,
                 deadline: {
                     gte: new Date()
                 }
+                    */
             }
         });
 
@@ -55,7 +58,7 @@ export default class FeedbackService {
         });
     }
 
-    static async getFeedbackForSubmission(submissionId: number, teacherId: number): Promise<Feedback> {
+    static async getFeedbackForSubmission(submissionId: number, teacherId: number): Promise<Feedback | null> {
         if (!await this.hasSubmissionRights(teacherId, submissionId)) {
             throw new Error("The teacher is unauthorized to perform this action");
         }
@@ -98,16 +101,15 @@ export default class FeedbackService {
     static async hasAssignmentRights(assignmentId: number, teacherId: number) {
         // Tel aantal leerkrachten die rechten hebben op de evaluatie
         const teacherWithRights = await prisma.teacher.findFirst({
-                where: {
-                    userId: teacherId,
-                    teaches: {
-                        some: {
-                            class: {
-                                assignments: {
-                                    some: {
-                                        assignment: {
-                                            id: assignmentId,
-                                        }
+            where: {
+                userId: teacherId,
+                teaches: {
+                    some: {
+                        class: {
+                            assignments: {
+                                some: {
+                                    assignment: {
+                                        id: assignmentId,
                                     }
                                 }
                             }
@@ -115,6 +117,7 @@ export default class FeedbackService {
                     }
                 }
             }
+        }
         );
 
         return teacherWithRights !== null;
@@ -123,18 +126,17 @@ export default class FeedbackService {
     static async hasSubmissionRights(teacherId: number, submissionId: number) {
         // Tel aantal leerkrachten die rechten hebben op de submission
         const teacherWithRights: number = await prisma.teacher.count({
-                where: {
-                    userId: teacherId,
-                    teaches: {
-                        some: {
-                            class: {
-                                assignments: {
-                                    some: {
-                                        assignment: {
-                                            submissions: {
-                                                some: {
-                                                    submissionId: submissionId,
-                                                }
+            where: {
+                userId: teacherId,
+                teaches: {
+                    some: {
+                        class: {
+                            assignments: {
+                                some: {
+                                    assignment: {
+                                        submissions: {
+                                            some: {
+                                                submissionId: submissionId,
                                             }
                                         }
                                     }
@@ -144,6 +146,7 @@ export default class FeedbackService {
                     }
                 }
             }
+        }
         );
 
         // Return true als teacher rechten heeft

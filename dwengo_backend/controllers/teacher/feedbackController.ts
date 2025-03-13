@@ -1,18 +1,18 @@
-import {Response} from "express";
+import { Response } from "express";
 import service from "../../services/feedbackService";
-import {Feedback} from "@prisma/client";
-import {AuthenticatedRequest} from "../../interfaces/extendedTypeInterfaces";
+import { Feedback } from "@prisma/client";
+import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 
 export default class FeedbackController {
     static async getAllFeedbackForEvaluation(req: AuthenticatedRequest, res: Response) {
         try {
-            const {assignmentId, evaluationId}: { assignmentId: number, evaluationId: string } = req.params;
+            const { assignmentId, evaluationId } = req.params;
             const teacherId: number = Number(req.user?.id);
 
-            const feedback: Feedback[] = await service.getAllFeedbackForEvaluation(assignmentId, evaluationId, teacherId);
+            const feedback: Feedback[] = await service.getAllFeedbackForEvaluation(Number(assignmentId), evaluationId, teacherId);
             res.json(feedback);
         } catch (error) {
-            res.status(500).json({error: "Failed to retrieve feedback"});
+            res.status(500).json({ error: "Failed to retrieve feedback" });
         }
     }
 
@@ -21,7 +21,7 @@ export default class FeedbackController {
             const teacherId: number | undefined = req.user?.id;
             // TODO Is dit sowieso defined of hoe ga ik hier het beste met de undefined om?
 
-            const {submissionId, description}: {
+            const { submissionId, description }: {
                 submissionId: number,
                 description: string
             } = req.body;
@@ -29,7 +29,7 @@ export default class FeedbackController {
             const feedback: Feedback = await service.createFeedback(submissionId, Number(teacherId), description);
             res.status(201).json(feedback);
         } catch (error) {
-            res.status(500).json({error: "Failed to create feedback"});
+            res.status(500).json({ error: "Failed to create feedback" });
         }
 
     }
@@ -39,10 +39,14 @@ export default class FeedbackController {
             const submissionId: number = Number(req.params.submissionId);
             const teacherId: number = Number(req.user?.id);
 
-            const feedback: Feedback = await service.getFeedbackForSubmission(submissionId, teacherId);
-            res.json(feedback);
+            const feedback: Feedback | null = await service.getFeedbackForSubmission(submissionId, teacherId);
+            if (feedback) {
+                res.json(feedback);
+            } else {
+                res.status(404).json({ error: "Feedback not found" });
+            }
         } catch (error) {
-            res.status(500).json({error: "Failed to retrieve feedback"});
+            res.status(500).json({ error: "Failed to retrieve feedback" });
         }
 
     }
@@ -52,11 +56,11 @@ export default class FeedbackController {
             const submissionId: number = Number(req.params.submissionId);
             const teacherId: number = Number(req.user?.id);
 
-            const {description}: { description: string } = req.body;
+            const { description }: { description: string } = req.body;
             const feedback: Feedback = await service.updateFeedbackForSubmission(submissionId, description, teacherId);
             res.json(feedback)
         } catch (error) {
-            res.status(500).json({error: "Failed to update feedback"});
+            res.status(500).json({ error: "Failed to update feedback" });
         }
     }
 
@@ -66,9 +70,9 @@ export default class FeedbackController {
             const teacherId: number = Number(req.user?.id);
 
             await service.deleteFeedbackForSubmission(submissionId, teacherId);
-            res.json({message: "Feedback deleted"});
+            res.json({ message: "Feedback deleted" });
         } catch (error) {
-            res.status(500).json({error: "Failed to delete feedback"});
+            res.status(500).json({ error: "Failed to delete feedback" });
         }
     }
 }
