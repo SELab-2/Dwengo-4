@@ -252,6 +252,12 @@ describe("Tests for teacherAssignment", async () => {
 
       expect(status).toBe(500);
       expect(body.error).toBe("Failed to delete assignment");
+
+      // Check if assignment is not gone from database
+      const assignment = await prisma.assignment.findUnique({
+        where: { id: assignment4.id },
+      });
+      expect(assignment).not.toBeNull();
     });
   });
 });
