@@ -10,7 +10,9 @@ import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearn
 
 import assignmentRoutes from "./routes/assignmentRoutes";
 import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
-import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
+import studentTeamRoutes from "./routes/student/studentTeamRoutes";
+import progressRoutes from "./routes/progressRoutes"; 
+import teacherClassRoutes from './routes/teacher/teacherClassRoutes';
 import studentAssignmentRoutes from "./routes/student/studentAssignmentRoutes";
 import feedbackRoutes from "./routes/teacher/feedbackRoutes";
 import studentClassRoutes from "./routes/student/studentClassRoutes";
@@ -74,6 +76,9 @@ app.use("/question", QuestionRoutes);
 
 app.use("/learningPaths", learningPathRoutes);
 
+app.use("/student/teams", studentTeamRoutes);
+
+app.use("/progress", progressRoutes); 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Error Handler
