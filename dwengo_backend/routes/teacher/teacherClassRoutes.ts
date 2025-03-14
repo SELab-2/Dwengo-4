@@ -14,21 +14,32 @@ import {
   updateInviteStatus,
   deleteInvite
 } from '../../controllers/teacher/inviteController';
+import { 
+  getJoinRequestsByClass,
+  updateJoinRequestStatus
+} from '../../controllers/joinrequest/joinRequestController';
 
 const router = express.Router();
 
 // Alleen leerkrachten mogen deze routes gebruiken
-router.post("/", protectTeacher, createClassroom);
-router.delete("/:classId", protectTeacher, deleteClassroom);
-router.get("/:classId/join-link", protectTeacher, getJoinLink);
-router.post("/:classId/regenerate-join-link", protectTeacher, regenerateJoinLink);
-router.get("/:classId/students", protectTeacher, getClassroomStudents);
+router.use(protectTeacher);
+
+// routes for classes
+router.post("/", createClassroom);
+router.delete("/:classId", deleteClassroom);
+router.get("/:classId/join-link", getJoinLink);
+router.patch("/:classId/regenerate-join-link", regenerateJoinLink);
+router.get("/:classId/students", getClassroomStudents);
 
 // routes for invites
-router.post("/:classId/invites", protectTeacher, createInvite);
-router.get("/:classId/invites", protectTeacher, getPendingInvitesForClass);
-router.delete("/:classId/invites/:inviteId", protectTeacher, deleteInvite);
-router.get("/invites", protectTeacher, getPendingInvitesForTeacher);
-router.patch("/invites/:inviteId", protectTeacher, updateInviteStatus);
+router.post("/:classId/invites", createInvite);
+router.get("/:classId/invites", getPendingInvitesForClass);
+router.delete("/:classId/invites/:inviteId", deleteInvite);
+router.get("/invites", getPendingInvitesForTeacher);
+router.patch("/invites/:inviteId", updateInviteStatus);
+
+// routes for join requests
+router.get("/:classId/join-requests", getJoinRequestsByClass);
+router.patch("/:classId/join-requests/:requestId", updateJoinRequestStatus);
 
 export default router;
