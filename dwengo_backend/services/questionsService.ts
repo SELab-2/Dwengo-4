@@ -118,7 +118,14 @@ export default class QuestionService {
         const [, , learningPathNode,] = await Promise.all([
             prisma.learningObject.findUniqueOrThrow({ where: { id: learningObjectId } }),
             prisma.assignment.findUniqueOrThrow({ where: { id: assignmentId } }),
-            prisma.learningPathNode.findFirstOrThrow({ where: { learningPathId: learningPathId, learningObjectId: learningObjectId } }),
+            prisma.learningPathNode.findFirstOrThrow({
+                where: {
+                  learningPathId: learningPathId,
+                  learningObjectRef: learningObjectId,
+                  isExternal: false
+                }
+              })
+              ,
             prisma.assignment.findFirstOrThrow({ where: { id: assignmentId, learningPathId: learningPathId } })
         ]);
 

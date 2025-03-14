@@ -14,6 +14,9 @@ import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
 import studentAssignmentRoutes from "./routes/student/studentAssignmentRoutes";
 import feedbackRoutes from "./routes/teacher/feedbackRoutes";
 import studentClassRoutes from "./routes/student/studentClassRoutes";
+import teacherLocalLearningPathRoutes from "./routes/teacher/teacherLocalLearningPathRoutes";
+import teacherLocalLearningPathNodesRoutes from "./routes/teacher/teacherLocalLearningPathNodesRoutes";
+
 
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
@@ -53,6 +56,8 @@ app.use("/student/classes", studentClassRoutes);
 // Routes voor Teacher (Auth)
 app.use("/teacher/auth", teacherAuthRoutes);
 app.use("/teacher/learningObjects", teacherLocalLearningObjectRoutes);
+app.use("/teacher/learningPaths", teacherLocalLearningPathRoutes);
+app.use("/teacher/learningPaths", teacherLocalLearningPathNodesRoutes)
 
 // Routes voor Student (Auth)
 app.use("/student/auth", studentAuthRoutes);

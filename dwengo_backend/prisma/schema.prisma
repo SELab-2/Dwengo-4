@@ -181,30 +181,28 @@ model LearningPath {
 }
 
 model LearningPathNode {
-  // _id bij Dwengo API
+  // Primair ID
   nodeId           String   @id @default(uuid())
+
+  // Koppeling met LearningPath
   learningPathId   String
-  // Bij een node hoort een leerobject
-  learningObjectId String
-  // Duid aan of dit de eerste node van een leerpad is
-  // Standaard op false, meer nodes die niet het begin gaan zijn, dan moet dit niet door de gebruiker steeds ingegeven worden.
+  learningPath     LearningPath @relation(fields: [learningPathId], references: [id])
+
+  // In plaats van "learningObjectId" en de relation naar LearningObject,
+  // gebruik één stringveld en een boolean:
+  learningObjectRef String
+  isExternal        Boolean @default(false)
+
+  // overig
   start_node       Boolean  @default(false)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  learningObject LearningObject @relation(fields: [learningObjectId], references: [id])
-
-  // Een node kan meerdere transities hebben. Dit duidt aan wat de volgende node is en of er een eventuele conditie aan deze node vasthangt.
-  transitions LearningPathTransition[] @relation("TransitionNode")
-
-  // Een node hoort bij een leerpad
-  learningPath LearningPath @relation(fields: [learningPathId], references: [id])
-
-  // Dit is om de relatie tussen een transitie en een node vast te leggen.
-  // Een transitie kan maar naar 1 volgende node gaan. 
-  // Dit is wat rare syntax, maar het is de enige manier om het in prisma werkende te krijgen.
+  // Relaties voor transitions blijven ongewijzigd
+  transitions     LearningPathTransition[] @relation("TransitionNode")
   nextTransitions LearningPathTransition[] @relation("NextNode")
 }
+
 
 model LearningPathTransition {
   // _id bij Dwengo API
@@ -277,8 +275,7 @@ model LearningObject {
   progress          LearningObjectProgress[]
   QuestionSpecifics QuestionSpecific[]
 
-  // Een leerobject kan voorkomen in verschillende nodes van verschillende leerpaden
-  nodes LearningPathNode[]
+
 }
 
 model EducationalGoal {
