@@ -12,9 +12,10 @@ export const createTeamInAssignment = async (req: AuthenticatedRequest, res: Res
     try {
         // This is guaranteed to be possible by "makeAssignmentIdParamValid" in middleware/teamValidationMiddleware.ts
         const assignmentId: number = Number(req.params.assignmentId);
+        const classId: number = Number(req.params.classId);
         const { teams } = req.body;
 
-        const createdTeams: Team[] = await createTeamsInAssignment(assignmentId, teams);
+        const createdTeams: Team[] = await createTeamsInAssignment(assignmentId, classId, teams);
         res.status(201).json({ createdTeams });
     } catch (error) {
         res.status(500).json({ error: "Error creating teams in assignment." });

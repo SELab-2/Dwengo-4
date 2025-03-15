@@ -11,13 +11,18 @@ const prisma = new PrismaClient();
  * **/
 export const createTeamsInAssignment = async (
     assignmentId: number,
+    classId: number,
     teams: TeamDivision[]
 ): Promise<Team[]> => {
     const createdTeams: Team[] = [];
 
-    // Fetch class assignments and the class with its students
+    // Check if a class has been assigned an Assignment before splitting this class up into
+    // Teams to solve this assignment.
     const classAssignments: ClassAssignment[] = await prisma.classAssignment.findMany({
-        where: { assignmentId: assignmentId }
+        where: {
+            assignmentId: assignmentId,
+            classId: classId,
+        }
     });
 
     if (classAssignments.length === 0) {
@@ -26,7 +31,7 @@ export const createTeamsInAssignment = async (
 
     // Create teams in the database
     for (const team of teams) {
-        const newTeam: Team = await createTeam(team.teamName);
+        const newTeam: Team = await createTeam(team.teamName, classId);
         await assignStudentsToTeam(newTeam.id, team.studentIds);
         await giveAssignmentToTeam(newTeam.id, assignmentId);
 
@@ -38,10 +43,11 @@ export const createTeamsInAssignment = async (
 
 // Helper function for createTeamsInAssignment
 // This function creates a Team with a given teamname
-async function createTeam(teamName: string): Promise<Team> {
+async function createTeam(teamName: string, classId: number): Promise<Team> {
     return prisma.team.create({
         data: {
             teamname: teamName,
+            classId: classId,
         }
     });
 }
@@ -52,11 +58,12 @@ async function giveAssignmentToTeam(teamId: number, assignmentId: number): Promi
     return prisma.team.update({
         where: { id: teamId },
         data: {
-            // A new TeamAssignment record is created and linked to the Team.
-            // Since teamAssignments[] in Team is a relation field, it will automatically
-            // reflect this change when queried with `include: { teamAssignments: true }`.
-            teamAssignments: {
-                create: { assignmentId: assignmentId },
+            teamAssignment: {
+                // Update if it already exists, create if it does not exist
+                upsert: {
+                    create: { assignmentId },
+                    update: { assignmentId },
+                },
             },
         },
     });
@@ -214,7 +221,7 @@ export const updateTeamsForAssignment = async (
                     // The set operation removes all existing students from the team and replaces them with the new list of students (team.studentIds).
                     set: team.studentIds.map((studentId: number): {userId: number} => ({ userId: studentId }))
                 },
-                teamAssignments: {
+                teamAssignment: {
                     connectOrCreate: {
                         where: { teamId_assignmentId: {  teamId: team.teamId, assignmentId } },
                         create: { assignmentId: assignmentId }
@@ -234,10 +241,8 @@ export const updateTeamsForAssignment = async (
 export const getTeamsThatHaveAssignment = async (assignmentId: number): Promise<Team[]> => {
     return prisma.team.findMany({
         where: {
-            teamAssignments: {
-                some: {
-                    assignmentId: assignmentId,
-                }
+            teamAssignment: {
+                assignmentId: assignmentId,
             }
         }
     });
