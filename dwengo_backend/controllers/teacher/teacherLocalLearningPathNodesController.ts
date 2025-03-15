@@ -1,4 +1,3 @@
-// src/controllers/teacher/teacherLocalLearningPathNodesController.ts
 
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
