@@ -2,30 +2,42 @@ import {PrismaClient, JoinRequestStatus, JoinRequest} from "@prisma/client";
 import classService from "./classService";
 import {ClassWithLinks} from "./classService";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { AccesDeniedError, BadRequestError, NotFoundError } from "../errors/errors";
 
 const prisma = new PrismaClient();
 
 export default class joinRequestService {
 
     // Validate whether the class exists before proceeding
-    private static async validateClassExists(classCode: string): Promise<ClassWithLinks> {
-        const classroom: ClassWithLinks | null = await classService.getClassByJoinCode(classCode);
+    private static async validateClassExists(joinCode: string): Promise<ClassWithLinks> {
+        const classroom: ClassWithLinks | null = await classService.getClassByJoinCode(joinCode);
         if (!classroom) {
-            throw new Error(`Class with code ${classCode} not found.`);
+            throw new NotFoundError(`Class with code ${joinCode} not found.`);
         }
         return classroom;
     }
 
-    private static async updateAndValidateRequest(studentId: number, classId: number, status: JoinRequestStatus): Promise<void> {
+    private static async updateAndValidateRequest(requestId: number, teacherId: number, classId: number, status: JoinRequestStatus): Promise<JoinRequest> {
+        // check if teacher is allowed to approve/deny the request
+        const isTeacher: boolean = await classService.isTeacherOfClass(classId, teacherId);
+        if (!isTeacher) {
+            throw new AccesDeniedError(`Teacher ${teacherId} is not a teacher of class ${classId}`);
+        }
+
+        const joinRequest: JoinRequest | null = await prisma.joinRequest.findFirst({
+            where: { requestId, classId, status: JoinRequestStatus.PENDING },
+        });
+        if (!joinRequest) {
+            throw new NotFoundError(`Join request ${requestId} for class ${classId} not found/not pending.`);
+        }
+        
         // Update the join request status
         const updatedRequest = await prisma.joinRequest.update({
-            where: { studentId_classId: { studentId, classId } },
+            where: { requestId },
             data: { status: status },
         });
 
-        if (!updatedRequest) {
-            throw new Error(`Join request for student ${studentId} and class ${classId} not found.`);
-        }
+        return updatedRequest;
     }
 
     static async createJoinRequest(studentId: number, classId: number): Promise<JoinRequest> {
@@ -38,10 +50,26 @@ export default class joinRequestService {
         });
     }
 
-
-    static async createValidJoinRequest(studentId: number, classCode: string): Promise<JoinRequest> {
+    static async createValidJoinRequest(studentId: number, joinCode: string): Promise<JoinRequest> {
         try {
-            const classroom: ClassWithLinks = await this.validateClassExists(classCode);
+            const classroom: ClassWithLinks = await this.validateClassExists(joinCode);
+
+            // check if the student is already a member of the class
+            if (await classService.isStudentInClass(classroom, studentId)) {
+                throw new BadRequestError(`Student ${studentId} is already a member of class ${classroom.id}`);
+            }
+
+            // check if there's already a pending join request for this student and class
+            const existingRequest: JoinRequest | null = await prisma.joinRequest.findFirst({
+                where: {
+                    studentId,
+                    classId: classroom.id,
+                    status: JoinRequestStatus.PENDING,
+                },
+            });
+            if (existingRequest) {
+                throw new BadRequestError(`There's already a pending join request for student ${studentId} and class ${classroom.id}`);
+            }
 
             return await this.createJoinRequest(studentId, classroom.id);
         } catch (error) {
@@ -54,30 +82,36 @@ export default class joinRequestService {
         }
     };
 
-    static async approveRequestAndAddStudentToClass (studentId: number, classId: number): Promise<void> {
+    static async approveRequestAndAddStudentToClass(requestId: number, teacherId: number, classId: number): Promise<JoinRequest> {
         try {
-            await this.updateAndValidateRequest(studentId, classId, JoinRequestStatus.APPROVED);
+            const updatedRequest: JoinRequest = await this.updateAndValidateRequest(requestId, teacherId, classId, JoinRequestStatus.APPROVED);
 
             // Add the student to the class
-            await classService.addStudentToClass(studentId, classId);
+            await classService.addStudentToClass(updatedRequest.studentId, classId);
+            return updatedRequest;
         } catch (error) {
-            this.handleError(error, `Error approving join request for student ${studentId} and class ${classId}`);
+            this.handleError(error, `Error approving join request ${requestId} for class ${classId}`);
+            throw error;
         }
     };
 
-    static async denyJoinRequest(studentId: number, classId: number): Promise<void> {
+    static async denyJoinRequest(requestId: number, teacherId: number, classId: number): Promise<JoinRequest> {
         try {
-            await this.updateAndValidateRequest(studentId, classId, JoinRequestStatus.DENIED);
+            return await this.updateAndValidateRequest(requestId, teacherId, classId, JoinRequestStatus.DENIED);
         } catch (error) {
-            this.handleError(error, `Error denying join request for student ${studentId} and class ${classId}`);
+            this.handleError(error, `Error denying join request ${requestId} for class ${classId}`);
+            throw error;
         }
     };
 
-    static async getJoinRequestsByClass(classId: number): Promise<JoinRequest[]> {
+    static async getJoinRequestsByClass(teacherId: number, classId: number): Promise<JoinRequest[]> {
         try {
+            const isTeacher: boolean = await classService.isTeacherOfClass(classId, teacherId);
+            if (!isTeacher) {
+                throw new AccesDeniedError(`Teacher ${teacherId} is not a teacher of class ${classId}`);
+            }
             return await prisma.joinRequest.findMany({
-                where: { classId },
-                include: { student: true },
+                where: { classId }
             });
         } catch (error) {
             this.handleError(error, `Error fetching join requests for class ${classId}`);
@@ -89,7 +123,8 @@ export default class joinRequestService {
         if (error instanceof PrismaClientKnownRequestError) {
             throw new Error(`Prisma error occurred: ${error.message}`);
         } else if (error instanceof Error) {
-            throw new Error(`${message}: ${error.message}`);
+            error.message = `${message}: ${error.message}`;
+            throw error;
         }
         throw new Error(`${message}: Unknown error occurred.`);
     }

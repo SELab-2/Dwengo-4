@@ -52,9 +52,7 @@ model Teacher {
   userId Int  @id
   user   User @relation(fields: [userId], references: [id])
 
-  // Antwoorden en feedback
-  teacherAnswers   Answer[]
-  teacherFeedbacks TeacherFeedback[]
+  teacherFeedbacks Feedback[]
   // Uitnodigingen om een klas mee te beheren
   invite           Invite[]
 
@@ -94,6 +92,7 @@ model Class {
   assignments  ClassAssignment[]
   Invite       Invite[]
   ClassTeacher ClassTeacher[]
+  teams        Team[]
 }
 
 ///
@@ -103,8 +102,8 @@ model ClassStudent {
   studentId Int
   classId   Int
 
-  student Student @relation(fields: [studentId], references: [userId])
-  class   Class   @relation(fields: [classId], references: [id])
+  student Student @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
 
   @@id([studentId, classId])
 }
@@ -116,8 +115,9 @@ model ClassTeacher {
   teacherId Int
   classId   Int
 
-  teacher Teacher @relation(fields: [teacherId], references: [userId])
-  class   Class   @relation(fields: [classId], references: [id])
+  teacher Teacher  @relation(fields: [teacherId], references: [userId], onDelete: Cascade)
+  class   Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  invites Invite[] // the invites that the teacher has sent
 
   @@id([teacherId, classId])
 }
@@ -126,83 +126,159 @@ model ClassTeacher {
 /// JoinRequest – voor verzoeken om een klas te joinen
 
 model JoinRequest {
+  // Op deze manier kan een leerling meer dan 1 keer een verzoek sturen naar een klas
+  requestId Int               @id @default(autoincrement())
   studentId Int
   classId   Int
   status    JoinRequestStatus
 
-  student Student @relation(fields: [studentId], references: [userId])
-  class   Class   @relation(fields: [classId], references: [id])
-
-  @@id([studentId, classId])
+  student Student @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
 }
 
 model Invite {
-  teacherId Int
-  classId   Int
-  status    JoinRequestStatus
+  inviteId       Int               @id @default(autoincrement())
+  otherTeacherId Int
+  classTeacherId Int
+  classId        Int
+  status         JoinRequestStatus
 
-  teacher Teacher @relation(fields: [teacherId], references: [userId])
-  class   Class   @relation(fields: [classId], references: [id])
-
-  @@id([teacherId, classId])
+  otherTeacher Teacher      @relation(fields: [otherTeacherId], references: [userId], onDelete: Cascade)
+  classTeacher ClassTeacher @relation(fields: [classTeacherId, classId], references: [teacherId, classId], onDelete: Cascade)
+  class        Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
 }
 
 model LearningPath {
-  id          Int      @id @default(autoincrement())
-  title       String   @unique
-  language    String
-  description String
-  image       String?
-  minItems    Int?
-  nodes       Json
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  ///
+  /// Velden uit de Dwengo API
+  ///
 
-  creatorId Int
-  creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator")
+  // _id bij Dwengo API
+  id             String  @id @default(uuid())
+  hruid          String  @unique
+  title          String
+  language       String
+  description    String
+  // Base 64 encoding van de cover afbeelding
+  image          String?
+  // Aantal nodes in het leerpad
+  num_nodes      Int?
+  // Ik ga ervan uit dat dit is hoeveel nodes een leerling nog moet doorlopen? Hier kunnen we misschien iets mee doen om de progressie bij te houden?
+  num_nodes_left Int?
 
-  assignments       Assignment[]
-  learningPathNodes LearningPathNode[]
-  generalQuestions  GeneralQuestion[]
+  // De nodes van het leerpad
+  nodes LearningPathNode[]
+
+  ///
+  /// Custom velden
+  ///
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  creatorId       Int
+  creator         Teacher           @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator", onDelete: Cascade)
+  assignments     Assignment[]
+  questionGeneral QuestionGeneral[]
 }
 
 model LearningPathNode {
-  learningPathId Int
-  nodeId         Int
+  // _id bij Dwengo API
+  nodeId           String   @id @default(uuid())
+  learningPathId   String
+  // Bij een node hoort een leerobject
+  learningObjectId String
+  // Duid aan of dit de eerste node van een leerpad is
+  // Standaard op false, meer nodes die niet het begin gaan zijn, dan moet dit niet door de gebruiker steeds ingegeven worden.
+  start_node       Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
+  learningObject LearningObject @relation(fields: [learningObjectId], references: [id])
+
+  // Een node kan meerdere transities hebben. Dit duidt aan wat de volgende node is en of er een eventuele conditie aan deze node vasthangt.
+  transitions LearningPathTransition[] @relation("TransitionNode")
+
+  // Een node hoort bij een leerpad
   learningPath LearningPath @relation(fields: [learningPathId], references: [id])
 
-  @@id([learningPathId, nodeId])
+  // Dit is om de relatie tussen een transitie en een node vast te leggen.
+  // Een transitie kan maar naar 1 volgende node gaan.
+  // Dit is wat rare syntax, maar het is de enige manier om het in prisma werkende te krijgen.
+  nextTransitions LearningPathTransition[] @relation("NextNode")
+}
+
+model LearningPathTransition {
+  // _id bij Dwengo API
+  transitionId String  @id @default(uuid())
+  // Ik ben niet 100% zeker waarvoor default staat in de Dwengo API, maar ik denk dat het betekent dat er geen conditie is.
+  // Er wordt dus standaard naar de volgende node gegaan.
+  default      Boolean @default(true)
+  // Een eventuele conditie die aan deze transitie vasthangt.
+  condition    String?
+
+  // Een transitie hoort bij een node
+  nodeId String
+  node   LearningPathNode @relation(fields: [nodeId], references: [nodeId], name: "TransitionNode")
+
+  // Next wijst in de Dwengo API naar de volgende node.
+  // Als next leeg is, betekent dit dat de laatste node van het leerpad bereikt is.
+  nextNodeId String?
+  nextNode   LearningPathNode? @relation(fields: [nextNodeId], references: [nodeId], name: "NextNode")
+}
+
+///
+/// Content types van leerobjecten; kan altijd nog uitgebreid worden
+enum ContentType {
+  // Dwengo API
+  TEXT_PLAIN
+  TEXT_MARKDOWN
+  IMAGE_IMAGE_BLOCK
+  IMAGE_IMAGE
+  AUDO_MPEG
+  // Eigen toevoegingen
+  VIDEO
+  EVAL_MULTIPLE_CHOICE
+  EVAL_OPEN_QUESTION
 }
 
 model LearningObject {
-  id               String   @id
-  version          String
+  // _id bij Dwengo APi
+  id               String      @id @default(uuid())
+  uuid             String      @unique @default(cuid())
+  // In de Dwengo API wordt er nog met een hruid gewerkt ook. Ik zou voorstellen om anders de titel van een leerobject uniek te maken.
+  // Op die manier kan de hruid ingesteld worden op de titel van het leerobject.
+  // Ik ga dit voorlopig laten staan, maar misschien dat we dit nog moeten aanpassen.
+  hruid            String      @unique
+  title            String
+  version          Int         @default(1)
   language         String
-  title            String   @unique
   description      String
-  contentType      String
-  keywords         String
-  targetAges       String
+  contentType      ContentType
+  estimatedTime    Int // In minuten
+  keywords         String[]    @default([])
+  targetAges       Int[]
   teacherExclusive Boolean
-  skosConcepts     String
-  copyright        String?
-  licence          String
+  skosConcepts     String[]    @default([])
+  copyright        String      @default("CC BY Dwengo")
+  licence          String      @default("dwengo")
   difficulty       Int
-  estimatedTime    Int
-  available        Boolean
-  contentLocation  String
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  available        Boolean     @default(true)
+  // Link to external content
+  contentLocation  String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
   creatorId Int
   creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningObjectCreator")
 
+  // Binnen een leerobject kunnen er meerdere evaluaties zitten
   evaluations       Evaluation[]
   educationalGoals  EducationalGoal[]
   returnValue       ReturnValue?
   progress          LearningObjectProgress[]
-  specificQuestions SpecificQuestion[]
+  QuestionSpecifics QuestionSpecific[]
+
+  // Een leerobject kan voorkomen in verschillende nodes van verschillende leerpaden
+  nodes LearningPathNode[]
 }
 
 model EducationalGoal {
@@ -226,12 +302,12 @@ model ReturnValue {
 model Evaluation {
   id             String         @id
   nrOfQuestions  Int
-  deadline       DateTime
   evaluationType EvaluationType
 
-  learningObject LearningObject         @relation(fields: [id], references: [id])
+  learningObject LearningObject       @relation(fields: [id], references: [id])
   questions      EvaluationQuestion[]
-  submissions    EvaluationSubmission[]
+  // Een evaluatie kan meerdere inzendingen hebben
+  submissions    Submission[]
 }
 
 model EvaluationQuestion {
@@ -266,102 +342,85 @@ enum QuestionType {
   // GENERAL representeert algemene vragen die door studenten worden gesteld
   // bij het doorlopen van een leerpad
   GENERAL
-  // ADDITIONAL representeert vragen die door leerlingen als bijvragen worden
-  // gesteld. Dit zijn vragen bij een antwoord van een leerkracht
-  ADDITIONAL
 }
 
-model SpecificQuestion {
+model QuestionSpecific {
   questionId       Int    @unique
   learningObjectId String
 
-  // Een SpecificQuestion is een vraag
+  // Een QuestionSpecific is een vraag
   question       Question       @relation(fields: [questionId], references: [id])
   // Er kunnen meerdere vragen over een leerobject worden gesteld
-  learningObject LearningObject @relation(fields: [learningObjectId], references: [id])
+  learningObject LearningObject @relation(fields: [learningObjectId], references: [id], onDelete: Cascade)
 
   @@id([questionId, learningObjectId])
 }
 
-model GeneralQuestion {
-  questionId       Int @unique
-  learningObjectId Int
+model QuestionGeneral {
+  questionId     Int    @unique
+  learningPathId String
 
-  // Een SpecificQuestion is een vraag
+  // Een QuestionSpecific is een vraag
   question     Question     @relation(fields: [questionId], references: [id])
   // Er kunnen meerdere vragen over een leerobject worden gesteld
-  learningPath LearningPath @relation(fields: [learningObjectId], references: [id])
+  learningPath LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
 
-  @@id([questionId, learningObjectId])
-}
-
-model AdditionalQuestion {
-  questionId Int @unique
-  answerId   Int
-
-  // Een AdditionalQuestion is een vraag
-  question Question @relation(fields: [questionId], references: [id])
-  // Er kunnen meerdere bijvragen gesteld worden bij een antwoord
-  answer   Answer   @relation(fields: [answerId], references: [id])
-
-  @@id([questionId, answerId])
+  @@id([questionId, learningPathId])
 }
 
 model Question {
-  id          Int          @id @default(autoincrement())
-  teamId      Int
-  // De vraag zelf
-  description String
-  type        QuestionType
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id           Int          @id @default(autoincrement())
+  teamId       Int
+  title        String
+  assignmentId Int
+  type         QuestionType
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
   // Een vraag is ofwel een specifieke vraag (bij leerobject),
   // een algemene vraag (bij leerpad) of
   // een bijvraag bij een antwoord
-  specific   SpecificQuestion?
-  general    GeneralQuestion?
-  additional AdditionalQuestion?
-  team       Team                @relation(fields: [teamId], references: [id])
-  // Een vraag kan meerdere antwoorden hebben
-  answers    Answer[]
+  specific QuestionSpecific?
+  general  QuestionGeneral?
+
+  assignment           Assignment        @relation(fields: [assignmentId], references: [id])
+  team                 Team              @relation(fields: [teamId], references: [id])
+  questionConversation QuestionMessage[]
 }
 
-model Answer {
+model QuestionMessage {
   id         Int      @id @default(autoincrement())
   questionId Int
-  teacherId  Int
-  answer     String
+  //leerkracht of student
+  userId     Int
+  //de inhoud van de vraag dus
+  text       String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
-  teacher Teacher @relation(fields: [teacherId], references: [userId])
-
-  // Een antwoord hoort bij 1 vraag
-  question            Question             @relation(fields: [questionId], references: [id])
-  // Een antwoord kan meerdere bijvragen hebben
-  additionalQuestions AdditionalQuestion[]
+  Questions  Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
 ///
 /// Taken en indieningen
 model Assignment {
-  id             Int      @id @default(autoincrement())
-  learningPathId Int
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  learningPath     LearningPath      @relation(fields: [learningPathId], references: [id])
+  id               Int               @id @default(autoincrement())
+  learningPathId   String
+  deadline         DateTime
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  learningPath     LearningPath      @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  Questions        Question[]
   classAssignments ClassAssignment[]
   teamAssignments  TeamAssignment[]
+
+  submissions Submission[]
 }
 
 model ClassAssignment {
   classId      Int
   assignmentId Int
-
-  class      Class      @relation(fields: [classId], references: [id])
-  assignment Assignment @relation(fields: [assignmentId], references: [id])
+  class        Class      @relation(fields: [classId], references: [id], onDelete: Cascade)
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 
   @@id([classId, assignmentId])
 }
@@ -369,65 +428,60 @@ model ClassAssignment {
 model Team {
   id       Int    @id @default(autoincrement())
   teamname String
+  classId  Int
 
   // Een team bestaat uit studenten
   students        Student[]
-  // Een verwijzing naar de assignments van dit team
-  teamAssignments TeamAssignment[]
+  // Een verwijzing naar de assignment van dit team
+  teamAssignment TeamAssignment?
+
   // De indieningen van een team
-  teamSubmissions TeamSubmission[]
-  Questions       Question[]
+  class       Class        @relation(fields: [classId], references: [id])
+  submissions Submission[]
+  Questions   Question[]
 }
 
 model TeamAssignment {
-  teamId       Int
+  teamId       Int  @unique
   assignmentId Int
 
   team       Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  Assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 
   @@id([teamId, assignmentId])
 }
 
-model EvaluationSubmission {
-  id           Int      @id @default(autoincrement())
+model Submission {
+  submissionId Int       @id @default(autoincrement())
+  // Een inzending hoort bij een evaluatie
   evaluationId String
-  submission   String
-  submitted    DateTime @default(now())
-
-  evaluation          Evaluation           @relation(fields: [evaluationId], references: [id])
-  teamSubmissions     TeamSubmission[]
-  submissionFeedbacks SubmissionFeedback[]
-}
-
-model TeamSubmission {
+  // Een inzending is van een team
   teamId       Int
-  submissionId Int
+  submitted    DateTime  @default(now())
+  // Er kan feedback komen op een inzending
+  feedback     Feedback?
 
-  team       Team                 @relation(fields: [teamId], references: [id])
-  submission EvaluationSubmission @relation(fields: [submissionId], references: [id])
+  assignmentId Int
+  assignement  Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 
-  @@id([teamId, submissionId])
+  evaluation Evaluation @relation(fields: [evaluationId], references: [id])
+  team       Team       @relation(fields: [teamId], references: [id])
 }
 
-model TeacherFeedback {
-  id        Int    @id @default(autoincrement())
-  teacherId Int
-  feedback  String
+model Feedback {
+  // Feedback hoort bij een inzending
+  // Er kan maar 1 keer feedback gegeven worden op een inzending
+  submissionId Int    @unique
+  // Feedback kan gegeven worden door een teacher
+  teacherId    Int
+  // De feedback zelf
+  description  String
 
-  teacher             Teacher              @relation(fields: [teacherId], references: [userId])
-  submissionFeedbacks SubmissionFeedback[]
-}
+  teacher    Teacher    @relation(fields: [teacherId], references: [userId], onDelete: Cascade)
+  submission Submission @relation(fields: [submissionId], references: [submissionId], onDelete: Cascade)
 
-model SubmissionFeedback {
-  submissionId Int
-  feedbackId   Int
-  createdAt    DateTime @default(now())
-
-  submission EvaluationSubmission @relation(fields: [submissionId], references: [id])
-  feedback   TeacherFeedback      @relation(fields: [feedbackId], references: [id])
-
-  @@id([submissionId, feedbackId])
+  // Feedback wordt uniek bepaald door deze attributen
+  @@id([submissionId, teacherId])
 }
 
 model LearningObjectProgress {
