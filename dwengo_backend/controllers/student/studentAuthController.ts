@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import {PrismaClient, User} from '@prisma/client';
 import asyncHandler from 'express-async-handler';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -24,7 +24,7 @@ interface RegisterStudentBody {
 // @desc    Registreer een nieuwe leerling
 // @route   POST /student/auth/register
 // @access  Public
-export const registerStudent = asyncHandler(async (req: Request, res: Response) => {
+export const registerStudent = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { firstName, lastName, email, password } = req.body as RegisterStudentBody;
 
   // Controleer of alle velden ingevuld zijn
@@ -46,17 +46,17 @@ export const registerStudent = asyncHandler(async (req: Request, res: Response) 
   }
 
   // Controleer of er al een gebruiker bestaat met dit e-mailadres
-  const existingUser = await prisma.user.findUnique({ where: { email } });
+  const existingUser: User | null = await prisma.user.findUnique({ where: { email } });
   if (existingUser) {
     res.status(400);
     throw new Error("Gebruiker bestaat al");
   }
 
   // Hash het wachtwoord
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword: string = await bcrypt.hash(password, 10);
 
   // Maak eerst een User-record aan met role "STUDENT"
-  const newUser = await prisma.user.create({
+  const newUser: User = await prisma.user.create({
     data: {
       firstName,
       lastName,
@@ -112,7 +112,7 @@ export const loginStudent = asyncHandler(async (req: Request, res: Response) => 
   }
 
   // Vergelijk het opgegeven wachtwoord met de opgeslagen hash
-  const passwordMatches = await bcrypt.compare(password, student.user.password);
+  const passwordMatches: boolean = await bcrypt.compare(password, student.user.password);
   if (!passwordMatches) {
     res.status(401);
     throw new Error("Ongeldig wachtwoord");

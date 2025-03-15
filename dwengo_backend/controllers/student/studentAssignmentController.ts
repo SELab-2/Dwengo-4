@@ -4,11 +4,11 @@ import { Assignment } from "@prisma/client";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
-const allowedSortFields = ["deadline", "createdAt", "updatedAt"];
+const allowedSortFields: string[] = ["deadline", "createdAt", "updatedAt"];
 
 function extractSortableFields(input: string): string[] {
   return (
-    input?.split(",").filter((field) => allowedSortFields.includes(field)) || [
+    input?.split(",").filter((field: string): boolean => allowedSortFields.includes(field)) || [
       "deadline",
     ]
   );

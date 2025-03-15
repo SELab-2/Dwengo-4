@@ -1,6 +1,7 @@
 import { Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import {PrismaClient, Team} from "@prisma/client";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
+import {getUserFromAuthRequest} from "../../helpers/getUserFromAuthRequest";
 
 const prisma = new PrismaClient();
 
@@ -9,14 +10,9 @@ const prisma = new PrismaClient();
  */
 export const getStudentTeams = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    if (!req.user) {
-      res.status(401).json({ error: "Unauthorized: No user found" });
-      return;
-    }
+    const studentId: number = getUserFromAuthRequest(req).id;
 
-    const studentId: number = req.user.id;
-
-    const teams = await prisma.team.findMany({
+    const teams: Team[] = await prisma.team.findMany({
       where: {
         students: {
           some: { userId: studentId }
@@ -43,13 +39,8 @@ export const getStudentTeams = async (req: AuthenticatedRequest, res: Response):
  */
 export const getTeamByAssignment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    if (!req.user) {
-      res.status(401).json({ error: "Unauthorized: No user found" });
-      return;
-    }
-
-    const studentId: number = req.user.id;
-    const assignmentId = parseInt(req.params.assignmentId, 10);
+    const studentId: number = getUserFromAuthRequest(req).id;
+    const assignmentId: number = parseInt(req.params.assignmentId, 10);
 
     if (isNaN(assignmentId)) {
       res.status(400).json({ error: "Invalid assignment ID" });
@@ -102,7 +93,7 @@ export const getTeamMembers = async (req: AuthenticatedRequest, res: Response): 
       return;
     }
 
-    const teamId = parseInt(req.params.teamId, 10);
+    const teamId: number = parseInt(req.params.teamId, 10);
 
     if (isNaN(teamId)) {
       res.status(400).json({ error: "Invalid team ID" });
