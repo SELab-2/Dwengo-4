@@ -176,32 +176,34 @@ model LearningPath {
   updatedAt       DateTime          @updatedAt
   creatorId       Int
   creator         Teacher           @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator", onDelete: Cascade)
-  assignments     Assignment[]
-  questionGeneral QuestionGeneral[]
+  //assignments     Assignment[]
+  //questionGeneral QuestionGeneral[]
 }
 
 model LearningPathNode {
-  // Primair ID
-  nodeId           String   @id @default(uuid())
+  nodeId        String @id @default(uuid())
+  learningPathId String
+  learningPath  LearningPath @relation(fields: [learningPathId], references: [id])
 
-  // Koppeling met LearningPath
-  learningPathId   String
-  learningPath     LearningPath @relation(fields: [learningPathId], references: [id])
+  // Deze velden gebruik je voor lokale objecten:
+  localLearningObjectId String? // bv. ID uit je eigen 'LearningObject' tabel
 
-  // In plaats van "learningObjectId" en de relation naar LearningObject,
-  // gebruik één stringveld en een boolean:
-  learningObjectRef String
-  isExternal        Boolean @default(false)
+  // Deze velden gebruik je voor Dwengo-objecten:
+  dwengoHruid    String?
+  dwengoLanguage String?
+  dwengoVersion  Int?
 
-  // overig
-  start_node       Boolean  @default(false)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  // True als dit een extern (Dwengo) object is, false als lokaal
+  isExternal Boolean @default(false)
 
-  // Relaties voor transitions blijven ongewijzigd
+  start_node Boolean @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
   transitions     LearningPathTransition[] @relation("TransitionNode")
   nextTransitions LearningPathTransition[] @relation("NextNode")
 }
+
 
 
 model LearningPathTransition {
@@ -231,7 +233,7 @@ enum ContentType {
   TEXT_MARKDOWN
   IMAGE_IMAGE_BLOCK
   IMAGE_IMAGE
-  AUDO_MPEG
+  AUDIO_MPEG
   // Eigen toevoegingen
   VIDEO
   EVAL_MULTIPLE_CHOICE
@@ -273,7 +275,7 @@ model LearningObject {
   educationalGoals  EducationalGoal[]
   returnValue       ReturnValue?
   progress          LearningObjectProgress[]
-  QuestionSpecifics QuestionSpecific[]
+  //QuestionSpecifics QuestionSpecific[]
 
 
 }
@@ -342,27 +344,34 @@ enum QuestionType {
 }
 
 model QuestionSpecific {
-  questionId       Int    @unique
-  learningObjectId String
+  questionId Int @unique
+  // Lokaal leerobject
+  localLearningObjectId String?
 
-  // Een QuestionSpecific is een vraag
-  question       Question       @relation(fields: [questionId], references: [id])
-  // Er kunnen meerdere vragen over een leerobject worden gesteld
-  learningObject LearningObject @relation(fields: [learningObjectId], references: [id], onDelete: Cascade)
+  // Dwengo-velden
+  dwengoHruid    String?
+  dwengoLanguage String?
+  dwengoVersion  Int?
 
-  @@id([questionId, learningObjectId])
+  isExternal Boolean @default(false)
+
+  question Question @relation(fields: [questionId], references: [id])
+
+  @@id([questionId])
 }
+
+
 
 model QuestionGeneral {
   questionId     Int    @unique
-  learningPathId String
+  pathRef   String
+  isExternal Boolean @default(false)
 
   // Een QuestionSpecific is een vraag
   question     Question     @relation(fields: [questionId], references: [id])
-  // Er kunnen meerdere vragen over een leerobject worden gesteld
-  learningPath LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  
 
-  @@id([questionId, learningPathId])
+  @@id([questionId])
 }
 
 model Question {
@@ -401,11 +410,12 @@ model QuestionMessage {
 /// Taken en indieningen
 model Assignment {
   id               Int               @id @default(autoincrement())
-  learningPathId   String
+  pathRef    String
+  isExternal Boolean @default(false)
   deadline         DateTime
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
-  learningPath     LearningPath      @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  
   Questions        Question[]
   classAssignments ClassAssignment[]
   teamAssignments  TeamAssignment[]

@@ -8,7 +8,7 @@ CREATE TYPE "JoinRequestStatus" AS ENUM ('PENDING', 'APPROVED', 'DENIED');
 CREATE TYPE "EvaluationType" AS ENUM ('OPEN', 'MULTIPLE');
 
 -- CreateEnum
-CREATE TYPE "ContentType" AS ENUM ('TEXT_PLAIN', 'TEXT_MARKDOWN', 'IMAGE_IMAGE_BLOCK', 'IMAGE_IMAGE', 'AUDO_MPEG', 'VIDEO', 'EVAL_MULTIPLE_CHOICE', 'EVAL_OPEN_QUESTION');
+CREATE TYPE "ContentType" AS ENUM ('TEXT_PLAIN', 'TEXT_MARKDOWN', 'IMAGE_IMAGE_BLOCK', 'IMAGE_IMAGE', 'AUDIO_MPEG', 'VIDEO', 'EVAL_MULTIPLE_CHOICE', 'EVAL_OPEN_QUESTION');
 
 -- CreateEnum
 CREATE TYPE "QuestionType" AS ENUM ('SPECIFIC', 'GENERAL');
@@ -117,7 +117,10 @@ CREATE TABLE "LearningPath" (
 CREATE TABLE "LearningPathNode" (
     "nodeId" TEXT NOT NULL,
     "learningPathId" TEXT NOT NULL,
-    "learningObjectRef" TEXT NOT NULL,
+    "localLearningObjectId" TEXT,
+    "dwengoHruid" TEXT,
+    "dwengoLanguage" TEXT,
+    "dwengoVersion" INTEGER,
     "isExternal" BOOLEAN NOT NULL DEFAULT false,
     "start_node" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -216,17 +219,22 @@ CREATE TABLE "MultipleChoiceOption" (
 -- CreateTable
 CREATE TABLE "QuestionSpecific" (
     "questionId" INTEGER NOT NULL,
-    "learningObjectId" TEXT NOT NULL,
+    "localLearningObjectId" TEXT,
+    "dwengoHruid" TEXT,
+    "dwengoLanguage" TEXT,
+    "dwengoVersion" INTEGER,
+    "isExternal" BOOLEAN NOT NULL DEFAULT false,
 
-    CONSTRAINT "QuestionSpecific_pkey" PRIMARY KEY ("questionId","learningObjectId")
+    CONSTRAINT "QuestionSpecific_pkey" PRIMARY KEY ("questionId")
 );
 
 -- CreateTable
 CREATE TABLE "QuestionGeneral" (
     "questionId" INTEGER NOT NULL,
-    "learningPathId" TEXT NOT NULL,
+    "pathRef" TEXT NOT NULL,
+    "isExternal" BOOLEAN NOT NULL DEFAULT false,
 
-    CONSTRAINT "QuestionGeneral_pkey" PRIMARY KEY ("questionId","learningPathId")
+    CONSTRAINT "QuestionGeneral_pkey" PRIMARY KEY ("questionId")
 );
 
 -- CreateTable
@@ -257,7 +265,8 @@ CREATE TABLE "QuestionMessage" (
 -- CreateTable
 CREATE TABLE "Assignment" (
     "id" SERIAL NOT NULL,
-    "learningPathId" TEXT NOT NULL,
+    "pathRef" TEXT NOT NULL,
+    "isExternal" BOOLEAN NOT NULL DEFAULT false,
     "deadline" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -438,13 +447,7 @@ ALTER TABLE "MultipleChoiceOption" ADD CONSTRAINT "MultipleChoiceOption_evaluati
 ALTER TABLE "QuestionSpecific" ADD CONSTRAINT "QuestionSpecific_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "QuestionSpecific" ADD CONSTRAINT "QuestionSpecific_learningObjectId_fkey" FOREIGN KEY ("learningObjectId") REFERENCES "LearningObject"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "QuestionGeneral" ADD CONSTRAINT "QuestionGeneral_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "QuestionGeneral" ADD CONSTRAINT "QuestionGeneral_learningPathId_fkey" FOREIGN KEY ("learningPathId") REFERENCES "LearningPath"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Question" ADD CONSTRAINT "Question_assignmentId_fkey" FOREIGN KEY ("assignmentId") REFERENCES "Assignment"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -454,9 +457,6 @@ ALTER TABLE "Question" ADD CONSTRAINT "Question_teamId_fkey" FOREIGN KEY ("teamI
 
 -- AddForeignKey
 ALTER TABLE "QuestionMessage" ADD CONSTRAINT "QuestionMessage_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Assignment" ADD CONSTRAINT "Assignment_learningPathId_fkey" FOREIGN KEY ("learningPathId") REFERENCES "LearningPath"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ClassAssignment" ADD CONSTRAINT "ClassAssignment_classId_fkey" FOREIGN KEY ("classId") REFERENCES "Class"("id") ON DELETE CASCADE ON UPDATE CASCADE;

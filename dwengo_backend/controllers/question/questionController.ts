@@ -1,52 +1,119 @@
+// controllers/question/questionController.ts
 import { Response } from "express";
 import QuestionService from "../../services/questionsService";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
+
+// Hulp-functie om errors te uniformiseren
+const handleRequest = (
+  handler: (req: AuthenticatedRequest, res: Response) => Promise<void>
+) => async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    await handler(req, res);
+  } catch (error) {
+    const message: string =
+      error instanceof Error ? error.message : "An unknown error occurred";
+    res.status(400).json({ error: message });
+    return;
+  }
+};
+
 /**
- * Een type voor een AuthenticatedRequest met een getypeerde user-property.
+ * createQuestionGeneral
+ *  Verwacht in de route:
+ *    POST /question/general/:assignmentId
+ *  In de body:
+ *  {
+ *    title, text, teamId,
+ *    pathRef, isExternal
+ *  }
  */
-
-
-// Higher-order function to handle errors and reduce duplication, copied from joinRequestController.ts
-const handleRequest = (handler: (req: AuthenticatedRequest, res: Response) => Promise<void>) =>
-    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-        try {
-            await handler(req, res);
-        } catch (error) {
-            const message: string = error instanceof Error ? error.message : "An unknown error occurred";
-            res.status(400).json({ error: message });
-            return;
-        }
-    };
-
-
-
-export const createQuestionGeneral = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { assignmentId, learningPathId } = req.params;
-    const { title, text, teamId }: { title: string, text: string, teamId: number } = req.body;
+export const createQuestionGeneral = handleRequest(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { assignmentId } = req.params; // we gebruiken learningPathId niet meer in param, want we hebben pathRef in de body
+    const { title, text, teamId, pathRef, isExternal } = req.body;
     const studentId = getUserFromAuthRequest(req).id;
-    if (studentId === undefined) {
-        res.status(400).json({ error: "Student ID is required" });
-        return;
+
+    if (!studentId) {
+      res.status(400).json({ error: "Student ID is required" });
+      return;
+    }
+    if (!assignmentId) {
+      res.status(400).json({ error: "Missing assignmentId param" });
+      return;
+    }
+    if (!pathRef) {
+      res.status(400).json({ error: "Missing pathRef in body" });
+      return;
     }
 
-    const questionGeneral = await QuestionService.createQuestionGeneral(Number(assignmentId), title, text, teamId, studentId, "GENERAL", learningPathId);
+    const questionGeneral = await QuestionService.createQuestionGeneral(
+      Number(assignmentId),
+      title,
+      text,
+      teamId,
+      studentId,
+      "GENERAL",
+      pathRef,
+      !!isExternal
+    );
     res.status(201).json(questionGeneral);
-});
+  }
+);
 
-
-
-export const createQuestionSpecific = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { assignmentId, learningPathId, learningObjectId } = req.params;
-    const { title, text, teamId }: { title: string, text: string, teamId: number } = req.body;
+/**
+ * createQuestionSpecific
+ *  Verwacht in de route:
+ *    POST /question/specific/:assignmentId
+ *  In de body:
+ *  {
+ *    title, text, teamId,
+ *    objectRef, isExternal,
+ *    learningPathId (optioneel, als je die logica wil)
+ *  }
+ */
+export const createQuestionSpecific = handleRequest(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { assignmentId } = req.params; // i.p.v. learningPathId, etc. In de body kan je dat ook meesturen
+    const {
+      title,
+      text,
+      teamId,
+      objectRef,
+      isExternal,
+      learningPathId,
+    } = req.body;
     const studentId = getUserFromAuthRequest(req).id;
+
     if (studentId === undefined) {
-        res.status(400).json({ error: "Student ID is required" });
-        return;
+      res.status(400).json({ error: "Student ID is required" });
+      return;
     }
-    const questionSpecific = await QuestionService.createQuestionSpecific(Number(assignmentId), title, learningPathId, text, teamId, studentId, "SPECIFIC", learningObjectId);
+    if (!assignmentId) {
+      res.status(400).json({ error: "Missing assignmentId param" });
+      return;
+    }
+    if (!objectRef) {
+      res.status(400).json({ error: "Missing objectRef in body" });
+      return;
+    }
+
+    // Let op: we willen misschien wel learningPathId checken (optioneel).
+    // Is up to you of je dat in param of body zet.
+    const questionSpecific = await QuestionService.createQuestionSpecific(
+      Number(assignmentId),
+      title,
+      text,
+      teamId,
+      studentId,
+      "SPECIFIC",
+      objectRef,
+      isExternal,
+      learningPathId || ""
+    );
     res.status(201).json(questionSpecific);
-});
+  }
+);
 
 export const createQuestionMessage = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { questionId } = req.params;

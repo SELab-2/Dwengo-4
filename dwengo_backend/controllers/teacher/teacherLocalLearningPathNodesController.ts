@@ -1,3 +1,5 @@
+// src/controllers/teacher/teacherLocalLearningPathNodesController.ts
+
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
@@ -25,7 +27,14 @@ export const getNodesForPath = asyncHandler(
 
 /**
  * POST /teacher/learningPaths/:pathId/nodes
- *  -> node maken
+ *  -> node aanmaken
+ *  -> Body-velden:
+ *     {
+ *       "isExternal": true/false,
+ *       // Als extern: dwengoHruid, dwengoLanguage, dwengoVersion
+ *       // Als lokaal: localLearningObjectId
+ *       "start_node": bool
+ *     }
  */
 export const createNodeForPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -36,24 +45,24 @@ export const createNodeForPath = asyncHandler(
     }
 
     const { pathId } = req.params;
-    // We verwachten dat de client "learningObjectRef" en "isExternal" opgeeft
-    // + "start_node"
-    const { learningObjectRef, isExternal, start_node } = req.body;
+    const {
+      isExternal,
+      localLearningObjectId,
+      dwengoHruid,
+      dwengoLanguage,
+      dwengoVersion,
+      start_node,
+    } = req.body;
 
-    if (!learningObjectRef) {
-      res.status(400);
-      throw new Error("learningObjectRef is vereist.");
-    }
-
-    const newNode = await localLearningPathNodeService.createNodeForPath(
-      teacherId,
-      pathId,
-      {
-        learningObjectRef,
-        isExternal: !!isExternal,
-        start_node: !!start_node,
-      }
-    );
+    // Overdragen naar service
+    const newNode = await localLearningPathNodeService.createNodeForPath(teacherId, pathId, {
+      isExternal: !!isExternal,
+      localLearningObjectId,
+      dwengoHruid,
+      dwengoLanguage,
+      dwengoVersion,
+      start_node: !!start_node,
+    });
 
     res.status(201).json({
       message: "Node aangemaakt",
@@ -64,6 +73,16 @@ export const createNodeForPath = asyncHandler(
 
 /**
  * PUT /teacher/learningPaths/:pathId/nodes/:nodeId
+ * -> node updaten
+ * -> Body-velden (optioneel):
+ *     {
+ *       "isExternal": true/false,
+ *       "localLearningObjectId": "...",
+ *       "dwengoHruid": "...",
+ *       "dwengoLanguage": "...",
+ *       "dwengoVersion": number,
+ *       "start_node": bool
+ *     }
  */
 export const updateNodeForPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -74,15 +93,25 @@ export const updateNodeForPath = asyncHandler(
     }
 
     const { pathId, nodeId } = req.params;
-    const { learningObjectRef, isExternal, start_node } = req.body;
+    const {
+      isExternal,
+      localLearningObjectId,
+      dwengoHruid,
+      dwengoLanguage,
+      dwengoVersion,
+      start_node,
+    } = req.body;
 
     const updatedNode = await localLearningPathNodeService.updateNodeForPath(
       teacherId,
       pathId,
       nodeId,
       {
-        learningObjectRef,
         isExternal,
+        localLearningObjectId,
+        dwengoHruid,
+        dwengoLanguage,
+        dwengoVersion,
         start_node,
       }
     );
