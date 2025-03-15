@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
 
@@ -30,7 +30,7 @@ export const createProgress = async (req: AuthenticatedRequest, res: Response): 
       // Koppel de progressie aan de ingelogde student
       await prisma.studentProgress.create({
         data: {
-          studentId: req.user.id,
+          studentId: req.user!.id,
           progressId: progress.id,
         },
       });

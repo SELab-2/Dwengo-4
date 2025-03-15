@@ -23,14 +23,9 @@ export const getStudentTeams = async (req: AuthenticatedRequest, res: Response):
         }
       },
       include: {
-        teamAssignments: {
+        teamAssignment: {
           include: {
-            Assignment: true, 
-          },
-        },
-        teamSubmissions: {
-          include: {
-            submission: true,
+            assignment: true,
           },
         },
       },
@@ -66,8 +61,8 @@ export const getTeamByAssignment = async (req: AuthenticatedRequest, res: Respon
         students: {
           some: { userId: studentId }
         },
-        teamAssignments: {
-          some: { assignmentId: assignmentId }
+        teamAssignment: {
+          assignmentId: assignmentId,
         }
       },
       include: {
@@ -77,14 +72,9 @@ export const getTeamByAssignment = async (req: AuthenticatedRequest, res: Respon
             user: { select: { id: true, email: true, firstName: true, lastName: true } }
           }
         },
-        teamAssignments: {
+        teamAssignment: {
           include: {
-            Assignment: true, // Gebruik de juiste veldnaam
-          },
-        },
-        teamSubmissions: {
-          include: {
-            submission: true,
+            assignment: true, // Gebruik de juiste veldnaam
           },
         },
       },
