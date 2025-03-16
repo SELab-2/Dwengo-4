@@ -1,4 +1,4 @@
-import express, {NextFunction, Request, Response} from "express";
+import express, {Request, Response, NextFunction, Express} from "express";
 import dotenv from "dotenv";
 import errorHandler from "./middleware/errorMiddleware";
 import teacherAuthRoutes from "./routes/teacher/teacherAuthRoutes";
@@ -11,7 +11,7 @@ import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearn
 import assignmentRoutes from "./routes/assignmentRoutes";
 import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
 import studentTeamRoutes from "./routes/student/studentTeamRoutes";
-import progressRoutes from "./routes/progressRoutes"; 
+import progressRoutes from "./routes/progressRoutes";
 import teacherClassRoutes from './routes/teacher/teacherClassRoutes';
 import studentAssignmentRoutes from "./routes/student/studentAssignmentRoutes";
 import feedbackRoutes from "./routes/teacher/feedbackRoutes";
@@ -19,15 +19,16 @@ import studentClassRoutes from "./routes/student/studentClassRoutes";
 
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
+import teacherTeamsRoutes from "./routes/teacher/teacherTeamsRoutes";
 
 dotenv.config();
 
-const app = express();
+const app: Express = express();
 const swaggerDocument = YAML.load('./openapi3_0.yaml');
 
 // Stel CORS-headers in
-app.use((req: Request, res: Response, next: NextFunction) => {
-  const allowedOrigins = ["https://dwengo.org", "http://localhost:3000"];
+app.use((req: Request, res: Response, next: NextFunction): void => {
+  const allowedOrigins: string[] = ["https://dwengo.org", "http://localhost:3000"];
   const origin = req.headers.origin;
   if (origin && allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
@@ -56,6 +57,9 @@ app.use("/student/classes", studentClassRoutes);
 app.use("/teacher/auth", teacherAuthRoutes);
 app.use("/teacher/learningObjects", teacherLocalLearningObjectRoutes);
 
+// Routes voor Teacher (Teams)
+app.use("/teacher/:assignmentId", teacherTeamsRoutes);
+
 // Routes voor Student (Auth)
 app.use("/student/auth", studentAuthRoutes);
 
@@ -78,7 +82,7 @@ app.use("/learningPaths", learningPathRoutes);
 
 app.use("/student/teams", studentTeamRoutes);
 
-app.use("/progress", progressRoutes); 
+app.use("/progress", progressRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Error Handler
