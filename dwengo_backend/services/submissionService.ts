@@ -16,23 +16,21 @@ export default class submissionService {
                         userId: studentId,
                     }
                 },
-                teamAssignments: {
-                    some: {
-                        assignment: {
-                            id: assignmentId,
-                            learningPath: {
-                                nodes: {
-                                    some: {
-                                        learningObject: {
-                                            evaluations: {
-                                                some: {
-                                                    id: evaluationId,
-                                                }
+                teamAssignment: {
+                    assignment: {
+                        id: assignmentId,
+                        learningPath: {
+                            nodes: {
+                                some: {
+                                    learningObject: {
+                                        evaluations: {
+                                            some: {
+                                                id: evaluationId,
                                             }
                                         }
                                     }
                                 }
-                            },
+                            }
                         }
                     }
                 },
@@ -63,10 +61,8 @@ export default class submissionService {
                             userId: studentId,
                         }
                     },
-                    teamAssignments: {
-                        some: {
-                            assignmentId: assignmentId,
-                        }
+                    teamAssignment: {
+                        assignmentId: assignmentId,
                     }
                 },
                 assignmentId: assignmentId,
@@ -86,10 +82,8 @@ export default class submissionService {
                             userId: studentId,
                         }
                     },
-                    teamAssignments: {
-                        some: {
-                            assignmentId: assignmentId,
-                        }
+                    teamAssignment: {
+                        assignmentId: assignmentId,
                     }
                 }
             }
