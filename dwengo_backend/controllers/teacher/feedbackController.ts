@@ -2,12 +2,13 @@ import {Response} from "express";
 import service from "../../services/feedbackService";
 import {Feedback} from "@prisma/client";
 import {AuthenticatedRequest} from "../../interfaces/extendedTypeInterfaces";
+import {getUserFromAuthRequest} from "../../helpers/getUserFromAuthRequest";
 
 export default class FeedbackController {
     static async getAllFeedbackForEvaluation(req: AuthenticatedRequest, res: Response) {
         try {
             const {assignmentId, evaluationId} = req.params;
-            const teacherId: number = Number(req.user?.id);
+            const teacherId: number = getUserFromAuthRequest(req).id;
 
             const feedback: Feedback[] = await service.getAllFeedbackForEvaluation(Number(assignmentId), evaluationId, teacherId);
             res.json(feedback);
@@ -18,14 +19,14 @@ export default class FeedbackController {
 
     static async createFeedback(req: AuthenticatedRequest, res: Response) {
         try {
-            const teacherId: number | undefined = req.user?.id;
+            const teacherId: number = getUserFromAuthRequest(req).id;
 
             const {submissionId, description}: {
                 submissionId: number,
                 description: string
             } = req.body;
 
-            const feedback: Feedback = await service.createFeedback(submissionId, Number(teacherId), description);
+            const feedback: Feedback = await service.createFeedback(submissionId, teacherId, description);
             res.status(201).json(feedback);
         } catch (error) {
             res.status(500).json({error: "Failed to create feedback"});
@@ -36,7 +37,7 @@ export default class FeedbackController {
     static async getFeedbackForSubmission(req: AuthenticatedRequest, res: Response) {
         try {
             const submissionId: number = Number(req.params.submissionId);
-            const teacherId: number = Number(req.user?.id);
+            const teacherId: number = getUserFromAuthRequest(req).id;
 
             const feedback: Feedback | null = await service.getFeedbackForSubmission(submissionId, teacherId);
             res.json(feedback);
@@ -49,7 +50,7 @@ export default class FeedbackController {
     static async updateFeedbackForSubmission(req: AuthenticatedRequest, res: Response) {
         try {
             const submissionId: number = Number(req.params.submissionId);
-            const teacherId: number = Number(req.user?.id);
+            const teacherId: number = getUserFromAuthRequest(req).id;
 
             const {description}: { description: string } = req.body;
             const feedback: Feedback = await service.updateFeedbackForSubmission(submissionId, description, teacherId);
@@ -62,7 +63,7 @@ export default class FeedbackController {
     static async deleteFeedbackForSubmission(req: AuthenticatedRequest, res: Response) {
         try {
             const submissionId: number = Number(req.params.submissionId);
-            const teacherId: number = Number(req.user?.id);
+            const teacherId: number = getUserFromAuthRequest(req).id;
 
             await service.deleteFeedbackForSubmission(submissionId, teacherId);
             res.json({message: "Feedback deleted"});
