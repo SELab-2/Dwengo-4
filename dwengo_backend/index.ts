@@ -80,10 +80,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 // Error Handler
 app.use(errorHandler);
 
-//if (process.env.NODE_ENV !== "test") { //TEMP! CHANGE BACK UNCOMMENT
-console.log(process.env.NODE_ENV);
-const PORT: string | number = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server draait op poort ${PORT}`));
-//}
+if (process.env.NODE_ENV !== "test") {
+  console.log(process.env.NODE_ENV);
+  const PORT: string | number = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`Server draait op poort ${PORT}`));
+}
 
 export default app;
