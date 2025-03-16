@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
+import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 import {
   getNodesForPath,
   createNodeForPath,
@@ -8,7 +8,7 @@ import {
 } from "../../controllers/teacher/teacherLocalLearningPathNodesController";
 
 const router = Router();
-router.use(protectAnyUser);
+router.use(protectTeacher);
 
 /**
  * GET /teacher/learningPaths/:pathId/nodes
@@ -23,10 +23,10 @@ router.get("/:pathId/nodes", getNodesForPath);
 router.post("/:pathId/nodes", createNodeForPath);
 
 /**
- * PUT /teacher/learningPaths/:pathId/nodes/:nodeId
+ * PATCH /teacher/learningPaths/:pathId/nodes/:nodeId
  *   -> update de node
  */
-router.put("/:pathId/nodes/:nodeId", updateNodeForPath);
+router.patch("/:pathId/nodes/:nodeId", updateNodeForPath);
 
 /**
  * DELETE /teacher/learningPaths/:pathId/nodes/:nodeId

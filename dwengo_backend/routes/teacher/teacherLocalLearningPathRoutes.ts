@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
+import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 import {
   createLocalLearningPath,
   getLocalLearningPaths,
@@ -11,7 +11,7 @@ import {
 const router = Router();
 
 // Zorg dat alleen ingelogde gebruikers (teachers/admin) toegang hebben
-router.use(protectAnyUser);
+router.use(protectTeacher);
 
 /**
  * POST /teacher/learningPaths
@@ -32,10 +32,10 @@ router.get("/", getLocalLearningPaths);
 router.get("/:pathId", getLocalLearningPathById);
 
 /**
- * PUT /teacher/learningPaths/:pathId
+ * PATCH /teacher/learningPaths/:pathId
  *   -> update een leerpad
  */
-router.put("/:pathId", updateLocalLearningPath);
+router.patch("/:pathId", updateLocalLearningPath);
 
 /**
  * DELETE /teacher/learningPaths/:pathId

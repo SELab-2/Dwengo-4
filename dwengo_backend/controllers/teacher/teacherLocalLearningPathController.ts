@@ -3,20 +3,25 @@ import asyncHandler from "express-async-handler";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import LocalLearningPathService from "../../services/localLearningPathService";
 
+// Een interface om je body te structureren.
+// Je kunt er bijvoorbeeld nog meer velden in opnemen, afhankelijk van je noden.
+interface PathMetadata {
+  title: string;
+  language: string;
+  description?: string;
+  image?: string | null;
+}
+
 /**
  * POST /teacher/learningPaths
  *   -> nieuw leerpad (zonder nodes)
  */
 export const createLocalLearningPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    // We gaan ervan uit dat protectAnyUser al checkt of ingelogd, maar we doen extra check:
-    const teacherId = req.user?.id;
-    if (!teacherId || req.user?.role !== "TEACHER") {
-      res.status(403);
-      throw new Error("Alleen leerkrachten kunnen leerpaden aanmaken.");
-    }
+    // Door protectTeacher in de routes weten we: role=TEACHER
+    const teacherId = req.user!.id; // null-check niet nodig
 
-    const { title, language, description, image } = req.body;
+    const { title, language, description, image } = req.body as PathMetadata;
     if (!title || !language) {
       res.status(400);
       throw new Error("Vereiste velden: title, language (optioneel: description, image).");
@@ -38,14 +43,11 @@ export const createLocalLearningPath = asyncHandler(
 
 /**
  * GET /teacher/learningPaths
+ *   -> haal alle leerpaden op van de ingelogde teacher
  */
 export const getLocalLearningPaths = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user?.id;
-    if (!teacherId || req.user?.role !== "TEACHER") {
-      res.status(403);
-      throw new Error("Alleen leerkrachten kunnen hun leerpaden opvragen.");
-    }
+    const teacherId = req.user!.id;
 
     const paths = await LocalLearningPathService.getAllLearningPathsByTeacher(teacherId);
     res.json(paths);
@@ -54,14 +56,11 @@ export const getLocalLearningPaths = asyncHandler(
 
 /**
  * GET /teacher/learningPaths/:pathId
+ *   -> haal één leerpad op
  */
 export const getLocalLearningPathById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user?.id;
-    if (!teacherId || req.user?.role !== "TEACHER") {
-      res.status(403);
-      throw new Error("Niet geautoriseerd.");
-    }
+    const teacherId = req.user!.id;
 
     const { pathId } = req.params;
     const path = await LocalLearningPathService.getLearningPathById(pathId);
@@ -69,6 +68,7 @@ export const getLocalLearningPathById = asyncHandler(
       res.status(404);
       throw new Error("Leerpad niet gevonden");
     }
+    // Domein-check: Is dit path van deze teacher?
     if (path.creatorId !== teacherId) {
       res.status(403);
       throw new Error("Je bent niet de eigenaar van dit leerpad.");
@@ -79,15 +79,12 @@ export const getLocalLearningPathById = asyncHandler(
 );
 
 /**
- * PUT /teacher/learningPaths/:pathId
+ * PATCH /teacher/learningPaths/:pathId
+ *   -> Update (gedeeltelijk) een leerpad
  */
 export const updateLocalLearningPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user?.id;
-    if (!teacherId || req.user?.role !== "TEACHER") {
-      res.status(403);
-      throw new Error("Niet geautoriseerd.");
-    }
+    const teacherId = req.user!.id;
 
     const { pathId } = req.params;
     const existingPath = await LocalLearningPathService.getLearningPathById(pathId);
@@ -100,13 +97,14 @@ export const updateLocalLearningPath = asyncHandler(
       throw new Error("Je bent niet de eigenaar van dit leerpad.");
     }
 
-    const { title, language, description, image } = req.body;
+    // Hier kun je gedeeltelijk updaten
+    const { title, language, description, image } = req.body as Partial<PathMetadata>;
 
     const updatedPath = await LocalLearningPathService.updateLearningPath(pathId, {
-      title,
-      language,
-      description,
-      image,
+      title: title !== undefined ? title : existingPath.title,
+      language: language !== undefined ? language : existingPath.language,
+      description: description !== undefined ? description : existingPath.description,
+      image: image !== undefined ? image : existingPath.image || null,
     });
 
     res.json({
@@ -121,11 +119,7 @@ export const updateLocalLearningPath = asyncHandler(
  */
 export const deleteLocalLearningPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user?.id;
-    if (!teacherId || req.user?.role !== "TEACHER") {
-      res.status(403);
-      throw new Error("Niet geautoriseerd.");
-    }
+    const teacherId = req.user!.id;
 
     const { pathId } = req.params;
     const existingPath = await LocalLearningPathService.getLearningPathById(pathId);
