@@ -24,10 +24,11 @@ const router = express.Router();
 // Alleen leerkrachten mogen deze routes gebruiken
 router.use(protectTeacher);
 
+// routes for classes
 router.post("/", createClassroom);
 router.delete("/:classId", deleteClassroom);
 router.get("/:classId/join-link", getJoinLink);
-router.post("/:classId/regenerate-join-link", regenerateJoinLink);
+router.patch("/:classId/regenerate-join-link", regenerateJoinLink);
 router.get("/:classId/students", getClassroomStudents);
 
 // routes for invites

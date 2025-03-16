@@ -1,0 +1,1961 @@
+<?xml version="1.0" standalone="no"?>
+<svg id="mermaid-svg" width="undefined" xmlns="http://www.w3.org/2000/svg"
+     height="undefined" style="max-width: 3897.495849609375px;" viewBox="-49.94921875 0 3897.495849609375 1659">
+    <style>#mermaid-svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#333;}#mermaid-svg
+        .error-icon{fill:#552222;}#mermaid-svg .error-text{fill:#552222;stroke:#552222;}#mermaid-svg
+        .edge-thickness-normal{stroke-width:2px;}#mermaid-svg .edge-thickness-thick{stroke-width:3.5px;}#mermaid-svg
+        .edge-pattern-solid{stroke-dasharray:0;}#mermaid-svg .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-svg
+        .edge-pattern-dotted{stroke-dasharray:2;}#mermaid-svg .marker{fill:#333333;}#mermaid-svg
+        .marker.cross{stroke:#333333;}#mermaid-svg svg{font-family:"trebuchet
+        ms",verdana,arial,sans-serif;font-size:16px;}#mermaid-svg .entityBox{fill:#ECECFF;stroke:#9370DB;}#mermaid-svg
+        .attributeBoxOdd{fill:#ffffff;stroke:#9370DB;}#mermaid-svg
+        .attributeBoxEven{fill:#f2f2f2;stroke:#9370DB;}#mermaid-svg
+        .relationshipLabelBox{fill:hsl(80,100%,96.2745098039%);opacity:0.7;background-color:hsl(80,100%,96.2745098039%);}#mermaid-svg
+        .relationshipLabelBox rect{opacity:0.5;}#mermaid-svg
+        .relationshipLine{stroke:#333333;}#mermaid-svg:root{--mermaid-font-family:"trebuchet
+        ms",verdana,arial,sans-serif;}#mermaid-svg er{fill:apa;}
+    </style>
+    <g/>
+    <defs>
+        <marker id="ONLY_ONE_START" refX="0" refY="9" markerWidth="18" markerHeight="18" orient="auto">
+            <path stroke="gray" fill="none" d="M9,0 L9,18 M15,0 L15,18"/>
+        </marker>
+    </defs>
+    <defs>
+        <marker id="ONLY_ONE_END" refX="18" refY="9" markerWidth="18" markerHeight="18" orient="auto">
+            <path stroke="gray" fill="none" d="M3,0 L3,18 M9,0 L9,18"/>
+        </marker>
+    </defs>
+    <defs>
+        <marker id="ZERO_OR_ONE_START" refX="0" refY="9" markerWidth="30" markerHeight="18" orient="auto">
+            <circle stroke="gray" fill="white" cx="21" cy="9" r="6"/>
+            <path stroke="gray" fill="none" d="M9,0 L9,18"/>
+        </marker>
+    </defs>
+    <defs>
+        <marker id="ZERO_OR_ONE_END" refX="30" refY="9" markerWidth="30" markerHeight="18" orient="auto">
+            <circle stroke="gray" fill="white" cx="9" cy="9" r="6"/>
+            <path stroke="gray" fill="none" d="M21,0 L21,18"/>
+        </marker>
+    </defs>
+    <defs>
+        <marker id="ONE_OR_MORE_START" refX="18" refY="18" markerWidth="45" markerHeight="36" orient="auto">
+            <path stroke="gray" fill="none" d="M0,18 Q 18,0 36,18 Q 18,36 0,18 M42,9 L42,27"/>
+        </marker>
+    </defs>
+    <defs>
+        <marker id="ONE_OR_MORE_END" refX="27" refY="18" markerWidth="45" markerHeight="36" orient="auto">
+            <path stroke="gray" fill="none" d="M3,9 L3,27 M9,18 Q27,0 45,18 Q27,36 9,18"/>
+        </marker>
+    </defs>
+    <defs>
+        <marker id="ZERO_OR_MORE_START" refX="18" refY="18" markerWidth="57" markerHeight="36" orient="auto">
+            <circle stroke="gray" fill="white" cx="48" cy="18" r="6"/>
+            <path stroke="gray" fill="none" d="M0,18 Q18,0 36,18 Q18,36 0,18"/>
+        </marker>
+    </defs>
+    <defs>
+        <marker id="ZERO_OR_MORE_END" refX="39" refY="18" markerWidth="57" markerHeight="36" orient="auto">
+            <circle stroke="gray" fill="white" cx="9" cy="18" r="6"/>
+            <path stroke="gray" fill="none" d="M21,18 Q39,0 57,18 Q39,36 21,18"/>
+        </marker>
+    </defs>
+    <path class="er relationshipLine"
+          d="M1018.8081207275391,1339L1018.8081207275391,1347.3333333333333C1018.8081207275391,1355.6666666666667,1018.8081207275391,1372.3333333333333,1042.7498296101887,1398.622948328654C1066.6915384928386,1424.9125633239746,1114.574956258138,1460.8251266479492,1138.5166651407878,1478.7814083099365L1162.4583740234375,1496.7376899719238"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_ONE_START)"/>
+    <path class="er relationshipLine"
+          d="M1218.808120727539,1339L1218.808120727539,1347.3333333333333C1218.808120727539,1355.6666666666667,1218.808120727539,1372.3333333333333,1218.808120727539,1389C1218.808120727539,1405.6666666666667,1218.808120727539,1422.3333333333333,1218.808120727539,1430.6666666666667L1218.808120727539,1439"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_ONE_START)"/>
+    <path class="er relationshipLine"
+          d="M3749.3591957092285,969.5L3749.3591957092285,1010.25C3749.3591957092285,1051,3749.3591957092285,1132.5,3749.3591957092285,1187.8333333333333C3749.3591957092285,1243.1666666666667,3749.3591957092285,1272.3333333333333,3749.3591957092285,1301.5C3749.3591957092285,1330.6666666666667,3749.3591957092285,1359.8333333333333,3336.992307662964,1398.859972244835C2924.625419616699,1437.8866111563366,2099.89164352417,1486.7732223126732,1687.5247554779053,1511.2165278908415L1275.1578674316406,1535.6598334690098"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_ONE_START)"/>
+    <path class="er relationshipLine"
+          d="M1526.5270309448242,546.4663086551049L1876.3537890116374,563.7219238792541C2226.1805470784507,580.9775391034033,2925.8340632120767,615.4887695517017,3293.560709104471,673.4943847758508C3661.287354996864,731.5,3697.0871306480244,813,3714.987018473605,853.75L3732.8869062991853,894.5"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M1426.5270309448242,547.8453128546263L1205.1434682210286,564.8710940455219C983.759905497233,581.8968752364175,540.992780049642,615.9484376182087,368.08930015563965,672.3468933002363C195.18582026163736,728.7453489822637,292.14598592122394,807.4906979645276,340.62606875101727,846.8633724556595L389.10615158081055,886.2360469467915"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M34.67342275943396,581.5L23.902982507861633,592.9166666666666C13.132542256289307,604.3333333333334,-8.408338246855346,627.1666666666666,-19.178778498427672,685.5833333333334C-29.94921875,744,-29.94921875,838,-29.94921875,932C-29.94921875,1026,-29.94921875,1120,169.8436711629232,1180.9994195146792C369.6365610758464,1241.9988390293584,769.2223409016927,1269.997678058717,969.0152308146158,1283.997097573396L1168.808120727539,1297.9965170880753"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M115.395665690584,581.5L129.20066384249512,592.9166666666666C143.00566199440627,604.3333333333334,170.6156582982285,627.1666666666666,216.23407261326625,674.8708976068609C261.852486928304,722.5751285470551,325.4793192545573,795.1502570941102,357.2927354176839,831.4378213676378L389.10615158081055,867.7253856411653"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M2349.854434967041,549.4172405198004L2579.126625696818,566.1810337665004C2808.398816426595,582.9448270132003,3266.943197886149,616.4724135066002,3499.6649218315774,673.9862067533C3732.3866457770055,731.5,3739.285712208308,813,3742.735245423959,853.75L3746.1847786396106,894.5"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M2201.67525100708,547.9713482271326L1884.433651606242,564.9761235226105C1567.1920522054036,581.9808988180883,932.7088534037272,615.9904494090442,634.1755887498247,668.8285580378555C335.64232409592216,721.6666666666666,373.05899358979354,793.3333333333334,391.76732833672924,829.1666666666666L410.4756630836649,865"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M429.8140296936035,331.8907746102553L543.200766881307,349.5756455085461C656.5875040690104,367.2605164068368,883.3609784444174,402.6302582034184,996.7477156321207,437.9817957683759C1110.1344528198242,473.3333333333333,1110.1344528198242,508.6666666666667,1110.1344528198242,544C1110.1344528198242,579.3333333333334,1110.1344528198242,614.6666666666666,1110.1344528198242,679.3333333333334C1110.1344528198242,744,1110.1344528198242,838,1110.1344528198242,932C1110.1344528198242,1026,1110.1344528198242,1120,1120.4843259538923,1175.3333333333333C1130.8341990879605,1230.6666666666667,1151.5339453560966,1247.3333333333333,1161.8838184901647,1255.6666666666667L1172.2336916242327,1264"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M290.1613960266113,349.17743508614217L253.47629356384277,363.9811959051185C216.79119110107422,378.7849567240948,143.4209861755371,408.39247836204737,106.73588371276855,434.6129058476904C70.05078125,460.8333333333333,70.05078125,483.6666666666667,70.05078125,495.0833333333333L70.05078125,506.5"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M371.0995933663132,355L375.62060357226943,368.8333333333333C380.14161377822575,382.6666666666667,389.18363419013826,410.3333333333333,393.7046443960946,441.8333333333333C398.2256546020508,473.3333333333333,398.2256546020508,508.6666666666667,398.2256546020508,544C398.2256546020508,579.3333333333334,398.2256546020508,614.6666666666666,404.2271335570243,668.1666666666666C410.2286125119978,721.6666666666666,422.2315704219448,793.3333333333334,428.23304937691836,829.1666666666666L434.23452833189185,865"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M1354.9982872009277,1054L1354.9982872009277,1080.6666666666667C1354.9982872009277,1107.3333333333333,1354.9982872009277,1160.6666666666667,1340.633259455363,1196.5626335117902C1326.268231709798,1232.4586003569138,1297.5381762186687,1250.9172007138275,1283.1731484731038,1260.1465008922844L1268.808120727539,1269.3758010707413"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M1770.5992965698242,567.4284505651569L1808.098965326945,581.1903754709641C1845.5986340840657,594.9523003767713,1920.5979715983074,622.4761501883856,2062.809331893921,678.0715130169204C2205.0206921895347,733.6668758454553,2414.44407526652,817.3337516909105,2519.155766805013,859.1671896136381L2623.867458343506,901.0006275363658"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M1642.9196090698242,557.6260225270577L1570.7887496948242,573.0216854392147C1498.6578903198242,588.4173483513717,1354.3961715698242,619.2086741756858,1295.9640199377181,661.2710037545096C1237.531868305612,703.3333333333334,1264.9292837914,756.6666666666666,1278.6279915342939,783.3333333333334L1292.3266992771878,810"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M1790.833511352539,349.972204579594L1752.1024182637532,364.64350381632835C1713.3713251749675,379.3148030530627,1635.9091389973958,408.6574015265314,1611.2568219502766,433.39090226628576C1586.6045049031575,458.1244030060402,1614.762056986491,478.24880601208037,1628.8408330281575,488.31100751510047L1642.9196090698242,498.3732090181205"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M1824.7954119168794,366L1813.4560854007034,378C1802.1167588845276,390,1779.4381058521758,414,1764.1679617259372,434.3333333333333C1748.8978175996983,454.6666666666667,1741.0361823795727,471.3333333333333,1737.1053647695098,479.6666666666667L1733.1745471594468,488"
+          stroke="gray" fill="none" marker-end="url(#ZERO_OR_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M2701.4608116149902,1164L2701.4608116149902,1172.3333333333333C2701.4608116149902,1180.6666666666667,2701.4608116149902,1197.3333333333333,2462.6853631337485,1219.758201299503C2223.9099146525064,1242.1830692656729,1746.3590176900227,1270.3661385313458,1507.583569208781,1284.457673164182L1268.808120727539,1298.5492077970187"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M2508.751895904541,589L2508.751895904541,599.1666666666666C2508.751895904541,609.3333333333334,2508.751895904541,629.6666666666666,2527.9378229777017,667.9090007962787C2547.123750050863,706.1513349258909,2585.495604197184,762.3026698517816,2604.681531270345,790.3783373147271L2623.867458343506,818.4540047776725"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M2727.958034515381,589L2727.958034515381,599.1666666666666C2727.958034515381,609.3333333333334,2727.958034515381,629.6666666666666,2727.1750196542584,648.1666666666666C2726.3920047931356,666.6666666666666,2724.8259750708903,683.3333333333334,2724.042960209768,691.6666666666666L2723.259945348645,700"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_ONE_START)"/>
+    <path class="er relationshipLine"
+          d="M2967.5335121154785,578L2967.5335121154785,590C2967.5335121154785,602,2967.5335121154785,626,2936.120287577311,671.2936423131727C2904.707063039144,716.5872846263454,2841.880613962809,783.1745692526907,2810.467389424642,816.4682115658634L2779.0541648864746,849.7618538790362"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M2867.1897621154785,346.81396846812964L2827.781667073568,362.0116403901081C2788.3735720316567,377.2093123120864,2709.5573819478354,407.6046561560432,2713.0702069600425,436.3110016794254C2716.5830319722495,465.01734720280757,2802.424872080485,492.0346944056151,2845.345792134603,505.5433680070189L2888.2667121887207,519.0520416084227"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M2919.0230398911694,132L2921.5402475014707,144C2924.057455111773,156,2929.0918703323755,180,2931.6090779426772,204C2934.1262855529785,228,2934.1262855529785,252,2934.1262855529785,264L2934.1262855529785,276"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M1687.5583686828613,92.67370363422245L1492.2157128651936,111.22808636185204C1296.8730570475261,129.78246908948162,906.1877454121908,166.8912345447408,717.9675967170302,193.77895060570373C529.7474480218697,220.66666666666666,543.992462266884,237.33333333333334,551.1149693893911,245.66666666666666L558.2374765118982,254"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_ONE_START)"/>
+    <path class="er relationshipLine"
+          d="M1807.0251655578613,91.9208577636982L2033.7765566507976,110.60071480308183C2260.527947743734,129.28057184246546,2714.030729929606,166.64028592123273,2940.7821210225425,204.82014296061638C3167.5335121154785,243,3167.5335121154785,282,3167.5335121154785,321C3167.5335121154785,360,3167.5335121154785,399,3167.5335121154785,436.1666666666667C3167.5335121154785,473.3333333333333,3167.5335121154785,508.6666666666667,3167.5335121154785,544C3167.5335121154785,579.3333333333334,3167.5335121154785,614.6666666666666,3102.786954243978,671.5086150010998C3038.040396372477,728.3505633355329,2908.547280629476,806.7011266710657,2843.800722757975,845.8764083388322L2779.0541648864746,885.0516900065987"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M561.6998636783698,124.5L570.6669586947841,137.75C579.6340537111984,151,597.5682437440269,177.5,606.5353387604412,199.08333333333334C615.5024337768555,220.66666666666666,615.5024337768555,237.33333333333334,615.5024337768555,245.66666666666666L615.5024337768555,254"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_ONE_START)"/>
+    <path class="er relationshipLine"
+          d="M596.3085975646973,96.07003784861693L715.2795734405518,114.05836487384745C834.2505493164062,132.04669189907796,1072.1925010681152,168.023345949539,1191.1634769439697,205.51167297476948C1310.1344528198242,243,1310.1344528198242,282,1310.1344528198242,321C1310.1344528198242,360,1310.1344528198242,399,1310.1344528198242,436.1666666666667C1310.1344528198242,473.3333333333333,1310.1344528198242,508.6666666666667,1310.1344528198242,544C1310.1344528198242,579.3333333333334,1310.1344528198242,614.6666666666666,1314.3768957873044,659C1318.6193387547846,703.3333333333334,1327.1042246897453,756.6666666666666,1331.3466676572255,783.3333333333334L1335.5891106247057,810"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M680.6128082275391,327.1372573881625L876.6372489929199,345.61438115680204C1072.6616897583008,364.0915049254416,1464.7105712890625,401.0457524627208,1682.7710628509521,431.9101610371761C1900.8315544128418,462.7745696116313,1944.9036560058594,487.54913922326267,1966.9397068023682,499.93642402907835L1988.975757598877,512.323708834894"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M680.6128082275391,366.7650152482797L697.5039367675781,378.63751270689977C714.3950653076172,390.5100101655198,748.1773223876953,414.2550050827599,778.7312485317015,438.12750254137995C809.2851746757075,462,836.6107698836416,486,850.2735674876086,498L863.9363650915758,510"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M817.6543006896973,113.24543445765906L852.6212603251139,128.37119538138253C887.5882199605306,143.49695630510604,957.5221392313639,173.74847815255302,934.6818904876709,205.29221181499233C911.8416417439779,236.83594547743166,796.2272249857584,269.67189095486333,738.4200166066488,286.08986369357916L680.6128082275391,302.507836432295"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M1988.975757598877,581.3096023650462L1971.6849161783855,592.7580019708718C1954.3940747578938,604.2064015766974,1919.8123919169109,627.1032007883488,1825.663609822591,679.4278998731396C1731.5148277282715,731.7525989579304,1577.7989463806152,813.505197915861,1500.941005706787,854.3814973948262L1424.083065032959,895.2577968737913"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M787.5628696832902,358.5L769.2436622309888,371.75C750.9244547786875,385,714.286039874085,411.5,695.9668324217837,442.4166666666667C677.6476249694824,473.3333333333333,677.6476249694824,508.6666666666667,677.6476249694824,544C677.6476249694824,579.3333333333334,677.6476249694824,614.6666666666666,648.1433570988071,668.1666666666666C618.6390892281319,721.6666666666666,559.6305534867812,793.3333333333334,530.126285616106,829.1666666666666L500.6220177454306,865"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M898.2065582275391,327.15674210727246L1074.6320406595867,345.6306184227271C1251.057523091634,364.1044947381817,1603.9084879557292,401.0522473690908,1787.296710284251,427.8594570178787C1970.684932612773,454.6666666666667,1984.610412405722,471.3333333333333,1991.5731523021961,479.6666666666667L1998.5358921986706,488"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M902.6476249694824,578L902.6476249694824,590C902.6476249694824,602,902.6476249694824,626,835.8406283060709,679.207160933776C769.0336316426595,732.4143218675521,635.4196383158366,814.828643735104,568.6126416524252,856.0358046688801L501.8056449890137,897.2429656026561"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M1570.692886352539,330.3859409604277L1455.9040018717449,348.3216174670231C1341.1151173909504,366.25729397361846,1111.537348429362,402.1286469868092,999.0905068355537,432.06432349340463C886.6436652417452,462,891.3277510157171,486,893.6697939027031,498L896.011836789689,510"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M1690.833511352539,335.48845621725155L1761.6703713734944,352.5737135143763C1832.50723139445,369.658970811501,1974.1809514363606,403.8294854057505,2039.473065610202,429.2480760362086C2104.765179784043,454.6666666666667,2093.6756880898147,471.3333333333333,2088.1309422427007,479.6666666666667L2082.5861963955863,488"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M2645.2824745178223,344.5066800341031L2604.8772328694663,360.08890002841923C2564.47199122111,375.67112002273535,2483.661507924398,406.8355600113677,2393.060304005941,437.2999959543477C2302.459100087484,467.7644318973277,2202.0671755472817,497.52886379465536,2151.871213277181,512.4110797433192L2101.67525100708,527.2932956919831"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M2767.1897621154785,343.17088782436474L2810.641487121582,358.9757398536373C2854.0932121276855,374.78059188290985,2940.9966621398926,406.39029594145495,2977.614432424869,434.1951479707275C3014.2322027098458,462,3000.5642932675923,486,2993.730338546465,498L2986.896383825338,510"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M2645.2824745178223,325.13598176614056L2368.061992009481,343.94665147178375C2090.841509501139,362.757321177427,1536.4005444844563,400.3786605887135,1250.2013501461197,431.18933029435675C964.002155807783,462,946.0447321477926,486,937.0660203177973,498L928.0873084878021,510"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M3525.487579345703,110L3525.487579345703,125.66666666666667C3525.487579345703,141.33333333333334,3525.487579345703,172.66666666666666,3525.487579345703,207.83333333333334C3525.487579345703,243,3525.487579345703,282,3525.487579345703,321C3525.487579345703,360,3525.487579345703,399,3525.487579345703,436.1666666666667C3525.487579345703,473.3333333333333,3525.487579345703,508.6666666666667,3525.487579345703,544C3525.487579345703,579.3333333333334,3525.487579345703,614.6666666666666,3525.487579345703,679.3333333333334C3525.487579345703,744,3525.487579345703,838,3525.487579345703,932C3525.487579345703,1026,3525.487579345703,1120,3149.374336242676,1181.267222369609C2773.2610931396484,1242.5344447392183,2021.0346069335938,1271.0688894784364,1644.9213638305664,1285.3361118480454L1268.808120727539,1299.6033342176547"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M3475.487579345703,94.14066471441123L3347.279002507528,112.45055392867603C3219.070425669352,130.76044314294083,2962.6532719930015,167.3802215714704,2834.4446951548257,199.52344411906856C2706.2361183166504,231.66666666666666,2706.2361183166504,259.3333333333333,2706.2361183166504,273.1666666666667L2706.2361183166504,287"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_ONE_START)"/>
+    <path class="er relationshipLine"
+          d="M3347.044219970703,578L3347.044219970703,590C3347.044219970703,602,3347.044219970703,626,3252.3792107899985,679.3510202453184C3157.7142016092935,732.7020404906367,2968.3841832478843,815.4040809812736,2873.719174067179,856.755101226592L2779.0541648864746,898.1061214719105"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M3405.020782470703,335.17776562174697L3475.0985819498696,352.3148046847891C3545.1763814290366,369.45184374783133,3685.3319803873696,403.72592187391564,3755.4097798665366,438.5296276036245C3825.487579345703,473.3333333333333,3825.487579345703,508.6666666666667,3825.487579345703,544C3825.487579345703,579.3333333333334,3825.487579345703,614.6666666666666,3814.4867579514253,673.0833333333334C3803.485936557148,731.5,3781.484293768592,813,3770.4834723743147,853.75L3759.4826509800364,894.5"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <path class="er relationshipLine"
+          d="M3347.044219970703,358.5L3347.044219970703,371.75C3347.044219970703,385,3347.044219970703,411.5,3347.044219970703,436.75C3347.044219970703,462,3347.044219970703,486,3347.044219970703,498L3347.044219970703,510"
+          stroke="gray" fill="none" marker-end="url(#ONLY_ONE_END)" marker-start="url(#ZERO_OR_MORE_START)"/>
+    <g id="User" transform="translate(1162.4583740234375,1439 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0"
+              width="112.69949340820312" height="200"/>
+        <text class="er entityLabel" id="entity-User" x="0" y="0" dominant-baseline="middle" text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(56.34974670410156,12)">User
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-User-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="24" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-User-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,35)">id
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-User-attr-2-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">String
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="46" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-User-attr-2-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,57)">firstName
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="68"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-User-attr-3-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,79)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="68" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-User-attr-3-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,79)">lastName
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="90"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-User-attr-4-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,101)">String
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="90" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-User-attr-4-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,101)">email
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="112"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-User-attr-5-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,123)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="112" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-User-attr-5-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,123)">password
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="134"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-User-attr-6-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,145)">Role
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="134" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-User-attr-6-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,145)">role
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="156"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-User-attr-7-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,167)">DateTime
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="156" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-User-attr-7-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,167)">createdAt
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="178"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-User-attr-8-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,189)">DateTime
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="178" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-User-attr-8-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,189)">updatedAt
+        </text>
+    </g>
+    <g id="Admin" transform="translate(968.8081207275391,1264 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="100"
+              height="75"/>
+        <text class="er entityLabel" id="entity-Admin" x="0" y="0" dominant-baseline="middle" text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(50,37.5)">Admin
+        </text>
+    </g>
+    <g id="Teacher" transform="translate(1168.808120727539,1264 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="100"
+              height="75"/>
+        <text class="er entityLabel" id="entity-Teacher" x="0" y="0" dominant-baseline="middle" text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(50,37.5)">Teacher
+        </text>
+    </g>
+    <g id="Student" transform="translate(3699.3591957092285,894.5 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="100"
+              height="75"/>
+        <text class="er entityLabel" id="entity-Student" x="0" y="0" dominant-baseline="middle" text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(50,37.5)">Student
+        </text>
+    </g>
+    <g id="Class" transform="translate(389.10615158081055,865 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0"
+              width="112.69949340820312" height="134"/>
+        <text class="er entityLabel" id="entity-Class" x="0" y="0" dominant-baseline="middle" text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(56.34974670410156,12)">Class
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-Class-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="24" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-Class-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,35)">id
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-Class-attr-2-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">String
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="46" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-Class-attr-2-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,57)">name
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="68"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-Class-attr-3-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,79)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="68" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-Class-attr-3-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,79)">code
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="90"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-Class-attr-4-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,101)">DateTime
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="90" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-Class-attr-4-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,101)">createdAt
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="112"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-Class-attr-5-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,123)">DateTime
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="112" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-Class-attr-5-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,123)">updatedAt
+        </text>
+    </g>
+    <g id="ClassStudent" transform="translate(1426.5270309448242,506.5 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="100"
+              height="75"/>
+        <text class="er entityLabel" id="entity-ClassStudent" x="0" y="0" dominant-baseline="middle"
+              text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(50,37.5)">ClassStudent
+        </text>
+    </g>
+    <g id="ClassTeacher" transform="translate(20,506.5 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="100.1015625"
+              height="75"/>
+        <text class="er entityLabel" id="entity-ClassTeacher" x="0" y="0" dominant-baseline="middle"
+              text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(50.05078125,37.5)">ClassTeacher
+        </text>
+    </g>
+    <g id="JoinRequest" transform="translate(2201.67525100708,510 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0"
+              width="148.17918395996094" height="68"/>
+        <text class="er entityLabel" id="entity-JoinRequest" x="0" y="0" dominant-baseline="middle" text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(74.08959197998047,12)">JoinRequest
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="94.82075500488281" height="22"/>
+        <text class="er entityLabel" id="entity-JoinRequest-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="094.82075500488281" y="24"
+              width="53.358428955078125" height="22"/>
+        <text class="er entityLabel" id="entity-JoinRequest-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(99.82075500488281,35)">requestId
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="94.82075500488281" height="22"/>
+        <text class="er entityLabel" id="entity-JoinRequest-attr-2-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">JoinRequestStatus
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="094.82075500488281"
+              y="46" width="53.358428955078125" height="22"/>
+        <text class="er entityLabel" id="entity-JoinRequest-attr-2-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(99.82075500488281,57)">status
+        </text>
+    </g>
+    <g id="Invite" transform="translate(290.1613960266113,287 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0"
+              width="139.6526336669922" height="68"/>
+        <text class="er entityLabel" id="entity-Invite" x="0" y="0" dominant-baseline="middle" text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(69.8263168334961,12)">Invite
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="94.82075500488281" height="22"/>
+        <text class="er entityLabel" id="entity-Invite-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="094.82075500488281" y="24"
+              width="44.831878662109375" height="22"/>
+        <text class="er entityLabel" id="entity-Invite-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(99.82075500488281,35)">inviteId
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="94.82075500488281" height="22"/>
+        <text class="er entityLabel" id="entity-Invite-attr-2-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">JoinRequestStatus
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="094.82075500488281"
+              y="46" width="44.831878662109375" height="22"/>
+        <text class="er entityLabel" id="entity-Invite-attr-2-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(99.82075500488281,57)">status
+        </text>
+    </g>
+    <g id="LearningPath" transform="translate(1285.9135093688965,810 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0"
+              width="138.1695556640625" height="244"/>
+        <text class="er entityLabel" id="entity-LearningPath" x="0" y="0" dominant-baseline="middle"
+              text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(69.08477783203125,12)">LearningPath
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="24" width="84.07400512695312" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,35)">id
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-2-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">String
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="46" width="84.07400512695312" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-2-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,57)">hruid
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="68"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-3-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,79)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="68" width="84.07400512695312" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-3-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,79)">title
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="90"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-4-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,101)">String
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="90" width="84.07400512695312" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-4-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,101)">language
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="112"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-5-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,123)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="112" width="84.07400512695312" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-5-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,123)">description
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="134"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-6-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,145)">String
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="134" width="84.07400512695312" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-6-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,145)">image
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="156"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-7-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,167)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="156" width="84.07400512695312" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-7-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,167)">num_nodes
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="178"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-8-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,189)">Int
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="178" width="84.07400512695312" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-8-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,189)">num_nodes_left
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="200"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-9-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,211)">DateTime
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="200" width="84.07400512695312" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-9-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,211)">createdAt
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="222"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-10-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,233)">DateTime
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="222" width="84.07400512695312" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPath-attr-10-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,233)">updatedAt
+        </text>
+    </g>
+    <g id="LearningPathNode" transform="translate(1642.9196090698242,488 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="127.6796875"
+              height="112"/>
+        <text class="er entityLabel" id="entity-LearningPathNode" x="0" y="0" dominant-baseline="middle"
+              text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(63.83984375,12)">LearningPathNode
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="61.07818603515625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPathNode-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="061.07818603515625" y="24"
+              width="66.60150146484375" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPathNode-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(66.07818603515625,35)">nodeId
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="61.07818603515625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPathNode-attr-2-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">Boolean
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="061.07818603515625"
+              y="46" width="66.60150146484375" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPathNode-attr-2-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(66.07818603515625,57)">start_node
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="68"
+              width="61.07818603515625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPathNode-attr-3-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,79)">DateTime
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="061.07818603515625" y="68"
+              width="66.60150146484375" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPathNode-attr-3-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(66.07818603515625,79)">createdAt
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="90"
+              width="61.07818603515625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPathNode-attr-4-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,101)">DateTime
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="061.07818603515625"
+              y="90" width="66.60150146484375" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPathNode-attr-4-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(66.07818603515625,101)">updatedAt
+        </text>
+    </g>
+    <g id="LearningPathTransition" transform="translate(1790.833511352539,276 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="152.96875"
+              height="90"/>
+        <text class="er entityLabel" id="entity-LearningPathTransition" x="0" y="0" dominant-baseline="middle"
+              text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(76.484375,12)">LearningPathTransition
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="68.40109252929688" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPathTransition-attr-1-type" x="0" y="0"
+              dominant-baseline="middle" text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="068.40109252929688" y="24"
+              width="84.56765747070312" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPathTransition-attr-1-name" x="0" y="0"
+              dominant-baseline="middle" text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(73.40109252929688,35)">transitionId
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="68.40109252929688" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPathTransition-attr-2-type" x="0" y="0"
+              dominant-baseline="middle" text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">Boolean
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="068.40109252929688"
+              y="46" width="84.56765747070312" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPathTransition-attr-2-name" x="0" y="0"
+              dominant-baseline="middle" text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(73.40109252929688,57)">default
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="68"
+              width="68.40109252929688" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPathTransition-attr-3-type" x="0" y="0"
+              dominant-baseline="middle" text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,79)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="068.40109252929688" y="68"
+              width="84.56765747070312" height="22"/>
+        <text class="er entityLabel" id="entity-LearningPathTransition-attr-3-name" x="0" y="0"
+              dominant-baseline="middle" text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(73.40109252929688,79)">condition
+        </text>
+    </g>
+    <g id="LearningObject" transform="translate(2623.867458343506,700 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0"
+              width="155.18670654296875" height="464"/>
+        <text class="er entityLabel" id="entity-LearningObject" x="0" y="0" dominant-baseline="middle"
+              text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(77.59335327148438,12)">LearningObject
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625" y="24"
+              width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,35)">id
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-2-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">String
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625" y="46"
+              width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-2-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,57)">uuid
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="68"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-3-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,79)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625" y="68"
+              width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-3-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,79)">hruid
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="90"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-4-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,101)">String
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625" y="90"
+              width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-4-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,101)">title
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="112"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-5-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,123)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625" y="112"
+              width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-5-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,123)">version
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="134"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-6-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,145)">String
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625"
+              y="134" width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-6-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,145)">language
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="156"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-7-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,167)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625" y="156"
+              width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-7-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,167)">description
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="178"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-8-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,189)">ContentType
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625"
+              y="178" width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-8-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,189)">contentType
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="200"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-9-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,211)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625" y="200"
+              width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-9-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,211)">estimatedTime
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="222"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-10-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,233)">String
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625"
+              y="222" width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-10-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,233)">keywords
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="244"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-11-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,255)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625" y="244"
+              width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-11-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,255)">targetAges
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="266"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-12-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,277)">Boolean
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625"
+              y="266" width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-12-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,277)">teacherExclusive
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="288"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-13-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,299)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625" y="288"
+              width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-13-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,299)">skosConcepts
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="310"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-14-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,321)">String
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625"
+              y="310" width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-14-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,321)">copyright
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="332"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-15-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,343)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625" y="332"
+              width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-15-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,343)">licence
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="354"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-16-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,365)">Int
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625"
+              y="354" width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-16-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,365)">difficulty
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="376"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-17-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,387)">Boolean
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625" y="376"
+              width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-17-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,387)">available
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="398"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-18-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,409)">String
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625"
+              y="398" width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-18-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,409)">contentLocation
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="420"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-19-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,431)">DateTime
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625" y="420"
+              width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-19-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,431)">createdAt
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="442"
+              width="67.8316650390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-20-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,453)">DateTime
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="067.8316650390625"
+              y="442" width="87.35504150390625" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObject-attr-20-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(72.8316650390625,453)">updatedAt
+        </text>
+    </g>
+    <g id="EducationalGoal" transform="translate(2449.854434967041,499 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="117.794921875"
+              height="90"/>
+        <text class="er entityLabel" id="entity-EducationalGoal" x="0" y="0" dominant-baseline="middle"
+              text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(58.8974609375,12)">EducationalGoal
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="57.50044250488281" height="22"/>
+        <text class="er entityLabel" id="entity-EducationalGoal-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="057.50044250488281" y="24"
+              width="60.29447937011719" height="22"/>
+        <text class="er entityLabel" id="entity-EducationalGoal-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(62.50044250488281,35)">id
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="57.50044250488281" height="22"/>
+        <text class="er entityLabel" id="entity-EducationalGoal-attr-2-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">String
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="057.50044250488281"
+              y="46" width="60.29447937011719" height="22"/>
+        <text class="er entityLabel" id="entity-EducationalGoal-attr-2-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(62.50044250488281,57)">source
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="68"
+              width="57.50044250488281" height="22"/>
+        <text class="er entityLabel" id="entity-EducationalGoal-attr-3-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,79)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="057.50044250488281" y="68"
+              width="60.29447937011719" height="22"/>
+        <text class="er entityLabel" id="entity-EducationalGoal-attr-3-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(62.50044250488281,79)">goalId
+        </text>
+    </g>
+    <g id="ReturnValue" transform="translate(2667.649356842041,499 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0"
+              width="120.61735534667969" height="90"/>
+        <text class="er entityLabel" id="entity-ReturnValue" x="0" y="0" dominant-baseline="middle" text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(60.308677673339844,12)">ReturnValue
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="37.39605712890625" height="22"/>
+        <text class="er entityLabel" id="entity-ReturnValue-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="037.39605712890625" y="24"
+              width="83.22129821777344" height="22"/>
+        <text class="er entityLabel" id="entity-ReturnValue-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(42.39605712890625,35)">id
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="37.39605712890625" height="22"/>
+        <text class="er entityLabel" id="entity-ReturnValue-attr-2-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">String
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="037.39605712890625"
+              y="46" width="83.22129821777344" height="22"/>
+        <text class="er entityLabel" id="entity-ReturnValue-attr-2-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(42.39605712890625,57)">callbackUrl
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="68"
+              width="37.39605712890625" height="22"/>
+        <text class="er entityLabel" id="entity-ReturnValue-attr-3-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,79)">Json
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="037.39605712890625" y="68"
+              width="83.22129821777344" height="22"/>
+        <text class="er entityLabel" id="entity-ReturnValue-attr-3-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(42.39605712890625,79)">callbackSchema
+        </text>
+    </g>
+    <g id="Evaluation" transform="translate(2888.2667121887207,510 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0"
+              width="158.53359985351562" height="68"/>
+        <text class="er entityLabel" id="entity-Evaluation" x="0" y="0" dominant-baseline="middle" text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(79.26679992675781,12)">Evaluation
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="79.21699523925781" height="22"/>
+        <text class="er entityLabel" id="entity-Evaluation-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="079.21699523925781" y="24"
+              width="79.31660461425781" height="22"/>
+        <text class="er entityLabel" id="entity-Evaluation-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(84.21699523925781,35)">nrOfQuestions
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="79.21699523925781" height="22"/>
+        <text class="er entityLabel" id="entity-Evaluation-attr-2-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">EvaluationType
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="079.21699523925781"
+              y="46" width="79.31660461425781" height="22"/>
+        <text class="er entityLabel" id="entity-Evaluation-attr-2-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(84.21699523925781,57)">evaluationType
+        </text>
+    </g>
+    <g id="EvaluationQuestion" transform="translate(2867.1897621154785,276 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="133.873046875"
+              height="90"/>
+        <text class="er entityLabel" id="entity-EvaluationQuestion" x="0" y="0" dominant-baseline="middle"
+              text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(66.9365234375,12)">EvaluationQuestion
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="56.74152374267578" height="22"/>
+        <text class="er entityLabel" id="entity-EvaluationQuestion-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="056.74152374267578" y="24"
+              width="77.13152313232422" height="22"/>
+        <text class="er entityLabel" id="entity-EvaluationQuestion-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(61.74152374267578,35)">id
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="56.74152374267578" height="22"/>
+        <text class="er entityLabel" id="entity-EvaluationQuestion-attr-2-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">Int
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="056.74152374267578"
+              y="46" width="77.13152313232422" height="22"/>
+        <text class="er entityLabel" id="entity-EvaluationQuestion-attr-2-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(61.74152374267578,57)">questionId
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="68"
+              width="56.74152374267578" height="22"/>
+        <text class="er entityLabel" id="entity-EvaluationQuestion-attr-3-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,79)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="056.74152374267578" y="68"
+              width="77.13152313232422" height="22"/>
+        <text class="er entityLabel" id="entity-EvaluationQuestion-attr-3-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(61.74152374267578,79)">question
+        </text>
+    </g>
+    <g id="MultipleChoiceOption" transform="translate(2836.067886352539,42 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="147.03125"
+              height="90"/>
+        <text class="er entityLabel" id="entity-MultipleChoiceOption" x="0" y="0" dominant-baseline="middle"
+              text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(73.515625,12)">MultipleChoiceOption
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="70.76338195800781" height="22"/>
+        <text class="er entityLabel" id="entity-MultipleChoiceOption-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="070.76338195800781" y="24"
+              width="76.26786804199219" height="22"/>
+        <text class="er entityLabel" id="entity-MultipleChoiceOption-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(75.76338195800781,35)">id
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="70.76338195800781" height="22"/>
+        <text class="er entityLabel" id="entity-MultipleChoiceOption-attr-2-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">String
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="070.76338195800781"
+              y="46" width="76.26786804199219" height="22"/>
+        <text class="er entityLabel" id="entity-MultipleChoiceOption-attr-2-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(75.76338195800781,57)">option
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="68"
+              width="70.76338195800781" height="22"/>
+        <text class="er entityLabel" id="entity-MultipleChoiceOption-attr-3-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,79)">Boolean
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="070.76338195800781" y="68"
+              width="76.26786804199219" height="22"/>
+        <text class="er entityLabel" id="entity-MultipleChoiceOption-attr-3-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(75.76338195800781,79)">isCorrect
+        </text>
+    </g>
+    <g id="QuestionSpecific" transform="translate(1687.5583686828613,49.5 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="119.466796875"
+              height="75"/>
+        <text class="er entityLabel" id="entity-QuestionSpecific" x="0" y="0" dominant-baseline="middle"
+              text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(59.7333984375,37.5)">QuestionSpecific
+        </text>
+    </g>
+    <g id="QuestionGeneral" transform="translate(476.33398818969727,49.5 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="119.974609375"
+              height="75"/>
+        <text class="er entityLabel" id="entity-QuestionGeneral" x="0" y="0" dominant-baseline="middle"
+              text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(59.9873046875,37.5)">QuestionGeneral
+        </text>
+    </g>
+    <g id="Question" transform="translate(550.3920593261719,254 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0"
+              width="130.2207489013672" height="134"/>
+        <text class="er entityLabel" id="entity-Question" x="0" y="0" dominant-baseline="middle" text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(65.1103744506836,12)">Question
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="71.61680603027344" height="22"/>
+        <text class="er entityLabel" id="entity-Question-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="071.61680603027344" y="24"
+              width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-Question-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(76.61680603027344,35)">id
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="71.61680603027344" height="22"/>
+        <text class="er entityLabel" id="entity-Question-attr-2-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">String
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="071.61680603027344"
+              y="46" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-Question-attr-2-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(76.61680603027344,57)">title
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="68"
+              width="71.61680603027344" height="22"/>
+        <text class="er entityLabel" id="entity-Question-attr-3-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,79)">QuestionType
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="071.61680603027344" y="68"
+              width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-Question-attr-3-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(76.61680603027344,79)">type
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="90"
+              width="71.61680603027344" height="22"/>
+        <text class="er entityLabel" id="entity-Question-attr-4-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,101)">DateTime
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="071.61680603027344"
+              y="90" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-Question-attr-4-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(76.61680603027344,101)">createdAt
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="112"
+              width="71.61680603027344" height="22"/>
+        <text class="er entityLabel" id="entity-Question-attr-5-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,123)">DateTime
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="071.61680603027344"
+              y="112" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-Question-attr-5-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(76.61680603027344,123)">updatedAt
+        </text>
+    </g>
+    <g id="QuestionMessage" transform="translate(696.3085975646973,20 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="121.345703125"
+              height="134"/>
+        <text class="er entityLabel" id="entity-QuestionMessage" x="0" y="0" dominant-baseline="middle"
+              text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(60.6728515625,12)">QuestionMessage
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="58.41865539550781" height="22"/>
+        <text class="er entityLabel" id="entity-QuestionMessage-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="058.41865539550781" y="24"
+              width="62.92704772949219" height="22"/>
+        <text class="er entityLabel" id="entity-QuestionMessage-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(63.41865539550781,35)">id
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="58.41865539550781" height="22"/>
+        <text class="er entityLabel" id="entity-QuestionMessage-attr-2-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">Int
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="058.41865539550781"
+              y="46" width="62.92704772949219" height="22"/>
+        <text class="er entityLabel" id="entity-QuestionMessage-attr-2-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(63.41865539550781,57)">userId
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="68"
+              width="58.41865539550781" height="22"/>
+        <text class="er entityLabel" id="entity-QuestionMessage-attr-3-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,79)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="058.41865539550781" y="68"
+              width="62.92704772949219" height="22"/>
+        <text class="er entityLabel" id="entity-QuestionMessage-attr-3-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(63.41865539550781,79)">text
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="90"
+              width="58.41865539550781" height="22"/>
+        <text class="er entityLabel" id="entity-QuestionMessage-attr-4-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,101)">DateTime
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="058.41865539550781"
+              y="90" width="62.92704772949219" height="22"/>
+        <text class="er entityLabel" id="entity-QuestionMessage-attr-4-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(63.41865539550781,101)">createdAt
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="112"
+              width="58.41865539550781" height="22"/>
+        <text class="er entityLabel" id="entity-QuestionMessage-attr-5-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,123)">DateTime
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="058.41865539550781"
+              y="112" width="62.92704772949219" height="22"/>
+        <text class="er entityLabel" id="entity-QuestionMessage-attr-5-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(63.41865539550781,123)">updatedAt
+        </text>
+    </g>
+    <g id="Assignment" transform="translate(1988.975757598877,488 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0"
+              width="112.69949340820312" height="112"/>
+        <text class="er entityLabel" id="entity-Assignment" x="0" y="0" dominant-baseline="middle" text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(56.34974670410156,12)">Assignment
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-Assignment-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="24" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-Assignment-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,35)">id
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-Assignment-attr-2-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">DateTime
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="46" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-Assignment-attr-2-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,57)">createdAt
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="68"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-Assignment-attr-3-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,79)">DateTime
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="68" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-Assignment-attr-3-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,79)">updatedAt
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="90"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-Assignment-attr-4-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,101)">DateTime
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="90" width="58.60394287109375" height="22"/>
+        <text class="er entityLabel" id="entity-Assignment-attr-4-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,101)">deadline
+        </text>
+    </g>
+    <g id="ClassAssignment" transform="translate(780.6128082275391,283.5 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="117.59375"
+              height="75"/>
+        <text class="er entityLabel" id="entity-ClassAssignment" x="0" y="0" dominant-baseline="middle"
+              text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(58.796875,37.5)">ClassAssignment
+        </text>
+    </g>
+    <g id="Team" transform="translate(852.6476249694824,510 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="100"
+              height="68"/>
+        <text class="er entityLabel" id="entity-Team" x="0" y="0" dominant-baseline="middle" text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(50,12)">Team
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="39.28203582763672" height="22"/>
+        <text class="er entityLabel" id="entity-Team-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="039.28203582763672" y="24"
+              width="60.71796417236328" height="22"/>
+        <text class="er entityLabel" id="entity-Team-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(44.28203582763672,35)">id
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="39.28203582763672" height="22"/>
+        <text class="er entityLabel" id="entity-Team-attr-2-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">String
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="039.28203582763672"
+              y="46" width="60.71796417236328" height="22"/>
+        <text class="er entityLabel" id="entity-Team-attr-2-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(44.28203582763672,57)">teamname
+        </text>
+    </g>
+    <g id="TeamAssignment" transform="translate(1570.692886352539,283.5 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="120.140625"
+              height="75"/>
+        <text class="er entityLabel" id="entity-TeamAssignment" x="0" y="0" dominant-baseline="middle"
+              text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(60.0703125,37.5)">TeamAssignment
+        </text>
+    </g>
+    <g id="Submission" transform="translate(2645.2824745178223,287 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0"
+              width="121.90728759765625" height="68"/>
+        <text class="er entityLabel" id="entity-Submission" x="0" y="0" dominant-baseline="middle" text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(60.953643798828125,12)">Submission
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-Submission-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="24" width="67.81173706054688" height="22"/>
+        <text class="er entityLabel" id="entity-Submission-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,35)">submissionId
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="54.095550537109375" height="22"/>
+        <text class="er entityLabel" id="entity-Submission-attr-2-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">DateTime
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="054.095550537109375"
+              y="46" width="67.81173706054688" height="22"/>
+        <text class="er entityLabel" id="entity-Submission-attr-2-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(59.095550537109375,57)">submitted
+        </text>
+    </g>
+    <g id="Feedback" transform="translate(3475.487579345703,64 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="100"
+              height="46"/>
+        <text class="er entityLabel" id="entity-Feedback" x="0" y="0" dominant-baseline="middle" text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(50,12)">Feedback
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="37.994606018066406" height="22"/>
+        <text class="er entityLabel" id="entity-Feedback-attr-1-type" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">String
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="037.994606018066406"
+              y="24" width="62.005393981933594" height="22"/>
+        <text class="er entityLabel" id="entity-Feedback-attr-1-name" x="0" y="0" dominant-baseline="middle"
+              text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(42.994606018066406,35)">description
+        </text>
+    </g>
+    <g id="LearningObjectProgress" transform="translate(3268.600860595703,510 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="156.88671875"
+              height="68"/>
+        <text class="er entityLabel" id="entity-LearningObjectProgress" x="0" y="0" dominant-baseline="middle"
+              text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(78.443359375,12)">LearningObjectProgress
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="24"
+              width="85.40354919433594" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObjectProgress-attr-1-type" x="0" y="0"
+              dominant-baseline="middle" text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,35)">Int
+        </text>
+        <rect class="er attributeBoxOdd" fill="honeydew" fill-opacity="100%" stroke="gray" x="085.40354919433594" y="24"
+              width="71.48316955566406" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObjectProgress-attr-1-name" x="0" y="0"
+              dominant-baseline="middle" text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(90.40354919433594,35)">id
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="46"
+              width="85.40354919433594" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObjectProgress-attr-2-type" x="0" y="0"
+              dominant-baseline="middle" text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(5,57)">Boolean
+        </text>
+        <rect class="er attributeBoxEven" fill="honeydew" fill-opacity="100%" stroke="gray" x="085.40354919433594"
+              y="46" width="71.48316955566406" height="22"/>
+        <text class="er entityLabel" id="entity-LearningObjectProgress-attr-2-name" x="0" y="0"
+              dominant-baseline="middle" text-anchor="left"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 10.2px"
+              transform="translate(90.40354919433594,57)">done
+        </text>
+    </g>
+    <g id="StudentProgress" transform="translate(3289.067657470703,283.5 )">
+        <rect class="er entityBox" fill="honeydew" fill-opacity="100%" stroke="gray" x="0" y="0" width="115.953125"
+              height="75"/>
+        <text class="er entityLabel" id="entity-StudentProgress" x="0" y="0" dominant-baseline="middle"
+              text-anchor="middle"
+              style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px"
+              transform="translate(57.9765625,37.5)">StudentProgress
+        </text>
+    </g>
+    <rect class="er relationshipLabelBox" x="1063.03857421875" y="1421.906494140625" width="23.958984375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel1" x="1075.01806640625" y="1428.906494140625" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">user
+    </text>
+    <rect class="er relationshipLabelBox" x="1206.82861328125" y="1382" width="23.958984375" height="14" fill="white"
+          fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel2" x="1218.80810546875" y="1389" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">user
+    </text>
+    <rect class="er relationshipLabelBox" x="2679.6064453125" y="1441.5936279296875" width="23.958984375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel3" x="2691.5859375" y="1448.5936279296875" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">user
+    </text>
+    <rect class="er relationshipLabelBox" x="2650.0107421875" y="602.8283081054688" width="40.958984375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel4" x="2670.490234375" y="609.8283081054688" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">student
+    </text>
+    <rect class="er relationshipLabelBox" x="723.0947875976562" y="600.5213012695312" width="25.642578125" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel5" x="735.9160766601562" y="607.5213012695312" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">class
+    </text>
+    <rect class="er relationshipLabelBox" x="288.4374084472656" y="1206.653076171875" width="42.650390625" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel6" x="309.7626037597656" y="1213.653076171875" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">teacher
+    </text>
+    <rect class="er relationshipLabelBox" x="244.77792358398438" y="712.3445434570312" width="25.642578125" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel7" x="257.5992126464844" y="719.3445434570312" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">class
+    </text>
+    <rect class="er relationshipLabelBox" x="3088.15283203125" y="605.3345336914062" width="40.958984375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel8" x="3108.63232421875" y="612.3345336914062" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">student
+    </text>
+    <rect class="er relationshipLabelBox" x="1214.616943359375" y="598.3016967773438" width="25.642578125" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel9" x="1227.438232421875" y="605.3016967773438" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">class
+    </text>
+    <rect class="er relationshipLabelBox" x="1073.95947265625" y="532.1884765625" width="72.328125" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel10" x="1110.12353515625" y="539.1884765625" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">otherTeacher
+    </text>
+    <rect class="er relationshipLabelBox" x="123.22801208496094" y="398.5990905761719" width="68.865234375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel11" x="157.66062927246094" y="405.5990905761719" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">classTeacher
+    </text>
+    <rect class="er relationshipLabelBox" x="386.6058349609375" y="602.6351318359375" width="25.642578125" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel12" x="399.4271240234375" y="609.6351318359375" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">class
+    </text>
+    <rect class="er relationshipLabelBox" x="1326.2991943359375" y="1170.6063232421875" width="40.65234375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel13" x="1346.6253662109375" y="1177.6063232421875" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">creator
+    </text>
+    <rect class="er relationshipLabelBox" x="2158.17626953125" y="724.4353637695312" width="80.26953125" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel14" x="2198.31103515625" y="731.4353637695312" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">learningObject
+    </text>
+    <rect class="er relationshipLabelBox" x="1350.7655029296875" y="613.5543823242188" width="67.802734375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel15" x="1384.6668701171875" y="620.5543823242188" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">learningPath
+    </text>
+    <rect class="er relationshipLabelBox" x="1645.44873046875" y="396.4824523925781" width="26.681640625" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel16" x="1658.78955078125" y="403.4824523925781" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">node
+    </text>
+    <rect class="er relationshipLabelBox" x="1747.4066162109375" y="415.8345642089844" width="51.654296875" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel17" x="1773.2337646484375" y="422.8345642089844" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">nextNode
+    </text>
+    <rect class="er relationshipLabelBox" x="1973.8172607421875" y="1247.6455078125" width="40.65234375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel18" x="1994.1434326171875" y="1254.6455078125" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">creator
+    </text>
+    <rect class="er relationshipLabelBox" x="2511.58984375" y="702.8045654296875" width="80.26953125" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel19" x="2551.724609375" y="709.8045654296875" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">learningObject
+    </text>
+    <rect class="er relationshipLabelBox" x="2687.181884765625" y="637.5750122070312" width="80.26953125" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel20" x="2727.316650390625" y="644.5750122070312" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">learningObject
+    </text>
+    <rect class="er relationshipLabelBox" x="2853.450927734375" y="718.1500244140625" width="80.26953125" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel21" x="2893.585693359375" y="725.1500244140625" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">learningObject
+    </text>
+    <rect class="er relationshipLabelBox" x="2686.93701171875" y="435.9444885253906" width="56.74609375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel22" x="2715.31005859375" y="442.9444885253906" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">evaluation
+    </text>
+    <rect class="er relationshipLabelBox" x="2879.5576171875" y="196.47982788085938" width="103.990234375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel23" x="2931.552734375" y="203.47982788085938" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">evaluationQuestion
+    </text>
+    <rect class="er relationshipLabelBox" x="1080.5179443359375" y="142.25283813476562" width="46.263671875" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel24" x="1103.6497802734375" y="149.25283813476562" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">question
+    </text>
+    <rect class="er relationshipLabelBox" x="2849.77099609375" y="189.80873107910156" width="80.26953125" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel25" x="2889.90576171875" y="196.80873107910156" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">learningObject
+    </text>
+    <rect class="er relationshipLabelBox" x="576.7621459960938" y="178.0590057373047" width="46.263671875" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel26" x="599.8939819335938" y="185.0590057373047" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">question
+    </text>
+    <rect class="er relationshipLabelBox" x="1189.0068359375" y="209.60813903808594" width="67.802734375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel27" x="1222.908203125" y="216.60813903808594" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">learningPath
+    </text>
+    <rect class="er relationshipLabelBox" x="1310.6966552734375" y="384.3461608886719" width="60.083984375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel28" x="1340.7386474609375" y="391.3461608886719" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">assignment
+    </text>
+    <rect class="er relationshipLabelBox" x="761.0385131835938" y="428.10443115234375" width="27.607421875" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel29" x="774.8422241210938" y="435.10443115234375" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">team
+    </text>
+    <rect class="er relationshipLabelBox" x="862.8320922851562" y="228.49783325195312" width="52.244140625" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel30" x="888.9541625976562" y="235.49783325195312" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">Questions
+    </text>
+    <rect class="er relationshipLabelBox" x="1675.3232421875" y="735.9970703125" width="67.802734375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel31" x="1709.224609375" y="742.9970703125" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">learningPath
+    </text>
+    <rect class="er relationshipLabelBox" x="657.1708374023438" y="609.3203125" width="25.642578125" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel32" x="669.9921264648438" y="616.3203125" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">class
+    </text>
+    <rect class="er relationshipLabelBox" x="1424.268798828125" y="379.5361328125" width="60.083984375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel33" x="1454.310791015625" y="386.5361328125" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">assignment
+    </text>
+    <rect class="er relationshipLabelBox" x="711.8194580078125" y="750.5171508789062" width="25.642578125" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel34" x="724.6407470703125" y="757.5171508789062" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">class
+    </text>
+    <rect class="er relationshipLabelBox" x="1198.0274658203125" y="381.2872009277344" width="27.607421875" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel35" x="1211.8311767578125" y="388.2872009277344" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">team
+    </text>
+    <rect class="er relationshipLabelBox" x="1879.3841552734375" y="382.8220520019531" width="61.857421875" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel36" x="1910.3128662109375" y="389.8220520019531" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">Assignment
+    </text>
+    <rect class="er relationshipLabelBox" x="2345.844482421875" y="436.0287780761719" width="60.083984375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel37" x="2375.886474609375" y="443.0287780761719" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">assignment
+    </text>
+    <rect class="er relationshipLabelBox" x="2887.1064453125" y="393.2345886230469" width="56.74609375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel38" x="2915.4794921875" y="400.2345886230469" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">evaluation
+    </text>
+    <rect class="er relationshipLabelBox" x="1764.6246337890625" y="378.626708984375" width="27.607421875" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel39" x="1778.4283447265625" y="385.626708984375" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">team
+    </text>
+    <rect class="er relationshipLabelBox" x="2849.566650390625" y="1208.5823974609375" width="42.650390625" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel40" x="2870.891845703125" y="1215.5823974609375" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">teacher
+    </text>
+    <rect class="er relationshipLabelBox" x="3040.763916015625" y="147.21905517578125" width="58.05859375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel41" x="3069.793212890625" y="154.21905517578125" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">submission
+    </text>
+    <rect class="er relationshipLabelBox" x="3044.568115234375" y="755.58349609375" width="80.26953125" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel42" x="3084.702880859375" y="762.58349609375" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">learningObject
+    </text>
+    <rect class="er relationshipLabelBox" x="3786.467529296875" y="469.0925598144531" width="40.958984375" height="14"
+          fill="white" fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel43" x="3806.947021484375" y="476.0925598144531" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">student
+    </text>
+    <rect class="er relationshipLabelBox" x="3324.604736328125" y="427.25" width="44.87890625" height="14" fill="white"
+          fill-opacity="85%"/>
+    <text class="er relationshipLabel" id="rel44" x="3347.044189453125" y="434.25" text-anchor="middle"
+          dominant-baseline="middle"
+          style="font-family: &quot;trebuchet ms&quot;, verdana, arial, sans-serif;; font-size: 12px">progress
+    </text>
+</svg>

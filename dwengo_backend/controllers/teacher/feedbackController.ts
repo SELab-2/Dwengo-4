@@ -40,7 +40,11 @@ export default class FeedbackController {
             const teacherId: number = getUserFromAuthRequest(req).id;
 
             const feedback: Feedback | null = await service.getFeedbackForSubmission(submissionId, teacherId);
-            res.json(feedback);
+            if (feedback) {
+                res.json(feedback);
+            } else {
+                res.status(404).json({error: "Feedback not found"});
+            }
         } catch (error) {
             res.status(500).json({error: "Failed to retrieve feedback"});
         }

@@ -23,9 +23,9 @@ const handleRequest = (handler: (req: Request, res: Response) => Promise<void>) 
  * returns the created join request in the response body
  */
 export const createJoinRequest = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { classCode }: {classCode: string } = req.body;
+    const joinCode = req.body.joinCode || req.query.joinCode as string;
     const studentId: number = getUserFromAuthRequest(req).id;
-    const joinRequest: JoinRequest | undefined = await joinRequestService.createValidJoinRequest(studentId, classCode);
+    const joinRequest: JoinRequest | undefined = await joinRequestService.createValidJoinRequest(studentId, joinCode);
     res.status(201).json({ joinRequest });
 });
 
@@ -66,4 +66,3 @@ export const getJoinRequestsByClass = handleRequest(async (req: AuthenticatedReq
     const joinRequests: JoinRequest[] = await joinRequestService.getJoinRequestsByClass(teacherId, classId);
     res.status(200).json({ joinRequests });
 });
-
