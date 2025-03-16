@@ -25,6 +25,7 @@ import {
 } from "../util/student/authStudent";
 import { action as studentLogoutAction } from "../pages/student/LogoutStudent";
 import StudentIndex from "../pages/student";
+import JoinLink from "../pages/student/joinlink-example";
 
 // Home-pagina waar de gebruiker zijn rol kiest
 const HomePage = () => (
@@ -91,6 +92,11 @@ export const router = createBrowserRouter([
         index: true,
         // Je kunt hier eventueel een aparte HomeStudent-component gebruiken
         element: <StudentIndex />,
+      },
+
+      {
+        path: "join-link-example",
+        element: <JoinLink />,
       },
       {
         path: "inloggen",
