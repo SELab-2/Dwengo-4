@@ -43,6 +43,7 @@ const SignupTeacher: React.FC = () => {
     Error,
     SignupFormData
   >({
+
     mutationFn: signupTeacher,
     onSuccess: () => {
       navigate("/teacher/inloggen");

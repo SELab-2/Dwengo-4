@@ -1,0 +1,84 @@
+import { Response } from "express";
+import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
+import teacherAssignmentService from "../../services/teacherServices/teacherAssignmentService";
+import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
+
+export class AssignmentTeacherController {
+  createAssignmentForClass = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const teacherId: number = getUserFromAuthRequest(req).id;
+      const {
+        classId,
+        learningPathId,
+        deadline,
+      }: { classId: number; learningPathId: string; deadline: string } =
+        req.body;
+
+      const parsedDeadline = new Date(deadline);
+
+      const assignment =
+        await teacherAssignmentService.createAssignmentForClass(
+          teacherId,
+          classId,
+          learningPathId,
+          parsedDeadline
+        );
+      res.status(201).json(assignment);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create assignment" });
+    }
+  };
+
+  getAssignmentsByClass = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const classId: number = parseInt(req.params.classId);
+      const teacherId: number = getUserFromAuthRequest(req).id;
+      const assignments = await teacherAssignmentService.getAssignmentsByClass(
+        classId,
+        teacherId
+      );
+      res.status(200).json(assignments);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to retrieve assignments" });
+    }
+  };
+
+  updateAssignment = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const assignmentId: number = parseInt(req.params.assignmentId);
+      const { learningPathId }: { learningPathId: string } = req.body;
+      const teacherId: number = getUserFromAuthRequest(req).id;
+      const updatedAssignment = await teacherAssignmentService.updateAssignment(
+        assignmentId,
+        learningPathId,
+        teacherId
+      );
+      res.json(updatedAssignment);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update assignment" });
+    }
+  };
+
+  deleteAssignment = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const assignmentId: number = parseInt(req.params.assignmentId);
+      const teacherId: number = getUserFromAuthRequest(req).id;
+      await teacherAssignmentService.deleteAssignment(assignmentId, teacherId);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete assignment" });
+    }
+  };
+}

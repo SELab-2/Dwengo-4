@@ -28,7 +28,6 @@ import {
 import { action as studentLogoutAction } from "../pages/student/LogoutStudent";
 import StudentIndex from "../pages/student";
 
-
 const HomePage: React.FC = () => (
   <div style={{ textAlign: "center", marginTop: "50px" }}>
     <h2>Kies een rol:</h2>
@@ -91,7 +90,12 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
+        // Je kunt hier eventueel een aparte HomeStudent-component gebruiken
         element: <StudentIndex />,
+      },
+      {
+        path: "join-link-example",
+        element: <JoinLink />,
       },
       {
         path: "inloggen",
