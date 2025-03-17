@@ -16,9 +16,10 @@ import teacherClassRoutes from './routes/teacher/teacherClassRoutes';
 import studentAssignmentRoutes from "./routes/student/studentAssignmentRoutes";
 import feedbackRoutes from "./routes/teacher/feedbackRoutes";
 import studentClassRoutes from "./routes/student/studentClassRoutes";
+import teacherSubmissionRoute from "./routes/teacher/teacherSubmissionRoute";
+import studentSubmissionRoute from "./routes/student/studentSubmissionRoute";
 import teacherLocalLearningPathRoutes from "./routes/teacher/teacherLocalLearningPathRoutes";
 import teacherLocalLearningPathNodesRoutes from "./routes/teacher/teacherLocalLearningPathNodesRoutes";
-
 
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
@@ -76,6 +77,7 @@ app.use("/teacher/assignments", teacherAssignmentRoutes);
 // Routes voor het opvragen van de Assignments door students
 app.use("/student/assignments", studentAssignmentRoutes);
 
+// Routes om feedback te geven
 app.use('/teacher/feedback', feedbackRoutes);
 
 // Nieuwe routes voor leerobjecten
@@ -89,6 +91,11 @@ app.use("/student/teams", studentTeamRoutes);
 
 app.use("/progress", progressRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+// Routes voor indieningen
+app.use('/teacher/submissions', teacherSubmissionRoute);
+app.use('/student/submissions', studentSubmissionRoute);
+
 
 // Error Handler
 app.use(errorHandler);
