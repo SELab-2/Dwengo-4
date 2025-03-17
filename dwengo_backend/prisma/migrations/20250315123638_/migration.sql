@@ -8,10 +8,10 @@ CREATE TYPE "JoinRequestStatus" AS ENUM ('PENDING', 'APPROVED', 'DENIED');
 CREATE TYPE "EvaluationType" AS ENUM ('OPEN', 'MULTIPLE');
 
 -- CreateEnum
-CREATE TYPE "ContentType" AS ENUM ('TEXT_PLAIN', 'TEXT_MARKDOWN', 'IMAGE_IMAGE_BLOCK', 'IMAGE_IMAGE', 'AUDO_MPEG', 'VIDEO', 'EVAL_MULTIPLE_CHOICE', 'EVAL_OPEN_QUESTION');
+CREATE TYPE "ContentType" AS ENUM ('TEXT_PLAIN', 'TEXT_MARKDOWN', 'IMAGE_IMAGE_BLOCK', 'IMAGE_IMAGE', 'AUDIO_MPEG', 'VIDEO', 'EVAL_MULTIPLE_CHOICE', 'EVAL_OPEN_QUESTION');
 
 -- CreateEnum
-CREATE TYPE "QuestionType" AS ENUM ('SPECIFIC', 'GENERAL', 'ADDITIONAL');
+CREATE TYPE "QuestionType" AS ENUM ('SPECIFIC', 'GENERAL');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -77,11 +77,12 @@ CREATE TABLE "ClassTeacher" (
 
 -- CreateTable
 CREATE TABLE "JoinRequest" (
+    "requestId" SERIAL NOT NULL,
     "studentId" INTEGER NOT NULL,
     "classId" INTEGER NOT NULL,
     "status" "JoinRequestStatus" NOT NULL,
 
-    CONSTRAINT "JoinRequest_pkey" PRIMARY KEY ("studentId","classId")
+    CONSTRAINT "JoinRequest_pkey" PRIMARY KEY ("requestId")
 );
 
 -- CreateTable
@@ -116,7 +117,11 @@ CREATE TABLE "LearningPath" (
 CREATE TABLE "LearningPathNode" (
     "nodeId" TEXT NOT NULL,
     "learningPathId" TEXT NOT NULL,
-    "learningObjectId" TEXT NOT NULL,
+    "localLearningObjectId" TEXT,
+    "dwengoHruid" TEXT,
+    "dwengoLanguage" TEXT,
+    "dwengoVersion" INTEGER,
+    "isExternal" BOOLEAN NOT NULL DEFAULT false,
     "start_node" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -186,7 +191,6 @@ CREATE TABLE "ReturnValue" (
 CREATE TABLE "Evaluation" (
     "id" TEXT NOT NULL,
     "nrOfQuestions" INTEGER NOT NULL,
-    "deadline" TIMESTAMP(3) NOT NULL,
     "evaluationType" "EvaluationType" NOT NULL,
 
     CONSTRAINT "Evaluation_pkey" PRIMARY KEY ("id")
@@ -213,34 +217,32 @@ CREATE TABLE "MultipleChoiceOption" (
 );
 
 -- CreateTable
-CREATE TABLE "SpecificQuestion" (
+CREATE TABLE "QuestionSpecific" (
     "questionId" INTEGER NOT NULL,
-    "learningObjectId" TEXT NOT NULL,
+    "localLearningObjectId" TEXT,
+    "dwengoHruid" TEXT,
+    "dwengoLanguage" TEXT,
+    "dwengoVersion" INTEGER,
+    "isExternal" BOOLEAN NOT NULL DEFAULT false,
 
-    CONSTRAINT "SpecificQuestion_pkey" PRIMARY KEY ("questionId","learningObjectId")
+    CONSTRAINT "QuestionSpecific_pkey" PRIMARY KEY ("questionId")
 );
 
 -- CreateTable
-CREATE TABLE "GeneralQuestion" (
+CREATE TABLE "QuestionGeneral" (
     "questionId" INTEGER NOT NULL,
-    "learningPathId" TEXT NOT NULL,
+    "pathRef" TEXT NOT NULL,
+    "isExternal" BOOLEAN NOT NULL DEFAULT false,
 
-    CONSTRAINT "GeneralQuestion_pkey" PRIMARY KEY ("questionId","learningPathId")
-);
-
--- CreateTable
-CREATE TABLE "AdditionalQuestion" (
-    "questionId" INTEGER NOT NULL,
-    "answerId" INTEGER NOT NULL,
-
-    CONSTRAINT "AdditionalQuestion_pkey" PRIMARY KEY ("questionId","answerId")
+    CONSTRAINT "QuestionGeneral_pkey" PRIMARY KEY ("questionId")
 );
 
 -- CreateTable
 CREATE TABLE "Question" (
     "id" SERIAL NOT NULL,
     "teamId" INTEGER NOT NULL,
-    "description" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "assignmentId" INTEGER NOT NULL,
     "type" "QuestionType" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -249,21 +251,23 @@ CREATE TABLE "Question" (
 );
 
 -- CreateTable
-CREATE TABLE "Answer" (
+CREATE TABLE "QuestionMessage" (
     "id" SERIAL NOT NULL,
     "questionId" INTEGER NOT NULL,
-    "teacherId" INTEGER NOT NULL,
-    "answer" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "text" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Answer_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "QuestionMessage_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Assignment" (
     "id" SERIAL NOT NULL,
-    "learningPathId" TEXT NOT NULL,
+    "pathRef" TEXT NOT NULL,
+    "isExternal" BOOLEAN NOT NULL DEFAULT false,
+    "deadline" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -282,6 +286,7 @@ CREATE TABLE "ClassAssignment" (
 CREATE TABLE "Team" (
     "id" SERIAL NOT NULL,
     "teamname" TEXT NOT NULL,
+    "classId" INTEGER NOT NULL,
 
     CONSTRAINT "Team_pkey" PRIMARY KEY ("id")
 );
@@ -300,6 +305,7 @@ CREATE TABLE "Submission" (
     "evaluationId" TEXT NOT NULL,
     "teamId" INTEGER NOT NULL,
     "submitted" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "assignmentId" INTEGER NOT NULL,
 
     CONSTRAINT "Submission_pkey" PRIMARY KEY ("submissionId")
 );
@@ -360,13 +366,10 @@ CREATE UNIQUE INDEX "ReturnValue_learningObjectId_key" ON "ReturnValue"("learnin
 CREATE UNIQUE INDEX "EvaluationQuestion_evaluationId_questionId_key" ON "EvaluationQuestion"("evaluationId", "questionId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "SpecificQuestion_questionId_key" ON "SpecificQuestion"("questionId");
+CREATE UNIQUE INDEX "QuestionSpecific_questionId_key" ON "QuestionSpecific"("questionId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "GeneralQuestion_questionId_key" ON "GeneralQuestion"("questionId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "AdditionalQuestion_questionId_key" ON "AdditionalQuestion"("questionId");
+CREATE UNIQUE INDEX "QuestionGeneral_questionId_key" ON "QuestionGeneral"("questionId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Feedback_submissionId_key" ON "Feedback"("submissionId");
@@ -384,22 +387,22 @@ ALTER TABLE "Teacher" ADD CONSTRAINT "Teacher_userId_fkey" FOREIGN KEY ("userId"
 ALTER TABLE "Student" ADD CONSTRAINT "Student_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ClassStudent" ADD CONSTRAINT "ClassStudent_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "Student"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ClassStudent" ADD CONSTRAINT "ClassStudent_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "Student"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ClassStudent" ADD CONSTRAINT "ClassStudent_classId_fkey" FOREIGN KEY ("classId") REFERENCES "Class"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ClassStudent" ADD CONSTRAINT "ClassStudent_classId_fkey" FOREIGN KEY ("classId") REFERENCES "Class"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ClassTeacher" ADD CONSTRAINT "ClassTeacher_teacherId_fkey" FOREIGN KEY ("teacherId") REFERENCES "Teacher"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ClassTeacher" ADD CONSTRAINT "ClassTeacher_teacherId_fkey" FOREIGN KEY ("teacherId") REFERENCES "Teacher"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ClassTeacher" ADD CONSTRAINT "ClassTeacher_classId_fkey" FOREIGN KEY ("classId") REFERENCES "Class"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ClassTeacher" ADD CONSTRAINT "ClassTeacher_classId_fkey" FOREIGN KEY ("classId") REFERENCES "Class"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "JoinRequest" ADD CONSTRAINT "JoinRequest_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "Student"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "JoinRequest" ADD CONSTRAINT "JoinRequest_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "Student"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "JoinRequest" ADD CONSTRAINT "JoinRequest_classId_fkey" FOREIGN KEY ("classId") REFERENCES "Class"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "JoinRequest" ADD CONSTRAINT "JoinRequest_classId_fkey" FOREIGN KEY ("classId") REFERENCES "Class"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Invite" ADD CONSTRAINT "Invite_otherTeacherId_fkey" FOREIGN KEY ("otherTeacherId") REFERENCES "Teacher"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -411,10 +414,7 @@ ALTER TABLE "Invite" ADD CONSTRAINT "Invite_classTeacherId_classId_fkey" FOREIGN
 ALTER TABLE "Invite" ADD CONSTRAINT "Invite_classId_fkey" FOREIGN KEY ("classId") REFERENCES "Class"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "LearningPath" ADD CONSTRAINT "LearningPath_creatorId_fkey" FOREIGN KEY ("creatorId") REFERENCES "Teacher"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "LearningPathNode" ADD CONSTRAINT "LearningPathNode_learningObjectId_fkey" FOREIGN KEY ("learningObjectId") REFERENCES "LearningObject"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "LearningPath" ADD CONSTRAINT "LearningPath_creatorId_fkey" FOREIGN KEY ("creatorId") REFERENCES "Teacher"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "LearningPathNode" ADD CONSTRAINT "LearningPathNode_learningPathId_fkey" FOREIGN KEY ("learningPathId") REFERENCES "LearningPath"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -444,46 +444,37 @@ ALTER TABLE "EvaluationQuestion" ADD CONSTRAINT "EvaluationQuestion_evaluationId
 ALTER TABLE "MultipleChoiceOption" ADD CONSTRAINT "MultipleChoiceOption_evaluationQuestionId_fkey" FOREIGN KEY ("evaluationQuestionId") REFERENCES "EvaluationQuestion"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SpecificQuestion" ADD CONSTRAINT "SpecificQuestion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "QuestionSpecific" ADD CONSTRAINT "QuestionSpecific_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SpecificQuestion" ADD CONSTRAINT "SpecificQuestion_learningObjectId_fkey" FOREIGN KEY ("learningObjectId") REFERENCES "LearningObject"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "QuestionGeneral" ADD CONSTRAINT "QuestionGeneral_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "GeneralQuestion" ADD CONSTRAINT "GeneralQuestion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "GeneralQuestion" ADD CONSTRAINT "GeneralQuestion_learningPathId_fkey" FOREIGN KEY ("learningPathId") REFERENCES "LearningPath"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "AdditionalQuestion" ADD CONSTRAINT "AdditionalQuestion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "AdditionalQuestion" ADD CONSTRAINT "AdditionalQuestion_answerId_fkey" FOREIGN KEY ("answerId") REFERENCES "Answer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Question" ADD CONSTRAINT "Question_assignmentId_fkey" FOREIGN KEY ("assignmentId") REFERENCES "Assignment"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Question" ADD CONSTRAINT "Question_teamId_fkey" FOREIGN KEY ("teamId") REFERENCES "Team"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Answer" ADD CONSTRAINT "Answer_teacherId_fkey" FOREIGN KEY ("teacherId") REFERENCES "Teacher"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "QuestionMessage" ADD CONSTRAINT "QuestionMessage_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Answer" ADD CONSTRAINT "Answer_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ClassAssignment" ADD CONSTRAINT "ClassAssignment_classId_fkey" FOREIGN KEY ("classId") REFERENCES "Class"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Assignment" ADD CONSTRAINT "Assignment_learningPathId_fkey" FOREIGN KEY ("learningPathId") REFERENCES "LearningPath"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ClassAssignment" ADD CONSTRAINT "ClassAssignment_assignmentId_fkey" FOREIGN KEY ("assignmentId") REFERENCES "Assignment"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ClassAssignment" ADD CONSTRAINT "ClassAssignment_classId_fkey" FOREIGN KEY ("classId") REFERENCES "Class"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "ClassAssignment" ADD CONSTRAINT "ClassAssignment_assignmentId_fkey" FOREIGN KEY ("assignmentId") REFERENCES "Assignment"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Team" ADD CONSTRAINT "Team_classId_fkey" FOREIGN KEY ("classId") REFERENCES "Class"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "TeamAssignment" ADD CONSTRAINT "TeamAssignment_teamId_fkey" FOREIGN KEY ("teamId") REFERENCES "Team"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "TeamAssignment" ADD CONSTRAINT "TeamAssignment_assignmentId_fkey" FOREIGN KEY ("assignmentId") REFERENCES "Assignment"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "TeamAssignment" ADD CONSTRAINT "TeamAssignment_assignmentId_fkey" FOREIGN KEY ("assignmentId") REFERENCES "Assignment"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Submission" ADD CONSTRAINT "Submission_assignmentId_fkey" FOREIGN KEY ("assignmentId") REFERENCES "Assignment"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Submission" ADD CONSTRAINT "Submission_evaluationId_fkey" FOREIGN KEY ("evaluationId") REFERENCES "Evaluation"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -492,10 +483,10 @@ ALTER TABLE "Submission" ADD CONSTRAINT "Submission_evaluationId_fkey" FOREIGN K
 ALTER TABLE "Submission" ADD CONSTRAINT "Submission_teamId_fkey" FOREIGN KEY ("teamId") REFERENCES "Team"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_teacherId_fkey" FOREIGN KEY ("teacherId") REFERENCES "Teacher"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_teacherId_fkey" FOREIGN KEY ("teacherId") REFERENCES "Teacher"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "Submission"("submissionId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "Submission"("submissionId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "LearningObjectProgress" ADD CONSTRAINT "LearningObjectProgress_learningObjectId_fkey" FOREIGN KEY ("learningObjectId") REFERENCES "LearningObject"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

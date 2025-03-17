@@ -20,18 +20,15 @@ export const getStudentAssignments = async (
 ): Promise<void> => {
   try {
     const studentId: number = getUserFromAuthRequest(req).id;
-
     // Een URL van volgend formaat wordt verwacht
     // GET /assignments?sort=deadline&order=desc&limit=5
 
     // Sorteer standaard de deadline, extra velden kunnen meegegeven worden
-    const sortFields: string[] = extractSortableFields(
-      req.query.sort as string
-    );
-    // Sorteer standaard ascending, descending kan ook
+    const sortFields: string[] = extractSortableFields(req.query.sort as string);
     const order: "desc" | "asc" = req.query.order === "desc" ? "desc" : "asc";
-    // Haal standaard 5 assignments op, andere hoeveelheden kunnen ook
+    // Sorteer standaard ascending, descending kan ook
     const limit: number = Number(req.query.limit) || 5;
+    // Haal standaard 5 assignments op, andere hoeveelheden kunnen ook
 
     if (isNaN(limit) || limit <= 0) {
       res.status(400).json({ error: "Limit wasn't a valid number" });
