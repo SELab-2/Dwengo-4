@@ -6,7 +6,6 @@ import styles from "./Nav.module.css";
 const NavAdmin = () => {
    const [menuOpen, setMenuOpen] = useState(false);
 
-   // Functie om menu te openen/sluiten
    const toggleMenu = () => {
       setMenuOpen(!menuOpen);
    };

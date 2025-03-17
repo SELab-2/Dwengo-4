@@ -1,7 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
-//import { getAuthToken } from "./authStudent";
 
-// API backend URL (pas aan indien nodig)
+
 const BACKEND = "http://localhost:5000";
 
 export const queryClient = new QueryClient({
@@ -12,9 +11,26 @@ export const queryClient = new QueryClient({
   },
 });
 
-// Inloggen als student
-export async function loginStudent({ email, password }) {
-  const response = await fetch(`${BACKEND}/student/auth/login`, {
+interface AuthCredentials {
+  email: string;
+  password: string;
+}
+
+interface AuthResponse {
+  token: string;
+}
+
+interface APIError extends Error {
+  code?: number;
+  info?: any;
+}
+
+
+export async function loginTeacher({
+  email,
+  password,
+}: AuthCredentials): Promise<AuthResponse> {
+  const response = await fetch(`${BACKEND}/teacher/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -23,7 +39,7 @@ export async function loginStudent({ email, password }) {
   });
 
   if (!response.ok) {
-    const error = new Error("Er is iets misgegaan tijdens het inloggen.");
+    const error: APIError = new Error("Er is iets misgegaan tijdens het inloggen.");
     error.code = response.status;
     error.info = await response.json();
     throw error;
@@ -32,9 +48,11 @@ export async function loginStudent({ email, password }) {
   return await response.json();
 }
 
-// Registreren als student
-export async function signupStudent({ email, password }) {
-  const response = await fetch(`${BACKEND}/student/auth/register`, {
+export async function signupTeacher({
+  email,
+  password,
+}: AuthCredentials): Promise<AuthResponse> {
+  const response = await fetch(`${BACKEND}/teacher/auth/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -43,7 +61,7 @@ export async function signupStudent({ email, password }) {
   });
 
   if (!response.ok) {
-    const error = new Error("Er is iets misgegaan tijdens het registreren.");
+    const error: APIError = new Error("Er is iets misgegaan tijdens het registreren.");
     error.code = response.status;
     error.info = await response.json();
     throw error;

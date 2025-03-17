@@ -14,32 +14,51 @@ import BoxBorder from "../../components/shared/BoxBorder";
 import { loginTeacher } from "../../util/teacher/httpTeacher";
 import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
 
-const LoginTeacher = () => {
-  const emailRef = useRef(null);
-  const passwordRef = useRef(null);
+interface LoginFormData {
+  email: string;
+  password: string;
+}
+
+interface LoginResponse {
+  token: string;
+}
+
+
+interface InputWithChecksHandle {
+  validateInput: () => boolean;
+  getValue: () => string;
+}
+
+const LoginTeacher: React.FC = () => {
+  const emailRef = useRef<InputWithChecksHandle | null>(null);
+  const passwordRef = useRef<InputWithChecksHandle | null>(null);
   const navigate = useNavigate();
 
-  const { mutate, isPending, isError, error } = useMutation({
+  const { mutate, isPending, isError, error } = useMutation<
+    LoginResponse,
+    Error,
+    LoginFormData
+  >({
     mutationFn: loginTeacher,
     onSuccess: (data) => {
-        const token = data.token;
-        const expires = new Date();
-        expires.setDate(expires.getDate() + 7);
-        localStorage.setItem("token", token);
-        localStorage.setItem("expiration", expires.toISOString());
+      const token = data.token;
+      const expires = new Date();
+      expires.setDate(expires.getDate() + 7);
+      localStorage.setItem("token", token);
+      localStorage.setItem("expiration", expires.toISOString());
 
-        navigate("/teacher/dashboard");
+      navigate("/teacher/dashboard");
     },
   });
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const emailValid = emailRef.current?.validateInput();
-    const passwordValid = passwordRef.current?.validateInput();
+    const emailValid = emailRef.current?.validateInput() ?? false;
+    const passwordValid = passwordRef.current?.validateInput() ?? false;
 
-    if (emailValid && passwordValid) {
-      const formData = {
+    if (emailValid && passwordValid && emailRef.current && passwordRef.current) {
+      const formData: LoginFormData = {
         email: emailRef.current.getValue(),
         password: passwordRef.current.getValue(),
       };
@@ -58,7 +77,7 @@ const LoginTeacher = () => {
               ref={emailRef}
               label="E-mailadres"
               inputType="email"
-              validate={(value) =>
+              validate={(value: string) =>
                 validateForm(value, [validateRequired, validateEmail])
               }
               placeholder="Voer je e-mailadres in"
@@ -67,17 +86,18 @@ const LoginTeacher = () => {
               ref={passwordRef}
               label="Wachtwoord"
               inputType="password"
-              validate={(value) =>
+              validate={(value: string) =>
                 validateForm(value, [
                   validateRequired,
-                  (v) => validateMinLength(v, 6),
+                  (v: string) => validateMinLength(v, 6),
                 ])
               }
               placeholder="Voer je wachtwoord in"
             />
             {isError && (
               <div className="c-r">
-                {error.info?.message || "Er is iets fout gelopen tijdens het inloggen"}
+                {(error as any)?.info?.message ||
+                  "Er is iets fout gelopen tijdens het inloggen"}
               </div>
             )}
             <div>

@@ -1,6 +1,10 @@
 import React from "react";
 
-const LoadingIndicatorButton = ({dark}) => {
+interface LoadingIndicatorButtonProps {
+  dark?: boolean; 
+}
+
+const LoadingIndicatorButton: React.FC<LoadingIndicatorButtonProps> = ({ dark }) => {
   return (
     <div className={`loading-indicator ${dark ? "dark" : ""}`}>
       <span className="dot"></span>

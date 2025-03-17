@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 import { Outlet, useLoaderData, useSubmit } from "react-router-dom";
-import { getTokenDuration } from "../../util/student/authStudent";
-import styles from "./RootLayoutDashboardStudent.module.css";
-import SideBarStudent from "./SideBarStudent.jsx";
+import { getTokenDuration } from "../../util/teacher/authTeacher.js";
+import styles from "./RootLayoutDashboardTeacher.module.css";
+import SideBarTeacher from "./SideBarTeacher.js";
+import React from "react";
 
-function RootLayoutDashboardStudent() {
+function RootLayoutDashboardTeacher() {
    const token = useLoaderData();
    const submit = useSubmit();
 
@@ -26,7 +27,7 @@ function RootLayoutDashboardStudent() {
    }, [token, submit]);
    return (
       <div className={styles.wrapper}>
-         <SideBarStudent></SideBarStudent>
+         <SideBarTeacher></SideBarTeacher>
          <main>
             {/* {navigation.state === 'loading' && <p>Loading...</p>} */}
             <Outlet />
@@ -35,4 +36,4 @@ function RootLayoutDashboardStudent() {
    );
 }
 
-export default RootLayoutDashboardStudent;
+export default RootLayoutDashboardTeacher;

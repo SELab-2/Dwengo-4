@@ -1,7 +1,8 @@
 import { Outlet } from "react-router-dom";
-import Nav from "./NavTeacher";
+import Nav from "./NavStudent";
+import React from "react";
 
-function RootLayoutTeacher() {
+function RootLayoutStudent() {
     return (
         <>
             <Nav />
@@ -13,4 +14,4 @@ function RootLayoutTeacher() {
     );
 }
 
-export default RootLayoutTeacher;
+export default RootLayoutStudent;

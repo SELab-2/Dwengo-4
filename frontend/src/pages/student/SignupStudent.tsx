@@ -14,26 +14,44 @@ import BoxBorder from "../../components/shared/BoxBorder";
 import { signupStudent } from "../../util/student/httpStudent";
 import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
 
-const SignupStudent = () => {
-  const emailRef = useRef(null);
-  const passwordRef = useRef(null);
+interface SignupFormData {
+  email: string;
+  password: string;
+}
+
+interface AuthResponse {
+  token: string;
+}
+
+interface InputWithChecksHandle {
+  validateInput: () => boolean;
+  getValue: () => string;
+}
+
+const SignupStudent: React.FC = () => {
+  const emailRef = useRef<InputWithChecksHandle | null>(null);
+  const passwordRef = useRef<InputWithChecksHandle | null>(null);
   const navigate = useNavigate();
 
-  const { mutate, isPending, isError, error } = useMutation({
+  const { mutate, isPending, isError, error } = useMutation<
+    AuthResponse,
+    Error,
+    SignupFormData
+  >({
     mutationFn: signupStudent,
     onSuccess: () => {
       navigate("/student/inloggen");
     },
   });
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const emailValid = emailRef.current?.validateInput();
-    const passwordValid = passwordRef.current?.validateInput();
+    const emailValid = emailRef.current?.validateInput() ?? false;
+    const passwordValid = passwordRef.current?.validateInput() ?? false;
 
-    if (emailValid && passwordValid) {
-      const formData = {
+    if (emailValid && passwordValid && emailRef.current && passwordRef.current) {
+      const formData: SignupFormData = {
         email: emailRef.current.getValue(),
         password: passwordRef.current.getValue(),
       };
@@ -52,7 +70,7 @@ const SignupStudent = () => {
               ref={emailRef}
               label="E-mailadres"
               inputType="email"
-              validate={(value) =>
+              validate={(value: string) =>
                 validateForm(value, [validateRequired, validateEmail])
               }
               placeholder="Voer je e-mailadres in"
@@ -61,17 +79,18 @@ const SignupStudent = () => {
               ref={passwordRef}
               label="Wachtwoord"
               inputType="password"
-              validate={(value) =>
+              validate={(value: string) =>
                 validateForm(value, [
                   validateRequired,
-                  (v) => validateMinLength(v, 6),
+                  (v: string) => validateMinLength(v, 6),
                 ])
               }
               placeholder="Voer je wachtwoord in"
             />
             {isError && (
               <div className="c-r">
-                {error.info?.message || "Er is iets fout gelopen tijdens het registreren"}
+                {(error as any)?.info?.message ||
+                  "Er is iets fout gelopen tijdens het registreren"}
               </div>
             )}
             <div>
