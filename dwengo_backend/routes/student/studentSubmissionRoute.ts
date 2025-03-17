@@ -4,9 +4,11 @@ import {protectStudent} from "../../middleware/studentAuthMiddleware";
 
 const router: Router = express.Router();
 
-router.get('/assignment/:assignmentId/', protectStudent, controller.getSubmissionsForAssignment)
+router.use(protectStudent);
 
-router.post('/assignment/:assignmentId/evaluation/:evaluationId', protectStudent, controller.createSubmission)
-router.get('/assignment/:assignmentId/evaluation/:evaluationId', protectStudent, controller.getSubmissionsForEvaluation)
+router.get('/assignment/:assignmentId/', controller.getSubmissionsForAssignment)
+
+router.post('/assignment/:assignmentId/evaluation/:evaluationId', controller.createSubmission)
+router.get('/assignment/:assignmentId/evaluation/:evaluationId', controller.getSubmissionsForEvaluation)
 
 export default router;

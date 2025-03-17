@@ -4,11 +4,13 @@ import {protectTeacher} from "../../middleware/teacherAuthMiddleware";
 
 const router: Router = express.Router();
 
-router.get('/student/:studentId', protectTeacher, controller.getSubmissionsForStudent);
-router.get('/team/:teamId', protectTeacher, controller.getSubmissionsForTeam);
+router.use(protectTeacher);
 
-router.get('/assignment/:assignmentId/student/:studentId', protectTeacher, controller.getAssignmentSubmissionsForStudent);
-router.get('/assignment/:assignmentId/team/:teamId', protectTeacher, controller.getAssignmentSubmissionsForTeam);
+router.get('/student/:studentId', controller.getSubmissionsForStudent);
+router.get('/team/:teamId', controller.getSubmissionsForTeam);
+
+router.get('/assignment/:assignmentId/student/:studentId', controller.getAssignmentSubmissionsForStudent);
+router.get('/assignment/:assignmentId/team/:teamId', controller.getAssignmentSubmissionsForTeam);
 
 
 export default router;
