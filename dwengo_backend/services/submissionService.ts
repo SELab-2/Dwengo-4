@@ -7,7 +7,6 @@ const prisma = new PrismaClient();
 export default class submissionService {
 
     static async createSubmission(studentId: number, evaluationId: string, assignmentId: number): Promise<Submission> {
-        // TODO problemen met type
         // Controleren of student in team zit voor deze assignment
         const team = await prisma.team.findFirst({
             where: {
