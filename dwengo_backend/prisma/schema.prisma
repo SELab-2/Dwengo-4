@@ -176,35 +176,35 @@ model LearningPath {
   updatedAt       DateTime          @updatedAt
   creatorId       Int
   creator         Teacher           @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator", onDelete: Cascade)
-  assignments     Assignment[]
-  questionGeneral QuestionGeneral[]
+  //assignments     Assignment[]
+  //questionGeneral QuestionGeneral[]
 }
 
 model LearningPathNode {
-  // _id bij Dwengo API
-  nodeId           String   @id @default(uuid())
-  learningPathId   String
-  // Bij een node hoort een leerobject
-  learningObjectId String
-  // Duid aan of dit de eerste node van een leerpad is
-  // Standaard op false, meer nodes die niet het begin gaan zijn, dan moet dit niet door de gebruiker steeds ingegeven worden.
-  start_node       Boolean  @default(false)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  nodeId        String @id @default(uuid())
+  learningPathId String
+  learningPath  LearningPath @relation(fields: [learningPathId], references: [id])
 
-  learningObject LearningObject @relation(fields: [learningObjectId], references: [id])
+  // Deze velden gebruik je voor lokale objecten:
+  localLearningObjectId String? // bv. ID uit je eigen 'LearningObject' tabel
 
-  // Een node kan meerdere transities hebben. Dit duidt aan wat de volgende node is en of er een eventuele conditie aan deze node vasthangt.
-  transitions LearningPathTransition[] @relation("TransitionNode")
+  // Deze velden gebruik je voor Dwengo-objecten:
+  dwengoHruid    String?
+  dwengoLanguage String?
+  dwengoVersion  Int?
 
-  // Een node hoort bij een leerpad
-  learningPath LearningPath @relation(fields: [learningPathId], references: [id])
+  // True als dit een extern (Dwengo) object is, false als lokaal
+  isExternal Boolean @default(false)
 
-  // Dit is om de relatie tussen een transitie en een node vast te leggen.
-  // Een transitie kan maar naar 1 volgende node gaan. 
-  // Dit is wat rare syntax, maar het is de enige manier om het in prisma werkende te krijgen.
+  start_node Boolean @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  transitions     LearningPathTransition[] @relation("TransitionNode")
   nextTransitions LearningPathTransition[] @relation("NextNode")
 }
+
+
 
 model LearningPathTransition {
   // _id bij Dwengo API
@@ -233,7 +233,7 @@ enum ContentType {
   TEXT_MARKDOWN
   IMAGE_IMAGE_BLOCK
   IMAGE_IMAGE
-  AUDO_MPEG
+  AUDIO_MPEG
   // Eigen toevoegingen
   VIDEO
   EVAL_MULTIPLE_CHOICE
@@ -275,10 +275,9 @@ model LearningObject {
   educationalGoals  EducationalGoal[]
   returnValue       ReturnValue?
   progress          LearningObjectProgress[]
-  QuestionSpecifics QuestionSpecific[]
+  //QuestionSpecifics QuestionSpecific[]
 
-  // Een leerobject kan voorkomen in verschillende nodes van verschillende leerpaden
-  nodes LearningPathNode[]
+
 }
 
 model EducationalGoal {
@@ -345,27 +344,34 @@ enum QuestionType {
 }
 
 model QuestionSpecific {
-  questionId       Int    @unique
-  learningObjectId String
+  questionId Int @unique
+  // Lokaal leerobject
+  localLearningObjectId String?
 
-  // Een QuestionSpecific is een vraag
-  question       Question       @relation(fields: [questionId], references: [id])
-  // Er kunnen meerdere vragen over een leerobject worden gesteld
-  learningObject LearningObject @relation(fields: [learningObjectId], references: [id], onDelete: Cascade)
+  // Dwengo-velden
+  dwengoHruid    String?
+  dwengoLanguage String?
+  dwengoVersion  Int?
 
-  @@id([questionId, learningObjectId])
+  isExternal Boolean @default(false)
+
+  question Question @relation(fields: [questionId], references: [id])
+
+  @@id([questionId])
 }
+
+
 
 model QuestionGeneral {
   questionId     Int    @unique
-  learningPathId String
+  pathRef   String
+  isExternal Boolean @default(false)
 
   // Een QuestionSpecific is een vraag
   question     Question     @relation(fields: [questionId], references: [id])
-  // Er kunnen meerdere vragen over een leerobject worden gesteld
-  learningPath LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  
 
-  @@id([questionId, learningPathId])
+  @@id([questionId])
 }
 
 model Question {
@@ -404,11 +410,12 @@ model QuestionMessage {
 /// Taken en indieningen
 model Assignment {
   id               Int               @id @default(autoincrement())
-  learningPathId   String
+  pathRef    String
+  isExternal Boolean @default(false)
   deadline         DateTime
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
-  learningPath     LearningPath      @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  
   Questions        Question[]
   classAssignments ClassAssignment[]
   teamAssignments  TeamAssignment[]
