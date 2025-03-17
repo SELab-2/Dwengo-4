@@ -27,7 +27,7 @@ export const isTeacher = async (req: AuthenticatedRequest, res: Response, next: 
 };
 
 export const protectTeacher = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     let token: string | undefined;
 
     if (

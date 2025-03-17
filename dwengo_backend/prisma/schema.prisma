@@ -439,8 +439,8 @@ model Team {
 
   // Een team bestaat uit studenten
   students        Student[]
-  // Een verwijzing naar de assignments van dit team
-  teamAssignments TeamAssignment[]
+  // Een verwijzing naar de assignment van dit team
+  teamAssignment TeamAssignment?
 
   // De indieningen van een team
   class       Class        @relation(fields: [classId], references: [id])
@@ -449,7 +449,7 @@ model Team {
 }
 
 model TeamAssignment {
-  teamId       Int
+  teamId       Int  @unique
   assignmentId Int
 
   team       Team       @relation(fields: [teamId], references: [id])
