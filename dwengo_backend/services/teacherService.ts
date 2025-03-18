@@ -2,23 +2,20 @@ import {PrismaClient, Teacher, User} from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export default class TeacherService {
-    static async findTeacherById(userId: number): Promise<(Teacher & { user: User })> {
-        return prisma.teacher.findUniqueOrThrow({
-            where: {userId: userId},
-            include: {
-                user: true
-            },
-        });
-    }
+export const findTeacherById = async (userId: number, inclusions: any): Promise<Teacher> => {
+    return prisma.teacher.findUniqueOrThrow({
+        where: {userId: userId},
+        include: inclusions,
+    });
+}
 
-    static async getAllTeachers(): Promise<Teacher[]> {
-        return prisma.teacher.findMany({
-            include: {
-                user: true, // Inclusief gebruikersinformatie
-            },
-        });
-    };
+export const getAllTeachers = async (): Promise<Teacher[]> => {
+    return prisma.teacher.findMany({
+        include: {
+            user: true, // Inclusief gebruikersinformatie
+        },
+    });
+};
 
     static async getTeachersByClass(classId: number): Promise<Teacher[]> {
         return prisma.teacher.findMany({
