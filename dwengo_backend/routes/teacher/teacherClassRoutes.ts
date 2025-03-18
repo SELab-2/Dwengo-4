@@ -53,7 +53,15 @@ import {
 =======
   updateJoinRequestStatus,
 } from "../../controllers/joinrequest/joinRequestController";
+<<<<<<< HEAD
 >>>>>>> 048bf9e (get classes for students and teachers)
+=======
+import { validateRequest } from "../../middleware/validateRequest";
+import {
+  createInviteBodySchema,
+  createInviteParamsSchema,
+} from "../../zodSchemas/inviteSchemas";
+>>>>>>> b9274c4 (request validation for invite creation)
 
 const router = express.Router();
 
@@ -114,7 +122,15 @@ router.get("/invites", getPendingInvitesForTeacher);
 =======
 
 // routes for invites
-router.post("/:classId/invites", createInvite);
+router.post(
+  "/:classId/invites",
+  validateRequest(
+    "invalid request for invite creation",
+    createInviteBodySchema,
+    createInviteParamsSchema
+  ),
+  createInvite
+);
 router.get("/:classId/invites", getPendingInvitesForClass);
 router.delete("/:classId/invites/:inviteId", deleteInvite);
 router.get("/invites", getPendingInvitesForTeacher);
