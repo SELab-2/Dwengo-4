@@ -26,16 +26,17 @@ export const getStudentsByClass = async (classId: number): Promise<Student[]> =>
 export const getStudentsByTeamAssignment = async (assignmentId: number, teamId: number): Promise<Student[]> => {
     return prisma.student.findMany({
         where: {
-            teamAssignments: {
-                some: { // Check if the student has any team assignment matching the criteria
-                    assignmentId,
-                    teamId,
-                },
-            },
+            Team: {
+                some: {
+                    id: teamId,
+                    teamAssignment: {
+                        assignmentId: assignmentId
+                    }
+                }
+            }
         },
         include: {
-            user: true, // Include user info if needed
-            teamAssignments: true, // Include the student's team assignments if necessary
-        },
+            user: true
+        }
     });
 };
