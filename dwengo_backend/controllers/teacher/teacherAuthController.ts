@@ -2,12 +2,9 @@ import {Role, User} from '@prisma/client';
 import asyncHandler from 'express-async-handler';
 import bcrypt from 'bcryptjs';
 import { Request, Response } from 'express';
-import { UserController } from "../user/userController";
-import { TeacherController } from "./teacherController";
+import * as userService from "../../services/userService";
+import * as teacherService from "../../services/teacherService";
 import { generateToken } from "../../helpers/generateToken";
-
-const userController = new UserController();
-const teacherController = new TeacherController();
 
 interface RegisterTeacherBody {
   firstName: string;
@@ -41,7 +38,7 @@ export const registerTeacher = asyncHandler(async (req: Request, res: Response):
   }
 
   // Controleer of er al een gebruiker bestaat met dit e-mailadres
-  const existingUser: User | null = await userController.findUser(email);
+  const existingUser: User | null = await userService.findUser(email);
 
   if (existingUser) {
     res.status(400);
@@ -52,7 +49,7 @@ export const registerTeacher = asyncHandler(async (req: Request, res: Response):
   const hashedPassword: string = await bcrypt.hash(password, 10);
 
   // Maak eerst een User-record aan met role "TEACHER"
-  await userController.createUser(
+  await userService.createUser(
       firstName, lastName, email, hashedPassword, Role.TEACHER
   );
 
@@ -77,7 +74,7 @@ export const loginTeacher = asyncHandler(async (req: Request, res: Response): Pr
   }
 
   // Zoek eerst de gebruiker
-  const user: User = await userController.findUserByEmail(email);
+  const user: User = await userService.findUserByEmail(email);
   if (!user || user.role !== "TEACHER") {
     res.status(401);
     throw new Error("Ongeldige gebruiker");
@@ -85,7 +82,7 @@ export const loginTeacher = asyncHandler(async (req: Request, res: Response): Pr
 
   // Haal het gekoppelde Teacher-record op
   // Hier geen type aan proberen geven, zorgt enkel voor problemen
-  const teacher: any = await teacherController.findTeacherById(user.id, {user: true});
+  const teacher: any = await teacherService.findTeacherById(user.id, {user: true});
 
   if (!teacher.user) {
     res.status(401);

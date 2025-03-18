@@ -3,8 +3,8 @@ import asyncHandler from 'express-async-handler';
 import bcrypt from 'bcryptjs';
 import { Request, Response } from 'express';
 import {generateToken} from "../../helpers/generateToken";
-import {UserController} from "../user/userController";
-import {StudentController} from "./studentController";
+import * as userService from "../../services/userService";
+import * as studentService from "../../services/studentService";
 
 interface RegisterStudentBody {
   firstName: string;
@@ -12,9 +12,6 @@ interface RegisterStudentBody {
   email: string;
   password: string;
 }
-
-const userController = new UserController();
-const studentController = new StudentController();
 
 // @desc    Registreer een nieuwe leerling
 // @route   POST /student/auth/register
@@ -41,7 +38,7 @@ export const registerStudent = asyncHandler(async (req: Request, res: Response):
   }
 
   // Controleer of er al een gebruiker bestaat met dit e-mailadres
-  const existingUser: User = await userController.findUserByEmail(email);
+  const existingUser: User = await userService.findUserByEmail(email);
   if (existingUser) {
     res.status(400);
     throw new Error("Gebruiker bestaat al");
@@ -51,7 +48,7 @@ export const registerStudent = asyncHandler(async (req: Request, res: Response):
   const hashedPassword: string = await bcrypt.hash(password, 10);
 
   // Maak eerst een User-record aan met role "STUDENT"
-  await userController.createUser(
+  await userService.createUser(
       firstName, lastName, email, hashedPassword, Role.STUDENT
   )
 
@@ -76,7 +73,7 @@ export const loginStudent = asyncHandler(async (req: Request, res: Response): Pr
   }
 
   // Zoek eerst de gebruiker
-  const user: User = await userController.findUserByEmail(email);
+  const user: User = await userService.findUserByEmail(email);
   if (!user || user.role !== "STUDENT") {
     res.status(401);
     throw new Error("Ongeldige gebruiker");
@@ -84,7 +81,7 @@ export const loginStudent = asyncHandler(async (req: Request, res: Response): Pr
 
   // Haal het gekoppelde Student-record op
   // Hier geen type aan proberen koppelen, zorgt enkel voor problemen
-  const student: any = await studentController.findStudentById(user.id, {user: true});
+  const student: any = await studentService.findStudentById(user.id, {user: true});
 
   if (!student || !student.user) {
     res.status(401);
