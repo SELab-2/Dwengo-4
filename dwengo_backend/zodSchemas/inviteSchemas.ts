@@ -1,15 +1,16 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * schemas for invite creation route (POST /teacher/classes/:classId/invites)
  */
 export const createInviteBodySchema = z.object({
-    otherTeacherId: z.number().int().positive()
+    otherTeacherId: z.number().int().positive(),
 });
 export const createInviteParamsSchema = z.object({
-    classId: z.coerce.number({message: "classId should be a number"})
-        .int({message: "classId should be an integer"})
-        .positive({message: "classId should be a positive integer"})
+    classId: z.coerce
+        .number({ message: "classId should be a number" })
+        .int({ message: "classId should be an integer" })
+        .positive({ message: "classId should be a positive integer" }),
 });
 
 /**
@@ -21,12 +22,13 @@ export const getClassInvitesParamsSchema = createInviteParamsSchema; // also jus
  * schemas for update invite route (PATCH /teacher/classes/invites/:inviteId)
  */
 export const updateInviteBodySchema = z.object({
-    action: z.enum(["accept", "decline"])
+    action: z.enum(["accept", "decline"]),
 });
 export const updateInviteParamsSchema = z.object({
-    inviteId: z.coerce.number({message: "inviteId should be a number"})
-        .int({message: "inviteId should be an integer"})
-        .positive({message: "inviteId should be a positive integer"})
+    inviteId: z.coerce
+        .number({ message: "inviteId should be a number" })
+        .int({ message: "inviteId should be an integer" })
+        .positive({ message: "inviteId should be a positive integer" }),
 });
 
 /**
