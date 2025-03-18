@@ -1,4 +1,4 @@
-import { afterAll, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import prisma from "./helpers/prisma";
 import app from "../index";
@@ -194,6 +194,33 @@ describe('invite tests', async () => {
         "Er bestaat al een pending uitnodiging voor deze leerkracht en klas"
       );
       expect(status).toBe(409);
+    });
+    it('should respond with a `400` status code when request body/params are incorrect', async () => {
+      await addTeacherToClass(teacherUser1.id, classroom.id);
+
+      // try to create an invite with an invalid body and params
+      const { status, body } = await request(app)
+        .post(`/teacher/classes/${"invalidid"}/invites`)
+        .set("Authorization", `Bearer ${teacherUser1.token}`)
+        .send({
+          otherTeacherId: "sldk"
+        });
+
+      expect(status).toBe(400);
+      expect(body.error).toBe("validation error");
+      expect(body.message).toBe("invalid request for invite creation");
+
+      expect(body.details).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ field: "otherTeacherId", source: "body" }),
+          expect.objectContaining({ field: "classId", source: "params" }),
+        ])
+      );
+
+      // verify no invite was created
+      await prisma.invite.findMany().then((invites) => {
+        expect(invites.length).toBe(0);
+      });
     });
   });
   describe("[GET] /teacher/classes/invites", async () => {

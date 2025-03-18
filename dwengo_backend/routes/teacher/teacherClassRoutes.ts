@@ -18,6 +18,8 @@ import {
   getJoinRequestsByClass,
   updateJoinRequestStatus
 } from '../../controllers/joinrequest/joinRequestController';
+import { validateRequest } from '../../middleware/validateRequest';
+import { createInviteBodySchema, createInviteParamsSchema } from '../../zodSchemas/inviteSchemas';
 
 const router = express.Router();
 
@@ -32,7 +34,11 @@ router.patch("/:classId/regenerate-join-link", regenerateJoinLink);
 router.get("/:classId/students", getClassroomStudents);
 
 // routes for invites
-router.post("/:classId/invites", createInvite);
+router.post(
+  "/:classId/invites", 
+  validateRequest("invalid request for invite creation", createInviteBodySchema, createInviteParamsSchema), 
+  createInvite
+);
 router.get("/:classId/invites", getPendingInvitesForClass);
 router.delete("/:classId/invites/:inviteId", deleteInvite);
 router.get("/invites", getPendingInvitesForTeacher);
