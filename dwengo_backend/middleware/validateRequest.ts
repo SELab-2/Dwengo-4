@@ -1,6 +1,9 @@
 import { Response, NextFunction } from "express";
 import { z } from "zod";
 import { AuthenticatedRequest } from "./teacherAuthMiddleware";
+import { Response, NextFunction } from "express";
+import { z } from "zod";
+import { AuthenticatedRequest } from "./teacherAuthMiddleware";
 
 const formatZodErrors = (error: z.ZodError, source: string) => {
   return error.issues.map((issue) => ({
@@ -14,6 +17,7 @@ const formatZodErrors = (error: z.ZodError, source: string) => {
  * use before controller to validate request body and params
  * all arguments can be undefined as not every route has a body, params, or query
  * if a schema is provided, it will be validated against the request object
+ * @param customErrorMessage a custom error message for in the response
  * @param bodySchema a zod schema for the request body
  * @param paramsSchema a zod schema for the request params
  * @param querySchema a zod schema for the request query

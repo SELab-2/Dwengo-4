@@ -1,5 +1,7 @@
 import express from "express";
 import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
+import express from "express";
+import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 import {
 <<<<<<< HEAD
     createClassroom,
@@ -35,7 +37,6 @@ import {
   getJoinLink,
   regenerateJoinLink,
   getClassroomStudents,
-  getTeacherClasses,
 } from "../../controllers/teacher/teacherClassController";
 import {
   createInvite,

@@ -196,7 +196,7 @@ describe("invite tests", async () => {
       );
       expect(status).toBe(409);
     });
-    it('should respond with a `400` status code when request body/params are incorrect', async () => {
+    it("should respond with a `400` status code when request body/params are incorrect", async () => {
       // try to create an invite with an invalid body and params
       const { status, body } = await request(app)
         .post(`/teacher/classes/${"invalidid"}/invites`)
@@ -211,8 +211,14 @@ describe("invite tests", async () => {
 
       expect(body.details).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ field: "otherTeacherId", source: "body" }),
-          expect.objectContaining({ field: "classId", source: "params" }),
+          expect.objectContaining({
+            field: "otherTeacherId",
+            source: "body",
+          }),
+          expect.objectContaining({
+            field: "classId",
+            source: "params",
+          }),
         ])
       );
 
@@ -221,19 +227,22 @@ describe("invite tests", async () => {
         expect(invites.length).toBe(0);
       });
     });
-    it('should respond with a `400` status code when the request body is missing', async () => {
+    it("should respond with a `400` status code when the request body is missing", async () => {
       await addTeacherToClass(teacherUser1.id, classroom.id);
       const { status: status, body: body } = await request(app)
         .post(`/teacher/classes/${classroom.id}/invites`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
-        .send({});  // empty body
+        .send({}); // empty body
 
       expect(status).toBe(400);
       expect(body.error).toBe("validation error");
       expect(body.message).toBe("invalid request for invite creation");
       expect(body.details).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ field: "otherTeacherId", source: "body" }),
+          expect.objectContaining({
+            field: "otherTeacherId",
+            source: "body",
+          }),
         ])
       );
 
@@ -335,7 +344,10 @@ describe("invite tests", async () => {
       expect(body.message).toBe("invalid request for invite update");
       expect(body.details).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ field: "action", source: "body" }),
+          expect.objectContaining({
+            field: "action",
+            source: "body",
+          }),
         ])
       );
 
@@ -410,7 +422,7 @@ describe("invite tests", async () => {
       expect(checkInvite).not.toBeNull();
       expect(checkInvite!.status).toStrictEqual(invite.status);
     });
-    it('should respond with a `400` status code when the inviteId param is not a positive integer', async () => {
+    it("should respond with a `400` status code when the inviteId param is not a positive integer", async () => {
       // try to update an invite with an invalid inviteId
       const { status, body } = await request(app)
         .patch(`/teacher/classes/invites/${"invalidid"}`)
@@ -424,7 +436,10 @@ describe("invite tests", async () => {
       expect(body.message).toBe("invalid request for invite update");
       expect(body.details).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ field: "inviteId", source: "params" }),
+          expect.objectContaining({
+            field: "inviteId",
+            source: "params",
+          }),
         ])
       );
     });
@@ -432,18 +447,13 @@ describe("invite tests", async () => {
   describe("[DELETE] /teacher/classes/:classId/invites/:inviteId", async () => {
     let invite: Invite;
     beforeEach(async () => {
-    let invite: Invite;
-    beforeEach(async () => {
       // set up scenario with a valid invite
       await addTeacherToClass(teacherUser1.id, classroom.id);
-      invite = await createInvite(
       invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
         classroom.id
       );
-    });
-    it("should respond with a `200` status code and the deleted invite", async () => {
     });
     it("should respond with a `200` status code and the deleted invite", async () => {
       // test deleting the invite
@@ -463,7 +473,8 @@ describe("invite tests", async () => {
       expect(deletedInvite).toBeNull();
     });
     it("should respond with a `403` status code when the teacher trying to delete the invite is not part of the class", async () => {
-      const teacherUser3: User & { teacher: Teacher; token: string } = await createTeacher("Jane", "Doe", "jane.doe@gmail.com");
+      const teacherUser3: User & { teacher: Teacher; token: string } =
+        await createTeacher("Jane", "Doe", "jane.doe@gmail.com");
       const { status, body } = await request(app)
         .delete(`/teacher/classes/${classroom.id}/invites/${invite.inviteId}`)
         .set("Authorization", `Bearer ${teacherUser3.token}`);
@@ -479,11 +490,12 @@ describe("invite tests", async () => {
       expect(checkInvite).toStrictEqual(invite);
     });
     it("should let another teacher of the class delete the invite, even if they didn't create the invite", async () => {
-      const teacherUser3: User & { teacher: Teacher; token: string } = await createTeacher("Jane", "Doe", "jane.doe@gmail.com");
+      const teacherUser3: User & { teacher: Teacher; token: string } =
+        await createTeacher("Jane", "Doe", "jane.doe@gmail.com");
       await addTeacherToClass(teacherUser3.id, classroom.id);
       const { status, body } = await request(app)
         .delete(`/teacher/classes/${classroom.id}/invites/${invite.inviteId}`)
-        .set("Authorization", `Bearer ${teacherUser3.token}`);  // teacher3 didn't create the invite, but is part of the class
+        .set("Authorization", `Bearer ${teacherUser3.token}`); // teacher3 didn't create the invite, but is part of the class
 
       expect(status).toBe(200);
       expect(body.invite).toStrictEqual(invite);
@@ -508,13 +520,14 @@ describe("invite tests", async () => {
         .delete(`/teacher/classes/${classroom.id}/invites/${invite.inviteId}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
-      console.log(body);
-      // TODO catch prisma errors and make them more user-friendly to read
-
+      expect(status).toBe(404);
+      expect(body.error).toBe("Resource not found"); // this error message is defined in `errorMiddleware.ts`
     });
     it("should respond with a `400` status code when the params are not correct", async () => {
       const { status, body } = await request(app)
-        .delete(`/teacher/classes/${"invalidclassid"}/invites/${"invalidinviteid"}`)
+        .delete(
+          `/teacher/classes/${"invalidclassid"}/invites/${"invalidinviteid"}`
+        )
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(400);
@@ -522,8 +535,14 @@ describe("invite tests", async () => {
       expect(body.message).toBe("invalid request params");
       expect(body.details).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ field: "classId", source: "params" }),
-          expect.objectContaining({ field: "inviteId", source: "params" }),
+          expect.objectContaining({
+            field: "classId",
+            source: "params",
+          }),
+          expect.objectContaining({
+            field: "inviteId",
+            source: "params",
+          }),
         ])
       );
     });
@@ -576,7 +595,10 @@ describe("invite tests", async () => {
       expect(body.message).toBe("invalid request params");
       expect(body.details).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ field: "classId", source: "params" }),
+          expect.objectContaining({
+            field: "classId",
+            source: "params",
+          }),
         ])
       );
     });

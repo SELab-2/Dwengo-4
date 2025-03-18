@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { z } from "zod";
 
 /**
  * schemas for invite creation route (POST /teacher/classes/:classId/invites)
