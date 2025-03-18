@@ -58,7 +58,6 @@ app.options("*", (req, res) => {
 // JSON-parser middleware
 app.use(express.json());
 
-
 // Routes voor Teacher (Classes)
 app.use("/teacher/classes", teacherClassRoutes);
 
@@ -72,7 +71,7 @@ app.use("/teacher/learningPaths", teacherLocalLearningPathRoutes);
 app.use("/teacher/learningPaths", teacherLocalLearningPathNodesRoutes);
 
 // Routes voor Teacher (Teams)
-app.use("/teacher/assignments/:assignmentId/team", teacherTeamsRoutes);
+app.use("/teacher/team/assignments/:assignmentId", teacherTeamsRoutes);
 
 // Routes voor Student (Auth)
 app.use("/student/auth", studentAuthRoutes);
