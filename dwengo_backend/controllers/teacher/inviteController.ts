@@ -63,12 +63,10 @@ export const updateInviteStatus = asyncHandler(async (req: AuthenticatedRequest,
     if (action == "accept") {
         const invite: Invite = await inviteService.acceptInviteAndJoinClass(teacherId, inviteId);
         res.status(200).json({ invite });
-    } else if (action == "decline") {
+    } else { // action == "decline" (ensured by validation middleware)
         const invite: Invite = await inviteService.declineInvite(teacherId, inviteId);
         res.status(200).json({ invite });
-    } else {
-        res.status(400).json({ error: "Action must be 'accept' or 'decline'" });
-    }
+    } 
 });
 
 

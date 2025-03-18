@@ -19,7 +19,14 @@ import {
   updateJoinRequestStatus
 } from '../../controllers/joinrequest/joinRequestController';
 import { validateRequest } from '../../middleware/validateRequest';
-import { createInviteBodySchema, createInviteParamsSchema } from '../../zodSchemas/inviteSchemas';
+import { 
+  createInviteBodySchema, 
+  createInviteParamsSchema,
+  deleteInviteParamsSchema,
+  getClassInvitesParamsSchema,
+  updateInviteBodySchema,
+  updateInviteParamsSchema 
+} from '../../zodSchemas/inviteSchemas';
 
 const router = express.Router();
 
@@ -39,10 +46,23 @@ router.post(
   validateRequest("invalid request for invite creation", createInviteBodySchema, createInviteParamsSchema), 
   createInvite
 );
-router.get("/:classId/invites", getPendingInvitesForClass);
-router.delete("/:classId/invites/:inviteId", deleteInvite);
-router.get("/invites", getPendingInvitesForTeacher);
-router.patch("/invites/:inviteId", updateInviteStatus);
+router.get(
+  "/:classId/invites",
+  validateRequest("invalid request params", undefined, getClassInvitesParamsSchema), 
+  getPendingInvitesForClass
+);
+router.delete(
+  "/:classId/invites/:inviteId", 
+  validateRequest("invalid request params", undefined, deleteInviteParamsSchema),
+  deleteInvite);
+router.patch(
+  "/invites/:inviteId",
+  validateRequest("invalid request for invite update", updateInviteBodySchema, updateInviteParamsSchema),
+  updateInviteStatus);
+router.get(
+  "/invites",
+  getPendingInvitesForTeacher
+);
 
 // routes for join requests
 router.get("/:classId/join-requests", getJoinRequestsByClass);
