@@ -60,6 +60,10 @@ import { validateRequest } from "../../middleware/validateRequest";
 import {
   createInviteBodySchema,
   createInviteParamsSchema,
+  deleteInviteParamsSchema,
+  getClassInvitesParamsSchema,
+  updateInviteBodySchema,
+  updateInviteParamsSchema,
 } from "../../zodSchemas/inviteSchemas";
 >>>>>>> b9274c4 (request validation for invite creation)
 
@@ -131,11 +135,39 @@ router.post(
   ),
   createInvite
 );
-router.get("/:classId/invites", getPendingInvitesForClass);
-router.delete("/:classId/invites/:inviteId", deleteInvite);
+router.get(
+  "/:classId/invites",
+  validateRequest(
+    "invalid request params",
+    undefined,
+    getClassInvitesParamsSchema
+  ),
+  getPendingInvitesForClass
+);
+router.delete(
+  "/:classId/invites/:inviteId",
+  validateRequest(
+    "invalid request params",
+    undefined,
+    deleteInviteParamsSchema
+  ),
+  deleteInvite
+);
+router.patch(
+  "/invites/:inviteId",
+  validateRequest(
+    "invalid request for invite update",
+    updateInviteBodySchema,
+    updateInviteParamsSchema
+  ),
+  updateInviteStatus
+);
 router.get("/invites", getPendingInvitesForTeacher);
+<<<<<<< HEAD
 router.patch("/invites/:inviteId", updateInviteStatus);
 >>>>>>> 048bf9e (get classes for students and teachers)
+=======
+>>>>>>> da44f98 (add request validation for other invite routes + tests)
 
 // routes for join requests
 router.get("/:classId/join-requests", getJoinRequestsByClass);
