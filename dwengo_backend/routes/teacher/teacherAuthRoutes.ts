@@ -1,7 +1,8 @@
-import express from 'express';
-import { registerTeacher, loginTeacher } from '../../controllers/teacher/teacherAuthController';
+import express, {Router} from 'express';
+import { loginTeacher } from '../../controllers/teacher/teacherAuthController';
+import { registerTeacher } from "../../controllers/userController";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // Route voor registratie van een leerkracht
 router.post("/register", registerTeacher);
