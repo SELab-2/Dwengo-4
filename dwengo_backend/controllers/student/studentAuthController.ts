@@ -1,20 +1,10 @@
-import { PrismaClient, User } from "@prisma/client";
+import { Role, User } from "@prisma/client";
 import asyncHandler from "express-async-handler";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
-
-const prisma = new PrismaClient();
-
-// Functie om een JWT-token te genereren
-const generateToken = (id: number | string): string => {
-  if (!process.env.JWT_SECRET) {
-    throw new Error(
-      "JWT_SECRET is niet gedefinieerd in de omgevingsvariabelen"
-    );
-  }
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
-};
+import { generateToken } from "../../helpers/generateToken";
+import { UserController } from "../user/userController";
+import { StudentController } from "./studentController";
 
 interface RegisterStudentBody {
   firstName: string;
@@ -22,6 +12,9 @@ interface RegisterStudentBody {
   email: string;
   password: string;
 }
+
+const userController = new UserController();
+const studentController = new StudentController();
 
 // @desc    Registreer een nieuwe leerling
 // @route   POST /student/auth/register
@@ -50,9 +43,7 @@ export const registerStudent = asyncHandler(
     }
 
     // Controleer of er al een gebruiker bestaat met dit e-mailadres
-    const existingUser: User | null = await prisma.user.findUnique({
-      where: { email },
-    });
+    const existingUser: User = await userController.findUserByEmail(email);
     if (existingUser) {
       res.status(400);
       throw new Error("Gebruiker bestaat al");
@@ -62,22 +53,13 @@ export const registerStudent = asyncHandler(
     const hashedPassword: string = await bcrypt.hash(password, 10);
 
     // Maak eerst een User-record aan met role "STUDENT"
-    const newUser: User = await prisma.user.create({
-      data: {
-        firstName,
-        lastName,
-        email,
-        password: hashedPassword,
-        role: "STUDENT",
-      },
-    });
-
-    // Maak vervolgens het gekoppelde Student-record
-    await prisma.student.create({
-      data: {
-        userId: newUser.id,
-      },
-    });
+    await userController.createUser(
+      firstName,
+      lastName,
+      email,
+      hashedPassword,
+      Role.STUDENT
+    );
 
     res.status(201).json({ message: "Leerling succesvol geregistreerd" });
   }
@@ -93,7 +75,7 @@ interface LoginStudentBody {
 // @access  Public
 
 export const loginStudent = asyncHandler(
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body as LoginStudentBody;
 
     // Basisvalidatie voor e-mail
@@ -103,16 +85,16 @@ export const loginStudent = asyncHandler(
     }
 
     // Zoek eerst de gebruiker
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user: User = await userController.findUserByEmail(email);
     if (!user || user.role !== "STUDENT") {
       res.status(401);
       throw new Error("Ongeldige gebruiker");
     }
 
     // Haal het gekoppelde Student-record op
-    const student = await prisma.student.findUnique({
-      where: { userId: user.id },
-      include: { user: true },
+    // Hier geen type aan proberen koppelen, zorgt enkel voor problemen
+    const student: any = await studentController.findStudentById(user.id, {
+      user: true,
     });
 
     if (!student || !student.user) {
