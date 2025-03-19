@@ -83,14 +83,10 @@ export class AssignmentTeacherController {
     req: AuthenticatedRequest,
     res: Response
   ): Promise<void> => {
-    console.log("hallo");
     try {
-      console.log("hallo");
       const assignmentId: number = parseInt(req.params.assignmentId);
       const teacherId: number = getUserFromAuthRequest(req).id;
-      console.log("AAAAAAAAAAAAAAA");
       await teacherAssignmentService.deleteAssignment(assignmentId, teacherId);
-      console.log("AAAAAAAAAAAAAAA");
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete assignment" });
