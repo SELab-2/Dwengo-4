@@ -19,7 +19,7 @@ const router: Router = express.Router();
 // "/teacher/team/assignments/:assignmentId"
 
 // Route to create teams in an assignment
-router.post("class/:classId", protectTeacher, makeAssignmentIdParamValid, ensureTeamsParamValidTeamDivision, createTeamInAssignment);
+router.post("/class/:classId", protectTeacher, makeAssignmentIdParamValid, ensureTeamsParamValidTeamDivision, createTeamInAssignment);
 
 // Route to get all teams in an assignment
 router.get("/", protectTeacher, makeAssignmentIdParamValid, getTeamsInAssignment);
