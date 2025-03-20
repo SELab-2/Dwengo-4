@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import prisma from "./helpers/prisma";
 import app from "../index";
-import { Class, Teacher, User } from "@prisma/client";
+import { Class, Student, Teacher, User } from "@prisma/client";
 import {
     addStudentToClass,
     addTeacherToClass,
@@ -24,57 +24,77 @@ describe("classroom tests", () => {
         // create a class
         classroom = await createClass("5A", "ABCD");
     });
-    describe("GET /teacher/classes", () => {
-        it("should respond with a `200` status code and a list of classes", async () => {
+    describe("GET /teacher/classes, GET /student/classes", () => {
+        let classroom2: Class;
+        let studentUser: User & { student: Student; token: string };
+        beforeEach(async () => {
             // add teacherUser1 to some classes
             await addTeacherToClass(teacherUser1.id, classroom.id);
-            const classroom2: Class = await createClass("6A", "EFGH");
+            classroom2 = await createClass("6A", "EFGH");
             await addTeacherToClass(teacherUser1.id, classroom2.id);
-
-            // now test getting the classes
-            const { status, body } = await request(app)
-                .get("/teacher/classes")
-                .set("Authorization", `Bearer ${teacherUser1.token}`);
-
-            expect(status).toBe(200);
-            expect(body.classes).toBeDefined();
-            expect(body.classes).toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        id: classroom.id,
-                    }),
-                    expect.objectContaining({
-                        id: classroom2.id,
-                    }),
-                ])
-            );
-        });
-    });
-    describe("GET /student/classes", () => {
-        it("should respond with a `200` status code and a list of classes", async () => {
             // create a student and add them to some classes
-            const studentUser = await createStudent("Alice", "Anderson", "alan@gmail.com");
-            await addStudentToClass(studentUser.id, classroom.id);
-            const classroom2: Class = await createClass("6A", "EFGH");
+            studentUser = await createStudent("Alice", "Anderson", "alan@gmail.com");
+            addStudentToClass(studentUser.id, classroom.id);
             await addStudentToClass(studentUser.id, classroom2.id);
+        });
+        describe("GET /teacher/classes", () => {
+            it("should respond with a `200` status code and a list of classes", async () => {
+                // now test getting the classes
+                const { status, body } = await request(app)
+                    .get("/teacher/classes")
+                    .set("Authorization", `Bearer ${teacherUser1.token}`);
 
-            // now test getting the classes
-            const { status, body } = await request(app)
-                .get("/student/classes")
-                .set("Authorization", `Bearer ${studentUser.token}`);
+                expect(status).toBe(200);
+                expect(body.classes).toBeDefined();
+                expect(body.classes).toEqual(
+                    expect.arrayContaining([
+                        expect.objectContaining({
+                            id: classroom.id,
+                        }),
+                        expect.objectContaining({
+                            id: classroom2.id,
+                        }),
+                    ])
+                );
+            });
+            it("shouldn't allow a student to get the classes via the teacher route", async () => {
+                const { status, body } = await request(app)
+                    .get("/teacher/classes")
+                    .set("Authorization", `Bearer ${studentUser.token}`);
 
-            expect(status).toBe(200);
-            expect(body.classes).toBeDefined();
-            expect(body.classes).toEqual(
-                expect.arrayContaining([
-                    expect.objectContaining({
-                        id: classroom.id,
-                    }),
-                    expect.objectContaining({
-                        id: classroom2.id,
-                    }),
-                ])
-            );
+                expect(body.classes).not.toBeDefined();
+                expect(status).toBe(401);
+                expect(body.error).toBe("Leerkracht niet gevonden.");
+            });
+        });
+        describe("GET /student/classes", () => {
+            it("should respond with a `200` status code and a list of classes", async () => {
+                const { status, body } = await request(app)
+                    .get("/student/classes")
+                    .set("Authorization", `Bearer ${studentUser.token}`);
+
+                expect(status).toBe(200);
+                expect(body.classes).toBeDefined();
+                expect(body.classes).toEqual(
+                    expect.arrayContaining([
+                        expect.objectContaining({
+                            id: classroom.id,
+                        }),
+                        expect.objectContaining({
+                            id: classroom2.id,
+                        }),
+                    ])
+                );
+            });
+            it("shouldn't allow a teacher to get the classes via the student route", async () => {
+                const { status, body } = await request(app)
+                    .get("/student/classes")
+                    .set("Authorization", `Bearer ${teacherUser1.token}`);
+
+                expect(body.classes).not.toBeDefined();
+                expect(status).toBe(401);
+                expect(body.error).toBe("Student niet gevonden.");
+            });
         });
     });
     describe("POST /teacher/classes", () => {
