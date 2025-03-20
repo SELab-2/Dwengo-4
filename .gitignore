@@ -29,3 +29,6 @@ coverage/
 # Build output
 dist/
 build/
+
+# migrations
+dwengo_backend/prisma/migrations/
