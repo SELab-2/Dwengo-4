@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, useLoaderData, useSubmit } from "react-router-dom";
 import { getTokenDuration } from "../../util/student/authStudent";
+import styles from "./RootLayoutDashboardStudent.module.css";
 import React from "react";
 
 const RootLayoutDashboardStudent: React.FC = () => {

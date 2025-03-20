@@ -1,5 +1,5 @@
-import React, { useState, MouseEvent } from "react";
-import { NavLink, useSubmit, useLocation } from "react-router-dom";
+import React, { useState, MouseEvent, MouseEvent } from "react";
+import { NavLink, useSubmit, useSubmit, useLocation } from "react-router-dom";
 import Container from "../shared/Container";
 import styles from "./Nav.module.css";
 import NavButton from "../shared/NavButton";
@@ -15,6 +15,8 @@ const NavTeacher: React.FC = () => {
   const toggleMenu = (): void => {
     setMenuOpen(!menuOpen);
   };
+
+  const submit = useSubmit();
 
   const handleLogout = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -48,6 +50,53 @@ const NavTeacher: React.FC = () => {
                 }
               />
             </div>
+
+            {/* Hamburger Icon */}
+            <div
+              className={styles.hamburger}
+              onClick={toggleMenu}
+              aria-label="Toggle menu"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+
+            <NavLink to="/teacher/dashboard/klassen" onClick={toggleMenu}>
+              Klassen
+            </NavLink>
+
+            {/* Menu Items */}
+            {firstName ? (
+              <div>
+                <span>Ingelogd als {firstName}!</span>
+                <button
+                  onClick={handleLogout}
+                  className="hover:cursor-pointer text-white bg-red-500 p-1 ml-3 text-sm rounded-2xl"
+                >
+                  Uitloggen
+                </button>
+              </div>
+            ) : (
+              <div
+                className={`${styles.navLinks} ${menuOpen ? styles.open : ""}`}
+              >
+                <NavLink
+                  to="/teacher/inloggen"
+                  className="t-h-d-u"
+                  onClick={toggleMenu}
+                >
+                  Inloggen
+                </NavLink>
+                <NavLink to="/teacher/registreren" onClick={toggleMenu}>
+                  Maak Account
+                </NavLink>
+              </div>
+            )}
+          </div>
+        </Container>
+      </nav>
+    </>
           ) : (
             <></>
           )}
