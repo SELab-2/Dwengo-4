@@ -1,7 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 
-
-const BACKEND = "http://localhost:5000";
+const BACKEND = process.env.BACKEND_URL || "http://localhost:5000";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -11,7 +10,6 @@ export const queryClient = new QueryClient({
   },
 });
 
-
 interface AuthCredentials {
   firstName: string;
   lastName: string;
@@ -19,17 +17,14 @@ interface AuthCredentials {
   password: string;
 }
 
-
 interface AuthResponse {
   token: string;
 }
-
 
 interface APIError extends Error {
   code?: number;
   info?: any;
 }
-
 
 export async function loginStudent({
   email,
@@ -44,7 +39,9 @@ export async function loginStudent({
   });
 
   if (!response.ok) {
-    const error: APIError = new Error("Er is iets misgegaan tijdens het inloggen.");
+    const error: APIError = new Error(
+      "Er is iets misgegaan tijdens het inloggen."
+    );
     error.code = response.status;
     error.info = await response.json();
     throw error;
@@ -52,7 +49,6 @@ export async function loginStudent({
 
   return await response.json();
 }
-
 
 export async function signupStudent({
   firstName,
@@ -69,7 +65,9 @@ export async function signupStudent({
   });
 
   if (!response.ok) {
-    const error: APIError = new Error("Er is iets misgegaan tijdens het registreren.");
+    const error: APIError = new Error(
+      "Er is iets misgegaan tijdens het registreren."
+    );
     error.code = response.status;
     error.info = await response.json();
     throw error;
