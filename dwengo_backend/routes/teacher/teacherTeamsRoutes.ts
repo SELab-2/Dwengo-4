@@ -15,6 +15,9 @@ import {protectTeacher} from "../../middleware/teacherAuthMiddleware";
 
 const router: Router = express.Router();
 
+// Route prefix
+// "/teacher/:assignmentId"
+
 // Route to create teams in an assignment
 router.post("/:classId", protectTeacher, makeAssignmentIdParamValid, ensureTeamsParamValidTeamDivision, createTeamInAssignment);
 
