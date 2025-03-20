@@ -47,7 +47,7 @@ export const updateTeamsInAssignment = async (req: AuthenticatedRequest, res: Re
 export const deleteTeamInAssignment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         // This is guaranteed to be possible by "makeTeamIdParamValid" in middleware/teamValidationMiddleware.ts
-        const teamId: number = Number(req.params);
+        const teamId: number = Number(req.params.teamId);
 
         await deleteTeam(teamId);
         res.status(200).json({ message: "Team successfully deleted." });
