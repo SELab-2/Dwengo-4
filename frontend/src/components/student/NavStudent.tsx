@@ -3,8 +3,9 @@ import { NavLink } from "react-router-dom";
 import Container from "../shared/Container";
 import styles from "./Nav.module.css";
 
-const NavAdmin: React.FC = () => {
+const NavStudent: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const [firstName, setFirstName] = useState<string | null>(localStorage.getItem('firstName'));
 
   const toggleMenu = () => {
     setMenuOpen((prev) => !prev);
@@ -39,12 +40,18 @@ const NavAdmin: React.FC = () => {
 
           {/* Menu Items */}
           <div className={`${styles.navLinks} ${menuOpen ? styles.open : ""}`}>
-            <NavLink to="/student/inloggen" className="t-h-d-u" onClick={toggleMenu}>
-              Inloggen
-            </NavLink>
-            <NavLink to="/student/registreren" onClick={toggleMenu}>
-              Maak Account
-            </NavLink>
+            {firstName ? (
+              <span>Welcome {firstName}!</span>
+            ) : (
+              <>
+                <NavLink to="/student/inloggen" className="t-h-d-u" onClick={toggleMenu}>
+                  Inloggen
+                </NavLink>
+                <NavLink to="/student/registreren" onClick={toggleMenu}>
+                  Maak Account
+                </NavLink>
+              </>
+            )}
           </div>
         </div>
       </Container>
@@ -52,4 +59,4 @@ const NavAdmin: React.FC = () => {
   );
 };
 
-export default NavAdmin;
+export default NavStudent;
