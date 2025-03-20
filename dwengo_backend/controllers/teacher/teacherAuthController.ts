@@ -2,8 +2,8 @@ import { User } from "@prisma/client";
 import asyncHandler from "express-async-handler";
 import bcrypt from "bcryptjs";
 import { Request, Response } from "express";
-import * as userService from "../../services/userService";
-import * as teacherService from "../../services/teacherService";
+import UserService from "../../services/userService";
+import TeacherService from "../../services/teacherService";
 import { generateToken } from "../../helpers/generateToken";
 
 interface LoginTeacherBody {
@@ -26,7 +26,7 @@ export const loginTeacher = asyncHandler(
     }
 
     // Zoek eerst de gebruiker
-    const user: User = await userService.findUserByEmail(email);
+    const user: User = await UserService.findUserByEmail(email);
     if (!user || user.role !== "TEACHER") {
       res.status(401);
       throw new Error("Ongeldige gebruiker");
@@ -34,7 +34,7 @@ export const loginTeacher = asyncHandler(
 
     // Haal het gekoppelde Teacher-record op
     // Hier geen type aan proberen geven, zorgt enkel voor problemen
-    const teacher: any = await teacherService.findTeacherById(user.id, {
+    const teacher: any = await TeacherService.findTeacherById(user.id, {
       user: true,
     });
 
