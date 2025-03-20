@@ -34,7 +34,7 @@ const swaggerDocument = YAML.load("./openapi3_0.yaml");
 app.use((req: Request, res: Response, next: NextFunction): void => {
   const allowedOrigins: string[] = [
     "https://dwengo.org",
-    "http://localhost:3000",
+    "http://localhost:5173",
   ];
   const origin = req.headers.origin;
   if (origin && allowedOrigins.includes(origin)) {
