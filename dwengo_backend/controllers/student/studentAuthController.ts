@@ -3,8 +3,8 @@ import asyncHandler from 'express-async-handler';
 import bcrypt from 'bcryptjs';
 import { Request, Response } from 'express';
 import {generateToken} from "../../helpers/generateToken";
-import * as userService from "../../services/userService";
-import * as studentService from "../../services/studentService";
+import UserService from "../../services/userService";
+import StudentService from "../../services/studentService";
 
 interface LoginStudentBody {
   email: string;
@@ -24,7 +24,7 @@ export const loginStudent = asyncHandler(async (req: Request, res: Response): Pr
   }
 
   // Zoek eerst de gebruiker
-  const user: User = await userService.findUserByEmail(email);
+  const user: User = await UserService.findUserByEmail(email);
   if (!user || user.role !== "STUDENT") {
     res.status(401);
     throw new Error("Ongeldige gebruiker");
@@ -32,7 +32,7 @@ export const loginStudent = asyncHandler(async (req: Request, res: Response): Pr
 
   // Haal het gekoppelde Student-record op
   // Hier geen type aan proberen koppelen, zorgt enkel voor problemen
-  const student: any = await studentService.findStudentById(user.id, {user: true});
+  const student: any = await StudentService.findStudentById(user.id, {user: true});
 
   if (!student || !student.user) {
     res.status(401);
