@@ -13,7 +13,8 @@ import {
 } from "../../middleware/teamValidationMiddleware";
 import {protectTeacher} from "../../middleware/teacherAuthMiddleware";
 
-const router: Router = express.Router();
+
+const router: Router = express.Router({ mergeParams: true });
 
 // Prefix voor deze routes:
 // "/teacher/assignments/:assignmentId/team"
