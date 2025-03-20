@@ -1,0 +1,36 @@
+name: Run tests
+
+on:
+    pull_request:
+        types: [opened, synchronize, reopened]
+        branches:
+            - main
+            - develop
+
+jobs:
+    test:
+        runs-on: self-hosted
+        env:
+            DATABASE_URL: postgresql://selab2:passwor@localhost:15432/selab2?schema=public
+
+        services:
+            postgres:
+                image: postgres
+                env:
+                    POSTGRES_DB: selab2
+                    POSTGRES_USER: selab2
+                    POSTGRES_PASSWORD: passwor
+                ports:
+                    - 15432:5432
+
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Node.js 22
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "22.x"
+                  cache: "npm"
+                  cache-dependency-path: "dwengo_backend/package-lock.json"
+            - run: npm ci
+            - run: npx prisma migrate dev
+            - run: npm run test:int
