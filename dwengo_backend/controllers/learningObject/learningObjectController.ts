@@ -1,23 +1,17 @@
-import { Request, Response } from "express";
+import {Response} from "express";
 import {
   getAllLearningObjects,
-  getLearningObjectById,
-  searchLearningObjects,
-  getLearningObjectsForPath,
-  // [NIEUW] importeer de nieuwe service-functie:
   getLearningObjectByHruidLangVersion,
+  getLearningObjectById,
+  getLearningObjectsForPath,
+  searchLearningObjects,
 } from "../../services/combinedLearningObjectService";
-import { LearningObjectDto } from "../../services/dwengoLearningObjectService";
-
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id: number;
-    role: string;
-  };
-}
+import {LearningObjectDto} from "../../services/dwengoLearningObjectService";
+import {getUserFromAuthRequest} from "../../helpers/getUserFromAuthRequest";
+import {AuthenticatedRequest} from "../../interfaces/extendedTypeInterfaces";
 
 function userIsTeacherOrAdmin(req: AuthenticatedRequest): boolean {
-  const role: string | undefined = req.user?.role;
+  const role: string | undefined = getUserFromAuthRequest(req).role;
   return role === "TEACHER" || role === "ADMIN";
 }
 

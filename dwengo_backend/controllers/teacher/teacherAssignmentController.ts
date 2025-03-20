@@ -12,10 +12,17 @@ export class AssignmentTeacherController {
       const teacherId: number = getUserFromAuthRequest(req).id;
       const {
         classId,
-        learningPathId,
+        pathRef,
+        pathLanguage,
+        isExternal,
         deadline,
-      }: { classId: number; learningPathId: string; deadline: string } =
-        req.body;
+      }: {
+        classId: number;
+        pathRef: string;
+        pathLanguage: string;
+        isExternal: boolean;
+        deadline: string;
+      } = req.body;
 
       const parsedDeadline = new Date(deadline);
 
@@ -23,7 +30,9 @@ export class AssignmentTeacherController {
         await teacherAssignmentService.createAssignmentForClass(
           teacherId,
           classId,
-          learningPathId,
+          pathRef,
+          pathLanguage,
+          isExternal,
           parsedDeadline
         );
       res.status(201).json(assignment);
@@ -55,11 +64,13 @@ export class AssignmentTeacherController {
   ): Promise<void> => {
     try {
       const assignmentId: number = parseInt(req.params.assignmentId);
-      const { learningPathId }: { learningPathId: string } = req.body;
+      const { pathRef, isExternal } = req.body;
       const teacherId: number = getUserFromAuthRequest(req).id;
+
       const updatedAssignment = await teacherAssignmentService.updateAssignment(
         assignmentId,
-        learningPathId,
+        pathRef,
+        isExternal,
         teacherId
       );
       res.json(updatedAssignment);
