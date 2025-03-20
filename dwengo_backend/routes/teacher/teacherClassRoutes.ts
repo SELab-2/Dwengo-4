@@ -34,21 +34,26 @@ import {
   deleteClassroom,
   getJoinLink,
   regenerateJoinLink,
-  getClassrooms,
   getClassroomStudents,
-} from '../../controllers/teacher/teacherClassController';
-import { 
+  getTeacherClasses,
+} from "../../controllers/teacher/teacherClassController";
+import {
   createInvite,
   getPendingInvitesForClass,
   getPendingInvitesForTeacher,
   updateInviteStatus,
-  deleteInvite
-} from '../../controllers/teacher/inviteController';
-import { 
+  deleteInvite,
+} from "../../controllers/teacher/inviteController";
+import {
   getJoinRequestsByClass,
+<<<<<<< HEAD
   updateJoinRequestStatus
 } from '../../controllers/joinrequest/joinRequestController';
 >>>>>>> f28556a (teacher invite op email)
+=======
+  updateJoinRequestStatus,
+} from "../../controllers/joinrequest/joinRequestController";
+>>>>>>> 048bf9e (get classes for students and teachers)
 
 const router = express.Router();
 
@@ -57,12 +62,16 @@ router.use(protectTeacher);
 
 // routes for classes
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 048bf9e (get classes for students and teachers)
 router.get("/", getTeacherClasses);
 router.post("/", createClassroom);
 router.delete("/:classId", deleteClassroom);
 router.get("/:classId/join-link", getJoinLink);
 router.patch("/:classId/regenerate-join-link", regenerateJoinLink);
 router.get("/:classId/students", getClassroomStudents);
+<<<<<<< HEAD
 =======
 router.post("/", protectTeacher, createClassroom);
 router.get("/", protectTeacher, getClassrooms);
@@ -102,6 +111,15 @@ router.patch(
     updateInviteStatus
 );
 router.get("/invites", getPendingInvitesForTeacher);
+=======
+
+// routes for invites
+router.post("/:classId/invites", createInvite);
+router.get("/:classId/invites", getPendingInvitesForClass);
+router.delete("/:classId/invites/:inviteId", deleteInvite);
+router.get("/invites", getPendingInvitesForTeacher);
+router.patch("/invites/:inviteId", updateInviteStatus);
+>>>>>>> 048bf9e (get classes for students and teachers)
 
 // routes for join requests
 router.get("/:classId/join-requests", getJoinRequestsByClass);

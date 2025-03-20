@@ -33,20 +33,6 @@ export const getTeacherClasses = asyncHandler(
 );
 
 /**
- * Fetch all classrooms for the authenticated teacher
- * @route GET /teacher/classes
- * returns a list of all classrooms in the response body
- */
-export const getClassrooms = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const teacherId: number = getUserFromAuthRequest(req).id;
-
-    const classrooms = await classService.getClassesByTeacher(teacherId);
-    res.status(200).json(classrooms);
-  }
-);
-
-/**
  * Create classroom
  * @route POST /teacher/classes
  * returns the created class in the response body
@@ -56,6 +42,7 @@ export const createClassroom = asyncHandler(
     const { name } = req.body;
     const teacherId: number = getUserFromAuthRequest(req).id;
 
+    isNameValid(req, res); // if invalid, an error is thrown
     isNameValid(req, res); // if invalid, an error is thrown
 
     const classroom = await classService.createClass(name, teacherId);
@@ -67,6 +54,7 @@ export const createClassroom = asyncHandler(
  * Delete a classroom
  * @route DELETE /teacher/classes/:classId
  * @param classId - id of the class to be deleted
+ */
  */
 export const deleteClassroom = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -128,6 +116,8 @@ export const getClassroomStudents = asyncHandler(
     const teacherId: number = getUserFromAuthRequest(req).id;
 
     // include user details of the students
+    const students: (Student & { user: User })[] =
+      await classService.getStudentsByClass(classId, teacherId);
     const students: (Student & { user: User })[] =
       await classService.getStudentsByClass(classId, teacherId);
     res.status(200).json({ students });
