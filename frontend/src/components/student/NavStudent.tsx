@@ -1,11 +1,20 @@
-import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState, MouseEvent } from "react";
+import { NavLink, useSubmit } from "react-router-dom";
 import Container from "../shared/Container";
 import styles from "./Nav.module.css";
 
 const NavStudent: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
-  const [firstName, setFirstName] = useState<string | null>(localStorage.getItem('firstName'));
+  const [firstName, setFirstName] = useState<string | null>(
+    localStorage.getItem("firstName")
+  );
+
+  const submit = useSubmit();
+
+  const handleLogout = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    submit(null, { action: "/student/logout", method: "post" });
+  };
 
   const toggleMenu = () => {
     setMenuOpen((prev) => !prev);
@@ -41,10 +50,22 @@ const NavStudent: React.FC = () => {
           {/* Menu Items */}
           <div className={`${styles.navLinks} ${menuOpen ? styles.open : ""}`}>
             {firstName ? (
-              <span>Welcome {firstName}!</span>
+              <div>
+                <span>Ingelogd als {firstName}!</span>
+                <button
+                  onClick={handleLogout}
+                  className="hover:cursor-pointer text-white bg-red-500 p-1 ml-3 text-sm rounded-2xl"
+                >
+                  Uitloggen
+                </button>
+              </div>
             ) : (
               <>
-                <NavLink to="/student/inloggen" className="t-h-d-u" onClick={toggleMenu}>
+                <NavLink
+                  to="/student/inloggen"
+                  className="t-h-d-u"
+                  onClick={toggleMenu}
+                >
                   Inloggen
                 </NavLink>
                 <NavLink to="/student/registreren" onClick={toggleMenu}>

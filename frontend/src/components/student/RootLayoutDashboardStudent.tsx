@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { Outlet, useLoaderData, useSubmit } from "react-router-dom";
 import { getTokenDuration } from "../../util/student/authStudent";
 import styles from "./RootLayoutDashboardStudent.module.css";
-import SideBarStudent from "./SideBarStudent";
 import React from "react";
 
 const RootLayoutDashboardStudent: React.FC = () => {
@@ -28,7 +27,6 @@ const RootLayoutDashboardStudent: React.FC = () => {
 
   return (
     <div className={styles.wrapper}>
-      <SideBarStudent />
       <main>
         {/* {navigation.state === 'loading' && <p>Loading...</p>} */}
         <Outlet />
