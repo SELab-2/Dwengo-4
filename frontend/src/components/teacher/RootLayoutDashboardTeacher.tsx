@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { Outlet, useLoaderData, useSubmit } from "react-router-dom";
 import { getTokenDuration } from "../../util/teacher/authTeacher.js";
-import styles from "./RootLayoutDashboardTeacher.module.css";
 import React from "react";
 
 function RootLayoutDashboardTeacher() {
@@ -25,7 +24,7 @@ function RootLayoutDashboardTeacher() {
     }, tokenDuration);
   }, [token, submit]);
   return (
-    <div className={styles.wrapper}>
+    <div>
       <main>
         {/* {navigation.state === 'loading' && <p>Loading...</p>} */}
         <Outlet />

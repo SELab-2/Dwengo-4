@@ -42,9 +42,16 @@ const NavTeacher: React.FC = () => {
               <span></span>
             </div>
 
-            <NavLink to="/teacher/dashboard/klassen" onClick={toggleMenu}>
-              Klassen
-            </NavLink>
+            {firstName ? (
+              //dees moet opzich enkel maar zichtbaar zijn als je ingelogd bent dus vandaar
+              <>
+                <NavLink to="/teacher/dashboard/klassen" onClick={toggleMenu}>
+                  Klassen
+                </NavLink>
+              </>
+            ) : (
+              <></>
+            )}
 
             {/* Menu Items */}
             {firstName ? (
