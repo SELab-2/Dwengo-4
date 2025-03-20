@@ -81,6 +81,7 @@ export const registerTeacher = asyncHandler(
   }
 );
 
+
 interface LoginTeacherBody {
   email: string;
   password: string;
@@ -89,6 +90,7 @@ interface LoginTeacherBody {
 // @desc    Inloggen van een leerkracht
 // @route   POST /teacher/auth/login
 // @access  Public
+
 export const loginTeacher = asyncHandler(
   async (req: Request, res: Response) => {
     const { email, password } = req.body as LoginTeacherBody;

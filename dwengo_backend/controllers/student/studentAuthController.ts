@@ -91,6 +91,7 @@ interface LoginStudentBody {
 // @desc    Inloggen van een leerling
 // @route   POST /student/auth/login
 // @access  Public
+
 export const loginStudent = asyncHandler(
   async (req: Request, res: Response) => {
     const { email, password } = req.body as LoginStudentBody;
