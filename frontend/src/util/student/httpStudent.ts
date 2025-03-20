@@ -13,6 +13,8 @@ export const queryClient = new QueryClient({
 
 
 interface AuthCredentials {
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
 }
@@ -53,6 +55,8 @@ export async function loginStudent({
 
 
 export async function signupStudent({
+  firstName,
+  lastName,
   email,
   password,
 }: AuthCredentials): Promise<AuthResponse> {
@@ -61,7 +65,7 @@ export async function signupStudent({
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ firstName, lastName, email, password }),
   });
 
   if (!response.ok) {

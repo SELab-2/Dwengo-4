@@ -169,7 +169,7 @@ export async function createAssignment(
 ): Promise<Assignment> {
   return prisma.assignment.create({
     data: {
-      learningPathId,
+      pathRef: learningPathId,
       deadline,
       classAssignments: {
         create: {
@@ -177,20 +177,7 @@ export async function createAssignment(
         },
       },
     },
-    include: {
-      learningPath: true,
-    },
   });
-}
-
-export function stringToDateWithLP(body: any, length: number) {
-  for (let i = 0; i < length; i += 1) {
-    body[i].createdAt = new Date(body[i].createdAt);
-    body[i].updatedAt = new Date(body[i].updatedAt);
-    body[i].deadline = new Date(body[i].deadline);
-    body[i].learningPath.createdAt = new Date(body[i].learningPath.createdAt);
-    body[i].learningPath.updatedAt = new Date(body[i].learningPath.updatedAt);
-  }
 }
 
 export function stringToDate(body: any, length: number) {
