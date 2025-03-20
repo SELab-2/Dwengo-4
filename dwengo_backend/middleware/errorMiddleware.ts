@@ -10,12 +10,12 @@ const errorHandler = (err: Error, req: Request, res: Response, next: NextFunctio
         res.status(statusCode);
     }
 
+    // make sure no specific database messages are shown to the user
     if (err instanceof PrismaClientKnownRequestError) {
         if (err.code == "P2025") {
-            res.status(404).json({ error: "Resource not found", details: err.meta });
+            res.status(404).json({ error: "not found" });
         } else {
-            // TODO: figure out how to handle other PrismaClientKnownRequestErrors (add more cases as needed)
-            res.status(500).json({ error: "a database error occured", details: err.meta });
+            res.status(500).json({ error: "a database error occured" });
         }
     }
 

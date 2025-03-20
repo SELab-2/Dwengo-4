@@ -508,7 +508,7 @@ describe("invite tests", async () => {
                 .set("Authorization", `Bearer ${teacherUser1.token}`);
 
             expect(status).toBe(404);
-            expect(body.error).toBe("Resource not found"); // this error message is defined in `errorMiddleware.ts`
+            expect(body.error).toBe("not found"); // this error message is defined in `errorMiddleware.ts`
         });
         it("should respond with a `400` status code when the params are not correct", async () => {
             const { status, body } = await request(app)
