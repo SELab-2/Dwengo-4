@@ -20,6 +20,8 @@ interface LoginFormData {
 }
 
 interface LoginResponse {
+  firstName : string;
+  lastName : string;
   token: string;
 }
 
@@ -46,6 +48,8 @@ const LoginTeacher: React.FC = () => {
       expires.setDate(expires.getDate() + 7);
       localStorage.setItem("token", token);
       localStorage.setItem("expiration", expires.toISOString());
+      localStorage.setItem("firstName", data.firstName);
+      localStorage.setItem("lastName", data.lastName);
 
       navigate("/teacher/dashboard");
     },
