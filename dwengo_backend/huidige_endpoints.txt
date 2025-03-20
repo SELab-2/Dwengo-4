@@ -1,0 +1,148 @@
+Dit zijn onze huidige endpoints
+
+Authenticatie:
+	Teacher:
+		POST /teacher/auth/register 	--> registreer leerkracht
+		POST /teacher/auth/login 	--> inloggen van leerkracht
+
+	Student:
+		POST /student/auth/register 	--> registreer student
+		POST /student/auth/login 	--> inloggen van een student
+
+
+Leerpaden doorzoeken
+	User:
+		GET /learningPaths/ 	--> krijg alle leerpaden te zien
+		GET /learningPaths/:pathId 	--> specifiek leerpad zoeken
+
+Leerobjecten doorzoeken
+	User:
+		GET /learningObjects/ 	--> krijg alle leerobjecten te zien
+		GET /learningObjects/search 	--> zoek leerobject op bepaalde parameter
+		GET /learningObjects/path/:pathId 	--> krijg alle leerobjecten van een leerpad te zien
+		GET /learningObjects/:id 	--> haal een specifiek leerobject op
+
+Assignments doorzoeken
+	User:
+		GET /assignments/:assignmentId 			--> haal een specifieke assignment op
+
+	Student:
+		GET /student/assignments/ 	--> Haal alle assignments op van een student
+
+Aanpassingen van assignments
+	Teacher:
+		POST /teacher/assignments/ 	--> maak een assignment aan voor een bepaalde klas
+		GET /teacher/assignments/class/:classId 	--> haal alle assignments op voor een bepaalde klas
+		PATCH /teacher/assignments/:assignmentId 	--> update een assignment voor alle klassen van deze assignment
+		DELETE /teacher/assignments/:assignmentId 	--> verwijder een assignment
+
+Klassen bekijken en aanpassen
+	Teacher:
+		POST /teacher/classes/ 	--> maak nieuwe klas
+		DELETE /teacher/classes/:classId 	--> Verwijder klas
+		GET /teacher/classes/:classId/join-link 	--> vraag join code van klas op
+		POST /teacher/classes/:classId/regenerate-join-link 	--> genereer nieuwe join code
+		GET /teacher/classes/:classId/students 	--> vraag alle leerlingen van die klas op
+
+Verzoeken om klas te joinen sturen
+	Student:
+		POST /student/classes/join --> stuur request om nieuwe klas te joinen
+
+Invites
+	Teacher:
+		POST /teacher/classes/:classId/invites 	--> nieuwe invite maken
+		GET	/teacher/classes/:classId/invites 	--> bekijk alle invites voor een klas, teacher moet klas beheren
+		DELETE /teacher/classes/:classId/invites/:inviteId 	--> verwijder invite
+		GET /teacher/classes/invites 	--> haal alle invites van een leerkracht op
+		PATCH /teacher/classes/invites/:inviteId 	--> update een invite, accept of decline
+
+Teams
+	Teacher:
+		POST /teacher/:assignmentId/ 	--> maak een nieuw team aan
+		GET /teacher/:assignmentId/ 	--> haal alle teams van een assignment op
+		PATCH /teacher/:assignmentId/ 	--> update de teams van een assignment
+		DELETE /teacher/:assignmentId/ 	--> verwijder een team uit een assignment
+
+Vragen
+	User:
+		POST /assignment/:assignmentId/learningPath/:learningPathId/question 	--> vraag over leerpad stellen
+		POST /assignment/:assignmentId/learningPath/:learningPathId/learningObject/:learningObjectId/question 	--> vraag over leerobject stellen
+		POST /question/:questionId 	--> leerkracht antwoordt op vraag
+		PATCH /question/:questionId/conversation/:questionConversationId 	--> update een vraag of een antwoord
+		GET /question/:questionId 	--> haal een vraag op
+		GET /team/:teamId/questions 	--> haal alle vragen van een team op
+		GET /class/:classId/questions 	--> haal alle vragen van een klas op
+		GET /assignment/:assignmentId/class/:classId/questions 	--> haal alle vragen op bij een assignment van een bepaalde klas
+		GET /question/:questionId/conversations 	--> haal een conversatie op?
+		DELETE /question/:questionId 	--> verwijder een vraag
+		DELETE /question/:questiionId/conversation/:questionConversationId 	--> verwijder een gesprek
+
+Progressie
+	Teacher:
+		GET /progress/teacher/:teamId 	--> haal de progressie op van een team
+		GET /progress/techer/:assignmentId/average 	--> haal de gemiddelde progressie van een assignment op
+
+	Student:
+		POST /progress/:learningObjectId 	--> "maak progressie"
+		GET /progress/:learningObjectId 	--> haal progressie op van een specifiek leerobject
+		PATCH /progress/:learningObjectId 	--> update progressie, leerobject is afgewerkt of niet meer afgewerkt
+		GET /progress/student/:teamid 	--> haal de progressie op van je team
+		GET /progress/student/assignment/:assignmentId 	--> haal persoonlijke progressie van een assignment op
+
+Leerobjecten
+	Teacher:
+		GET /teacher/learningObjects 	--> Vraag alle leerobjecten op
+		POST /teacher/learningObjects 	--> Maak een nieuw leerobject aan
+		GET /teacher/learningObjects/:learningObjectId 	--> Haal specifiek leerobject op
+		PATCH /teacher/learningObjects/:learningObjectId 	--> Update specifiek leerobject
+		DELETE /teacher/learningObjects/:learningObjectId 	--> Verwijder specifiek leerobject
+
+	User:
+		GET /learningObjects 	--> Haal alle leerobjecten op
+		GET /learningObjects/search 	--> Zoek leerobject obv parameters
+		GET /learningObjects/path/:pathId 	--> Haal alle leerobjecten op bij een leerpad
+		GET /learningObjects/lookup 	--> Zoek leerobject obv hruid, taal en versie
+		GET /learningObjects/:id 	--> Haal 1 leerobject op
+
+Leerpaden
+	Teacher:
+		GET /teacher/learningPaths 	--> Haal alle leerpaden op
+		POST /teacher/learningPaths 	--> Maak nieuw leerpad aan
+		GET /teacher/learningPaths/:learningPathId 	--> Vraag specifiek leerpad op
+		PATCH /teacher/learningPaths/:learningPathId 	--> Update leerpad
+		DELETE /teacher/learningPaths/:learningPathId 	--> Verwijder leerpad
+
+		GET /teacher/learningPaths/:pathId/nodes 	--> Haal alle nodes op voor een leerpad
+		POST /teacher/learningPaths/:pathId/nodes 	--> Maak een nieuwe node in het leerpad
+		PATCH /teacher/learningPaths/:pathId/nodes/:nodeId 	--> Update een node
+		DELETE /teacher/learningPaths/:pathId/nodes/:nodeId 	--> Verwijder een node
+
+	User:
+		GET /learningPaths/ 	--> Zoek leerpad met obv parameters
+		GET /learningPaths/:pathId 	--> Haal 1 leerpad op
+
+Feedback
+	Teacher:
+		POST /teacher/feedback/ 	--> Maak nieuwe feedback
+		GET /teacher/feedback/submission/:submissionId 	--> Haal feedback op voor een bepaalde submissie
+		PATCH /teacher/feedback/submission/:submissionId 	--> Update feedback 
+		DELETE /teacher/feedback/submission/:submissionId 	--> Verwijder feedback
+		GET	/teacher/feedback/assignment/:assignmentId/evaluation/:evaluationId 	--> Haal alle feedback op voor een evaluatie in een assignment
+
+Teams
+	Student:
+		GET /student/teams/ 	--> Haal alle teams op van een student
+		GET	/student/teams/:assignmentId 	--> Haal team op van student bij assignment
+		GET /student/teams/:teamId/members 	--> Haal leden van een team op
+
+Submissions
+	Teacher:
+		GET /teacher/submissions/student/:studentId 	--> Haal submissies op van student
+		GET /teacher/submissions/team/:teamId 	--> Haal submissies op van team
+		GET /teacher/submissions/assignment/:assignmentId/student/:studentId 	--> Haal submissies op van student bij een bepaalde assignment
+		GET /teacher/submissions/assignment/:assignmentId/team/:teamId 	--> Haal submissies op van een team bij een bepaalde assignment
+
+	Student:
+		GET /student/submissions/assignment/:assignmentId 	--> Haal submissies op voor assignment
+		GET /student/submissions/assignment/:assignmentId/evaluation/:evaluationId 	--> Haal inzendingen op bij een bepaalde evaluatie van een assignment
+		POST /student/submissions/assignment/:assignmentId/evaluation/:evaluationId 	--> Maak een nieuwe inzending van een evaluatie bij een assignment
