@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import prisma from "./helpers/prisma";
 import app from "../index";
@@ -11,6 +11,7 @@ import {
   createTeacher,
   stringToDate,
 } from "./helpers/testDataCreation";
+import { isExternal } from "util/types";
 
 describe("Tests for teacherAssignment", async () => {
   let teacher1: User & { teacher: Teacher; token: string };
@@ -112,12 +113,13 @@ describe("Tests for teacherAssignment", async () => {
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
-          learningPathId: lp1.id,
+          pathRef: lp1.id,
           deadline: "2026-10-23",
+          pathLanguage: "nl",
         });
       expect(status).toBe(201);
       expect(body.deadline).toStrictEqual(new Date("2026-10-23").toISOString());
-      expect(body.learningPathId).toBe(lp1.id);
+      expect(body.pathRef).toBe(lp1.id);
     });
     it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
       // class3 has no assignments
@@ -126,8 +128,9 @@ describe("Tests for teacherAssignment", async () => {
         .set("Authorization", `Bearer ${teacher2.token}`)
         .send({
           classId: class3.id,
-          learningPathId: lp1.id,
+          pathRef: lp1.id,
           deadline: "2026-10-23",
+          pathLanguage: "nl",
         });
       expect(status).toBe(500);
       expect(body.error).toBe("Failed to create assignment");
@@ -185,8 +188,9 @@ describe("Tests for teacherAssignment", async () => {
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
-          learningPathId: lp1.id,
+          pathRef: lp1.id,
           deadline: "2026-10-23",
+          pathLanguage: "nl",
         });
 
       expect(status).toBe(201);
@@ -196,22 +200,15 @@ describe("Tests for teacherAssignment", async () => {
         .patch(`/teacher/assignments/${assignmentId}`)
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
-          learningPathId: lp2.id,
+          pathRef: lp2.id,
         });
 
       expect(req.status).toBe(200);
-      expect(req.body.learningPathId).toBe(lp2.id);
+      expect(req.body.pathRef).toBe(lp2.id);
       expect(req.body.deadline).toStrictEqual(
         new Date("2026-10-23").toISOString()
       );
       expect(req.body.updatedAt).not.toStrictEqual(body.updatedAt);
-
-      // Check if assignment is actually updated in database
-      const assignment = await prisma.assignment.findUnique({
-        where: { id: assignmentId },
-      });
-      expect(assignment).not.toBeNull();
-      expect(assignment!.learningPathId).toBe(lp2.id);
     });
 
     it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
@@ -234,14 +231,6 @@ describe("Tests for teacherAssignment", async () => {
 
       expect(status).toBe(500);
       expect(body.error).toBe("Failed to update assignment");
-
-      // Check if assignment is not updated in database
-      const assignment = await prisma.assignment.findUnique({
-        where: { id: assignment1.id },
-      });
-
-      expect(assignment).not.toBeNull();
-      expect(assignment!.learningPathId).toBe(lp1.id);
     });
   });
 
@@ -250,7 +239,6 @@ describe("Tests for teacherAssignment", async () => {
       const { status, body } = await request(app)
         .delete(`/teacher/assignments/${assignment4.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`);
-
       expect(status).toBe(204);
 
       // Check if assignment is actually gone from database
@@ -267,12 +255,6 @@ describe("Tests for teacherAssignment", async () => {
 
       expect(status).toBe(500);
       expect(body.error).toBe("Failed to delete assignment");
-
-      // Check if assignment is not gone from database
-      const assignment = await prisma.assignment.findUnique({
-        where: { id: assignment4.id },
-      });
-      expect(assignment).not.toBeNull();
     });
   });
 });

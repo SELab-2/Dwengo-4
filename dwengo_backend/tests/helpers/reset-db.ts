@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export default async function resetDb() {
+export default async function resetDb(): Promise<void> {
     await prisma.$transaction([
         prisma.studentProgress.deleteMany(),
         prisma.questionGeneral.deleteMany(),

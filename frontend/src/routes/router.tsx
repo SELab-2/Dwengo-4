@@ -8,6 +8,7 @@ import {
 // ==== TEACHER ROUTES ==== //
 import RootLayoutTeacher from "../components/teacher/RootLayoutTeacher";
 import LoginTeacher from "../pages/teacher/LoginTeacher";
+import ClassesPage from "../pages/teacher/ClassesTeacher";
 import SignupTeacher from "../pages/teacher/SignupTeacher";
 import RootLayoutDashboardTeacher from "../components/teacher/RootLayoutDashboardTeacher";
 import {
@@ -77,7 +78,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "klassen",
-            element: <h1>Klassen</h1>,
+            element: <ClassesPage></ClassesPage>,
             loader: teacherCheckAuthLoader,
           },
         ],
@@ -95,7 +96,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "join-link-example",
-        element: <JoinLink />,
+        element: <p>Join Link Example</p>,
       },
       {
         path: "inloggen",
