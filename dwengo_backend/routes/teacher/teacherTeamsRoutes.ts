@@ -20,7 +20,7 @@ const router: Router = express.Router();
 
 // Route to create teams in an assignment
 router.post(
-  "class/:classId",
+  "/class/:classId",
   protectTeacher,
   makeAssignmentIdParamValid,
   ensureTeamsParamValidTeamDivision,
