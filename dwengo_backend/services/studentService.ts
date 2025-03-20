@@ -1,15 +1,16 @@
-import { PrismaClient, Student } from "@prisma/client";
+import { PrismaClient, Student, User } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 export default class StudentService {
   static async findStudentById(
-    userId: number,
-    inclusions: any
-  ): Promise<Student> {
+    userId: number
+  ): Promise<Student & { user: User }> {
     return prisma.student.findUniqueOrThrow({
       where: { userId: userId },
-      include: inclusions,
+      include: {
+        user: true,
+      },
     });
   }
 
