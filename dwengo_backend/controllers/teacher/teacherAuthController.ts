@@ -1,4 +1,4 @@
-import {User} from '@prisma/client';
+import {Teacher, User} from '@prisma/client';
 import asyncHandler from 'express-async-handler';
 import bcrypt from 'bcryptjs';
 import { Request, Response } from 'express';
@@ -32,7 +32,7 @@ export const loginTeacher = asyncHandler(async (req: Request, res: Response): Pr
 
   // Haal het gekoppelde Teacher-record op
   // Hier geen type aan proberen geven, zorgt enkel voor problemen
-  const teacher: any = await TeacherService.findTeacherById(user.id, {user: true});
+  const teacher: (Teacher & { user: User }) = await TeacherService.findTeacherById(user.id);
 
   if (!teacher.user) {
     res.status(401);
