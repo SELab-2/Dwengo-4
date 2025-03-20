@@ -1,23 +1,24 @@
-import express from 'express';
-import { protectTeacher } from '../../middleware/teacherAuthMiddleware';
+import express from "express";
+import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 import {
-  createClassroom,
-  deleteClassroom,
-  getJoinLink,
-  regenerateJoinLink,
-  getClassroomStudents,
-} from '../../controllers/teacher/teacherClassController';
-import { 
-  createInvite,
-  getPendingInvitesForClass,
-  getPendingInvitesForTeacher,
-  updateInviteStatus,
-  deleteInvite
-} from '../../controllers/teacher/inviteController';
-import { 
-  getJoinRequestsByClass,
-  updateJoinRequestStatus
-} from '../../controllers/joinrequest/joinRequestController';
+    createClassroom,
+    deleteClassroom,
+    getJoinLink,
+    regenerateJoinLink,
+    getClassroomStudents,
+    getTeacherClasses,
+} from "../../controllers/teacher/teacherClassController";
+import {
+    createInvite,
+    getPendingInvitesForClass,
+    getPendingInvitesForTeacher,
+    updateInviteStatus,
+    deleteInvite,
+} from "../../controllers/teacher/inviteController";
+import {
+    getJoinRequestsByClass,
+    updateJoinRequestStatus,
+} from "../../controllers/joinrequest/joinRequestController";
 
 const router = express.Router();
 
@@ -25,6 +26,7 @@ const router = express.Router();
 router.use(protectTeacher);
 
 // routes for classes
+router.get("/", getTeacherClasses);
 router.post("/", createClassroom);
 router.delete("/:classId", deleteClassroom);
 router.get("/:classId/join-link", getJoinLink);
