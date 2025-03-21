@@ -2,8 +2,17 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import request from 'supertest';
 import prisma from './helpers/prisma'
 import app from '../index';
-import {Class, Student, Teacher, User} from '@prisma/client';
-import { addStudentToClass, addTeacherToClass, createClass, createInvite, createJoinRequest, createStudent, createTeacher } from './helpers/testDataCreation';
+import {Class, Evaluation, EvaluationType, Student, Teacher, User} from '@prisma/client';
+import {
+    addStudentToClass,
+    addTeacherToClass,
+    createClass,
+    createEvaluation,
+    createInvite,
+    createJoinRequest,
+    createStudent,
+    createTeacher
+} from './helpers/testDataCreation';
 
 const APP_URL: string = process.env.APP_URL || "http://localhost:5000";
 
@@ -16,6 +25,8 @@ describe('Submission tests', (): void => {
 
     let classroom: Class;
     let classroomId: number;
+
+    let evaluation: Evaluation;
 
     beforeEach(async (): Promise<void> => {
         // Create a teacher
@@ -36,8 +47,9 @@ describe('Submission tests', (): void => {
         // Add the student to the class
         await addStudentToClass(studentId, classroomId);
 
-        // Create an evaluation so a student can send in a submission
-
+        // Create an evaluation so a student can send in a submission$
+        const learningObjectId = "FOO"
+        evaluation = await createEvaluation(learningObjectId, EvaluationType.OPEN);
     })
 
 })

@@ -1,7 +1,7 @@
 import prisma from "./prisma";
 import {
   Assignment,
-  Class,
+  Class, EvaluationType,
   Invite,
   JoinRequest,
   JoinRequestStatus,
@@ -174,6 +174,18 @@ export async function createAssignment(
         create: {
           classId, // This will automatically link to the created Assignment
         },
+      },
+    },
+  });
+}
+
+export async function createEvaluation(learningObjectId: string, type: EvaluationType) {
+  return prisma.evaluation.create({
+    data: {
+      nrOfQuestions: 10,
+      evaluationType: type,
+      learningObject: {
+        connect: { id: learningObjectId },
       },
     },
   });
