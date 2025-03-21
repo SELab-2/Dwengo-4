@@ -38,6 +38,9 @@ describe('Submission tests', (): void => {
     let classroom: Class;
     let classroomId: number;
 
+    let team: Team;
+    let teamId: number;
+
     let evaluation: Evaluation;
     let evalId: string;
 
@@ -89,12 +92,12 @@ describe('Submission tests', (): void => {
         );
 
         // Create a team to receive the assignment
-        const team: Team = await createTeamWithStudents(
+        team = await createTeamWithStudents(
             "Testing teamName",
             classroomId,
             [student.student]
         );
-        const teamId: number = team.id;
+        teamId = team.id;
 
         // Create an assignment to give to a team
         const deadline = new Date(Date.now() + 1000 * 60 * 60 * 24); // Add 1 day
@@ -104,13 +107,24 @@ describe('Submission tests', (): void => {
             deadline,
         );
         assignmentId = assignment.id;
+    })
 
-        // Give the assignment to the team
-        await giveAssignmentToTeam(assignmentId, teamId);
+    describe('POST /student/submissions/assignment/:assignmentId/evaluation/:evaluationId', (): void => {
+        it("Should throw an error if the student is not yet part of the team with the assignment", async (): Promise<void> => {
+            const { status, body } = await request(app)
+                    .post(`/student/submissions/assignment/${assignmentId}/evaluation/${evalId}`)
+                    .set('Authorization', `Bearer ${student.token}`);
+            expect(status).toBe(403);
+            expect(body.message).toBe("Student is not in a team for this assignment");
+        })
     })
 
     describe('POST /student/submissions/assignment/:assignmentId/evaluation/:evaluationId', (): void => {
         it("Should respond with a `201` status code and the submission", async (): Promise<void> => {
+
+            // Give the assignment to the team
+            await giveAssignmentToTeam(assignmentId, teamId);
+
             const { status, body } = await request(app)
                 .post(`/student/submissions/assignment/${assignmentId}/evaluation/${evalId}`)
                 .set('Authorization', `Bearer ${student.token}`);

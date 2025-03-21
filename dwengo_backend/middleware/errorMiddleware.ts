@@ -6,7 +6,7 @@ const errorHandler = (err: Error, req: Request, res: Response, next: NextFunctio
     if (err instanceof AppError) {
         res.status(err.statusCode);
     } else {
-        const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+        const statusCode: number = res.statusCode === 200 ? 500 : res.statusCode;
         res.status(statusCode);
     }
 
