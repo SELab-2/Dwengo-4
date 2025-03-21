@@ -9,7 +9,7 @@ import {
     EvaluationType,
     LearningObject,
     LearningPath,
-    Student, Submission,
+    Student,
     Teacher,
     Team,
     User
@@ -21,7 +21,8 @@ import {
     createClass,
     createEvaluation,
     createLearningPath,
-    createStudent, createSubmission,
+    createStudent,
+    createSubmission,
     createTeacher,
     createTeamWithStudents,
     giveAssignmentToTeam
@@ -48,9 +49,7 @@ describe('Submission tests', (): void => {
     let assignment: Assignment;
     let assignmentId: number;
 
-    let submission: Submission;
-    let submissionId: number;
-
+    // Dit vult alle bovenstaande variabelen in zodat deze later gebruikt kunnen worden in de testen
     beforeEach(async (): Promise<void> => {
         // Create a teacher
         teacher = await createTeacher("Sponge", "Bob", "sponge.bob@gmail.com");
@@ -116,13 +115,12 @@ describe('Submission tests', (): void => {
         await giveAssignmentToTeam(assignmentId, teamId);
 
         // Create a submission for this assignment
-        submission = await createSubmission(
+        await createSubmission(
             evalId,
             teamId,
             assignmentId
         );
-        submissionId = submission.submissionId;
-    })
+    });
 
     describe('POST /student/submissions/assignment/:assignmentId/evaluation/:evaluationId', (): void => {
         it("Should throw an error if the student is not yet part of the team with the assignment", async (): Promise<void> => {
@@ -142,6 +140,7 @@ describe('Submission tests', (): void => {
             const { status, body } = await request(app)
                     .post(`/student/submissions/assignment/${assignmentId}/evaluation/${evalId}`)
                     .set('Authorization', `Bearer ${student.token}`);
+
             expect(status).toBe(403);
             expect(body.message).toBe("Student is not in a team for this assignment");
         });
@@ -152,14 +151,7 @@ describe('Submission tests', (): void => {
                 .post(`/student/submissions/assignment/${assignmentId}/evaluation/${evalId}`)
                 .set('Authorization', `Bearer ${student.token}`);
 
-            expect(status).toBe(201);
-            expect(body).toEqual({
-                submissionId: expect.any(Number),
-                evaluationId: expect.any(String),
-                teamId: expect.any(Number),
-                submitted: expect.any(String),
-                assignmentId: expect.any(Number),
-            });
+            expectSuccessfulSubmissionCreation(status, body);
 
             // Double check that the database now contains the submission
             await prisma.submission.findUnique({
@@ -172,19 +164,102 @@ describe('Submission tests', (): void => {
 
     describe('GET /student/submissions/assignment/:assignmentId', (): void => {
         it("Should respond with a `200` status code and return the submission for an assignment", async (): Promise<void> => {
-
             const { status, body } = await request(app)
                 .get(`/student/submissions/assignment/${assignmentId}`)
                 .set('Authorization', `Bearer ${student.token}`);
 
-            expect(status).toBe(200);
-            expect(body).toEqual([{
-                assignmentId: expect.any(Number),
-                evaluationId: expect.any(String),
-                submissionId: expect.any(Number),
-                submitted: expect.any(String),
-                teamId: expect.any(Number),
-            }]);
-        })
+            expectSuccessfulSubmissionRetrieval(status, body);
+        });
     })
-})
+
+    describe('GET /student/submissions/assignment/:assignmentId/evaluation/:evaluationId', (): void => {
+        it("Should respond with a `200` status code and return the submission for an evaluation", async (): Promise<void> => {
+            const { status, body } = await request(app)
+                .get(`/student/submissions/assignment/${assignmentId}/evaluation/${evalId}`)
+                .set('Authorization', `Bearer ${student.token}`);
+
+            expectSuccessfulSubmissionRetrieval(status, body);
+        });
+    })
+
+    describe('GET /teacher/submissions/student/:studentId', (): void => {
+        it("Should respond with a `401` status code because a student is unauthorized", async (): Promise<void> => {
+            const { status, body } = await request(app)
+                .get(`/teacher/submissions/student/${studentId}`)
+                .set('Authorization', `Bearer ${student.token}`);
+
+            expect(status).toBe(401);
+            expect(body.error).toBe("Leerkracht niet gevonden.");
+        });
+    });
+
+    describe('GET /teacher/submissions/student/:studentId', (): void => {
+        it("Should respond with a `200` status code and return the submissions for a student", async (): Promise<void> => {
+            const { status, body } = await request(app)
+                .get(`/teacher/submissions/student/${studentId}`)
+                .set('Authorization', `Bearer ${teacher.token}`);
+
+            expectSuccessfulSubmissionRetrieval(status, body);
+        });
+    });
+
+    describe('GET /teacher/submissions/team/:teamId', (): void => {
+        it("Should respond with a `200` status code and return the submissions for a team", async (): Promise<void> => {
+            const { status, body } = await request(app)
+                .get(`/teacher/submissions/team/${teamId}`)
+                .set('Authorization', `Bearer ${teacher.token}`);
+
+            expectSuccessfulSubmissionRetrieval(status, body);
+        });
+    });
+
+    describe('GET /teacher/submissions/assignment/:assignmentId/student/:studentId', (): void => {
+        it("Should respond with a `200` status code and return the submissions for a specific assignment and student", async (): Promise<void> => {
+            const { status, body } = await request(app)
+                .get(`/teacher/submissions/assignment/${assignmentId}/student/${studentId}`)
+                .set('Authorization', `Bearer ${teacher.token}`);
+
+            expectSuccessfulSubmissionRetrieval(status, body);
+        });
+    });
+
+    describe('GET /teacher/submissions/assignment/:assignmentId/team/:teamId', (): void => {
+        it("Should respond with a `200` status code and return the submissions for a specific assignment and team", async (): Promise<void> => {
+            const { status, body } = await request(app)
+                .get(`/teacher/submissions/assignment/${assignmentId}/team/${teamId}`)
+                .set('Authorization', `Bearer ${teacher.token}`);
+
+            expectSuccessfulSubmissionRetrieval(status, body);
+        });
+    });
+});
+
+function expectSuccessfulSubmissionRetrieval(status: number, body: any): void {
+    expect(status).toBe(200);
+    expectCorrectSubmissionListBody(body);
+}
+
+function expectSuccessfulSubmissionCreation(status: number, body: any): void {
+    expect(status).toBe(201);
+    expectCorrectSubmissionBody(body);
+}
+
+function expectCorrectSubmissionBody(body: any): void {
+    expect(body).toEqual({
+        assignmentId: expect.any(Number),
+        evaluationId: expect.any(String),
+        submissionId: expect.any(Number),
+        submitted: expect.any(String),
+        teamId: expect.any(Number),
+    });
+}
+
+function expectCorrectSubmissionListBody(body: any): void {
+    expect(body).toEqual([{
+        assignmentId: expect.any(Number),
+        evaluationId: expect.any(String),
+        submissionId: expect.any(Number),
+        submitted: expect.any(String),
+        teamId: expect.any(Number),
+    }]);
+}

@@ -11,7 +11,7 @@ export default class TeacherSubmissionController {
 
         const submissions: Submission[] = await service.teacherGetSubmissionsForStudent(studentId, teacherId);
 
-        res.json(submissions);
+        res.status(200).json(submissions);
     }
 
     static async getSubmissionsForTeam(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -20,7 +20,7 @@ export default class TeacherSubmissionController {
 
         const submissions: Submission[] = await service.teacherGetSubmissionsForTeam(teamId, teacherId);
 
-        res.json(submissions);
+        res.status(200).json(submissions);
     }
 
     static async getAssignmentSubmissionsForStudent(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -29,7 +29,7 @@ export default class TeacherSubmissionController {
 
         const submissions: Submission[] = await service.teacherGetSubmissionsForStudent(Number(studentId), teacherId, Number(assignmentId));
 
-        res.json(submissions);
+        res.status(200).json(submissions);
     }
 
     static async getAssignmentSubmissionsForTeam(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -38,6 +38,6 @@ export default class TeacherSubmissionController {
 
         const submissions: Submission[] = await service.teacherGetSubmissionsForTeam(Number(teamId), teacherId, Number(assignmentId));
 
-        res.json(submissions);
+        res.status(200).json(submissions);
     }
 }
