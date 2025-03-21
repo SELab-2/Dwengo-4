@@ -6,6 +6,7 @@ import {
     getJoinLink,
     regenerateJoinLink,
     getClassroomStudents,
+    getTeacherClasses
 } from "../../controllers/teacher/teacherClassController";
 import {
     createInvite,
@@ -34,6 +35,7 @@ const router = express.Router();
 router.use(protectTeacher);
 
 // routes for classes
+router.get("/", getTeacherClasses);
 router.post("/", createClassroom);
 router.delete("/:classId", deleteClassroom);
 router.get("/:classId/join-link", getJoinLink);
