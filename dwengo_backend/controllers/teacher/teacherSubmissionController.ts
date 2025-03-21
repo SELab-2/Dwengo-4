@@ -5,7 +5,7 @@ import {Submission} from "@prisma/client";
 import {getUserFromAuthRequest} from "../../helpers/getUserFromAuthRequest";
 
 export default class TeacherSubmissionController {
-    static async getSubmissionsForStudent(req: AuthenticatedRequest, res: Response) {
+    static async getSubmissionsForStudent(req: AuthenticatedRequest, res: Response): Promise<void> {
         const studentId: number = Number(req.params.studentId);
         const teacherId: number = getUserFromAuthRequest(req).id;
 
@@ -14,7 +14,7 @@ export default class TeacherSubmissionController {
         res.json(submissions);
     }
 
-    static async getSubmissionsForTeam(req: AuthenticatedRequest, res: Response) {
+    static async getSubmissionsForTeam(req: AuthenticatedRequest, res: Response): Promise<void> {
         const teamId: number = Number(req.params.teamId);
         const teacherId: number = getUserFromAuthRequest(req).id;
 
@@ -23,7 +23,7 @@ export default class TeacherSubmissionController {
         res.json(submissions);
     }
 
-    static async getAssignmentSubmissionsForStudent(req: AuthenticatedRequest, res: Response) {
+    static async getAssignmentSubmissionsForStudent(req: AuthenticatedRequest, res: Response): Promise<void> {
         const {studentId, assignmentId} = req.params;
         const teacherId: number = getUserFromAuthRequest(req).id;
 
@@ -32,7 +32,7 @@ export default class TeacherSubmissionController {
         res.json(submissions);
     }
 
-    static async getAssignmentSubmissionsForTeam(req: AuthenticatedRequest, res: Response) {
+    static async getAssignmentSubmissionsForTeam(req: AuthenticatedRequest, res: Response): Promise<void> {
         const {teamId, assignmentId} = req.params;
         const teacherId: number = getUserFromAuthRequest(req).id;
 

@@ -5,7 +5,7 @@ import {AuthenticatedRequest} from "../../interfaces/extendedTypeInterfaces";
 import {getUserFromAuthRequest} from "../../helpers/getUserFromAuthRequest";
 
 export default class StudentSubmissionController {
-    static async createSubmission(req: AuthenticatedRequest, res: Response) {
+    static async createSubmission(req: AuthenticatedRequest, res: Response): Promise<void> {
         const {assignmentId, evaluationId} = req.params;
         const studentId: number = getUserFromAuthRequest(req).id;
 
@@ -13,7 +13,7 @@ export default class StudentSubmissionController {
         res.status(201).json(submission);
     }
 
-    static async getSubmissionsForAssignment(req: AuthenticatedRequest, res: Response) {
+    static async getSubmissionsForAssignment(req: AuthenticatedRequest, res: Response): Promise<void> {
         const assignmentId: number = Number(req.params.assignmentId);
         const studentId: number = getUserFromAuthRequest(req).id;
 
@@ -22,7 +22,7 @@ export default class StudentSubmissionController {
         res.json(submissions);
     }
 
-    static async getSubmissionsForEvaluation(req: AuthenticatedRequest, res: Response) {
+    static async getSubmissionsForEvaluation(req: AuthenticatedRequest, res: Response): Promise<void> {
         const {assignmentId, evaluationId} = req.params;
         const studentId: number = getUserFromAuthRequest(req).id;
 

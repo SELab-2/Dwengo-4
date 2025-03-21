@@ -1,16 +1,16 @@
 import prisma from "./prisma";
 import {
-  User,
+  Assignment,
   Class,
   Invite,
-  Teacher,
-  JoinRequestStatus,
-  Student,
   JoinRequest,
+  JoinRequestStatus,
   LearningPath,
-  Assignment,
+  Student,
+  Teacher,
+  User,
 } from "@prisma/client";
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -118,12 +118,12 @@ export async function createLearningPath(
   description: string,
   creatorId: number
 ): Promise<LearningPath> {
-  const lp = await prisma.learningPath.create({
+  return prisma.learningPath.create({
     data: {
       // Random string generator that generates a string of numbers and lowercase letters
       hruid: Math.random()
-        .toString(36)
-        .substring(2, 2 + 12),
+          .toString(36)
+          .substring(2, 2 + 12),
       title,
       description,
       language: "nl",
@@ -134,7 +134,6 @@ export async function createLearningPath(
       },
     },
   });
-  return lp;
 }
 
 export async function addStudentToClass(
@@ -153,7 +152,7 @@ export async function createJoinRequest(
   studentId: number,
   classId: number
 ): Promise<JoinRequest> {
-  return await prisma.joinRequest.create({
+  return prisma.joinRequest.create({
     data: {
       studentId,
       classId,
@@ -180,8 +179,8 @@ export async function createAssignment(
   });
 }
 
-export function stringToDate(body: any, length: number) {
-  for (let i = 0; i < length; i += 1) {
+export function stringToDate(body: any, length: number): void {
+  for (let i: number = 0; i < length; i += 1) {
     body[i].createdAt = new Date(body[i].createdAt);
     body[i].updatedAt = new Date(body[i].updatedAt);
     body[i].deadline = new Date(body[i].deadline);
