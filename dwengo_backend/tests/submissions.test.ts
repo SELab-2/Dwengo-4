@@ -7,22 +7,26 @@ import {
     ContentType,
     Evaluation,
     EvaluationType,
-    LearningObject, LearningPath,
+    LearningObject,
+    LearningPath,
     Student,
     Teacher,
+    Team,
     User
 } from '@prisma/client';
 import {
     addStudentToClass,
-    addTeacherToClass, createAssignment,
+    addTeacherToClass,
+    createAssignment,
     createClass,
-    createEvaluation, createLearningPath,
+    createEvaluation,
+    createLearningPath,
     createStudent,
-    createTeacher
+    createTeacher,
+    createTeamWithStudents,
+    giveAssignmentToTeam
 } from './helpers/testDataCreation';
 import LocalLearningObjectService from "../services/localLearningObjectService";
-
-const APP_URL: string = process.env.APP_URL || "http://localhost:5000";
 
 describe('Submission tests', (): void => {
     let teacher: User & { teacher: Teacher, token: string };
@@ -84,7 +88,15 @@ describe('Submission tests', (): void => {
             teacherId
         );
 
-        // Create an assignment
+        // Create a team to receive the assignment
+        const team: Team = await createTeamWithStudents(
+            "Testing teamName",
+            classroomId,
+            [student.student]
+        );
+        const teamId: number = team.id;
+
+        // Create an assignment to give to a team
         const deadline = new Date(Date.now() + 1000 * 60 * 60 * 24); // Add 1 day
         assignment = await createAssignment(
             classroomId,
@@ -92,6 +104,9 @@ describe('Submission tests', (): void => {
             deadline,
         );
         assignmentId = assignment.id;
+
+        // Give the assignment to the team
+        await giveAssignmentToTeam(assignmentId, teamId);
     })
 
     describe('POST /student/submissions/assignment/:assignmentId/evaluation/:evaluationId', (): void => {
@@ -101,7 +116,14 @@ describe('Submission tests', (): void => {
                 .set('Authorization', `Bearer ${student.token}`);
 
             expect(status).toBe(201);
-            expect(body.submission).toBeDefined();
+            expect(body).toEqual({
+                submissionId: expect.any(Number),
+                evaluationId: expect.any(String),
+                teamId: expect.any(Number),
+                submitted: expect.any(String),
+                assignmentId: expect.any(Number),
+            });
+
         })
     })
 

@@ -7,7 +7,7 @@ import {
   JoinRequestStatus,
   LearningPath,
   Student,
-  Teacher,
+  Teacher, Team, TeamAssignment,
   User,
 } from "@prisma/client";
 import jwt from "jsonwebtoken";
@@ -179,6 +179,15 @@ export async function createAssignment(
   });
 }
 
+export async function giveAssignmentToTeam(assignmentId: number, teamId: number): Promise<TeamAssignment> {
+  return prisma.teamAssignment.create({
+    data: {
+      teamId: teamId,
+      assignmentId: assignmentId,
+    },
+  });
+}
+
 export async function createEvaluation(learningObjectId: string, type: EvaluationType) {
   return prisma.evaluation.create({
     data: {
@@ -189,6 +198,18 @@ export async function createEvaluation(learningObjectId: string, type: Evaluatio
       },
     },
   });
+}
+
+export async function createTeamWithStudents(teamName: string, classId: number, students: Student[]): Promise<Team> {
+  return prisma.team.create({
+    data: {
+      teamname: teamName,
+      classId,
+      students: {
+        connect: students.map((student: Student): {userId: number} => ({ userId: student.userId }))
+      }
+    }
+  })
 }
 
 export function stringToDate(body: any, length: number): void {
