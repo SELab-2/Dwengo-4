@@ -27,6 +27,7 @@ describe('Submission tests', (): void => {
     let classroomId: number;
 
     let evaluation: Evaluation;
+    let evalId: string;
 
     beforeEach(async (): Promise<void> => {
         // Create a teacher
@@ -48,8 +49,20 @@ describe('Submission tests', (): void => {
         await addStudentToClass(studentId, classroomId);
 
         // Create an evaluation so a student can send in a submission$
-        const learningObjectId = "FOO"
+        const learningObjectId = "FOO";
         evaluation = await createEvaluation(learningObjectId, EvaluationType.OPEN);
+        evalId = evaluation.id;
+    })
+
+    describe('POST /assignment/:assignmentId/evaluation/:evaluationId', (): void => {
+        it("Should respond with a `201` status code and the submission", async (): Promise<void> => {
+            const { status, body } = await request(app)
+                .post(`/assignment/:assignmentId/evaluation/${evalId}`)
+                .set('Authorization', `Bearer ${student.token}`);
+
+            expect(status).toBe(201);
+            expect(body.submission).toBeDefined();
+        })
     })
 
 })
