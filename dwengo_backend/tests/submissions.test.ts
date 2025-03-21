@@ -9,7 +9,7 @@ import {
     EvaluationType,
     LearningObject,
     LearningPath,
-    Student,
+    Student, Submission,
     Teacher,
     Team,
     User
@@ -21,12 +21,13 @@ import {
     createClass,
     createEvaluation,
     createLearningPath,
-    createStudent,
+    createStudent, createSubmission,
     createTeacher,
     createTeamWithStudents,
     giveAssignmentToTeam
 } from './helpers/testDataCreation';
 import LocalLearningObjectService from "../services/localLearningObjectService";
+import prisma from "./helpers/prisma";
 
 describe('Submission tests', (): void => {
     let teacher: User & { teacher: Teacher, token: string };
@@ -46,6 +47,9 @@ describe('Submission tests', (): void => {
 
     let assignment: Assignment;
     let assignmentId: number;
+
+    let submission: Submission;
+    let submissionId: number;
 
     beforeEach(async (): Promise<void> => {
         // Create a teacher
@@ -107,23 +111,42 @@ describe('Submission tests', (): void => {
             deadline,
         );
         assignmentId = assignment.id;
+
+        // Give the assignment to the team
+        await giveAssignmentToTeam(assignmentId, teamId);
+
+        // Create a submission for this assignment
+        submission = await createSubmission(
+            evalId,
+            teamId,
+            assignmentId
+        );
+        submissionId = submission.submissionId;
     })
 
     describe('POST /student/submissions/assignment/:assignmentId/evaluation/:evaluationId', (): void => {
         it("Should throw an error if the student is not yet part of the team with the assignment", async (): Promise<void> => {
+
+            // Hiermee garandeer ik dat de student geen deel uitmaakt van de groep met de assignment
+            await prisma.team.update({
+                where: {
+                    id: teamId
+                },
+                data: {
+                    students: {
+                        disconnect: [{ userId: studentId }]  // Optionally, you can disconnect specific students if you know them
+                    }
+                }
+            });
+
             const { status, body } = await request(app)
                     .post(`/student/submissions/assignment/${assignmentId}/evaluation/${evalId}`)
                     .set('Authorization', `Bearer ${student.token}`);
             expect(status).toBe(403);
             expect(body.message).toBe("Student is not in a team for this assignment");
-        })
-    })
+        });
 
-    describe('POST /student/submissions/assignment/:assignmentId/evaluation/:evaluationId', (): void => {
-        it("Should respond with a `201` status code and the submission", async (): Promise<void> => {
-
-            // Give the assignment to the team
-            await giveAssignmentToTeam(assignmentId, teamId);
+        it("Should respond with a `201` status code and the created submission", async (): Promise<void> => {
 
             const { status, body } = await request(app)
                 .post(`/student/submissions/assignment/${assignmentId}/evaluation/${evalId}`)
@@ -138,7 +161,30 @@ describe('Submission tests', (): void => {
                 assignmentId: expect.any(Number),
             });
 
+            // Double check that the database now contains the submission
+            await prisma.submission.findUnique({
+                where: {
+                    submissionId: body.submissionId
+                }
+            });
+        });
+    });
+
+    describe('GET /student/submissions/assignment/:assignmentId', (): void => {
+        it("Should respond with a `200` status code and return the submission for an assignment", async (): Promise<void> => {
+
+            const { status, body } = await request(app)
+                .get(`/student/submissions/assignment/${assignmentId}`)
+                .set('Authorization', `Bearer ${student.token}`);
+
+            expect(status).toBe(200);
+            expect(body).toEqual([{
+                assignmentId: expect.any(Number),
+                evaluationId: expect.any(String),
+                submissionId: expect.any(Number),
+                submitted: expect.any(String),
+                teamId: expect.any(Number),
+            }]);
         })
     })
-
 })

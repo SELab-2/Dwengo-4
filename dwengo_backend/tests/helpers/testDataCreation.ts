@@ -6,7 +6,7 @@ import {
   JoinRequest,
   JoinRequestStatus,
   LearningPath,
-  Student,
+  Student, Submission,
   Teacher, Team, TeamAssignment,
   User,
 } from "@prisma/client";
@@ -176,6 +176,16 @@ export async function createAssignment(
         },
       },
     },
+  });
+}
+
+export async function createSubmission(evaluationId: string, teamId: number, assignmentId: number): Promise<Submission> {
+  return prisma.submission.create({
+    data: {
+      evaluationId,
+      teamId,
+      assignmentId
+    }
   });
 }
 

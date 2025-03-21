@@ -25,7 +25,7 @@ export default class StudentSubmissionController {
 
         const submissions: Submission[] = await service.getSubmissionsForAssignment(assignmentId, studentId);
 
-        res.json(submissions);
+        res.status(200).json(submissions);
     }
 
     static async getSubmissionsForEvaluation(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -34,6 +34,6 @@ export default class StudentSubmissionController {
 
         const submissions: Submission[] = await service.getSubmissionsForEvaluation(Number(assignmentId), evaluationId, studentId);
 
-        res.json(submissions);
+        res.status(200).json(submissions);
     }
 }

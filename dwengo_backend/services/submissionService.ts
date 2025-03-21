@@ -11,7 +11,7 @@ export default class submissionService {
   ): Promise<Submission> {
     // Controleren of de student in een team zit dat gekoppeld is aan de opdracht.
     // De originele filter probeerde ook te filteren op assignment.learningPath, maar dat veld bestaat niet.
-    const team = await prisma.team.findFirst({
+    const team: {id: number} | null = await prisma.team.findFirst({
       where: {
         students: {
           some: {
@@ -48,6 +48,7 @@ export default class submissionService {
   ): Promise<Submission[]> {
     return prisma.submission.findMany({
       where: {
+        assignmentId: assignmentId,
         team: {
           students: {
             some: {
@@ -58,7 +59,6 @@ export default class submissionService {
             assignmentId: assignmentId,
           },
         },
-        assignmentId: assignmentId,
       },
     });
   }
