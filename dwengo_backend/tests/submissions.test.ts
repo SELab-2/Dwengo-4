@@ -1,18 +1,26 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import {beforeEach, describe, expect, it} from 'vitest'
 import request from 'supertest';
-import prisma from './helpers/prisma'
 import app from '../index';
-import {Class, Evaluation, EvaluationType, Student, Teacher, User} from '@prisma/client';
+import {
+    Assignment,
+    Class,
+    ContentType,
+    Evaluation,
+    EvaluationType,
+    LearningObject, LearningPath,
+    Student,
+    Teacher,
+    User
+} from '@prisma/client';
 import {
     addStudentToClass,
-    addTeacherToClass,
+    addTeacherToClass, createAssignment,
     createClass,
-    createEvaluation,
-    createInvite,
-    createJoinRequest,
+    createEvaluation, createLearningPath,
     createStudent,
     createTeacher
 } from './helpers/testDataCreation';
+import LocalLearningObjectService from "../services/localLearningObjectService";
 
 const APP_URL: string = process.env.APP_URL || "http://localhost:5000";
 
@@ -28,6 +36,9 @@ describe('Submission tests', (): void => {
 
     let evaluation: Evaluation;
     let evalId: string;
+
+    let assignment: Assignment;
+    let assignmentId: number;
 
     beforeEach(async (): Promise<void> => {
         // Create a teacher
@@ -48,16 +59,45 @@ describe('Submission tests', (): void => {
         // Add the student to the class
         await addStudentToClass(studentId, classroomId);
 
+        // De data voor het aanmaken van een LocalLearningObject
+        const data = {
+            title: "Test LO",
+            description: "Niet voor echt gebruik",
+            contentType: ContentType.TEXT_PLAIN,
+        };
+
+        // Create a local learningObject
+        const LO: LearningObject = await LocalLearningObjectService.createLearningObject(
+            teacherId,
+            data
+        );
+
         // Create an evaluation so a student can send in a submission$
-        const learningObjectId = "FOO";
+        const learningObjectId: string = LO.id;
         evaluation = await createEvaluation(learningObjectId, EvaluationType.OPEN);
         evalId = evaluation.id;
+
+        // Create a learningPath
+        const learningPath: LearningPath = await createLearningPath(
+            "Fake learning path",
+            "This path is solely used for testing.",
+            teacherId
+        );
+
+        // Create an assignment
+        const deadline = new Date(Date.now() + 1000 * 60 * 60 * 24); // Add 1 day
+        assignment = await createAssignment(
+            classroomId,
+            learningPath.id,
+            deadline,
+        );
+        assignmentId = assignment.id;
     })
 
-    describe('POST /assignment/:assignmentId/evaluation/:evaluationId', (): void => {
+    describe('POST /student/submissions/assignment/:assignmentId/evaluation/:evaluationId', (): void => {
         it("Should respond with a `201` status code and the submission", async (): Promise<void> => {
             const { status, body } = await request(app)
-                .post(`/assignment/:assignmentId/evaluation/${evalId}`)
+                .post(`/student/submissions/assignment/${assignmentId}/evaluation/${evalId}`)
                 .set('Authorization', `Bearer ${student.token}`);
 
             expect(status).toBe(201);
