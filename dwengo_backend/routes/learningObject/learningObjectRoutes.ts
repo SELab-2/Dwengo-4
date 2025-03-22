@@ -15,27 +15,39 @@ const router = express.Router();
 router.use(protectAnyUser);
 
 /**
- * GET /teacher/learningObject
- * GET /student/learningObject
- *   -> haal alle leerobjecten op
+ * @route GET /teacher/learningObject
+ * @route GET /student/learningObject
+ * @description Haal alle leerobjecten op
+ * @access Teacher/Student
  */
 router.get("/", getAllLearningObjectsController);
 
 /**
- * GET /teacher/learningObject/search
- * GET /student/learningObject/search
- *   -> zoek leerobject met bepaalde parameters
+ * @route GET /teacher/learningObject/search
+ * @route GET /student/learningObject/search
+ * @description Zoek leerobject met bepaalde parameters
+ * @query q: string (zoekterm)
+ * @access Teacher/Student
  */
 router.get("/search", searchLearningObjectsController);
-// [NIEUW] Extra endpoint om op hruid+language+version te zoeken
-// Voorbeeld:
-//   GET /learningObjects/lookup?hruid=opdracht_leds&language=nl&version=2
+
+/**
+ * @route GET /teacher/learningObject/lookup
+ * @route GET /student/learningObject/lookup
+ * @description Haal leerobject op met hruid+language+version
+ * @query hruid: string (hruid van leerobject)
+ * @query language: string (taal van leerobject)
+ * @query version: number (versie van leerobject)
+ * @access Teacher/Student
+ */
 router.get("/lookup", getLearningObjectByHruidLangVersionController);
 
 /**
- * GET /teacher/learningObject/:learningObjectId
- * GET /student/learningObject/:learningObjectId
- *   -> haal bepaald leerobject op
+ * @route GET /teacher/learningObject/:learningObjectId
+ * @route GET /student/learningObject/:learningObjectId
+ * @description Haal bepaald leerobject op
+ * @param learningObjectId: string
+ * @access Teacher/Student
  */
 router.get("/:learningObjectId", getLearningObjectController);
 
