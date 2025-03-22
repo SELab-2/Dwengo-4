@@ -11,27 +11,27 @@ const router = Router();
 router.use(protectTeacher);
 
 /**
- * GET /teacher/learningPaths/:pathId/nodes
+ * GET /teacher/learningPaths/:pathId/node
  *   -> haal alle nodes op voor dat leerpad
  */
-router.get("/:pathId/nodes", getNodesForPath);
+router.get("/", getNodesForPath);
 
 /**
- * POST /teacher/learningPaths/:pathId/nodes
+ * POST /teacher/learningPaths/:pathId/node
  *   -> maak een nieuwe node in dit leerpad
  */
-router.post("/:pathId/nodes", createNodeForPath);
+router.post("/", createNodeForPath);
 
 /**
- * PATCH /teacher/learningPaths/:pathId/nodes/:nodeId
+ * PATCH /teacher/learningPath/:pathId/node/:nodeId
  *   -> update de node
  */
-router.patch("/:pathId/nodes/:nodeId", updateNodeForPath);
+router.patch("/:nodeId", updateNodeForPath);
 
 /**
- * DELETE /teacher/learningPaths/:pathId/nodes/:nodeId
+ * DELETE /teacher/learningPath/:pathId/node/:nodeId
  *   -> verwijder de node
  */
-router.delete("/:pathId/nodes/:nodeId", deleteNodeFromPath);
+router.delete("/:nodeId", deleteNodeFromPath);
 
 export default router;
