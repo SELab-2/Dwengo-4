@@ -14,18 +14,35 @@ const router = express.Router();
 router.use(protectTeacher);
 
 /**
- * POST /teacher/createdLearningObject -> nieuw leerobject aanmaken
- * GET  /teacher/createdLearningObject -> alle leerobjecten van deze teacher
+ * @route POST /teacher/createdLearningObject
+ * @description Nieuw leerobject aanmaken
+ * @access Teacher
+ *
+ * @route GET  /teacher/createdLearningObject
+ * @description Alle leerobjecten van deze teacher ophalen
+ * @access Teacher
  */
 router.route("/").post(createLocalLearningObject).get(getLocalLearningObjects);
 
 /**
- * GET    /teacher/createdLearningObject/:id -> 1 leerobject ophalen
- * PATCh   /teacher/createdLearningObject/:id -> updaten (gedeeltelijk)
- * DELETE /teacher/createdLearningObject/:id -> verwijderen
+ * @route GET    /teacher/createdLearningObject/:id
+ * @description Specifiek leerobject ophalen
+ * @param createdLearningObjectId: string
+ * @access Teacher
+ *
+ * @route PATCH   /teacher/createdLearningObject/:id
+ * @description Leerobject updaten
+ * @param createdLearningObjectId: string
+ * @body LocalLearningObjectData (optioneel)
+ * @access Teacher
+ *
+ * @route DELETE /teacher/createdLearningObject/:id
+ * @description Leerobject verwijderen
+ * @param createdLearningObjectId: string
+ * @access Teacher
  */
 router
-  .route("/:id")
+  .route("/:createdLearningObjectId")
   .get(getLocalLearningObjectById)
   .patch(updateLocalLearningObject)
   .delete(deleteLocalLearningObject);
