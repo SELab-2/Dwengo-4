@@ -1,4 +1,4 @@
-import express, {Request, Response, NextFunction, Express} from "express";
+import express, { Request, Response, NextFunction, Express } from "express";
 import dotenv from "dotenv";
 import errorHandler from "./middleware/errorMiddleware";
 import teacherAuthRoutes from "./routes/teacher/teacherAuthRoutes";
@@ -84,7 +84,8 @@ app.use("/student/assignments", studentAssignmentRoutes);
 app.use("/teacher/feedback", feedbackRoutes);
 
 // Nieuwe routes voor leerobjecten
-app.use("/learningObjects", learningObjectRoutes);
+app.use("/student/learningObject", learningObjectRoutes);
+app.use("/teacher/learningObject", learningObjectRoutes);
 
 app.use("/question", QuestionRoutes);
 
