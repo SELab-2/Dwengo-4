@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  createBrowserRouter,
-  Link,
-  RouteObject,
-} from "react-router-dom";
+import {createBrowserRouter, Link, RouteObject,} from "react-router-dom";
 
 // ==== TEACHER ROUTES ==== //
 import RootLayoutTeacher from "../components/teacher/RootLayoutTeacher";
@@ -15,7 +11,7 @@ import {
   checkAuthLoader as teacherCheckAuthLoader,
   tokenLoader as teacherTokenLoader,
 } from "../util/teacher/authTeacher";
-import { action as teacherLogoutAction } from "../pages/teacher/LogoutTeacher";
+import {action as teacherLogoutAction} from "../pages/teacher/LogoutTeacher";
 
 // ==== STUDENT ROUTES ==== //
 import RootLayoutStudent from "../components/student/RootLayoutStudent";
@@ -26,8 +22,9 @@ import {
   checkAuthLoader as studentCheckAuthLoader,
   tokenLoader as studentTokenLoader,
 } from "../util/student/authStudent";
-import { action as studentLogoutAction } from "../pages/student/LogoutStudent";
+import {action as studentLogoutAction} from "../pages/student/LogoutStudent";
 import StudentIndex from "../pages/student";
+import StudentClasses from "../pages/student/ClassesStudent"
 
 const HomePage: React.FC = () => (
   <div style={{ textAlign: "center", marginTop: "50px" }}>
@@ -93,6 +90,11 @@ export const router = createBrowserRouter([
         index: true,
         // Je kunt hier eventueel een aparte HomeStudent-component gebruiken
         element: <StudentIndex />,
+      },
+      {
+        path: "student-index", // TODO waar plaatsen?
+        element: <StudentClasses/>,
+        loader: studentCheckAuthLoader,
       },
       {
         path: "join-link-example",
