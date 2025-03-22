@@ -10,11 +10,11 @@ const assignmentController = new AssignmentController();
 /**
  * @route POST /teacher/assignment
  * @description Create an assignment for a class
- * @param classId: number
- * @param pathRef: string
- * @param pathLanguage: string
- * @param isExternal: boolean
- * @param deadline: string
+ * @body classId: number
+ * @body pathRef: string
+ * @body pathLanguage: string
+ * @body isExternal: boolean
+ * @body deadline: string
  * @access Teacher
  */
 router.post("/", protectTeacher, controller.createAssignmentForClass);
@@ -22,6 +22,7 @@ router.post("/", protectTeacher, controller.createAssignmentForClass);
 /**
  * @route GET /teacher/assignment/:assignmentId
  * @description Get an assignment by id
+ * @param assignmentId: number
  * @access Anyone (Should be checked if user is teacher is teacher of this class)
  */
 router.get("/:assignmentId", assignmentController.getAssignmentsById);
@@ -29,6 +30,7 @@ router.get("/:assignmentId", assignmentController.getAssignmentsById);
 /**
  * @route GET /teacher/assignment/class/:classId
  * @description Get all assignments for a class
+ * @param classId: number
  * @access Teacher
  */
 router.get("/class/:classId", protectTeacher, controller.getAssignmentsByClass);
@@ -47,6 +49,7 @@ router.patch("/:assignmentId", protectTeacher, controller.updateAssignment);
 /**
  * @route DELETE /teacher/assignment/:assignmentId
  * @description Delete an assignment
+ * @param assignmentId: number
  * @access Teacher
  */
 router.delete("/:assignmentId", protectTeacher, controller.deleteAssignment);
