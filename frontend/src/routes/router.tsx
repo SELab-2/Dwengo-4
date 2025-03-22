@@ -3,6 +3,7 @@ import {
   createBrowserRouter,
   Link,
   RouteObject,
+  useNavigate,
 } from "react-router-dom";
 
 // ==== TEACHER ROUTES ==== //
@@ -16,6 +17,7 @@ import {
   tokenLoader as teacherTokenLoader,
 } from "../util/teacher/authTeacher";
 import { action as teacherLogoutAction } from "../pages/teacher/LogoutTeacher";
+import EditClassTeacher from "../pages/teacher/EditClassTeacher";
 
 // ==== STUDENT ROUTES ==== //
 import RootLayoutStudent from "../components/student/RootLayoutStudent";
@@ -82,6 +84,10 @@ export const router = createBrowserRouter([
             loader: teacherCheckAuthLoader,
           },
         ],
+      },
+      {
+        path: "classes/:classId",
+        element: <EditClassTeacher />,
       },
     ],
   },
