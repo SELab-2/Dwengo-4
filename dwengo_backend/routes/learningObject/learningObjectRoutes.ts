@@ -27,7 +27,6 @@ router.get("/", getAllLearningObjectsController);
  *   -> zoek leerobject met bepaalde parameters
  */
 router.get("/search", searchLearningObjectsController);
-router.get("/path/:pathId", getLearningObjectsForPathController);
 // [NIEUW] Extra endpoint om op hruid+language+version te zoeken
 // Voorbeeld:
 //   GET /learningObjects/lookup?hruid=opdracht_leds&language=nl&version=2
