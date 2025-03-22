@@ -151,7 +151,7 @@ echo "$LOCAL_LO"
 
 echo
 echo "==[ 8) Teacher maakt lokaal leerpad ]=============================="
-LOCAL_LP_RESP=$(curl -s -X POST "$BASE_URL/teacher/createdPath" \
+LOCAL_LP_RESP=$(curl -s -X POST "$BASE_URL/pathByTeacher" \
    -H "Authorization: Bearer $TEACHER_TOKEN" \
    -H "Content-Type: application/json" \
    -d '{
@@ -167,7 +167,7 @@ echo "$LOCAL_LP_RESP"
 
 echo
 echo "==[ 9) Teacher voegt node toe in leerpad (lokaal LO) ]============"
-LP_NODE_RESP=$(curl -s -X POST "$BASE_URL/teacher/learningPath/$LP_ID/node" \
+LP_NODE_RESP=$(curl -s -X POST "$BASE_URL/learningPath/$LP_ID/node" \
    -H "Authorization: Bearer $TEACHER_TOKEN" \
    -H "Content-Type: application/json" \
    -d "{
