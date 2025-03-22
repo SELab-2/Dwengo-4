@@ -11,10 +11,14 @@ interface ClassItem {
 }
 
 const ClassesPage: React.FC = () => {
-  const { data: classes, isLoading, isError, error } = useQuery<ClassItem[]>({
+  const { data, isLoading, isError, error } = useQuery<{
+    classes: ClassItem[];
+  }>({
     queryKey: ["classes"],
     queryFn: fetchClasses,
   });
+
+  const classes = data?.classes || [];
 
   const handleTeacherInvite = (classId: string): void => {
     console.log(`Beheer leerkracht uitnodigingen voor klas: ${classId}`);
@@ -25,7 +29,7 @@ const ClassesPage: React.FC = () => {
   };
 
   return (
-    <div className="g-30">
+    <div className="flex flex-col gap-6">
       <CreateClass />
 
       {isLoading && <p>Loading...</p>}
@@ -37,7 +41,7 @@ const ClassesPage: React.FC = () => {
       )}
 
       {!isLoading && !isError && (
-        <>
+        <div className="flex flex-col gap-4">
           <h2>Mijn Klassen</h2>
           <table>
             <thead>
@@ -48,26 +52,38 @@ const ClassesPage: React.FC = () => {
                 <th>Leerling Invite</th>
               </tr>
             </thead>
-            <tbody>
-              {classes?.map((classItem) => (
-                <tr key={classItem.id}>
-                  <td>{classItem.name}</td>
-                  <td>{classItem.code}</td>
-                  <td>
-                    <PrimaryButton onClick={() => handleTeacherInvite(classItem.id)}>
-                      Beheer
-                    </PrimaryButton>
-                  </td>
-                  <td>
-                    <PrimaryButton onClick={() => handleStudentInvite(classItem.id)}>
-                      Beheer
-                    </PrimaryButton>
+            <tbody className="divide-y divide-gray-200">
+              {classes.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="c-r">
+                    Geen klassen gevonden.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                classes.map((classItem) => (
+                  <tr key={classItem.id} className="py-2">
+                    <td className="py-3">{classItem.name}</td>
+                    <td className="py-3">{classItem.code}</td>
+                    <td className="py-3">
+                      <PrimaryButton
+                        onClick={() => handleTeacherInvite(classItem.id)}
+                      >
+                        Beheer
+                      </PrimaryButton>
+                    </td>
+                    <td className="py-3">
+                      <PrimaryButton
+                        onClick={() => handleStudentInvite(classItem.id)}
+                      >
+                        Beheer
+                      </PrimaryButton>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
-        </>
+        </div>
       )}
     </div>
   );

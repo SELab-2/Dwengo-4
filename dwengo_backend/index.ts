@@ -1,4 +1,4 @@
-import express, {Request, Response, NextFunction, Express} from "express";
+import express, { Request, Response, NextFunction, Express } from "express";
 import dotenv from "dotenv";
 import errorHandler from "./middleware/errorMiddleware";
 import teacherAuthRoutes from "./routes/teacher/teacherAuthRoutes";
@@ -35,6 +35,7 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
   const allowedOrigins: string[] = [
     "https://dwengo.org",
     "http://localhost:5173",
+    "http://localhost:5000",
   ];
   const origin = req.headers.origin;
   if (origin && allowedOrigins.includes(origin)) {
