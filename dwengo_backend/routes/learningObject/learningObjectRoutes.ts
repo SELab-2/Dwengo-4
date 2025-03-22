@@ -7,48 +7,61 @@ import {
   // [NIEUW] importeer de extra controller-functie:
   getLearningObjectByHruidLangVersionController,
 } from "../../controllers/learningObject/learningObjectController";
+import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
 
 const router = express.Router();
 
-// Bescherm alle endpoints, user moet ingelogd zijn (student/teacher/admin)
-router.use(protectAnyUser);
-
 /**
- * @route GET /teacher/learningObject
- * @route GET /student/learningObject
- * @description Haal alle leerobjecten op
- * @access Teacher/Student
+ * @route GET /learningObject
+ * @description Haal alle leerobjecten op. Enkel leerkrachten kunnen dit doen.
+ * @access Teacher
  */
-router.get("/", getAllLearningObjectsController);
+router.get("/", protectTeacher, getAllLearningObjectsController);
 
 /**
- * @route GET /teacher/learningObject/search
- * @route GET /student/learningObject/search
+ * @route GET /learningObject/search
  * @description Zoek leerobject met bepaalde parameters
  * @query q: string (zoekterm)
- * @access Teacher/Student
+ * @access Teacher
  */
-router.get("/search", searchLearningObjectsController);
+router.get("/search", protectTeacher, searchLearningObjectsController);
 
 /**
- * @route GET /teacher/learningObject/lookup
- * @route GET /student/learningObject/lookup
+ * @route GET /learningObject/lookup
  * @description Haal leerobject op met hruid+language+version
  * @query hruid: string (hruid van leerobject)
  * @query language: string (taal van leerobject)
  * @query version: number (versie van leerobject)
- * @access Teacher/Student
+ * @access Teacher
  */
-router.get("/lookup", getLearningObjectByHruidLangVersionController);
+router.get(
+  "/lookup",
+  protectTeacher,
+  getLearningObjectByHruidLangVersionController
+);
 
 /**
- * @route GET /teacher/learningObject/:learningObjectId
- * @route GET /student/learningObject/:learningObjectId
+ * @route GET /learningObject/:learningObjectId
  * @description Haal bepaald leerobject op
  * @param learningObjectId: string
  * @access Teacher/Student
  */
-router.get("/:learningObjectId", getLearningObjectController);
+router.get("/:learningObjectId", protectAnyUser, getLearningObjectController);
+
+/**
+ * @route GET /learningObject/learningPath/:pathId
+ * @description Haal alle leerobjecten op die horen bij een specifiek leerpad
+ * @param pathId: string
+ * @queryparam language: string
+ * @queryparam hruid: string
+ * @queryparam version: int
+ * @access Teacher/Student
+ */
+router.get(
+  "/learningPath/learningPathId",
+  protectAnyUser,
+  getLearningObjectByHruidLangVersionController
+);
 
 export default router;
