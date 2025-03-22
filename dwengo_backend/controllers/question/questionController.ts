@@ -2,189 +2,180 @@
 import { Response } from "express";
 import QuestionService from "../../services/questionsService";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
-import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
+// errors
+import { BadRequestError } from "../../errors/errors";
 
-// Hulp-functie om errors te uniformiseren
+/**
+ * Hulp om try/catch te bundelen: elke controller-functie in "handleRequest"
+ */
 const handleRequest = (
   handler: (req: AuthenticatedRequest, res: Response) => Promise<void>
 ) => async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     await handler(req, res);
-  } catch (error) {
-    const message: string =
-      error instanceof Error ? error.message : "An unknown error occurred";
-    res.status(400).json({ error: message });
-    return;
+  } catch (err: any) {
+    const msg = err.message || "Unknown error";
+    res.status(err.statusCode || 400).json({ error: msg });
   }
 };
 
-/**
- * createQuestionGeneral
- *  Verwacht in de route:
- *    POST /question/general/:assignmentId
- *  In de body:
- *  {
- *    title, text, teamId,
- *    pathRef, isExternal
- *  }
- */
-export const createQuestionGeneral = handleRequest(
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { assignmentId } = req.params; // we gebruiken learningPathId niet meer in param, want we hebben pathRef in de body
-    const { title, text, teamId, pathRef, isExternal } = req.body;
-    const studentId = getUserFromAuthRequest(req).id;
+// ----------------------------------
+// CREATE: SPECIFIC
+// ----------------------------------
+export const createQuestionSpecific = handleRequest(async (req, res) => {
+  const { assignmentId } = req.params;
+  const { teamId, title, text, isExternal, localLearningObjectId, dwengoHruid, dwengoLanguage, dwengoVersion } = req.body;
 
-    if (!studentId) {
-      res.status(400).json({ error: "Student ID is required" });
-      return;
-    }
-    if (!assignmentId) {
-      res.status(400).json({ error: "Missing assignmentId param" });
-      return;
-    }
-    if (!pathRef) {
-      res.status(400).json({ error: "Missing pathRef in body" });
-      return;
-    }
-
-    const questionGeneral = await QuestionService.createQuestionGeneral(
-      Number(assignmentId),
-      title,
-      text,
-      teamId,
-      studentId,
-      "GENERAL",
-      pathRef,
-      !!isExternal
-    );
-    res.status(201).json(questionGeneral);
+  if (!assignmentId || !teamId || !title || !text) {
+    throw new BadRequestError("Missing required fields (assignmentId, teamId, title, text).");
   }
-);
+  const studentId = req.user!.id; // verondersteld dat user is student
 
-/**
- * createQuestionSpecific
- *  Verwacht in de route:
- *    POST /question/specific/:assignmentId
- *  In de body:
- *  {
- *    title, text, teamId,
- *    objectRef, isExternal,
- *    learningPathId (optioneel, als je die logica wil)
- *  }
- */
-export const createQuestionSpecific = handleRequest(
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { assignmentId } = req.params; // i.p.v. learningPathId, etc. In de body kan je dat ook meesturen
-    const {
-      title,
-      text,
-      teamId,
-      objectRef,
-      isExternal,
-      learningPathId,
-    } = req.body;
-    const studentId = getUserFromAuthRequest(req).id;
+  const questionSpec = await QuestionService.createQuestionSpecific(
+    Number(assignmentId),
+    Number(teamId),
+    studentId,
+    title,
+    text,
+    !!isExternal,
+    localLearningObjectId,
+    dwengoHruid,
+    dwengoLanguage,
+    dwengoVersion ? Number(dwengoVersion) : undefined
+  );
 
-    if (studentId === undefined) {
-      res.status(400).json({ error: "Student ID is required" });
-      return;
-    }
-    if (!assignmentId) {
-      res.status(400).json({ error: "Missing assignmentId param" });
-      return;
-    }
-    if (!objectRef) {
-      res.status(400).json({ error: "Missing objectRef in body" });
-      return;
-    }
+  res.status(201).json(questionSpec);
+});
 
-    // Let op: we willen misschien wel learningPathId checken (optioneel).
-    // Is up to you of je dat in param of body zet.
-    const questionSpecific = await QuestionService.createQuestionSpecific(
-      Number(assignmentId),
-      title,
-      text,
-      teamId,
-      studentId,
-      "SPECIFIC",
-      objectRef,
-      isExternal,
-      learningPathId || ""
-    );
-    res.status(201).json(questionSpecific);
+// ----------------------------------
+// CREATE: GENERAL
+// ----------------------------------
+export const createQuestionGeneral = handleRequest(async (req, res) => {
+  const { assignmentId } = req.params;
+  const { teamId, title, text, isExternal, pathRef, dwengoLanguage } = req.body;
+
+  if (!assignmentId || !teamId || !title || !text || !pathRef) {
+    throw new BadRequestError("Missing required fields (assignmentId, teamId, title, text, pathRef).");
   }
-);
+  const studentId = req.user!.id;
 
-export const createQuestionMessage = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { questionId } = req.params;
-    const { text } = req.body;
-    const userId = getUserFromAuthRequest(req).id;
-    if (userId === undefined) {
-        res.status(400).json({ error: "Student ID is required" });
-        return;
-    }
-    const questionMessage = await QuestionService.createQuestionMessage(Number(questionId), text, Number(userId));
-    res.status(201).json(questionMessage);
+  const questionGen = await QuestionService.createQuestionGeneral(
+    Number(assignmentId),
+    Number(teamId),
+    studentId,
+    title,
+    text,
+    !!isExternal,
+    pathRef,
+    dwengoLanguage
+  );
+
+  res.status(201).json(questionGen);
 });
 
-export const updateQuestion = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { questionId } = req.params;
-    const { title } = req.body;
-    const question = await QuestionService.updateQuestion(Number(questionId), title);
-    res.status(201).json(question);
+// ----------------------------------
+// CREATE message (reply)
+// ----------------------------------
+export const createQuestionMessage = handleRequest(async (req, res) => {
+  const { questionId } = req.params;
+  const { text } = req.body;
+
+  if (!questionId || !text) {
+    throw new BadRequestError("Missing questionId or text");
+  }
+  const userId = req.user!.id;
+
+  const msg = await QuestionService.createQuestionMessage(Number(questionId), userId, text);
+  res.status(201).json(msg);
 });
 
-export const updateQuestionMessage = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { questionId, questionMessageId } = req.params;
-    const { text } = req.body;
-    const userId = getUserFromAuthRequest(req).id;
-    if (userId === undefined) {
-        res.status(400).json({ error: "Student ID is required" });
-        return;
-    }
-    const questionMessage = await QuestionService.updateQuestionMessage(Number(questionId), Number(questionMessageId), text, userId);
-    res.status(201).json(questionMessage);
+// ----------------------------------
+// UPDATE question
+// ----------------------------------
+export const updateQuestion = handleRequest(async (req, res) => {
+  const { questionId } = req.params;
+  const { title } = req.body;
+  if (!title) {
+    throw new BadRequestError("Missing title");
+  }
+  const updated = await QuestionService.updateQuestion(Number(questionId), title);
+  res.status(200).json(updated);
 });
 
-export const getQuestion = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { questionId } = req.params;
-    const question = await QuestionService.getQuestion(Number(questionId));
-    res.status(200).json(question);
+// ----------------------------------
+// UPDATE message
+// ----------------------------------
+export const updateQuestionMessage = handleRequest(async (req, res) => {
+  const { questionMessageId } = req.params;
+  const { text } = req.body;
+
+  if (!text) {
+    throw new BadRequestError("Missing text for question message update.");
+  }
+
+  const updatedMsg = await QuestionService.updateQuestionMessage(Number(questionMessageId), text);
+  res.status(200).json(updatedMsg);
 });
 
-export const getQuestionsTeam = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { teamId } = req.params;
-    const questions = await QuestionService.getQuestionsTeam(Number(teamId));
-    res.status(200).json(questions);
+// ----------------------------------
+// GET question
+// ----------------------------------
+export const getQuestion = handleRequest(async (req, res) => {
+  const { questionId } = req.params;
+  const q = await QuestionService.getQuestion(Number(questionId));
+  res.json(q);
 });
 
-export const getQuestionsClass = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { classId } = req.params;
-    const questions = await QuestionService.getQuestionsClass(Number(classId));
-    res.status(200).json(questions);
+// ----------------------------------
+// GET questions by team
+// ----------------------------------
+export const getQuestionsTeam = handleRequest(async (req, res) => {
+  const { teamId } = req.params;
+  const questions = await QuestionService.getQuestionsForTeam(Number(teamId));
+  res.json(questions);
 });
 
-export const getQuestionsAssignment = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { assignmentId, classId } = req.params;
-    const questions = await QuestionService.getQuestionsAssignment(Number(assignmentId), Number(classId));
-    res.status(200).json(questions);
+// ----------------------------------
+// GET questions by class
+// ----------------------------------
+export const getQuestionsClass = handleRequest(async (req, res) => {
+  const { classId } = req.params;
+  const questions = await QuestionService.getQuestionsForClass(Number(classId));
+  res.json(questions);
 });
 
-export const getQuestionMessages = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { questionId } = req.params;
-    const messages = await QuestionService.getQuestionMessages(Number(questionId));
-    res.status(200).json(messages);
+// ----------------------------------
+// GET questions for assignment + class
+// ----------------------------------
+export const getQuestionsAssignment = handleRequest(async (req, res) => {
+  const { assignmentId, classId } = req.params;
+  const questions = await QuestionService.getQuestionsForAssignment(Number(assignmentId), Number(classId));
+  res.json(questions);
 });
 
-export const deleteQuestion = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { questionId } = req.params;
-    await QuestionService.deleteQuestion(Number(questionId));
-    res.status(204).end();
+// ----------------------------------
+// GET question messages
+// ----------------------------------
+export const getQuestionMessages = handleRequest(async (req, res) => {
+  const { questionId } = req.params;
+  const msgs = await QuestionService.getQuestionMessages(Number(questionId));
+  res.json(msgs);
 });
 
-export const deleteQuestionMessage = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { questionId, questionMessageId } = req.params;
-    await QuestionService.deleteQuestionMessage(Number(questionId), Number(questionMessageId));
-    res.status(204).end();
+// ----------------------------------
+// DELETE question
+// ----------------------------------
+export const deleteQuestion = handleRequest(async (req, res) => {
+  const { questionId } = req.params;
+  await QuestionService.deleteQuestion(Number(questionId));
+  res.status(204).end();
 });
 
+// ----------------------------------
+// DELETE message
+// ----------------------------------
+export const deleteQuestionMessage = handleRequest(async (req, res) => {
+  const { questionMessageId } = req.params;
+  await QuestionService.deleteQuestionMessage(Number(questionMessageId));
+  res.status(204).end();
+});

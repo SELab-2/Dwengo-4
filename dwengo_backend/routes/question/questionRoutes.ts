@@ -1,96 +1,76 @@
+// routes/question/questionRoutes.ts
 import express from "express";
 import {
-    createQuestionGeneral,
-    createQuestionSpecific,
-    createQuestionMessage,
-    updateQuestion,
-    updateQuestionMessage,
-    getQuestion,
-    getQuestionsTeam,
-    getQuestionsClass,
-    getQuestionsAssignment,
-    getQuestionMessages,
-    deleteQuestion,
-    deleteQuestionMessage
+  createQuestionGeneral,
+  createQuestionSpecific,
+  createQuestionMessage,
+  updateQuestion,
+  updateQuestionMessage,
+  getQuestion,
+  getQuestionsTeam,
+  getQuestionsClass,
+  getQuestionsAssignment,
+  getQuestionMessages,
+  deleteQuestion,
+  deleteQuestionMessage
 } from "../../controllers/question/questionController";
+
 import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
+// of als je gerichte middleware hebt: protectStudent, etc.
+
 import {
-    authorizeStudentInTeamWithAssignment,
-    authorizeQuestion,
-    authorizeOwnerOfQuestionMessage,
-    authorizeStudentInTeamThatCreatedQuestion,
-    authorizeTeacherOfClass,
-    authorizeTeacherOfAssignmentClass
+  authorizeQuestion,
+  authorizeOwnerOfQuestionMessage,
+  // etc. plus wat je nog wilt
 } from "../../middleware/questionsAuthMiddleware";
 
 const router = express.Router();
+
+// Het is typisch dat je een user (student/teacher) moet ingelogd zijn
 router.use(protectAnyUser);
 
-// Routes for creating questions
-router.post(
-    "/assignment/:assignmentId/learningPath/:learningPathId/",
-    authorizeStudentInTeamWithAssignment,
-    createQuestionGeneral
-);
-router.post(
-    "/assignment/:assignmentId/learningPath/:learningPathId/learningObject/:learningObjectId/",
-    authorizeStudentInTeamWithAssignment,
-    createQuestionSpecific
-);
-router.post(
-    "/:questionId/message",
-    authorizeQuestion,
-    createQuestionMessage
-);
+/** 
+ * Voorbeelden van routes. Pas ze aan naar eigen smaak.
+ * Je kunt bv. 
+ *   POST /question/specific/:assignmentId 
+ *   POST /question/general/:assignmentId
+ *   etc.
+ */
 
-// Routes for updating questions
-router.patch(
-    "/:questionId",
-    authorizeQuestion,
-    updateQuestion);
+// CREATE SPECIFIC
+router.post("/specific/:assignmentId", createQuestionSpecific);
 
-router.patch(
-    "/:questionId/message/:questionMessageId",
-    authorizeOwnerOfQuestionMessage,
-    updateQuestionMessage);
+// CREATE GENERAL
+router.post("/general/:assignmentId", createQuestionGeneral);
 
-// Routes for retrieving questions
-router.get(
-    "/:questionId",
-    authorizeQuestion,
-    getQuestion
-);
-router.get(
-    "/team/:teamId/",
-    authorizeStudentInTeamThatCreatedQuestion,
-    getQuestionsTeam
-);
-router.get(
-    "/class/:classId",
-    authorizeTeacherOfClass,
-    getQuestionsClass
-);
-router.get(
-    "/assignment/:assignmentId/class/:classId",
-    authorizeTeacherOfAssignmentClass,
-    getQuestionsAssignment
-);
-router.get(
-    "/:questionId/messages",
-    authorizeQuestion,
-    getQuestionMessages
-);
+// CREATE message
+router.post("/:questionId/message", authorizeQuestion, createQuestionMessage);
 
-// Routes for deleting questions
-router.delete(
-    "/:questionId",
-    authorizeQuestion,
-    deleteQuestion
-);
-router.delete(
-    "/:questionId/message/:questionMessageId",
-    authorizeOwnerOfQuestionMessage,
-    deleteQuestionMessage
-);
+// UPDATE question
+router.patch("/:questionId", authorizeQuestion, updateQuestion);
+
+// UPDATE message
+router.patch("/:questionId/message/:questionMessageId", authorizeOwnerOfQuestionMessage, updateQuestionMessage);
+
+// GET question
+router.get("/:questionId", authorizeQuestion, getQuestion);
+
+// GET messages
+router.get("/:questionId/messages", authorizeQuestion, getQuestionMessages);
+
+// GET questions by team
+router.get("/team/:teamId", getQuestionsTeam);
+
+// GET questions by class
+router.get("/class/:classId", getQuestionsClass);
+
+// GET questions by assignment + class
+router.get("/assignment/:assignmentId/class/:classId", getQuestionsAssignment);
+
+// DELETE question
+router.delete("/:questionId", authorizeQuestion, deleteQuestion);
+
+// DELETE question message
+router.delete("/:questionId/message/:questionMessageId", authorizeOwnerOfQuestionMessage, deleteQuestionMessage);
 
 export default router;
