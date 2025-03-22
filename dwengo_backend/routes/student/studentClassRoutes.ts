@@ -1,13 +1,14 @@
-import express from 'express';
-import { protectStudent } from '../../middleware/studentAuthMiddleware';
-import { createJoinRequest } from '../../controllers/joinrequest/joinRequestController'
+import express from "express";
+import { protectStudent } from "../../middleware/studentAuthMiddleware";
+import { createJoinRequest } from "../../controllers/joinrequest/joinRequestController";
+import { getStudentClasses } from "../../controllers/student/studentClassController";
 
 const router = express.Router();
 
 // Alleen studenten mogen deze route gebruiken
-router.post("/join", protectStudent, createJoinRequest);
+router.use(protectStudent);
 
-// kan een student al een overzicht van al z'n klassen zien? 
+router.post("/join", createJoinRequest);
+router.get("/", getStudentClasses);
 
 export default router;
-
