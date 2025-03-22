@@ -14,18 +14,15 @@ const router = express.Router();
 router.use(protectTeacher);
 
 /**
- * POST /teacher/learningObjects -> nieuw leerobject aanmaken
- * GET  /teacher/learningObjects -> alle leerobjecten van deze teacher
+ * POST /teacher/createdLearningObject -> nieuw leerobject aanmaken
+ * GET  /teacher/createdLearningObject -> alle leerobjecten van deze teacher
  */
-router
-  .route("/")
-  .post(createLocalLearningObject)
-  .get(getLocalLearningObjects);
+router.route("/").post(createLocalLearningObject).get(getLocalLearningObjects);
 
 /**
- * GET    /teacher/learningObjects/:id -> 1 leerobject ophalen
- * PATCh   /teacher/learningObjects/:id -> updaten (gedeeltelijk)
- * DELETE /teacher/learningObjects/:id -> verwijderen
+ * GET    /teacher/createdLearningObject/:id -> 1 leerobject ophalen
+ * PATCh   /teacher/createdLearningObject/:id -> updaten (gedeeltelijk)
+ * DELETE /teacher/createdLearningObject/:id -> verwijderen
  */
 router
   .route("/:id")
