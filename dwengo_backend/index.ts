@@ -75,11 +75,6 @@ app.use("/student/auth", studentAuthRoutes);
 // Routes voor de assignments
 app.use("/assignment", assignmentRoutes);
 
-// Routes voor de aanpassingen op Assignments door teachers
-app.use("/teacher/assignment", teacherAssignmentRoutes);
-// Routes voor het opvragen van de Assignments door students
-app.use("/student/assignment", studentAssignmentRoutes);
-
 // Routes om feedback te geven
 app.use("/teacher/feedback", feedbackRoutes);
 
