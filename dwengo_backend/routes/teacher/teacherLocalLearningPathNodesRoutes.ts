@@ -11,7 +11,7 @@ const router = Router();
 router.use(protectTeacher);
 
 /**
- * @route GET /teacher/learningPath/:pathId/node
+ * @route GET /learningPath/:pathId/node
  * @description Haal alle nodes op voor dat leerpad
  * @param pathId: string
  * @access Teacher
@@ -19,7 +19,7 @@ router.use(protectTeacher);
 router.get("/", getNodesForPath);
 
 /**
- * @route POST /teacher/learningPath/:pathId/node
+ * @route POST /learningPath/:pathId/node
  * @description Maak een nieuwe node in dit leerpad
  * @param pathId: string
  * @body NodeMetadata
@@ -28,7 +28,7 @@ router.get("/", getNodesForPath);
 router.post("/", createNodeForPath);
 
 /**
- * @route PATCH /teacher/learningPath/:pathId/node/:nodeId
+ * @route PATCH /learningPath/:pathId/node/:nodeId
  * @description Update de node
  * @param pathId: string
  * @param nodeId: string
@@ -38,7 +38,7 @@ router.post("/", createNodeForPath);
 router.patch("/:nodeId", updateNodeForPath);
 
 /**
- * @route DELETE /teacher/learningPath/:pathId/node/:nodeId
+ * @route DELETE /learningPath/:pathId/node/:nodeId
  * @description Verwijder de node
  * @param pathId: string
  * @param nodeId: string

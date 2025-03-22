@@ -91,8 +91,7 @@ app.use("/learningObjects", learningObjectRoutes);
 
 app.use("/question", QuestionRoutes);
 
-app.use("/teacher/learningPath", learningPathRoutes);
-app.use("/student/learningPath", learningPathRoutes);
+app.use("/learningPath", learningPathRoutes);
 
 app.use("/student/teams", studentTeamRoutes);
 

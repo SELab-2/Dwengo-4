@@ -22,4 +22,18 @@ router.get("/lookup", getLearningObjectByHruidLangVersionController);
 
 router.get("/:id", getLearningObjectController);
 
+/**
+ * @route GET /learningObject/learningPath/:pathId
+ * @description Haal alle leerobjecten op die horen bij een specifiek leerpad
+ * @param pathId: string
+ * @queryparam language: string
+ * @queryparam hruid: string
+ * @queryparam version: int
+ * @access User
+ */
+router.get(
+  "/learningPath/learningPathId",
+  getLearningObjectByHruidLangVersionController
+);
+
 export default router;
