@@ -8,7 +8,7 @@ import QuestionRoutes from "./routes/question/questionRoutes";
 import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
 import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearningObjectRoutes";
 
-import assignmentRoutes from "./routes/assignmentRoutes";
+import assignmentRoutes from "./routes/assignments/assignmentRoutes";
 import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
 import studentTeamRoutes from "./routes/student/studentTeamRoutes";
 import progressRoutes from "./routes/progressRoutes";
@@ -71,6 +71,9 @@ app.use("/teacher/assignments/:assignmentId/team", teacherTeamsRoutes);
 
 // Routes voor Student (Auth)
 app.use("/student/auth", studentAuthRoutes);
+
+// Routes voor de assignments
+app.use("/assignments", assignmentRoutes);
 
 // Routes voor de aanpassingen op Assignments door teachers
 app.use("/teacher/assignment", teacherAssignmentRoutes);

@@ -1,5 +1,5 @@
-import express, {Router} from 'express';
-import {AssignmentController} from "../controllers/assignmentController";
+import express, { Router } from "express";
+import { AssignmentController } from "../../controllers/assignmentController";
 
 const router: Router = express.Router();
 const controller = new AssignmentController();
