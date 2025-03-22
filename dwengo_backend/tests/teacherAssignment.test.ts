@@ -105,11 +105,11 @@ describe("Tests for teacherAssignment", async () => {
     );
   });
 
-  describe("[POST] /teacher/assignments", async () => {
+  describe("[POST] /teacher/assignment", async () => {
     it("should respond with a `201` status code and the newly created assignment", async () => {
       // class3 has no assignments
       const { status, body } = await request(app)
-        .post("/teacher/assignments/")
+        .post("/teacher/assignment/")
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
@@ -124,7 +124,7 @@ describe("Tests for teacherAssignment", async () => {
     it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
       // class3 has no assignments
       const { status, body } = await request(app)
-        .post("/teacher/assignments/")
+        .post("/teacher/assignment/")
         .set("Authorization", `Bearer ${teacher2.token}`)
         .send({
           classId: class3.id,
@@ -137,10 +137,10 @@ describe("Tests for teacherAssignment", async () => {
     });
   });
 
-  describe("[GET] /teacher/assignments/class/:classId", async () => {
+  describe("[GET] /teacher/assignment/class/:classId", async () => {
     it("should respond with a `200` status code and a list of assignments for that class", async () => {
       const { status, body } = await request(app)
-        .get(`/teacher/assignments/class/${class1.id}`)
+        .get(`/teacher/assignment/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher1.token}`);
 
       expect(status).toBe(200);
@@ -155,11 +155,11 @@ describe("Tests for teacherAssignment", async () => {
 
     it("should respond with the same assignments for teachers that are members of the same class", async () => {
       let req = await request(app)
-        .get(`/teacher/assignments/class/${class1.id}`)
+        .get(`/teacher/assignment/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher1.token}`);
 
       let req2 = await request(app)
-        .get(`/teacher/assignments/class/${class1.id}`)
+        .get(`/teacher/assignment/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`);
 
       expect(req.status).toBe(200);
@@ -173,18 +173,18 @@ describe("Tests for teacherAssignment", async () => {
 
     it("should respond with an error because the teacher is not part of the class", async () => {
       const { status, body } = await request(app)
-        .get(`/teacher/assignments/class/${class1.id}`)
+        .get(`/teacher/assignment/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher3.token}`);
       expect(status).toBe(500);
       expect(body.error).toBe("Failed to retrieve assignments");
     });
   });
 
-  describe("[PATCH] /teacher/assignments/:assignmentId", async () => {
+  describe("[PATCH] /teacher/assignment/:assignmentId", async () => {
     it("should respond with a `200` status code and the updated assignment", async () => {
       // First create assignment for class3
       const { status, body } = await request(app)
-        .post("/teacher/assignments/")
+        .post("/teacher/assignment/")
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
@@ -197,7 +197,7 @@ describe("Tests for teacherAssignment", async () => {
       const assignmentId = body.id;
 
       let req = await request(app)
-        .patch(`/teacher/assignments/${assignmentId}`)
+        .patch(`/teacher/assignment/${assignmentId}`)
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           pathRef: lp2.id,
@@ -214,7 +214,7 @@ describe("Tests for teacherAssignment", async () => {
     it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
       // First create assignment for class3
       await request(app)
-        .post("/teacher/assignments/")
+        .post("/teacher/assignment/")
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
@@ -223,7 +223,7 @@ describe("Tests for teacherAssignment", async () => {
         });
 
       const { status, body } = await request(app)
-        .patch(`/teacher/assignments/${assignment1.id}`)
+        .patch(`/teacher/assignment/${assignment1.id}`)
         .set("Authorization", `Bearer ${teacher3.token}`)
         .send({
           learningPathId: lp2.id,
@@ -234,10 +234,10 @@ describe("Tests for teacherAssignment", async () => {
     });
   });
 
-  describe("[DELETE] /teacher/assignments/:assignmentId", async () => {
+  describe("[DELETE] /teacher/assignment/:assignmentId", async () => {
     it("should respond with a `204` status code and delete the assignment", async () => {
       const { status, body } = await request(app)
-        .delete(`/teacher/assignments/${assignment4.id}`)
+        .delete(`/teacher/assignment/${assignment4.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`);
       expect(status).toBe(204);
 
@@ -250,7 +250,7 @@ describe("Tests for teacherAssignment", async () => {
 
     it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
       const { status, body } = await request(app)
-        .delete(`/teacher/assignments/${assignment1.id}`)
+        .delete(`/teacher/assignment/${assignment1.id}`)
         .set("Authorization", `Bearer ${teacher3.token}`);
 
       expect(status).toBe(500);
