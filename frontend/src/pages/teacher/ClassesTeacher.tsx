@@ -19,52 +19,13 @@ interface ClassItem {
   code: string;
 }
 
-interface TeacherInvite {
-  inviteId: number;
-  status: "PENDING" | "APPROVED" | "DENIED";
-  otherTeacher: {
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-}
-
-interface JoinRequest {
-  requestId: number;
-  status: "PENDING" | "APPROVED" | "DENIED";
-  student: {
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-}
-
-const ClassesPageTeacher: React.FC = () => {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  // Refs voor de modals
-  const teacherInvitesModalRef = useRef<{ open: () => void; close: () => void } | null>(null);
-  const studentJoinModalRef = useRef<{ open: () => void; close: () => void } | null>(null);
-
-  // State voor de geselecteerde klas per modal
-  const [selectedTeacherClassId, setSelectedTeacherClassId] = useState<string | null>(null);
-  const [selectedStudentClassId, setSelectedStudentClassId] = useState<string | null>(null);
-
-  // State voor de mini-form in de teacher invites modal (nu op basis van email)
-  const [inviteTeacherEmail, setInviteTeacherEmail] = useState<string>("");
-
-  // Query: Haal alle klassen op
+const ClassesPage: React.FC = () => {
   const { data, isLoading, isError, error } = useQuery<{
     classes: ClassItem[];
   }>({
     queryKey: ["classes"],
     queryFn: fetchClasses,
   });
-
-  const classes = data?.classes || [];
-
-  const classes = data?.classes || [];
 
   // Query: Haal pending teacher invites voor de geselecteerde klas op
   const { data: teacherInvites, isLoading: isInvitesLoading } = useQuery<TeacherInvite[]>({
@@ -155,12 +116,11 @@ const ClassesPageTeacher: React.FC = () => {
       {isLoading && <p>Loading...</p>}
       {isError && (
         <p className="c-r">
-          {(error as any)?.info?.message || "Er is iets fout gegaan bij het ophalen van de klassen."}
+          {(error as any)?.info?.message ||
+            "Er is iets fout gegaan bij het ophalen van de klassen."}
         </p>
       )}
 
-      {!isLoading && !isError && classes && classes.length > 0 ? (
-        <div className="px-10 py-10">
       {!isLoading && !isError && (
         <div className="flex flex-col gap-4">
           <h2>Mijn Klassen</h2>
@@ -179,20 +139,16 @@ const ClassesPageTeacher: React.FC = () => {
                 <tr>
                   <td colSpan={4} className="c-r">
                     Geen klassen gevonden.
+            <tbody className="divide-y divide-gray-200">
+              {classes.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="c-r">
+                    Geen klassen gevonden.
                   </td>
                 </tr>
               ) : (
-                classes.map((classItem: ClassItem) => (
+                classes.map((classItem) => (
                   <tr key={classItem.id} className="py-2">
-                    <td className="py-3">
-                      <PrimaryButton
-                        onClick={() =>
-                          navigate(`/teacher/classes/${classItem.id}`)
-                        }
-                      >
-                        Beheer
-                      </PrimaryButton>
-                    </td>
                     <td className="py-3">{classItem.name}</td>
                     <td className="py-3">{classItem.code}</td>
                     <td className="py-3">
@@ -224,7 +180,10 @@ const ClassesPageTeacher: React.FC = () => {
       <Modal ref={teacherInvitesModalRef}>
         <h2>Teacher Invites</h2>
         {/* Mini-form om een leerkracht uit te nodigen via email */}
-        <form onSubmit={handleInviteSubmit} className="mb-4 g-1fr-130 gap-2 items-center">
+        <form
+          onSubmit={handleInviteSubmit}
+          className="mb-4 g-1fr-130 gap-2 items-center"
+        >
           <input
             type="email"
             value={inviteTeacherEmail}
@@ -236,7 +195,10 @@ const ClassesPageTeacher: React.FC = () => {
         </form>
         {/* Success- en error-message voor invite */}
         {createInviteMutation.isSuccess && (
-          <SuccessMessage title="Succes!" description="De invite is verstuurd." />
+          <SuccessMessage
+            title="Succes!"
+            description="De invite is verstuurd."
+          />
         )}
         {createInviteMutation.isError && (
           <div className="c-r">
@@ -268,7 +230,10 @@ const ClassesPageTeacher: React.FC = () => {
                     <td>{invite.otherTeacher.lastName}</td>
                     <td>{invite.otherTeacher.email}</td>
                     <td>
-                      <button disabled className="text-xs px-2 py-1 bg-gray-200 text-gray-700 rounded">
+                      <button
+                        disabled
+                        className="text-xs px-2 py-1 bg-gray-200 text-gray-700 rounded"
+                      >
                         {invite.status}
                       </button>
                     </td>
@@ -309,23 +274,32 @@ const ClassesPageTeacher: React.FC = () => {
                     <td>{request.student.lastName}</td>
                     <td>{request.student.email}</td>
                     <td>
-                      <button disabled className="text-xs px-2 py-1 bg-gray-200 text-gray-700 rounded">
+                      <button
+                        disabled
+                        className="text-xs px-2 py-1 bg-gray-200 text-gray-700 rounded"
+                      >
                         {request.status}
                       </button>
                     </td>
                     <td>
                       {request.status === "PENDING" && (
                         <div className="flex gap-2">
-                          <PrimaryButton onClick={() => handleApprove(request.requestId)}>
+                          <PrimaryButton
+                            onClick={() => handleApprove(request.requestId)}
+                          >
                             Approve
                           </PrimaryButton>
-                          <PrimaryButton onClick={() => handleDeny(request.requestId)}>
+                          <PrimaryButton
+                            onClick={() => handleDeny(request.requestId)}
+                          >
                             Deny
                           </PrimaryButton>
                         </div>
                       )}
                       {request.status === "DENIED" && (
-                        <PrimaryButton onClick={() => handleApprove(request.requestId)}>
+                        <PrimaryButton
+                          onClick={() => handleApprove(request.requestId)}
+                        >
                           Approve
                         </PrimaryButton>
                       )}
