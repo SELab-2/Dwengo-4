@@ -11,13 +11,13 @@ const router = Router();
 router.use(protectTeacher);
 
 /**
- * GET /teacher/learningPaths/:pathId/node
+ * GET /teacher/learningPath/:pathId/node
  *   -> haal alle nodes op voor dat leerpad
  */
 router.get("/", getNodesForPath);
 
 /**
- * POST /teacher/learningPaths/:pathId/node
+ * POST /teacher/learningPath/:pathId/node
  *   -> maak een nieuwe node in dit leerpad
  */
 router.post("/", createNodeForPath);
