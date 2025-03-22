@@ -64,7 +64,10 @@ app.use("/student/classes", studentClassRoutes);
 app.use("/teacher/auth", teacherAuthRoutes);
 app.use("/teacher/learningObjects", teacherLocalLearningObjectRoutes);
 app.use("/teacher/createdPath", teacherLocalLearningPathRoutes);
-app.use("/teacher/learningPaths", teacherLocalLearningPathNodesRoutes);
+app.use(
+  "/teacher/learningPath/:learningPathId/node",
+  teacherLocalLearningPathNodesRoutes
+);
 
 // Routes voor Teacher (Teams)
 app.use("/teacher/assignments/:assignmentId/team", teacherTeamsRoutes);
