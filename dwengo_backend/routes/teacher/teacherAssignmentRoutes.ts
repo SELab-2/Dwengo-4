@@ -1,14 +1,21 @@
 import express, { Router } from "express";
 import { AssignmentTeacherController } from "../../controllers/teacher/teacherAssignmentController";
 import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
-import { AssignmentController } from "../../controllers/assignmentController";
 
 const router: Router = express.Router();
 const controller = new AssignmentTeacherController();
-const assignmentController = new AssignmentController();
+
+router.use(protectTeacher);
 
 /**
- * @route POST /teacher/assignment
+ * @route GET /assignment/teacher
+ * @description Get all assignments that the teacher has created
+ * @access Teacher
+ */
+router.get("/teacher", controller.getAllAssignments);
+
+/**
+ * @route POST /assignment
  * @description Create an assignment for a class
  * @body classId: number
  * @body pathRef: string
@@ -17,26 +24,18 @@ const assignmentController = new AssignmentController();
  * @body deadline: string
  * @access Teacher
  */
-router.post("/", protectTeacher, controller.createAssignmentForClass);
+router.post("/", controller.createAssignmentForClass);
 
 /**
- * @route GET /teacher/assignment/:assignmentId
- * @description Get an assignment by id
- * @param assignmentId: number
- * @access Anyone (Should be checked if user is teacher is teacher of this class)
- */
-router.get("/:assignmentId", assignmentController.getAssignmentsById);
-
-/**
- * @route GET /teacher/assignment/class/:classId
+ * @route GET /assignment/class/:classId
  * @description Get all assignments for a class
  * @param classId: number
  * @access Teacher
  */
-router.get("/class/:classId", protectTeacher, controller.getAssignmentsByClass);
+router.get("/class/:classId", controller.getAssignmentsByClass);
 
 /**
- * @route PATCH /teacher/assignment/:assignmentId
+ * @route PATCH /assignment/:assignmentId
  * @description Update an assignment
  * @param pathRef: string (optional)
  * @param pathLanguage: string (optional)
@@ -44,14 +43,14 @@ router.get("/class/:classId", protectTeacher, controller.getAssignmentsByClass);
  * @param deadline: string
  * @access Teacher
  */
-router.patch("/:assignmentId", protectTeacher, controller.updateAssignment);
+router.patch("/:assignmentId", controller.updateAssignment);
 
 /**
- * @route DELETE /teacher/assignment/:assignmentId
+ * @route DELETE /assignment/:assignmentId
  * @description Delete an assignment
  * @param assignmentId: number
  * @access Teacher
  */
-router.delete("/:assignmentId", protectTeacher, controller.deleteAssignment);
+router.delete("/:assignmentId", controller.deleteAssignment);
 
 export default router;

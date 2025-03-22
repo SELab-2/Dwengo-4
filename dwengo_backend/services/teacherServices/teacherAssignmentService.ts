@@ -1,7 +1,6 @@
-
 import { Assignment, PrismaClient, Role } from "@prisma/client";
 import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
-import  ReferenceValidationService  from "../../services/referenceValidationService"; 
+import ReferenceValidationService from "../../services/referenceValidationService";
 // ^ let op: named import, géén "default" meer.
 
 const prisma = new PrismaClient();
@@ -22,17 +21,17 @@ export default class TeacherAssignmentService {
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
       throw new Error("The teacher is unauthorized to perform this action");
     }
-  
+
     // 2) Valideer pathRef
     // => isExternal=true => Dwengo (hruid + language)
     // => isExternal=false => lokaal (localId=pathRef)
     await ReferenceValidationService.validateLearningPath(
       isExternal,
-      isExternal ? undefined : pathRef,    // localId
-      isExternal ? pathRef : undefined,    // hruid
-      isExternal ? pathLanguage : undefined  // language
+      isExternal ? undefined : pathRef, // localId
+      isExternal ? pathRef : undefined, // hruid
+      isExternal ? pathLanguage : undefined // language
     );
-  
+
     // 3) Maak assignment
     return prisma.assignment.create({
       data: {
@@ -47,7 +46,27 @@ export default class TeacherAssignmentService {
       },
     });
   }
-  
+
+  /**
+   * Haal alle assignments op voor 1 teacher
+   */
+  static async getAllAssignments(teacherId: number): Promise<Assignment[]> {
+    return prisma.assignment.findMany({
+      where: {
+        classAssignments: {
+          some: {
+            class: {
+              ClassTeacher: {
+                some: {
+                  teacherId,
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  }
 
   /**
    * Haal alle assignments op voor 1 klas
@@ -85,7 +104,7 @@ export default class TeacherAssignmentService {
     }
 
     // 2) validate new pathRef
-    await ReferenceValidationService.validateLearningPath( isExternal,pathRef);
+    await ReferenceValidationService.validateLearningPath(isExternal, pathRef);
 
     // 3) update
     return prisma.assignment.update({

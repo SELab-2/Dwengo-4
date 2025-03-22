@@ -73,7 +73,7 @@ app.use("/teacher/assignments/:assignmentId/team", teacherTeamsRoutes);
 app.use("/student/auth", studentAuthRoutes);
 
 // Routes voor de assignments
-app.use("/assignments", assignmentRoutes);
+app.use("/assignment", assignmentRoutes);
 
 // Routes voor de aanpassingen op Assignments door teachers
 app.use("/teacher/assignment", teacherAssignmentRoutes);
