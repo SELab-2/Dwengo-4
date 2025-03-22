@@ -14,31 +14,31 @@ const router = Router();
 router.use(protectTeacher);
 
 /**
- * POST /teacher/learningPaths
+ * POST /teacher/createdPath
  *   -> maak een nieuw leerpad aan (standaard zonder nodes)
  */
 router.post("/", createLocalLearningPath);
 
 /**
- * GET /teacher/learningPaths
+ * GET /teacher/createdPath
  *   -> haal alle leerpaden op van de ingelogde teacher
  */
 router.get("/", getLocalLearningPaths);
 
 /**
- * GET /teacher/learningPaths/:pathId
+ * GET /teacher/createdPath/:pathId
  *   -> haal één leerpad op (mits je eigenaar bent)
  */
 router.get("/:pathId", getLocalLearningPathById);
 
 /**
- * PATCH /teacher/learningPaths/:pathId
+ * PATCH /teacher/createdPath/:pathId
  *   -> update een leerpad
  */
 router.patch("/:pathId", updateLocalLearningPath);
 
 /**
- * DELETE /teacher/learningPaths/:pathId
+ * DELETE /teacher/createdPath/:pathId
  *   -> verwijder een leerpad
  */
 router.delete("/:pathId", deleteLocalLearningPath);
