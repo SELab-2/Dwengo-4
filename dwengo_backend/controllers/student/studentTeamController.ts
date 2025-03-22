@@ -1,9 +1,8 @@
 import { Response } from "express";
-import {PrismaClient, Team} from "@prisma/client";
+import { Team } from "@prisma/client";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
-import {getUserFromAuthRequest} from "../../helpers/getUserFromAuthRequest";
-
-const prisma = new PrismaClient();
+import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
+import StudentTeamService from "../../services/studentTeamService";
 
 /**
  * Haalt alle teams op waarin de ingelogde student zit.
@@ -12,20 +11,7 @@ export const getStudentTeams = async (req: AuthenticatedRequest, res: Response):
   try {
     const studentId: number = getUserFromAuthRequest(req).id;
 
-    const teams: Team[] = await prisma.team.findMany({
-      where: {
-        students: {
-          some: { userId: studentId }
-        }
-      },
-      include: {
-        teamAssignment: {
-          include: {
-            assignment: true,
-          },
-        },
-      },
-    });
+    const teams: Team[] = await StudentTeamService.getStudentTeams(studentId);
 
     res.status(200).json(teams);
   } catch (error) {
@@ -47,29 +33,7 @@ export const getTeamByAssignment = async (req: AuthenticatedRequest, res: Respon
       return;
     }
 
-    const team = await prisma.team.findFirst({
-      where: {
-        students: {
-          some: { userId: studentId }
-        },
-        teamAssignment: {
-          assignmentId: assignmentId,
-        }
-      },
-      include: {
-        students: {
-          select: {
-            userId: true,
-            user: { select: { id: true, email: true, firstName: true, lastName: true } }
-          }
-        },
-        teamAssignment: {
-          include: {
-            assignment: true, // Gebruik de juiste veldnaam
-          },
-        },
-      },
-    });
+    const team = await StudentTeamService.getTeam(studentId, assignmentId);
 
     if (!team) {
       res.status(404).json({ error: "Geen team gevonden voor deze opdracht." });
@@ -100,17 +64,7 @@ export const getTeamMembers = async (req: AuthenticatedRequest, res: Response): 
       return;
     }
 
-    const team = await prisma.team.findUnique({
-      where: { id: teamId },
-      include: {
-        students: {
-          select: {
-            userId: true,
-            user: { select: { id: true, email: true, firstName: true, lastName: true } }
-          }
-        }
-      }
-    });
+    const team = await StudentTeamService.getTeamById(teamId);
 
     if (!team) {
       res.status(404).json({ error: "Team niet gevonden." });

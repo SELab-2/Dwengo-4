@@ -12,28 +12,29 @@ export class AssignmentTeacherController {
       const teacherId: number = getUserFromAuthRequest(req).id;
       const {
         classId,
-        pathRef, 
+        pathRef,
         pathLanguage,
         isExternal,
         deadline,
-      }: { 
-        classId: number; 
-        pathRef: string; 
+      }: {
+        classId: number;
+        pathRef: string;
         pathLanguage: string;
-        isExternal: boolean; 
-        deadline: string 
+        isExternal: boolean;
+        deadline: string;
       } = req.body;
 
       const parsedDeadline = new Date(deadline);
 
-      const assignment = await teacherAssignmentService.createAssignmentForClass(
-        teacherId,
-        classId,
-        pathRef,
-        pathLanguage,
-        isExternal,
-        parsedDeadline
-      );
+      const assignment =
+        await teacherAssignmentService.createAssignmentForClass(
+          teacherId,
+          classId,
+          pathRef,
+          pathLanguage,
+          isExternal,
+          parsedDeadline
+        );
       res.status(201).json(assignment);
     } catch (error) {
       res.status(500).json({ error: "Failed to create assignment" });
@@ -63,7 +64,7 @@ export class AssignmentTeacherController {
   ): Promise<void> => {
     try {
       const assignmentId: number = parseInt(req.params.assignmentId);
-      const { pathRef, isExternal } = req.body; 
+      const { pathRef, isExternal } = req.body;
       const teacherId: number = getUserFromAuthRequest(req).id;
 
       const updatedAssignment = await teacherAssignmentService.updateAssignment(
