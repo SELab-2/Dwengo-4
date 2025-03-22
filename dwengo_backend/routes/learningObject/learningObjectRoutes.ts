@@ -3,7 +3,6 @@ import {
   getAllLearningObjectsController,
   getLearningObjectController,
   searchLearningObjectsController,
-  getLearningObjectsForPathController,
   // [NIEUW] importeer de extra controller-functie:
   getLearningObjectByHruidLangVersionController,
 } from "../../controllers/learningObject/learningObjectController";
@@ -16,14 +15,11 @@ router.use(protectAnyUser);
 
 router.get("/", getAllLearningObjectsController);
 router.get("/search", searchLearningObjectsController);
-router.get("/path/:pathId", getLearningObjectsForPathController);
 // [NIEUW] Extra endpoint om op hruid+language+version te zoeken
 // Voorbeeld:
 //   GET /learningObjects/lookup?hruid=opdracht_leds&language=nl&version=2
 router.get("/lookup", getLearningObjectByHruidLangVersionController);
 
 router.get("/:id", getLearningObjectController);
-
-
 
 export default router;

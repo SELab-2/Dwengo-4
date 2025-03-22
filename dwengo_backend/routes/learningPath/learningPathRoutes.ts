@@ -4,6 +4,7 @@ import {
   getLearningPathByIdController,
 } from "../../controllers/learningPath/learningPathController";
 import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
+import { getLearningObjectByHruidLangVersionController } from "../../controllers/learningObject/learningObjectController";
 
 const router: Router = express.Router();
 
@@ -18,5 +19,9 @@ router.get("/", searchLearningPathsController);
 // GET /teacher/learningPath/:pathId
 // GET /student/learningPath/:pathId
 router.get("/:pathId", getLearningPathByIdController);
+
+// GET /teacher/learningPath/:pathId/learningObject --> Haal alle leerobjecten op die horen bij een specifiek leerpad
+// GET /student/learningPath/:pathId/learningObject
+router.get("/learningObject", getLearningObjectByHruidLangVersionController);
 
 export default router;
