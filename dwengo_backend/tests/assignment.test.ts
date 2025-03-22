@@ -18,11 +18,11 @@ describe("Assignment test", (): void => {
     teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
   });
 
-  describe("GET teacher/assignment/:assignmentId", (): void => {
+  describe("GET assignment/:assignmentId", (): void => {
     const nonExistentId = 123;
     it("should return 400 when the assignment isn't found", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(`/teacher/assignment/${nonExistentId}`)
+        .get(`/assignment/${nonExistentId}`)
         .set(getAuthHeaders(teacherUser1));
 
       expect(status).toBe(404);

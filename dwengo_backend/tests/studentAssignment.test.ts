@@ -19,7 +19,7 @@ import {
   stringToDate,
 } from "./helpers/testDataCreation";
 
-describe("[GET] /student/assignment", async () => {
+describe("[GET] /assignment/student", async () => {
   let student1: User & { student: Student; token: string };
   let student2: User & { student: Student; token: string };
   let student3: User & { student: Student; token: string };
@@ -103,7 +103,7 @@ describe("[GET] /student/assignment", async () => {
       this list will be empty because student doesn't have any assignments", async () => {
     // set up scenario where student has no assignments
     const { status, body } = await request(app)
-      .get("/student/assignment")
+      .get("/assignment/student")
       .set("Authorization", `Bearer ${student1.token}`);
 
     expect(status).toBe(200);
@@ -112,7 +112,7 @@ describe("[GET] /student/assignment", async () => {
 
   it("should respond with a `200` status code and a list of 2 assignments", async () => {
     const { status, body } = await request(app)
-      .get("/student/assignment")
+      .get("/assignment/student")
       .set("Authorization", `Bearer ${student2.token}`);
 
     expect(status).toBe(200);
@@ -128,7 +128,7 @@ describe("[GET] /student/assignment", async () => {
 
   it("should return the same array of assignments for all students in the same class", async () => {
     let req = await request(app)
-      .get("/student/assignment")
+      .get("/assignment/student")
       .set("Authorization", `Bearer ${student2.token}`);
 
     const s = req.status;
@@ -138,7 +138,7 @@ describe("[GET] /student/assignment", async () => {
     expect(b).toHaveLength(2);
 
     req = await request(app)
-      .get("/student/assignment")
+      .get("/assignment/student")
       .set("Authorization", `Bearer ${student3.token}`);
 
     const s1 = req.status;
@@ -153,7 +153,7 @@ describe("[GET] /student/assignment", async () => {
 
   it("should not return the same array of assignments for students in other classes", async () => {
     let req = await request(app)
-      .get("/student/assignment")
+      .get("/assignment/student")
       .set("Authorization", `Bearer ${student2.token}`);
 
     const s = req.status;
@@ -163,7 +163,7 @@ describe("[GET] /student/assignment", async () => {
     expect(b).toHaveLength(2);
 
     req = await request(app)
-      .get("/student/assignment")
+      .get("/assignment/student")
       .set("Authorization", `Bearer ${student4.token}`);
 
     const s1 = req.status;
@@ -179,7 +179,7 @@ describe("[GET] /student/assignment", async () => {
 
   it("should return a sorted list of assignments in descending order based on the deadline", async () => {
     const { status, body } = await request(app)
-      .get("/student/assignment")
+      .get("/assignment/student")
       .query({ sort: "deadline", order: "desc" })
       .set("Authorization", `Bearer ${student5.token}`);
 
@@ -192,7 +192,7 @@ describe("[GET] /student/assignment", async () => {
 
   it("should return a sorted list of assignments in ascending order based on the deadline", async () => {
     const { status, body } = await request(app)
-      .get("/student/assignment")
+      .get("/assignment/student")
       .query({ sort: "deadline", order: "asc" })
       .set("Authorization", `Bearer ${student5.token}`);
 
@@ -205,7 +205,7 @@ describe("[GET] /student/assignment", async () => {
 
   it("should return a sorted list of assignments in descending order based on createdAt", async () => {
     const { status, body } = await request(app)
-      .get("/student/assignment")
+      .get("/assignment/student")
       .query({ sort: "createdAt", order: "desc" })
       .set("Authorization", `Bearer ${student5.token}`);
 
@@ -218,7 +218,7 @@ describe("[GET] /student/assignment", async () => {
 
   it("should return a sorted list of assignments in ascending order based on createdAt", async () => {
     const { status, body } = await request(app)
-      .get("/student/assignment")
+      .get("/assignment/student")
       .query({ sort: "createdAt", order: "asc" })
       .set("Authorization", `Bearer ${student5.token}`);
 
@@ -231,7 +231,7 @@ describe("[GET] /student/assignment", async () => {
 
   it("should return a sorted list of assignments in descending order based on updatedAt", async () => {
     const { status, body } = await request(app)
-      .get("/student/assignment")
+      .get("/assignment/student")
       .query({ sort: "updatedAt", order: "desc" })
       .set("Authorization", `Bearer ${student5.token}`);
 
@@ -244,7 +244,7 @@ describe("[GET] /student/assignment", async () => {
 
   it("should return a sorted list of assignments in ascending order based on updatedAt", async () => {
     const { status, body } = await request(app)
-      .get("/student/assignment")
+      .get("/assignment/student")
       .query({ sort: "updatedAt", order: "asc" })
       .set("Authorization", `Bearer ${student5.token}`);
 
@@ -257,7 +257,7 @@ describe("[GET] /student/assignment", async () => {
 
   it("should return a sorted list of 1 assignment due to limit", async () => {
     const { status, body } = await request(app)
-      .get("/student/assignment")
+      .get("/assignment/student")
       .query({ limit: 1 })
       .set("Authorization", `Bearer ${student5.token}`);
 
@@ -269,7 +269,7 @@ describe("[GET] /student/assignment", async () => {
 
   it("should only return 2 assignments even though limit is higher", async () => {
     const { status, body } = await request(app)
-      .get("/student/assignment")
+      .get("/assignment/student")
       .query({ limit: 10 })
       .set("Authorization", `Bearer ${student5.token}`);
 
