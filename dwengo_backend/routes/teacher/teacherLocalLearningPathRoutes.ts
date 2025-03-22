@@ -14,32 +14,42 @@ const router = Router();
 router.use(protectTeacher);
 
 /**
- * POST /teacher/createdPath
- *   -> maak een nieuw leerpad aan (standaard zonder nodes)
+ * @route POST /teacher/createdPath
+ * @description Maak een nieuw leerpad aan (standaard zonder nodes)
+ * @body PathMetadata
+ * @access Teacher
  */
 router.post("/", createLocalLearningPath);
 
 /**
- * GET /teacher/createdPath
- *   -> haal alle leerpaden op van de ingelogde teacher
+ * @route GET /teacher/createdPath
+ * @description Haal alle leerpaden op van de ingelogde teacher
+ * @access Teacher
  */
 router.get("/", getLocalLearningPaths);
 
 /**
- * GET /teacher/createdPath/:pathId
- *   -> haal één leerpad op (mits je eigenaar bent)
+ * @route GET /teacher/createdPath/:pathId
+ * @description Haal één leerpad op (mits je eigenaar bent)
+ * @param pathId: string
+ * @access Teacher
  */
 router.get("/:pathId", getLocalLearningPathById);
 
 /**
- * PATCH /teacher/createdPath/:pathId
- *   -> update een leerpad
+ * @route PATCH /teacher/createdPath/:pathId
+ * @description Update een leerpad
+ * @param pathId: string
+ * @body PathMetadata
+ * @access Teacher
  */
 router.patch("/:pathId", updateLocalLearningPath);
 
 /**
- * DELETE /teacher/createdPath/:pathId
- *   -> verwijder een leerpad
+ * @route DELETE /teacher/createdPath/:pathId
+ * @description Verwijder een leerpad
+ * @param pathId: string
+ * @access Teacher
  */
 router.delete("/:pathId", deleteLocalLearningPath);
 
