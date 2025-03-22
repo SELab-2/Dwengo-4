@@ -10,8 +10,7 @@ import {
 } from "../../util/teacher/httpTeacher";
 import PrimaryButton from "../../components/shared/PrimaryButton";
 import CreateClass from "../../components/teacher/classes/CreateClassForm";
-import Modal from "../../components/shared/Modal";
-import SuccessMessage from "../../components/shared/SuccessMessage";
+import { useNavigate } from "react-router-dom";
 
 interface ClassItem {
   id: string;
@@ -20,6 +19,7 @@ interface ClassItem {
 }
 
 const ClassesPage: React.FC = () => {
+  const navigate = useNavigate();
   const { data, isLoading, isError, error } = useQuery<{
     classes: ClassItem[];
   }>({
@@ -147,8 +147,17 @@ const ClassesPage: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                classes.map((classItem) => (
+                classes.map((classItem: ClassItem) => (
                   <tr key={classItem.id} className="py-2">
+                    <td className="py-3">
+                      <PrimaryButton
+                        onClick={() =>
+                          navigate(`/teacher/classes/${classItem.id}`)
+                        }
+                      >
+                        Beheer
+                      </PrimaryButton>
+                    </td>
                     <td className="py-3">{classItem.name}</td>
                     <td className="py-3">{classItem.code}</td>
                     <td className="py-3">
