@@ -10,7 +10,6 @@ import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearn
 
 import assignmentRoutes from "./routes/assignmentRoutes";
 import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
-import studentTeamRoutes from "./routes/team/studentTeamRoutes";
 import progressRoutes from "./routes/progressRoutes";
 import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
 import studentAssignmentRoutes from "./routes/student/studentAssignmentRoutes";
@@ -23,7 +22,7 @@ import teacherLocalLearningPathNodesRoutes from "./routes/teacher/teacherLocalLe
 
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
-import teacherTeamsRoutes from "./routes/team/teacherTeamRoutes";
+import teamRoutes from "./routes/team/teamRoutes";
 
 dotenv.config();
 
@@ -66,8 +65,8 @@ app.use("/teacher/learningObjects", teacherLocalLearningObjectRoutes);
 app.use("/teacher/learningPaths", teacherLocalLearningPathRoutes);
 app.use("/teacher/learningPaths", teacherLocalLearningPathNodesRoutes);
 
-// Routes voor Teacher (Teams)
-app.use("/teacher/assignments/:assignmentId/team", teacherTeamsRoutes);
+// Routes voor teams
+app.use("/team", teamRoutes);
 
 // Routes voor Student (Auth)
 app.use("/student/auth", studentAuthRoutes);
@@ -89,8 +88,6 @@ app.use("/learningObjects", learningObjectRoutes);
 app.use("/question", QuestionRoutes);
 
 app.use("/learningPaths", learningPathRoutes);
-
-app.use("/student/teams", studentTeamRoutes);
 
 app.use("/progress", progressRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
