@@ -14,7 +14,7 @@ import studentTeamRoutes from "./routes/student/studentTeamRoutes";
 import progressRoutes from "./routes/progress/progressRoutes";
 import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
 import studentAssignmentRoutes from "./routes/student/studentAssignmentRoutes";
-import feedbackRoutes from "./routes/teacher/feedbackRoutes";
+import feedbackRoutes from "./routes/feedback/feedbackRoutes";
 import studentClassRoutes from "./routes/student/studentClassRoutes";
 import teacherSubmissionRoute from "./routes/teacher/teacherSubmissionRoute";
 import studentSubmissionRoute from "./routes/student/studentSubmissionRoute";
@@ -81,7 +81,7 @@ app.use("/teacher/assignments", teacherAssignmentRoutes);
 app.use("/student/assignments", studentAssignmentRoutes);
 
 // Routes om feedback te geven
-app.use("/teacher/feedback", feedbackRoutes);
+app.use("/feedback", feedbackRoutes);
 
 // Nieuwe routes voor leerobjecten
 app.use("/learningObjects", learningObjectRoutes);
