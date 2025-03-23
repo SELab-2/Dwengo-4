@@ -1,4 +1,4 @@
-// routes/question/questionRoutes.ts
+
 import express from "express";
 import {
   createQuestionGeneral,
@@ -16,41 +16,31 @@ import {
 } from "../../controllers/question/questionController";
 
 import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
-// of als je gerichte middleware hebt: protectStudent, etc.
-
 import {
   authorizeQuestion,
-  authorizeOwnerOfQuestionMessage,
-  // etc. plus wat je nog wilt
+  authorizeMessageUpdate,
+  authorizeMessageDelete,
 } from "../../middleware/questionsAuthMiddleware";
 
 const router = express.Router();
 
-// Het is typisch dat je een user (student/teacher) moet ingelogd zijn
+// Gebruiker moet ingelogd zijn
 router.use(protectAnyUser);
 
-/** 
- * Voorbeelden van routes. Pas ze aan naar eigen smaak.
- * Je kunt bv. 
- *   POST /question/specific/:assignmentId 
- *   POST /question/general/:assignmentId
- *   etc.
- */
+// CREATE SPECIFIC question
+router.post("/specific/assignment/:assignmentId", createQuestionSpecific);
 
-// CREATE SPECIFIC
-router.post("/specific/:assignmentId", createQuestionSpecific);
-
-// CREATE GENERAL
-router.post("/general/:assignmentId", createQuestionGeneral);
+// CREATE GENERAL question
+router.post("/general/assignment/:assignmentId", createQuestionGeneral);
 
 // CREATE message
 router.post("/:questionId/message", authorizeQuestion, createQuestionMessage);
 
-// UPDATE question
+// UPDATE question (titel)
 router.patch("/:questionId", authorizeQuestion, updateQuestion);
 
 // UPDATE message
-router.patch("/:questionId/message/:questionMessageId", authorizeOwnerOfQuestionMessage, updateQuestionMessage);
+router.patch("/:questionId/message/:questionMessageId", authorizeMessageUpdate, updateQuestionMessage);
 
 // GET question
 router.get("/:questionId", authorizeQuestion, getQuestion);
@@ -64,13 +54,13 @@ router.get("/team/:teamId", getQuestionsTeam);
 // GET questions by class
 router.get("/class/:classId", getQuestionsClass);
 
-// GET questions by assignment + class
+// GET questions for assignment + class
 router.get("/assignment/:assignmentId/class/:classId", getQuestionsAssignment);
 
 // DELETE question
 router.delete("/:questionId", authorizeQuestion, deleteQuestion);
 
-// DELETE question message
-router.delete("/:questionId/message/:questionMessageId", authorizeOwnerOfQuestionMessage, deleteQuestionMessage);
+// DELETE message
+router.delete("/:questionId/message/:questionMessageId", authorizeMessageDelete, deleteQuestionMessage);
 
 export default router;
