@@ -1,4 +1,4 @@
-import express, {Request, Response, NextFunction, Express} from "express";
+import express, { Request, Response, NextFunction, Express } from "express";
 import dotenv from "dotenv";
 import errorHandler from "./middleware/errorMiddleware";
 import teacherAuthRoutes from "./routes/teacher/teacherAuthRoutes";
@@ -10,7 +10,7 @@ import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearn
 
 import assignmentRoutes from "./routes/assignmentRoutes";
 import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
-import studentTeamRoutes from "./routes/student/studentTeamRoutes";
+import studentTeamRoutes from "./routes/team/studentTeamRoutes";
 import progressRoutes from "./routes/progressRoutes";
 import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
 import studentAssignmentRoutes from "./routes/student/studentAssignmentRoutes";
@@ -23,7 +23,7 @@ import teacherLocalLearningPathNodesRoutes from "./routes/teacher/teacherLocalLe
 
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
-import teacherTeamsRoutes from "./routes/teacher/teacherTeamsRoutes";
+import teacherTeamsRoutes from "./routes/team/teacherTeamRoutes";
 
 dotenv.config();
 
