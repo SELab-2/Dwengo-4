@@ -38,11 +38,11 @@ describe("join request tests", async () => {
       "piet.pieters@gmail.com"
     );
   });
-  describe("[POST] /class/join", async () => {
+  describe("[POST] /class/student/join", async () => {
     it("should respond with a `201` status code and return the created join request", async () => {
       // we've got a scenario with a valid class and student, let's test a student creating a join request
       const { status, body } = await request(app)
-        .post("/class/join")
+        .post("/class/student/join")
         .set("Authorization", `Bearer ${studentUser1.token}`)
         .send({
           joinCode: classroom.code,
@@ -77,7 +77,7 @@ describe("join request tests", async () => {
       });
       // test creating a new join request
       const { status, body } = await request(app)
-        .post("/class/join")
+        .post("/class/student/join")
         .set("Authorization", `Bearer ${studentUser1.token}`)
         .send({
           joinCode: classroom.code,
@@ -100,7 +100,7 @@ describe("join request tests", async () => {
     it("should respond with a `404` status code when the class does not exist", async () => {
       // try to send a join request for a class with a non-existent class code
       const { status, body } = await request(app)
-        .post("/class/join")
+        .post("/class/student/join")
         .set("Authorization", `Bearer ${studentUser1.token}`)
         .send({
           joinCode: "BLABLA", // non-existent class code
@@ -118,7 +118,7 @@ describe("join request tests", async () => {
     it("should respond with a `400` status code when student is already a member of the class", async () => {
       await addStudentToClass(studentUser1.id, classroom.id);
       const { status, body } = await request(app)
-        .post("/class/join")
+        .post("/class/student/join")
         .set("Authorization", `Bearer ${studentUser1.token}`)
         .send({
           joinCode: classroom.code,
@@ -131,7 +131,7 @@ describe("join request tests", async () => {
     it("should respond with a `400` status code when there is already a pending join request for the student and class", async () => {
       // send a first join request
       await request(app)
-        .post("/class/join")
+        .post("/class/student/join")
         .set("Authorization", `Bearer ${studentUser1.token}`)
         .send({
           joinCode: classroom.code,
@@ -142,7 +142,7 @@ describe("join request tests", async () => {
       });
       // send a second join request
       const { status, body } = await request(app)
-        .post("/class/join")
+        .post("/class/student/join")
         .set("Authorization", `Bearer ${studentUser1.token}`)
         .send({
           joinCode: classroom.code,
