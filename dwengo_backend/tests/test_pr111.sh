@@ -79,7 +79,7 @@ echo "Student token: $STUDENT_TOKEN"
 
 echo
 echo "==[ 3) Teacher maakt klas aan ]===================================="
-CLASS_CREATE_RESP=$(curl -s -X POST "$BASE_URL/class" \
+CLASS_CREATE_RESP=$(curl -s -X POST "$BASE_URL/class/teacher" \
   -H "Authorization: Bearer $TEACHER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -92,7 +92,7 @@ echo "$CLASS_CREATE_RESP"
 
 echo
 echo "==[ 4) Teacher haalt de join link op ]============================="
-JOIN_LINK_RESP=$(curl -s -X GET "$BASE_URL/class/$CLASS_ID/join-link" \
+JOIN_LINK_RESP=$(curl -s -X GET "$BASE_URL/class/teacher/$CLASS_ID/join-link" \
    -H "Authorization: Bearer $TEACHER_TOKEN")
 
 JOIN_LINK=$(echo "$JOIN_LINK_RESP" | jq -r '.joinLink')
@@ -104,7 +104,7 @@ echo "JoinCode is: $JOIN_CODE"
 
 echo
 echo "==[ 5) Student join request ]======================================"
-curl -i -X POST "$BASE_URL/class/join" \
+curl -i -X POST "$BASE_URL/class/student/join" \
    -H "Authorization: Bearer $STUDENT_TOKEN" \
    -H "Content-Type: application/json" \
    -d "{
