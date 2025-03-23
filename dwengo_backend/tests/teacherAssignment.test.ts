@@ -234,7 +234,7 @@ describe("Tests for teacherAssignment", async () => {
     });
   });
 
-  describe("[DELETE] /teacher/assignment/:assignmentId", async () => {
+  describe("[DELETE] /assignment/:assignmentId", async () => {
     it("should respond with a `204` status code and delete the assignment", async () => {
       const { status, body } = await request(app)
         .delete(`/assignment/${assignment4.id}`)
@@ -255,6 +255,23 @@ describe("Tests for teacherAssignment", async () => {
 
       expect(status).toBe(500);
       expect(body.error).toBe("Failed to delete assignment");
+    });
+  });
+
+  describe("[GET] /assignment/teacher", async () => {
+    it("should respond with a `200` status code and return all the assignments of the teacher", async () => {
+      const { status, body } = await request(app)
+        .get(`/assignment/teacher`)
+        .set("Authorization", `Bearer ${teacher1.token}`);
+
+      expect(status).toBe(200);
+      expect(body).toHaveLength(2);
+      expect(body.map((elem: { id: number }) => elem.id)).toContain(
+        assignment1.id
+      );
+      expect(body.map((elem: { id: number }) => elem.id)).toContain(
+        assignment2.id
+      );
     });
   });
 });
