@@ -1,8 +1,6 @@
 import express, { Request, Response, NextFunction, Express } from "express";
 import dotenv from "dotenv";
 import errorHandler from "./middleware/errorMiddleware";
-import teacherAuthRoutes from "./routes/teacher/teacherAuthRoutes";
-import studentAuthRoutes from "./routes/student/studentAuthRoutes";
 import learningObjectRoutes from "./routes/learningObject/learningObjectRoutes";
 import QuestionRoutes from "./routes/question/questionRoutes";
 import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
@@ -24,6 +22,7 @@ import teacherLocalLearningPathNodesRoutes from "./routes/teacher/teacherLocalLe
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
 import teacherTeamsRoutes from "./routes/teacher/teacherTeamsRoutes";
+import authRoutes from "./routes/authentication/authRoutes";
 
 dotenv.config();
 
@@ -60,17 +59,14 @@ app.use("/teacher/classes", teacherClassRoutes);
 // Routes voor student (Classes)
 app.use("/student/classes", studentClassRoutes);
 
-// Routes voor Teacher (Auth)
-app.use("/teacher/auth", teacherAuthRoutes);
+// Routes voor authentificatie
+app.use("auth", authRoutes);
 app.use("/teacher/learningObjects", teacherLocalLearningObjectRoutes);
 app.use("/teacher/learningPaths", teacherLocalLearningPathRoutes);
 app.use("/teacher/learningPaths", teacherLocalLearningPathNodesRoutes);
 
 // Routes voor Teacher (Teams)
 app.use("/teacher/assignments/:assignmentId/team", teacherTeamsRoutes);
-
-// Routes voor Student (Auth)
-app.use("/student/auth", studentAuthRoutes);
 
 // Routes voor de Assignments
 app.use("/assignments", assignmentRoutes);

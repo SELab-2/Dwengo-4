@@ -1,6 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
 
-
 const BACKEND = "http://localhost:5000";
 
 export const queryClient = new QueryClient({
@@ -11,7 +10,6 @@ export const queryClient = new QueryClient({
   },
 });
 
-
 interface AuthCredentials {
   firstName: string;
   lastName: string;
@@ -19,23 +17,20 @@ interface AuthCredentials {
   password: string;
 }
 
-
 interface AuthResponse {
   token: string;
 }
-
 
 interface APIError extends Error {
   code?: number;
   info?: any;
 }
 
-
 export async function loginStudent({
   email,
   password,
 }: AuthCredentials): Promise<AuthResponse> {
-  const response = await fetch(`${BACKEND}/student/auth/login`, {
+  const response = await fetch(`${BACKEND}/auth/student/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -44,7 +39,9 @@ export async function loginStudent({
   });
 
   if (!response.ok) {
-    const error: APIError = new Error("Er is iets misgegaan tijdens het inloggen.");
+    const error: APIError = new Error(
+      "Er is iets misgegaan tijdens het inloggen."
+    );
     error.code = response.status;
     error.info = await response.json();
     throw error;
@@ -53,14 +50,13 @@ export async function loginStudent({
   return await response.json();
 }
 
-
 export async function signupStudent({
   firstName,
   lastName,
   email,
   password,
 }: AuthCredentials): Promise<AuthResponse> {
-  const response = await fetch(`${BACKEND}/student/auth/register`, {
+  const response = await fetch(`${BACKEND}/auth/student/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -69,7 +65,9 @@ export async function signupStudent({
   });
 
   if (!response.ok) {
-    const error: APIError = new Error("Er is iets misgegaan tijdens het registreren.");
+    const error: APIError = new Error(
+      "Er is iets misgegaan tijdens het registreren."
+    );
     error.code = response.status;
     error.info = await response.json();
     throw error;
