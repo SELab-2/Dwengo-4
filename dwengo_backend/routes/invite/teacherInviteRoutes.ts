@@ -26,8 +26,23 @@ const router = express.Router();
 router.use(protectTeacher);
 
 // routes for invites
+
+/**
+ * @route GET /invite
+ * @description Get all pending invites for a teacher
+ * @access Teacher
+ */
+router.get("/", getPendingInvitesForTeacher);
+
+/**
+ * @route POST /invite/class/:classId
+ * @description Create an invite for a class
+ * @body otherTeacherId: number
+ * @param classId: number
+ * @access Teacher
+ */
 router.post(
-  "/:classId/invites",
+  "/class/:classId",
   validateRequest(
     "invalid request for invite creation",
     createInviteBodySchema,
@@ -35,8 +50,15 @@ router.post(
   ),
   createInvite
 );
+
+/**
+ * @route GET /invite/class/:classId
+ * @description Get all pending invites for a class
+ * @param classId: number
+ * @access Teacher
+ */
 router.get(
-  "/:classId/invites",
+  "/class/:classId",
   validateRequest(
     "invalid request params",
     undefined,
@@ -44,17 +66,16 @@ router.get(
   ),
   getPendingInvitesForClass
 );
-router.delete(
-  "/:classId/invites/:inviteId",
-  validateRequest(
-    "invalid request params",
-    undefined,
-    deleteInviteParamsSchema
-  ),
-  deleteInvite
-);
+
+/**
+ * @route PATCH /invite/:inviteId
+ * @description Update an invite
+ * @body action: string {"accept", "decline"}
+ * @param inviteId: number
+ * @access Teacher
+ */
 router.patch(
-  "/invites/:inviteId",
+  "/:inviteId",
   validateRequest(
     "invalid request for invite update",
     updateInviteBodySchema,
@@ -62,7 +83,23 @@ router.patch(
   ),
   updateInviteStatus
 );
-router.get("/invites", getPendingInvitesForTeacher);
+
+/**
+ * @route DELETE /invite/:inviteId/class/:classId
+ * @description Delete an invite
+ * @param inviteId: number
+ * @param classId: number
+ * @access Teacher
+ */
+router.delete(
+  ":inviteId/class/:classId",
+  validateRequest(
+    "invalid request params",
+    undefined,
+    deleteInviteParamsSchema
+  ),
+  deleteInvite
+);
 
 // routes for join requests
 router.get("/:classId/join-requests", getJoinRequestsByClass);

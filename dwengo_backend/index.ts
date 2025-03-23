@@ -23,6 +23,7 @@ import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
 import teacherTeamsRoutes from "./routes/teacher/teacherTeamsRoutes";
 import classRoutes from "./routes/class/classRoutes";
+import teacherInviteRoutes from "./routes/invite/teacherInviteRoutes";
 
 dotenv.config();
 
@@ -55,6 +56,9 @@ app.use(express.json());
 
 // Routes voor classes
 app.use("/class", classRoutes);
+
+// Routes voor invites
+app.use("/invite", teacherInviteRoutes);
 
 // Routes voor Teacher (Auth)
 app.use("/teacher/auth", teacherAuthRoutes);
