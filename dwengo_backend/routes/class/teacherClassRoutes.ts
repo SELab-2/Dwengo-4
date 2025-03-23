@@ -15,11 +15,52 @@ const router = express.Router();
 router.use(protectTeacher);
 
 // routes for classes
-router.get("/teacher", getTeacherClasses);
+
+/**
+ * @route POST /class
+ * @description Create a classroom
+ * @body name: string
+ * @access Teacher
+ */
 router.post("/", createClassroom);
-router.delete("/:classId", deleteClassroom);
-router.get("/:classId/join-link", getJoinLink);
-router.patch("/:classId/join-link", regenerateJoinLink);
+
+/**
+ * @route GET /class/teacher
+ * @description Get all classes for a teacher
+ * @access Teacher
+ */
+router.get("/teacher", getTeacherClasses);
+
+/**
+ * @route GET /class/:classId
+ * @description Get all students in a classroom
+ * @param classId: string
+ * @access Teacher
+ */
 router.get("/:classId", getClassroomStudents);
+
+/**
+ * @route DELETE /class/:classId
+ * @description Delete a classroom
+ * @param classId: string
+ * @access Teacher
+ */
+router.delete("/:classId", deleteClassroom);
+
+/**
+ * @route GET /class/:classId/join-link
+ * @description Get the join link for a classroom
+ * @param classId: string
+ * @access Teacher
+ */
+router.get("/:classId/join-link", getJoinLink);
+
+/**
+ * @route PATCH /class/:classId/join-link
+ * @description Regenerate the join link for a classroom
+ * @param classId: string
+ * @access Teacher
+ */
+router.patch("/:classId/join-link", regenerateJoinLink);
 
 export default router;
