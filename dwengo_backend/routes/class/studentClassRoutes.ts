@@ -9,6 +9,6 @@ const router = express.Router();
 router.use(protectStudent);
 
 router.post("/join", createJoinRequest);
-router.get("/", getStudentClasses);
+router.get("/student", getStudentClasses);
 
 export default router;

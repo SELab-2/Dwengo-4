@@ -1,4 +1,4 @@
-import express, {Request, Response, NextFunction, Express} from "express";
+import express, { Request, Response, NextFunction, Express } from "express";
 import dotenv from "dotenv";
 import errorHandler from "./middleware/errorMiddleware";
 import teacherAuthRoutes from "./routes/teacher/teacherAuthRoutes";
@@ -12,10 +12,8 @@ import assignmentRoutes from "./routes/assignmentRoutes";
 import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
 import studentTeamRoutes from "./routes/student/studentTeamRoutes";
 import progressRoutes from "./routes/progressRoutes";
-import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
 import studentAssignmentRoutes from "./routes/student/studentAssignmentRoutes";
 import feedbackRoutes from "./routes/teacher/feedbackRoutes";
-import studentClassRoutes from "./routes/student/studentClassRoutes";
 import teacherSubmissionRoute from "./routes/teacher/teacherSubmissionRoute";
 import studentSubmissionRoute from "./routes/student/studentSubmissionRoute";
 import teacherLocalLearningPathRoutes from "./routes/teacher/teacherLocalLearningPathRoutes";
@@ -24,6 +22,7 @@ import teacherLocalLearningPathNodesRoutes from "./routes/teacher/teacherLocalLe
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
 import teacherTeamsRoutes from "./routes/teacher/teacherTeamsRoutes";
+import classRoutes from "./routes/class/classRoutes";
 
 dotenv.config();
 
@@ -54,11 +53,8 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
 // JSON-parser middleware
 app.use(express.json());
 
-// Routes voor Teacher (Classes)
-app.use("/teacher/classes", teacherClassRoutes);
-
-// Routes voor student (Classes)
-app.use("/student/classes", studentClassRoutes);
+// Routes voor classes
+app.use("/class", classRoutes);
 
 // Routes voor Teacher (Auth)
 app.use("/teacher/auth", teacherAuthRoutes);
