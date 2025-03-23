@@ -11,9 +11,6 @@ import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 
 const router = express.Router();
 
-// Alleen leerkrachten mogen deze routes gebruiken
-router.use(protectTeacher);
-
 // routes for classes
 
 /**
@@ -22,14 +19,14 @@ router.use(protectTeacher);
  * @body name: string
  * @access Teacher
  */
-router.post("/", createClassroom);
+router.post("/", protectTeacher, createClassroom);
 
 /**
  * @route GET /class/teacher
  * @description Get all classes for a teacher
  * @access Teacher
  */
-router.get("/teacher", getTeacherClasses);
+router.get("/teacher", protectTeacher, getTeacherClasses);
 
 /**
  * @route GET /class/:classId
@@ -37,7 +34,7 @@ router.get("/teacher", getTeacherClasses);
  * @param classId: string
  * @access Teacher
  */
-router.get("/:classId", getClassroomStudents);
+router.get("/:classId", protectTeacher, getClassroomStudents);
 
 /**
  * @route DELETE /class/:classId
@@ -45,7 +42,7 @@ router.get("/:classId", getClassroomStudents);
  * @param classId: string
  * @access Teacher
  */
-router.delete("/:classId", deleteClassroom);
+router.delete("/:classId", protectTeacher, deleteClassroom);
 
 /**
  * @route GET /class/:classId/join-link
@@ -53,7 +50,7 @@ router.delete("/:classId", deleteClassroom);
  * @param classId: string
  * @access Teacher
  */
-router.get("/:classId/join-link", getJoinLink);
+router.get("/:classId/join-link", protectTeacher, getJoinLink);
 
 /**
  * @route PATCH /class/:classId/join-link
@@ -61,6 +58,6 @@ router.get("/:classId/join-link", getJoinLink);
  * @param classId: string
  * @access Teacher
  */
-router.patch("/:classId/join-link", regenerateJoinLink);
+router.patch("/:classId/join-link", protectTeacher, regenerateJoinLink);
 
 export default router;

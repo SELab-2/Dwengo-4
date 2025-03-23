@@ -72,7 +72,7 @@ export const getJoinLink = asyncHandler(
 
     const joinCode = await classService.getJoinCode(classId, teacherId);
 
-    const joinLink = `${APP_URL}/student/classes/join?joinCode=${joinCode}`;
+    const joinLink = `${APP_URL}/class/join?joinCode=${joinCode}`;
     res.status(200).json({ joinLink });
   }
 );
@@ -90,7 +90,7 @@ export const regenerateJoinLink = asyncHandler(
       classId,
       teacherId
     );
-    const joinLink = `${APP_URL}/student/classes/join?joinCode=${newJoinCode}`;
+    const joinLink = `${APP_URL}/class/join?joinCode=${newJoinCode}`;
     res.status(200).json({ joinLink });
   }
 );

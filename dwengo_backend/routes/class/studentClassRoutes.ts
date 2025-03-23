@@ -5,22 +5,19 @@ import { getStudentClasses } from "../../controllers/student/studentClassControl
 
 const router = express.Router();
 
-// Alleen studenten mogen deze route gebruiken
-router.use(protectStudent);
-
 /**
- * @route POST /class/join
+ * @route POST /class/student/join
  * @description Create a join request for a class
  * @body joinCode: number
  * @access Student
  */
-router.post("/join", createJoinRequest);
+router.post("/join", protectStudent, createJoinRequest);
 
 /**
  * @route GET /class/student
  * @description Get all classes for a student
  * @access Student
  */
-router.get("/student", getStudentClasses);
+router.get("/student", protectStudent, getStudentClasses);
 
 export default router;
