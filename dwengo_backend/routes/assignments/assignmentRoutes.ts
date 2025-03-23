@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { AssignmentController } from "../../controllers/assignmentController";
-import teacherAssignmentRoutes from "../teacher/teacherAssignmentRoutes";
-import studentAssignmentRoutes from "../student/studentAssignmentRoutes";
+import teacherAssignmentRoutes from "./teacherAssignmentRoutes";
+import studentAssignmentRoutes from "./studentAssignmentRoutes";
 
 const router: Router = Router();
 const controller = new AssignmentController();

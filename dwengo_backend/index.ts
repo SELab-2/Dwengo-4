@@ -9,11 +9,11 @@ import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
 import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearningObjectRoutes";
 
 import assignmentRoutes from "./routes/assignments/assignmentRoutes";
-import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
+import teacherAssignmentRoutes from "./routes/assignments/teacherAssignmentRoutes";
 import studentTeamRoutes from "./routes/student/studentTeamRoutes";
 import progressRoutes from "./routes/progressRoutes";
 import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
-import studentAssignmentRoutes from "./routes/student/studentAssignmentRoutes";
+import studentAssignmentRoutes from "./routes/assignments/studentAssignmentRoutes";
 import feedbackRoutes from "./routes/teacher/feedbackRoutes";
 import studentClassRoutes from "./routes/student/studentClassRoutes";
 import teacherSubmissionRoute from "./routes/teacher/teacherSubmissionRoute";
