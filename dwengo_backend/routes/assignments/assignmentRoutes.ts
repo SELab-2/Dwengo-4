@@ -6,8 +6,8 @@ import studentAssignmentRoutes from "./studentAssignmentRoutes";
 const router: Router = Router();
 const controller = new AssignmentController();
 
-router.use("/", studentAssignmentRoutes);
-router.use("/", teacherAssignmentRoutes);
+router.use("/student", studentAssignmentRoutes);
+router.use("/teacher", teacherAssignmentRoutes);
 
 // Geen protectTeacher nodig want teacherId is niet verwacht, iedereen mag de assignments opvragen
 /**

@@ -13,6 +13,6 @@ const router: Router = express.Router();
  * @queryparam limit: number
  * @access Student
  */
-router.get("/student", protectStudent, getStudentAssignments);
+router.get("/", protectStudent, getStudentAssignments);
 
 export default router;

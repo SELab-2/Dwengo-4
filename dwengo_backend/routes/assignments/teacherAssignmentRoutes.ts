@@ -12,10 +12,10 @@ router.use(protectTeacher);
  * @description Get all assignments that the teacher has created
  * @access Teacher
  */
-router.get("/teacher", controller.getAllAssignments);
+router.get("/", controller.getAllAssignments);
 
 /**
- * @route POST /assignment
+ * @route POST /assignment/teacher
  * @description Create an assignment for a class
  * @body classId: number
  * @body pathRef: string
@@ -27,7 +27,7 @@ router.get("/teacher", controller.getAllAssignments);
 router.post("/", controller.createAssignmentForClass);
 
 /**
- * @route GET /assignment/class/:classId
+ * @route GET /assignment/teacher/class/:classId
  * @description Get all assignments for a class
  * @param classId: number
  * @access Teacher
@@ -35,7 +35,7 @@ router.post("/", controller.createAssignmentForClass);
 router.get("/class/:classId", controller.getAssignmentsByClass);
 
 /**
- * @route PATCH /assignment/:assignmentId
+ * @route PATCH /assignment/teacher/:assignmentId
  * @description Update an assignment
  * @param pathRef: string (optional)
  * @param pathLanguage: string (optional)
@@ -46,7 +46,7 @@ router.get("/class/:classId", controller.getAssignmentsByClass);
 router.patch("/:assignmentId", controller.updateAssignment);
 
 /**
- * @route DELETE /assignment/:assignmentId
+ * @route DELETE /assignment/teacher/:assignmentId
  * @description Delete an assignment
  * @param assignmentId: number
  * @access Teacher
