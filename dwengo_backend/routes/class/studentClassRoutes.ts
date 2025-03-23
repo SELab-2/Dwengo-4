@@ -6,7 +6,7 @@ import { getStudentClasses } from "../../controllers/student/studentClassControl
 const router = express.Router();
 
 /**
- * @route POST /class/student/join
+ * @route POST /class/join
  * @description Create a join request for a class
  * @body joinCode: number
  * @access Student
