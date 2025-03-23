@@ -24,6 +24,7 @@ import YAML from "yamljs";
 import teacherTeamsRoutes from "./routes/teacher/teacherTeamsRoutes";
 import classRoutes from "./routes/class/classRoutes";
 import teacherInviteRoutes from "./routes/invite/teacherInviteRoutes";
+import joinRequestRoutes from "./routes/joinRequest/joinRequestRoutes";
 
 dotenv.config();
 
@@ -59,6 +60,9 @@ app.use("/class", classRoutes);
 
 // Routes voor invites
 app.use("/invite", teacherInviteRoutes);
+
+// Routes voor join requests
+app.use("/join-request", joinRequestRoutes);
 
 // Routes voor Teacher (Auth)
 app.use("/teacher/auth", teacherAuthRoutes);

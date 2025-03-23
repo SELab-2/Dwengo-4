@@ -6,10 +6,7 @@ import {
   updateInviteStatus,
   deleteInvite,
 } from "../../controllers/teacher/inviteController";
-import {
-  getJoinRequestsByClass,
-  updateJoinRequestStatus,
-} from "../../controllers/joinrequest/joinRequestController";
+
 import { validateRequest } from "../../middleware/validateRequest";
 import {
   createInviteBodySchema,
@@ -100,9 +97,5 @@ router.delete(
   ),
   deleteInvite
 );
-
-// routes for join requests
-router.get("/:classId/join-requests", getJoinRequestsByClass);
-router.patch("/:classId/join-requests/:requestId", updateJoinRequestStatus);
 
 export default router;
