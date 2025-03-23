@@ -66,6 +66,54 @@ export const authorizeQuestion = asyncHandler(
   }
 );
 
+
+/**
+ * authorizeQuestionUpdate:
+ *  - Alleen de *owner* (question.createdBy)  of *admin* mag de vraagtitel updaten.
+ *  - Dit is strenger dan authorizeQuestion (zien). 
+ */
+export const authorizeQuestionUpdate = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const { questionId } = req.params;
+    const user = req.user;
+    if (!user) {
+      throw new AccesDeniedError("Not logged in");
+    }
+
+    const question = await prisma.question.findUnique({
+      where: { id: Number(questionId) },
+      include: {
+        team: {
+          include: {
+            class: {
+              include: {
+                ClassTeacher: true
+              }
+            }
+          }
+        }
+      }
+    });
+    if (!question) {
+      throw new NotFoundError("Question not found");
+    }
+
+    // Is user the owner?
+    const isOwner = (question.createdBy === user.id);
+
+    
+
+    // Is user admin?
+    const isAdmin = (user.role === "ADMIN");
+
+    if (!isOwner  && !isAdmin) {
+      throw new AccesDeniedError("Only the question owner, or admin can update this question.");
+    }
+
+    next();
+  }
+);
+
 /**
  * authorizeMessageUpdate:
  *  - Alleen de eigenaar (message.userId) of admin mag de tekst updaten

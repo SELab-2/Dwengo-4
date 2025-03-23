@@ -20,6 +20,7 @@ import {
   authorizeQuestion,
   authorizeMessageUpdate,
   authorizeMessageDelete,
+  authorizeQuestionUpdate
 } from "../../middleware/questionsAuthMiddleware";
 
 const router = express.Router();
@@ -37,8 +38,7 @@ router.post("/general/assignment/:assignmentId", createQuestionGeneral);
 router.post("/:questionId/message", authorizeQuestion, createQuestionMessage);
 
 // UPDATE question (titel)
-router.patch("/:questionId", authorizeQuestion, updateQuestion);
-
+router.patch("/:questionId", authorizeQuestionUpdate, updateQuestion);
 // UPDATE message
 router.patch("/:questionId/message/:questionMessageId", authorizeMessageUpdate, updateQuestionMessage);
 

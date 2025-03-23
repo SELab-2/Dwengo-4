@@ -354,7 +354,7 @@ echo "$MSG_STUD1_2"
 
 echo ""
 echo "=== [9e] Bekijk de hele conversation van Q_SHARED_ID ==="
-echo "=== Verwacht: 3 berichten (student2, teacher, student1) ==="
+echo "=== Verwacht: 4 berichten (student2, teacher, student1) ==="
 curl -s -X GET "$BASE_URL/question/$Q_SHARED_ID" \
   -H "Authorization: Bearer $STUD1_TOKEN" | jq '.'
 
