@@ -130,12 +130,14 @@ const NavTeacher: React.FC = () => {
               <NavButton
                 to="/teacher/inloggen"
                 label="Inloggen"
-                isActive={(path) => location.pathname === "/teacher"}
+                isActive={(path) => location.pathname === "/teacher/inloggen"}
               />
               <NavButton
                 to="/teacher/registreren"
                 label="Registreren"
-                isActive={(path) => location.pathname === "/teacher"}
+                isActive={(path) =>
+                  location.pathname === "/teacher/registreren"
+                }
               />
             </div>
           )}
