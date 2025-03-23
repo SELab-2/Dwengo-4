@@ -89,7 +89,7 @@ router.patch(
  * @access Teacher
  */
 router.delete(
-  ":inviteId/class/:classId",
+  "/:inviteId/class/:classId",
   validateRequest(
     "invalid request params",
     undefined,
