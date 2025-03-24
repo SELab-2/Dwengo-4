@@ -16,7 +16,7 @@ import {
     addTeacherToClass, createAssignment,
     createClass, createEvaluation, createLearningPath,
     createStudent, createSubmission,
-    createTeacher, createTeamWithStudents, giveAssignmentToTeam, giveFeedbackToSubmission
+    createTeacher, createTeamWithStudents, giveAssignmentToTeam, giveFeedbackToSubmission, updateAssignmentForTeam
 } from "./helpers/testDataCreation";
 import LocalLearningObjectService from "../services/localLearningObjectService";
 import app from "../index";
@@ -39,11 +39,17 @@ describe('Feedback tests', (): void => {
     let evaluation: Evaluation;
     let evalId: string;
 
-    let assignment: Assignment;
-    let assignmentId: number;
+    let onGoingAssignment: Assignment;
+    let onGoingAssignmentId: number;
 
-    let submission: Submission;
-    let submissionId: number
+    let passedAssignment: Assignment;
+    let passedAssignmentId: number;
+
+    let submissionForOnGoingAssignment: Submission;
+    let onGoingAssignmentSubmissionId: number
+
+    let submissionForPassedAssignment: Submission;
+    let passedAssignmentSubmissionId: number;
 
     // Dit vult alle bovenstaande variabelen in zodat deze later gebruikt kunnen worden in de testen
     beforeEach(async (): Promise<void> => {
@@ -100,48 +106,103 @@ describe('Feedback tests', (): void => {
 
         // Create an assignment to give to a team
         const deadline = new Date(Date.now() + 1000 * 60 * 60 * 24); // Add 1 day
-        assignment = await createAssignment(
+        onGoingAssignment = await createAssignment(
             classroomId,
             learningPath.id,
             deadline,
         );
-        assignmentId = assignment.id;
+        onGoingAssignmentId = onGoingAssignment.id;
 
         // Give the assignment to the team
-        await giveAssignmentToTeam(assignmentId, teamId);
+        await giveAssignmentToTeam(onGoingAssignmentId, teamId);
 
         // Create a submission for this assignment
-        submission = await createSubmission(
+        submissionForOnGoingAssignment = await createSubmission(
             evalId,
             teamId,
-            assignmentId
+            onGoingAssignmentId
         );
-        submissionId = submission.submissionId;
+        onGoingAssignmentSubmissionId = submissionForOnGoingAssignment.submissionId;
 
-        // Now we will need to give feedback to this submission
-        const description = "Mooie oplossing!"
-        await giveFeedbackToSubmission(
-            submissionId,
-            teacherId,
-            description
+        // Create an assigment whose deadline has already passed
+        const passedDeadline = new Date(Date.now() - 1000 * 60 * 60 * 24); // Subtract a day
+        passedAssignment = await createAssignment(
+            classroomId,
+            learningPath.id,
+            passedDeadline,
         );
+        passedAssignmentId = passedAssignment.id;
+
+        // Since a TeamAssignment
+        await updateAssignmentForTeam(passedAssignmentId, teamId);
+
+        // Create a submission for the passed assignment
+        submissionForPassedAssignment = await createSubmission(
+            evalId,
+            teamId,
+            passedAssignmentId,
+        );
+        passedAssignmentSubmissionId = submissionForPassedAssignment.submissionId;
+    });
+
+    describe('POST /teacher/feedback/submission/:submissionId', (): void => {
+        it("Should respond with a `500` status saying 'Failed to create feedback'", async (): Promise<void> => {
+            // In deze test wordt nagegaan dat je geen feedback kan geven op een submission van een assignment
+            // waarvan de deadline nog niet verstreken is
+            const { status, body } = await request(app)
+                .post(`/teacher/feedback/submission/${onGoingAssignmentSubmissionId}`)
+                .set('Authorization', `Bearer ${teacher.token}`);
+
+            expect(status).toBe(500);
+            expect(body.error).toEqual("Failed to create feedback");
+
+            // Gaat na dat er geen feedback is aangemaakt
+            let feedback: Feedback | null = await prisma.feedback.findUnique({
+                where: {
+                    submissionId: onGoingAssignmentSubmissionId
+                }
+            });
+            expect(feedback).toBeNull();
+        });
+    });
+
+    describe('POST /teacher/feedback/submission/:submissionId', (): void => {
+        it("Should respond with a `401` status (UnauthorizedError)", async (): Promise<void> => {
+            // In deze test wordt nagegaan dat je geen feedback kunt geven als student
+            const { status, body } = await request(app)
+                .post(`/teacher/feedback/submission/${passedAssignmentSubmissionId}`)
+                .set('Authorization', `Bearer ${student.token}`);
+
+            expect(status).toBe(401);
+            expect(body.error).toEqual("Leerkracht niet gevonden.");
+
+            // Gaat na dat er geen feedback is aangemaakt
+            let feedback: Feedback | null = await prisma.feedback.findUnique({
+                where: {
+                    submissionId: passedAssignmentSubmissionId
+                }
+            });
+            expect(feedback).toBeNull();
+        });
     });
 
     describe('POST /teacher/feedback/submission/:submissionId', (): void => {
         it("Should respond with a `201` status and the created feedback", async (): Promise<void> => {
             const { status, body } = await request(app)
-                .post('/teacher/feedback')
+                .post(`/teacher/feedback/submission/${passedAssignmentSubmissionId}`)
                 .set('Authorization', `Bearer ${teacher.token}`)
+                .send({description: "Mooie oplossing!"});
 
             expect(status).toBe(201);
             expectCorrectFeedbackBody(body);
 
-            let newFeedback: Feedback | null = await prisma.feedback.findUnique({
+            // Gaat na dat er geen feedback is aangemaakt
+            let feedback: Feedback | null = await prisma.feedback.findUnique({
                 where: {
-                    submissionId: submissionId
+                    submissionId: passedAssignmentSubmissionId
                 }
             });
-            expect(newFeedback).toBeDefined();
+            expect(feedback).toBeNull();
         });
     });
 });

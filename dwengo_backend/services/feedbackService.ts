@@ -1,4 +1,4 @@
-import { Feedback, PrismaClient } from '@prisma/client';
+import {Assignment, Feedback, PrismaClient} from '@prisma/client';
 
 
 const prisma = new PrismaClient();
@@ -28,12 +28,16 @@ export default class FeedbackService {
         }
 
         // aantal evaluaties met deadline in de toekomst
-        const deadline = await prisma.evaluation.findFirst({
+        const deadline: Assignment | null = await prisma.assignment.findFirst({
             where: {
                 submissions: {
                     some: {
                         submissionId: submissionId,
                     },
+                },
+                deadline: {
+                    // gte == Greater than equal
+                    gte: new Date()
                 }
             }
         });
