@@ -21,6 +21,7 @@ import {
 import LocalLearningObjectService from "../services/localLearningObjectService";
 import app from "../index";
 import request from "supertest";
+import prisma from "./helpers/prisma";
 
 describe('Feedback tests', (): void => {
     let teacher: User & { teacher: Teacher, token: string };
@@ -133,8 +134,22 @@ describe('Feedback tests', (): void => {
                 .set('Authorization', `Bearer ${teacher.token}`)
 
             expect(status).toBe(201);
+            expectCorrectFeedbackBody(body);
 
-            let newFeedback: Feedback;
+            let newFeedback: Feedback | null = await prisma.feedback.findUnique({
+                where: {
+                    submissionId: submissionId
+                }
+            });
+            expect(newFeedback).toBeDefined();
         });
     });
 });
+
+function expectCorrectFeedbackBody(body: any): void {
+    expect(body).toEqual({
+        submissionId: expect.any(Number),
+        teacherId: expect.any(Number),
+        description: expect.any(String),
+    });
+}
