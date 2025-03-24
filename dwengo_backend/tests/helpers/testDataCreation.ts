@@ -189,6 +189,10 @@ export async function createSubmission(evaluationId: string, teamId: number, ass
   });
 }
 
+export async function giveFeedbackToSubmission() {
+
+}
+
 export async function giveAssignmentToTeam(assignmentId: number, teamId: number): Promise<TeamAssignment> {
   return prisma.teamAssignment.create({
     data: {

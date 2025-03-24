@@ -5,7 +5,7 @@ import {AuthenticatedRequest} from "../../interfaces/extendedTypeInterfaces";
 import {getUserFromAuthRequest} from "../../helpers/getUserFromAuthRequest";
 
 export default class FeedbackController {
-    static async getAllFeedbackForEvaluation(req: AuthenticatedRequest, res: Response) {
+    static async getAllFeedbackForEvaluation(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const {assignmentId, evaluationId} = req.params;
             const teacherId: number = getUserFromAuthRequest(req).id;
@@ -17,7 +17,7 @@ export default class FeedbackController {
         }
     }
 
-    static async createFeedback(req: AuthenticatedRequest, res: Response) {
+    static async createFeedback(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const teacherId: number = getUserFromAuthRequest(req).id;
 
@@ -34,7 +34,7 @@ export default class FeedbackController {
 
     }
 
-    static async getFeedbackForSubmission(req: AuthenticatedRequest, res: Response) {
+    static async getFeedbackForSubmission(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const submissionId: number = Number(req.params.submissionId);
             const teacherId: number = getUserFromAuthRequest(req).id;
@@ -51,7 +51,7 @@ export default class FeedbackController {
 
     }
 
-    static async updateFeedbackForSubmission(req: AuthenticatedRequest, res: Response) {
+    static async updateFeedbackForSubmission(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const submissionId: number = Number(req.params.submissionId);
             const teacherId: number = getUserFromAuthRequest(req).id;
@@ -64,7 +64,7 @@ export default class FeedbackController {
         }
     }
 
-    static async deleteFeedbackForSubmission(req: AuthenticatedRequest, res: Response) {
+    static async deleteFeedbackForSubmission(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const submissionId: number = Number(req.params.submissionId);
             const teacherId: number = getUserFromAuthRequest(req).id;
