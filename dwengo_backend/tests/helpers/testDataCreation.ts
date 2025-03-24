@@ -189,8 +189,34 @@ export async function createSubmission(evaluationId: string, teamId: number, ass
   });
 }
 
-export async function giveFeedbackToSubmission() {
+export async function giveFeedbackToSubmission(submissionId: number, teacherId: number, description: string) {
+  /*if (!await this.hasSubmissionRights(teacherId, submissionId)) {
+    throw new Error("The teacher is unauthorized to perform this action");
+  }
 
+  // aantal evaluaties met deadline in de toekomst
+  const deadline = await prisma.evaluation.findFirst({
+    where: {
+      submissions: {
+        some: {
+          submissionId: submissionId,
+        },
+      }
+    }
+  });
+
+  // Als deadline in de toekomst ligt: error
+  if (deadline !== null) {
+    throw new Error("Deadline in toekomst");
+  }*/
+
+  return prisma.feedback.create({
+    data: {
+      submissionId: submissionId,
+      teacherId: teacherId,
+      description: description,
+    },
+  });
 }
 
 export async function giveAssignmentToTeam(assignmentId: number, teamId: number): Promise<TeamAssignment> {

@@ -6,7 +6,7 @@ import {
     Evaluation,
     EvaluationType,
     LearningObject, LearningPath,
-    Student,
+    Student, Submission,
     Teacher,
     Team,
     User
@@ -16,7 +16,7 @@ import {
     addTeacherToClass, createAssignment,
     createClass, createEvaluation, createLearningPath,
     createStudent, createSubmission,
-    createTeacher, createTeamWithStudents, giveAssignmentToTeam
+    createTeacher, createTeamWithStudents, giveAssignmentToTeam, giveFeedbackToSubmission
 } from "./helpers/testDataCreation";
 import LocalLearningObjectService from "../services/localLearningObjectService";
 
@@ -38,6 +38,9 @@ describe('Feedback tests', (): void => {
 
     let assignment: Assignment;
     let assignmentId: number;
+
+    let submission: Submission;
+    let submissionId: number
 
     // Dit vult alle bovenstaande variabelen in zodat deze later gebruikt kunnen worden in de testen
     beforeEach(async (): Promise<void> => {
@@ -105,13 +108,19 @@ describe('Feedback tests', (): void => {
         await giveAssignmentToTeam(assignmentId, teamId);
 
         // Create a submission for this assignment
-        await createSubmission(
+        submission = await createSubmission(
             evalId,
             teamId,
             assignmentId
         );
+        submissionId = submission.submissionId;
 
         // Now we will need to give feedback to this submission
-        await giveFeedbackToSubmission();
+        const description = "Mooie oplossing!"
+        await giveFeedbackToSubmission(
+            submissionId,
+            teacherId,
+            description
+        );
     });
 });

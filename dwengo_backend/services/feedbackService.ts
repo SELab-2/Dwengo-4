@@ -35,12 +35,6 @@ export default class FeedbackService {
                         submissionId: submissionId,
                     },
                 }
-
-                /*,
-                deadline: {
-                    gte: new Date()
-                }
-                    */
             }
         });
 

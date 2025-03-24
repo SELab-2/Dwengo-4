@@ -1,8 +1,8 @@
-import express from "express";
+import express, {Router} from "express";
 import controller from "../../controllers/teacher/feedbackController";
 import {protectTeacher} from "../../middleware/teacherAuthMiddleware";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 router.get('assignment/:assignmentId/evaluation/:evaluationId', protectTeacher, controller.getAllFeedbackForEvaluation);
 router.get('submission/:submissionId', protectTeacher, controller.getFeedbackForSubmission);
