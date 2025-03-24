@@ -260,6 +260,23 @@ describe('Feedback tests', (): void => {
             expect(status).toBe(401);
             expect(body.error).toEqual("Leerkracht niet gevonden.");
         });
+
+        it("Should respond with a `200` status and all the feedback for an assignment and evaluation combination", async (): Promise<void> => {
+
+            const classes: any = await prisma.class.findMany({
+                include: {
+                    assignments: true
+                }
+            });
+            console.log(classes);
+            console.log(classes[0].assignments)
+
+            const { status, body } = await request(app)
+                .get(`/teacher/feedback/assignment/${passedAssignmentSubmissionId}/evaluation/${evalId}`)
+                .set('Authorization', `Bearer ${teacher.token}`);
+
+            expect(status).toBe(200);
+        });
     });
 });
 
