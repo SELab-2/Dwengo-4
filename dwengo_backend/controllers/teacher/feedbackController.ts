@@ -71,13 +71,16 @@ export default class FeedbackController {
         }
     }
 
+    // route: /teacher/feedback/submission/:submissionId
+    // http-command: DELETE
     static async deleteFeedbackForSubmission(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const submissionId: number = Number(req.params.submissionId);
             const teacherId: number = getUserFromAuthRequest(req).id;
 
-            const updatedFeedback: Feedback = await service.deleteFeedbackForSubmission(submissionId, teacherId);
-            res.status(200).json(updatedFeedback);
+            await service.deleteFeedbackForSubmission(submissionId, teacherId);
+            // Status 204: successful deletion but no json body returned (no content).
+            res.status(204).end();
         } catch (error) {
             res.status(500).json({error: "Failed to delete feedback"});
         }

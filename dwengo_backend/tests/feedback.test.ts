@@ -329,7 +329,46 @@ describe('Feedback tests', (): void => {
             expectCorrectFeedbackBody(body);
             expect(body.description).toEqual("Zeer netjes!");
         });
-    })
+
+        it("Should respond with a `500` status code when updating feedback that does not exist", async (): Promise<void> => {
+
+            const { status, body } = await request(app)
+                .patch(`/teacher/feedback/submission/${passedAssignmentSubmissionId}`)
+                .set('Authorization', `Bearer ${teacher.token}`)
+                .send({description: "Zeer netjes!"});
+
+            expect(status).toBe(500);
+            expect(body.error).toEqual("Failed to update feedback");
+        });
+    });
+
+    describe('DELETE /teacher/feedback/submission/:submissionId', (): void => {
+        it("Should respond with a `204` status code and no content", async (): Promise<void> => {
+
+            // We first need to create feedback for a submission
+            await giveFeedbackToSubmission(onGoingAssignmentSubmissionId, teacherId, "Netjes!");
+
+            const { status, body } = await request(app)
+                .delete(`/teacher/feedback/submission/${onGoingAssignmentSubmissionId}`)
+                .set('Authorization', `Bearer ${teacher.token}`);
+
+            expect(status).toBe(204);
+            // Should match an empty object since we return nothing (status code 204)
+            expect(body).toStrictEqual({});
+        });
+    });
+
+    describe('DELETE /teacher/feedback/submission/:submissionId', (): void => {
+        it("Should respond with a `500` status code when trying to delete feedback that doesn't exist", async (): Promise<void> => {
+
+            const { status, body } = await request(app)
+                .delete(`/teacher/feedback/submission/${passedAssignmentSubmissionId}`)
+                .set('Authorization', `Bearer ${teacher.token}`);
+
+            expect(status).toBe(500);
+            expect(body.error).toEqual("Failed to delete feedback");
+        });
+    });
 });
 
 async function findFeedback(id: number): Promise<Feedback | null> {
