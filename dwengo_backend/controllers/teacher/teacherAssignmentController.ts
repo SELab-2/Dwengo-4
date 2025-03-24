@@ -41,6 +41,21 @@ export class AssignmentTeacherController {
     }
   };
 
+  getAllAssignments = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const teacherId: number = getUserFromAuthRequest(req).id;
+      const assignments = await teacherAssignmentService.getAllAssignments(
+        teacherId
+      );
+      res.status(200).json(assignments);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to retrieve assignments" });
+    }
+  };
+
   getAssignmentsByClass = async (
     req: AuthenticatedRequest,
     res: Response
