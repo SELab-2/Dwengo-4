@@ -1,10 +1,10 @@
-import {beforeEach, describe} from "vitest";
+import {beforeEach, describe, expect, it} from "vitest";
 import {
     Assignment,
     Class,
     ContentType,
     Evaluation,
-    EvaluationType,
+    EvaluationType, Feedback,
     LearningObject, LearningPath,
     Student, Submission,
     Teacher,
@@ -19,6 +19,8 @@ import {
     createTeacher, createTeamWithStudents, giveAssignmentToTeam, giveFeedbackToSubmission
 } from "./helpers/testDataCreation";
 import LocalLearningObjectService from "../services/localLearningObjectService";
+import app from "../index";
+import request from "supertest";
 
 describe('Feedback tests', (): void => {
     let teacher: User & { teacher: Teacher, token: string };
@@ -122,5 +124,17 @@ describe('Feedback tests', (): void => {
             teacherId,
             description
         );
+    });
+
+    describe('POST /teacher/feedback/submission/:submissionId', (): void => {
+        it("Should respond with a `201` status and the created feedback", async (): Promise<void> => {
+            const { status, body } = await request(app)
+                .post('/teacher/feedback')
+                .set('Authorization', `Bearer ${teacher.token}`)
+
+            expect(status).toBe(201);
+
+            let newFeedback: Feedback;
+        });
     });
 });

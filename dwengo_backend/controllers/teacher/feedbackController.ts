@@ -17,14 +17,14 @@ export default class FeedbackController {
         }
     }
 
+    // route: "/teacher/feedback/submission/:submissionId"
+    // http-command: POST
     static async createFeedback(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const teacherId: number = getUserFromAuthRequest(req).id;
+            const submissionId: number = Number(req.params.submissionId);
 
-            const {submissionId, description}: {
-                submissionId: number,
-                description: string
-            } = req.body;
+            const description: string = req.body.description;
 
             const feedback: Feedback = await service.createFeedback(submissionId, teacherId, description);
             res.status(201).json(feedback);

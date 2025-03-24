@@ -9,7 +9,7 @@ import {
     EvaluationType,
     LearningObject,
     LearningPath,
-    Student,
+    Student, Submission,
     Teacher,
     Team,
     User
@@ -154,11 +154,12 @@ describe('Submission tests', (): void => {
             expectSuccessfulSubmissionCreation(status, body);
 
             // Double check that the database now contains the submission
-            await prisma.submission.findUnique({
+            let newSubmission: Submission | null = await prisma.submission.findUnique({
                 where: {
                     submissionId: body.submissionId
                 }
             });
+            expect(newSubmission).toBeDefined();
         });
     });
 
