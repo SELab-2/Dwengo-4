@@ -7,13 +7,7 @@ import React from "react";
 function RootLayoutDashboardTeacher() {
   const token = useLoaderData();
   const submit = useSubmit();
-  const token = useLoaderData();
-  const submit = useSubmit();
 
-  useEffect(() => {
-    if (!token) {
-      return;
-    }
   useEffect(() => {
     if (!token) {
       return;
@@ -28,7 +22,6 @@ function RootLayoutDashboardTeacher() {
       return;
     }
 
-    const tokenDuration = getTokenDuration();
     const tokenDuration = getTokenDuration();
 
     setTimeout(() => {

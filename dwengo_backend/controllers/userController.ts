@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { Role, User } from "@prisma/client";
-import * as userService from "../services/userService";
+import UserService, * as userService from "../services/userService";
 import bcrypt from "bcryptjs";
 import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
 import { Response } from "express";
@@ -41,7 +41,7 @@ const registerUser = async (
   const { firstName, lastName, email, password } = req.body;
 
   // Controleer of gebruiker al bestaat
-  const existingUser: User | null = await userService.findUser(email);
+  const existingUser: User | null = await UserService.findUser(email);
   if (existingUser) {
     res.status(400);
     throw new Error("Gebruiker bestaat al");
@@ -51,7 +51,7 @@ const registerUser = async (
   const hashedPassword: string = await bcrypt.hash(password, 10);
 
   // Maak de gebruiker aan met de juiste rol
-  await userService.createUser(
+  await UserService.createUser(
     firstName,
     lastName,
     email,

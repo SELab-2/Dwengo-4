@@ -68,7 +68,7 @@ const EditClassTeacher: React.FC = () => {
         const data = await response.json();
         console.log("All classes data:", data);
 
-        const classes = data.classes || [];
+        const classes = data || [];
         console.log("Classes array:", classes);
 
         // Convert classId to string for comparison if needed

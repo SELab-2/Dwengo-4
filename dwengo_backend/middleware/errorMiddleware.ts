@@ -1,9 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { AppError } from "../errors/errors";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { Request, Response, NextFunction } from "express";
-import { AppError } from "../errors/errors";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 const errorHandler = (
   err: Error,

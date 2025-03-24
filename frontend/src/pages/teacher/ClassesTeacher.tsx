@@ -10,6 +10,8 @@ import {
 } from "../../util/teacher/httpTeacher";
 import PrimaryButton from "../../components/shared/PrimaryButton";
 import CreateClass from "../../components/teacher/classes/CreateClassForm";
+import Modal from "../../components/shared/Modal";
+import SuccessMessage from "../../components/shared/SuccessMessage";
 import { useNavigate } from "react-router-dom";
 
 interface ClassItem {
@@ -18,28 +20,77 @@ interface ClassItem {
   code: string;
 }
 
-const ClassesPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { data, isLoading, isError, error } = useQuery<{
-    classes: ClassItem[];
-  }>({
+interface TeacherInvite {
+  inviteId: number;
+  status: "PENDING" | "APPROVED" | "DENIED";
+  otherTeacher: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}
+
+interface JoinRequest {
+  requestId: number;
+  status: "PENDING" | "APPROVED" | "DENIED";
+  student: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}
+
+const ClassesPageTeacher: React.FC = () => {
+  const queryClient = useQueryClient();
+
+  // Refs voor de modals
+  const teacherInvitesModalRef = useRef<{
+    open: () => void;
+    close: () => void;
+  } | null>(null);
+  const studentJoinModalRef = useRef<{
+    open: () => void;
+    close: () => void;
+  } | null>(null);
+
+  // State voor de geselecteerde klas per modal
+  const [selectedTeacherClassId, setSelectedTeacherClassId] = useState<
+    string | null
+  >(null);
+  const [selectedStudentClassId, setSelectedStudentClassId] = useState<
+    string | null
+  >(null);
+
+  // State voor de mini-form in de teacher invites modal (nu op basis van email)
+  const [inviteTeacherEmail, setInviteTeacherEmail] = useState<string>("");
+
+  // Query: Haal alle klassen op
+  const {
+    data: classes,
+    isLoading,
+    isError,
+    error,
+  } = useQuery<ClassItem[]>({
     queryKey: ["classes"],
     queryFn: fetchClasses,
   });
 
   // Query: Haal pending teacher invites voor de geselecteerde klas op
-  const { data: teacherInvites, isLoading: isInvitesLoading } = useQuery<TeacherInvite[]>({
+  const { data: teacherInvites, isLoading: isInvitesLoading } = useQuery<
+    TeacherInvite[]
+  >({
     queryKey: ["teacherInvites", selectedTeacherClassId],
     queryFn: () => getPendingInvitesForClass(selectedTeacherClassId!),
     enabled: !!selectedTeacherClassId,
   });
 
   // Query: Haal student join requests voor de geselecteerde klas op
-  const { data: studentJoinRequests, isLoading: isStudentJoinLoading } = useQuery<JoinRequest[]>({
-    queryKey: ["studentJoinRequests", selectedStudentClassId],
-    queryFn: () => fetchJoinRequests(selectedStudentClassId!),
-    enabled: !!selectedStudentClassId,
-  });
+  const { data: studentJoinRequests, isLoading: isStudentJoinLoading } =
+    useQuery<JoinRequest[]>({
+      queryKey: ["studentJoinRequests", selectedStudentClassId],
+      queryFn: () => fetchJoinRequests(selectedStudentClassId!),
+      enabled: !!selectedStudentClassId,
+    });
 
   // Mutation: Creëer een invite (op basis van teacher email)
   const createInviteMutation = useMutation({
@@ -52,7 +103,9 @@ const ClassesPage: React.FC = () => {
     }) => createInvite({ classId, otherTeacherEmail }),
     onSuccess: () => {
       if (selectedTeacherClassId) {
-        queryClient.invalidateQueries({ queryKey: ["teacherInvites", selectedTeacherClassId] });
+        queryClient.invalidateQueries({
+          queryKey: ["teacherInvites", selectedTeacherClassId],
+        });
         setInviteTeacherEmail(""); // Reset het form
       }
     },
@@ -60,22 +113,36 @@ const ClassesPage: React.FC = () => {
 
   // Mutatie: Approve student join request
   const approveMutation = useMutation({
-    mutationFn: ({ classId, requestId }: { classId: string; requestId: number }) =>
-      approveJoinRequest({ classId, requestId }),
+    mutationFn: ({
+      classId,
+      requestId,
+    }: {
+      classId: string;
+      requestId: number;
+    }) => approveJoinRequest({ classId, requestId }),
     onSuccess: () => {
       if (selectedStudentClassId) {
-        queryClient.invalidateQueries({ queryKey: ["studentJoinRequests", selectedStudentClassId] });
+        queryClient.invalidateQueries({
+          queryKey: ["studentJoinRequests", selectedStudentClassId],
+        });
       }
     },
   });
 
   // Mutatie: Deny student join request
   const denyMutation = useMutation({
-    mutationFn: ({ classId, requestId }: { classId: string; requestId: number }) =>
-      denyJoinRequest({ classId, requestId }),
+    mutationFn: ({
+      classId,
+      requestId,
+    }: {
+      classId: string;
+      requestId: number;
+    }) => denyJoinRequest({ classId, requestId }),
     onSuccess: () => {
       if (selectedStudentClassId) {
-        queryClient.invalidateQueries({ queryKey: ["studentJoinRequests", selectedStudentClassId] });
+        queryClient.invalidateQueries({
+          queryKey: ["studentJoinRequests", selectedStudentClassId],
+        });
       }
     },
   });
@@ -83,7 +150,10 @@ const ClassesPage: React.FC = () => {
   const handleInviteSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (selectedTeacherClassId && inviteTeacherEmail.trim() !== "") {
-      createInviteMutation.mutate({ classId: selectedTeacherClassId, otherTeacherEmail: inviteTeacherEmail });
+      createInviteMutation.mutate({
+        classId: selectedTeacherClassId,
+        otherTeacherEmail: inviteTeacherEmail,
+      });
     }
   };
 
@@ -108,9 +178,10 @@ const ClassesPage: React.FC = () => {
     setSelectedStudentClassId(classId);
     studentJoinModalRef.current?.open();
   };
+  const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="g-30">
       <CreateClass />
 
       {isLoading && <p>Loading...</p>}
@@ -121,8 +192,8 @@ const ClassesPage: React.FC = () => {
         </p>
       )}
 
-      {!isLoading && !isError && (
-        <div className="flex flex-col gap-4">
+      {!isLoading && !isError && classes && classes.length > 0 ? (
+        <div className="px-10 py-10">
           <h2>Mijn Klassen</h2>
           <table className="tableSimpleStyling">
             <thead>
@@ -134,55 +205,39 @@ const ClassesPage: React.FC = () => {
                 <th>Leerling Join Requests</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
-              {classes.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="c-r">
-                    Geen klassen gevonden.
-            <tbody className="divide-y divide-gray-200">
-              {classes.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="c-r">
-                    Geen klassen gevonden.
+            <tbody>
+              {classes.map((classItem) => (
+                <tr key={classItem.id}>
+                  <PrimaryButton
+                    onClick={() => navigate(`/teacher/classes/${classItem.id}`)}
+                  >
+                    Beheer
+                  </PrimaryButton>
+                  <td>{classItem.name}</td>
+                  <td>{classItem.code}</td>
+                  <td>
+                    <PrimaryButton
+                      onClick={() => handleManageTeacherInvites(classItem.id)}
+                    >
+                      <span className="f-s">Beheer</span>
+                    </PrimaryButton>
+                  </td>
+                  <td>
+                    <PrimaryButton
+                      onClick={() =>
+                        handleManageStudentJoinRequests(classItem.id)
+                      }
+                    >
+                      <span className="f-s">Beheer</span>
+                    </PrimaryButton>
                   </td>
                 </tr>
-              ) : (
-                classes.map((classItem: ClassItem) => (
-                  <tr key={classItem.id} className="py-2">
-                    <td className="py-3">
-                      <PrimaryButton
-                        onClick={() =>
-                          navigate(`/teacher/classes/${classItem.id}`)
-                        }
-                      >
-                        Beheer
-                      </PrimaryButton>
-                    </td>
-                    <td className="py-3">{classItem.name}</td>
-                    <td className="py-3">{classItem.code}</td>
-                    <td className="py-3">
-                      <PrimaryButton
-                        onClick={() => handleTeacherInvite(classItem.id)}
-                      >
-                        Beheer
-                      </PrimaryButton>
-                    </td>
-                    <td className="py-3">
-                      <PrimaryButton
-                        onClick={() => handleStudentInvite(classItem.id)}
-                      >
-                        Beheer
-                      </PrimaryButton>
-                    </td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>
       ) : (
         !isLoading && <p>Geen klassen gevonden.</p>
-        </div>
       )}
 
       {/* Modal voor teacher invites */}
