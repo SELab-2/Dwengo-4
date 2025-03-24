@@ -216,6 +216,16 @@ describe('Feedback tests', (): void => {
             expect(body.error).toEqual("Feedback not found");
         });
 
+        it("Should respond with a `500` status when the ID is not a number", async (): Promise<void> => {
+            // Check if this returns a 404 when searching for feedback that does not yet exist
+            const {status, body} = await request(app)
+                .get(`/teacher/feedback/submission/notANumber`)
+                .set('Authorization', `Bearer ${teacher.token}`);
+
+            expect(status).toBe(500);
+            expect(body.error).toEqual("Failed to retrieve feedback");
+        });
+
         it("Should respond with a `401` status meaning a student not allowed to fetch feedback for a submission", async (): Promise<void> => {
 
             // We first need to create feedback for a submission
