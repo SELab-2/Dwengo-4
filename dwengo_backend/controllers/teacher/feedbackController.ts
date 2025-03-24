@@ -74,8 +74,8 @@ export default class FeedbackController {
             const submissionId: number = Number(req.params.submissionId);
             const teacherId: number = getUserFromAuthRequest(req).id;
 
-            await service.deleteFeedbackForSubmission(submissionId, teacherId);
-            res.json({message: "Feedback deleted"});
+            const updatedFeedback: Feedback = await service.deleteFeedbackForSubmission(submissionId, teacherId);
+            res.status(200).json(updatedFeedback);
         } catch (error) {
             res.status(500).json({error: "Failed to delete feedback"});
         }

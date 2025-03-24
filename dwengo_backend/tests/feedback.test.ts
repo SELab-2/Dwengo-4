@@ -274,8 +274,6 @@ describe('Feedback tests', (): void => {
                 .get(`/teacher/feedback/assignment/${passedAssignmentId}/evaluation/${evalId}`)
                 .set('Authorization', `Bearer ${teacher.token}`);
 
-            console.log(body)
-
             expect(status).toBe(200);
             expect(body).toEqual(
                 expect.arrayContaining([
@@ -295,6 +293,17 @@ describe('Feedback tests', (): void => {
             );
         });
     });
+
+    describe('PATCH /teacher/feedback/submission/:submissionId', (): void => {
+        it("Should respond with a `203` status code and the updated feedback", async (): Promise<void> => {
+
+            const { status, body } = await request(app)
+                .patch(`/teacher/feedback/submission/:submissionId`)
+                .set('Authorization', `Bearer ${student.token}`);
+
+            expect(status).toBe(203);
+        })
+    })
 });
 
 async function findFeedback(id: number): Promise<Feedback | null> {
