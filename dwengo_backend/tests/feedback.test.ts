@@ -162,9 +162,7 @@ describe('Feedback tests', (): void => {
             let feedback: Feedback | null = await findFeedback(onGoingAssignmentSubmissionId);
             expect(feedback).toBeNull();
         });
-    });
 
-    describe('POST /teacher/feedback/submission/:submissionId', (): void => {
         it("Should respond with a `401` status (UnauthorizedError)", async (): Promise<void> => {
             // In deze test wordt nagegaan dat je geen feedback kunt geven als student
             const { status, body } = await request(app)
@@ -178,9 +176,7 @@ describe('Feedback tests', (): void => {
             let feedback: Feedback | null = await findFeedback(passedAssignmentSubmissionId);
             expect(feedback).toBeNull();
         });
-    });
 
-    describe('POST /teacher/feedback/submission/:submissionId', (): void => {
         it("Should respond with a `201` status and the created feedback", async (): Promise<void> => {
             const { status, body } = await request(app)
                 .post(`/teacher/feedback/submission/${passedAssignmentSubmissionId}`)
@@ -198,14 +194,40 @@ describe('Feedback tests', (): void => {
 
     describe('GET /teacher/feedback/submission/:submissionId', (): void => {
         it("Should respond with a `201` status and the fetched feedback", async (): Promise<void> => {
-            // You should still be able to request feedback from submissions whose deadline has already passed
+
+            // We first need to create feedback for a submission
+            await giveFeedbackToSubmission(passedAssignmentSubmissionId, teacherId, "Goede oplossing!");
+
             const {status, body} = await request(app)
                 .get(`/teacher/feedback/submission/${passedAssignmentSubmissionId}`)
                 .set('Authorization', `Bearer ${teacher.token}`);
 
-            expect(status).toBe(201);
+            expect(status).toBe(200);
             expectCorrectFeedbackBody(body);
-        })
+        });
+
+        it("Should respond with a `404` status and saying it found no feedback", async (): Promise<void> => {
+            // Check if this returns a 404 when searching for feedback that does not yet exist
+            const {status, body} = await request(app)
+                .get(`/teacher/feedback/submission/${passedAssignmentSubmissionId}`)
+                .set('Authorization', `Bearer ${teacher.token}`);
+
+            expect(status).toBe(404);
+            expect(body.error).toEqual("Feedback not found");
+        });
+
+        it("Should respond with a `401` status meaning a student not allowed to fetch feedback for a submission", async (): Promise<void> => {
+
+            // We first need to create feedback for a submission
+            await giveFeedbackToSubmission(passedAssignmentSubmissionId, teacherId, "Goede oplossing!");
+
+            const {status, body} = await request(app)
+                .get(`/teacher/feedback/submission/${passedAssignmentSubmissionId}`)
+                .set('Authorization', `Bearer ${student.token}`);
+
+            expect(status).toBe(401);
+            expect(body.error).toEqual("Leerkracht niet gevonden.");
+        });
     });
 });
 

@@ -43,7 +43,7 @@ export default class FeedbackController {
 
             const feedback: Feedback | null = await service.getFeedbackForSubmission(submissionId, teacherId);
             if (feedback) {
-                res.json(feedback);
+                res.status(200).json(feedback);
             } else {
                 res.status(404).json({error: "Feedback not found"});
             }
