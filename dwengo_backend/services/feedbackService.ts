@@ -1,4 +1,4 @@
-import {Assignment, Feedback, PrismaClient} from '@prisma/client';
+import {Assignment, Feedback, PrismaClient, Teacher} from '@prisma/client';
 
 
 const prisma = new PrismaClient();
@@ -96,9 +96,9 @@ export default class FeedbackService {
 
     }
 
-    static async hasAssignmentRights(assignmentId: number, teacherId: number) {
+    static async hasAssignmentRights(assignmentId: number, teacherId: number): Promise<boolean> {
         // Tel aantal leerkrachten die rechten hebben op de evaluatie
-        const teacherWithRights = await prisma.teacher.findFirst({
+        const teacherWithRights: Teacher | null = await prisma.teacher.findFirst({
             where: {
                 userId: teacherId,
                 teaches: {
@@ -121,7 +121,7 @@ export default class FeedbackService {
         return teacherWithRights !== null;
     }
 
-    static async hasSubmissionRights(teacherId: number, submissionId: number) {
+    static async hasSubmissionRights(teacherId: number, submissionId: number): Promise<boolean> {
         // Tel aantal leerkrachten die rechten hebben op de submission
         const teacherWithRights: number = await prisma.teacher.count({
             where: {

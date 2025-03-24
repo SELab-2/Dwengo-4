@@ -34,6 +34,8 @@ export default class FeedbackController {
 
     }
 
+    // route: "/teacher/feedback/submission/:submissionId"
+    // http-command: GET
     static async getFeedbackForSubmission(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const submissionId: number = Number(req.params.submissionId);
