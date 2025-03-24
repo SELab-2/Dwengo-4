@@ -5,14 +5,17 @@ import {AuthenticatedRequest} from "../../interfaces/extendedTypeInterfaces";
 import {getUserFromAuthRequest} from "../../helpers/getUserFromAuthRequest";
 
 export default class FeedbackController {
+    // route: "/teacher/feedback/assignment/:assignmentId/evaluation/:evaluationId"
+    // http-command: GET
     static async getAllFeedbackForEvaluation(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const {assignmentId, evaluationId} = req.params;
             const teacherId: number = getUserFromAuthRequest(req).id;
 
             const feedback: Feedback[] = await service.getAllFeedbackForEvaluation(Number(assignmentId), evaluationId, teacherId);
-            res.json(feedback);
+            res.status(200).json(feedback);
         } catch (error) {
+            console.log(error);
             res.status(500).json({error: "Failed to retrieve feedback"});
         }
     }

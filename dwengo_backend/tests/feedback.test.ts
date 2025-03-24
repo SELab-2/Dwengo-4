@@ -193,7 +193,7 @@ describe('Feedback tests', (): void => {
     });
 
     describe('GET /teacher/feedback/submission/:submissionId', (): void => {
-        it("Should respond with a `201` status and the fetched feedback", async (): Promise<void> => {
+        it("Should respond with a `200` status and the fetched feedback", async (): Promise<void> => {
 
             // We first need to create feedback for a submission
             await giveFeedbackToSubmission(passedAssignmentSubmissionId, teacherId, "Goede oplossing!");
@@ -233,6 +233,28 @@ describe('Feedback tests', (): void => {
 
             const {status, body} = await request(app)
                 .get(`/teacher/feedback/submission/${passedAssignmentSubmissionId}`)
+                .set('Authorization', `Bearer ${student.token}`);
+
+            expect(status).toBe(401);
+            expect(body.error).toEqual("Leerkracht niet gevonden.");
+        });
+    });
+
+    describe('GET /teacher/feedback/assignment/:assignmentId/evaluation/:evaluationId', (): void => {
+        it("Should respond with a `500` status (the teacher can only access feedback from assignments that are given to classes he teaches)", async (): Promise<void> => {
+
+            const { status, body } = await request(app)
+                .get(`/teacher/feedback/assignment/${passedAssignmentSubmissionId}/evaluation/${evalId}`)
+                .set('Authorization', `Bearer ${teacher.token}`);
+
+            expect(status).toBe(500);
+            expect(body.error).toEqual("Failed to retrieve feedback");
+        });
+
+        it("Should respond with a `404` status when a student tries to access the information", async (): Promise<void> => {
+
+            const { status, body } = await request(app)
+                .get(`/teacher/feedback/assignment/${passedAssignmentSubmissionId}/evaluation/${evalId}`)
                 .set('Authorization', `Bearer ${student.token}`);
 
             expect(status).toBe(401);
