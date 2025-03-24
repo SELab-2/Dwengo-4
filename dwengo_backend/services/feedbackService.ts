@@ -115,8 +115,7 @@ export default class FeedbackService {
                     }
                 }
             }
-        }
-        );
+        });
 
         return teacherWithRights !== null;
     }

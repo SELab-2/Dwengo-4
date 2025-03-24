@@ -243,8 +243,9 @@ describe('Feedback tests', (): void => {
     describe('GET /teacher/feedback/assignment/:assignmentId/evaluation/:evaluationId', (): void => {
         it("Should respond with a `500` status (the teacher can only access feedback from assignments that are given to classes he teaches)", async (): Promise<void> => {
 
+            const assignmentIdFromOtherClass = 123;
             const { status, body } = await request(app)
-                .get(`/teacher/feedback/assignment/${passedAssignmentSubmissionId}/evaluation/${evalId}`)
+                .get(`/teacher/feedback/assignment/${assignmentIdFromOtherClass}/evaluation/${evalId}`)
                 .set('Authorization', `Bearer ${teacher.token}`);
 
             expect(status).toBe(500);
@@ -263,19 +264,35 @@ describe('Feedback tests', (): void => {
 
         it("Should respond with a `200` status and all the feedback for an assignment and evaluation combination", async (): Promise<void> => {
 
-            const classes: any = await prisma.class.findMany({
-                include: {
-                    assignments: true
-                }
-            });
-            console.log(classes);
-            console.log(classes[0].assignments)
+            // We first need to create feedback for a submission
+            await giveFeedbackToSubmission(passedAssignmentSubmissionId, teacherId, "Netjes!");
+            // Now we create an extra submission to the list will be 2 items long
+            const newSubmission: Submission = await createSubmission(evalId, teamId, passedAssignmentId);
+            await giveFeedbackToSubmission(newSubmission.submissionId, teacherId, "Goed gedaan!");
 
             const { status, body } = await request(app)
-                .get(`/teacher/feedback/assignment/${passedAssignmentSubmissionId}/evaluation/${evalId}`)
+                .get(`/teacher/feedback/assignment/${passedAssignmentId}/evaluation/${evalId}`)
                 .set('Authorization', `Bearer ${teacher.token}`);
 
+            console.log(body)
+
             expect(status).toBe(200);
+            expect(body).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        submissionId: expect.any(Number),
+                        teacherId: expect.any(Number),
+                        description: expect.any(String),
+                        submission: expect.objectContaining({
+                            submissionId: expect.any(Number),
+                            evaluationId: expect.any(String),
+                            teamId: expect.any(Number),
+                            submitted: expect.any(String),
+                            assignmentId: expect.any(Number),
+                        }),
+                    }),
+                ])
+            );
         });
     });
 });
