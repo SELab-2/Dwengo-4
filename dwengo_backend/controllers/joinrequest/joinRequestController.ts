@@ -64,5 +64,5 @@ export const getJoinRequestsByClass = handleRequest(async (req: AuthenticatedReq
     const classId: number = parseInt(req.params.classId);
     const teacherId: number = getUserFromAuthRequest(req).id;
     const joinRequests: JoinRequest[] = await joinRequestService.getJoinRequestsByClass(teacherId, classId);
-    res.status(200).json({ joinRequests });
+    res.status(200).json(joinRequests);
 });

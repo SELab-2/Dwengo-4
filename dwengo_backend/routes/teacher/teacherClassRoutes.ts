@@ -1,6 +1,7 @@
 import express from "express";
 import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 import {
+<<<<<<< HEAD
     createClassroom,
     deleteClassroom,
     getJoinLink,
@@ -28,6 +29,26 @@ import {
     updateInviteBodySchema,
     updateInviteParamsSchema,
 } from "../../zodSchemas/inviteSchemas";
+=======
+  createClassroom,
+  deleteClassroom,
+  getJoinLink,
+  regenerateJoinLink,
+  getClassrooms,
+  getClassroomStudents,
+} from '../../controllers/teacher/teacherClassController';
+import { 
+  createInvite,
+  getPendingInvitesForClass,
+  getPendingInvitesForTeacher,
+  updateInviteStatus,
+  deleteInvite
+} from '../../controllers/teacher/inviteController';
+import { 
+  getJoinRequestsByClass,
+  updateJoinRequestStatus
+} from '../../controllers/joinrequest/joinRequestController';
+>>>>>>> f28556a (teacher invite op email)
 
 const router = express.Router();
 
@@ -35,12 +56,21 @@ const router = express.Router();
 router.use(protectTeacher);
 
 // routes for classes
+<<<<<<< HEAD
 router.get("/", getTeacherClasses);
 router.post("/", createClassroom);
 router.delete("/:classId", deleteClassroom);
 router.get("/:classId/join-link", getJoinLink);
 router.patch("/:classId/regenerate-join-link", regenerateJoinLink);
 router.get("/:classId/students", getClassroomStudents);
+=======
+router.post("/", protectTeacher, createClassroom);
+router.get("/", protectTeacher, getClassrooms);
+router.delete("/:classId", protectTeacher, deleteClassroom);
+router.get("/:classId/join-link", protectTeacher, getJoinLink);
+router.patch("/:classId/regenerate-join-link", protectTeacher, regenerateJoinLink);
+router.get("/:classId/students", protectTeacher, getClassroomStudents);
+>>>>>>> f28556a (teacher invite op email)
 
 // routes for invites
 router.post(

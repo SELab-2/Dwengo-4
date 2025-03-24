@@ -8,12 +8,15 @@ import { BadRequestError } from "../../errors/errors";
 
 const APP_URL = process.env.APP_URL || "http://localhost:5000";
 
-export const isNameValid = (req: AuthenticatedRequest, res: Response): boolean => {
-    const { name } = req.body;
-    if (!name || typeof name !== "string" || name.trim() === "") {
-        throw new BadRequestError("Vul een geldige klasnaam in");
-    }
-    return true;
+export const isNameValid = (
+  req: AuthenticatedRequest,
+  res: Response
+): boolean => {
+  const { name } = req.body;
+  if (!name || typeof name !== "string" || name.trim() === "") {
+    throw new BadRequestError("Vul een geldige klasnaam in");
+  }
+  return true;
 };
 
 /**
@@ -22,11 +25,25 @@ export const isNameValid = (req: AuthenticatedRequest, res: Response): boolean =
  * returns a list of all classes in the response body
  */
 export const getTeacherClasses = asyncHandler(
-    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-        const teacherId: number = getUserFromAuthRequest(req).id;
-        const classes = await classService.getClassesByTeacher(teacherId);
-        res.status(200).json({ classes });
-    }
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const teacherId: number = getUserFromAuthRequest(req).id;
+    const classes = await classService.getClassesByTeacher(teacherId);
+    res.status(200).json({ classes });
+  }
+);
+
+/**
+ * Fetch all classrooms for the authenticated teacher
+ * @route GET /teacher/classes
+ * returns a list of all classrooms in the response body
+ */
+export const getClassrooms = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const teacherId: number = getUserFromAuthRequest(req).id;
+
+    const classrooms = await classService.getClassesByTeacher(teacherId);
+    res.status(200).json(classrooms);
+  }
 );
 
 /**
@@ -35,15 +52,15 @@ export const getTeacherClasses = asyncHandler(
  * returns the created class in the response body
  */
 export const createClassroom = asyncHandler(
-    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-        const { name } = req.body;
-        const teacherId: number = getUserFromAuthRequest(req).id;
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { name } = req.body;
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
-        isNameValid(req, res); // if invalid, an error is thrown
+    isNameValid(req, res); // if invalid, an error is thrown
 
-        const classroom = await classService.createClass(name, teacherId);
-        res.status(201).json({ message: "Klas aangemaakt", classroom });
-    }
+    const classroom = await classService.createClass(name, teacherId);
+    res.status(201).json({ message: "Klas aangemaakt", classroom });
+  }
 );
 
 /**
@@ -52,13 +69,13 @@ export const createClassroom = asyncHandler(
  * @param classId - id of the class to be deleted
  */
 export const deleteClassroom = asyncHandler(
-    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-        const classId: number = parseInt(req.params.classId);
-        const teacherId: number = getUserFromAuthRequest(req).id;
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const classId: number = parseInt(req.params.classId);
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
-        await classService.deleteClass(classId, teacherId);
-        res.status(200).json({ message: `Klas met id ${classId} verwijderd` });
-    }
+    await classService.deleteClass(classId, teacherId);
+    res.status(200).json({ message: `Klas met id ${classId} verwijderd` });
+  }
 );
 
 /**
@@ -68,15 +85,15 @@ export const deleteClassroom = asyncHandler(
  * returns the join link in the response body
  */
 export const getJoinLink = asyncHandler(
-    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-        const classId: number = parseInt(req.params.classId);
-        const teacherId: number = getUserFromAuthRequest(req).id;
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const classId: number = parseInt(req.params.classId);
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
-        const joinCode = await classService.getJoinCode(classId, teacherId);
+    const joinCode = await classService.getJoinCode(classId, teacherId);
 
-        const joinLink = `${APP_URL}/student/classes/join?joinCode=${joinCode}`;
-        res.status(200).json({ joinLink });
-    }
+    const joinLink = `${APP_URL}/student/classes/join?joinCode=${joinCode}`;
+    res.status(200).json({ joinLink });
+  }
 );
 
 /**
@@ -86,14 +103,17 @@ export const getJoinLink = asyncHandler(
  * returns the new join link in the response body
  */
 export const regenerateJoinLink = asyncHandler(
-    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-        const classId: number = parseInt(req.params.classId);
-        const teacherId: number = getUserFromAuthRequest(req).id;
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const classId: number = parseInt(req.params.classId);
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
-        const newJoinCode = await classService.regenerateJoinCode(classId, teacherId);
-        const joinLink = `${APP_URL}/student/classes/join?joinCode=${newJoinCode}`;
-        res.status(200).json({ joinLink });
-    }
+    const newJoinCode = await classService.regenerateJoinCode(
+      classId,
+      teacherId
+    );
+    const joinLink = `${APP_URL}/student/classes/join?joinCode=${newJoinCode}`;
+    res.status(200).json({ joinLink });
+  }
 );
 
 /**
@@ -103,15 +123,13 @@ export const regenerateJoinLink = asyncHandler(
  * returns a list of all students in the class in the response body
  */
 export const getClassroomStudents = asyncHandler(
-    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-        const classId: number = parseInt(req.params.classId);
-        const teacherId: number = getUserFromAuthRequest(req).id;
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const classId: number = parseInt(req.params.classId);
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
-        // include user details of the students
-        const students: (Student & { user: User })[] = await classService.getStudentsByClass(
-            classId,
-            teacherId
-        );
-        res.status(200).json({ students });
-    }
+    // include user details of the students
+    const students: (Student & { user: User })[] =
+      await classService.getStudentsByClass(classId, teacherId);
+    res.status(200).json({ students });
+  }
 );
