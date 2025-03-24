@@ -8,7 +8,7 @@ import {
 // ==== TEACHER ROUTES ==== //
 import RootLayoutTeacher from "../components/teacher/RootLayoutTeacher";
 import LoginTeacher from "../pages/teacher/LoginTeacher";
-import ClassesPage from "../pages/teacher/ClassesTeacher";
+import ClassesPageTeacher from "../pages/teacher/ClassesTeacher";
 import SignupTeacher from "../pages/teacher/SignupTeacher";
 import RootLayoutDashboardTeacher from "../components/teacher/RootLayoutDashboardTeacher";
 import {
@@ -21,6 +21,7 @@ import { action as teacherLogoutAction } from "../pages/teacher/LogoutTeacher";
 import RootLayoutStudent from "../components/student/RootLayoutStudent";
 import LoginStudent from "../pages/student/LoginStudent";
 import SignupStudent from "../pages/student/SignupStudent";
+import ClassesPageStudent from "../pages/student/ClassesStudent";
 import RootLayoutDashboardStudent from "../components/student/RootLayoutDashboardStudent";
 import {
   checkAuthLoader as studentCheckAuthLoader,
@@ -78,7 +79,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "klassen",
-            element: <ClassesPage></ClassesPage>,
+            element: <ClassesPageTeacher></ClassesPageTeacher>,
             loader: teacherCheckAuthLoader,
           },
         ],
@@ -119,6 +120,11 @@ export const router = createBrowserRouter([
             index: true,
             element: <h1>Home Student</h1>,
             loader: studentCheckAuthLoader,
+          },
+          {
+            path: "klassen",
+            element: <ClassesPageStudent></ClassesPageStudent>,
+            loader: teacherCheckAuthLoader,
           },
         ],
       },

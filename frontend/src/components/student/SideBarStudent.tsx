@@ -11,7 +11,7 @@ const SideBarStudent: React.FC = () => {
   };
 
   return (
-    <aside className={`py-20 px-30 bg-lg aside`}>
+    <aside className={`py-10 px-30 bg-lg aside`}>
        <div className="g-20">
           <h2>Student Dashboard</h2>
           <nav className="navLinks">

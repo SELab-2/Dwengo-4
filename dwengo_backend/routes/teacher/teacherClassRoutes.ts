@@ -5,6 +5,7 @@ import {
   deleteClassroom,
   getJoinLink,
   regenerateJoinLink,
+  getClassrooms,
   getClassroomStudents,
 } from '../../controllers/teacher/teacherClassController';
 import { 
@@ -26,6 +27,7 @@ router.use(protectTeacher);
 
 // routes for classes
 router.post("/", protectTeacher, createClassroom);
+router.get("/", protectTeacher, getClassrooms);
 router.delete("/:classId", protectTeacher, deleteClassroom);
 router.get("/:classId/join-link", protectTeacher, getJoinLink);
 router.patch("/:classId/regenerate-join-link", protectTeacher, regenerateJoinLink);

@@ -10,7 +10,7 @@ const SideBarTeacher: React.FC = () => {
     submit(null, { action: "/teacher/logout", method: "post" });
   };
   return (
-    <aside className={`py-20 px-30 bg-lg aside`}>
+    <aside className={`py-10 px-30 bg-lg aside`}>
       <div className="g-20">
         <h2>Teacher Dashboard</h2>
         <nav className="navLinks">

@@ -20,6 +20,20 @@ export const isNameValid = (
 };
 
 /**
+ * Fetch all classrooms for the authenticated teacher
+ * @route GET /teacher/classes
+ * returns a list of all classrooms in the response body
+ */
+export const getClassrooms = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const teacherId: number = getUserFromAuthRequest(req).id;
+
+    const classrooms = await classService.getClassesByTeacher(teacherId);
+    res.status(200).json(classrooms);
+  }
+);
+
+/**
  * Create classroom
  * @route POST /teacher/classes
  * returns the created class in the response body
