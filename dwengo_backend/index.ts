@@ -28,7 +28,7 @@ import teacherTeamsRoutes from "./routes/teacher/teacherTeamsRoutes";
 dotenv.config();
 
 const app: Express = express();
-const swaggerDocument = YAML.load("./openapi3_0.yaml");
+const swaggerDocument: any = YAML.load("./openapi3_0.yaml");
 
 // Stel CORS-headers in
 app.use((req: Request, res: Response, next: NextFunction): void => {
@@ -36,7 +36,7 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
     "https://dwengo.org",
     "http://localhost:5173",
   ];
-  const origin = req.headers.origin;
+  const origin: string | undefined = req.headers.origin;
   if (origin && allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
@@ -105,7 +105,7 @@ app.use(errorHandler);
 if (process.env.NODE_ENV !== "test") {
   console.log(process.env.NODE_ENV);
   const PORT: string | number = process.env.PORT || 5000;
-  app.listen(PORT, () => console.log(`Server draait op poort ${PORT}`));
+  app.listen(PORT, (): void => console.log(`Server draait op poort ${PORT}`));
 }
 
 export default app;
