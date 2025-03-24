@@ -29,7 +29,6 @@ export default class FeedbackController {
             const feedback: Feedback = await service.createFeedback(submissionId, teacherId, description);
             res.status(201).json(feedback);
         } catch (error) {
-            console.log(error);
             res.status(500).json({error: "Failed to create feedback"});
         }
 

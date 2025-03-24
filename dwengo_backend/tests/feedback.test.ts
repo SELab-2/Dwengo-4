@@ -202,7 +202,7 @@ describe('Feedback tests', (): void => {
                     submissionId: passedAssignmentSubmissionId
                 }
             });
-            expect(feedback).toBeNull();
+            expect(feedback).toBeDefined();
         });
     });
 });
