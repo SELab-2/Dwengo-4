@@ -252,7 +252,7 @@ describe('Feedback tests', (): void => {
             expect(body.error).toEqual("Failed to retrieve feedback");
         });
 
-        it("Should respond with a `404` status when a student tries to access the information", async (): Promise<void> => {
+        it("Should respond with a `401` status when a student tries to access the information", async (): Promise<void> => {
 
             const { status, body } = await request(app)
                 .get(`/teacher/feedback/assignment/${passedAssignmentSubmissionId}/evaluation/${evalId}`)
@@ -295,14 +295,40 @@ describe('Feedback tests', (): void => {
     });
 
     describe('PATCH /teacher/feedback/submission/:submissionId', (): void => {
-        it("Should respond with a `203` status code and the updated feedback", async (): Promise<void> => {
+        it("Should respond with a `401` status code (Unauthorized user - student)", async (): Promise<void> => {
 
             const { status, body } = await request(app)
                 .patch(`/teacher/feedback/submission/:submissionId`)
                 .set('Authorization', `Bearer ${student.token}`);
 
-            expect(status).toBe(203);
-        })
+            expect(status).toBe(401);
+            expect(body.error).toEqual("Leerkracht niet gevonden.");
+        });
+
+        it("Should respond with a `500` status code when the submissionID is not valid", async (): Promise<void> => {
+
+            const { status, body } = await request(app)
+                .patch(`/teacher/feedback/submission/invalidSubmissionId`)
+                .set('Authorization', `Bearer ${teacher.token}`);
+
+            expect(status).toBe(500);
+            expect(body.error).toEqual("Failed to update feedback");
+        });
+
+        it("Should respond with a `200` status code and the updated feedback", async (): Promise<void> => {
+
+            // We first need to create feedback for a submission
+            await giveFeedbackToSubmission(passedAssignmentSubmissionId, teacherId, "Netjes!");
+
+            const { status, body } = await request(app)
+                .patch(`/teacher/feedback/submission/${passedAssignmentSubmissionId}`)
+                .set('Authorization', `Bearer ${teacher.token}`)
+                .send({description: "Zeer netjes!"});
+
+            expect(status).toBe(200);
+            expectCorrectFeedbackBody(body);
+            expect(body.description).toEqual("Zeer netjes!");
+        });
     })
 });
 
