@@ -24,6 +24,8 @@ import request from "supertest";
 import prisma from "./helpers/prisma";
 
 describe('Feedback tests', (): void => {
+    const dayInMilliseconds: number = 1000 * 60 * 60 * 24;
+
     let teacher: User & { teacher: Teacher, token: string };
     let teacherId: number;
 
@@ -105,7 +107,7 @@ describe('Feedback tests', (): void => {
         teamId = team.id;
 
         // Create an assignment to give to a team
-        const deadline = new Date(Date.now() + 1000 * 60 * 60 * 24); // Add 1 day
+        const deadline = new Date(Date.now() + dayInMilliseconds); // Add 1 day
         onGoingAssignment = await createAssignment(
             classroomId,
             learningPath.id,
@@ -125,7 +127,7 @@ describe('Feedback tests', (): void => {
         onGoingAssignmentSubmissionId = submissionForOnGoingAssignment.submissionId;
 
         // Create an assigment whose deadline has already passed
-        const passedDeadline = new Date(Date.now() - 1000 * 60 * 60 * 24); // Subtract a day
+        const passedDeadline = new Date(Date.now() - dayInMilliseconds); // Subtract a day
         passedAssignment = await createAssignment(
             classroomId,
             learningPath.id,
@@ -157,11 +159,7 @@ describe('Feedback tests', (): void => {
             expect(body.error).toEqual("Failed to create feedback");
 
             // Gaat na dat er geen feedback is aangemaakt
-            let feedback: Feedback | null = await prisma.feedback.findUnique({
-                where: {
-                    submissionId: onGoingAssignmentSubmissionId
-                }
-            });
+            let feedback: Feedback | null = await findFeedback(onGoingAssignmentSubmissionId);
             expect(feedback).toBeNull();
         });
     });
@@ -177,11 +175,7 @@ describe('Feedback tests', (): void => {
             expect(body.error).toEqual("Leerkracht niet gevonden.");
 
             // Gaat na dat er geen feedback is aangemaakt
-            let feedback: Feedback | null = await prisma.feedback.findUnique({
-                where: {
-                    submissionId: passedAssignmentSubmissionId
-                }
-            });
+            let feedback: Feedback | null = await findFeedback(passedAssignmentSubmissionId);
             expect(feedback).toBeNull();
         });
     });
@@ -196,16 +190,20 @@ describe('Feedback tests', (): void => {
             expect(status).toBe(201);
             expectCorrectFeedbackBody(body);
 
-            // Gaat na dat er geen feedback is aangemaakt
-            let feedback: Feedback | null = await prisma.feedback.findUnique({
-                where: {
-                    submissionId: passedAssignmentSubmissionId
-                }
-            });
+            // Gaat na dat de feedback is aangemaakt
+            let feedback: Feedback | null = await findFeedback(passedAssignmentSubmissionId);
             expect(feedback).toBeDefined();
         });
     });
 });
+
+async function findFeedback(id: number): Promise<Feedback | null> {
+    return prisma.feedback.findUnique({
+        where: {
+            submissionId: id
+        }
+    });
+}
 
 function expectCorrectFeedbackBody(body: any): void {
     expect(body).toEqual({
