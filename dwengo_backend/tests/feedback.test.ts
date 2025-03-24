@@ -195,6 +195,18 @@ describe('Feedback tests', (): void => {
             expect(feedback).toBeDefined();
         });
     });
+
+    describe('GET /teacher/feedback/submission/:submissionId', (): void => {
+        it("Should respond with a `201` status and the fetched feedback", async (): Promise<void> => {
+            // You should still be able to request feedback from submissions whose deadline has already passed
+            const {status, body} = await request(app)
+                .get(`/teacher/feedback/submission/${passedAssignmentSubmissionId}`)
+                .set('Authorization', `Bearer ${teacher.token}`);
+
+            expect(status).toBe(201);
+            expectCorrectFeedbackBody(body);
+        })
+    });
 });
 
 async function findFeedback(id: number): Promise<Feedback | null> {
