@@ -364,9 +364,7 @@ describe('Feedback tests', (): void => {
             })
             expect(feedback).toBeNull();
         });
-    });
 
-    describe('DELETE /teacher/feedback/submission/:submissionId', (): void => {
         it("Should respond with a `500` status code when trying to delete feedback that doesn't exist", async (): Promise<void> => {
 
             const { status, body } = await request(app)
@@ -376,9 +374,7 @@ describe('Feedback tests', (): void => {
             expect(status).toBe(500);
             expect(body.error).toEqual("Failed to delete feedback");
         });
-    });
 
-    describe('DELETE /teacher/feedback/submission/:submissionId', (): void => {
         it("Should respond with a `500` status code when :submissionId is not valid", async (): Promise<void> => {
 
             const { status, body } = await request(app)
@@ -388,9 +384,7 @@ describe('Feedback tests', (): void => {
             expect(status).toBe(500);
             expect(body.error).toEqual("Failed to delete feedback");
         });
-    });
 
-    describe('DELETE /teacher/feedback/submission/:submissionId', (): void => {
         it("Should respond with a `401` status code when a student tries to delete something", async (): Promise<void> => {
 
             const { status, body } = await request(app)
