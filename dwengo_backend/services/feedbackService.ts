@@ -121,8 +121,8 @@ export default class FeedbackService {
     }
 
     static async hasSubmissionRights(teacherId: number, submissionId: number): Promise<boolean> {
-        // Tel aantal leerkrachten die rechten hebben op de submission
-        const teacherWithRights: number = await prisma.teacher.count({
+        // Ga na of de leerkracht rechten heeft op de submission
+        const teacherWithRights: Teacher | null = await prisma.teacher.findFirst({
             where: {
                 userId: teacherId,
                 teaches: {
@@ -147,6 +147,6 @@ export default class FeedbackService {
         );
 
         // Return true als teacher rechten heeft
-        return teacherWithRights > 0;
+        return teacherWithRights !== null;
     }
 }

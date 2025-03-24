@@ -355,6 +355,14 @@ describe('Feedback tests', (): void => {
             expect(status).toBe(204);
             // Should match an empty object since we return nothing (status code 204)
             expect(body).toStrictEqual({});
+
+            // Double-check the feedback was removed
+            const feedback: Feedback | null = await prisma.feedback.findFirst({
+                where: {
+                    submissionId: passedAssignmentSubmissionId
+                }
+            })
+            expect(feedback).toBeNull();
         });
     });
 
@@ -367,6 +375,30 @@ describe('Feedback tests', (): void => {
 
             expect(status).toBe(500);
             expect(body.error).toEqual("Failed to delete feedback");
+        });
+    });
+
+    describe('DELETE /teacher/feedback/submission/:submissionId', (): void => {
+        it("Should respond with a `500` status code when :submissionId is not valid", async (): Promise<void> => {
+
+            const { status, body } = await request(app)
+                .delete(`/teacher/feedback/submission/invalidId`)
+                .set('Authorization', `Bearer ${teacher.token}`);
+
+            expect(status).toBe(500);
+            expect(body.error).toEqual("Failed to delete feedback");
+        });
+    });
+
+    describe('DELETE /teacher/feedback/submission/:submissionId', (): void => {
+        it("Should respond with a `401` status code when a student tries to delete something", async (): Promise<void> => {
+
+            const { status, body } = await request(app)
+                .delete(`/teacher/feedback/submission/${passedAssignmentSubmissionId}`)
+                .set('Authorization', `Bearer ${student.token}`);
+
+            expect(status).toBe(401);
+            expect(body.error).toEqual("Leerkracht niet gevonden.");
         });
     });
 });
