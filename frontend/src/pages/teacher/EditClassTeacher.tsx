@@ -7,7 +7,7 @@ import InputWithChecks from '../../components/shared/InputWithChecks';
 import PrimaryButton from '../../components/shared/PrimaryButton';
 import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButton';
 import { validateRequired, validateForm } from '../../util/shared/validation';
-import NavButton from '../../components/shared/NavButton';
+import NavButtont from '../../components/shared/NavButton';
 
 //husky testttt
 
