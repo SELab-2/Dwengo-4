@@ -9,7 +9,7 @@ import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButt
 import { validateRequired, validateForm } from '../../util/shared/validation';
 import NavButton from '../../components/shared/NavButton';
 
-//husky testtt
+//husky testttt
 
 interface ClassDetails {
   id: string;

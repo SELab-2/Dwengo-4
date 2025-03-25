@@ -1,13 +1,9 @@
-// eslint.config.js
 import globals from "globals";
 import js from "@eslint/js";
 import prettierConfig from "eslint-config-prettier";
 
 export default [
-  // 1. First apply recommended config
   js.configs.recommended,
-
-  // 2. Then apply your customizations (overrides recommended rules)
   {
     files: ["**/*.{js,ts}"],
     languageOptions: {
@@ -18,10 +14,17 @@ export default [
       },
     },
     rules: {
-      "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      "no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+      // New rule: Report unused ES6 imports
+      "no-unused-imports/no-unused-imports": "error",
     },
   },
-
-  // 3. Finally apply Prettier compatibility (should come last)
   prettierConfig,
 ];
