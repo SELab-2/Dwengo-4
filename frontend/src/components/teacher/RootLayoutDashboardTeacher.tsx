@@ -29,12 +29,10 @@ function RootLayoutDashboardTeacher() {
     }, tokenDuration);
   }, [token, submit]);
   return (
-    <div className={styles.wrapper}>
-      <main>
-        {/* {navigation.state === 'loading' && <p>Loading...</p>} */}
-        <Outlet />
-      </main>
-    </div>
+    <main>
+      {/* {navigation.state === 'loading' && <p>Loading...</p>} */}
+      <Outlet />
+    </main>
   );
 }
 
