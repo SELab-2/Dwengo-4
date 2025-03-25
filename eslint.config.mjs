@@ -1,11 +1,16 @@
 import globals from "globals";
 import js from "@eslint/js";
 import prettierConfig from "eslint-config-prettier";
+import unusedImports from "eslint-plugin-unused-imports"; // <– Add this import
 
 export default [
   js.configs.recommended,
   {
     files: ["**/*.{js,ts}"],
+    // Add plugin to the configuration object
+    plugins: {
+      "unused-imports": unusedImports, // <– Register the plugin
+    },
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: "module",
@@ -22,8 +27,8 @@ export default [
           caughtErrorsIgnorePattern: "^_",
         },
       ],
-      // New rule: Report unused ES6 imports
-      "no-unused-imports/no-unused-imports": "error",
+      // Reference the rule correctly using the registered plugin name
+      "unused-imports/no-unused-imports": "error", // <– Fixed reference
     },
   },
   prettierConfig,
