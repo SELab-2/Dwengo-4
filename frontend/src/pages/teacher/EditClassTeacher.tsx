@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import Container from "../../components/shared/Container";
-import BoxBorder from "../../components/shared/BoxBorder";
-import InputWithChecks from "../../components/shared/InputWithChecks";
-import PrimaryButton from "../../components/shared/PrimaryButton";
-import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
-import { validateRequired, validateForm } from "../../util/shared/validation";
-import NavButton from "../../components/shared/NavButton";
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import Container from '../../components/shared/Container';
+import BoxBorder from '../../components/shared/BoxBorder';
+import InputWithChecks from '../../components/shared/InputWithChecks';
+import PrimaryButton from '../../components/shared/PrimaryButton';
+import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButton';
+import { validateRequired, validateForm } from '../../util/shared/validation';
+import NavButton from '../../components/shared/NavButton';
 
 interface ClassDetails {
   id: string;
@@ -21,18 +21,18 @@ interface InputWithChecksRef {
 }
 
 // Define sidebar navigation sections
-type SidebarSection = "overview" | "assignments" | "questions" | "manage";
+type SidebarSection = 'overview' | 'assignments' | 'questions' | 'manage';
 
 const EditClassTeacher: React.FC = () => {
   const { classId } = useParams<{ classId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [className, setClassName] = useState("");
+  const [className, setClassName] = useState('');
   const classNameRef = React.useRef<InputWithChecksRef | null>(null);
 
   // Add state for active sidebar section
   const [activeSection, setActiveSection] =
-    useState<SidebarSection>("overview");
+    useState<SidebarSection>('overview');
 
   // Fetch class details
   const {
@@ -41,53 +41,53 @@ const EditClassTeacher: React.FC = () => {
     isError,
     error,
   } = useQuery<ClassDetails>({
-    queryKey: ["class", classId],
+    queryKey: ['class', classId],
     queryFn: async () => {
       try {
-        console.log("Fetching class with ID:", classId);
+        console.log('Fetching class with ID:', classId);
 
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/teacher/classes`,
           {
-            method: "GET",
+            method: 'GET',
             headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
             },
-          }
+          },
         );
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error("API Error:", response.status, errorText);
+          console.error('API Error:', response.status, errorText);
           throw new Error(
-            `Er is iets misgegaan bij het ophalen van de klasgegevens. Status: ${response.status}`
+            `Er is iets misgegaan bij het ophalen van de klasgegevens. Status: ${response.status}`,
           );
         }
 
         const data = await response.json();
-        console.log("All classes data:", data);
+        console.log('All classes data:', data);
 
         const classes = data.classrooms || [];
-        console.log("Classes array:", classes);
+        console.log('Classes array:', classes);
 
         // Convert classId to string for comparison if needed
         const targetClassId = classId;
-        console.log("Looking for class with ID:", targetClassId);
+        console.log('Looking for class with ID:', targetClassId);
 
         const targetClass = classes.find(
-          (c: any) => String(c.id) === String(targetClassId)
+          (c: any) => String(c.id) === String(targetClassId),
         );
-        console.log("Found class:", targetClass);
+        console.log('Found class:', targetClass);
 
         if (!targetClass) {
-          console.error("Class not found in the list of classes");
+          console.error('Class not found in the list of classes');
           throw new Error(`Klas met ID ${targetClassId} niet gevonden`);
         }
 
         return targetClass;
       } catch (error) {
-        console.error("Error in queryFn:", error);
+        console.error('Error in queryFn:', error);
         throw error;
       }
     },
@@ -99,35 +99,35 @@ const EditClassTeacher: React.FC = () => {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/teacher/classes/${classId}`,
         {
-          method: "PATCH",
+          method: 'PATCH',
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
           body: JSON.stringify({ name: newName }),
-        }
+        },
       );
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
           errorData.message ||
-            "Er is iets misgegaan bij het bijwerken van de klasnaam."
+            'Er is iets misgegaan bij het bijwerken van de klasnaam.',
         );
       }
 
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["classes"] });
-      queryClient.invalidateQueries({ queryKey: ["class", classId] });
-      navigate("/teacher/classes");
+      queryClient.invalidateQueries({ queryKey: ['classes'] });
+      queryClient.invalidateQueries({ queryKey: ['class', classId] });
+      navigate('/teacher/classes');
     },
   });
 
   useEffect(() => {
     if (classData) {
-      console.log("Setting class name from data:", classData.name);
+      console.log('Setting class name from data:', classData.name);
       setClassName(classData.name);
     }
   }, [classData]);
@@ -144,33 +144,33 @@ const EditClassTeacher: React.FC = () => {
   const handleDeleteClass = async () => {
     if (
       window.confirm(
-        "Weet je zeker dat je deze klas wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt."
+        'Weet je zeker dat je deze klas wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.',
       )
     ) {
       try {
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/teacher/classes/${classId}`,
           {
-            method: "DELETE",
+            method: 'DELETE',
             headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
             },
-          }
+          },
         );
 
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(
             errorData.message ||
-              "Er is iets misgegaan bij het verwijderen van de klas."
+              'Er is iets misgegaan bij het verwijderen van de klas.',
           );
         }
 
-        queryClient.invalidateQueries({ queryKey: ["classes"] });
-        navigate("/teacher/classes");
+        queryClient.invalidateQueries({ queryKey: ['classes'] });
+        navigate('/teacher/classes');
       } catch (error) {
-        console.error("Fout bij het verwijderen van de klas:", error);
+        console.error('Fout bij het verwijderen van de klas:', error);
       }
     }
   };
@@ -194,8 +194,8 @@ const EditClassTeacher: React.FC = () => {
         onClick={() => onClick(section)}
         className={`px-7 h-10 font-bold rounded-md ${
           isActive
-            ? "bg-dwengo-green-darker pt-1 text-white border-gray-600 border-3"
-            : "pt-1.5 bg-dwengo-green hover:bg-dwengo-green-dark text-white "
+            ? 'bg-dwengo-green-darker pt-1 text-white border-gray-600 border-3'
+            : 'pt-1.5 bg-dwengo-green hover:bg-dwengo-green-dark text-white '
         }`}
       >
         {label}
@@ -217,7 +217,7 @@ const EditClassTeacher: React.FC = () => {
 
   const renderContent = () => {
     switch (activeSection) {
-      case "overview":
+      case 'overview':
         return (
           <>
             <Container>
@@ -267,27 +267,27 @@ const EditClassTeacher: React.FC = () => {
                           import.meta.env.VITE_API_URL
                         }/teacher/classes/${classId}/regenerate-join-link`,
                         {
-                          method: "PATCH",
+                          method: 'PATCH',
                           headers: {
-                            "Content-Type": "application/json",
+                            'Content-Type': 'application/json',
                             Authorization: `Bearer ${localStorage.getItem(
-                              "token"
+                              'token',
                             )}`,
                           },
-                        }
+                        },
                       );
 
                       if (!response.ok) {
-                        throw new Error("Kon de klascode niet vernieuwen");
+                        throw new Error('Kon de klascode niet vernieuwen');
                       }
 
                       queryClient.invalidateQueries({
-                        queryKey: ["class", classId],
+                        queryKey: ['class', classId],
                       });
                     } catch (error) {
                       console.error(
-                        "Fout bij het vernieuwen van de klascode:",
-                        error
+                        'Fout bij het vernieuwen van de klascode:',
+                        error,
                       );
                     }
                   }}
@@ -298,7 +298,7 @@ const EditClassTeacher: React.FC = () => {
             </Container>
           </>
         );
-      case "assignments":
+      case 'assignments':
         return (
           <Container>
             <BoxBorder extraClasses="mxw-700 m-a g-20">
@@ -324,7 +324,7 @@ const EditClassTeacher: React.FC = () => {
             </BoxBorder>
           </Container>
         );
-      case "questions":
+      case 'questions':
         return (
           <Container>
             <BoxBorder extraClasses="mxw-700 m-a g-20">
@@ -337,7 +337,7 @@ const EditClassTeacher: React.FC = () => {
             </BoxBorder>
           </Container>
         );
-      case "manage":
+      case 'manage':
         return (
           <>
             <Container>
@@ -397,10 +397,10 @@ const EditClassTeacher: React.FC = () => {
           Dashboard voor {classData?.name}
         </h2>
         <div className="flex flex-col gap-2">
-          {renderSidebarItem("overview", "Overview")}
-          {renderSidebarItem("assignments", "Assignments")}
-          {renderSidebarItem("questions", "Questions")}
-          {renderSidebarItem("manage", "Manage")}
+          {renderSidebarItem('overview', 'Overview')}
+          {renderSidebarItem('assignments', 'Assignments')}
+          {renderSidebarItem('questions', 'Questions')}
+          {renderSidebarItem('manage', 'Manage')}
         </div>
       </div>
 
