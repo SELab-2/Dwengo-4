@@ -72,21 +72,8 @@ export const router = createBrowserRouter([
         action: teacherLogoutAction,
       },
       {
-        path: "dashboard",
-        element: <RootLayoutDashboardTeacher />,
-        loader: teacherTokenLoader,
-        children: [
-          {
-            index: true,
-            element: <h1>Teacher Dashboard</h1>,
-            loader: teacherCheckAuthLoader,
-          },
-          {
-            path: "klassen",
-            element: <ClassesPage></ClassesPage>,
-            loader: teacherCheckAuthLoader,
-          },
-        ],
+        path: "classes",
+        element: <ClassesPage></ClassesPage>,
       },
       {
         path: "classes/:classId",

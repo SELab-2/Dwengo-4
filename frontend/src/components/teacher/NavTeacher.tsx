@@ -24,49 +24,56 @@ const NavTeacher: React.FC = () => {
   return (
     <nav className="bg-gray-200 py-2">
       <Container>
-        <div className="flex justify-between items-center">
-          {firstName ? (
-            <div className="flex space-x-4">
-              <NavButton
-                to="/teacher"
-                label="Home"
-                isActive={(path) => location.pathname === "/teacher"}
-              />
-              <NavButton
-                to="/teacher/dashboard/klassen"
-                label="My Classes"
-                isActive={(path) =>
-                  location.pathname.includes("/teacher/dashboard/klassen")
-                }
-              />
-              <NavButton
-                to="/teacher/learning-paths"
-                label="My Learning Paths"
-                isActive={(path) =>
-                  location.pathname.includes("/teacher/learning-paths")
-                }
-              />
-            </div>
-          ) : (
-            <div
-              className={`flex flex-row justify-end w-full ${styles.navLinks} ${
-                menuOpen ? styles.open : ""
-              }`}
-            >
-              <NavButton
-                to="/teacher/inloggen"
-                label="Inloggen"
-                isActive={(path) => location.pathname === "/teacher/inloggen"}
-              />
-              <NavButton
-                to="/teacher/registreren"
-                label="Registreren"
-                isActive={(path) =>
-                  location.pathname === "/teacher/registreren"
-                }
-              />
-            </div>
-          )}
+        <div className="flex text-sm lg:text-lg justify-between items-center">
+          <div className="flex flex-row items-center justify-center">
+            <img
+              className="h-8 lg:h-12 xl:h-16 w-fit"
+              src="/img/dwengo-groen-zwart.png"
+              onClick={() => (window.location.href = "/teacher")}
+            />
+            {firstName ? (
+              <div className="flex space-x-4">
+                <NavButton
+                  to="/teacher"
+                  label="Home"
+                  isActive={(path) => location.pathname === "/teacher"}
+                />
+                <NavButton
+                  to="/teacher/classes"
+                  label="Klassen"
+                  isActive={(path) =>
+                    location.pathname.includes("/teacher/classes")
+                  }
+                />
+                <NavButton
+                  to="/teacher/learning-paths"
+                  label="Leerpaden"
+                  isActive={(path) =>
+                    location.pathname.includes("/teacher/learning-paths")
+                  }
+                />
+              </div>
+            ) : (
+              <div
+                className={`flex flex-row justify-end w-full ${
+                  styles.navLinks
+                } ${menuOpen ? styles.open : ""}`}
+              >
+                <NavButton
+                  to="/teacher/inloggen"
+                  label="Inloggen"
+                  isActive={(path) => location.pathname === "/teacher/inloggen"}
+                />
+                <NavButton
+                  to="/teacher/registreren"
+                  label="Registreren"
+                  isActive={(path) =>
+                    location.pathname === "/teacher/registreren"
+                  }
+                />
+              </div>
+            )}
+          </div>
 
           {/* Right side icons */}
           {firstName && (
