@@ -39,7 +39,7 @@ export default class StudentTeamService {
                 },
                 teamAssignment: {
                     include: {
-                        assignment: true, // Gebruik de juiste veldnaam
+                        assignment: true,
                     },
                 },
             },
