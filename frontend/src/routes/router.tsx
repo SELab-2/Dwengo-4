@@ -82,7 +82,7 @@ export const router = createBrowserRouter([
             loader: teacherCheckAuthLoader,
           },
           {
-            path: "klassen",
+            path: "classes",
             element: <ClassesPageTeacher></ClassesPageTeacher>,
             loader: teacherCheckAuthLoader,
           },

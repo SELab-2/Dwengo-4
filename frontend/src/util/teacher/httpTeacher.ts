@@ -43,6 +43,9 @@ export async function loginTeacher({
     const error: APIError = new Error(
       "Er is iets misgegaan tijdens het inloggen."
     );
+    const error: APIError = new Error(
+      "Er is iets misgegaan tijdens het inloggen."
+    );
     error.code = response.status;
     error.info = await response.json();
     throw error;
@@ -66,6 +69,9 @@ export async function signupTeacher({
   });
 
   if (!response.ok) {
+    const error: APIError = new Error(
+      "Er is iets misgegaan tijdens het registreren."
+    );
     const error: APIError = new Error(
       "Er is iets misgegaan tijdens het registreren."
     );
@@ -130,6 +136,138 @@ export async function createClass({
   }
 
   return await response.json();
+}
+
+export async function fetchClass({
+  classId,
+}: {
+  classId: number;
+}): Promise<ClassItem> {
+  const response = await fetch(`${BACKEND}/teacher/classes/${classId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      "Er is iets misgegaan bij het ophalen van de klas."
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+  let classroom = await response.json();
+  classroom = classroom.classroom;
+  return classroom;
+}
+
+interface StudentItem {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+export async function fetchStudentsByClass({
+  classId,
+}: {
+  classId: number;
+}): Promise<StudentItem[]> {
+  const response = await fetch(
+    `${BACKEND}/teacher/classes/${classId}/students`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      "Er is iets misgegaan bij het ophalen van de studenten."
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  let students = await response.json();
+  students = students.students;
+  return students;
+}
+
+interface LearningPath {
+  id: string;
+  title: string;
+}
+
+//Haal de locale leerpaden op van de leerkracht op
+export async function fetchLearningPaths(): Promise<LearningPath[]> {
+  const response = await fetch(`${BACKEND}/teacher/learningPaths`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      "Er is iets misgegaan bij het ophalen van de leerpaden."
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  let learningPaths = await response.json();
+  learningPaths = learningPaths;
+  return learningPaths;
+}
+
+export async function createAssignment({
+  classes,
+  name,
+  learningPathId,
+  students,
+  dueDate,
+  description,
+}: {
+  classes: ClassItem[];
+  name: string;
+  learningPathId: string;
+  students: StudentItem[];
+  dueDate: string;
+  description: string;
+}): Promise<void> {
+  const response = await fetch(`${BACKEND}/teacher/assignments`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+    body: JSON.stringify({
+      name,
+      learningPathId,
+      students: students.map((student) => student.id),
+      dueDate,
+      description,
+    }),
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      "Er is iets misgegaan bij het aanmaken van de opdracht."
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
 }
 
 export interface Invite {

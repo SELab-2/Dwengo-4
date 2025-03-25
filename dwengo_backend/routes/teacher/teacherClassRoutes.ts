@@ -1,5 +1,7 @@
 import express from "express";
 import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
+import express from "express";
+import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 import {
   createClassroom,
   deleteClassroom,
@@ -7,6 +9,8 @@ import {
   getJoinLink,
   regenerateJoinLink,
   getClassroomStudents,
+  getAllClassrooms,
+  getClassByIdAndTeacherId,
 } from "../../controllers/teacher/teacherClassController";
 import {
   createInvite,
@@ -15,6 +19,7 @@ import {
   updateInviteStatus,
   deleteInvite,
 } from "../../controllers/teacher/inviteController";
+import { deleteInvite } from "../../controllers/teacher/inviteController";
 import {
   getJoinRequestsByClass,
   updateJoinRequestStatus,
@@ -31,9 +36,14 @@ import {
 const router = express.Router();
 
 // Alleen leerkrachten mogen deze routes gebruiken
+router.use(protectTeacher);
+
+// routes for classes
+router.get("/", protectTeacher, getAllClassrooms);
 router.post("/", protectTeacher, createClassroom);
 router.get("/", protectTeacher, getClassrooms);
 router.delete("/:classId", protectTeacher, deleteClassroom);
+router.get("/:classId", protectTeacher, getClassByIdAndTeacherId);
 router.get("/:classId/join-link", protectTeacher, getJoinLink);
 router.post(
   "/:classId/regenerate-join-link",
