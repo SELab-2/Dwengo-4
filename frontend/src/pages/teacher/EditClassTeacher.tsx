@@ -241,7 +241,7 @@ const EditClassTeacher: React.FC = () => {
                     </PrimaryButton>
                     <button
                       type="button"
-                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+                      className={`px-7 h-10 font-bold rounded-md  bg-red-500 text-white hover:bg-red-600`}
                       onClick={handleDeleteClass}
                     >
                       Klas Verwijderen
@@ -258,7 +258,7 @@ const EditClassTeacher: React.FC = () => {
                   Deel deze code met leerlingen om ze uit te nodigen voor deze
                   klas.
                 </p>
-                <button
+                <PrimaryButton
                   className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mt-2"
                   onClick={async () => {
                     try {
@@ -293,7 +293,7 @@ const EditClassTeacher: React.FC = () => {
                   }}
                 >
                   Genereer Nieuwe Code
-                </button>
+                </PrimaryButton>
               </BoxBorder>
             </Container>
           </>

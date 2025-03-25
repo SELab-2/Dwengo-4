@@ -9,7 +9,10 @@ const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   ...props
 }) => {
   return (
-    <button {...props} className="btn-primary">
+    <button
+      {...props}
+      className={`px-7 h-10 font-bold rounded-md  bg-lime-500 text-white hover:bg-lime-600`}
+    >
       {children}
     </button>
   );
