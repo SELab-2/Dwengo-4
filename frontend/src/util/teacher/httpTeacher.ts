@@ -101,7 +101,11 @@ export async function fetchClasses(): Promise<ClassItem[]> {
     throw error;
   }
 
-  return await response.json();
+  const returner = await response.json();
+  const classrooms = returner["classrooms"];
+  console.log("GETTING CLASSES", classrooms);
+
+  return await classrooms;
 }
 
 interface CreateClassPayload {

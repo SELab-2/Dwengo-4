@@ -14,9 +14,6 @@ import Modal from "../../components/shared/Modal";
 import SuccessMessage from "../../components/shared/SuccessMessage";
 import { useNavigate } from "react-router-dom";
 
-interface Classes {
-  classrooms: ClassItem[];
-}
 interface ClassItem {
   id: string;
   name: string;
