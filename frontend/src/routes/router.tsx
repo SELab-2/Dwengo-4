@@ -33,18 +33,35 @@ import {
 import { action as studentLogoutAction } from "../pages/student/LogoutStudent";
 import StudentIndex from "../pages/student";
 import AddAssignmentForm from "../components/teacher/assignment/AddAssignmentForm";
+import PrimaryButton from "../components/shared/PrimaryButton";
 
-const HomePage: React.FC = () => (
-  <div style={{ textAlign: "center", marginTop: "50px" }}>
-    <h2>Kies een rol:</h2>
-    <Link to="/student" className="link mx-10">
-      Student
-    </Link>
-    <Link to="/teacher" className="link mx-10">
-      Teacher
-    </Link>
-  </div>
-);
+const HomePage: React.FC = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="flex flex-col justify-center items-center h-screen">
+      <div className="-translate-y-20">
+        <h2 className="justify-center flex flex-row font-bold text-5xl mb-8">
+          Kies een rol
+        </h2>
+        <div className="flex flex-row justify-center gap-x-10">
+          <button
+            onClick={() => navigate("/student")}
+            className={`px-7 text-4xl py-1.5 font-bold rounded-md  bg-lime-500 text-white hover:bg-lime-600 hover:cursor-pointer`}
+          >
+            Student
+          </button>
+          <button
+            className={`px-7 text-4xl py-1.5 font-bold rounded-md  bg-lime-500 text-white hover:bg-lime-600 hover:cursor-pointer`}
+            onClick={() => navigate("/teacher")}
+          >
+            Teacher
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const router = createBrowserRouter([
   {
