@@ -7,6 +7,8 @@ import {
 } from "react-router-dom";
 
 // ==== TEACHER ROUTES ==== //
+
+import AssignmentPage from "../pages/teacher/AddAssignment";
 import RootLayoutTeacher from "../components/teacher/RootLayoutTeacher";
 import LoginTeacher from "../pages/teacher/LoginTeacher";
 import ClassesPage from "../pages/teacher/ClassesTeacher";
@@ -30,6 +32,7 @@ import {
 } from "../util/student/authStudent";
 import { action as studentLogoutAction } from "../pages/student/LogoutStudent";
 import StudentIndex from "../pages/student";
+import AddAssignmentForm from "../components/teacher/assignment/AddAssignmentForm";
 
 const HomePage: React.FC = () => (
   <div style={{ textAlign: "center", marginTop: "50px" }}>
@@ -88,6 +91,10 @@ export const router = createBrowserRouter([
       {
         path: "classes/:classId",
         element: <EditClassTeacher />,
+      },
+      {
+        path: "classes/:classId/add-assignment",
+        element: <AssignmentPage></AssignmentPage>,
       },
     ],
   },

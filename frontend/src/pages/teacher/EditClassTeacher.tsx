@@ -305,8 +305,10 @@ const EditClassTeacher: React.FC = () => {
               <div className="flex justify-between items-center mb-4">
                 <h2>Opdrachten</h2>
                 <PrimaryButton
-                  onClick={() =>
-                    navigate(`/teacher/classes/${classId}/assignments/new`)
+                  onClick={
+                    () => navigate(`/teacher/classes/${classId}/add-assignment`)
+
+                    // http://localhost:5173/teacher/dashboard/1/add-assignment
                   }
                 >
                   Nieuwe Opdracht
