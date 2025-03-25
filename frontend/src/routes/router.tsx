@@ -1,4 +1,3 @@
-// router.js
 import React from "react";
 import {
   createBrowserRouter,
@@ -9,9 +8,8 @@ import {
 
 // ==== TEACHER ROUTES ==== //
 import RootLayoutTeacher from "../components/teacher/RootLayoutTeacher";
-import HomeTeacher from "../pages/teacher/HomeTeacher";
 import LoginTeacher from "../pages/teacher/LoginTeacher";
-import ClassesPageTeacher from "../pages/teacher/ClassesTeacher";
+import ClassesPage from "../pages/teacher/ClassesTeacher";
 import SignupTeacher from "../pages/teacher/SignupTeacher";
 import RootLayoutDashboardTeacher from "../components/teacher/RootLayoutDashboardTeacher";
 import {
@@ -25,16 +23,15 @@ import EditClassTeacher from "../pages/teacher/EditClassTeacher";
 import RootLayoutStudent from "../components/student/RootLayoutStudent";
 import LoginStudent from "../pages/student/LoginStudent";
 import SignupStudent from "../pages/student/SignupStudent";
-import ClassesPageStudent from "../pages/student/ClassesStudent";
 import RootLayoutDashboardStudent from "../components/student/RootLayoutDashboardStudent";
 import {
   checkAuthLoader as studentCheckAuthLoader,
   tokenLoader as studentTokenLoader,
 } from "../util/student/authStudent";
 import { action as studentLogoutAction } from "../pages/student/LogoutStudent";
+import StudentIndex from "../pages/student";
 
-// Home-pagina waar de gebruiker zijn rol kiest
-const HomePage = () => (
+const HomePage: React.FC = () => (
   <div style={{ textAlign: "center", marginTop: "50px" }}>
     <h2>Kies een rol:</h2>
     <Link to="/student" className="link mx-10">
@@ -82,8 +79,8 @@ export const router = createBrowserRouter([
             loader: teacherCheckAuthLoader,
           },
           {
-            path: "classes",
-            element: <ClassesPageTeacher></ClassesPageTeacher>,
+            path: "klassen",
+            element: <ClassesPage></ClassesPage>,
             loader: teacherCheckAuthLoader,
           },
         ],
@@ -101,7 +98,11 @@ export const router = createBrowserRouter([
       {
         index: true,
         // Je kunt hier eventueel een aparte HomeStudent-component gebruiken
-        element: <h1>Home Student</h1>,
+        element: <StudentIndex />,
+      },
+      {
+        path: "join-link-example",
+        element: <p>Join Link Example</p>,
       },
       {
         path: "inloggen",
@@ -125,13 +126,8 @@ export const router = createBrowserRouter([
             element: <h1>Home Student</h1>,
             loader: studentCheckAuthLoader,
           },
-          {
-            path: "klassen",
-            element: <ClassesPageStudent></ClassesPageStudent>,
-            loader: teacherCheckAuthLoader,
-          },
         ],
       },
     ],
   },
-]);
+] as RouteObject[]);

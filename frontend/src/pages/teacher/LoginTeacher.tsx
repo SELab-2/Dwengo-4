@@ -9,10 +9,10 @@ import {
   validateMinLength,
 } from "../../util/shared/validation";
 import Container from "../../components/shared/Container";
-import { PrimaryButton } from "../../components/shared/PrimaryButton";
 import BoxBorder from "../../components/shared/BoxBorder";
 import { loginTeacher } from "../../util/teacher/httpTeacher";
 import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
+import PrimaryButton from "../../components/shared/PrimaryButton";
 
 interface LoginFormData {
   email: string;
@@ -20,8 +20,8 @@ interface LoginFormData {
 }
 
 interface LoginResponse {
-  firstName : string;
-  lastName : string;
+  firstName: string;
+  lastName: string;
   token: string;
 }
 

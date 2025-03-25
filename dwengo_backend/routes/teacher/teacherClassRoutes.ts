@@ -1,11 +1,8 @@
 import express from "express";
 import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
-import express from "express";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 import {
   createClassroom,
   deleteClassroom,
-  getClassrooms,
   getJoinLink,
   regenerateJoinLink,
   getClassroomStudents,
@@ -19,7 +16,6 @@ import {
   updateInviteStatus,
   deleteInvite,
 } from "../../controllers/teacher/inviteController";
-import { deleteInvite } from "../../controllers/teacher/inviteController";
 import {
   getJoinRequestsByClass,
   updateJoinRequestStatus,
@@ -41,7 +37,6 @@ router.use(protectTeacher);
 // routes for classes
 router.get("/", protectTeacher, getAllClassrooms);
 router.post("/", protectTeacher, createClassroom);
-router.get("/", protectTeacher, getClassrooms);
 router.delete("/:classId", protectTeacher, deleteClassroom);
 router.get("/:classId", protectTeacher, getClassByIdAndTeacherId);
 router.get("/:classId/join-link", protectTeacher, getJoinLink);

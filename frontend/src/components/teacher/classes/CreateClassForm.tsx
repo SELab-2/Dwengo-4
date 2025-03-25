@@ -6,10 +6,10 @@ import {
   validateForm,
 } from "../../../util/shared/validation";
 import Container from "../../shared/Container";
-import { PrimaryButton } from "../../shared/PrimaryButton";
 import BoxBorder from "../../shared/BoxBorder";
 import { createClass } from "../../../util/teacher/httpTeacher";
 import LoadingIndicatorButton from "../../shared/LoadingIndicatorButton";
+import PrimaryButton from "../../shared/PrimaryButton";
 
 interface InputWithChecksRef {
   validateInput: () => boolean;

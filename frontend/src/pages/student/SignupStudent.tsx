@@ -9,10 +9,10 @@ import {
   validateMinLength,
 } from "../../util/shared/validation";
 import Container from "../../components/shared/Container";
-import { PrimaryButton } from "../../components/shared/PrimaryButton";
 import BoxBorder from "../../components/shared/BoxBorder";
 import { signupStudent } from "../../util/student/httpStudent";
 import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
+import PrimaryButton from "../../components/shared/PrimaryButton";
 
 interface SignupFormData {
   firstName: string;

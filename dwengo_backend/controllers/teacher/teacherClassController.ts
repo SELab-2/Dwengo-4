@@ -3,6 +3,8 @@ import { Response } from "express";
 import { AuthenticatedRequest } from "../../middleware/teacherAuthMiddleware";
 import classService from "../../services/classService";
 import { Student } from "@prisma/client";
+import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
+import { BadRequestError } from "../../errors/errors";
 
 const APP_URL = process.env.APP_URL || "http://localhost:5000";
 
@@ -81,7 +83,7 @@ export const getJoinLink = asyncHandler(
 
     if (!isTeacherValid(req, res)) return;
 
-    const joinCode = await classService.getJoinCode(classId, teacherId);
+    const joinCode = await classService.getJoinCode(Number(classId), teacherId);
 
     const joinLink = `${APP_URL}/student/classes/join?joinCode=${joinCode}`;
     res.status(200).json({ joinLink });

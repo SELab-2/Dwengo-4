@@ -43,9 +43,6 @@ export async function loginTeacher({
     const error: APIError = new Error(
       "Er is iets misgegaan tijdens het inloggen."
     );
-    const error: APIError = new Error(
-      "Er is iets misgegaan tijdens het inloggen."
-    );
     error.code = response.status;
     error.info = await response.json();
     throw error;
@@ -69,9 +66,6 @@ export async function signupTeacher({
   });
 
   if (!response.ok) {
-    const error: APIError = new Error(
-      "Er is iets misgegaan tijdens het registreren."
-    );
     const error: APIError = new Error(
       "Er is iets misgegaan tijdens het registreren."
     );

@@ -1,15 +1,9 @@
-import React, {
-  ButtonHTMLAttributes,
-  ReactNode,
-  AnchorHTMLAttributes,
-} from "react";
+import React, { ButtonHTMLAttributes, ReactNode } from "react";
 
 interface PrimaryButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
 }
-interface SecondaryButtonProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
-  children: ReactNode;
-}
+
 const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   children,
   ...props
@@ -21,14 +15,4 @@ const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   );
 };
 
-const SecondaryButton: React.FC<SecondaryButtonProps> = ({
-  children,
-  ...props
-}) => {
-  return (
-    <a {...props} className="btn-primary">
-      {children}
-    </a>
-  );
-};
-export { PrimaryButton, SecondaryButton };
+export default PrimaryButton;
