@@ -15,7 +15,6 @@ export default class FeedbackController {
             const feedback: Feedback[] = await service.getAllFeedbackForEvaluation(Number(assignmentId), evaluationId, teacherId);
             res.status(200).json(feedback);
         } catch (error) {
-            console.log(error);
             res.status(500).json({error: "Failed to retrieve feedback"});
         }
     }
