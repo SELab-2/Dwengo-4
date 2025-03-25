@@ -47,12 +47,12 @@ const HomePage: React.FC = () => {
         <div className="flex flex-row justify-center gap-x-10">
           <button
             onClick={() => navigate("/student")}
-            className={`px-7 text-4xl py-1.5 font-bold rounded-md  bg-lime-500 text-white hover:bg-lime-600 hover:cursor-pointer`}
+            className={`px-7 text-4xl py-1.5 font-bold rounded-md  bg-dwengo-green hover:bg-dwengo-green-dark text-white  hover:cursor-pointer`}
           >
             Student
           </button>
           <button
-            className={`px-7 text-4xl py-1.5 font-bold rounded-md  bg-lime-500 text-white hover:bg-lime-600 hover:cursor-pointer`}
+            className={`px-7 text-4xl py-1.5 font-bold rounded-md   text-white bg-dwengo-green hover:bg-dwengo-green-dark hover:cursor-pointer`}
             onClick={() => navigate("/teacher")}
           >
             Teacher

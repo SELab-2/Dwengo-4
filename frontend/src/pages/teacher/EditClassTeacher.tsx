@@ -194,8 +194,8 @@ const EditClassTeacher: React.FC = () => {
         onClick={() => onClick(section)}
         className={`px-7 h-10 font-bold rounded-md ${
           isActive
-            ? "bg-green-700 pt-1 text-white border-gray-600 border-3"
-            : "pt-1.5 bg-lime-500 text-white hover:bg-lime-600"
+            ? "bg-dwengo-green-darker pt-1 text-white border-gray-600 border-3"
+            : "pt-1.5 bg-dwengo-green hover:bg-dwengo-green-dark text-white "
         }`}
       >
         {label}
@@ -241,7 +241,7 @@ const EditClassTeacher: React.FC = () => {
                     </PrimaryButton>
                     <button
                       type="button"
-                      className={`px-7 h-10 font-bold rounded-md  bg-red-500 text-white hover:bg-red-600`}
+                      className={`px-7 h-10 font-bold rounded-md  bg-red-500 text-white hover:bg-red-700 hover:cursor-pointer`}
                       onClick={handleDeleteClass}
                     >
                       Klas Verwijderen

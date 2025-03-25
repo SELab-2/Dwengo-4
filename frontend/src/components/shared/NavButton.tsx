@@ -15,8 +15,8 @@ const NavButton: React.FC<NavButtonProps> = ({ to, label, isActive }) => {
         const active = isActive ? isActive(to) : linkIsActive;
         return `px-7 h-10 font-bold rounded-md  ${
           active
-            ? "bg-green-700 pt-1 text-white border-gray-600 border-3"
-            : "pt-1.5 bg-lime-500 text-white hover:bg-lime-600"
+            ? "bg-dwengo-green-darker pt-1 text-white border-gray-800 border-3"
+            : "pt-1.5 bg-dwengo-green hover:bg-dwengo-green-dark text-white "
         }`;
       }}
     >
