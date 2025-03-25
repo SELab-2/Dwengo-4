@@ -61,11 +61,5 @@
     "typescript": "^5.8.2",
     "vite": "^6.2.0",
     "vite-plugin-simple-html": "^0.2.0"
-  },
-  "lint-staged": {
-    "**/*.{js,ts,jsx,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ]
   }
 }

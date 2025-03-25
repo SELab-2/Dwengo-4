@@ -1,12 +1,23 @@
 {
   "devDependencies": {
-    "prisma": "^6.5.0",
-    "husky": "^8.0.0"
+    "@eslint/js": "^9.23.0",
+    "eslint-config-prettier": "^10.1.1",
+    "globals": "^16.0.0",
+    "husky": "^8.0.0",
+    "prisma": "^6.5.0"
   },
   "dependencies": {
-    "@prisma/client": "^6.5.0"
+    "@prisma/client": "^6.5.0",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3"
   },
   "scripts": {
     "prepare": "husky install"
+  },
+  "lint-staged": {
+    "**/*.{js,ts,jsx,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }
