@@ -221,7 +221,7 @@ const EditClassTeacher: React.FC = () => {
         return (
           <>
             <Container>
-              <BoxBorder extraClasses="mxw-700 m-a g-20">
+              <BoxBorder>
                 <h1>Klas Bewerken</h1>
                 <form className="g-20" onSubmit={handleFormSubmit}>
                   <InputWithChecks
@@ -252,7 +252,7 @@ const EditClassTeacher: React.FC = () => {
             </Container>
 
             <Container>
-              <BoxBorder extraClasses="mxw-700 m-a g-20">
+              <BoxBorder extraClasses="">
                 <h2>Klas Code: {classData?.code}</h2>
                 <p>
                   Deel deze code met leerlingen om ze uit te nodigen voor deze
@@ -292,7 +292,7 @@ const EditClassTeacher: React.FC = () => {
                     }
                   }}
                 >
-                  Genereer Nieuwe Code
+                  Genereer Nieuwe Code // TODO BORKED
                 </PrimaryButton>
               </BoxBorder>
             </Container>
