@@ -1,17 +1,12 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import {beforeEach, describe, expect, it} from "vitest";
 import request from "supertest";
 import prisma from "./helpers/prisma";
 import app from "../index";
 import {Class, ClassTeacher, Invite, JoinRequestStatus, Teacher, User} from "@prisma/client";
-import {
-    addTeacherToClass,
-    createClass,
-    createInvite,
-    createTeacher,
-} from "./helpers/testDataCreation";
+import {addTeacherToClass, createClass, createInvite, createTeacher,} from "./helpers/testDataCreation";
 
 // mock the protectTeacher middleware, as it's not relevant for these tests
-// (protectTeacher should be tested seperately though, TODO)
+// (protectTeacher should be tested separately though, TODO)
 // vi.mock('../middleware/teacherAuthMiddleware', async () => {
 //     const actual = await vi.importActual("../middleware/teacherAuthMiddleware");
 //     return {
@@ -25,7 +20,7 @@ let teacherUser1: User & { teacher: Teacher; token: string };
 let teacherUser2: User & { teacher: Teacher; token: string };
 let classroom: Class;
 
-async function sendInviteToTeacherAndValidate() {
+async function sendInviteToTeacherAndValidate(): Promise<void> {
     const { status, body } = await request(app)
         .post(`/teacher/classes/${classroom.id}/invites`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
@@ -33,7 +28,7 @@ async function sendInviteToTeacherAndValidate() {
             otherTeacherId: teacherUser2.id,
         });
     expect(status).toBe(201);
-    const newInvite = await prisma.invite.findFirst({
+    const newInvite: Invite | null = await prisma.invite.findFirst({
         where: {
             otherTeacherId: teacherUser2.id,
             classTeacherId: teacherUser1.id,
@@ -44,6 +39,19 @@ async function sendInviteToTeacherAndValidate() {
     expect(newInvite).not.toBeNull();
     // ensure response body contains the invite as expected
     expect(body.invite).toStrictEqual(newInvite);
+}
+
+async function expectSuccessfulInviteDeletion(status: number, body:any, invite: Invite): Promise<void> {
+    expect(status).toBe(200);
+    expect(body.invite).toStrictEqual(invite);
+    expect(body.message).toBe("invite was succesfully deleted");
+    // verify that the invite was deleted
+    const deletedInvite: Invite | null = await prisma.invite.findUnique({
+        where: {
+            inviteId: invite.inviteId,
+        },
+    });
+    expect(deletedInvite).toBeNull();
 }
 
 describe("invite tests", async (): Promise<void> => {
@@ -82,12 +90,12 @@ describe("invite tests", async (): Promise<void> => {
         });
         it("should respond with a `404` status code when the class does not exist", async (): Promise<void> => {
             // get an id that isn't used for any existing class in the database
-            const maxClass = await prisma.class.findFirst({
+            const maxClass: Class | null = await prisma.class.findFirst({
                 orderBy: {
                     id: "desc",
                 },
             });
-            const invalidClassId = (maxClass?.id ?? 0) + 1;
+            const invalidClassId: number = (maxClass?.id ?? 0) + 1;
             // try to create invite for non-existent class
             const { status, body } = await request(app)
                 .post(`/teacher/classes/${invalidClassId}/invites`)
@@ -430,16 +438,7 @@ describe("invite tests", async (): Promise<void> => {
                 .delete(`/teacher/classes/${classroom.id}/invites/${invite.inviteId}`)
                 .set("Authorization", `Bearer ${teacherUser1.token}`);
 
-            expect(status).toBe(200);
-            expect(body.invite).toStrictEqual(invite);
-            expect(body.message).toBe("invite was succesfully deleted");
-            // verify that the invite was deleted
-            const deletedInvite: Invite | null = await prisma.invite.findUnique({
-                where: {
-                    inviteId: invite.inviteId,
-                },
-            });
-            expect(deletedInvite).toBeNull();
+            await expectSuccessfulInviteDeletion(status, body, invite);
         });
         it("should respond with a `403` status code when the teacher trying to delete the invite is not part of the class", async (): Promise<void> => {
             const teacherUser3: User & { teacher: Teacher; token: string } = await createTeacher(
@@ -472,16 +471,7 @@ describe("invite tests", async (): Promise<void> => {
                 .delete(`/teacher/classes/${classroom.id}/invites/${invite.inviteId}`)
                 .set("Authorization", `Bearer ${teacherUser3.token}`); // teacher3 didn't create the invite, but is part of the class
 
-            expect(status).toBe(200);
-            expect(body.invite).toStrictEqual(invite);
-            expect(body.message).toBe("invite was succesfully deleted");
-            // verify that the invite was deleted
-            const deletedInvite: Invite | null = await prisma.invite.findUnique({
-                where: {
-                    inviteId: invite.inviteId,
-                },
-            });
-            expect(deletedInvite).toBeNull();
+            await expectSuccessfulInviteDeletion(status, body, invite)
         });
         it("should respond with a `404` status code when the invite does not exist", async (): Promise<void> => {
             // delete the existing invite
