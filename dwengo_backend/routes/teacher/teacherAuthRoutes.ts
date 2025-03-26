@@ -1,6 +1,5 @@
 import express, { Router } from "express";
-import { loginTeacher } from "../../controllers/teacher/teacherAuthController";
-import { registerTeacher } from "../../controllers/userController";
+import { registerTeacher, loginTeacher } from "../../controllers/userAuthController";
 import { validateRequest } from "../../middleware/validateRequest";
 import { loginBodySchema, registerBodySchema } from "../../zodSchemas/authSchemas";
 
