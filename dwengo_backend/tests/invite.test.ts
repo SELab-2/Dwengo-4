@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import prisma from "./helpers/prisma";
 import app from "../index";
-import { Class, Invite, JoinRequestStatus, Teacher, User } from "@prisma/client";
+import {Class, ClassTeacher, Invite, JoinRequestStatus, Teacher, User} from "@prisma/client";
 import {
     addTeacherToClass,
     createClass,
@@ -20,11 +20,11 @@ import {
 //     };
 // });
 
-describe("invite tests", async () => {
+describe("invite tests", async (): Promise<void> => {
     let teacherUser1: User & { teacher: Teacher; token: string };
     let teacherUser2: User & { teacher: Teacher; token: string };
     let classroom: Class;
-    beforeEach(async () => {
+    beforeEach(async (): Promise<void> => {
         // create two teachers
         teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
         teacherUser2 = await createTeacher("John", "Doe", "john.doe@gmail.com");
@@ -32,8 +32,8 @@ describe("invite tests", async () => {
         classroom = await createClass("5A", "ABCD");
     });
 
-    describe("[POST] /teacher/classes/:classId/invites", async () => {
-        it("should respond with a `201` status code and an invite", async () => {
+    describe("[POST] /teacher/classes/:classId/invites", async (): Promise<void> => {
+        it("should respond with a `201` status code and an invite", async (): Promise<void> => {
             // set up scenario where there's two teachers and a class, the first one being a teacher of the class
             await addTeacherToClass(teacherUser1.id, classroom.id);
 
@@ -59,12 +59,12 @@ describe("invite tests", async () => {
             // ensure response body contains the invite as expected
             expect(body.invite).toStrictEqual(invite);
         });
-        it("should create an invite, even when there is already a non-pending invite in the database", async () => {
+        it("should create an invite, even when there is already a non-pending invite in the database", async (): Promise<void> => {
             // emphasis on the 'non-pending' here
             // set up scenario where teacher has rejected the invite
             await addTeacherToClass(teacherUser1.id, classroom.id);
             let invite: Invite = await createInvite(teacherUser1.id, teacherUser2.id, classroom.id);
-            invite = await prisma.invite.update({
+            await prisma.invite.update({
                 where: {
                     inviteId: invite.inviteId,
                 },
@@ -92,7 +92,7 @@ describe("invite tests", async () => {
             expect(newInvite).not.toBeNull();
             expect(body.invite).toStrictEqual(newInvite);
         });
-        it("should respond with a `404` status code when the class does not exist", async () => {
+        it("should respond with a `404` status code when the class does not exist", async (): Promise<void> => {
             // get an id that isn't used for any existing class in the database
             const maxClass = await prisma.class.findFirst({
                 orderBy: {
@@ -115,7 +115,7 @@ describe("invite tests", async () => {
                 expect(invites.length).toBe(0);
             });
         });
-        it("should respond with a `403` status code when the teacher making the invite is not a teacher of the class", async () => {
+        it("should respond with a `403` status code when the teacher making the invite is not a teacher of the class", async (): Promise<void> => {
             // we can use the existing scenarion with two valid teachers and a class, but none of them are a teacher of the class
             // try to create invite for class where teacher1 is not a teacher
             const { status, body } = await request(app)
@@ -128,11 +128,11 @@ describe("invite tests", async () => {
             expect(body.message).toBe("Leerkracht is geen beheerder van de klas");
             expect(status).toBe(403);
             // verify that no invite was created
-            await prisma.invite.findMany().then((invites) => {
+            await prisma.invite.findMany().then((invites: Invite[]): void => {
                 expect(invites.length).toBe(0);
             });
         });
-        it("should respond with a `400` status code when the teacher receiving the invite is already a teacher of the class", async () => {
+        it("should respond with a `400` status code when the teacher receiving the invite is already a teacher of the class", async (): Promise<void> => {
             // set up scenario where there's two valid teachers and a class, both are teachers of the class
             await addTeacherToClass(teacherUser1.id, classroom.id);
             await addTeacherToClass(teacherUser2.id, classroom.id);
@@ -148,11 +148,11 @@ describe("invite tests", async () => {
             expect(body.message).toBe("Leerkracht is al lid van de klas");
             expect(status).toBe(400);
             // verify that no invite was created
-            await prisma.invite.findMany().then((invites) => {
+            await prisma.invite.findMany().then((invites: Invite[]): void => {
                 expect(invites.length).toBe(0);
             });
         });
-        it("should respond with a `409` status code when the teacher already has a pending invite", async () => {
+        it("should respond with a `409` status code when the teacher already has a pending invite", async (): Promise<void> => {
             // set up scenario where there's two valid teachers and a class, the first one being a teacher of the class, and the second one has already received an invite
             await addTeacherToClass(teacherUser1.id, classroom.id);
             // send a first invite
@@ -164,7 +164,7 @@ describe("invite tests", async () => {
                 });
 
             // verify an invite was created
-            await prisma.invite.findMany().then((invites) => {
+            await prisma.invite.findMany().then((invites: Invite[]): void => {
                 expect(invites.length).toBe(1);
             });
 
@@ -176,7 +176,7 @@ describe("invite tests", async () => {
                     otherTeacherId: teacherUser2.id,
                 });
             // no new invite should have been created
-            await prisma.invite.findMany().then((invites) => {
+            await prisma.invite.findMany().then((invites: Invite[]): void => {
                 expect(invites.length).toBe(1);
             });
 
@@ -185,10 +185,10 @@ describe("invite tests", async () => {
             );
             expect(status).toBe(409);
         });
-        it("should respond with a `400` status code when request body/params are incorrect", async () => {
+        it("should respond with a `400` status code when request body/params are incorrect", async (): Promise<void> => {
             // try to create an invite with an invalid body and params
             const { status, body } = await request(app)
-                .post(`/teacher/classes/${"invalidid"}/invites`)
+                .post(`/teacher/classes/invalided/invites`)
                 .set("Authorization", `Bearer ${teacherUser1.token}`)
                 .send({
                     otherTeacherId: "sldk",
@@ -212,11 +212,11 @@ describe("invite tests", async () => {
             );
 
             // verify no invite was created
-            await prisma.invite.findMany().then((invites) => {
+            await prisma.invite.findMany().then((invites: Invite[]): void => {
                 expect(invites.length).toBe(0);
             });
         });
-        it("should respond with a `400` status code when the request body is missing", async () => {
+        it("should respond with a `400` status code when the request body is missing", async (): Promise<void> => {
             await addTeacherToClass(teacherUser1.id, classroom.id);
             const { status: status, body: body } = await request(app)
                 .post(`/teacher/classes/${classroom.id}/invites`)
@@ -236,13 +236,13 @@ describe("invite tests", async () => {
             );
 
             // verify no invite was created
-            await prisma.invite.findMany().then((invites) => {
+            await prisma.invite.findMany().then((invites: Invite[]): void => {
                 expect(invites.length).toBe(0);
             });
         });
     });
-    describe("[GET] /teacher/classes/invites", async () => {
-        it("should respond with a `200` status code and a list of invites", async () => {
+    describe("[GET] /teacher/classes/invites", async (): Promise<void> => {
+        it("should respond with a `200` status code and a list of invites", async (): Promise<void> => {
             // set up scenario where a teacher has received a few invites
             await addTeacherToClass(teacherUser1.id, classroom.id);
             const classroom2: Class = await createClass("6A", "EFGH");
@@ -266,14 +266,14 @@ describe("invite tests", async () => {
             expect(body.invites).toStrictEqual([invite1, invite2]);
         });
     });
-    describe("[PATCH] /teacher/classes/invites/:inviteId", async () => {
+    describe("[PATCH] /teacher/classes/invites/:inviteId", async (): Promise<void> => {
         let invite: Invite;
-        beforeEach(async () => {
+        beforeEach(async (): Promise<void> => {
             // set up scenario with a valid pending invite
             await addTeacherToClass(teacherUser1.id, classroom.id);
             invite = await createInvite(teacherUser1.id, teacherUser2.id, classroom.id);
         });
-        it("should respond with a `200` status code and an updated invite when the action is `accept`", async () => {
+        it("should respond with a `200` status code and an updated invite when the action is `accept`", async (): Promise<void> => {
             // we've got a scenario with a valid pending invite, test accepting it
             const { status, body } = await request(app)
                 .patch(`/teacher/classes/invites/${invite.inviteId}`)
@@ -285,7 +285,7 @@ describe("invite tests", async () => {
             expect(status).toBe(200);
             expect(body.invite.status).toBe(JoinRequestStatus.APPROVED);
             // verify that the teacher was added to the class
-            const classTeacher2 = await prisma.classTeacher.findFirst({
+            const classTeacher2: ClassTeacher | null = await prisma.classTeacher.findFirst({
                 where: {
                     teacherId: teacherUser2.id,
                     classId: classroom.id,
@@ -295,7 +295,7 @@ describe("invite tests", async () => {
             expect(classTeacher2!.teacherId).toBe(teacherUser2.id);
             expect(classTeacher2!.classId).toBe(classroom.id);
         });
-        it("should respond with a `200` status code and an updated invite when the action is `decline`", async () => {
+        it("should respond with a `200` status code and an updated invite when the action is `decline`", async (): Promise<void> => {
             // we've got a scenario with a valid pending invite, test declining it
             const { status, body } = await request(app)
                 .patch(`/teacher/classes/invites/${invite.inviteId}`)
@@ -307,7 +307,7 @@ describe("invite tests", async () => {
             expect(status).toBe(200);
             expect(body.invite.status).toBe(JoinRequestStatus.DENIED);
             // verify that the teacher was not added to the class
-            const classTeacher2 = await prisma.classTeacher.findFirst({
+            const classTeacher2: ClassTeacher | null = await prisma.classTeacher.findFirst({
                 where: {
                     teacherId: teacherUser2.id,
                     classId: classroom.id,
@@ -315,7 +315,7 @@ describe("invite tests", async () => {
             });
             expect(classTeacher2).toBeNull();
         });
-        it("should respond with a `400` status code when the action is neither `accept` nor `decline`", async () => {
+        it("should respond with a `400` status code when the action is neither `accept` nor `decline`", async (): Promise<void> => {
             // we've got a scenario with a valid pending invite, test invalid action
             const { status, body } = await request(app)
                 .patch(`/teacher/classes/invites/${invite.inviteId}`)
@@ -337,7 +337,7 @@ describe("invite tests", async () => {
             );
 
             // verify that the invite was not updated
-            const updatedInvite = await prisma.invite.findFirst({
+            const updatedInvite: Invite | null = await prisma.invite.findFirst({
                 where: {
                     inviteId: invite.inviteId,
                 },
@@ -346,7 +346,7 @@ describe("invite tests", async () => {
             expect(updatedInvite).toStrictEqual(invite);
 
             // verify that the teacher was not added to the class
-            const classTeacher2 = await prisma.classTeacher.findFirst({
+            const classTeacher2: ClassTeacher | null = await prisma.classTeacher.findFirst({
                 where: {
                     teacherId: teacherUser2.id,
                     classId: classroom.id,
@@ -354,7 +354,7 @@ describe("invite tests", async () => {
             });
             expect(classTeacher2).toBeNull();
         });
-        it("should respond with a `400` status code when the invite does not exist", async () => {
+        it("should respond with a `400` status code when the invite does not exist", async (): Promise<void> => {
             // delete the existing invite
             await prisma.invite.delete({
                 where: {
@@ -379,7 +379,7 @@ describe("invite tests", async () => {
             });
             expect(classTeacher2).toBeNull();
         });
-        it("should should respond with a `400` status code when the invite exists, but is not pending", async () => {
+        it("should should respond with a `400` status code when the invite exists, but is not pending", async (): Promise<void> => {
             // change status of existing invite
             invite = await prisma.invite.update({
                 where: {
@@ -407,10 +407,10 @@ describe("invite tests", async () => {
             expect(checkInvite).not.toBeNull();
             expect(checkInvite!.status).toStrictEqual(invite.status);
         });
-        it("should respond with a `400` status code when the inviteId param is not a positive integer", async () => {
+        it("should respond with a `400` status code when the inviteId param is not a positive integer", async (): Promise<void> => {
             // try to update an invite with an invalid inviteId
             const { status, body } = await request(app)
-                .patch(`/teacher/classes/invites/${"invalidid"}`)
+                .patch(`/teacher/classes/invites/invalidid`)
                 .set("Authorization", `Bearer ${teacherUser2.token}`)
                 .send({
                     action: "accept",
@@ -429,14 +429,14 @@ describe("invite tests", async () => {
             );
         });
     });
-    describe("[DELETE] /teacher/classes/:classId/invites/:inviteId", async () => {
+    describe("[DELETE] /teacher/classes/:classId/invites/:inviteId", async (): Promise<void> => {
         let invite: Invite;
-        beforeEach(async () => {
+        beforeEach(async (): Promise<void> => {
             // set up scenario with a valid invite
             await addTeacherToClass(teacherUser1.id, classroom.id);
             invite = await createInvite(teacherUser1.id, teacherUser2.id, classroom.id);
         });
-        it("should respond with a `200` status code and the deleted invite", async () => {
+        it("should respond with a `200` status code and the deleted invite", async (): Promise<void> => {
             // test deleting the invite
             const { status, body } = await request(app)
                 .delete(`/teacher/classes/${classroom.id}/invites/${invite.inviteId}`)
@@ -446,14 +446,14 @@ describe("invite tests", async () => {
             expect(body.invite).toStrictEqual(invite);
             expect(body.message).toBe("invite was succesfully deleted");
             // verify that the invite was deleted
-            const deletedInvite = await prisma.invite.findUnique({
+            const deletedInvite: Invite | null = await prisma.invite.findUnique({
                 where: {
                     inviteId: invite.inviteId,
                 },
             });
             expect(deletedInvite).toBeNull();
         });
-        it("should respond with a `403` status code when the teacher trying to delete the invite is not part of the class", async () => {
+        it("should respond with a `403` status code when the teacher trying to delete the invite is not part of the class", async (): Promise<void> => {
             const teacherUser3: User & { teacher: Teacher; token: string } = await createTeacher(
                 "Jane",
                 "Doe",
@@ -466,14 +466,14 @@ describe("invite tests", async () => {
             expect(status).toBe(403);
             expect(body.message).toBe("Leerkracht is geen beheerder van de klas");
             // verify that the invite was not deleted
-            const checkInvite = await prisma.invite.findUnique({
+            const checkInvite: Invite | null = await prisma.invite.findUnique({
                 where: {
                     inviteId: invite.inviteId,
                 },
             });
             expect(checkInvite).toStrictEqual(invite);
         });
-        it("should let another teacher of the class delete the invite, even if they didn't create the invite", async () => {
+        it("should let another teacher of the class delete the invite, even if they didn't create the invite", async (): Promise<void> => {
             const teacherUser3: User & { teacher: Teacher; token: string } = await createTeacher(
                 "Jane",
                 "Doe",
@@ -488,14 +488,14 @@ describe("invite tests", async () => {
             expect(body.invite).toStrictEqual(invite);
             expect(body.message).toBe("invite was succesfully deleted");
             // verify that the invite was deleted
-            const deletedInvite = await prisma.invite.findUnique({
+            const deletedInvite: Invite | null = await prisma.invite.findUnique({
                 where: {
                     inviteId: invite.inviteId,
                 },
             });
             expect(deletedInvite).toBeNull();
         });
-        it("should respond with a `404` status code when the invite does not exist", async () => {
+        it("should respond with a `404` status code when the invite does not exist", async (): Promise<void> => {
             // delete the existing invite
             await prisma.invite.delete({
                 where: {
@@ -510,9 +510,9 @@ describe("invite tests", async () => {
             expect(status).toBe(404);
             expect(body.error).toBe("not found"); // this error message is defined in `errorMiddleware.ts`
         });
-        it("should respond with a `400` status code when the params are not correct", async () => {
+        it("should respond with a `400` status code when the params are not correct", async (): Promise<void> => {
             const { status, body } = await request(app)
-                .delete(`/teacher/classes/${"invalidclassid"}/invites/${"invalidinviteid"}`)
+                .delete(`/teacher/classes/invalidclassid/invites/invalidinviteid`)
                 .set("Authorization", `Bearer ${teacherUser1.token}`);
 
             expect(status).toBe(400);
@@ -532,8 +532,8 @@ describe("invite tests", async () => {
             );
         });
     });
-    describe("[GET] /teacher/classes/:classId/invites", async () => {
-        it("should respond with a `200` status code and a list of invites", async () => {
+    describe("[GET] /teacher/classes/:classId/invites", async (): Promise<void> => {
+        it("should respond with a `200` status code and a list of invites", async (): Promise<void> => {
             // set up scenario where there's some pending invites for a class
             await addTeacherToClass(teacherUser1.id, classroom.id);
             const teacherUser3: User & { teacher: Teacher } = await createTeacher(
@@ -560,7 +560,7 @@ describe("invite tests", async () => {
             expect(status).toBe(200);
             expect(body.invites).toStrictEqual([invite1, invite2]);
         });
-        it("should respond with a `403` status code when the teacher is not part of the class", async () => {
+        it("should respond with a `403` status code when the teacher is not part of the class", async (): Promise<void> => {
             // try to get invites for a class where the teacher is part of the class
             const { status, body } = await request(app)
                 .get(`/teacher/classes/${classroom.id}/invites`)
@@ -570,9 +570,9 @@ describe("invite tests", async () => {
             expect(body.message).toBe("Leerkracht is geen beheerder van de klas");
             expect(body.invites).toBeUndefined();
         });
-        it("should respond with a `400` status code when the params are not correct", async () => {
+        it("should respond with a `400` status code when the params are not correct", async (): Promise<void> => {
             const { status, body } = await request(app)
-                .get(`/teacher/classes/${"invalidclassid"}/invites`)
+                .get(`/teacher/classes/invalidclassid/invites`)
                 .set("Authorization", `Bearer ${teacherUser1.token}`);
 
             expect(status).toBe(400);
