@@ -7,8 +7,6 @@ import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
 import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearningObjectRoutes";
 
 import assignmentRoutes from "./routes/assignments/assignmentRoutes";
-import teacherAssignmentRoutes from "./routes/assignments/teacherAssignmentRoutes";
-import studentTeamRoutes from "./routes/student/studentTeamRoutes";
 import progressRoutes from "./routes/progress/progressRoutes";
 import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
 import studentAssignmentRoutes from "./routes/assignments/studentAssignmentRoutes";
@@ -20,8 +18,9 @@ import teacherLocalLearningPathNodesRoutes from "./routes/teacher/teacherLocalLe
 
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
-import teacherTeamsRoutes from "./routes/teacher/teacherTeamsRoutes";
+import teamRoutes from "./routes/team/teamRoutes";
 import authRoutes from "./routes/authentication/authRoutes";
+import teacherAssignmentRoutes from "./routes/assignments/teacherAssignmentRoutes";
 
 dotenv.config();
 
@@ -67,16 +66,8 @@ app.use(
 );
 app.use("/learningObjectByTeacher", teacherLocalLearningObjectRoutes);
 
-// Routes voor Teacher (Teams)
-app.use("/teacher/assignments/:assignmentId/team", teacherTeamsRoutes);
-
-// Routes voor de Assignments
-app.use("/assignments", assignmentRoutes);
-
-// Routes voor de aanpassingen op Assignments door teachers
-app.use("/teacher/assignments", teacherAssignmentRoutes);
-// Routes voor het opvragen van de Assignments door students
-app.use("/student/assignments", studentAssignmentRoutes);
+// Routes voor teams
+app.use("/team", teamRoutes);
 
 // Routes voor de assignments
 app.use("/assignment", assignmentRoutes);
@@ -90,8 +81,6 @@ app.use("/learningObject", learningObjectRoutes);
 app.use("/question", QuestionRoutes);
 
 app.use("/learningPath", learningPathRoutes);
-
-app.use("/student/teams", studentTeamRoutes);
 
 app.use("/progress", progressRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
