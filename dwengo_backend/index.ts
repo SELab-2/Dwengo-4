@@ -8,19 +8,18 @@ import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearn
 
 import assignmentRoutes from "./routes/assignments/assignmentRoutes";
 import progressRoutes from "./routes/progress/progressRoutes";
-import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
-import studentAssignmentRoutes from "./routes/assignments/studentAssignmentRoutes";
 import feedbackRoutes from "./routes/feedback/feedbackRoutes";
-import studentClassRoutes from "./routes/student/studentClassRoutes";
 import submissionRoutes from "./routes/submission/submissionRoutes";
 import teacherLocalLearningPathRoutes from "./routes/teacher/teacherLocalLearningPathRoutes";
 import teacherLocalLearningPathNodesRoutes from "./routes/teacher/teacherLocalLearningPathNodesRoutes";
 
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
+import classRoutes from "./routes/class/classRoutes";
+import teacherInviteRoutes from "./routes/invite/teacherInviteRoutes";
+import joinRequestRoutes from "./routes/joinRequest/joinRequestRoutes";
 import teamRoutes from "./routes/team/teamRoutes";
 import authRoutes from "./routes/authentication/authRoutes";
-import teacherAssignmentRoutes from "./routes/assignments/teacherAssignmentRoutes";
 
 dotenv.config();
 
@@ -51,11 +50,14 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
 // JSON-parser middleware
 app.use(express.json());
 
-// Routes voor Teacher (Classes)
-app.use("/teacher/classes", teacherClassRoutes);
+// Routes voor classes
+app.use("/class", classRoutes);
 
-// Routes voor student (Classes)
-app.use("/student/classes", studentClassRoutes);
+// Routes voor invites
+app.use("/invite", teacherInviteRoutes);
+
+// Routes voor join requests
+app.use("/join-request", joinRequestRoutes);
 
 // Routes voor authentificatie
 app.use("/auth", authRoutes);

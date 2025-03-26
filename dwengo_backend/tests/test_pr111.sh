@@ -79,7 +79,7 @@ echo "Student token: $STUDENT_TOKEN"
 
 echo
 echo "==[ 3) Teacher maakt klas aan ]===================================="
-CLASS_CREATE_RESP=$(curl -s -X POST "$BASE_URL/teacher/classes" \
+CLASS_CREATE_RESP=$(curl -s -X POST "$BASE_URL/class/teacher" \
   -H "Authorization: Bearer $TEACHER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -92,7 +92,7 @@ echo "$CLASS_CREATE_RESP"
 
 echo
 echo "==[ 4) Teacher haalt de join link op ]============================="
-JOIN_LINK_RESP=$(curl -s -X GET "$BASE_URL/teacher/classes/$CLASS_ID/join-link" \
+JOIN_LINK_RESP=$(curl -s -X GET "$BASE_URL/class/teacher/$CLASS_ID/join-link" \
    -H "Authorization: Bearer $TEACHER_TOKEN")
 
 JOIN_LINK=$(echo "$JOIN_LINK_RESP" | jq -r '.joinLink')
@@ -104,7 +104,7 @@ echo "JoinCode is: $JOIN_CODE"
 
 echo
 echo "==[ 5) Student join request ]======================================"
-curl -i -X POST "$BASE_URL/student/classes/join" \
+curl -i -X POST "$BASE_URL/class/student/join" \
    -H "Authorization: Bearer $STUDENT_TOKEN" \
    -H "Content-Type: application/json" \
    -d "{
@@ -113,7 +113,7 @@ curl -i -X POST "$BASE_URL/student/classes/join" \
 
 echo
 echo "==[ 6) Teacher bekijkt join requests en approve ]=================="
-JOIN_REQS=$(curl -s -X GET "$BASE_URL/teacher/classes/$CLASS_ID/join-requests" \
+JOIN_REQS=$(curl -s -X GET "$BASE_URL/join-request/class/$CLASS_ID" \
   -H "Authorization: Bearer $TEACHER_TOKEN")
 
 echo "Join requests: $JOIN_REQS"
@@ -125,7 +125,7 @@ echo "Join requests: $JOIN_REQS"
 REQUEST_ID=$(echo "$JOIN_REQS" | jq -r '.joinRequests[0].requestId')
 echo "Approve requestId: $REQUEST_ID"
 
-curl -i -X PATCH "$BASE_URL/teacher/classes/$CLASS_ID/join-requests/$REQUEST_ID" \
+curl -i -X PATCH "$BASE_URL/join-request/$REQUEST_ID/classes/$CLASS_ID" \
    -H "Authorization: Bearer $TEACHER_TOKEN" \
    -H "Content-Type: application/json" \
    -d '{"action":"approve"}'
