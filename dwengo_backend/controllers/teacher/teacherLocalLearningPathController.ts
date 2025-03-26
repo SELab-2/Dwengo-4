@@ -12,10 +12,7 @@ interface PathMetadata {
   image?: string | null;
 }
 
-/**
- * POST /teacher/learningPaths
- *   -> nieuw leerpad (zonder nodes)
- */
+// De leerkracht maak een nieuwe leerpad aan
 export const createLocalLearningPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     // Door protectTeacher in de routes weten we: role=TEACHER
@@ -24,15 +21,20 @@ export const createLocalLearningPath = asyncHandler(
     const { title, language, description, image } = req.body as PathMetadata;
     if (!title || !language) {
       res.status(400);
-      throw new Error("Vereiste velden: title, language (optioneel: description, image).");
+      throw new Error(
+        "Vereiste velden: title, language (optioneel: description, image)."
+      );
     }
 
-    const newPath = await LocalLearningPathService.createLearningPath(teacherId, {
-      title,
-      language,
-      description: description || "",
-      image: image || null,
-    });
+    const newPath = await LocalLearningPathService.createLearningPath(
+      teacherId,
+      {
+        title,
+        language,
+        description: description || "",
+        image: image || null,
+      }
+    );
 
     res.status(201).json({
       message: "Leerpad aangemaakt",
@@ -41,23 +43,19 @@ export const createLocalLearningPath = asyncHandler(
   }
 );
 
-/**
- * GET /teacher/learningPaths
- *   -> haal alle leerpaden op van de ingelogde teacher
- */
+// haal alle leerpaden op van de ingelogde teacher
 export const getLocalLearningPaths = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = req.user!.id;
 
-    const paths = await LocalLearningPathService.getAllLearningPathsByTeacher(teacherId);
+    const paths = await LocalLearningPathService.getAllLearningPathsByTeacher(
+      teacherId
+    );
     res.json(paths);
   }
 );
 
-/**
- * GET /teacher/learningPaths/:pathId
- *   -> haal één leerpad op
- */
+// haal één leerpad op
 export const getLocalLearningPathById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = req.user!.id;
@@ -78,16 +76,15 @@ export const getLocalLearningPathById = asyncHandler(
   }
 );
 
-/**
- * PATCH /teacher/learningPaths/:pathId
- *   -> Update (gedeeltelijk) een leerpad
- */
+// Update (gedeeltelijk) een leerpad
 export const updateLocalLearningPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = req.user!.id;
 
     const { pathId } = req.params;
-    const existingPath = await LocalLearningPathService.getLearningPathById(pathId);
+    const existingPath = await LocalLearningPathService.getLearningPathById(
+      pathId
+    );
     if (!existingPath) {
       res.status(404);
       throw new Error("Leerpad niet gevonden");
@@ -98,14 +95,19 @@ export const updateLocalLearningPath = asyncHandler(
     }
 
     // Hier kun je gedeeltelijk updaten
-    const { title, language, description, image } = req.body as Partial<PathMetadata>;
+    const { title, language, description, image } =
+      req.body as Partial<PathMetadata>;
 
-    const updatedPath = await LocalLearningPathService.updateLearningPath(pathId, {
-      title: title !== undefined ? title : existingPath.title,
-      language: language !== undefined ? language : existingPath.language,
-      description: description !== undefined ? description : existingPath.description,
-      image: image !== undefined ? image : existingPath.image || null,
-    });
+    const updatedPath = await LocalLearningPathService.updateLearningPath(
+      pathId,
+      {
+        title: title !== undefined ? title : existingPath.title,
+        language: language !== undefined ? language : existingPath.language,
+        description:
+          description !== undefined ? description : existingPath.description,
+        image: image !== undefined ? image : existingPath.image || null,
+      }
+    );
 
     res.json({
       message: "Leerpad bijgewerkt",
@@ -114,15 +116,15 @@ export const updateLocalLearningPath = asyncHandler(
   }
 );
 
-/**
- * DELETE /teacher/learningPaths/:pathId
- */
+// Verwijder een leerpad
 export const deleteLocalLearningPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = req.user!.id;
 
     const { pathId } = req.params;
-    const existingPath = await LocalLearningPathService.getLearningPathById(pathId);
+    const existingPath = await LocalLearningPathService.getLearningPathById(
+      pathId
+    );
     if (!existingPath) {
       res.status(404);
       throw new Error("Leerpad niet gevonden");
