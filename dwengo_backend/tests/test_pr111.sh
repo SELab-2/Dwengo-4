@@ -151,7 +151,7 @@ echo "$LOCAL_LO"
 
 echo
 echo "==[ 8) Teacher maakt lokaal leerpad ]=============================="
-LOCAL_LP_RESP=$(curl -s -X POST "$BASE_URL/teacher/learningPaths" \
+LOCAL_LP_RESP=$(curl -s -X POST "$BASE_URL/pathByTeacher" \
    -H "Authorization: Bearer $TEACHER_TOKEN" \
    -H "Content-Type: application/json" \
    -d '{
@@ -167,7 +167,7 @@ echo "$LOCAL_LP_RESP"
 
 echo
 echo "==[ 9) Teacher voegt node toe in leerpad (lokaal LO) ]============"
-LP_NODE_RESP=$(curl -s -X POST "$BASE_URL/teacher/learningPaths/$LP_ID/nodes" \
+LP_NODE_RESP=$(curl -s -X POST "$BASE_URL/learningPath/$LP_ID/node" \
    -H "Authorization: Bearer $TEACHER_TOKEN" \
    -H "Content-Type: application/json" \
    -d "{
@@ -188,7 +188,7 @@ echo "Node response: $LP_NODE_RESP"
 echo
 echo "==[ 9b) Teacher voegt TWEEDE node toe (extern Dwengo LO) ]========="
 # Voorbeeld: hruid= 'opdracht_leds', language='nl', version=2
-LP_NODE2_RESP=$(curl -s -X POST "$BASE_URL/teacher/learningPaths/$LP_ID/nodes" \
+LP_NODE2_RESP=$(curl -s -X POST "$BASE_URL/teacher/learningPath/$LP_ID/node" \
    -H "Authorization: Bearer $TEACHER_TOKEN" \
    -H "Content-Type: application/json" \
    -d "{

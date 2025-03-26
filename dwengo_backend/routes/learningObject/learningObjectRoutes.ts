@@ -3,7 +3,6 @@ import {
   getAllLearningObjectsController,
   getLearningObjectController,
   searchLearningObjectsController,
-  getLearningObjectsForPathController,
   // [NIEUW] importeer de extra controller-functie:
   getLearningObjectByHruidLangVersionController,
 } from "../../controllers/learningObject/learningObjectController";
