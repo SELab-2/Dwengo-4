@@ -52,7 +52,7 @@ export default class inviteService {
         }
 
         // create the invite
-        return await prisma.invite.create({
+        return prisma.invite.create({
             data: {
                 otherTeacherId,
                 classTeacherId,
@@ -68,11 +68,11 @@ export default class inviteService {
         if (!isTeacher) {
             throw new AccesDeniedError("Leerkracht is geen beheerder van de klas");
         }
-        return await prisma.invite.findMany({
+        return prisma.invite.findMany({
             where: {
                 classId,
                 status: JoinRequestStatus.PENDING
-            },  
+            },
         });
     }
 
@@ -134,7 +134,7 @@ export default class inviteService {
         }
 
         // delete the invite
-        return await prisma.invite.delete({
+        return prisma.invite.delete({
             where: {
                 inviteId,
                 classId   // added this to make sure the invite belongs to the class that was passed in the arguments

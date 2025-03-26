@@ -89,18 +89,13 @@ export default class ReferenceValidationService {
   static async validateDwengoLearningPath(hruid: string, language: string): Promise<void> {
     // Dwengo: /api/learningPath/search?hruid=...&language=...
     // (versie voor paden is meestal niet gedefinieerd in Dwengo)
-    try {
-      const resp = await dwengoAPI.get(
-        `/api/learningPath/search?hruid=${hruid}&language=${language}`
+    const resp = await dwengoAPI.get(
+      `/api/learningPath/search?hruid=${hruid}&language=${language}`
+    );
+    if (!resp.data || !Array.isArray(resp.data) || resp.data.length === 0) {
+      throw new Error(
+        `Fout bij Dwengo-check leerpad: Dwengo leerpad (hruid=${hruid}, language=${language}) niet gevonden (lege array).`
       );
-      if (!resp.data || !Array.isArray(resp.data) || resp.data.length === 0) {
-        throw new Error(
-          `Dwengo leerpad (hruid=${hruid}, language=${language}) niet gevonden (lege array).`
-        );
-      }
-      // Eventueel checken of we exact 1 match hebben
-    } catch (err: any) {
-      throw new Error(`Fout bij Dwengo-check leerpad: ${err.message}`);
     }
   }
 

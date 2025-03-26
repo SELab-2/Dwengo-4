@@ -8,7 +8,7 @@ import { BadRequestError } from "../../errors/errors";
 
 const APP_URL = process.env.APP_URL || "http://localhost:5000";
 
-export const isNameValid = (req: AuthenticatedRequest, res: Response): boolean => {
+export const isNameValid = (req: AuthenticatedRequest): boolean => {
     const { name } = req.body;
     if (!name || typeof name !== "string" || name.trim() === "") {
         throw new BadRequestError("Vul een geldige klasnaam in");
@@ -39,7 +39,7 @@ export const createClassroom = asyncHandler(
         const { name } = req.body;
         const teacherId: number = getUserFromAuthRequest(req).id;
 
-        isNameValid(req, res); // if invalid, an error is thrown
+        isNameValid(req); // if invalid, an error is thrown
 
         const classroom = await classService.createClass(name, teacherId);
         res.status(201).json({ message: "Klas aangemaakt", classroom });

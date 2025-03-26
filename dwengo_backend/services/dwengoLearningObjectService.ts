@@ -1,5 +1,4 @@
-import { dwengoAPI } from "../config/dwengoAPI";
-import axios from "axios";
+import {dwengoAPI} from "../config/dwengoAPI";
 
 /**
  * De mogelijke content types (zie je enum in de oorspronkelijke code).

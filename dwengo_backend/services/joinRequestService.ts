@@ -1,8 +1,7 @@
-import {PrismaClient, JoinRequestStatus, JoinRequest} from "@prisma/client";
-import classService from "./classService";
-import {ClassWithLinks} from "./classService";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { AccesDeniedError, BadRequestError, NotFoundError } from "../errors/errors";
+import {JoinRequest, JoinRequestStatus, PrismaClient} from "@prisma/client";
+import classService, {ClassWithLinks} from "./classService";
+import {PrismaClientKnownRequestError} from "@prisma/client/runtime/library";
+import {AccesDeniedError, BadRequestError, NotFoundError} from "../errors/errors";
 
 const prisma = new PrismaClient();
 
@@ -32,12 +31,10 @@ export default class joinRequestService {
         }
         
         // Update the join request status
-        const updatedRequest = await prisma.joinRequest.update({
-            where: { requestId },
-            data: { status: status },
+        return prisma.joinRequest.update({
+            where: {requestId},
+            data: {status: status},
         });
-
-        return updatedRequest;
     }
 
     static async createJoinRequest(studentId: number, classId: number): Promise<JoinRequest> {

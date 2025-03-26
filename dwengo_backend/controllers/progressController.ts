@@ -1,7 +1,7 @@
-import { Response } from "express";
-import { Assignment, LearningObjectProgress, PrismaClient } from "@prisma/client";
-import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
-import { getUserFromAuthRequest } from "../helpers/getUserFromAuthRequest";
+import {Response} from "express";
+import {Assignment, LearningObjectProgress, PrismaClient, Student, Team, TeamAssignment} from "@prisma/client";
+import {AuthenticatedRequest} from "../interfaces/extendedTypeInterfaces";
+import {getUserFromAuthRequest} from "../helpers/getUserFromAuthRequest";
 
 const prisma = new PrismaClient();
 
@@ -128,30 +128,9 @@ export const getTeamProgressStudent = async (
   res: Response
 ): Promise<void> => {
   try {
-    if (!req.user) {
-      res.status(401).json({ error: "Niet ingelogd." });
-      return;
-    }
-
-    const teamId: number = parseInt(req.params.teamid, 10);
-    if (isNaN(teamId)) {
-      res.status(400).json({ error: "Ongeldig team ID." });
-      return;
-    }
-
-    // Haal team + assignment
-    const team = await prisma.team.findUnique({
-      where: { id: teamId },
-      include: {
-        students: true,
-        teamAssignment: true, // => assignmentId
-      },
-    });
-    if (!team) {
-      res.status(404).json({ error: "Team niet gevonden." });
-      return;
-    }
-    const ta = team.teamAssignment;
+    const team: Team & {students: Student[]; teamAssignment: TeamAssignment | null} | null = await getAndValidateTeam(req, res);
+    if (!team) return;
+    const ta: TeamAssignment | null = team.teamAssignment;
     if (!ta) {
       res.status(404).json({ error: "Geen assignment gekoppeld aan dit team." });
       return;
@@ -227,25 +206,9 @@ export const getStudentAssignmentProgress = async (
 ): Promise<void> => {
   try {
     const studentId: number = getUserFromAuthRequest(req).id;
-    const assignmentId: number = parseInt(req.params.assignmentId, 10);
-    if (isNaN(assignmentId)) {
-      res.status(400).json({ error: "Ongeldig assignment ID." });
-      return;
-    }
 
-    const assignment = await prisma.assignment.findUnique({
-      where: { id: assignmentId },
-    });
-    if (!assignment) {
-      res.status(404).json({ error: "Opdracht niet gevonden." });
-      return;
-    }
-
-    // Als isExternal -> Dwengo => 0%
-    if (assignment.isExternal) {
-      res.json({ assignmentProgress: 0 });
-      return;
-    }
+    const assignment: Assignment | null = await getAndValidateAssignment(req, res);
+    if (!assignment) return;
     const localPathId = assignment.pathRef;
 
     // Tel nodes
@@ -347,27 +310,9 @@ export const getTeamProgressTeacher = async (
   res: Response
 ): Promise<void> => {
   try {
-    if (!req.user) {
-      res.status(401).json({ error: "Niet ingelogd." });
-      return;
-    }
-    const teamId: number = parseInt(req.params.teamid, 10);
-    if (isNaN(teamId)) {
-      res.status(400).json({ error: "Ongeldig team ID." });
-      return;
-    }
+    const team: Team & {students: Student[]; teamAssignment: TeamAssignment | null} | null = await getAndValidateTeam(req, res);
+    if (!team) return;
 
-    const team = await prisma.team.findUnique({
-      where: { id: teamId },
-      include: {
-        students: true,
-        teamAssignment: true,
-      },
-    });
-    if (!team) {
-      res.status(404).json({ error: "Team niet gevonden." });
-      return;
-    }
     if (!team.teamAssignment) {
       res.status(404).json({ error: "Geen assignment gekoppeld aan dit team." });
       return;
@@ -441,23 +386,8 @@ export const getAssignmentAverageProgress = async (
       res.status(401).json({ error: "Niet ingelogd." });
       return;
     }
-    const assignmentId = parseInt(req.params.assignmentId, 10);
-    if (isNaN(assignmentId)) {
-      res.status(400).json({ error: "Ongeldig assignment ID." });
-      return;
-    }
-
-    const assignment = await prisma.assignment.findUnique({
-      where: { id: assignmentId },
-    });
-    if (!assignment) {
-      res.status(404).json({ error: "Opdracht niet gevonden." });
-      return;
-    }
-    if (assignment.isExternal) {
-      res.json({ averageProgress: 0 });
-      return;
-    }
+    const assignment: Assignment | null = await getAndValidateAssignment(req, res);
+    if (!assignment) return;
     const localPathId = assignment.pathRef;
 
     // tel local nodes
@@ -482,7 +412,7 @@ export const getAssignmentAverageProgress = async (
 
     // alle teams
     const teamAssignments = await prisma.teamAssignment.findMany({
-      where: { assignmentId },
+      where: { assignmentId: assignment.id },
       include: { team: { include: { students: true } } },
     });
     if (teamAssignments.length === 0) {
@@ -524,4 +454,56 @@ export const getAssignmentAverageProgress = async (
   }
 };
 
+// Hulpfunctie om codeduplicatie weg te werken
+async function getAndValidateAssignment(req: AuthenticatedRequest, res: Response): Promise<Assignment | null> {
+  const assignmentId: number = parseInt(req.params.assignmentId, 10);
+  if (isNaN(assignmentId)) {
+    res.status(400).json({error: "Ongeldig assignment ID."});
+    return null;
+  }
 
+  const assignment: Assignment | null = await prisma.assignment.findUnique({
+    where: {id: assignmentId},
+  });
+  if (!assignment) {
+    res.status(404).json({error: "Opdracht niet gevonden."});
+    return null;
+  }
+
+  // Als isExternal -> Dwengo => 0%
+  if (assignment.isExternal) {
+    res.json({assignmentProgress: 0});
+    return null;
+  }
+
+  return assignment;
+}
+
+// Hulpfunctie om codeduplicatie weg te werken
+async function getAndValidateTeam(req: AuthenticatedRequest, res: Response): Promise<Team & {students: Student[]; teamAssignment: TeamAssignment | null} | null> {
+  if (!req.user) {
+    res.status(401).json({ error: "Niet ingelogd." });
+    return null;
+  }
+
+  const teamId: number = parseInt(req.params.teamid, 10);
+  if (isNaN(teamId)) {
+    res.status(400).json({ error: "Ongeldig team ID." });
+    return null;
+  }
+
+  // Haal team + assignment
+  const team: Team & {students: Student[]; teamAssignment: TeamAssignment | null} | null = await prisma.team.findUnique({
+    where: { id: teamId },
+    include: {
+      students: true,
+      teamAssignment: true, // => assignmentId
+    },
+  });
+  if (!team) {
+    res.status(404).json({ error: "Team niet gevonden." });
+    return null;
+  }
+
+  return team;
+}

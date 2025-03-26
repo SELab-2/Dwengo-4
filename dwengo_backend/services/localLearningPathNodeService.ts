@@ -1,6 +1,5 @@
-import { PrismaClient, LearningPathNode } from "@prisma/client";
-import localLearningPathService from "./localLearningPathService";
-import { dwengoAPI } from "../config/dwengoAPI";
+import {LearningPathNode, PrismaClient} from "@prisma/client";
+import {dwengoAPI} from "../config/dwengoAPI";
 
 const prisma = new PrismaClient();
 
@@ -87,7 +86,7 @@ class LocalLearningPathNodeService {
     }
 
     // 2) Transactie:
-    const result = await prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx) => {
       // 2a) Node maken
       const newNode = await tx.learningPathNode.create({
         data: {
@@ -95,8 +94,8 @@ class LocalLearningPathNodeService {
           isExternal: data.isExternal,
 
           localLearningObjectId: data.isExternal
-            ? undefined
-            : data.localLearningObjectId,
+              ? undefined
+              : data.localLearningObjectId,
           dwengoHruid: data.isExternal ? data.dwengoHruid : undefined,
           dwengoLanguage: data.isExternal ? data.dwengoLanguage : undefined,
           dwengoVersion: data.isExternal ? data.dwengoVersion : undefined,
@@ -107,17 +106,15 @@ class LocalLearningPathNodeService {
 
       // 2b) Aantal nodes bijwerken
       const count = await tx.learningPathNode.count({
-        where: { learningPathId: pathId },
+        where: {learningPathId: pathId},
       });
       await tx.learningPath.update({
-        where: { id: pathId },
-        data: { num_nodes: count },
+        where: {id: pathId},
+        data: {num_nodes: count},
       });
 
       return newNode;
     });
-
-    return result;
   }
 
   /**
@@ -227,22 +224,20 @@ class LocalLearningPathNodeService {
       }
     }
 
-    const updatedNode = await prisma.learningPathNode.update({
-      where: { nodeId },
+    // Aantal nodes blijft hetzelfde → geen updateNumNodes nodig
+    return prisma.learningPathNode.update({
+      where: {nodeId},
       data: {
         isExternal: newIsExternal,
         localLearningObjectId: newIsExternal
-          ? null
-          : newLocalLearningObjectId ?? null,
+            ? null
+            : newLocalLearningObjectId ?? null,
         dwengoHruid: newIsExternal ? newDwengoHruid : null,
         dwengoLanguage: newIsExternal ? newDwengoLanguage : null,
         dwengoVersion: newIsExternal ? newDwengoVersion : null,
         start_node: data.start_node ?? node.start_node,
       },
     });
-
-    // Aantal nodes blijft hetzelfde → geen updateNumNodes nodig
-    return updatedNode;
   }
 
   /**

@@ -1,9 +1,7 @@
-import { Request, Response } from "express";
+import {Response} from "express";
 import asyncHandler from "express-async-handler";
-import LocalLearningObjectService, {
-  LocalLearningObjectData,
-} from "../../services/localLearningObjectService";
-import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
+import LocalLearningObjectService, {LocalLearningObjectData,} from "../../services/localLearningObjectService";
+import {AuthenticatedRequest} from "../../interfaces/extendedTypeInterfaces";
 
 /**
  * Maak een nieuw leerobject.

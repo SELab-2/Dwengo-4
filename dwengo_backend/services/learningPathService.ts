@@ -1,4 +1,4 @@
-import { dwengoAPI } from "../config/dwengoAPI";
+import {dwengoAPI} from "../config/dwengoAPI";
 
 export interface LearningPathDto {
   _id: string; // Dwengo gebruikt _id
@@ -72,8 +72,7 @@ export async function searchLearningPaths(
     const dwengoData = response.data; // array van leerpaden
 
     // Map elk item naar LearningPathDto
-    const results = dwengoData.map(mapDwengoPathToLocal);
-    return results;
+    return dwengoData.map(mapDwengoPathToLocal);
   } catch (error) {
     console.error("Fout bij searchLearningPaths:", error);
     throw new Error("Dwengo API call voor leerpaden mislukt.");

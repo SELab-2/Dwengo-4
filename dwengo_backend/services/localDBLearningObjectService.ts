@@ -1,7 +1,5 @@
-
-
-import { PrismaClient, LearningObject } from "@prisma/client";
-import { LearningObjectDto } from "./dwengoLearningObjectService";
+import {LearningObject, PrismaClient} from "@prisma/client";
+import {LearningObjectDto} from "./dwengoLearningObjectService";
 
 const prisma = new PrismaClient();
 

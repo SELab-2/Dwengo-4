@@ -56,11 +56,10 @@ export default class LocalLearningObjectService {
    * Of (afhankelijk van je wensen) alle leerobjecten in de DB als je dat wilt.
    */
   static async getAllLearningObjectsByTeacher(teacherId: number) {
-    const objects = await prisma.learningObject.findMany({
-      where: { creatorId: teacherId },
-      orderBy: { createdAt: "desc" },
+    return prisma.learningObject.findMany({
+      where: {creatorId: teacherId},
+      orderBy: {createdAt: "desc"},
     });
-    return objects;
   }
 
   /**
