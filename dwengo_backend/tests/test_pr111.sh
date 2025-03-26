@@ -36,7 +36,7 @@ echo "==[ 0) (Optioneel) Opschonen - indien nodig ]====================="
 echo
 echo "==[ 1) Registreren van Teacher en Student ]========================"
 # --- Teacher register ---
-curl -i -X POST "$BASE_URL/teacher/auth/register" \
+curl -i -X POST "$BASE_URL/auth/teacher/register" \
      -H "Content-Type: application/json" \
      -d "{
        \"firstName\":\"$TEACHER_FIRSTNAME\",
@@ -46,7 +46,7 @@ curl -i -X POST "$BASE_URL/teacher/auth/register" \
      }" || true
 
 # --- Student register ---
-curl -i -X POST "$BASE_URL/student/auth/register" \
+curl -i -X POST "$BASE_URL/auth/student/register" \
      -H "Content-Type: application/json" \
      -d "{
        \"firstName\":\"$STUDENT_FIRSTNAME\",
@@ -58,7 +58,7 @@ curl -i -X POST "$BASE_URL/student/auth/register" \
 echo
 echo "==[ 2) Inloggen Teacher en Student ]==============================="
 # Inloggen Teacher
-TEACHER_TOKEN=$(curl -s -X POST "$BASE_URL/teacher/auth/login" \
+TEACHER_TOKEN=$(curl -s -X POST "$BASE_URL/auth/teacher/login" \
   -H "Content-Type: application/json" \
   -d "{
     \"email\":\"$TEACHER_EMAIL\",
@@ -68,7 +68,7 @@ TEACHER_TOKEN=$(curl -s -X POST "$BASE_URL/teacher/auth/login" \
 echo "Teacher token: $TEACHER_TOKEN"
 
 # Inloggen Student
-STUDENT_TOKEN=$(curl -s -X POST "$BASE_URL/student/auth/login" \
+STUDENT_TOKEN=$(curl -s -X POST "$BASE_URL/auth/student/login" \
   -H "Content-Type: application/json" \
   -d "{
     \"email\":\"$STUDENT_EMAIL\",
