@@ -1,4 +1,4 @@
-import { PrismaClient, LearningPath } from "@prisma/client";
+import {LearningPath, PrismaClient} from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -17,7 +17,7 @@ class LocalLearningPathService {
     teacherId: number,
     data: Required<LocalLearningPathData>
   ): Promise<LearningPath> {
-    const newPath = await prisma.learningPath.create({
+    return prisma.learningPath.create({
       data: {
         title: data.title,
         language: data.language,
@@ -30,7 +30,6 @@ class LocalLearningPathService {
         hruid: `lp-${Date.now()}-${Math.floor(Math.random() * 100000)}`,
       },
     });
-    return newPath;
   }
 
   async getAllLearningPathsByTeacher(teacherId: number): Promise<LearningPath[]> {
@@ -47,8 +46,8 @@ class LocalLearningPathService {
   }
 
   async updateLearningPath(pathId: string, data: LocalLearningPathData): Promise<LearningPath> {
-    const updated = await prisma.learningPath.update({
-      where: { id: pathId },
+    return prisma.learningPath.update({
+      where: {id: pathId},
       data: {
         title: data.title,
         language: data.language,
@@ -56,7 +55,6 @@ class LocalLearningPathService {
         image: data.image,
       },
     });
-    return updated;
   }
 
   async deleteLearningPath(pathId: string): Promise<void> {
@@ -69,7 +67,7 @@ class LocalLearningPathService {
    * Hulpmethode om bij elke mutatie van nodes het aantal nodes te herberekenen
    */
   async updateNumNodes(pathId: string): Promise<void> {
-    const count = await prisma.learningPathNode.count({
+    const count: number = await prisma.learningPathNode.count({
       where: { learningPathId: pathId },
     });
     await prisma.learningPath.update({
