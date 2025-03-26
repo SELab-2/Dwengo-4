@@ -6,9 +6,8 @@ import QuestionRoutes from "./routes/question/questionRoutes";
 import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
 import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearningObjectRoutes";
 
-import assignmentRoutes from "./routes/assignmentRoutes";
-import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
-import progressRoutes from "./routes/progressRoutes";
+import assignmentRoutes from "./routes/assignments/assignmentRoutes";
+import progressRoutes from "./routes/progress/progressRoutes";
 import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
 import studentAssignmentRoutes from "./routes/assignments/studentAssignmentRoutes";
 import feedbackRoutes from "./routes/feedback/feedbackRoutes";
@@ -21,6 +20,7 @@ import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
 import teamRoutes from "./routes/team/teamRoutes";
 import authRoutes from "./routes/authentication/authRoutes";
+import teacherAssignmentRoutes from "./routes/assignments/teacherAssignmentRoutes";
 
 dotenv.config();
 
@@ -68,14 +68,6 @@ app.use("/learningObjectByTeacher", teacherLocalLearningObjectRoutes);
 
 // Routes voor teams
 app.use("/team", teamRoutes);
-
-// Routes voor de Assignments
-app.use("/assignments", assignmentRoutes);
-
-// Routes voor de aanpassingen op Assignments door teachers
-app.use("/teacher/assignments", teacherAssignmentRoutes);
-// Routes voor het opvragen van de Assignments door students
-app.use("/student/assignments", studentAssignmentRoutes);
 
 // Routes voor de assignments
 app.use("/assignment", assignmentRoutes);
