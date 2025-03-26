@@ -8,3 +8,8 @@ export const registerBodySchema = z.object({
         .string({ required_error: "password required" })
         .min(6, "password must be at least 6 characters"), // add other password rules here if needed
 });
+
+export const loginBodySchema = z.object({
+    email: z.string({ required_error: "email required" }).email("invalid email"),
+    password: z.string({ required_error: "password required" }),
+});

@@ -2,7 +2,7 @@ import express, { Router } from "express";
 import { loginStudent } from "../../controllers/student/studentAuthController";
 import { registerStudent } from "../../controllers/userController";
 import { validateRequest } from "../../middleware/validateRequest";
-import { registerBodySchema } from "../../zodSchemas/authSchemas";
+import { loginBodySchema, registerBodySchema } from "../../zodSchemas/authSchemas";
 
 const router: Router = express.Router();
 
@@ -14,6 +14,10 @@ router.post(
 );
 
 // Inloggen van een leerling
-router.post("/login", loginStudent);
+router.post(
+    "/login",
+    validateRequest("invalid request for student login", loginBodySchema),
+    loginStudent
+);
 
 export default router;

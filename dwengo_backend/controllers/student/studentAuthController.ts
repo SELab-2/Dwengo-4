@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 import crypto from "crypto";
+import { UnauthorizedError } from "../../errors/errors";
 const prisma = new PrismaClient();
 
 // Functie om een JWT-token te genereren
@@ -27,19 +28,13 @@ interface LoginStudentBody {
 // @route   POST /student/auth/login
 // @access  Public
 export const loginStudent = asyncHandler(async (req: Request, res: Response) => {
-    const { email, password } = req.body as LoginStudentBody;
-
-    // Basisvalidatie voor e-mail
-    if (!/\S+@\S+\.\S+/.test(email)) {
-        res.status(400);
-        throw new Error("Voer een geldig e-mailadres in");
-    }
+    let { email, password } = req.body as LoginStudentBody;
+    email = email.toLowerCase();
 
     // Zoek eerst de gebruiker
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user || user.role !== "STUDENT") {
-        res.status(401);
-        throw new Error("Ongeldige gebruiker");
+        throw new UnauthorizedError("Invalid user");
     }
 
     // Haal het gekoppelde Student-record op
@@ -49,15 +44,13 @@ export const loginStudent = asyncHandler(async (req: Request, res: Response) => 
     });
 
     if (!student || !student.user) {
-        res.status(401);
-        throw new Error("Ongeldige gebruiker");
+        throw new UnauthorizedError("Invalid user");
     }
 
     // Vergelijk het opgegeven wachtwoord met de opgeslagen hash
     const passwordMatches = await bcrypt.compare(password, student.user.password);
     if (!passwordMatches) {
-        res.status(401);
-        throw new Error("Ongeldig wachtwoord");
+        throw new UnauthorizedError("Incorrect password");
     }
 
     res.json({

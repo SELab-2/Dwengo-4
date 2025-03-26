@@ -21,7 +21,7 @@ describe("Authentication API Tests", () => {
 
             // verify user was created
             const user = await prisma.user.findUnique({ where: { email: "student1@example.com" } });
-            expect(user).toBeDefined();
+            expect(user).not.toBeNull();
             expect(user!.role).toBe("STUDENT");
             expect(user!.email).toBe("student1@example.com");
             expect(user!.firstName).toBe("Jan");
@@ -29,7 +29,7 @@ describe("Authentication API Tests", () => {
 
             // verify student was created
             const student = await prisma.student.findUnique({ where: { userId: user!.id } });
-            expect(student).toBeDefined();
+            expect(student).not.toBeNull();
         });
         it("should respond with `400` when some fields are missing", async () => {
             const response = await request(app).post("/student/auth/register").send({}); // empty body
@@ -149,7 +149,7 @@ describe("Authentication API Tests", () => {
             });
         });
 
-        it("should accept uppercase emails", async () => {
+        it("should convert emails to lower case", async () => {
             // create a student with an uppercase email
             const response = await request(app).post("/student/auth/register").send({
                 firstName: "Jan",
@@ -160,8 +160,8 @@ describe("Authentication API Tests", () => {
 
             expect(response.status).toBe(201);
             // email should be converted to lowercase in the database
-            const user = await prisma.user.findUnique({ where: { email: "student1@example.com" } });
-            expect(user).toBeDefined();
+            const user = await prisma.user.findUnique({ where: { email: "test@example.com" } });
+            expect(user).not.toBeNull();
         });
     });
 
@@ -178,7 +178,7 @@ describe("Authentication API Tests", () => {
                 })
                 .set("Content-Type", "application/json");
         });
-        it("2. Should login with registered student credentials", async () => {
+        it("should login with registered student credentials", async () => {
             // test logging in
             const response = await request(app)
                 .post("/student/auth/login")
@@ -190,7 +190,19 @@ describe("Authentication API Tests", () => {
 
             expect(response.status).toBe(200);
         });
-        it("3. Should fail login with non-registered email", async () => {
+        it("should log in, even if the email is in uppercase", async () => {
+            // test logging in with email in uppercase
+            const response = await request(app)
+                .post("/student/auth/login")
+                .send({
+                    email: "StUdEnt1@eXAmpLe.COm",
+                    password: "password123",
+                })
+                .set("Content-Type", "application/json");
+
+            expect(response.status).toBe(200);
+        });
+        it("should fail login with non-registered email", async () => {
             const response = await request(app)
                 .post("/student/auth/login")
                 .send({
@@ -200,8 +212,9 @@ describe("Authentication API Tests", () => {
                 .set("Content-Type", "application/json");
 
             expect(response.status).toBe(401);
+            expect(response.body.message).toBe("Invalid user");
         });
-        it("4. Should fail login with correct email but wrong password", async () => {
+        it("should fail login with correct email but wrong password", async () => {
             const response = await request(app)
                 .post("/student/auth/login")
                 .send({
@@ -211,14 +224,13 @@ describe("Authentication API Tests", () => {
                 .set("Content-Type", "application/json");
 
             expect(response.status).toBe(401);
-            // Uncomment when you want to test specific error messages
-            // expect(response.body).toHaveProperty("error");
-            // expect(response.body.error).toContain("Ongeldig wachtwoord");
+            expect(response.body.message).toBe("Incorrect password");
         });
     });
 
+    // same test cases as for student, but now for teacher routes
     describe("[POST] /teacher/auth/register", () => {
-        it("5. Should register a new teacher", async () => {
+        it("should register a new teacher", async () => {
             const response = await request(app)
                 .post("/teacher/auth/register")
                 .send({
@@ -233,7 +245,7 @@ describe("Authentication API Tests", () => {
 
             // verify user was created
             const user = await prisma.user.findUnique({ where: { email: "teacher1@example.com" } });
-            expect(user).toBeDefined();
+            expect(user).not.toBeNull();
             expect(user!.role).toBe("TEACHER");
             expect(user!.email).toBe("teacher1@example.com");
             expect(user!.firstName).toBe("Piet");
@@ -241,10 +253,139 @@ describe("Authentication API Tests", () => {
 
             // verify teacher was created
             const teacher = await prisma.teacher.findUnique({ where: { userId: user!.id } });
-            expect(teacher).toBeDefined();
+            expect(teacher).not.toBeNull();
+        });
+        it("should respond with `400` when some fields are missing", async () => {
+            const response = await request(app).post("/teacher/auth/register").send({}); // empty body
+
+            expect(response.status).toBe(400);
+            expect(response.body.details).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        field: "firstName",
+                        source: "body",
+                    }),
+                    expect.objectContaining({
+                        field: "lastName",
+                        source: "body",
+                    }),
+                    expect.objectContaining({
+                        field: "email",
+                        source: "body",
+                    }),
+                    expect.objectContaining({
+                        field: "password",
+                        source: "body",
+                    }),
+                ])
+            );
+
+            // verify no user was created
+            await prisma.user.findMany().then((users) => {
+                expect(users).toHaveLength(0);
+            });
+        });
+        it("should respond with `400` when email is invalid", async () => {
+            const response = await request(app).post("/teacher/auth/register").send({
+                firstName: "Jan",
+                lastName: "Jansen",
+                email: "invaidemail",
+                password: "password123",
+            });
+
+            expect(response.status).toBe(400);
+            expect(response.body.details).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        field: "email",
+                        source: "body",
+                    }),
+                ])
+            );
+
+            // verify no user was created
+            await prisma.user.findMany().then((users) => {
+                expect(users).toHaveLength(0);
+            });
+        });
+        it("should respond with `400` when password is too short", async () => {
+            const response = await request(app).post("/teacher/auth/register").send({
+                firstName: "Jan",
+                lastName: "Jansen",
+                email: "student1@example.com",
+                password: "12345",
+            });
+
+            expect(response.status).toBe(400);
+            expect(response.body.details).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        field: "password",
+                        source: "body",
+                    }),
+                ])
+            );
+
+            // verify no user was created
+            await prisma.user.findMany().then((users) => {
+                expect(users).toHaveLength(0);
+            });
+        });
+        it("should respond with `409` when email is already in use by a student", async () => {
+            // create a student with the email
+            const studentUser = await createStudent("Jan", "Jansen", "student1@example.com");
+
+            // test creating a new teacher with the same email
+            const response = await request(app).post("/teacher/auth/register").send({
+                firstName: "Bob",
+                lastName: "Bobsen",
+                email: studentUser.email,
+                password: "password123",
+            });
+
+            expect(response.status).toBe(409);
+            expect(response.body.message).toBe("Gebruiker bestaat al");
+
+            // verify no additional user was created
+            await prisma.user.findMany({ where: { email: studentUser.email } }).then((users) => {
+                expect(users).toHaveLength(1);
+            });
+        });
+        it("should respond with `409` when email is already in use by a teacher", async () => {
+            // create a teacher with the email
+            const teacherUser = await createTeacher("Jan", "Jansen", "teacher1@example.com");
+
+            // test creating a new teacher with the same email
+            const response = await request(app).post("/teacher/auth/register").send({
+                firstName: "Bob",
+                lastName: "Bobsen",
+                email: teacherUser.email,
+                password: "password123",
+            });
+
+            expect(response.status).toBe(409);
+            expect(response.body.message).toBe("Gebruiker bestaat al");
+
+            // verify no additional user was created
+            await prisma.user.findMany({ where: { email: teacherUser.email } }).then((users) => {
+                expect(users).toHaveLength(1);
+            });
         });
 
-        // again, some extra tests where registration fails needed
+        it("should convert emails to lowercase", async () => {
+            // create a teacher with an uppercase email
+            const response = await request(app).post("/teacher/auth/register").send({
+                firstName: "Jan",
+                lastName: "Jansen",
+                email: "TEST@EXAMPLE.COM",
+                password: "password123",
+            });
+
+            expect(response.status).toBe(201);
+            // email should be converted to lowercase in the database
+            const user = await prisma.user.findUnique({ where: { email: "test@example.com" } });
+            expect(user).not.toBeNull();
+        });
     });
 
     describe("[POST] /teacher/auth/login", () => {
