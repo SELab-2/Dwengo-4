@@ -20,10 +20,33 @@ import {
 //     };
 // });
 
+
+let teacherUser1: User & { teacher: Teacher; token: string };
+let teacherUser2: User & { teacher: Teacher; token: string };
+let classroom: Class;
+
+async function sendInviteToTeacherAndValidate() {
+    const { status, body } = await request(app)
+        .post(`/teacher/classes/${classroom.id}/invites`)
+        .set("Authorization", `Bearer ${teacherUser1.token}`)
+        .send({
+            otherTeacherId: teacherUser2.id,
+        });
+    expect(status).toBe(201);
+    const newInvite = await prisma.invite.findFirst({
+        where: {
+            otherTeacherId: teacherUser2.id,
+            classTeacherId: teacherUser1.id,
+            classId: classroom.id,
+            status: JoinRequestStatus.PENDING,
+        },
+    });
+    expect(newInvite).not.toBeNull();
+    // ensure response body contains the invite as expected
+    expect(body.invite).toStrictEqual(newInvite);
+}
+
 describe("invite tests", async (): Promise<void> => {
-    let teacherUser1: User & { teacher: Teacher; token: string };
-    let teacherUser2: User & { teacher: Teacher; token: string };
-    let classroom: Class;
     beforeEach(async (): Promise<void> => {
         // create two teachers
         teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
@@ -38,26 +61,7 @@ describe("invite tests", async (): Promise<void> => {
             await addTeacherToClass(teacherUser1.id, classroom.id);
 
             // now we can test the invite creation
-            const { status, body } = await request(app)
-                .post(`/teacher/classes/${classroom.id}/invites`)
-                .set("Authorization", `Bearer ${teacherUser1.token}`)
-                .send({
-                    otherTeacherId: teacherUser2.id,
-                });
-
-            expect(status).toBe(201);
-            // double check that the invite was created
-            const invite = await prisma.invite.findFirst({
-                where: {
-                    otherTeacherId: teacherUser2.id,
-                    classTeacherId: teacherUser1.id,
-                    classId: classroom.id,
-                    status: JoinRequestStatus.PENDING,
-                },
-            });
-            expect(invite).not.toBeNull();
-            // ensure response body contains the invite as expected
-            expect(body.invite).toStrictEqual(invite);
+            await sendInviteToTeacherAndValidate();
         });
         it("should create an invite, even when there is already a non-pending invite in the database", async (): Promise<void> => {
             // emphasis on the 'non-pending' here
@@ -74,23 +78,7 @@ describe("invite tests", async (): Promise<void> => {
             });
 
             // it should be possible to send another invite
-            const { status, body } = await request(app)
-                .post(`/teacher/classes/${classroom.id}/invites`)
-                .set("Authorization", `Bearer ${teacherUser1.token}`)
-                .send({
-                    otherTeacherId: teacherUser2.id,
-                });
-            expect(status).toBe(201);
-            const newInvite = await prisma.invite.findFirst({
-                where: {
-                    otherTeacherId: teacherUser2.id,
-                    classTeacherId: teacherUser1.id,
-                    classId: classroom.id,
-                    status: JoinRequestStatus.PENDING,
-                },
-            });
-            expect(newInvite).not.toBeNull();
-            expect(body.invite).toStrictEqual(newInvite);
+            await sendInviteToTeacherAndValidate();
         });
         it("should respond with a `404` status code when the class does not exist", async (): Promise<void> => {
             // get an id that isn't used for any existing class in the database
