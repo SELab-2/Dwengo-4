@@ -1,5 +1,5 @@
-import { QueryClient } from "@tanstack/react-query";
-import { getAuthToken } from "./authStudent";
+import {QueryClient} from "@tanstack/react-query";
+import {getAuthToken} from "./authStudent";
 
 const BACKEND = "http://localhost:5000";
 
@@ -95,4 +95,35 @@ export async function joinClass({ joinCode }: { joinCode: string }): Promise<voi
     console.log(error.info)
     throw error;
   }
+}
+
+export interface ClassItem {
+  id: string;
+  name: string;
+  code: string;
+}
+
+export async function fetchClasses(): Promise<ClassItem[]> {
+  const response = await fetch(`${BACKEND}/student/classes`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+        "Er is iets misgegaan bij het ophalen van de klassen."
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  const returner = await response.json();
+  const classrooms = returner["classrooms"];
+  console.log("GETTING CLASSES", classrooms);
+
+  return await classrooms;
 }
