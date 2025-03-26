@@ -106,18 +106,47 @@ export default class joinRequestService {
 
     static async getJoinRequestsByClass(teacherId: number, classId: number): Promise<JoinRequest[]> {
         try {
-            const isTeacher: boolean = await classService.isTeacherOfClass(classId, teacherId);
-            if (!isTeacher) {
-                throw new AccesDeniedError(`Teacher ${teacherId} is not a teacher of class ${classId}`);
-            }
-            return await prisma.joinRequest.findMany({
-                where: { classId }
-            });
+          const isTeacher: boolean = await classService.isTeacherOfClass(classId, teacherId);
+          if (!isTeacher) {
+            throw new AccesDeniedError(`Teacher ${teacherId} is not a teacher of class ${classId}`);
+          }
+    
+          return await prisma.joinRequest.findMany({
+            where: { classId },
+            include: {
+              student: {
+                select: {
+                  user: {
+                    select: {
+                      firstName: true,
+                      lastName: true,
+                      email: true,
+                    },
+                  },
+                },
+              },
+            },
+          }).then((requests) =>
+            requests.map((request) => ({
+              requestId: request.requestId,
+              studentId: request.studentId,
+              classId: request.classId,
+              status: request.status,
+              student: request.student?.user
+                ? {
+                    firstName: request.student.user.firstName,
+                    lastName: request.student.user.lastName,
+                    email: request.student.user.email,
+                  }
+                : undefined,
+            }))
+          );
         } catch (error) {
-            this.handleError(error, `Error fetching join requests for class ${classId}`);
-            return [];
+          console.error(`Error fetching join requests for class ${classId}:`, error);
+          throw new Error("Er is een probleem opgetreden bij het ophalen van join requests.");
         }
-    }
+      }
+    
 
     private static handleError(error: any, message: string): void {
         if (error instanceof PrismaClientKnownRequestError) {

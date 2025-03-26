@@ -1,12 +1,15 @@
 import React, { useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import InputWithChecks from "../../shared/InputWithChecks";
-import { validateRequired, validateForm } from "../../../util/shared/validation";
+import {
+  validateRequired,
+  validateForm,
+} from "../../../util/shared/validation";
 import Container from "../../shared/Container";
-import PrimaryButton from "../../shared/PrimaryButton";
 import BoxBorder from "../../shared/BoxBorder";
 import { createClass } from "../../../util/teacher/httpTeacher";
 import LoadingIndicatorButton from "../../shared/LoadingIndicatorButton";
+import PrimaryButton from "../../shared/PrimaryButton";
 
 interface InputWithChecksRef {
   validateInput: () => boolean;
@@ -27,7 +30,11 @@ const CreateClass: React.FC = () => {
   const classNameRef = useRef<InputWithChecksRef | null>(null);
   const queryClient = useQueryClient();
 
-  const { mutate, isPending, isError, error } = useMutation<ClassItem, Error, CreateClassPayload>({
+  const { mutate, isPending, isError, error } = useMutation<
+    ClassItem,
+    Error,
+    CreateClassPayload
+  >({
     mutationFn: createClass,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["classes"] });
@@ -41,6 +48,7 @@ const CreateClass: React.FC = () => {
       const formData = {
         name: classNameRef.current.getValue(),
       };
+      console.log(formData);
       mutate(formData);
     }
   };
@@ -55,7 +63,9 @@ const CreateClass: React.FC = () => {
               ref={classNameRef}
               label="Klasnaam"
               inputType="text"
-              validate={(value: string) => validateForm(value, [validateRequired])}
+              validate={(value: string) =>
+                validateForm(value, [validateRequired])
+              }
               placeholder="Voer de naam van de klas in"
             />
             {isError && (

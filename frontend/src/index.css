@@ -1,7 +1,36 @@
 /* Fonts */
-@import url("https://fonts.googleapis.com/css2?family=Sen:wght@400..800&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap");
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Sen:wght@400..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+@import 'tailwindcss';
+
+/* Define your custom dwengo palette using theme variables */
+@theme {
+  /* Red family */
+  --color-dwengo-red-100: #f28e78; /* coral (lightest red) */
+  --color-dwengo-red-200: #ec606a; /* blush */
+  --color-dwengo-red: #e8385d; /* rose (base red) */
+  --color-dwengo-red-dark: #e22b41; /* ruby */
+  --color-dwengo-red-darker: #d02625; /* crimson (darkest red) */
+
+  /* Yellow family */
+  --color-dwengo-yellow: #ffdd04; /* lemon (bright yellow) */
+  --color-dwengo-yellow-dark: #fab63c; /* amber */
+
+  /* Green family */
+  --color-dwengo-green: #88bd28; /* lime (light green) */
+  --color-dwengo-green-dark: #4a9234; /* forest */
+  --color-dwengo-green-darker: #0e6942; /* pine */
+
+  /* Blue family */
+  --color-dwengo-blue: #0b75bb; /* royal (base blue) */
+  --color-dwengo-blue-dark: #096f80; /* marine */
+
+  /* Teal */
+  --color-dwengo-teal: #0a6d61;
+
+  /* Neutral */
+  --color-dwengo-neutral-ivory: #f6faf2;
+}
 
 @layer base {
   :root {
@@ -28,7 +57,7 @@
   /* Body and Typography */
 
   html {
-    font-family: "Sen", sans-serif;
+    font-family: 'Sen', sans-serif;
     scroll-behavior: smooth;
   }
 
@@ -237,7 +266,7 @@
 
   ul.bullet li::before {
     position: absolute;
-    content: "";
+    content: '';
     width: 2px;
     height: 2px;
     top: 50%;
@@ -1026,7 +1055,7 @@
     padding-right: 15px;
   }
 
-  .px-20 {
+  .px-10 {
     padding-left: 20px;
     padding-right: 20px;
   }
@@ -1071,7 +1100,7 @@
     padding-bottom: 15px;
   }
 
-  .py-20 {
+  .py-10 {
     padding-top: 20px;
     padding-bottom: 20px;
   }
@@ -1461,7 +1490,7 @@
 
   input,
   textarea {
-    font-family: "Sen", sans-serif;
+    font-family: 'Sen', sans-serif;
     outline: none;
   }
 
@@ -1476,7 +1505,7 @@
   textarea::-moz-placeholder,
   textarea:-ms-input-placeholder,
   textarea::placeholder {
-    font-family: "Sen", sans-serif;
+    font-family: 'Sen', sans-serif;
   }
 
   textarea,

@@ -1,7 +1,6 @@
-
 import { Assignment, PrismaClient, Role } from "@prisma/client";
 import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
-import  ReferenceValidationService  from "../../services/referenceValidationService"; 
+import ReferenceValidationService from "../../services/referenceValidationService";
 // ^ let op: named import, géén "default" meer.
 
 const prisma = new PrismaClient();
@@ -16,23 +15,25 @@ export default class TeacherAssignmentService {
     pathRef: string,
     pathLanguage: string,
     isExternal: boolean,
-    deadline: Date
+    deadline: Date,
+    title: string,
+    description: string
   ): Promise<Assignment> {
     // 1) check authorization
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
       throw new Error("The teacher is unauthorized to perform this action");
     }
-  
+
     // 2) Valideer pathRef
     // => isExternal=true => Dwengo (hruid + language)
     // => isExternal=false => lokaal (localId=pathRef)
     await ReferenceValidationService.validateLearningPath(
       isExternal,
-      isExternal ? undefined : pathRef,    // localId
-      isExternal ? pathRef : undefined,    // hruid
-      isExternal ? pathLanguage : undefined  // language
+      isExternal ? undefined : pathRef, // localId
+      isExternal ? pathRef : undefined, // hruid
+      isExternal ? pathLanguage : undefined // language
     );
-  
+
     // 3) Maak assignment
     return prisma.assignment.create({
       data: {
@@ -44,10 +45,11 @@ export default class TeacherAssignmentService {
             classId,
           },
         },
+        title,
+        description,
       },
     });
   }
-  
 
   /**
    * Haal alle assignments op voor 1 klas
@@ -77,7 +79,9 @@ export default class TeacherAssignmentService {
     assignmentId: number,
     pathRef: string,
     isExternal: boolean,
-    teacherId: number
+    teacherId: number,
+    title: string,
+    description: string
   ): Promise<Assignment> {
     // 1) autorisatie
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
@@ -85,7 +89,7 @@ export default class TeacherAssignmentService {
     }
 
     // 2) validate new pathRef
-    await ReferenceValidationService.validateLearningPath( isExternal,pathRef);
+    await ReferenceValidationService.validateLearningPath(isExternal, pathRef);
 
     // 3) update
     return prisma.assignment.update({
@@ -93,6 +97,8 @@ export default class TeacherAssignmentService {
       data: {
         pathRef,
         isExternal,
+        title,
+        description,
       },
     });
   }

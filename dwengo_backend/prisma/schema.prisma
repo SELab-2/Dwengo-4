@@ -414,6 +414,8 @@ model QuestionMessage {
 /// Taken en indieningen
 model Assignment {
   id               Int               @id @default(autoincrement())
+  title       String
+  description String
   pathRef    String
   isExternal Boolean @default(false)
   deadline         DateTime
