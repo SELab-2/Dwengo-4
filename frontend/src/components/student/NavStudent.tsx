@@ -21,6 +21,17 @@ const Navstudent: React.FC = () => {
     submit(null, { action: '/student/logout', method: 'post' });
   };
 
+  const routes = [
+    {
+      to: '/student',
+      label: 'Home',
+    },
+    {
+      to: '/student/klassen',
+      label: 'Klassen',
+    },
+  ];
+
   return (
     <nav className="bg-gray-200 py-2">
       <Container>
@@ -33,25 +44,13 @@ const Navstudent: React.FC = () => {
             />
             {firstName ? (
               <div className="flex space-x-4">
-                <NavButton
-                  to="/student"
-                  label="Home"
-                  isActive={(path) => location.pathname === '/student'}
-                />
-                <NavButton
-                  to="/student/classes"
-                  label="Klassen"
-                  isActive={(path) =>
-                    location.pathname.includes('/student/classes')
-                  }
-                />
-                <NavButton
-                  to="/student/learning-paths"
-                  label="Leerpaden"
-                  isActive={(path) =>
-                    location.pathname.includes('/student/learning-paths')
-                  }
-                />
+                {routes.map(({ to, label }) => (
+                  <NavButton
+                    to={to}
+                    label={label}
+                    isActive={(path) => location.pathname === to}
+                  />
+                ))}
               </div>
             ) : (
               <div
