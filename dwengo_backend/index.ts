@@ -51,6 +51,10 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
   next();
 });
 
+app.options("*", (req, res) => {
+  res.sendStatus(200);
+});
+
 // JSON-parser middleware
 app.use(express.json());
 
