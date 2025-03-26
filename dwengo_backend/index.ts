@@ -1,8 +1,6 @@
 import express, { Request, Response, NextFunction, Express } from "express";
 import dotenv from "dotenv";
 import errorHandler from "./middleware/errorMiddleware";
-import teacherAuthRoutes from "./routes/teacher/teacherAuthRoutes";
-import studentAuthRoutes from "./routes/student/studentAuthRoutes";
 import learningObjectRoutes from "./routes/learningObject/learningObjectRoutes";
 import QuestionRoutes from "./routes/question/questionRoutes";
 import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
@@ -16,6 +14,13 @@ import studentAssignmentRoutes from "./routes/student/studentAssignmentRoutes";
 import feedbackRoutes from "./routes/teacher/feedbackRoutes";
 import teacherSubmissionRoute from "./routes/teacher/teacherSubmissionRoute";
 import studentSubmissionRoute from "./routes/student/studentSubmissionRoute";
+import assignmentRoutes from "./routes/assignments/assignmentRoutes";
+import progressRoutes from "./routes/progress/progressRoutes";
+import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
+import studentAssignmentRoutes from "./routes/assignments/studentAssignmentRoutes";
+import feedbackRoutes from "./routes/feedback/feedbackRoutes";
+import studentClassRoutes from "./routes/student/studentClassRoutes";
+import submissionRoutes from "./routes/submission/submissionRoutes";
 import teacherLocalLearningPathRoutes from "./routes/teacher/teacherLocalLearningPathRoutes";
 import teacherLocalLearningPathNodesRoutes from "./routes/teacher/teacherLocalLearningPathNodesRoutes";
 
@@ -25,6 +30,9 @@ import teacherTeamsRoutes from "./routes/teacher/teacherTeamsRoutes";
 import classRoutes from "./routes/class/classRoutes";
 import teacherInviteRoutes from "./routes/invite/teacherInviteRoutes";
 import joinRequestRoutes from "./routes/joinRequest/joinRequestRoutes";
+import teamRoutes from "./routes/team/teamRoutes";
+import authRoutes from "./routes/authentication/authRoutes";
+import teacherAssignmentRoutes from "./routes/assignments/teacherAssignmentRoutes";
 
 dotenv.config();
 
@@ -64,44 +72,36 @@ app.use("/invite", teacherInviteRoutes);
 // Routes voor join requests
 app.use("/join-request", joinRequestRoutes);
 
-// Routes voor Teacher (Auth)
-app.use("/teacher/auth", teacherAuthRoutes);
-app.use("/teacher/learningObjects", teacherLocalLearningObjectRoutes);
-app.use("/teacher/learningPaths", teacherLocalLearningPathRoutes);
-app.use("/teacher/learningPaths", teacherLocalLearningPathNodesRoutes);
+// Routes voor authentificatie
+app.use("/auth", authRoutes);
+app.use("/pathByTeacher", teacherLocalLearningPathRoutes);
+app.use(
+  "learningPath/:learningPathId/node",
+  teacherLocalLearningPathNodesRoutes
+);
+app.use("/learningObjectByTeacher", teacherLocalLearningObjectRoutes);
 
-// Routes voor Teacher (Teams)
-app.use("/teacher/assignments/:assignmentId/team", teacherTeamsRoutes);
+// Routes voor teams
+app.use("/team", teamRoutes);
 
-// Routes voor Student (Auth)
-app.use("/student/auth", studentAuthRoutes);
-
-// Routes voor de Assignments
-app.use("/assignments", assignmentRoutes);
-
-// Routes voor de aanpassingen op Assignments door teachers
-app.use("/teacher/assignments", teacherAssignmentRoutes);
-// Routes voor het opvragen van de Assignments door students
-app.use("/student/assignments", studentAssignmentRoutes);
+// Routes voor de assignments
+app.use("/assignment", assignmentRoutes);
 
 // Routes om feedback te geven
-app.use("/teacher/feedback", feedbackRoutes);
+app.use("/feedback", feedbackRoutes);
 
 // Nieuwe routes voor leerobjecten
-app.use("/learningObjects", learningObjectRoutes);
+app.use("/learningObject", learningObjectRoutes);
 
 app.use("/question", QuestionRoutes);
 
-app.use("/learningPaths", learningPathRoutes);
-
-app.use("/student/teams", studentTeamRoutes);
+app.use("/learningPath", learningPathRoutes);
 
 app.use("/progress", progressRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Routes voor indieningen
-app.use("/teacher/submissions", teacherSubmissionRoute);
-app.use("/student/submissions", studentSubmissionRoute);
+app.use("submission", submissionRoutes);
 
 // Error Handler
 app.use(errorHandler);
