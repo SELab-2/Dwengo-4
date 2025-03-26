@@ -6,32 +6,44 @@ import {
   updateNodeForPath,
   deleteNodeFromPath,
 } from "../../controllers/teacher/teacherLocalLearningPathNodesController";
+import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
 
 const router = Router();
-router.use(protectTeacher);
 
 /**
- * GET /teacher/learningPaths/:pathId/nodes
- *   -> haal alle nodes op voor dat leerpad
+ * @route GET /learningPath/:pathId/node
+ * @description Haal alle nodes op voor dat leerpad
+ * @param pathId: string
+ * @access User
  */
-router.get("/:pathId/nodes", getNodesForPath);
+router.get("/", protectAnyUser, getNodesForPath);
 
 /**
- * POST /teacher/learningPaths/:pathId/nodes
- *   -> maak een nieuwe node in dit leerpad
+ * @route POST /learningPath/:pathId/node
+ * @description Maak een nieuwe node in dit leerpad
+ * @param pathId: string
+ * @body NodeMetadata
+ * @access Teacher
  */
-router.post("/:pathId/nodes", createNodeForPath);
+router.post("/", protectTeacher, createNodeForPath);
 
 /**
- * PATCH /teacher/learningPaths/:pathId/nodes/:nodeId
- *   -> update de node
+ * @route PATCH /learningPath/:pathId/node/:nodeId
+ * @description Update de node
+ * @param pathId: string
+ * @param nodeId: string
+ * @body NodeMetadata
+ * @access Teacher
  */
-router.patch("/:pathId/nodes/:nodeId", updateNodeForPath);
+router.patch("/:nodeId", protectTeacher, updateNodeForPath);
 
 /**
- * DELETE /teacher/learningPaths/:pathId/nodes/:nodeId
- *   -> verwijder de node
+ * @route DELETE /learningPath/:pathId/node/:nodeId
+ * @description Verwijder de node
+ * @param pathId: string
+ * @param nodeId: string
+ * @access Teacher
  */
-router.delete("/:pathId/nodes/:nodeId", deleteNodeFromPath);
+router.delete("/:nodeId", protectTeacher, deleteNodeFromPath);
 
 export default router;

@@ -6,12 +6,12 @@ import QuestionRoutes from "./routes/question/questionRoutes";
 import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
 import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearningObjectRoutes";
 
-import assignmentRoutes from "./routes/assignmentRoutes";
-import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
+import assignmentRoutes from "./routes/assignments/assignmentRoutes";
+import teacherAssignmentRoutes from "./routes/assignments/teacherAssignmentRoutes";
 import studentTeamRoutes from "./routes/student/studentTeamRoutes";
 import progressRoutes from "./routes/progress/progressRoutes";
 import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
-import studentAssignmentRoutes from "./routes/student/studentAssignmentRoutes";
+import studentAssignmentRoutes from "./routes/assignments/studentAssignmentRoutes";
 import feedbackRoutes from "./routes/teacher/feedbackRoutes";
 import studentClassRoutes from "./routes/student/studentClassRoutes";
 import teacherSubmissionRoute from "./routes/teacher/teacherSubmissionRoute";
@@ -61,9 +61,14 @@ app.use("/student/classes", studentClassRoutes);
 
 // Routes voor authentificatie
 app.use("/auth", authRoutes);
-app.use("/teacher/learningObjects", teacherLocalLearningObjectRoutes);
-app.use("/teacher/learningPaths", teacherLocalLearningPathRoutes);
-app.use("/teacher/learningPaths", teacherLocalLearningPathNodesRoutes);
+// Routes voor Teacher (Auth)
+app.use("/teacher/auth", teacherAuthRoutes);
+app.use("/pathByTeacher", teacherLocalLearningPathRoutes);
+app.use(
+  "learningPath/:learningPathId/node",
+  teacherLocalLearningPathNodesRoutes
+);
+app.use("/learningObjectByTeacher", teacherLocalLearningObjectRoutes);
 
 // Routes voor Teacher (Teams)
 app.use("/teacher/assignments/:assignmentId/team", teacherTeamsRoutes);
@@ -76,15 +81,18 @@ app.use("/teacher/assignments", teacherAssignmentRoutes);
 // Routes voor het opvragen van de Assignments door students
 app.use("/student/assignments", studentAssignmentRoutes);
 
+// Routes voor de assignments
+app.use("/assignment", assignmentRoutes);
+
 // Routes om feedback te geven
 app.use("/teacher/feedback", feedbackRoutes);
 
 // Nieuwe routes voor leerobjecten
-app.use("/learningObjects", learningObjectRoutes);
+app.use("/learningObject", learningObjectRoutes);
 
 app.use("/question", QuestionRoutes);
 
-app.use("/learningPaths", learningPathRoutes);
+app.use("/learningPath", learningPathRoutes);
 
 app.use("/student/teams", studentTeamRoutes);
 
