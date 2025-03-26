@@ -1,256 +1,254 @@
-
-import {
-  PrismaClient,
-  Question,
-  QuestionType,
-  QuestionSpecific,
-  QuestionGeneral,
-  QuestionMessage,
+import { 
+  PrismaClient, 
+  Question, 
+  QuestionType, 
+  QuestionSpecific, 
+  QuestionGeneral, 
+  QuestionMessage, 
+  Role 
 } from "@prisma/client";
-import  ReferenceValidationService  from "./referenceValidationService";
+
+import referenceValidationService from "./referenceValidationService";
+import { NotFoundError, BadRequestError } from "../errors/errors";
+import { AuthenticatedUser } from "../interfaces/extendedTypeInterfaces";
 
 const prisma = new PrismaClient();
 
+/**
+ * Helper: bepaal of een gegeven user deze vraag mag *zien* in een overzicht.
+ *
+ * - Als question.isPrivate == true => enkel zichtbaar voor:
+ *   (1) de maker (question.createdBy),
+ *   (2) teacher(s) in de class,
+ *   ((3) admin)
+ * - Als question.isPrivate == false => zichtbaar voor:
+ *   (1) teamleden,
+ *   (2) teacher(s) in de class,
+ *   ((3) admin)
+ *
+ * Let op: we veronderstellen dat 'question' is ingeladen met
+ *  team -> { students, class -> { ClassTeacher } }.
+ */
+function canUserSeeQuestionInList(question: Question & {
+  team: {
+    students: { userId: number }[];
+    class: {
+      ClassTeacher: { teacherId: number }[];
+    };
+  };
+}, user: AuthenticatedUser): boolean {
+  
+  const isAdmin = (user.role === Role.ADMIN);
+
+  // Teacher in class?
+  const isTeacherInClass = question.team.class.ClassTeacher
+    .some(ct => ct.teacherId === user.id);
+
+  // Student in team?
+  const isStudentInTeam = question.team.students
+    .some(s => s.userId === user.id);
+
+  if (question.isPrivate) {
+    // Private => alleen creator, teacher in class, admin
+    const isCreator = (question.createdBy === user.id);
+    if (isCreator || isTeacherInClass || isAdmin) return true;
+    return false;
+  } else {
+    // Niet private => hele team, teacher, admin
+    if (isStudentInTeam || isTeacherInClass || isAdmin) return true;
+    return false;
+  }
+}
+
 export default class QuestionService {
+
   /**
-   * -----------------------------------------------------
-   *  HELPER: Create the base question + initial message
-   * -----------------------------------------------------
+   * ------------------------------------------
+   * HULPFUNCTIE: maak basis Question + 1ste msg
+   * ------------------------------------------
    */
   private static async createQuestionAndMessage(
     assignmentId: number,
     teamId: number,
-    studentId: number,
+    creatorId: number,
     title: string,
-    text: string,
-    type: QuestionType
+    initialMessage: string,
+    type: QuestionType,
+    isTeacher: boolean,
+    isPrivate: boolean
   ): Promise<Question> {
-    // 1) Controleer of assignment en team bestaan
-    //    (en dat de studentId in de team zit, e.d.)
-    await Promise.all([
-      prisma.assignment.findUniqueOrThrow({ where: { id: assignmentId } }),
-      prisma.team.findFirstOrThrow({
-        where: { id: teamId, students: { some: { userId: studentId } } },
-      }),
-    ]);
+    // 1) Check assignment
+    const assignment = await prisma.assignment.findUnique({
+      where: { id: assignmentId },
+    });
+    if (!assignment) {
+      throw new NotFoundError("Assignment not found.");
+    }
 
-    // 2) Maak question + eerste message in een transactie
-    return prisma.$transaction(async (tx) => {
-      const question = await tx.question.create({
+    // 2) Check team
+    const team = await prisma.team.findUnique({
+      where: { id: teamId },
+      include: {
+        teamAssignment: true,
+        students: true,
+      },
+    });
+    if (!team) {
+      throw new BadRequestError("Team niet gevonden.");
+    }
+
+    // Check of team bij deze assignment hoort
+    if (!team.teamAssignment || team.teamAssignment.assignmentId !== assignmentId) {
+      throw new BadRequestError("Team is niet gekoppeld aan deze assignment.");
+    }
+
+    // Indien student => check of hij/zij in team zit
+    if (!isTeacher) {
+      const studentInTeam = team.students.some(s => s.userId === creatorId);
+      if (!studentInTeam) {
+        throw new BadRequestError("Student zit niet in dit team.");
+      }
+    }
+
+    // 3) Transactie: Question + eerste message
+    const newQuestion = await prisma.$transaction(async (tx) => {
+      const q = await tx.question.create({
         data: {
-          assignmentId,
-          teamId,
           title,
           type,
+          assignmentId,
+          teamId,
+          createdBy: creatorId,
+          isPrivate
         },
       });
       await tx.questionMessage.create({
         data: {
-          questionId: question.id,
-          userId: studentId,
-          text,
+          questionId: q.id,
+          userId: creatorId,
+          text: initialMessage,
         },
       });
-      return question;
+      return q;
     });
+
+    return newQuestion;
   }
 
   /**
-   * -----------------------------------------------------
-   *  CREATE: QUESTION SPECIFIC (leerobject)
-   * -----------------------------------------------------
-   *  We verwachten in de controller een body met:
-   *    assignmentId, title, text, teamId, studentId,
-   *    isExternal (bool), 
-   *    - Als isExternal=true: dwengoHruid, dwengoLanguage, dwengoVersion
-   *    - Als isExternal=false: localLearningObjectId
-   *    (optioneel) learningPathId (ter controle dat assignment bij path hoort)
+   * CREATE SPECIFIC
    */
   static async createQuestionSpecific(
     assignmentId: number,
+    teamId: number,
+    creatorId: number,
+    creatorRole: Role,
     title: string,
     text: string,
-    teamId: number,
-    studentId: number,
-    type: QuestionType,
-
-    // Belangrijkste velden voor extern / lokaal:
     isExternal: boolean,
+    isPrivate: boolean,
+    localLearningObjectId?: string,
     dwengoHruid?: string,
     dwengoLanguage?: string,
-    dwengoVersion?: number,
-    localLearningObjectId?: string,
-
-    // Als je nog logic hebt om assignment vs path te matchen:
-    learningPathId?: string
+    dwengoVersion?: number
   ): Promise<QuestionSpecific> {
-    // 1) Assignment check
-    const assignment = await prisma.assignment.findUnique({
-      where: { id: assignmentId },
-    });
-    if (!assignment) {
-      throw new Error("Assignment not found");
-    }
-    // (optionele check of assignment.pathRef == learningPathId)
-    if (learningPathId && assignment.pathRef !== learningPathId) {
-      throw new Error("Assignment not linked to this learningPathId");
-    }
 
-    // 2) Maak eerst basis question + message
-    const question = await this.createQuestionAndMessage(
+    const baseQuestion = await this.createQuestionAndMessage(
       assignmentId,
       teamId,
-      studentId,
+      creatorId,
       title,
       text,
-      type
+      QuestionType.SPECIFIC,
+      creatorRole === Role.TEACHER,
+      isPrivate
     );
 
-    // 3) Valideer object, afhankelijk van isExternal
-    //    -> roep ReferenceValidationService aan
+    // Validatie object
     if (isExternal) {
-      // Dwengo-leerobject
-      if (!dwengoHruid || !dwengoLanguage || typeof dwengoVersion !== "number") {
-        throw new Error(
-          "Missing Dwengo leerobject fields: dwengoHruid, dwengoLanguage, dwengoVersion"
-        );
+      if (!dwengoHruid || !dwengoLanguage || dwengoVersion == null) {
+        throw new BadRequestError("Dwengo fields missing: hruid, language, version");
       }
-      await ReferenceValidationService.validateDwengoLearningObject(
-        dwengoHruid,
-        dwengoLanguage,
-        dwengoVersion
-      );
+      await referenceValidationService.validateDwengoLearningObject(dwengoHruid, dwengoLanguage, dwengoVersion);
     } else {
-      // Lokaal
       if (!localLearningObjectId) {
-        throw new Error("Missing localLearningObjectId for local object");
+        throw new BadRequestError("localLearningObjectId is missing for local question");
       }
-      await ReferenceValidationService.validateLocalLearningObject(
-        localLearningObjectId
-      );
+      await referenceValidationService.validateLocalLearningObject(localLearningObjectId);
     }
 
-    // 4) questionSpecific aanmaken
-    const questionSpec = await prisma.questionSpecific.create({
+    return prisma.questionSpecific.create({
       data: {
-        questionId: question.id,
+        questionId: baseQuestion.id,
         isExternal,
-        ...(isExternal
-          ? {
-              dwengoHruid,
-              dwengoLanguage,
-              dwengoVersion,
-            }
-          : {
-              localLearningObjectId,
-            }),
+        localLearningObjectId: isExternal ? undefined : localLearningObjectId,
+        dwengoHruid: isExternal ? dwengoHruid : undefined,
+        dwengoLanguage: isExternal ? dwengoLanguage : undefined,
+        dwengoVersion: isExternal ? dwengoVersion : undefined,
       },
     });
-
-    return questionSpec;
   }
 
   /**
-   * -----------------------------------------------------
-   *  CREATE: QUESTION GENERAL (leerpad)
-   * -----------------------------------------------------
-   *  - local path -> validateLocalLearningPath
-   *  - external path -> validateDwengoLearningPath (hruid+language?)
-   *  In DB: we slaan 'pathRef' (string) en 'isExternal' op in questionGeneral.
+   * CREATE GENERAL
    */
   static async createQuestionGeneral(
     assignmentId: number,
+    teamId: number,
+    creatorId: number,
+    creatorRole: Role,
     title: string,
     text: string,
-    teamId: number,
-    studentId: number,
-    type: QuestionType,
-    pathRef: string,    // hier komt ofwel localID, ofwel Dwengo-hruid
     isExternal: boolean,
+    isPrivate: boolean,
+    pathRef: string,
     dwengoLanguage?: string
   ): Promise<QuestionGeneral> {
-    // 1) Assignment check
-    const assignment = await prisma.assignment.findUnique({
-      where: { id: assignmentId },
-    });
-    if (!assignment) {
-      throw new Error("Assignment not found");
-    }
 
-    // 2) Basis question + message
-    const question = await this.createQuestionAndMessage(
+    const baseQuestion = await this.createQuestionAndMessage(
       assignmentId,
       teamId,
-      studentId,
+      creatorId,
       title,
       text,
-      type
+      QuestionType.GENERAL,
+      creatorRole === "TEACHER",
+      isPrivate
     );
 
-    // 3) Validatie (dwengo vs local)
+    // Validatie path
     if (isExternal) {
-      // We gaan ervan uit dat pathRef = Dwengo-hruid, en dwengoLanguage is meegegeven
       if (!dwengoLanguage) {
-        throw new Error("Missing dwengoLanguage for external path");
+        throw new BadRequestError("Dwengo language is missing for external path question");
       }
-      await ReferenceValidationService.validateDwengoLearningPath(
-        pathRef,
-        dwengoLanguage
-      );
+      await referenceValidationService.validateDwengoLearningPath(pathRef, dwengoLanguage);
     } else {
-      // Lokale leerpad-check (pathRef = local ID)
-      await ReferenceValidationService.validateLocalLearningPath(pathRef);
+      await referenceValidationService.validateLocalLearningPath(pathRef);
     }
 
-    // 4) questionGeneral opslaan
-    const questionGen = await prisma.questionGeneral.create({
+    return prisma.questionGeneral.create({
       data: {
-        questionId: question.id,
-        pathRef: pathRef,   // string
-        isExternal: isExternal,
+        questionId: baseQuestion.id,
+        pathRef,
+        isExternal,
       },
     });
-
-    return questionGen;
   }
 
   /**
-   * -----------------------------------------------------
-   *  Overige CREATE, GET, UPDATE, DELETE methodes
-   * -----------------------------------------------------
+   * CREATE message
    */
-
-  // Een extra message bij een vraag aanmaken
   static async createQuestionMessage(
     questionId: number,
-    text: string,
-    userId: number
+    userId: number,
+    text: string
   ): Promise<QuestionMessage> {
-    if (!text || !userId) {
-      throw new Error("Invalid input");
+    if (!text.trim()) {
+      throw new BadRequestError("Message cannot be empty");
     }
-
-    // check of user in het team of teacher van die team
-    const question = await prisma.question.findUniqueOrThrow({
-      where: { id: questionId },
-      include: {
-        team: {
-          include: {
-            students: true,
-            class: { include: { ClassTeacher: true } },
-          },
-        },
-      },
-    });
-
-    const isUserInTeam = question.team.students.some(
-      (student) => student.userId === userId
-    );
-    const isUserTeacher = question.team.class.ClassTeacher.some(
-      (teacher) => teacher.teacherId === userId
-    );
-    if (!isUserInTeam && !isUserTeacher) {
-      throw new Error("User is not in team or not a teacher of this question");
+    const question = await prisma.question.findUnique({ where: { id: questionId } });
+    if (!question) {
+      throw new NotFoundError("Question not found");
     }
 
     return prisma.questionMessage.create({
@@ -262,99 +260,164 @@ export default class QuestionService {
     });
   }
 
-  // Titel van een vraag bijwerken
-  static async updateQuestion(questionId: number, title: string): Promise<Question> {
-    if (!title) {
-      throw new Error("Invalid input (title is required)");
+  /**
+   * UPDATE question (titel)
+   */
+  static async updateQuestion(questionId: number, newTitle: string): Promise<Question> {
+    if (!newTitle.trim()) {
+      throw new BadRequestError("Title mag niet leeg zijn");
     }
-    await prisma.question.findUniqueOrThrow({ where: { id: questionId } });
+    const q = await prisma.question.findUnique({ where: { id: questionId } });
+    if (!q) {
+      throw new NotFoundError("Question not found");
+    }
     return prisma.question.update({
       where: { id: questionId },
-      data: { title },
+      data: { title: newTitle },
     });
   }
 
-  // Een message in een vraag updaten
-  static async updateQuestionMessage(
-    questionId: number,
-    questionMessageId: number,
-    text: string,
-    userId: number
-  ): Promise<QuestionMessage> {
-    if (!userId || !text) {
-      throw new Error("Invalid input");
+  /**
+   * UPDATE message (tekst)
+   */
+  static async updateQuestionMessage(questionMessageId: number, newText: string): Promise<QuestionMessage> {
+    if (!newText.trim()) {
+      throw new BadRequestError("Message cannot be empty");
     }
-    // check of message met (id, questionId, userId) bestaat
-    await prisma.questionMessage.findUniqueOrThrow({
-      where: {
-        // je kunt in Prisma 4.8 nog geen multi-col key direct meegeven,
-        // dus doe:
-        id: questionMessageId,
-      },
-    });
-    // (optioneel: checken of userId klopt)
+    const msg = await prisma.questionMessage.findUnique({ where: { id: questionMessageId } });
+    if (!msg) {
+      throw new NotFoundError("QuestionMessage not found");
+    }
     return prisma.questionMessage.update({
       where: { id: questionMessageId },
-      data: { text },
+      data: { text: newText },
     });
   }
 
-  // GET: alle vragen van een team
-  static async getQuestionsTeam(teamId: number): Promise<Question[]> {
-    await prisma.team.findUniqueOrThrow({ where: { id: teamId } });
-    return prisma.question.findMany({
-      where: { teamId },
-    });
-  }
-
-  // GET: alle vragen in een klas
-  static async getQuestionsClass(classId: number): Promise<Question[]> {
-    await prisma.class.findUniqueOrThrow({ where: { id: classId } });
-    return prisma.question.findMany({
-      where: { team: { classId } },
-    });
-  }
-
-  // GET: alle vragen in een assignment en klas
-  static async getQuestionsAssignment(
-    assignmentId: number,
-    classId: number
-  ): Promise<Question[]> {
-    await prisma.assignment.findUniqueOrThrow({ where: { id: assignmentId } });
-    await prisma.class.findUniqueOrThrow({ where: { id: classId } });
-    return prisma.question.findMany({
-      where: {
-        assignmentId,
-        team: { classId },
+  /**
+   * GET één vraag (enkel 1 detail)
+   * (De authorizeQuestion middleware checkt of user mag inzien.)
+   */
+  static async getQuestion(questionId: number): Promise<Question> {
+    const question = await prisma.question.findUnique({
+      where: { id: questionId },
+      include: {
+        specific: true,
+        general: true,
+        questionConversation: true,
       },
     });
+    if (!question) {
+      throw new NotFoundError("Question not found");
+    }
+    return question;
   }
 
-  // GET: één vraag
-  static async getQuestion(questionId: number): Promise<Question> {
-    return prisma.question.findUniqueOrThrow({ where: { id: questionId } });
+  /**
+   * GET: alle vragen in 1 team, gefilterd op private
+   *  We hebben 'user' nodig om te filteren.
+   */
+  static async getQuestionsForTeam(teamId: number, user: AuthenticatedUser): Promise<Question[]> {
+    const allQs = await prisma.question.findMany({
+      where: { teamId },
+      include: {
+        team: {
+          include: {
+            students: true,
+            class: { include: { ClassTeacher: true } }
+          }
+        },
+        specific: true,
+        general: true,
+        questionConversation: true
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    return allQs.filter(q => canUserSeeQuestionInList(q, user));
   }
 
-  // GET: alle messages in een vraag
+  /**
+   * GET: alle vragen in 1 class, gefilterd
+   */
+  static async getQuestionsForClass(classId: number, user: AuthenticatedUser): Promise<Question[]> {
+    const allQs = await prisma.question.findMany({
+      where: {
+        team: { classId },
+      },
+      include: {
+        team: {
+          include: {
+            students: true,
+            class: { include: { ClassTeacher: true } }
+          }
+        },
+        specific: true,
+        general: true,
+        questionConversation: true
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    return allQs.filter(q => canUserSeeQuestionInList(q, user));
+  }
+
+  /**
+   * GET: alle vragen voor assignment + class, gefilterd
+   */
+  static async getQuestionsForAssignment(assignmentId: number, classId: number, user: AuthenticatedUser): Promise<Question[]> {
+    const allQs = await prisma.question.findMany({
+      where: {
+        assignmentId,
+        team: {
+          classId,
+        }
+      },
+      include: {
+        team: {
+          include: {
+            students: true,
+            class: { include: { ClassTeacher: true } }
+          }
+        },
+        specific: true,
+        general: true,
+        questionConversation: true
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    return allQs.filter(q => canUserSeeQuestionInList(q, user));
+  }
+
+  /**
+   * GET: alle messages van 1 vraag
+   * (De authorizeQuestion-middleware checkt of user de vraag mag zien.)
+   */
   static async getQuestionMessages(questionId: number): Promise<QuestionMessage[]> {
-    await prisma.question.findUniqueOrThrow({ where: { id: questionId } });
-    return prisma.questionMessage.findMany({ where: { questionId } });
+    await this.getQuestion(questionId); // check existence
+    return prisma.questionMessage.findMany({
+      where: { questionId },
+      orderBy: { createdAt: "asc" },
+    });
   }
 
-  // DELETE: een vraag
+  /**
+   * DELETE vraag (cascade messages)
+   */
   static async deleteQuestion(questionId: number): Promise<Question> {
-    await prisma.question.findUniqueOrThrow({ where: { id: questionId } });
+    const question = await prisma.question.findUnique({ where: { id: questionId } });
+    if (!question) {
+      throw new NotFoundError("Question not found");
+    }
     return prisma.question.delete({ where: { id: questionId } });
   }
 
-  // DELETE: een bericht in een vraag
-  static async deleteQuestionMessage(
-    questionId: number,
-    questionMessageId: number
-  ): Promise<QuestionMessage> {
-    // optioneel: check of user mag deleten, etc.
-    return prisma.questionMessage.delete({
-      where: { id: questionMessageId },
-    });
+  /**
+   * DELETE message
+   */
+  static async deleteQuestionMessage(questionMessageId: number): Promise<QuestionMessage> {
+    const msg = await prisma.questionMessage.findUnique({ where: { id: questionMessageId } });
+    if (!msg) {
+      throw new NotFoundError("QuestionMessage not found");
+    }
+    return prisma.questionMessage.delete({ where: { id: questionMessageId } });
   }
 }

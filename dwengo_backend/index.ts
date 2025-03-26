@@ -55,6 +55,10 @@ app.options("*", (req, res) => {
   res.sendStatus(200);
 });
 
+app.options("*", (req, res) => {
+  res.sendStatus(200);
+});
+
 // JSON-parser middleware
 app.use(express.json());
 
