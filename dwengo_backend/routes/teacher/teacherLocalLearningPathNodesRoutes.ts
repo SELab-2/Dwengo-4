@@ -6,17 +6,17 @@ import {
   updateNodeForPath,
   deleteNodeFromPath,
 } from "../../controllers/teacher/teacherLocalLearningPathNodesController";
+import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
 
 const router = Router();
-router.use(protectTeacher);
 
 /**
  * @route GET /learningPath/:pathId/node
  * @description Haal alle nodes op voor dat leerpad
  * @param pathId: string
- * @access Teacher
+ * @access User
  */
-router.get("/", getNodesForPath);
+router.get("/", protectAnyUser, getNodesForPath);
 
 /**
  * @route POST /learningPath/:pathId/node
@@ -25,7 +25,7 @@ router.get("/", getNodesForPath);
  * @body NodeMetadata
  * @access Teacher
  */
-router.post("/", createNodeForPath);
+router.post("/", protectTeacher, createNodeForPath);
 
 /**
  * @route PATCH /learningPath/:pathId/node/:nodeId
@@ -35,7 +35,7 @@ router.post("/", createNodeForPath);
  * @body NodeMetadata
  * @access Teacher
  */
-router.patch("/:nodeId", updateNodeForPath);
+router.patch("/:nodeId", protectTeacher, updateNodeForPath);
 
 /**
  * @route DELETE /learningPath/:pathId/node/:nodeId
@@ -44,6 +44,6 @@ router.patch("/:nodeId", updateNodeForPath);
  * @param nodeId: string
  * @access Teacher
  */
-router.delete("/:nodeId", deleteNodeFromPath);
+router.delete("/:nodeId", protectTeacher, deleteNodeFromPath);
 
 export default router;
