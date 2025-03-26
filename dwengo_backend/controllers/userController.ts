@@ -23,7 +23,7 @@ const registerUser = async (
     const hashedPassword: string = await bcrypt.hash(password, 10);
 
     // Maak de gebruiker aan met de juiste rol
-    await UserService.createUser(firstName, lastName, email, hashedPassword, role);
+    await UserService.createUser(firstName, lastName, email.toLowerCase(), hashedPassword, role);
 
     res.status(201).json({
         message: `${role === Role.TEACHER ? "Leerkracht" : "Leerling"} succesvol geregistreerd`,

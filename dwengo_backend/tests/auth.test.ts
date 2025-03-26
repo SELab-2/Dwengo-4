@@ -2,7 +2,7 @@ import { it, describe, expect, beforeEach } from "vitest";
 import request from "supertest";
 import app from "../index";
 import prisma from "./helpers/prisma";
-import { createStudent } from "./helpers/testDataCreation";
+import { createStudent, createTeacher } from "./helpers/testDataCreation";
 
 describe("Authentication API Tests", () => {
     describe("[POST] /student/auth/register", () => {
@@ -110,13 +110,13 @@ describe("Authentication API Tests", () => {
         });
         it("should respond with `409` when email is already in use by a student", async () => {
             // create a student with the email
-            const studentUser1 = await createStudent("Jan", "Jansen", "student1@example.com");
+            const studentUser = await createStudent("Jan", "Jansen", "student1@example.com");
 
             // test creating a new student with the same email
             const response = await request(app).post("/student/auth/register").send({
                 firstName: "Bob",
                 lastName: "Bobsen",
-                email: studentUser1.email,
+                email: studentUser.email,
                 password: "password123",
             });
 
@@ -124,13 +124,45 @@ describe("Authentication API Tests", () => {
             expect(response.body.message).toBe("Gebruiker bestaat al");
 
             // verify no additional student was created
-            await prisma.user.findMany({ where: { email: studentUser1.email } }).then((users) => {
+            await prisma.user.findMany({ where: { email: studentUser.email } }).then((users) => {
                 expect(users).toHaveLength(1);
             });
         });
-        it("should respond with `400` when email is already in use by a teacher", async () => {});
+        it("should respond with `409` when email is already in use by a teacher", async () => {
+            // create a teacher with the email
+            const teacherUser = await createTeacher("Jan", "Jansen", "teacher1@example.com");
 
-        it("should accept uppercase emails", async () => {});
+            // test creating a new student with the same email
+            const response = await request(app).post("/student/auth/register").send({
+                firstName: "Bob",
+                lastName: "Bobsen",
+                email: teacherUser.email,
+                password: "password123",
+            });
+
+            expect(response.status).toBe(409);
+            expect(response.body.message).toBe("Gebruiker bestaat al");
+
+            // verify no additional user was created
+            await prisma.user.findMany({ where: { email: teacherUser.email } }).then((users) => {
+                expect(users).toHaveLength(1);
+            });
+        });
+
+        it("should accept uppercase emails", async () => {
+            // create a student with an uppercase email
+            const response = await request(app).post("/student/auth/register").send({
+                firstName: "Jan",
+                lastName: "Jansen",
+                email: "TEST@EXAMPLE.COM",
+                password: "password123",
+            });
+
+            expect(response.status).toBe(201);
+            // email should be converted to lowercase in the database
+            const user = await prisma.user.findUnique({ where: { email: "student1@example.com" } });
+            expect(user).toBeDefined();
+        });
     });
 
     describe("[POST] /student/auth/login", () => {
