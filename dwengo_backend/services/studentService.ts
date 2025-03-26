@@ -1,34 +1,46 @@
-import {PrismaClient, Student} from "@prisma/client";
+import {PrismaClient, Student, User} from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export const getStudentsByClass = async (classId: number): Promise<Student[]> => {
-    const classWithStudents = await prisma.class.findUnique({
-        where: { id: classId },
-        include: { classLinks: { include: { student: { include: { user: true } } } } },
-    });
-
-    if (!classWithStudents) {
-        throw new Error(`Class with ID: ${classId} not found`);
+export default class StudentService {
+    static async findStudentById(userId: number): Promise<(Student & { user: User })> {
+        return prisma.student.findUniqueOrThrow({
+            where: {userId: userId},
+            include: {
+                user: true
+            },
+        });
     }
 
-    return classWithStudents.classLinks.map(cs => cs.student);
-};
+    static async getStudentsByClass(classId: number): Promise<Student[]> {
+        const classWithStudents = await prisma.class.findUnique({
+            where: { id: classId },
+            include: { classLinks: { include: { student: { include: { user: true } } } } },
+        });
+
+        if (!classWithStudents) {
+            throw new Error(`Class with ID: ${classId} not found`);
+        }
+
+        return classWithStudents.classLinks.map(cs => cs.student);
+    };
 
 
-export const getStudentsByTeamAssignment = async (assignmentId: number, teamId: number): Promise<Student[]> => {
-    return prisma.student.findMany({
-        where: {
-            teamAssignments: {
-                some: { // Check if the student has any team assignment matching the criteria
-                    assignmentId,
-                    teamId,
-                },
+    static async getStudentsByTeamAssignment(assignmentId: number, teamId: number): Promise<Student[]> {
+        return prisma.student.findMany({
+            where: {
+                Team: {
+                    some: {
+                        id: teamId,
+                        teamAssignment: {
+                            assignmentId: assignmentId
+                        }
+                    }
+                }
             },
-        },
-        include: {
-            user: true, // Include user info if needed
-            teamAssignments: true, // Include the student's team assignments if necessary
-        },
-    });
-};
+            include: {
+                user: true
+            }
+        });
+    };
+}

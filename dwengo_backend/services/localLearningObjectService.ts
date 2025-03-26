@@ -1,4 +1,4 @@
-import { ContentType, PrismaClient } from "@prisma/client";
+import {ContentType, LearningObject, PrismaClient} from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -27,9 +27,9 @@ export default class LocalLearningObjectService {
   static async createLearningObject(
     teacherId: number,
     data: LocalLearningObjectData
-  ) {
+  ): Promise<LearningObject> {
     // Prisma create
-    const newObject = await prisma.learningObject.create({
+    return prisma.learningObject.create({
       data: {
         hruid: `${data.title.toLowerCase()}-${Date.now()}`,
         language: "nl", // Kan ook dynamisch
@@ -49,8 +49,6 @@ export default class LocalLearningObjectService {
         creatorId: teacherId,
       },
     });
-
-    return newObject;
   }
 
   /**

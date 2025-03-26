@@ -14,7 +14,7 @@ paths:
   /learningObjects:
     get:
       tags:
-        - learning Object
+        - Learning Object
       summary: Haal alle leerobjecten op
       operationId: getAllLearningObjects
       responses:
@@ -32,7 +32,7 @@ paths:
         - BearerAuth: []
     post:
       tags:
-        - learning Object
+        - Learning Object
       summary: Creëer een nieuw leerobject
       operationId: createLearningObject
       requestBody:
@@ -56,7 +56,7 @@ paths:
   /learningObjects/{id}:
     get:
       tags:
-        - learning Object
+        - Learning Object
       summary: Haal een specifiek leerobject op
       operationId: getLearningObject
       parameters:
@@ -83,7 +83,7 @@ paths:
   /learningObjects/search:
     get:
       tags:
-        - learning Object
+        - Learning Object
       summary: Zoek leerobjecten op basis van een zoekterm
       operationId: searchLearningObjects
       parameters:
@@ -110,7 +110,7 @@ paths:
   /learningObjects/path/{pathId}:
     get:
       tags:
-        - learning Object
+        - Learning Object
       summary: Haal leerobjecten op voor een specifiek leerpad
       operationId: getLearningObjectsForPath
       parameters:
@@ -137,7 +137,7 @@ paths:
   /learningPaths:
     get:
       tags:
-        - learning Path
+        - Learning Path
       summary: Zoekt leerpaden op basis van verschillende criteria
       operationId: searchLearningPaths
       parameters:
@@ -183,7 +183,7 @@ paths:
   /learningPaths/{pathId}:
     get:
       tags:
-        - learning Path
+        - Learning Path
       summary: Haalt een specifiek leerpad op op basis van de pathId
       operationId: getLearningPathById
       parameters:
@@ -679,6 +679,7 @@ paths:
           description: De unieke identifier van de opdracht
           schema:
             type: integer
+
       responses:
         '200':
           description: Details van de opdracht
@@ -1122,83 +1123,6 @@ paths:
           description: Toegang geweigerd
         '500':
           description: Serverfout bij het ophalen van studenten
-  /teacher/classes/{classId}/join-requests:
-    get:
-      tags:
-        - Teacher Class Operations
-      summary: Haal de join requests voor een klas op
-      description: Geeft een lijst van alle join requests voor de gegeven klas terug.
-      operationId: getJoinRequestsByClass
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: classId
-          in: path
-          required: true
-          description: De ID van de klas waarvoor de join requests worden opgehaald
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Lijst van join requests opgehaald
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  joinRequests:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/JoinRequest'
-        '401':
-          description: Niet geautoriseerd
-        '403':
-          description: Toegang geweigerd
-        '500':
-          description: Serverfout bij het ophalen van join requests
-  /teacher/classes/{classId}/join-requests/{requestId}:
-    patch:
-      tags:
-        - Teacher Class Operations
-      summary: Update de status van een join request
-      description: Accepteer of weiger een join request voor een klas.
-      operationId: updateJoinRequestStatus
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: classId
-          in: path
-          required: true
-          description: De ID van de klas waarvoor de join request wordt geüpdatet
-          schema:
-            type: integer
-        - name: requestId
-          in: path
-          required: true
-          description: De ID van de join request die wordt geüpdatet
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Join request geupdatet
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  joinRequest:
-                    type: object
-                    $ref: '#/components/schemas/JoinRequest'
-        '400':
-          description: Ongeldige actie meegegeven
-        '404':
-          description: Join request niet gevonden
-        '401':
-          description: Niet geautoriseerd
-        '403':
-          description: Toegang geweigerd
-        '500':
-          description: Serverfout bij het updaten van de join request
 
   /teacher/classes/{classId}/invites:
     get:
@@ -1280,7 +1204,7 @@ paths:
         '500':
           description: Serverfout bij het aanmaken van de uitnodiging
       
-  /teacher/invites:
+  /teacher/classes/invites:
     get:
       tags:
         - Teacher Invite Operations
@@ -1307,7 +1231,7 @@ paths:
           description: Toegang geweigerd
         '500':
           description: Serverfout bij het ophalen van uitnodigingen
-  /teacher/invites/{inviteId}:
+  /teacher/classes/invites/{inviteId}:
     patch:
       tags:
         - Teacher Invite Operations
@@ -1392,7 +1316,222 @@ paths:
           description: Toegang geweigerd
         '500':
           description: Serverfout bij het verwijderen van de uitnodiging
+  
+  /teacher/classes/{classId}/join-requests:
+    get:
+      summary: Haal alle join requests op voor een klas
+      security:
+        - BearerAuth: []
+      tags:
+        - Join Requests
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lijst van join requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  joinRequests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/JoinRequest'
+        "401":
+          description: Niet geautoriseerd
 
+  /teacher/classes/{classId}/join-requests/{requestId}:
+    patch:
+      summary: Werk de status van een join request bij (goedkeuren of weigeren)
+      security:
+        - BearerAuth: []
+      tags:
+        - Join Requests
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: ["approve", "deny"]
+      responses:
+        "200":
+          description: Join request succesvol bijgewerkt
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  joinRequest:
+                    $ref: '#/components/schemas/JoinRequest'
+        "400":
+          description: Ongeldige actie opgegeven
+        "401":
+          description: Niet geautoriseerd
+        "403":
+          description: Niet de eigenaar van de klas
+        "404":
+          description: Join request niet gevonden
+
+  /teacher/learningObjects:
+    post:
+      summary: Maak een nieuw leerobject
+      security:
+        - BearerAuth: []
+      tags:
+        - Learning Object
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocalLearningObjectData'
+      responses:
+        "201":
+          description: Leerobject succesvol aangemaakt
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  learningObject:
+                    $ref: '#/components/schemas/LearningObject'
+        "401":
+          description: Geen geldige teacher-gebruiker
+
+    get:
+      summary: Haal alle leerobjecten van de ingelogde teacher op
+      security:
+        - BearerAuth: []
+      tags:
+        - Learning Object
+      responses:
+        "200":
+          description: Lijst van leerobjecten
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LearningObject'
+        "401":
+          description: Geen geldige teacher-gebruiker
+
+  /teacher/learningObjects/{id}:
+    get:
+      summary: Haal één leerobject op
+      security:
+        - BearerAuth: []
+      tags:
+        - Learning Object
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Leerobject gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningObject'
+        "401":
+          description: Geen geldige teacher-gebruiker
+        "403":
+          description: Niet de eigenaar van het leerobject
+        "404":
+          description: Leerobject niet gevonden
+
+    patch:
+      summary: Update een leerobject
+      security:
+        - BearerAuth: []
+      tags:
+        - Learning Object
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocalLearningObjectData'
+      responses:
+        "200":
+          description: Leerobject bijgewerkt
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  learningObject:
+                    $ref: '#/components/schemas/LearningObject'
+        "401":
+          description: Geen geldige teacher-gebruiker
+        "403":
+          description: Niet de eigenaar van het leerobject
+        "404":
+          description: Leerobject niet gevonden
+
+    delete:
+      summary: Verwijder een leerobject
+      security:
+        - BearerAuth: []
+      tags:
+        - Learning Object
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Leerobject verwijderd
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: Geen geldige teacher-gebruiker
+        "403":
+          description: Niet de eigenaar van het leerobject
+        "404":
+          description: Leerobject niet gevonden
 components:
   schemas:
     User:
@@ -1502,8 +1641,6 @@ components:
     JoinRequest:
       type: object
       properties:
-        id:
-          type: integer
         studentId:
           type: integer
         classId:
@@ -1519,7 +1656,10 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
+        hruid:
+          type: string
         title:
           type: string
         language:
@@ -1528,61 +1668,130 @@ components:
           type: string
         image:
           type: string
-        minItems:
+          nullable: true
+          description: "Base64-gecodeerde cover afbeelding"
+        num_nodes:
           type: integer
-        nodes:
-          type: string
+          nullable: true
+          description: "Aantal nodes in het leerpad"
+        num_nodes_left:
+          type: integer
+          nullable: true
+          description: "Aantal resterende nodes voor de leerling"
         createdAt:
           type: string
           format: date-time
         updatedAt:
           type: string
           format: date-time
+        creatorId:
+          type: integer
+        creator:
+          type: object
+          properties:
+            userId:
+              type: integer
+        nodes:
+          type: array
+          items:
+            type: object
+        assignments:
+          type: array
+          items:
+            type: object
+        questionGeneral:
+          type: array
+          items:
+            type: object
 
     LearningObject:
       type: object
       properties:
         id:
           type: string
-        version:
+          format: uuid
+        uuid:
           type: string
-        language:
+        hruid:
           type: string
         title:
+          type: string
+        version:
+          type: integer
+          default: 1
+        language:
           type: string
         description:
           type: string
         contentType:
           type: string
+        estimatedTime:
+          type: integer
         keywords:
-          type: string
+          type: array
+          items:
+            type: string
         targetAges:
-          type: string
+          type: array
+          items:
+            type: integer
         teacherExclusive:
           type: boolean
         skosConcepts:
-          type: string
+          type: array
+          items:
+            type: string
         copyright:
           type: string
+          default: "CC BY Dwengo"
         licence:
           type: string
+          default: "dwengo"
         difficulty:
-          type: integer
-        estimatedTime:
           type: integer
         available:
           type: boolean
+          default: true
         contentLocation:
           type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
         updatedAt:
           type: string
+          format: date-time
+        creatorId:
+          type: integer
+        creator:
+          type: object
+          properties:
+            userId:
+              type: integer
         evaluations:
           type: array
           items:
             $ref: '#/components/schemas/Evaluation'
+        educationalGoals:
+          type: array
+          items:
+            type: object
+        returnValue:
+          type: object
+          nullable: true
+        progress:
+          type: array
+          items:
+            type: object
+        QuestionSpecifics:
+          type: array
+          items:
+            type: object
+        nodes:
+          type: array
+          items:
+            type: object
+  
 
     Evaluation:
       type: object
@@ -1695,6 +1904,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TeamAssignment'
+        submissions:
+          type: array
 
     ClassAssignment:
       type: object
@@ -1819,6 +2030,43 @@ components:
         updatedAt:
           type: string
           format: date-time
+    
+    LocalLearningObjectData:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        contentType:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        targetAges:
+          type: array
+          items:
+            type: integer
+        teacherExclusive:
+          type: boolean
+        skosConcepts:
+          type: array
+          items:
+            type: string
+        copyright:
+          type: string
+        licence:
+          type: string
+        difficulty:
+          type: integer
+        estimatedTime:
+          type: integer
+        available:
+          type: boolean
+        contentLocation:
+          type: string
+  
 
   securitySchemes:
     BearerAuth:

@@ -31,10 +31,8 @@ export const authorizeStudentInTeamWithAssignment = asyncHandler(
                         userId: student.userId,
                     },
                 },
-                teamAssignments: {
-                    some: {
-                        assignmentId: assignmentId,
-                    },
+                teamAssignment: {
+                    assignmentId: assignmentId,
                 },
             },
         });

@@ -1,7 +1,8 @@
-import express from 'express';
-import { registerStudent, loginStudent } from '../../controllers/student/studentAuthController';
+import express, {Router} from 'express';
+import { loginStudent } from '../../controllers/student/studentAuthController';
+import { registerStudent } from '../../controllers/userController';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // Registreren van een leerling
 router.post("/register", registerStudent);

@@ -1,16 +1,16 @@
 import prisma from "./prisma";
 import {
-  User,
-  Class,
-  Invite,
-  Teacher,
-  JoinRequestStatus,
-  Student,
-  JoinRequest,
-  LearningPath,
   Assignment,
+  Class, EvaluationType,
+  Invite,
+  JoinRequest,
+  JoinRequestStatus,
+  LearningPath,
+  Student, Submission,
+  Teacher, Team, TeamAssignment,
+  User,
 } from "@prisma/client";
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -118,12 +118,12 @@ export async function createLearningPath(
   description: string,
   creatorId: number
 ): Promise<LearningPath> {
-  const lp = await prisma.learningPath.create({
+  return prisma.learningPath.create({
     data: {
       // Random string generator that generates a string of numbers and lowercase letters
       hruid: Math.random()
-        .toString(36)
-        .substring(2, 2 + 12),
+          .toString(36)
+          .substring(2, 2 + 12),
       title,
       description,
       language: "nl",
@@ -134,7 +134,6 @@ export async function createLearningPath(
       },
     },
   });
-  return lp;
 }
 
 export async function addStudentToClass(
@@ -153,7 +152,7 @@ export async function createJoinRequest(
   studentId: number,
   classId: number
 ): Promise<JoinRequest> {
-  return await prisma.joinRequest.create({
+  return prisma.joinRequest.create({
     data: {
       studentId,
       classId,
@@ -169,7 +168,7 @@ export async function createAssignment(
 ): Promise<Assignment> {
   return prisma.assignment.create({
     data: {
-      learningPathId,
+      pathRef: learningPathId,
       deadline,
       classAssignments: {
         create: {
@@ -177,24 +176,54 @@ export async function createAssignment(
         },
       },
     },
-    include: {
-      learningPath: true,
+  });
+}
+
+export async function createSubmission(evaluationId: string, teamId: number, assignmentId: number): Promise<Submission> {
+  return prisma.submission.create({
+    data: {
+      evaluationId,
+      teamId,
+      assignmentId
+    }
+  });
+}
+
+export async function giveAssignmentToTeam(assignmentId: number, teamId: number): Promise<TeamAssignment> {
+  return prisma.teamAssignment.create({
+    data: {
+      teamId: teamId,
+      assignmentId: assignmentId,
     },
   });
 }
 
-export function stringToDateWithLP(body: any, length: number) {
-  for (let i = 0; i < length; i += 1) {
-    body[i].createdAt = new Date(body[i].createdAt);
-    body[i].updatedAt = new Date(body[i].updatedAt);
-    body[i].deadline = new Date(body[i].deadline);
-    body[i].learningPath.createdAt = new Date(body[i].learningPath.createdAt);
-    body[i].learningPath.updatedAt = new Date(body[i].learningPath.updatedAt);
-  }
+export async function createEvaluation(learningObjectId: string, type: EvaluationType) {
+  return prisma.evaluation.create({
+    data: {
+      nrOfQuestions: 10,
+      evaluationType: type,
+      learningObject: {
+        connect: { id: learningObjectId },
+      },
+    },
+  });
 }
 
-export function stringToDate(body: any, length: number) {
-  for (let i = 0; i < length; i += 1) {
+export async function createTeamWithStudents(teamName: string, classId: number, students: Student[]): Promise<Team> {
+  return prisma.team.create({
+    data: {
+      teamname: teamName,
+      classId,
+      students: {
+        connect: students.map((student: Student): {userId: number} => ({ userId: student.userId }))
+      }
+    }
+  })
+}
+
+export function stringToDate(body: any, length: number): void {
+  for (let i: number = 0; i < length; i += 1) {
     body[i].createdAt = new Date(body[i].createdAt);
     body[i].updatedAt = new Date(body[i].updatedAt);
     body[i].deadline = new Date(body[i].deadline);

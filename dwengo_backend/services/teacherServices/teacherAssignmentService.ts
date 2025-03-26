@@ -1,34 +1,57 @@
+
 import { Assignment, PrismaClient, Role } from "@prisma/client";
 import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
+import  ReferenceValidationService  from "../../services/referenceValidationService"; 
+// ^ let op: named import, géén "default" meer.
 
 const prisma = new PrismaClient();
 
 export default class TeacherAssignmentService {
-  // Static method to create an assignment for a class
+  /**
+   * Creëer een assignment voor een class, met pathRef/isExternal.
+   */
   static async createAssignmentForClass(
     teacherId: number,
     classId: number,
-    learningPathId: string,
+    pathRef: string,
+    pathLanguage: string,
+    isExternal: boolean,
     deadline: Date
   ): Promise<Assignment> {
+    // 1) check authorization
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
       throw new Error("The teacher is unauthorized to perform this action");
     }
-
+  
+    // 2) Valideer pathRef
+    // => isExternal=true => Dwengo (hruid + language)
+    // => isExternal=false => lokaal (localId=pathRef)
+    await ReferenceValidationService.validateLearningPath(
+      isExternal,
+      isExternal ? undefined : pathRef,    // localId
+      isExternal ? pathRef : undefined,    // hruid
+      isExternal ? pathLanguage : undefined  // language
+    );
+  
+    // 3) Maak assignment
     return prisma.assignment.create({
       data: {
-        learningPathId,
+        pathRef,
+        isExternal,
         deadline,
         classAssignments: {
           create: {
-            classId, // This will automatically link to the created Assignment
+            classId,
           },
         },
       },
     });
   }
+  
 
-  // Static method to get assignments by class
+  /**
+   * Haal alle assignments op voor 1 klas
+   */
   static async getAssignmentsByClass(
     classId: number,
     teacherId: number
@@ -40,30 +63,43 @@ export default class TeacherAssignmentService {
       where: {
         classAssignments: {
           some: {
-            classId: classId, // This ensures we are looking for assignments related to this class
+            classId,
           },
         },
       },
     });
   }
 
-  // Static method to update an assignment
+  /**
+   * Update assignment => pathRef/isExternal
+   */
   static async updateAssignment(
     assignmentId: number,
-    learningPathId: string,
+    pathRef: string,
+    isExternal: boolean,
     teacherId: number
   ): Promise<Assignment> {
+    // 1) autorisatie
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
       throw new Error("The teacher is unauthorized to update the assignment");
     }
 
+    // 2) validate new pathRef
+    await ReferenceValidationService.validateLearningPath( isExternal,pathRef);
+
+    // 3) update
     return prisma.assignment.update({
       where: { id: assignmentId },
-      data: { learningPathId },
+      data: {
+        pathRef,
+        isExternal,
+      },
     });
   }
 
-  // Static method to delete an assignment
+  /**
+   * Delete assignment
+   */
   static async deleteAssignment(
     assignmentId: number,
     teacherId: number

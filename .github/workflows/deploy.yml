@@ -1,23 +1,29 @@
-name: Deploy Server
+name: CI/CD Workflow
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - yolo
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: self-hosted
-
     steps:
-      - name: Pull repo
-        run: |
-          cd /home/selab2/Dwengo-4/
-          git pull
+      - name: Kill existing Node processes
+        run: pkill -f "node.*server.js" || true
 
-      - name: Deploy application
+      - name: Deploy yolo branch
         run: |
-          cd /home/selab2/Dwengo-4/dwengo_backend
-          killall node
-          npx nodemon server.js > /dev/null 2>&1 &
-          echo "Deployment completed successfully"
+          cd /home/selab2/Dwengo-4-yolo/Dwengo-4/
+          git pull
+          git checkout yolo
+          cd /home/selab2/Dwengo-4-yolo/Dwengo-4/frontend
+          npm i
+          npm run build
+          cd /home/selab2/Dwengo-4-yolo/Dwengo-4/dwengo_backend
+          npm i
+          PORT=4000 npx nodemon server.js > /dev/null 2>&1 &
+          sleep 3 #aapjes 
+          echo "Yolo branch deployment completed successfully on port $PORT"

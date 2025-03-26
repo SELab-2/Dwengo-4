@@ -1,5 +1,5 @@
-import * as jwt from 'jsonwebtoken';
-import  asyncHandler from 'express-async-handler';
+import jwt from 'jsonwebtoken';
+import asyncHandler from 'express-async-handler';
 import { PrismaClient } from '@prisma/client';
 import { Request, Response, NextFunction } from 'express';
 
@@ -17,7 +17,7 @@ interface JwtPayload {
 }
 
 export const protectStudent = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     let token: string | undefined;
 
     if (
