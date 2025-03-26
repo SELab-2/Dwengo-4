@@ -4,7 +4,10 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction): void => {
     if (err instanceof AppError) {
-        res.status(err.statusCode);
+        res.status(err.statusCode).json({
+            error: err.name,
+            message: err.message,
+        });
     } else {
         const statusCode: number = res.statusCode === 200 ? 500 : res.statusCode;
         res.status(statusCode);
