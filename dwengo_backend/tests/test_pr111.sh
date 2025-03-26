@@ -132,7 +132,7 @@ curl -i -X PATCH "$BASE_URL/teacher/classes/$CLASS_ID/join-requests/$REQUEST_ID"
 
 echo
 echo "==[ 7) Teacher maakt lokaal leerobject ]==========================="
-LOCAL_LO=$(curl -s -X POST "$BASE_URL/teacher/learningObjects" \
+LOCAL_LO=$(curl -s -X POST "$BASE_URL/learningObjectByTeacher" \
    -H "Authorization: Bearer $TEACHER_TOKEN" \
    -H "Content-Type: application/json" \
    -d '{
@@ -249,15 +249,10 @@ echo "Assignments for student:"
 echo "$STU_ASSIGNMENTS"
 
 echo
-echo "==[ 13) Student / Teacher bekijkt laatste 10 leerobjecten (combi) ]"
-echo "---- Student sees LO (limited fields) ----"
-ALL_LO_STUDENT=$(curl -s -X GET "$BASE_URL/learningObjects" \
-  -H "Authorization: Bearer $STUDENT_TOKEN" \
-  | jq '.[-10:] | map({title, id, hruid, language, teacherExclusive})')
-echo "$ALL_LO_STUDENT"
+echo "==[ 13) Teacher bekijkt laatste 10 leerobjecten (combi) ]"
 
 echo "---- Teacher sees LO (limited fields) ----"
-ALL_LO_TEACHER=$(curl -s -X GET "$BASE_URL/learningObjects" \
+ALL_LO_TEACHER=$(curl -s -X GET "$BASE_URL/learningObject" \
   -H "Authorization: Bearer $TEACHER_TOKEN" \
   | jq '.[-10:] | map({title, id, hruid, language, teacherExclusive})')
 echo "$ALL_LO_TEACHER"
