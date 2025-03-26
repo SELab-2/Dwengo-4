@@ -6,33 +6,20 @@ import QuestionRoutes from "./routes/question/questionRoutes";
 import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
 import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearningObjectRoutes";
 
-import assignmentRoutes from "./routes/assignmentRoutes";
-import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
-import studentTeamRoutes from "./routes/student/studentTeamRoutes";
-import progressRoutes from "./routes/progressRoutes";
-import studentAssignmentRoutes from "./routes/student/studentAssignmentRoutes";
-import feedbackRoutes from "./routes/teacher/feedbackRoutes";
-import teacherSubmissionRoute from "./routes/teacher/teacherSubmissionRoute";
-import studentSubmissionRoute from "./routes/student/studentSubmissionRoute";
 import assignmentRoutes from "./routes/assignments/assignmentRoutes";
 import progressRoutes from "./routes/progress/progressRoutes";
-import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
-import studentAssignmentRoutes from "./routes/assignments/studentAssignmentRoutes";
 import feedbackRoutes from "./routes/feedback/feedbackRoutes";
-import studentClassRoutes from "./routes/student/studentClassRoutes";
 import submissionRoutes from "./routes/submission/submissionRoutes";
 import teacherLocalLearningPathRoutes from "./routes/teacher/teacherLocalLearningPathRoutes";
 import teacherLocalLearningPathNodesRoutes from "./routes/teacher/teacherLocalLearningPathNodesRoutes";
 
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
-import teacherTeamsRoutes from "./routes/teacher/teacherTeamsRoutes";
 import classRoutes from "./routes/class/classRoutes";
 import teacherInviteRoutes from "./routes/invite/teacherInviteRoutes";
 import joinRequestRoutes from "./routes/joinRequest/joinRequestRoutes";
 import teamRoutes from "./routes/team/teamRoutes";
 import authRoutes from "./routes/authentication/authRoutes";
-import teacherAssignmentRoutes from "./routes/assignments/teacherAssignmentRoutes";
 
 dotenv.config();
 
