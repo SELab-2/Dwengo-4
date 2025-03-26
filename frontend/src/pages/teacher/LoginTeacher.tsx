@@ -1,18 +1,18 @@
-import React, { useRef } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import InputWithChecks from "../../components/shared/InputWithChecks";
+import React, { useRef } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import InputWithChecks from '../../components/shared/InputWithChecks';
 import {
   validateEmail,
   validateRequired,
   validateForm,
   validateMinLength,
-} from "../../util/shared/validation";
-import Container from "../../components/shared/Container";
-import BoxBorder from "../../components/shared/BoxBorder";
-import { loginTeacher } from "../../util/teacher/httpTeacher";
-import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
-import PrimaryButton from "../../components/shared/PrimaryButton";
+} from '../../util/shared/validation';
+import Container from '../../components/shared/Container';
+import BoxBorder from '../../components/shared/BoxBorder';
+import { loginTeacher } from '../../util/teacher/httpTeacher';
+import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButton';
+import PrimaryButton from '../../components/shared/PrimaryButton';
 
 interface LoginFormData {
   email: string;
@@ -45,12 +45,12 @@ const LoginTeacher: React.FC = () => {
       const token = data.token;
       const expires = new Date();
       expires.setDate(expires.getDate() + 7);
-      localStorage.setItem("token", token);
-      localStorage.setItem("expiration", expires.toISOString());
-      localStorage.setItem("firstName", data.firstName);
-      localStorage.setItem("lastName", data.lastName);
+      localStorage.setItem('token', token);
+      localStorage.setItem('expiration', expires.toISOString());
+      localStorage.setItem('firstName', data.firstName);
+      localStorage.setItem('lastName', data.lastName);
 
-      navigate("/teacher/dashboard");
+      navigate('/teacher');
     },
   });
 
@@ -105,7 +105,7 @@ const LoginTeacher: React.FC = () => {
             {isError && (
               <div className="c-r">
                 {(error as any)?.info?.message ||
-                  "Er is iets fout gelopen tijdens het inloggen"}
+                  'Er is iets fout gelopen tijdens het inloggen'}
               </div>
             )}
             <div>

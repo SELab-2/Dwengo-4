@@ -1,96 +1,66 @@
+
 import express from "express";
 import {
-    createQuestionGeneral,
-    createQuestionSpecific,
-    createQuestionMessage,
-    updateQuestion,
-    updateQuestionMessage,
-    getQuestion,
-    getQuestionsTeam,
-    getQuestionsClass,
-    getQuestionsAssignment,
-    getQuestionMessages,
-    deleteQuestion,
-    deleteQuestionMessage
+  createQuestionGeneral,
+  createQuestionSpecific,
+  createQuestionMessage,
+  updateQuestion,
+  updateQuestionMessage,
+  getQuestion,
+  getQuestionsTeam,
+  getQuestionsClass,
+  getQuestionsAssignment,
+  getQuestionMessages,
+  deleteQuestion,
+  deleteQuestionMessage
 } from "../../controllers/question/questionController";
+
 import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
 import {
-    authorizeStudentInTeamWithAssignment,
-    authorizeQuestion,
-    authorizeOwnerOfQuestionMessage,
-    authorizeStudentInTeamThatCreatedQuestion,
-    authorizeTeacherOfClass,
-    authorizeTeacherOfAssignmentClass
+  authorizeQuestion,
+  authorizeMessageUpdate,
+  authorizeMessageDelete,
+  authorizeQuestionUpdate
 } from "../../middleware/questionsAuthMiddleware";
 
 const router = express.Router();
+
+// Gebruiker moet ingelogd zijn
 router.use(protectAnyUser);
 
-// Routes for creating questions
-router.post(
-    "/assignment/:assignmentId/learningPath/:learningPathId/",
-    authorizeStudentInTeamWithAssignment,
-    createQuestionGeneral
-);
-router.post(
-    "/assignment/:assignmentId/learningPath/:learningPathId/learningObject/:learningObjectId/",
-    authorizeStudentInTeamWithAssignment,
-    createQuestionSpecific
-);
-router.post(
-    "/:questionId/message",
-    authorizeQuestion,
-    createQuestionMessage
-);
+// CREATE SPECIFIC question
+router.post("/specific/assignment/:assignmentId", createQuestionSpecific);
 
-// Routes for updating questions
-router.patch(
-    "/:questionId",
-    authorizeQuestion,
-    updateQuestion);
+// CREATE GENERAL question
+router.post("/general/assignment/:assignmentId", createQuestionGeneral);
 
-router.patch(
-    "/:questionId/message/:questionMessageId",
-    authorizeOwnerOfQuestionMessage,
-    updateQuestionMessage);
+// CREATE message
+router.post("/:questionId/message", authorizeQuestion, createQuestionMessage);
 
-// Routes for retrieving questions
-router.get(
-    "/:questionId",
-    authorizeQuestion,
-    getQuestion
-);
-router.get(
-    "/team/:teamId/",
-    authorizeStudentInTeamThatCreatedQuestion,
-    getQuestionsTeam
-);
-router.get(
-    "/class/:classId",
-    authorizeTeacherOfClass,
-    getQuestionsClass
-);
-router.get(
-    "/assignment/:assignmentId/class/:classId",
-    authorizeTeacherOfAssignmentClass,
-    getQuestionsAssignment
-);
-router.get(
-    "/:questionId/messages",
-    authorizeQuestion,
-    getQuestionMessages
-);
+// UPDATE question (titel)
+router.patch("/:questionId", authorizeQuestionUpdate, updateQuestion);
+// UPDATE message
+router.patch("/:questionId/message/:questionMessageId", authorizeMessageUpdate, updateQuestionMessage);
 
-// Routes for deleting questions
-router.delete(
-    "/:questionId",
-    authorizeQuestion,
-    deleteQuestion
-);
-router.delete(
-    "/:questionId/message/:questionMessageId",
-    authorizeOwnerOfQuestionMessage,
-    deleteQuestionMessage
-);
+// GET question
+router.get("/:questionId", authorizeQuestion, getQuestion);
+
+// GET messages
+router.get("/:questionId/messages", authorizeQuestion, getQuestionMessages);
+
+// GET questions by team
+router.get("/team/:teamId", getQuestionsTeam);
+
+// GET questions by class
+router.get("/class/:classId", getQuestionsClass);
+
+// GET questions for assignment + class
+router.get("/assignment/:assignmentId/class/:classId", getQuestionsAssignment);
+
+// DELETE question
+router.delete("/:questionId", authorizeQuestion, deleteQuestion);
+
+// DELETE message
+router.delete("/:questionId/message/:questionMessageId", authorizeMessageDelete, deleteQuestionMessage);
 
 export default router;

@@ -1,10 +1,12 @@
 import globals from "globals";
-import js from "@eslint/js";
+import eslint from "@eslint/js";
+import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
 import unusedImports from "eslint-plugin-unused-imports"; // <– Add this import
 
 export default [
-  js.configs.recommended,
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
   {
     files: ["**/*.{js,ts}"],
     // Add plugin to the configuration object

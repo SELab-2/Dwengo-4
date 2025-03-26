@@ -383,6 +383,10 @@ model Question {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
+  // Nieuw:
+  createdBy  Int
+  isPrivate  Boolean @default(false)
+
   // Een vraag is ofwel een specifieke vraag (bij leerobject),
   // een algemene vraag (bij leerpad) of
   // een bijvraag bij een antwoord
