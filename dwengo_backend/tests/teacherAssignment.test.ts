@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import {beforeEach, describe, expect, it} from "vitest";
 import request from "supertest";
 import prisma from "./helpers/prisma";
 import app from "../index";
-import { Assignment, Class, LearningPath, Teacher, User } from "@prisma/client";
+import {Assignment, Class, LearningPath, Teacher, User} from "@prisma/client";
 import {
   addTeacherToClass,
   createAssignment,
@@ -11,7 +11,6 @@ import {
   createTeacher,
   stringToDate,
 } from "./helpers/testDataCreation";
-import { isExternal } from "util/types";
 
 describe("Tests for teacherAssignment", async () => {
   let teacher1: User & { teacher: Teacher; token: string };
@@ -31,10 +30,8 @@ describe("Tests for teacherAssignment", async () => {
   let assignment1: Assignment;
   let assignment2: Assignment;
   let assignment3: Assignment;
-  let assignment4: Assignment;
-  let assignment5: Assignment;
 
-  beforeEach(async () => {
+  beforeEach(async (): Promise<void> => {
     // create some classes
     class1 = await createClass("1LA", "ABCD");
     class2 = await createClass("3LAWI", "EFGH");
@@ -70,12 +67,12 @@ describe("Tests for teacherAssignment", async () => {
     );
 
     // Add teacher to classes
-    addTeacherToClass(teacher1.id, class1.id);
-    addTeacherToClass(teacher2.id, class1.id);
-    addTeacherToClass(teacher2.id, class2.id);
-    addTeacherToClass(teacher3.id, class2.id);
+    await addTeacherToClass(teacher1.id, class1.id);
+    await addTeacherToClass(teacher2.id, class1.id);
+    await addTeacherToClass(teacher2.id, class2.id);
+    await addTeacherToClass(teacher3.id, class2.id);
 
-    addTeacherToClass(teacher1.id, class3.id);
+    await addTeacherToClass(teacher1.id, class3.id);
     // Create assignments
     assignment1 = await createAssignment(
       class1.id,
@@ -91,17 +88,6 @@ describe("Tests for teacherAssignment", async () => {
       class2.id,
       lp3.id,
       new Date("2026-10-19")
-    );
-
-    assignment4 = await createAssignment(
-      class2.id,
-      lp4.id,
-      new Date("2026-10-17")
-    );
-    assignment5 = await createAssignment(
-      class2.id,
-      lp1.id,
-      new Date("2025-05-28")
     );
   });
 
@@ -236,14 +222,14 @@ describe("Tests for teacherAssignment", async () => {
 
   describe("[DELETE] /teacher/assignments/:assignmentId", async () => {
     it("should respond with a `204` status code and delete the assignment", async () => {
-      const { status, body } = await request(app)
-        .delete(`/teacher/assignments/${assignment4.id}`)
+      const { status } = await request(app)
+        .delete(`/teacher/assignments/${assignment3.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`);
       expect(status).toBe(204);
 
       // Check if assignment is actually gone from database
       const assignment = await prisma.assignment.findUnique({
-        where: { id: assignment4.id },
+        where: { id: assignment3.id },
       });
       expect(assignment).toBeNull();
     });

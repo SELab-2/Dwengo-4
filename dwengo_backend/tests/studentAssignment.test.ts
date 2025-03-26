@@ -77,10 +77,10 @@ describe("[GET] /student/assignments", async () => {
     );
 
     // Add students to classes
-    addStudentToClass(student2.id, class1.id);
-    addStudentToClass(student3.id, class1.id);
-    addStudentToClass(student4.id, class2.id);
-    addStudentToClass(student5.id, class3.id);
+    await addStudentToClass(student2.id, class1.id);
+    await addStudentToClass(student3.id, class1.id);
+    await addStudentToClass(student4.id, class2.id);
+    await addStudentToClass(student5.id, class3.id);
 
     // Create assignments
     assignment1 = await createAssignment(class1.id, lp1.id, new Date());
