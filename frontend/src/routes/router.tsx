@@ -1,39 +1,32 @@
-import React from "react";
+import React from 'react';
 import {
   createBrowserRouter,
-  Link,
   RouteObject,
   useNavigate,
-} from "react-router-dom";
+} from 'react-router-dom';
 
 // ==== TEACHER ROUTES ==== //
 
-import AssignmentPage from "../pages/teacher/AddAssignment";
-import RootLayoutTeacher from "../components/teacher/RootLayoutTeacher";
-import LoginTeacher from "../pages/teacher/LoginTeacher";
-import ClassesPage from "../pages/teacher/ClassesTeacher";
-import SignupTeacher from "../pages/teacher/SignupTeacher";
-import RootLayoutDashboardTeacher from "../components/teacher/RootLayoutDashboardTeacher";
-import {
-  checkAuthLoader as teacherCheckAuthLoader,
-  tokenLoader as teacherTokenLoader,
-} from "../util/teacher/authTeacher";
-import { action as teacherLogoutAction } from "../pages/teacher/LogoutTeacher";
-import EditClassTeacher from "../pages/teacher/EditClassTeacher";
+import AssignmentPage from '../pages/teacher/AddAssignment';
+import RootLayoutTeacher from '../components/teacher/RootLayoutTeacher';
+import LoginTeacher from '../pages/teacher/LoginTeacher';
+import ClassesPage from '../pages/teacher/ClassesTeacher';
+import SignupTeacher from '../pages/teacher/SignupTeacher';
+import { action as teacherLogoutAction } from '../pages/teacher/LogoutTeacher';
+import EditClassTeacher from '../pages/teacher/EditClassTeacher';
 
 // ==== STUDENT ROUTES ==== //
-import RootLayoutStudent from "../components/student/RootLayoutStudent";
-import LoginStudent from "../pages/student/LoginStudent";
-import SignupStudent from "../pages/student/SignupStudent";
-import RootLayoutDashboardStudent from "../components/student/RootLayoutDashboardStudent";
+import RootLayoutStudent from '../components/student/RootLayoutStudent';
+import LoginStudent from '../pages/student/LoginStudent';
+import SignupStudent from '../pages/student/SignupStudent';
+import RootLayoutDashboardStudent from '../components/student/RootLayoutDashboardStudent';
 import {
   checkAuthLoader as studentCheckAuthLoader,
   tokenLoader as studentTokenLoader,
-} from "../util/student/authStudent";
-import { action as studentLogoutAction } from "../pages/student/LogoutStudent";
-import StudentIndex from "../pages/student";
-import AddAssignmentForm from "../components/teacher/assignment/AddAssignmentForm";
-import PrimaryButton from "../components/shared/PrimaryButton";
+} from '../util/student/authStudent';
+import { action as studentLogoutAction } from '../pages/student/LogoutStudent';
+import StudentIndex from '../pages/student';
+import JoinClass from '../components/student/classes/JoinRequestForm';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -46,14 +39,14 @@ const HomePage: React.FC = () => {
         </h2>
         <div className="flex flex-row justify-center gap-x-10">
           <button
-            onClick={() => navigate("/student")}
+            onClick={() => navigate('/student')}
             className={`px-7 text-4xl py-1.5 font-bold rounded-md  bg-dwengo-green hover:bg-dwengo-green-dark text-white  hover:cursor-pointer`}
           >
             Student
           </button>
           <button
             className={`px-7 text-4xl py-1.5 font-bold rounded-md   text-white bg-dwengo-green hover:bg-dwengo-green-dark hover:cursor-pointer`}
-            onClick={() => navigate("/teacher")}
+            onClick={() => navigate('/teacher')}
           >
             Teacher
           </button>
@@ -65,11 +58,11 @@ const HomePage: React.FC = () => {
 
 export const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <HomePage />,
   },
   {
-    path: "teacher",
+    path: 'teacher',
     element: <RootLayoutTeacher />,
     children: [
       {
@@ -77,33 +70,33 @@ export const router = createBrowserRouter([
         element: <h1>Home teacher</h1>,
       },
       {
-        path: "inloggen",
+        path: 'inloggen',
         element: <LoginTeacher />,
       },
       {
-        path: "registreren",
+        path: 'registreren',
         element: <SignupTeacher />,
       },
       {
-        path: "logout",
+        path: 'logout',
         action: teacherLogoutAction,
       },
       {
-        path: "classes",
+        path: 'classes',
         element: <ClassesPage></ClassesPage>,
       },
       {
-        path: "classes/:classId",
+        path: 'classes/:classId',
         element: <EditClassTeacher />,
       },
       {
-        path: "classes/:classId/add-assignment",
+        path: 'classes/:classId/add-assignment',
         element: <AssignmentPage></AssignmentPage>,
       },
     ],
   },
   {
-    path: "student",
+    path: 'student',
     element: <RootLayoutStudent />,
     children: [
       {
@@ -112,23 +105,23 @@ export const router = createBrowserRouter([
         element: <StudentIndex />,
       },
       {
-        path: "join-link-example",
-        element: <p>Join Link Example</p>,
+        path: 'klassen',
+        element: <JoinClass />,
       },
       {
-        path: "inloggen",
+        path: 'inloggen',
         element: <LoginStudent />,
       },
       {
-        path: "registreren",
+        path: 'registreren',
         element: <SignupStudent />,
       },
       {
-        path: "logout",
+        path: 'logout',
         action: studentLogoutAction,
       },
       {
-        path: "dashboard",
+        path: 'dashboard',
         element: <RootLayoutDashboardStudent />,
         loader: studentTokenLoader,
         children: [
