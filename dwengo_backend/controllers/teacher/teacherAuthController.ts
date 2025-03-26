@@ -51,7 +51,7 @@ export const loginTeacher = asyncHandler(async (req: Request, res: Response) => 
     // Vergelijk het opgegeven wachtwoord met de opgeslagen hash
     const passwordMatches = await bcrypt.compare(password, teacher.user.password);
     if (!passwordMatches) {
-        throw new UnauthorizedError("Invalid password");
+        throw new UnauthorizedError("Incorrect password");
     }
 
     res.json({

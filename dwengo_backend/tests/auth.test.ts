@@ -84,7 +84,6 @@ describe("Authentication API Tests", () => {
                 expect(users).toHaveLength(0);
             });
         });
-
         it("should respond with `400` when password is too short", async () => {
             const response = await request(app).post("/student/auth/register").send({
                 firstName: "Jan",
@@ -121,7 +120,7 @@ describe("Authentication API Tests", () => {
             });
 
             expect(response.status).toBe(409);
-            expect(response.body.message).toBe("Gebruiker bestaat al");
+            expect(response.body.message).toBe("Email is already in use");
 
             // verify no additional student was created
             await prisma.user.findMany({ where: { email: studentUser.email } }).then((users) => {
@@ -141,14 +140,13 @@ describe("Authentication API Tests", () => {
             });
 
             expect(response.status).toBe(409);
-            expect(response.body.message).toBe("Gebruiker bestaat al");
+            expect(response.body.message).toBe("Email is already in use");
 
             // verify no additional user was created
             await prisma.user.findMany({ where: { email: teacherUser.email } }).then((users) => {
                 expect(users).toHaveLength(1);
             });
         });
-
         it("should convert emails to lower case", async () => {
             // create a student with an uppercase email
             const response = await request(app).post("/student/auth/register").send({
@@ -225,6 +223,23 @@ describe("Authentication API Tests", () => {
 
             expect(response.status).toBe(401);
             expect(response.body.message).toBe("Incorrect password");
+        });
+        it("should fail if request body is incorrect", async () => {
+            const response = await request(app).post("/student/auth/login").send({}); // empty body
+
+            expect(response.status).toBe(400);
+            expect(response.body.details).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        field: "email",
+                        source: "body",
+                    }),
+                    expect.objectContaining({
+                        field: "password",
+                        source: "body",
+                    }),
+                ])
+            );
         });
     });
 
@@ -344,7 +359,7 @@ describe("Authentication API Tests", () => {
             });
 
             expect(response.status).toBe(409);
-            expect(response.body.message).toBe("Gebruiker bestaat al");
+            expect(response.body.message).toBe("Email is already in use");
 
             // verify no additional user was created
             await prisma.user.findMany({ where: { email: studentUser.email } }).then((users) => {
@@ -364,14 +379,13 @@ describe("Authentication API Tests", () => {
             });
 
             expect(response.status).toBe(409);
-            expect(response.body.message).toBe("Gebruiker bestaat al");
+            expect(response.body.message).toBe("Email is already in use");
 
             // verify no additional user was created
             await prisma.user.findMany({ where: { email: teacherUser.email } }).then((users) => {
                 expect(users).toHaveLength(1);
             });
         });
-
         it("should convert emails to lowercase", async () => {
             // create a teacher with an uppercase email
             const response = await request(app).post("/teacher/auth/register").send({
@@ -398,7 +412,7 @@ describe("Authentication API Tests", () => {
                 password: "password123",
             });
         });
-        it("6. Should login with registered teacher credentials", async () => {
+        it("should login with registered teacher credentials", async () => {
             const response = await request(app)
                 .post("/teacher/auth/login")
                 .send({
@@ -409,7 +423,19 @@ describe("Authentication API Tests", () => {
 
             expect(response.status).toBe(200);
         });
-        it("7. Should fail login with non-registered email", async () => {
+        it("should log in, even if the email is in uppercase", async () => {
+            // test logging in with email in uppercase
+            const response = await request(app)
+                .post("/teacher/auth/login")
+                .send({
+                    email: "teACHer1@eXAMple.cOm",
+                    password: "password123",
+                })
+                .set("Content-Type", "application/json");
+
+            expect(response.status).toBe(200);
+        });
+        it("should fail login with non-registered email", async () => {
             const response = await request(app)
                 .post("/teacher/auth/login")
                 .send({
@@ -419,11 +445,9 @@ describe("Authentication API Tests", () => {
                 .set("Content-Type", "application/json");
 
             expect(response.status).toBe(401);
-            // Uncomment when you want to test specific error messages
-            // expect(response.body).toHaveProperty("error");
-            // expect(response.body.error).toContain("Ongeldige gebruiker");
+            expect(response.body.message).toBe("Invalid user");
         });
-        it("8. Should fail login with correct email but wrong password", async () => {
+        it("should fail login with correct email but wrong password", async () => {
             const response = await request(app)
                 .post("/teacher/auth/login")
                 .send({
@@ -433,9 +457,24 @@ describe("Authentication API Tests", () => {
                 .set("Content-Type", "application/json");
 
             expect(response.status).toBe(401);
-            // Uncomment when you want to test specific error messages
-            // expect(response.body).toHaveProperty("error");
-            // expect(response.body.error).toContain("Ongeldig wachtwoord");
+            expect(response.body.message).toBe("Incorrect password");
+        });
+        it("should fail if request body is incorrect", async () => {
+            const response = await request(app).post("/teacher/auth/login").send({}); // empty body
+
+            expect(response.status).toBe(400);
+            expect(response.body.details).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        field: "email",
+                        source: "body",
+                    }),
+                    expect.objectContaining({
+                        field: "password",
+                        source: "body",
+                    }),
+                ])
+            );
         });
     });
 });

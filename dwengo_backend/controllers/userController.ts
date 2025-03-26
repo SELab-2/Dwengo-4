@@ -16,7 +16,7 @@ const registerUser = async (
     // Controleer of er al een gebruiker bestaat met dit e-mailadres
     const existingUser: User | null = await UserService.findUser(email);
     if (existingUser) {
-        throw new ConflictError("Gebruiker bestaat al");
+        throw new ConflictError("Email is already in use");
     }
 
     // Hash het wachtwoord
