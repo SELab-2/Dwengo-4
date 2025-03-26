@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import { searchLearningPaths, getLearningPathByIdOrHruid, LearningPathDto } from "../../services/learningPathService";
+import {Request, Response} from "express";
+import {getLearningPathByIdOrHruid, LearningPathDto, searchLearningPaths} from "../../services/learningPathService";
 
 interface LearningPathFilters {
   language?: string;

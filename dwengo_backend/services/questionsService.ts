@@ -1,16 +1,18 @@
-import { 
-  PrismaClient, 
-  Question, 
-  QuestionType, 
-  QuestionSpecific, 
-  QuestionGeneral, 
-  QuestionMessage, 
-  Role 
+import {
+  Assignment,
+  PrismaClient,
+  Question,
+  QuestionGeneral,
+  QuestionMessage,
+  QuestionSpecific,
+  QuestionType,
+  Role,
+  Student
 } from "@prisma/client";
 
 import referenceValidationService from "./referenceValidationService";
-import { NotFoundError, BadRequestError } from "../errors/errors";
-import { AuthenticatedUser } from "../interfaces/extendedTypeInterfaces";
+import {BadRequestError, NotFoundError} from "../errors/errors";
+import {AuthenticatedUser} from "../interfaces/extendedTypeInterfaces";
 
 const prisma = new PrismaClient();
 
@@ -38,25 +40,25 @@ function canUserSeeQuestionInList(question: Question & {
   };
 }, user: AuthenticatedUser): boolean {
   
-  const isAdmin = (user.role === Role.ADMIN);
+  const isAdmin: boolean = (user.role === Role.ADMIN);
 
   // Teacher in class?
-  const isTeacherInClass = question.team.class.ClassTeacher
+  const isTeacherInClass: boolean = question.team.class.ClassTeacher
     .some(ct => ct.teacherId === user.id);
 
   // Student in team?
-  const isStudentInTeam = question.team.students
-    .some(s => s.userId === user.id);
+  const isStudentInTeam: boolean = question.team.students
+    .some((s: Student): boolean => s.userId === user.id);
 
   if (question.isPrivate) {
     // Private => alleen creator, teacher in class, admin
-    const isCreator = (question.createdBy === user.id);
-    if (isCreator || isTeacherInClass || isAdmin) return true;
-    return false;
+    const isCreator: boolean = (question.createdBy === user.id);
+    return isCreator || isTeacherInClass || isAdmin;
+
   } else {
     // Niet private => hele team, teacher, admin
-    if (isStudentInTeam || isTeacherInClass || isAdmin) return true;
-    return false;
+    return isStudentInTeam || isTeacherInClass || isAdmin;
+
   }
 }
 
@@ -78,7 +80,7 @@ export default class QuestionService {
     isPrivate: boolean
   ): Promise<Question> {
     // 1) Check assignment
-    const assignment = await prisma.assignment.findUnique({
+    const assignment: Assignment | null = await prisma.assignment.findUnique({
       where: { id: assignmentId },
     });
     if (!assignment) {
@@ -104,15 +106,15 @@ export default class QuestionService {
 
     // Indien student => check of hij/zij in team zit
     if (!isTeacher) {
-      const studentInTeam = team.students.some(s => s.userId === creatorId);
+      const studentInTeam: boolean = team.students.some((s: Student): boolean => s.userId === creatorId);
       if (!studentInTeam) {
         throw new BadRequestError("Student zit niet in dit team.");
       }
     }
 
     // 3) Transactie: Question + eerste message
-    const newQuestion = await prisma.$transaction(async (tx) => {
-      const q = await tx.question.create({
+    return prisma.$transaction(async (tx): Promise<Question> => {
+      const q: Question = await tx.question.create({
         data: {
           title,
           type,
@@ -131,8 +133,6 @@ export default class QuestionService {
       });
       return q;
     });
-
-    return newQuestion;
   }
 
   /**
@@ -153,7 +153,7 @@ export default class QuestionService {
     dwengoVersion?: number
   ): Promise<QuestionSpecific> {
 
-    const baseQuestion = await this.createQuestionAndMessage(
+    const baseQuestion: Question = await this.createQuestionAndMessage(
       assignmentId,
       teamId,
       creatorId,
@@ -205,7 +205,7 @@ export default class QuestionService {
     dwengoLanguage?: string
   ): Promise<QuestionGeneral> {
 
-    const baseQuestion = await this.createQuestionAndMessage(
+    const baseQuestion: Question = await this.createQuestionAndMessage(
       assignmentId,
       teamId,
       creatorId,
@@ -246,7 +246,7 @@ export default class QuestionService {
     if (!text.trim()) {
       throw new BadRequestError("Message cannot be empty");
     }
-    const question = await prisma.question.findUnique({ where: { id: questionId } });
+    const question: Question | null = await prisma.question.findUnique({ where: { id: questionId } });
     if (!question) {
       throw new NotFoundError("Question not found");
     }
@@ -299,7 +299,7 @@ export default class QuestionService {
    * (De authorizeQuestion middleware checkt of user mag inzien.)
    */
   static async getQuestion(questionId: number): Promise<Question> {
-    const question = await prisma.question.findUnique({
+    const question: Question | null = await prisma.question.findUnique({
       where: { id: questionId },
       include: {
         specific: true,
