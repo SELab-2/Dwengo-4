@@ -172,6 +172,7 @@ export default class TeacherAssignmentService {
       });
 
 
+
       console.log("assignment 2");
       // Create class assignments and teams
       for (const [classId, teams] of Object.entries(classTeams)) {
