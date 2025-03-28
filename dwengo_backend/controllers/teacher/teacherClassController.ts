@@ -137,12 +137,17 @@ export const getClassroomStudents = asyncHandler(
 /**
  * Get all classrooms
  * @route GET /teacher/classes
+ * @query includeStudents - optional query parameter to include student details
  * returns a list of all classes for the authenticated teacher in the response body
  */
 export const getAllClassrooms = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const teacherId: number = getUserFromAuthRequest(req).id;
-    const classrooms = await classService.getAllClassesByTeacher(teacherId);
+    const includeStudents = req.query.includeStudents === "true";
+    const classrooms = await classService.getAllClassesByTeacher(
+      teacherId,
+      includeStudents
+    );
     res.status(200).json({ classrooms });
   }
 );

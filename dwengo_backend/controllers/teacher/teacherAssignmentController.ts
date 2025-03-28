@@ -4,6 +4,7 @@ import teacherAssignmentService from "../../services/teacherServices/teacherAssi
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 export class AssignmentTeacherController {
+
   createAssignmentForClass = async (
     req: AuthenticatedRequest,
     res: Response
@@ -44,6 +45,40 @@ export class AssignmentTeacherController {
       res.status(201).json(assignment);
     } catch (error) {
       res.status(500).json({ error: "Failed to create assignment" });
+    }
+  };
+
+  createAssignmentWithTeams = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const teacherId: number = getUserFromAuthRequest(req).id;
+      const {
+        pathRef,
+        pathLanguage,
+        isExternal,
+        deadline,
+        title,
+        description,
+        classTeams,
+      } = req.body;
+
+      const parsedDeadline = new Date(deadline);
+
+      const assignment = await teacherAssignmentService.createAssignmentWithTeams(
+        teacherId,
+        pathRef,
+        pathLanguage,
+        isExternal,
+        parsedDeadline,
+        title,
+        description,
+        classTeams
+      );
+      res.status(201).json(assignment);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create assignment with teams" });
     }
   };
 
@@ -101,3 +136,5 @@ export class AssignmentTeacherController {
     }
   };
 }
+
+

@@ -1,57 +1,60 @@
 import React, { useState, useEffect } from "react";
 import styles from "./TeamCreationModal.module.css";
 import { FaTrash, FaMinus } from "react-icons/fa";
-
-interface Student {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-
-interface Team {
-  id: string;
-  members: Student[];
-}
+import { ClassItem, StudentItem, Team } from "../../../types/type";
+import { c } from "vite/dist/node/moduleRunnerTransport.d-CXw_Ws6P";
 
 interface Props {
-  students: Student[];
+  classes: ClassItem[];
   onClose: () => void;
-  teams: Team[];
-  setTeams: (teams: Team[]) => void;
+  teams: Record<string, Team[]>;
+  setTeams: (teams: Record<string, Team[]>) => void;
   teamSize: number;
+  selectedClasses: ClassItem[];
 }
 
 const TeamCreationModal = ({
-  students,
+  classes,
   onClose,
   teams,
   setTeams,
   teamSize,
+  selectedClasses,
 }: Props) => {
-  const [selectedStudents, setSelectedStudents] = useState<Student[]>([]);
-  const [availableStudents, setAvailableStudents] = useState<Student[]>([]);
+  const [selectedStudents, setSelectedStudents] = useState<StudentItem[]>([]);
+  const [availableStudents, setAvailableStudents] = useState<StudentItem[]>([]);
+  const [selectedClass, setSelectedClass] = useState<ClassItem | null>(classes[0] || null);
 
   useEffect(() => {
-    const studentsInTeams = teams.flatMap((team) =>
-      team.members.map((member) => member.id)
-    );
-    const availableStuds = students.filter(
-      (student) => !studentsInTeams.includes(student.id)
-    );
-    setAvailableStudents(availableStuds);
-  }, [students, teams]);
+    const studentsInTeams = selectedClass
+      ? teams[selectedClass.id]?.flatMap((team) =>
+        team.members.map((member) => member.id)
+      ) ?? []
+      : [];
 
-  const getNextTeamNumber = () => {
-    if (teams.length === 0) return 1;
-    const numbers = teams.map((team) => {
+    const availableStuds =
+      selectedClass?.students?.filter(
+        (student: StudentItem) => !studentsInTeams.includes(student.id)
+      ) ?? [];
+    setAvailableStudents(availableStuds);
+  }, [teams, selectedClass]);
+
+  const handleChangeClass = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const classId = Number(e.target.value);
+    const classItem = classes.find((c) => Number(c.id) === classId);
+    setSelectedClass(classItem || null);
+  };
+
+  const getNextTeamNumber = (classTeams: Team[]) => {
+    if (!classTeams || classTeams.length === 0) return 1;
+    const numbers = classTeams.map((team) => {
       const match = team.id.match(/\d+$/);
       return match ? parseInt(match[0]) : 0;
     });
     return Math.max(...numbers) + 1;
   };
 
-  const handleStudentSelect = (student: Student) => {
+  const handleStudentSelect = (student: StudentItem) => {
     if (selectedStudents.find((s) => s.id === student.id)) {
       setSelectedStudents((prev) => prev.filter((s) => s.id !== student.id));
     } else if (selectedStudents.length < teamSize) {
@@ -60,40 +63,46 @@ const TeamCreationModal = ({
   };
 
   const createTeam = () => {
-    if (selectedStudents.length === 0) return;
+    if (!selectedClass || selectedStudents.length === 0) return;
     if (selectedStudents.length > teamSize) return;
-    console.log("Creating incomplete team");
 
     if (selectedStudents.length < teamSize) {
       if (!window.confirm("Create an incomplete team?")) return;
     }
 
+    const classTeams = teams[selectedClass.id] || [];
     const newTeam: Team = {
-      id: `${getNextTeamNumber()}`,
+      id: `team-${getNextTeamNumber(classTeams)}`,
       members: selectedStudents,
     };
 
-    setTeams([...teams, newTeam]);
-    setAvailableStudents((prev) =>
-      prev.filter(
-        (student) =>
-          !selectedStudents.find((selected) => selected.id === student.id)
-      )
-    );
+    setTeams({
+      ...teams,
+      [selectedClass.id]: [...classTeams, newTeam],
+    });
     setSelectedStudents([]);
   };
 
-  const deleteTeam = (teamId: string) => {
-    const team = teams.find((t) => t.id === teamId);
+  const deleteTeam = (classId: string, teamId: string) => {
+    const classTeams = teams[classId] || [];
+    const team = classTeams.find((t) => t.id === teamId);
     if (team) {
-      setAvailableStudents((prev) => [...prev, ...team.members]);
-      setTeams(teams.filter((t) => t.id !== teamId));
+      setTeams({
+        ...teams,
+        [classId]: classTeams.filter((t) => t.id !== teamId),
+      });
     }
   };
 
-  const removeFromTeam = (teamId: string, student: Student) => {
-    setTeams(
-      teams.map((team) => {
+  const removeFromTeam = (
+    classId: string,
+    teamId: string,
+    student: StudentItem
+  ) => {
+    const classTeams = teams[classId] || [];
+    setTeams({
+      ...teams,
+      [classId]: classTeams.map((team) => {
         if (team.id === teamId) {
           return {
             ...team,
@@ -101,12 +110,13 @@ const TeamCreationModal = ({
           };
         }
         return team;
-      })
-    );
-    setAvailableStudents((prev) => [...prev, student]);
+      }),
+    });
   };
 
   const generateRandomTeams = () => {
+    if (!selectedClass) return;
+
     const shuffledStudents = [...availableStudents].sort(
       () => Math.random() - 0.5
     );
@@ -115,7 +125,9 @@ const TeamCreationModal = ({
     for (let i = 0; i < shuffledStudents.length; i += teamSize) {
       const teamMembers = shuffledStudents.slice(i, i + teamSize);
       if (teamMembers.length === teamSize) {
-        const teamNumber = getNextTeamNumber() + Math.floor(i / teamSize);
+        const teamNumber =
+          getNextTeamNumber(teams[selectedClass.id] || []) +
+          Math.floor(i / teamSize);
         newTeams.push({
           id: `team-${teamNumber}`,
           members: teamMembers,
@@ -123,11 +135,10 @@ const TeamCreationModal = ({
       }
     }
 
-    setTeams(newTeams);
-    const remainingStudents = shuffledStudents.slice(
-      Math.floor(shuffledStudents.length / teamSize) * teamSize
-    );
-    setAvailableStudents(remainingStudents);
+    setTeams({
+      ...teams,
+      [selectedClass.id]: newTeams,
+    });
   };
 
   return (
@@ -135,18 +146,23 @@ const TeamCreationModal = ({
       <div className={styles.content}>
         <h2>Team Creation</h2>
         <p>Create teams of {teamSize} students or generate random teams</p>
-
+        <select onChange={handleChangeClass}>
+          {selectedClasses.map((classItem) => (
+            <option key={classItem.id} value={classItem.id}>
+              {classItem.name}
+            </option>
+          ))}
+        </select>
         <div className={styles.teamBuilder}>
           <div className={styles.studentsList}>
             <h3>Available Students</h3>
             {availableStudents.map((student) => (
               <div
                 key={student.id}
-                className={`${styles.student} ${
-                  selectedStudents.find((s) => s.id === student.id)
-                    ? styles.selected
-                    : ""
-                }`}
+                className={`${styles.student} ${selectedStudents.find((s) => s.id === student.id)
+                  ? styles.selected
+                  : ""
+                  }`}
                 onClick={() => handleStudentSelect(student)}
               >
                 {student.firstName} {student.lastName}
@@ -156,32 +172,41 @@ const TeamCreationModal = ({
 
           <div className={styles.teams}>
             <h3>Teams</h3>
-            {teams.map((team) => (
-              <div key={team.id} className={styles.team}>
-                <div className={styles.teamHeader}>
-                  <h4>Team-{team.id}</h4>
-                  <button onClick={() => deleteTeam(team.id)}>
-                    <FaTrash />
-                  </button>
-                </div>
-                {team.members.map((member) => (
-                  <div key={member.id} className={styles.teamMember}>
-                    {member.firstName} {member.lastName}
-                    <button onClick={() => removeFromTeam(team.id, member)}>
-                      <FaMinus />
+            {selectedClass &&
+              teams[selectedClass.id]?.map((team) => (
+                <div key={team.id} className={styles.team}>
+                  <div className={styles.teamHeader}>
+                    <h4>{team.id}</h4>
+                    <button
+                      onClick={() => deleteTeam(selectedClass.id, team.id)}
+                    >
+                      <FaTrash />
                     </button>
                   </div>
-                ))}
-              </div>
-            ))}
+                  {team.members.map((member) => (
+                    <div key={member.id} className={styles.teamMember}>
+                      {member.firstName} {member.lastName}
+                      <button
+                        onClick={() =>
+                          removeFromTeam(selectedClass.id, team.id, member)
+                        }
+                      >
+                        <FaMinus />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ))}
           </div>
         </div>
 
         <div className={styles.actions}>
-          <button onClick={generateRandomTeams}>Generate Random Teams</button>
+          <button onClick={generateRandomTeams} disabled={!selectedClass}>
+            Generate Random Teams
+          </button>
           <button
             onClick={createTeam}
-            //disabled={selectedStudents.length !== teamSize}
+            disabled={!selectedClass || selectedStudents.length === 0}
           >
             Create Team ({selectedStudents.length}/{teamSize})
           </button>

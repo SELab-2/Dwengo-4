@@ -1,9 +1,14 @@
 import { Assignment, PrismaClient, Role } from "@prisma/client";
 import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
 import ReferenceValidationService from "../../services/referenceValidationService";
-// ^ let op: named import, géén "default" meer.
+import { TeamDivision } from "../../interfaces/extendedTypeInterfaces";
+import { createTeamsInAssignment } from "../teacherTeamsService";
 
 const prisma = new PrismaClient();
+
+interface ClassTeams {
+  [classId: number]: TeamDivision[];
+}
 
 export default class TeacherAssignmentService {
   /**
@@ -49,6 +54,8 @@ export default class TeacherAssignmentService {
         description,
       },
     });
+
+
   }
 
   /**
@@ -116,6 +123,72 @@ export default class TeacherAssignmentService {
 
     return prisma.assignment.delete({
       where: { id: assignmentId },
+    });
+  }
+
+  /**
+   * Create an assignment with class teams structure
+   */
+  static async createAssignmentWithTeams(
+    teacherId: number,
+    pathRef: string,
+    pathLanguage: string,
+    isExternal: boolean,
+    deadline: Date,
+    title: string,
+    description: string,
+    classTeams: ClassTeams
+  ): Promise<Assignment> {
+    // 1) Check authorization for all classes
+    for (const classId of Object.keys(classTeams)) {
+      if (!(await isAuthorized(teacherId, Role.TEACHER, parseInt(classId)))) {
+        throw new Error("The teacher is unauthorized to perform this action");
+      }
+    }
+
+    console.log(pathRef);
+
+    // 2) Validate pathRef
+    await ReferenceValidationService.validateLearningPath(
+      isExternal,
+      isExternal ? undefined : pathRef, // localId
+      isExternal ? pathRef : undefined, // hruid
+      isExternal ? pathLanguage : undefined // language
+    );
+
+    // 3) Create assignment and teams in transaction
+    return await prisma.$transaction(async (tx) => {
+      console.log("assignment");
+
+      // Create the assignment
+      const assignment = await tx.assignment.create({
+        data: {
+          pathRef,
+          isExternal,
+          deadline,
+          title,
+          description,
+        },
+      });
+
+
+      console.log("assignment 2");
+      // Create class assignments and teams
+      for (const [classId, teams] of Object.entries(classTeams)) {
+        console.log(classId)
+        await tx.classAssignment.create({
+          data: {
+            assignmentId: assignment.id,
+            classId: parseInt(classId),
+          },
+        });
+
+        console.log("assignment 3");
+
+        await createTeamsInAssignment(assignment.id, parseInt(classId), teams);
+      }
+
+      return assignment;
     });
   }
 }

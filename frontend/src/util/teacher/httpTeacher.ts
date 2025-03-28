@@ -1,5 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import { getAuthToken } from "./authTeacher";
+import { ClassItem, LearningPath, Team } from "../../types/type";
 
 const BACKEND = "http://localhost:5000";
 
@@ -77,20 +78,19 @@ export async function signupTeacher({
   return await response.json();
 }
 
-interface ClassItem {
-  id: string;
-  name: string;
-  code: string;
-}
-
-export async function fetchClasses(): Promise<ClassItem[]> {
-  const response = await fetch(`${BACKEND}/teacher/classes`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
-  });
+export async function fetchClasses(
+  includeStudents: boolean = false
+): Promise<ClassItem[]> {
+  const response = await fetch(
+    `${BACKEND}/teacher/classes?includeStudents=${includeStudents}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+    }
+  );
 
   if (!response.ok) {
     const error: APIError = new Error(
@@ -100,13 +100,17 @@ export async function fetchClasses(): Promise<ClassItem[]> {
     error.info = await response.json();
     throw error;
   }
+  let classrooms = await response.json();
+  classrooms = classrooms.classrooms;
+  if (includeStudents) {
+    classrooms.forEach((classroom: any) => {
+      classroom.students = classroom.classLinks.map((link: any) => link.student.user);
+    });
 
-  const returner = await response.json();
-  const classrooms = returner["classrooms"];
-  console.log("GETTING CLASSES", classrooms);
-
-  return await classrooms;
+  }
+  return classrooms;
 }
+
 
 interface CreateClassPayload {
   name: string;
@@ -199,14 +203,9 @@ export async function fetchStudentsByClass({
   return students;
 }
 
-interface LearningPath {
-  id: string;
-  title: string;
-}
-
 //Haal de locale leerpaden op van de leerkracht op
 export async function fetchLearningPaths(): Promise<LearningPath[]> {
-  const response = await fetch(`${BACKEND}/teacher/learningPaths`, {
+  const response = await fetch(`${BACKEND}/teacher/learningPaths/all`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -224,7 +223,11 @@ export async function fetchLearningPaths(): Promise<LearningPath[]> {
   }
 
   let learningPaths = await response.json();
-  learningPaths = learningPaths;
+  learningPaths = learningPaths.map((path: any) => ({
+    ...path,
+    id: path._id || path.id,
+  })) as LearningPath[];
+
   return learningPaths;
 }
 
@@ -266,6 +269,56 @@ export async function createAssignment({
     error.info = await response.json();
     throw error;
   }
+}
+
+interface AssignmentPayload {
+  title: string;
+  description: string;
+  pathLanguage: string;
+  isExternal: boolean;
+  deadline: string;
+  learningPathId: string;
+  classTeams?: Record<number, Team[]>;
+}
+
+export async function postAssignment({
+  title,
+  description,
+  pathLanguage,
+  isExternal,
+  deadline,
+  learningPathId,
+  classTeams,
+}: AssignmentPayload): Promise<void> {
+
+  console.log("classTeams", classTeams);
+  // Create group assignment with teams
+  const response = await fetch(`${BACKEND}/teacher/assignments/teams`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+    body: JSON.stringify({
+      title,
+      description,
+      deadline,
+      pathRef: learningPathId,
+      pathLanguage: pathLanguage, // default language
+      isExternal: isExternal,
+      classTeams: classTeams
+    }),
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      "Er is iets misgegaan bij het aanmaken van de groepsopdracht."
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
 }
 
 export interface Invite {
@@ -438,3 +491,5 @@ export async function denyJoinRequest({
   }
   return await response.json();
 }
+
+

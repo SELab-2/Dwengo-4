@@ -1,5 +1,5 @@
-import {ClassAssignment, ClassStudent, PrismaClient, Student, Team, User} from "@prisma/client";
-import {IdentifiableTeamDivision, TeamDivision} from "../interfaces/extendedTypeInterfaces"
+import { ClassAssignment, ClassStudent, PrismaClient, Student, Team, User } from "@prisma/client";
+import { IdentifiableTeamDivision, TeamDivision } from "../interfaces/extendedTypeInterfaces"
 import _ from "lodash";
 
 const prisma = new PrismaClient();
@@ -16,6 +16,10 @@ export const createTeamsInAssignment = async (
 ): Promise<Team[]> => {
     const createdTeams: Team[] = [];
 
+    console.log("Creating teams for assignment", assignmentId, "in class", classId);
+    console.log("Teams:", teams);
+    console.log(assignmentId, classId);
+
     // Check if a class has been assigned an Assignment before splitting this class up into
     // Teams to solve this assignment.
     const classAssignments: ClassAssignment[] = await prisma.classAssignment.findMany({
@@ -24,10 +28,12 @@ export const createTeamsInAssignment = async (
             classId: classId,
         }
     });
-
+    console.log("Class has been assigned this assignmentfqsfsqdf.");
     if (classAssignments.length === 0) {
         throw new Error("Assignment not found or not linked to any class.");
     }
+
+    console.log("Class has been assigned this assignment.");
 
     // Create teams in the database
     for (const team of teams) {
@@ -98,7 +104,7 @@ async function assignStudentsToTeam(teamId: number, studentIds: number[]): Promi
 async function randomlyDivideClassIntoTeams(teamSize: number, classId: number): Promise<TeamDivision[]> {
 
     const students: ClassStudent[] = await prisma.classStudent.findMany({
-        where: {classId: classId},
+        where: { classId: classId },
     });
 
     // Ensure that class is found and classLinks exists
@@ -115,7 +121,7 @@ async function randomlyDivideClassIntoTeams(teamSize: number, classId: number): 
 
     for (let i: number = 0; i < shuffledStudents.length; i += teamSize) {
         teams.push({
-            teamName: `Team ${i+1}`,
+            teamName: `Team ${i + 1}`,
             // Select "teamSize" amount of students via slicing
             studentIds: shuffledStudents.slice(i, i + teamSize),
         });
@@ -219,11 +225,11 @@ export const updateTeamsForAssignment = async (
                 teamname: team.teamName,
                 students: {
                     // The set operation removes all existing students from the team and replaces them with the new list of students (team.studentIds).
-                    set: team.studentIds.map((studentId: number): {userId: number} => ({ userId: studentId }))
+                    set: team.studentIds.map((studentId: number): { userId: number } => ({ userId: studentId }))
                 },
                 teamAssignment: {
                     connectOrCreate: {
-                        where: { teamId_assignmentId: {  teamId: team.teamId, assignmentId } },
+                        where: { teamId_assignmentId: { teamId: team.teamId, assignmentId } },
                         create: { assignmentId: assignmentId }
                     }
                 }

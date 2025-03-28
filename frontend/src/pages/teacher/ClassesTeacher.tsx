@@ -13,12 +13,7 @@ import CreateClass from "../../components/teacher/classes/CreateClassForm";
 import Modal from "../../components/shared/Modal";
 import SuccessMessage from "../../components/shared/SuccessMessage";
 import { useNavigate } from "react-router-dom";
-
-interface ClassItem {
-  id: string;
-  name: string;
-  code: string;
-}
+import { ClassItem } from "../../types/type";
 
 interface TeacherInvite {
   inviteId: number;
@@ -72,7 +67,7 @@ const ClassesPageTeacher: React.FC = () => {
     error,
   } = useQuery<ClassItem[]>({
     queryKey: ["classes"],
-    queryFn: fetchClasses,
+    queryFn: () => fetchClasses(),
   });
 
   // Query: Haal pending teacher invites voor de geselecteerde klas op

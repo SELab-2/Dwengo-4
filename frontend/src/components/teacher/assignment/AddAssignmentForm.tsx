@@ -3,42 +3,81 @@ import styles from "./AddAssignmentForm.module.css";
 import TeamCreationModal from "./TeamCreationModal";
 import {
   fetchLearningPaths,
-  fetchClasses,
+  postAssignment,
 } from "../../../util/teacher/httpTeacher";
 import { useQuery } from "@tanstack/react-query";
-import { MultiSelect } from "primereact/multiselect";
+import { ClassItem, LearningPath, Team } from "../../../types/type";
 
-interface StudentItem {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-}
+const CustomDropdownMultiselect = ({
+  options,
+  selectedOptions,
+  onChange,
+}: {
+  options: ClassItem[];
+  selectedOptions: ClassItem[];
+  onChange: (selected: ClassItem[]) => void;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
 
-interface LearningPath {
-  id: string;
-  title: string;
-}
+  const handleOptionToggle = (option: ClassItem) => {
+    const isSelected = selectedOptions.some((item) => item.id === option.id);
+    const updatedSelection = isSelected
+      ? selectedOptions.filter((item) => item.id !== option.id)
+      : [...selectedOptions, option];
+    onChange(updatedSelection);
+  };
 
-interface formData {
-  name: string;
-  students: StudentItem[];
-}
+  return (
+    <div className={styles.customDropdown}>
+      <div className={styles.dropdownToggle} onClick={() => setIsOpen(!isOpen)}>
+        {selectedOptions.length === 0 ? (
+          <span className={styles.placeholder}>Select classes</span>
+        ) : (
+          <div className={styles.selectedChips}>
+            {selectedOptions.map((option) => (
+              <span key={option.id} className={styles.chip}>
+                {option.name}
+                <span
+                  className={styles.chipRemove}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOptionToggle(option);
+                  }}
+                >
+                  ×
+                </span>
+              </span>
+            ))}
+          </div>
+        )}
+        <span className={styles.arrow}>▼</span>
+      </div>
+      {isOpen && (
+        <div className={styles.dropdownMenu}>
+          {options.map((option) => (
+            <div key={option.id} className={styles.dropdownOption}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={selectedOptions.some(
+                    (item) => item.id === option.id
+                  )}
+                  onChange={() => handleOptionToggle(option)}
+                />
+                {option.name}
+              </label>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
-interface Team {
-  id: string;
-  members: StudentItem[];
-}
-
-interface ClassItem {
-  id: string;
-  name: string;
-}
-
-const AddAssignmentForm = ({ formData }: { formData: formData }) => {
+const AddAssignmentForm = ({ classesData }: { classesData: ClassItem[] }) => {
   const [isTeamOpen, setIsTeamOpen] = useState<boolean>(false);
   const [assignmentType, setAssignmentType] = useState<string>("");
-  const [Teams, setTeams] = useState<Team[]>([]);
+  const [teams, setTeams] = useState<Record<string, Team[]>>({});
   const [teamSize, setTeamSize] = useState<number>(0);
   const [date, setDate] = useState<string>("");
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
@@ -47,44 +86,25 @@ const AddAssignmentForm = ({ formData }: { formData: formData }) => {
   const [selectedClasses, setSelectedClasses] = useState<ClassItem[]>([]);
   const [selectedLearningPath, setSelectedLearningPath] =
     useState<LearningPath>();
-
-  const {
-    data: classes,
-    isLoading,
-    isError,
-    error,
-  } = useQuery<ClassItem[]>({
-    queryKey: ["classes"],
-    queryFn: fetchClasses,
-  });
+  const [formErrors, setFormErrors] = useState<{
+    classes?: string;
+    teams?: string;
+  }>({});
 
   const {
     data: learningPathsData,
     isLoading: isLearningPathsLoading,
     isError: isLearningPathsError,
     error: learningPathsError,
-  } = useQuery<LearningPath[]>({
+  } = useQuery<LearningPath[], Error>({
     queryKey: ["learningPaths"],
     queryFn: fetchLearningPaths,
   });
 
   useEffect(() => {
-    setLearningPaths(
-      learningPathsData?.map((data: any) => ({
-        id: data.id,
-        title: data.title,
-      })) || []
+    setLearningPaths(learningPathsData || []
     );
   }, [learningPathsData]);
-
-  //TODO: handle loading and error states
-  if (isLearningPathsLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (isLearningPathsError) {
-    return <div>Error: {learningPathsError?.message}</div>;
-  }
 
   const handleTeamClicks = () => {
     setIsTeamOpen(true);
@@ -109,7 +129,6 @@ const AddAssignmentForm = ({ formData }: { formData: formData }) => {
     const pathId = e.target.value;
     const path = learningPaths.find((path) => path.id === pathId);
     setSelectedLearningPath(path);
-    console.log(path);
   };
 
   //datum voor morgen instellen zodat mensen alleen deadlines kunnen kiezen vanaf morgen
@@ -117,41 +136,100 @@ const AddAssignmentForm = ({ formData }: { formData: formData }) => {
   today.setDate(today.getDate() + 1);
   const formattedDate = today.toISOString().split("T")[0]; // Format as YYYY-MM-DD
 
+  const validateForm = () => {
+    const errors: { classes?: string; teams?: string } = {};
+
+    if (selectedClasses.length === 0) {
+      errors.classes = "Please select at least one class";
+    }
+
+    if (assignmentType === "group" && Object.keys(teams).length === 0) {
+      errors.teams = "Please create teams before submitting";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmission = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form submitted");
+    if (!validateForm()) {
+      return;
+    }
+
+    // Convert teams object keys from string to number
+    const teamsWithNumberKeys: Record<number, Team[]> = {};
+
+    if (assignmentType === "group") {
+      Object.entries(teams).forEach(([key, team]) => {
+        teamsWithNumberKeys[Number(key)] = team.map(team => ({
+          ...team,
+          teamName: team.id,
+          studentIds: team.members.map(member => member.id as unknown as number)
+        }));
+      });
+    } else {
+      // Create individual teams for non-group assignments
+      selectedClasses.forEach((classItem: ClassItem) => {
+        const individualTeams = classItem.students.map((student) => ({
+          id: 'null',
+          teamName: `individual-${student.id}`,
+          studentIds: [student.id],
+          members: [student], // Add members to team for easier access
+        }));
+        teamsWithNumberKeys[Number(classItem.id)] = individualTeams;
+      });
+    }
+
+    console.log("Submitting form with data:", {
+      title,
+      description,
+      pathLanguage: "nl", // default to English
+      isExternal: selectedLearningPath?.isExternal || false,
+      deadline: date,
+      learningPathId: selectedLearningPath?.id || "",
+      classTeams: teamsWithNumberKeys,
+    });
+
+
+    postAssignment({
+      title,
+      description,
+      pathLanguage: "nl", // default to English
+      isExternal: selectedLearningPath?.isExternal || false,
+      deadline: date,
+      learningPathId: selectedLearningPath?.id || "",
+      classTeams: teamsWithNumberKeys,
+    })
+      .then(() => {
+        // Handle success (e.g., show message, redirect)
+        console.log("Assignment created successfully");
+      })
+      .catch((error) => {
+        console.error("Error creating assignment:", error);
+        // Handle error (e.g., show error message)
+      });
+
+
   };
+
   return (
     <section className={styles.wrapper}>
-      <h2 className={styles.header}>
-        Assign Learning path to Classes: {formData.name}
-      </h2>
+      <h2 className={styles.header}>Assign Learning path to Classes:</h2>
 
       <div className={styles.form}>
-        <form>
+        <form onSubmit={handleSubmission}>
           <div className={styles.formGroup}>
             <label htmlFor="class" className={styles.label}>
               Choose Class:
             </label>
-            <MultiSelect
-              id="class"
-              value={selectedClasses}
-              onChange={(e) => setSelectedClasses(e.value)}
-              options={classes || []}
-              optionLabel="name"
-              display="chip"
-              placeholder="Select classes"
-              maxSelectedLabels={5}
-              className={`${styles.multiselect} w-full md:w-20rem`}
-              disabled={isLoading}
+            <CustomDropdownMultiselect
+              options={classesData || []}
+              selectedOptions={selectedClasses}
+              onChange={setSelectedClasses}
             />
-            {isLoading && (
-              <p className={styles.loadingText}>Loading classes...</p>
-            )}
-            {isError && (
-              <p className={styles.errorText}>
-                Error loading classes: {error?.message}
-              </p>
+            {formErrors.classes && (
+              <span className={styles.error}>{formErrors.classes}</span>
             )}
           </div>
           <div>
@@ -166,20 +244,26 @@ const AddAssignmentForm = ({ formData }: { formData: formData }) => {
           </div>
           <div>
             <label htmlFor="learningPath">Choose Learning Path:</label>
-            <select
-              required
-              id="learningPath"
-              name="learningPath"
-              onChange={handleLearningPathChange}
-              value={selectedLearningPath?.id || ""}
-            >
-              <option value="">-Select a Path-</option>
-              {learningPaths.map((path) => (
-                <option key={path.id} value={path.id}>
-                  {path.title}
-                </option>
-              ))}
-            </select>
+            {isLearningPathsLoading ? (
+              <div>Loading learning paths...</div>
+            ) : isLearningPathsError ? (
+              <div>Error loading learning paths: {learningPathsError?.message}</div>
+            ) : (
+              <select
+                required
+                id="learningPath"
+                name="learningPath"
+                onChange={handleLearningPathChange}
+                value={selectedLearningPath?.id || ""}
+              >
+                <option value="">-Select a Path-</option>
+                {learningPaths.map((path) => (
+                  <option key={path.id} value={path.id}>
+                    {path.title}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div>
@@ -228,17 +312,18 @@ const AddAssignmentForm = ({ formData }: { formData: formData }) => {
               <div className={styles.rightSide}>
                 <h6>Teams:</h6>
                 <div className={styles.teamsList}>
-                  {Teams.map((team: any) => (
-                    <div key={team.id} className={styles.teamPreview}>
-                      <p>
-                        Team-{team.id}:{" "}
-                        {team.members
-                          .map(
-                            (member: any) =>
+                  {Object.entries(teams).map(([classId, classTeams]) => (
+                    <div key={classId}>
+                      <h6>KLAS: {selectedClasses.find(c => c.id == classId)?.name}</h6>
+                      {classTeams.map((team) => (
+                        <div key={team.id} className={styles.teamPreview}>
+                          <p>
+                            {team.id}: {team.members.map(member =>
                               `${member.firstName} ${member.lastName}`
-                          )
-                          .join(", ")}
-                      </p>
+                            ).join(", ")}
+                          </p>
+                        </div>
+                      ))}
                     </div>
                   ))}
                 </div>
@@ -252,6 +337,9 @@ const AddAssignmentForm = ({ formData }: { formData: formData }) => {
               </div>
             )}
           </div>
+          {assignmentType === "group" && formErrors.teams && (
+            <div className={styles.error}>{formErrors.teams}</div>
+          )}
 
           <div>
             <label htmlFor="deadline">Choose Deadline:</label>
@@ -278,11 +366,12 @@ const AddAssignmentForm = ({ formData }: { formData: formData }) => {
 
       {isTeamOpen && (
         <TeamCreationModal
-          students={formData.students}
+          classes={selectedClasses}
           onClose={() => setIsTeamOpen(false)}
-          teams={Teams}
+          teams={teams}
           setTeams={setTeams}
           teamSize={teamSize}
+          selectedClasses={selectedClasses}
         />
       )}
     </section>

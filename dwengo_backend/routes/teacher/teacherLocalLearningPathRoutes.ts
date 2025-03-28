@@ -7,6 +7,7 @@ import {
   updateLocalLearningPath,
   deleteLocalLearningPath,
 } from "../../controllers/teacher/teacherLocalLearningPathController";
+import { getAllLearningPaths } from "../../controllers/teacher/teacherLearningPathController";
 
 const router = Router();
 
@@ -24,6 +25,12 @@ router.post("/", createLocalLearningPath);
  *   -> haal alle leerpaden op van de ingelogde teacher
  */
 router.get("/", getLocalLearningPaths);
+
+/**
+ * GET /teacher/learningPaths/all
+ *   -> haalt alle leerpaden op (zowel van de teacher als van de API)
+ */
+router.get("/all", getAllLearningPaths);
 
 /**
  * GET /teacher/learningPaths/:pathId

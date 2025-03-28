@@ -37,6 +37,7 @@
   border-radius: 4px;
   font-size: 16px;
 }
+
 .middle {
   display: flex;
   gap: 32px;
@@ -75,6 +76,7 @@ form button {
   border: none;
   border-radius: 4px;
 }
+
 .editButton {
   background: #007bff;
   color: white;
@@ -96,6 +98,7 @@ form button {
   gap: 16px;
   margin-top: 32px;
 }
+
 .cancelButton {
   background: #dc3545;
   color: white;
@@ -103,10 +106,119 @@ form button {
 
   font-size: 16px;
 }
+
 .submitButton {
   background: #007bff;
   color: white;
   padding: 12px 24px;
 
   font-size: 16px;
+}
+
+.customMultiselect {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.option input {
+  margin: 0;
+}
+
+.customDropdown {
+  position: relative;
+  width: 100%;
+}
+
+.dropdownToggle {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.dropdownOption {
+  padding: 8px 12px;
+}
+
+.dropdownOption:hover {
+  background: #f5f5f5;
+}
+
+.dropdownOption label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.dropdownOption label input {
+  width: fit-content;
+}
+
+.selectedChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chip {
+  background: #e9ecef;
+  padding: 2px 8px;
+  border-radius: 16px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chipRemove {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.arrow {
+  font-size: 12px;
+}
+
+.placeholder {
+  color: #6c757d;
+}
+
+.error {
+  color: red;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  display: block;
 }
