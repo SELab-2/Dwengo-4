@@ -29,13 +29,13 @@ describe("join request tests", async () => {
     teacherUser1 = await createTeacher(
       "Jan",
       "Janssens",
-      "jan.janssens@gmail.com",
+      "jan.janssens@gmail.com"
     );
     await addTeacherToClass(teacherUser1.id, classroom.id);
     studentUser1 = await createStudent(
       "Piet",
       "Pieters",
-      "piet.pieters@gmail.com",
+      "piet.pieters@gmail.com"
     );
   });
   describe("[POST] /student/classes/join", async () => {
@@ -65,7 +65,7 @@ describe("join request tests", async () => {
       // set up scenario where a previous join request was denied
       let joinRequest: JoinRequest = await createJoinRequest(
         studentUser1.id,
-        classroom.id,
+        classroom.id
       );
       joinRequest = await prisma.joinRequest.update({
         where: {
@@ -108,7 +108,7 @@ describe("join request tests", async () => {
 
       expect(status).toBe(404);
       expect(body.error).toBe(
-        `Error creating join request: Class with code BLABLA not found.`,
+        `Error creating join request: Class with code BLABLA not found.`
       );
       // verify that no join request was created
       await prisma.joinRequest.findMany().then((joinRequests) => {
@@ -125,7 +125,7 @@ describe("join request tests", async () => {
         });
       expect(status).toBe(400);
       expect(body.error).toBe(
-        `Error creating join request: Student ${studentUser1.id} is already a member of class ${classroom.id}`,
+        `Error creating join request: Student ${studentUser1.id} is already a member of class ${classroom.id}`
       );
     });
     it("should respond with a `400` status code when there is already a pending join request for the student and class", async () => {
@@ -149,7 +149,7 @@ describe("join request tests", async () => {
         });
       expect(status).toBe(400);
       expect(body.error).toBe(
-        `Error creating join request: There's already a pending join request for student ${studentUser1.id} and class ${classroom.id}`,
+        `Error creating join request: There's already a pending join request for student ${studentUser1.id} and class ${classroom.id}`
       );
       // verify no additional join request was created
       await prisma.joinRequest.findMany().then((joinRequests) => {
@@ -166,7 +166,7 @@ describe("join request tests", async () => {
       // test approving the join request
       const { status, body } = await request(app)
         .patch(
-          `/teacher/classes/${classroom.id}/join-requests/${joinRequest.requestId}`,
+          `/teacher/classes/${classroom.id}/join-requests/${joinRequest.requestId}`
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`) // teacherUser1 is a teacher of the class
         .send({
@@ -200,7 +200,7 @@ describe("join request tests", async () => {
       // test denying the join request
       const { status, body } = await request(app)
         .patch(
-          `/teacher/classes/${classroom.id}/join-requests/${joinRequest.requestId}`,
+          `/teacher/classes/${classroom.id}/join-requests/${joinRequest.requestId}`
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`) // teacherUser1 is a teacher of the class
         .send({
@@ -234,7 +234,7 @@ describe("join request tests", async () => {
       // test sending an invalid action
       const { status, body } = await request(app)
         .patch(
-          `/teacher/classes/${classroom.id}/join-requests/${joinRequest.requestId}`,
+          `/teacher/classes/${classroom.id}/join-requests/${joinRequest.requestId}`
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`) // teacherUser1 is a teacher of the class
         .send({
@@ -271,7 +271,7 @@ describe("join request tests", async () => {
       });
       const { status, body } = await request(app)
         .patch(
-          `/teacher/classes/${classroom.id}/join-requests/${joinRequest.requestId}`,
+          `/teacher/classes/${classroom.id}/join-requests/${joinRequest.requestId}`
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`) // teacherUser1 is a teacher of the class
         .send({
@@ -280,7 +280,7 @@ describe("join request tests", async () => {
 
       expect(status).toBe(404);
       expect(body.error).toBe(
-        `Error approving join request ${joinRequest.requestId} for class ${classroom.id}: Join request ${joinRequest.requestId} for class ${classroom.id} not found/not pending.`,
+        `Error approving join request ${joinRequest.requestId} for class ${classroom.id}: Join request ${joinRequest.requestId} for class ${classroom.id} not found/not pending.`
       );
     });
     it("should respond with a `404` status code when the join request is not pending", async () => {
@@ -296,7 +296,7 @@ describe("join request tests", async () => {
       // now let's try approving it
       const { status, body } = await request(app)
         .patch(
-          `/teacher/classes/${classroom.id}/join-requests/${joinRequest.requestId}`,
+          `/teacher/classes/${classroom.id}/join-requests/${joinRequest.requestId}`
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`) // teacherUser1 is a teacher of the class
         .send({
@@ -305,7 +305,7 @@ describe("join request tests", async () => {
 
       expect(status).toBe(404);
       expect(body.error).toBe(
-        `Error approving join request ${joinRequest.requestId} for class ${classroom.id}: Join request ${joinRequest.requestId} for class ${classroom.id} not found/not pending.`,
+        `Error approving join request ${joinRequest.requestId} for class ${classroom.id}: Join request ${joinRequest.requestId} for class ${classroom.id} not found/not pending.`
       );
     });
     it("should respond with a `403` status code when the teacher is not allowed to approve/deny the request", async () => {
@@ -315,7 +315,7 @@ describe("join request tests", async () => {
       // try having teacherUser2 approve the join request
       const { status, body } = await request(app)
         .patch(
-          `/teacher/classes/${classroom.id}/join-requests/${joinRequest.requestId}`,
+          `/teacher/classes/${classroom.id}/join-requests/${joinRequest.requestId}`
         )
         .set("Authorization", `Bearer ${teacherUser2.token}`) // teacherUser2 is not a teacher of the class
         .send({
@@ -324,7 +324,7 @@ describe("join request tests", async () => {
 
       expect(status).toBe(403);
       expect(body.error).toBe(
-        `Error approving join request ${joinRequest.requestId} for class ${classroom.id}: Teacher ${teacherUser2.id} is not a teacher of class ${classroom.id}`,
+        `Error approving join request ${joinRequest.requestId} for class ${classroom.id}: Teacher ${teacherUser2.id} is not a teacher of class ${classroom.id}`
       );
       // verify that the join request was not updated
       const dbJoinRequest = await prisma.joinRequest.findUnique({
@@ -363,8 +363,31 @@ describe("join request tests", async () => {
 
       expect(status).toBe(200);
       expect(body).toHaveProperty("joinRequests");
-      expect(body.joinRequests).toStrictEqual(
-        expect.arrayContaining([joinRequest1, joinRequest2]),
+      expect(body.joinRequests).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            requestId: joinRequest1.requestId,
+            classId: joinRequest1.classId,
+            studentId: joinRequest1.studentId,
+            status: joinRequest1.status,
+            student: {
+              firstName: studentUser1.firstName,
+              lastName: studentUser1.lastName,
+              email: studentUser1.email,
+            },
+          }),
+          expect.objectContaining({
+            requestId: joinRequest2.requestId,
+            classId: joinRequest2.classId,
+            studentId: joinRequest2.studentId,
+            status: joinRequest2.status,
+            student: {
+              firstName: studentUser2.firstName,
+              lastName: studentUser2.lastName,
+              email: studentUser2.email,
+            },
+          }),
+        ])
       );
     });
     it("should respond with a `403` status code when the teacher is not allowed to view the join requests", async () => {
@@ -375,10 +398,9 @@ describe("join request tests", async () => {
       const { status, body } = await request(app)
         .get(`/teacher/classes/${classroom.id}/join-requests`)
         .set("Authorization", `Bearer ${teacherUser2.token}`); // teacherUser2 is not a teacher of the class
-
       expect(status).toBe(400);
       expect(body.error).toBe(
-        "Er is een probleem opgetreden bij het ophalen van join requests.",
+        "Er is een probleem opgetreden bij het ophalen van join requests."
       );
       expect(body.joinRequests).toBeUndefined();
     });
