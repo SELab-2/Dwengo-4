@@ -4,14 +4,14 @@ import errorHandler from "./middleware/errorMiddleware";
 import learningObjectRoutes from "./routes/learningObject/learningObjectRoutes";
 import QuestionRoutes from "./routes/question/questionRoutes";
 import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
-import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearningObjectRoutes";
+import teacherLocalLearningObjectRoutes from "./routes/teacherMadeLearningObject/teacherLocalLearningObjectRoutes";
 
-import assignmentRoutes from "./routes/assignments/assignmentRoutes";
+import assignmentRoutes from "./routes/assignment/assignmentRoutes";
 import progressRoutes from "./routes/progress/progressRoutes";
 import feedbackRoutes from "./routes/feedback/feedbackRoutes";
 import submissionRoutes from "./routes/submission/submissionRoutes";
-import teacherLocalLearningPathRoutes from "./routes/teacher/teacherLocalLearningPathRoutes";
-import teacherLocalLearningPathNodesRoutes from "./routes/teacher/teacherLocalLearningPathNodesRoutes";
+import teacherLocalLearningPathRoutes from "./routes/teacherMadeLearningPath/teacherLocalLearningPathRoutes";
+import teacherLocalLearningPathNodesRoutes from "./routes/teacherMadeLearningPath/teacherLocalLearningPathNodesRoutes";
 
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
@@ -88,7 +88,7 @@ app.use("/progress", progressRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Routes voor indieningen
-app.use("submission", submissionRoutes);
+app.use("/submission", submissionRoutes);
 
 // Error Handler
 app.use(errorHandler);

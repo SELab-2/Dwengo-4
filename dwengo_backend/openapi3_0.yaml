@@ -6,15 +6,63 @@ servers:
   - url: http://localhost:5000
 
 tags:
-- name: Questions
+- name: Question
+  description: Alles over vragen
 - name: Assignment
-- name: Log In and Register
+  description: Alles over opdrachten
+- name: Authentication
+  description: Alles over authenticatie
+- name: Learning object
+  description: Alles over leerobjecten
+- name: Selfmade learning object
+  description: Alles over leerobjecten gemaakt door leerkrachten zelf
+- name: Learning path
+  description: Alles over leerpaden
+- name: Selfmade learning path
+  description: Alles over leerpaden gemaakt door leerkrachten zelf
+- name: Class
+  description: Alles over klassen
+- name: Invite
+  description: Alles over uitnodigingen
+- name: Join request
+  description: Alles over join verzoeken
+
+paths:
+  /auth:
+    $ref: './routes/authentication/authenticationRoutes.yaml'
+  /class:
+    $ref: './routes/class/classRoutes.yaml'
+  /invite:
+    $ref: './routes/invite/inviteRoutes.yaml'
+  /join-request:
+    $ref: './routes/joinRequest/joinRequestRoutes.yaml'
+  /pathByTeacher:
+    $ref: './routes/teacherMadeLearningPath/pathByTeacherRoutes.yaml'
+  /learningPath/:learningPathId/node:
+    $ref: './routes/teacherMadeLearningPath/learningPathNodeRoutes.yaml'
+  /learningObjectByTeacher:
+    $ref: './routes/teacherMadeLearningObject/learningObjectByTeacherRoutes.yaml'
+  /team:
+    $ref: './routes/team/teamRoutes.yaml'
+  /assignment:
+    $ref: './routes/assignment/assignmentRoutes.yaml'
+  /feedback:
+    $ref: './routes/feedback/feedbackRoutes.yaml'
+  /learningObject:
+    $ref: './routes/learningObject/learningObjectRoutes.yaml'
+  /learningPath:
+    $ref: './routes/learningPath/learningPathRoutes.yaml'
+  /question:
+    $ref: './routes/question/questionRoutes.yaml'
+  /progress:
+    $ref: './routes/progress/progressRoutes.yaml'
+  /submission:
+    $ref: './routes/submission/submissionRoutes.yaml'
+
 
 paths:
   /learningObjects:
     get:
-      tags:
-        - Learning Object
       summary: Haal alle leerobjecten op
       operationId: getAllLearningObjects
       responses:
@@ -31,8 +79,6 @@ paths:
       security:
         - BearerAuth: []
     post:
-      tags:
-        - Learning Object
       summary: Creëer een nieuw leerobject
       operationId: createLearningObject
       requestBody:
@@ -55,8 +101,6 @@ paths:
 
   /learningObjects/{id}:
     get:
-      tags:
-        - Learning Object
       summary: Haal een specifiek leerobject op
       operationId: getLearningObject
       parameters:
@@ -82,8 +126,6 @@ paths:
 
   /learningObjects/search:
     get:
-      tags:
-        - Learning Object
       summary: Zoek leerobjecten op basis van een zoekterm
       operationId: searchLearningObjects
       parameters:
@@ -109,8 +151,6 @@ paths:
 
   /learningObjects/path/{pathId}:
     get:
-      tags:
-        - Learning Object
       summary: Haal leerobjecten op voor een specifiek leerpad
       operationId: getLearningObjectsForPath
       parameters:
@@ -136,8 +176,6 @@ paths:
 
   /learningPaths:
     get:
-      tags:
-        - Learning Path
       summary: Zoekt leerpaden op basis van verschillende criteria
       operationId: searchLearningPaths
       parameters:
@@ -182,8 +220,6 @@ paths:
 
   /learningPaths/{pathId}:
     get:
-      tags:
-        - Learning Path
       summary: Haalt een specifiek leerpad op op basis van de pathId
       operationId: getLearningPathById
       parameters:
@@ -211,8 +247,6 @@ paths:
 
   /question/{questionId}:
     get:
-      tags:
-        - Questions
       summary: Haal een specifieke vraag op
       operationId: getQuestion
       parameters:
@@ -238,8 +272,6 @@ paths:
     patch:
       summary: Update de titel van een specifieke vraag
       operationId: updateQuestion
-      tags:
-        - Questions
       parameters:
         - name: questionId
           in: path
@@ -276,8 +308,6 @@ paths:
     delete:
       summary: Verwijder een specifieke vraag
       operationId: deleteQuestion
-      tags:
-        - Questions
       parameters:
         - name: questionId
           in: path
@@ -298,8 +328,6 @@ paths:
 
   /question/team/{teamId}:
     get:
-      tags:
-        - Questions
       summary: Haal vragen op voor een specifiek team
       operationId: getQuestionsTeam
       parameters:
@@ -326,8 +354,6 @@ paths:
 
   /question/class/{classId}:
     get:
-      tags:
-        - Questions
       summary: Haal vragen op voor een specifieke klas
       operationId: getQuestionsClass
       parameters:
@@ -354,8 +380,6 @@ paths:
 
   /question/assignment/{assignmentId}/class/{classId}:
     get:
-      tags:
-        - Questions
       summary: Haal vragen op voor een specifieke opdracht binnen een klas
       operationId: getQuestionsAssignment
       parameters:
@@ -387,8 +411,6 @@ paths:
 
   /question/{questionId}/message:
     get:
-      tags:
-        - Questions
       summary: Haal berichten op voor een specifieke vraag
       operationId: getQuestionMessages
       parameters:
@@ -416,8 +438,6 @@ paths:
     post:
       summary: Voeg een bericht toe aan een bestaande vraag.
       operationId: createQuestionMessage
-      tags:
-        - Questions
       parameters:
         - in: path
           name: questionId
@@ -455,8 +475,6 @@ paths:
   /question/{questionId}/message/{questionMessageId}:
     patch:
       summary: Update een bericht binnen een specifieke vraag
-      tags:
-        - Questions
       operationId: updateQuestionMessage
       parameters:
         - name: questionId
@@ -496,8 +514,6 @@ paths:
     delete:
       summary: Verwijder een bericht binnen een specifieke vraag
       operationId: deleteQuestionMessage
-      tags:
-        - Questions
       parameters:
         - name: questionId
           in: path
@@ -525,8 +541,6 @@ paths:
     post:
       summary: Creëer een algemene vraag voor een leerpad binnen een opdracht.
       operationId: createQuestionGeneral
-      tags:
-        - Questions
       parameters:
         - in: path
           name: assignmentId
@@ -573,8 +587,6 @@ paths:
     post:
       summary: Creëer een specifieke vraag gekoppeld aan een leerobject binnen een leerpad.
       operationId: createQuestionSpecific
-      tags:
-        - Questions
       parameters:
         - in: path
           name: assignmentId
@@ -625,8 +637,6 @@ paths:
 
   /student/assignment:
     get:
-      tags:
-        - Assignment
       summary: Haal opdrachten op voor een ingelogde student
       operationId: getStudentAssignments
       parameters:
@@ -668,8 +678,6 @@ paths:
   
   /assignments/{assignmentId}:
     get:
-      tags:
-        - Assignment
       summary: Haalt een specifieke opdracht op op basis van het assignment ID
       operationId: getAssignmentsById
       parameters:
@@ -694,8 +702,6 @@ paths:
   
   /teacher/assignments:
     post:
-      tags:
-        - Assignment
       summary: Creëer een nieuwe opdracht voor een klas
       description: Staats een leerkracht toe om een nieuwe opdracht te creëren.
       operationId: createAssignmentForClass
@@ -732,8 +738,6 @@ paths:
 
   /teacher/assignments/class/{classId}:
     get:
-      tags:
-        - Assignment
       summary: Haal opdrachten op per klas
       description: Geeft alle opdrachten terug die aan een specifieke klas zijn gekoppeld.
       operationId: getAssignmentsByClass
@@ -761,8 +765,6 @@ paths:
 
   /teacher/assignments/{assignmentId}:
     patch:
-      tags:
-        - Assignment
       summary: Werk een bestaande opdracht bij
       description: Staats een leerkracht toe om een bestaande opdracht te wijzigen.
       operationId: updateAssignment
@@ -798,8 +800,6 @@ paths:
           description: Serverfout
 
     delete:
-      tags:
-        - Assignment
       summary: Verwijder een bestaande opdracht
       description: Staats een leerkracht toe om een bestaande opdracht te verwijderen.
       operationId: deleteAssignment
@@ -821,8 +821,6 @@ paths:
 
   /student/auth/register:
     post:
-      tags:
-        - Log In and Register
       summary: Registreer een nieuwe leerling
       description: Maakt een nieuwe gebruiker aan met de rol van student.
       operationId: registerStudent
@@ -842,8 +840,6 @@ paths:
 
   /student/auth/login:
     post:
-      tags:
-        - Log In and Register
       summary: Inloggen van een leerling
       description: Verifieert de e-mail en het wachtwoord van de gebruiker en geeft een JWT-token terug.
       operationId: loginStudent
@@ -872,8 +868,6 @@ paths:
 
   /teacher/auth/register:
     post:
-      tags:
-        - Log In and Register
       summary: Registreer een nieuwe leerkracht
       description: Maakt een nieuwe gebruiker aan met de rol van leerkracht.
       operationId: registerTeacher
@@ -893,8 +887,6 @@ paths:
 
   /teacher/auth/login:
     post:
-      tags:
-        - Log In and Register
       summary: Inloggen van een leerkracht
       description: Verifieert de e-mail en het wachtwoord van de leerkracht en geeft een JWT-token terug.
       operationId: loginTeacher
@@ -923,8 +915,6 @@ paths:
 
   /student/classes/join:
     post:
-      tags:
-        - Student Class Operations
       summary: Toetreden tot een klas
       description: Laat een student toe om een klas te joinen door een join code te verstrekken.
       operationId: joinclass
@@ -959,8 +949,6 @@ paths:
   
   /teacher/classes:
     post:
-      tags:
-        - Teacher Class Operations
       summary: Creëer een nieuwe klas
       description: Sta een leerkracht toe om een nieuwe klas aan te maken.
       operationId: createclass
@@ -994,8 +982,6 @@ paths:
           description: Serverfout bij het aanmaken van de klas
   /teacher/classes/{classId}:
     delete:
-      tags:
-        - Teacher Class Operations
       summary: Verwijder een klas
       description: Sta een leerkracht toe om een bestaande klas te verwijderen.
       operationId: deleteclass
@@ -1027,8 +1013,6 @@ paths:
           description: Serverfout bij het verwijderen van de klas
   /teacher/classes/{classId}/join-link:
     get:
-      tags:
-        - Teacher Class Operations
       summary: Haal de join link van een klas op
       description: Geeft de join link voor studenten om deel te nemen aan de klas.
       operationId: getJoinLink
@@ -1059,8 +1043,6 @@ paths:
           description: Serverfout bij het ophalen van de join link
   /teacher/classes/{classId}/regenerate-join-link:
     post:
-      tags:
-        - Teacher Class Operations
       summary: Regenereer de join link van een klas
       description: Genereert een nieuwe join link voor de klas.
       operationId: regenerateJoinLink
@@ -1091,8 +1073,6 @@ paths:
           description: Serverfout bij het regenereren van de join link
   /teacher/classes/{classId}/students:
     get:
-      tags:
-        - Teacher Class Operations
       summary: Haal studenten van een klas op
       description: Geeft een lijst van alle studenten die zijn ingeschreven in de gespecificeerde klas.
       operationId: getclassStudents
@@ -1126,8 +1106,6 @@ paths:
 
   /teacher/classes/{classId}/invites:
     get:
-      tags:
-        - Teacher Invite Operations
       summary: Haal alle uitstaande uitnodigingen voor een klas op
       description: Geeft een lijst van alle uitstaande uitnodigingen voor de gespecificeerde klas.
       operationId: getPendingInvitesForClass
@@ -1159,8 +1137,6 @@ paths:
         '500':
           description: Serverfout bij het ophalen van uitnodigingen
     post:
-      tags:
-        - Teacher Invite Operations
       summary: Nodig een andere leerkracht uit voor een klas
       description: Creëert een uitnodiging voor een andere leerkracht om deel te nemen aan de klas.
       operationId: createInvite
@@ -1206,8 +1182,6 @@ paths:
       
   /teacher/classes/invites:
     get:
-      tags:
-        - Teacher Invite Operations
       summary: Haal alle uitstaande uitnodigingen voor een leerkracht op
       description: Geeft een lijst van alle uitstaande uitnodigingen voor de ingelogde leerkracht.
       operationId: getPendingInvitesForTeacher
@@ -1233,8 +1207,6 @@ paths:
           description: Serverfout bij het ophalen van uitnodigingen
   /teacher/classes/invites/{inviteId}:
     patch:
-      tags:
-        - Teacher Invite Operations
       summary: Update de status van een uitnodiging
       description: Update de status van een uitnodiging voor een leerkracht om deel te nemen aan een klas.
       operationId: updateInviteStatus
@@ -1279,8 +1251,6 @@ paths:
           description: Serverfout bij het updaten van de uitnodiging
   /teacher/classes/{classId}/invites/{inviteId}:
     delete:
-      tags:
-        - Teacher Invite Operations
       summary: Verwijder een uitnodiging
       description: Verwijdert een uitnodiging voor een leerkracht om deel te nemen aan een klas.
       operationId: deleteInvite
@@ -1322,8 +1292,6 @@ paths:
       summary: Haal alle join requests op voor een klas
       security:
         - BearerAuth: []
-      tags:
-        - Join Requests
       parameters:
         - name: classId
           in: path
@@ -1350,8 +1318,6 @@ paths:
       summary: Werk de status van een join request bij (goedkeuren of weigeren)
       security:
         - BearerAuth: []
-      tags:
-        - Join Requests
       parameters:
         - name: classId
           in: path
@@ -1399,8 +1365,6 @@ paths:
       summary: Maak een nieuw leerobject
       security:
         - BearerAuth: []
-      tags:
-        - Learning Object
       requestBody:
         required: true
         content:
@@ -1426,8 +1390,6 @@ paths:
       summary: Haal alle leerobjecten van de ingelogde teacher op
       security:
         - BearerAuth: []
-      tags:
-        - Learning Object
       responses:
         "200":
           description: Lijst van leerobjecten
@@ -1445,8 +1407,6 @@ paths:
       summary: Haal één leerobject op
       security:
         - BearerAuth: []
-      tags:
-        - Learning Object
       parameters:
         - name: id
           in: path
@@ -1471,8 +1431,6 @@ paths:
       summary: Update een leerobject
       security:
         - BearerAuth: []
-      tags:
-        - Learning Object
       parameters:
         - name: id
           in: path
@@ -1508,8 +1466,6 @@ paths:
       summary: Verwijder een leerobject
       security:
         - BearerAuth: []
-      tags:
-        - Learning Object
       parameters:
         - name: id
           in: path
