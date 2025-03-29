@@ -412,8 +412,161 @@ paths:
         "404":
           description: Evaluation not found
 
-  /learningObject:
-    $ref: "./routes/learningObject/learningObjectRoutes.yaml"
+  # Learning Object routes
+  /learningObject/{learningObjectId}:
+    get:
+      tags:
+        - Learning object
+        - User
+      summary: Get a specific learning object
+      description: Retrieve a specific learning object by its ID. Accessible to any authenticated user (student or teacher).
+      parameters:
+        - name: learningObjectId
+          in: path
+          required: true
+          description: The ID of the learning object
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Learning object retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningObject'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Learning object not found
+
+  /learningObject/learningPath/{pathId}:
+    get:
+      tags:
+        - Learning object
+        - User
+      summary: Get all learning objects for a specific learning path
+      description: Retrieve all learning objects associated with a specific learning path. Accessible to any authenticated user (student or teacher).
+      parameters:
+        - name: pathId
+          in: path
+          required: true
+          description: The ID of the learning path
+          schema:
+            type: string
+        - name: language
+          in: query
+          required: false
+          description: The language of the learning objects
+          schema:
+            type: string
+        - name: hruid
+          in: query
+          required: false
+          description: The human-readable ID of the learning object
+          schema:
+            type: string
+        - name: version
+          in: query
+          required: false
+          description: The version of the learning object
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Learning objects retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LearningObject'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Learning path not found
+
+  /learningObject/teacher:
+    get:
+      tags:
+        - Learning object
+        - Teacher
+      summary: Get all learning objects
+      description: Retrieve all learning objects. Only accessible to teachers.
+      responses:
+        '200':
+          description: Learning objects retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LearningObject'
+        '401':
+          description: Unauthorized access
+
+  /learningObject/teacher/search:
+    get:
+      tags:
+        - Learning object
+        - Teacher
+      summary: Search for learning objects
+      description: Search for learning objects based on query parameters. Only accessible to teachers.
+      parameters:
+        - name: q
+          in: query
+          required: false
+          description: The search term
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Learning objects retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LearningObject'
+        '401':
+          description: Unauthorized access
+
+  /learningObject/teacher/lookup:
+    get:
+      tags:
+        - Learning object
+        - Teacher
+      summary: Get a learning object by hruid, language, and version
+      description: Retrieve a learning object by its human-readable ID, language, and version. Only accessible to teachers.
+      parameters:
+        - name: hruid
+          in: query
+          required: true
+          description: The human-readable ID of the learning object
+          schema:
+            type: string
+        - name: language
+          in: query
+          required: true
+          description: The language of the learning object
+          schema:
+            type: string
+        - name: version
+          in: query
+          required: true
+          description: The version of the learning object
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Learning object retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningObject'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Learning object not found
 
   # Learning Path routes  
   /learningPath:
@@ -1521,4 +1674,92 @@ components:
           description: The ID of the next node the transition is linked to.
         nextNode:
           $ref: "#/components/schemas/Node"
+
+    LearningObject:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the learning object.
+        uuid:
+          type: string
+          format: uuid
+          description: The UUID of the learning object.
+        hruid:
+          type: string
+          description: The human-readable ID of the learning object.
+        version:
+          type: integer
+          description: The version of the learning object.
+        language:
+          type: string
+          description: The language of the learning object.
+        title:
+          type: string
+          description: The title of the learning object.
+        description:
+          type: string
+          description: The description of the learning object.
+        contentType:
+          type: string
+          description: The content type of the learning object.
+          enum:
+            - text/plain
+            - text/markdown
+            - image/image-block
+            - image/image
+            - audio/mpeg
+            - video
+            - evaluation/multiple-choice
+            - evaluation/open-question
+        keywords:
+          type: array
+          items:
+            type: string
+          description: The keywords associated with the learning object.
+        targetAges:
+          type: array
+          items:
+            type: number
+          description: The target ages for the learning object.
+        teacherExclusive:
+          type: boolean
+          description: Whether the learning object is exclusive to teachers or not.
+        skosConcepts:
+          type: array
+          items:
+            type: string
+          description: The SKOS concepts associated with the learning object.
+        copyright:
+          type: string
+          description: The copyright information for the learning object.
+        licence:
+          type: string
+          description: The license information for the learning object.
+        difficulty:
+          type: integer
+          description: The difficulty level of the learning object.
+        estimatedTime:
+          type: integer
+          description: The estimated time in minutes to complete the learning object.
+        available:
+          type: boolean
+          description: Whether the learning object is available or not.
+        contentLocation:
+          type: string
+          description: The external location of the content of the learning object (optional).
+        origin:
+          type: string
+          description: The origin of the learning object. Has the teacher made it itself or was this fetched from the Dwengo API?
+          enum:
+            - dwengo
+            - local
+        createdAt:
+          type: string
+          format: date-time
+          description: The date and time the learning object was created.
+        updatedAt:
+          type: string
+          format: date-time
+          description: The date and time the learning object was last updated.
           

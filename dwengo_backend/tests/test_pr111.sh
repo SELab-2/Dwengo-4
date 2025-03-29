@@ -252,7 +252,7 @@ echo
 echo "==[ 13) Teacher bekijkt laatste 10 leerobjecten (combi) ]"
 
 echo "---- Teacher sees LO (limited fields) ----"
-ALL_LO_TEACHER=$(curl -s -X GET "$BASE_URL/learningObject" \
+ALL_LO_TEACHER=$(curl -s -X GET "$BASE_URL/learningObject/teacher" \
   -H "Authorization: Bearer $TEACHER_TOKEN" \
   | jq '.[-10:] | map({title, id, hruid, language, teacherExclusive})')
 echo "$ALL_LO_TEACHER"

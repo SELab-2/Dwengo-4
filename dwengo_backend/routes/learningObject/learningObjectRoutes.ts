@@ -12,22 +12,22 @@ import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
 const router = express.Router();
 
 /**
- * @route GET /learningObject
+ * @route GET /learningObject/teacher
  * @description Haal alle leerobjecten op. Enkel leerkrachten kunnen dit doen.
  * @access Teacher
  */
-router.get("/", protectTeacher, getAllLearningObjectsController);
+router.get("/teacher", protectTeacher, getAllLearningObjectsController);
 
 /**
- * @route GET /learningObject/search
+ * @route GET /learningObject/teacher/search
  * @description Zoek leerobject met bepaalde parameters
  * @query q: string (zoekterm)
  * @access Teacher
  */
-router.get("/search", protectTeacher, searchLearningObjectsController);
+router.get("/teacher/search", protectTeacher, searchLearningObjectsController);
 
 /**
- * @route GET /learningObject/lookup
+ * @route GET /learningObject/teacher/lookup
  * @description Haal leerobject op met hruid+language+version
  * @query hruid: string (hruid van leerobject)
  * @query language: string (taal van leerobject)
@@ -35,7 +35,7 @@ router.get("/search", protectTeacher, searchLearningObjectsController);
  * @access Teacher
  */
 router.get(
-  "/lookup",
+  "/teacher/lookup",
   protectTeacher,
   getLearningObjectByHruidLangVersionController
 );
