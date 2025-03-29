@@ -20,6 +20,8 @@ tags:
     description: Everything about learning paths
   - name: Selfmade learning path
     description: Everything about learning paths created by teachers
+  - name: Node
+    description: Everything about learning path nodes
   - name: Class
     description: Everything about classes
   - name: Invite
@@ -50,14 +52,134 @@ paths:
     $ref: "./routes/invite/inviteRoutes.yaml"
   /join-request:
     $ref: "./routes/joinRequest/joinRequestRoutes.yaml"
-  /pathByTeacher:
-    $ref: "./routes/teacherMadeLearningPath/pathByTeacherRoutes.yaml"
 
   # Selfmade Learning Path routes
-  /learningPath/{pathId}/node:
+  /pathByTeacher:
+    post:
+      tags:
+        - Selfmade learning path
+        - Teacher
+      summary: Create a new learning path
+      description: Allows a teacher to create a new selfmade learning path (initially without nodes). Requires teacher authentication.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PathMetadata'
+      responses:
+        '201':
+          description: Learning path created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningPath'
+        '401':
+          description: Unauthorized access
+        '400':
+          description: Invalid request body
+
     get:
       tags:
         - Selfmade learning path
+        - Teacher
+      summary: Get all selfmade learning paths
+      description: Retrieve all selfmade learning paths created by the authenticated teacher. Requires teacher authentication.
+      responses:
+        '200':
+          description: Learning paths retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LearningPath'
+        '401':
+          description: Unauthorized access
+
+  /pathByTeacher/{pathId}:
+    get:
+      tags:
+        - Selfmade learning path
+        - Teacher
+      summary: Get a specific selfmade learning path
+      description: Retrieve a specific selfmade learning path by its ID. Requires teacher authentication.
+      parameters:
+        - name: pathId
+          in: path
+          required: true
+          description: The ID of the selfmade learning path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Learning path retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningPath'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Learning path not found
+
+    patch:
+      tags:
+        - Selfmade learning path
+        - Teacher
+      summary: Update a selfmade learning path
+      description: Allows a teacher to update a specific selfmade learning path. Requires teacher authentication.
+      parameters:
+        - name: pathId
+          in: path
+          required: true
+          description: The ID of the selfmade learning path
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OptionalPathMetaData'
+      responses:
+        '200':
+          description: Learning path updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningPath'
+        '401':
+          description: Unauthorized access
+        '400':
+          description: Invalid request body
+        '404':
+          description: Learning path not found
+
+    delete:
+      tags:
+        - Selfmade learning path
+        - Teacher
+      summary: Delete a selfmade learning path
+      description: Allows a teacher to delete a specific selfmade learning path. Requires teacher authentication.
+      parameters:
+        - name: pathId
+          in: path
+          required: true
+          description: The ID of the selfmade learning path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Learning path deleted successfully
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Learning path not found
+
+  # Node routes
+  /learningPath/{pathId}/node:
+    get:
+      tags:
+        - Node
         - User
       summary: Get all nodes for a learning path
       description: Retrieve all nodes for a specific selfmade learning path. Accessible to any authenticated user (student or teacher).
@@ -83,7 +205,7 @@ paths:
           description: Learning path not found
     post:
       tags:
-        - Selfmade learning path
+        - Node
         - Teacher
       summary: Create a new node for a learning path
       description: Allows a teacher to create a new node in a specific selfmade learning path. Requires teacher authentication.
@@ -114,7 +236,7 @@ paths:
   /learningPath/{pathId}/node/{nodeId}:
     patch:
       tags:
-        - Selfmade learning path
+        - Node
         - Teacher
       summary: Update a node in a learning path
       description: Allows a teacher to update a specific node in a selfmade learning path. Requires teacher authentication.
@@ -152,7 +274,7 @@ paths:
 
     delete:
       tags:
-        - Selfmade learning path
+        - Node
         - Teacher
       summary: Delete a node from a learning path
       description: Allows a teacher to delete a specific node from a selfmade learning path. Requires teacher authentication.
@@ -2578,3 +2700,42 @@ components:
           description: Whether this node is the starting node of the learning path.
       required:
         - isExternal
+
+    PathMetadata:
+      type: object
+      properties:
+        title: 
+          type: string
+          description: The title of the learning path.
+        language: 
+          type: string
+          description: The language of the learning path.
+        description:
+          type: string
+          description: The description of the learning path.
+        image:
+          type: string
+          format: byte
+          description: The image associated with the learning path.
+          nullable: true
+      required:
+        - title
+        - language
+        
+    OptionalPathMetaData:
+      type: object
+      properties:
+        title: 
+          type: string
+          description: The title of the learning path.
+        language: 
+          type: string
+          description: The language of the learning path.
+        description:
+          type: string
+          description: The description of the learning path.
+        image:
+          type: string
+          format: byte
+          description: The image associated with the learning path.
+          nullable: true
