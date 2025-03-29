@@ -1,29 +1,40 @@
 openapi: 3.0.0
 info:
   title: Learning Platform API
-  version: "1.0"
+  version: "1.1"
 servers:
   - url: http://localhost:5000
 
 tags:
-  - name: Question
-    description: Everything about questions
-  - name: Assignment
-    description: Everything about assignments
   - name: Authentication
     description: Everything about authentication
-  - name: Learning object
-    description: Everything about learning objects
-  - name: Selfmade learning object
-    description: Everything about learning objects created by teachers
+  - name: User
+    description: Routes accessible for all users
+
+  - name: Student
+    description: Routes only accessible for students
+  - name: Teacher
+    description: Routes only accessible for teachers
+
+  - name: Class
+    description: Everything about classes
+  - name: Assignment
+    description: Everything about assignments
+  - name: Team
+    description: Everything about teams
   - name: Learning path
     description: Everything about learning paths
   - name: Selfmade learning path
     description: Everything about learning paths created by teachers
   - name: Node
     description: Everything about learning path nodes
-  - name: Class
-    description: Everything about classes
+  - name: Learning object
+    description: Everything about learning objects
+  - name: Selfmade learning object
+    description: Everything about learning objects created by teachers
+
+  - name: Question
+    description: Everything about questions
   - name: Invite
     description: Everything about invitations
   - name: Join request
@@ -34,18 +45,161 @@ tags:
     description: Everything about progress
   - name: Submission
     description: Everything about submissions
-  - name: Team
-    description: Everything about teams
-  - name: Student
-    description: Routes only accessible for students
-  - name: Teacher
-    description: Routes only accessible for teachers
-  - name: User
-    description: Routes accessible for all users
+
 
 paths:
-  /auth:
-    $ref: "./routes/authentication/authenticationRoutes.yaml"
+  # Authentication routes
+  /auth/student/register:
+    post:
+      tags:
+        - Authentication
+        - Student
+      summary: Register a student
+      description: Allows a student to register for the platform. This route is publicly accessible.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  description: The first name of the student
+                lastName:
+                  type: string
+                  description: The last name of the student
+                email:
+                  type: string
+                  format: email
+                  description: The email address of the student
+                password:
+                  type: string
+                  format: password
+                  description: The password for the student account
+      responses:
+        '201':
+          description: Student registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+        '400':
+          description: Invalid request body
+        '409':
+          description: Email already in use
+
+  /auth/student/login:
+    post:
+      tags:
+        - Authentication
+        - Student
+      summary: Login a student
+      description: Allows a student to log in to the platform. This route is publicly accessible.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: The email address of the student
+                password:
+                  type: string
+                  format: password
+                  description: The password for the student account
+      responses:
+        '200':
+          description: Student logged in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: The JWT token for the student
+        '401':
+          description: Invalid email or password
+
+  /auth/teacher/register:
+    post:
+      tags:
+        - Authentication
+        - Teacher
+      summary: Register a teacher
+      description: Allows a teacher to register for the platform. This route is publicly accessible.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  description: The first name of the teacher
+                lastName:
+                  type: string
+                  description: The last name of the teacher
+                email:
+                  type: string
+                  format: email
+                  description: The email address of the teacher
+                password:
+                  type: string
+                  format: password
+                  description: The password for the teacher account
+      responses:
+        '201':
+          description: Teacher registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Teacher'
+        '400':
+          description: Invalid request body
+        '409':
+          description: Email already in use
+
+  /auth/teacher/login:
+    post:
+      tags:
+        - Authentication
+        - Teacher
+      summary: Login a teacher
+      description: Allows a teacher to log in to the platform. This route is publicly accessible.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: The email address of the teacher
+                password:
+                  type: string
+                  format: password
+                  description: The password for the teacher account
+      responses:
+        '200':
+          description: Teacher logged in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: The JWT token for the teacher
+        '401':
+          description: Invalid email or password
 
   # Class routes
   /class/student:
