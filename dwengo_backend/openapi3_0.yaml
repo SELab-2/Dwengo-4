@@ -46,11 +46,14 @@ tags:
   - name: Submission
     description: Everything about submissions
 
+security:
+  - BearerAuth: []
 
 paths:
   # Authentication routes
   /auth/student/register:
     post:
+      security: [] # Public route, no authentication required
       tags:
         - Authentication
         - Student
@@ -91,6 +94,7 @@ paths:
 
   /auth/student/login:
     post:
+      security: [] # Public route, no authentication required
       tags:
         - Authentication
         - Student
@@ -127,6 +131,7 @@ paths:
 
   /auth/teacher/register:
     post:
+      security: [] # Public route, no authentication required
       tags:
         - Authentication
         - Teacher
@@ -167,6 +172,7 @@ paths:
 
   /auth/teacher/login:
     post:
+      security: [] # Public route, no authentication required
       tags:
         - Authentication
         - Teacher
@@ -2541,6 +2547,8 @@ paths:
           description: Assignment or team not found
 
 components:
+  # Removed duplicate securitySchemes definition
+
   schemas:
     Feedback:
       type: object
@@ -3320,3 +3328,9 @@ components:
           format: byte
           description: The image associated with the learning path.
           nullable: true
+  
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
