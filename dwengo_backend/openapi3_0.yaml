@@ -32,6 +32,8 @@ tags:
     description: Everything about progress
   - name: Submission
     description: Everything about submissions
+  - name: Team
+    description: Everything about teams
   - name: Student
     description: Routes only accessible for students
   - name: Teacher
@@ -52,10 +54,342 @@ paths:
     $ref: "./routes/teacherMadeLearningPath/pathByTeacherRoutes.yaml"
   /learningPath/:learningPathId/node:
     $ref: "./routes/teacherMadeLearningPath/learningPathNodeRoutes.yaml"
+
+  # Selfmade Learning Object routes
   /learningObjectByTeacher:
-    $ref: "./routes/teacherMadeLearningObject/learningObjectByTeacherRoutes.yaml"
-  /team:
-    $ref: "./routes/team/teamRoutes.yaml"
+    post:
+      tags:
+        - Selfmade learning object
+        - Teacher
+      summary: Create a new learning object
+      description: Allows a teacher to create a new selfmade learning object. Requires teacher authentication.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelfmadeLearningObject'
+      responses:
+        '201':
+          description: Learning object created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningObject'
+        '401':
+          description: Unauthorized access
+        '400':
+          description: Invalid request body
+
+    get:
+      tags:
+        - Selfmade learning object
+        - Teacher
+      summary: Get all selfmade learning objects
+      description: Retrieve all selfmade learning objects created by the authenticated teacher. Requires teacher authentication.
+      responses:
+        '200':
+          description: Learning objects retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LearningObject'
+        '401':
+          description: Unauthorized access
+
+  /learningObjectByTeacher/{createdLearningObjectId}:
+    get:
+      tags:
+        - Selfmade learning object
+        - Teacher
+      summary: Get a specific selfmade learning object
+      description: Retrieve a specific selfmade learning object by its ID. Requires teacher authentication.
+      parameters:
+        - name: createdLearningObjectId
+          in: path
+          required: true
+          description: The ID of the selfmade learning object
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Learning object retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Learning'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Learning object not found
+
+    patch:
+      tags:
+        - Selfmade learning object
+        - Teacher
+      summary: Update a selfmade learning object
+      description: Allows a teacher to update a specific selfmade learning object. Requires teacher authentication.
+      parameters:
+        - name: createdLearningObjectId
+          in: path
+          required: true
+          description: The ID of the selfmade learning object
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelfmadeLearningObject'
+      responses:
+        '200':
+          description: Learning object updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningObject'
+        '401':
+          description: Unauthorized access
+        '400':
+          description: Invalid request body
+        '404':
+          description: Learning object not found
+
+    delete:
+      tags:
+        - Selfmade learning object
+        - Teacher
+      summary: Delete a selfmade learning object
+      description: Allows a teacher to delete a specific selfmade learning object. Requires teacher authentication.
+      parameters:
+        - name: createdLearningObjectId
+          in: path
+          required: true
+          description: The ID of the selfmade learning object
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Learning object deleted successfully
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Learning object not found
+
+  # Team routes
+  /team/{teamId}/members:
+    get:
+      tags:
+        - Team
+        - User
+      summary: Get all team members of a specific team
+      description: Retrieve all members of a specific team. Accessible to any authenticated user (student or teacher).
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          description: The ID of the team
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Team members retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamMember'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Team not found
+
+  /team/student:
+    get:
+      tags:
+        - Team
+        - Student
+      summary: Get all teams of the logged-in student
+      description: Retrieve all teams that the logged-in student is a member of. Requires student authentication.
+      responses:
+        '200':
+          description: Teams retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Team'
+        '401':
+          description: Unauthorized access
+
+  /team/student/assignment/{assignmentId}/studentTeam:
+    get:
+      tags:
+        - Team
+        - Student
+      summary: Get a specific team by assignment ID
+      description: Retrieve the team of the logged-in student for a specific assignment. Requires student authentication.
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          description: The ID of the assignment
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Team retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Team not found
+
+  /team/teacher/class/{classId}/assignment/{assignmentId}:
+    post:
+      tags:
+        - Team
+        - Teacher
+      summary: Create teams in an assignment
+      description: Allows a teacher to create teams for a specific assignment in a class. Requires teacher authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the class
+          schema:
+            type: integer
+        - name: assignmentId
+          in: path
+          required: true
+          description: The ID of the assignment
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Team'
+      responses:
+        '201':
+          description: Teams created successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Team'
+        '401':
+          description: Unauthorized access
+        '400':
+          description: Invalid request body
+
+  /team/teacher/assignment/{assignmentId}/all:
+    get:
+      tags:
+        - Team
+        - Teacher
+      summary: Get all teams in an assignment
+      description: Retrieve all teams for a specific assignment. Requires teacher authentication.
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          description: The ID of the assignment
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Teams retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Team'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Assignment not found
+
+  /team/teacher/assignment/{assignmentId}:
+    patch:
+      tags:
+        - Team
+        - Teacher
+      summary: Update teams in an assignment
+      description: Allows a teacher to update teams for a specific assignment. Requires teacher authentication.
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          description: The ID of the assignment
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Team'
+      responses:
+        '200':
+          description: Teams updated successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Team'
+        '401':
+          description: Unauthorized access
+        '400':
+          description: Invalid request body
+        '404':
+          description: Assignment not found
+
+  /team/teacher/{teamId}/assignment/{assignmentId}:
+    delete:
+      tags:
+        - Team
+        - Teacher
+      summary: Delete a team in an assignment
+      description: Allows a teacher to delete a specific team in an assignment. Requires teacher authentication.
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          description: The ID of the team
+          schema:
+            type: integer
+        - name: assignmentId
+          in: path
+          required: true
+          description: The ID of the assignment
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Team deleted successfully
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Team or assignment not found
+
+  # Assignment routes
   /assignment/{assignmentId}:
     get:
       tags:
@@ -268,6 +602,8 @@ paths:
           description: Unauthorized access
         '404':
           description: Assignment not found
+
+  # Feedback routes
   /feedback:
     post:
       tags:
@@ -1763,3 +2099,331 @@ components:
           format: date-time
           description: The date and time the learning object was last updated.
           
+    TeamMember:
+      type: object
+      properties:
+        userId: 
+          type: integer
+          description: The ID of the user.
+        email:
+          type: string
+          format: email
+          description: The email of the user.
+        firstName:
+          type: string
+          description: The first name of the user.
+        lastName:
+          type: string
+          description: The last name of the user.
+
+    Team:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the team.
+        teamname: 
+          type: string
+          description: The name of the team.
+        classId:
+          type: integer
+          description: The ID of the class the team is linked to.
+        students:
+          type: array
+          items:
+            $ref: "#/components/schemas/Student"
+        TeamAssignment:
+          $ref: "#/components/schemas/TeamAssignment"
+        class:
+          $ref: "#/components/schemas/Class"
+        submissions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Submission"
+        Questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Question" 
+
+    Class:
+      type: object
+      properties: 
+        id:
+          type: integer
+          description: The ID of the class.
+        name: 
+          type: string
+          description: The name of the class.
+        code: 
+          type: string
+          description: The unique code of the class.
+        createdAt:
+          type: string
+          format: date-time
+          description: The date and time the class was created.
+        updatedAt:
+          type: string
+          format: date-time
+          description: The date and time the class was last updated.
+        classLinks:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassStudent"
+        joinRequests: 
+          type: array
+          items:
+            $ref: "#/components/schemas/JoinRequest"
+        assignments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassAssignment"
+        Invite:
+          $ref: "#/components/schemas/Invite"
+        ClassTeacher:
+          $ref: "#/components/schemas/ClassTeacher"
+        teams: 
+          type: array
+          items:
+            $ref: "#/components/schemas/Team"
+
+    Student:
+      type: object
+      properties:
+        userId:
+          type: integer
+          description: The ID of the user.
+        user:
+          $ref: "#/components/schemas/User"
+        progress:
+          type: array
+          items:
+            $ref: "#/components/schemas/StudentProgress"
+        classes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassStudent"
+        Team:
+          $ref: "#/components/schemas/Team"
+      
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the user.
+        email:
+          type: string
+          format: email
+          description: The email of the user.
+        firstName:
+          type: string
+          description: The first name of the user.
+        lastName:
+          type: string
+          description: The last name of the user.
+        password:
+          type: string
+          format: password
+          description: The password of the user.
+        role:
+          type: string
+          enum:
+            - student
+            - teacher
+            - admin
+          description: The role of the user.
+        createdAt:
+          type: string
+          format: date-time
+          description: The date and time the user was created.
+        updatedAt:
+          type: string
+          format: date-time
+          description: The date and time the user was last updated.
+        admin:
+          $ref: "#/components/schemas/Admin"
+        teacher:
+          $ref: "#/components/schemas/Teacher"
+        student:
+          $ref: "#/components/schemas/Student"
+
+    Admin:
+      type: object
+      properties:
+        userId:
+          type: integer
+          description: The ID of the user.
+        user:
+          $ref: "#/components/schemas/User"
+
+    Teacher:
+      userId: 
+        type: integer
+        description: The ID of the user.
+      user:
+        $ref: "#/components/schemas/User"
+      teacherFeedbacks:
+        type: array
+        items:
+          $ref: "#/components/schemas/Feedback"
+      invite:
+        type: array
+        items:
+          $ref: "#/components/schemas/Invite"
+      createdLearningPaths:
+        type: array
+        items:
+          $ref: "#/components/schemas/LearningPath"
+      createdLearningObjects:
+        type: array
+        items:
+          $ref: "#/components/schemas/LearningObject"
+      teaches:
+        type: array
+        items:
+          $ref: "#/components/schemas/ClassTeacher"
+
+    ClassTeacher:
+      type: object
+      properties:
+        teacherId:
+          type: integer
+          description: The ID of the teacher.
+        classId:
+          type: integer
+          description: The ID of the class.
+        teacher: 
+          $ref: "#/components/schemas/Teacher"
+        class:
+          $ref: "#/components/schemas/Class"
+        invites:
+          type: array
+          items:
+            $ref: "#/components/schemas/Invite"
+
+    ClassStudent:
+      type: object
+      properties:
+        studentId:
+          type: integer
+          description: The ID of the student.
+        classId:
+          type: integer
+          description: The ID of the class.
+        student:
+          $ref: "#/components/schemas/Student"
+        class:
+          $ref: "#/components/schemas/Class"
+              
+    JoinRequest:
+      type: object
+      properties:
+        requestId:
+          type: integer
+          description: The ID of the join request.
+        studentId:
+          type: integer
+          description: The ID of the student.
+        classId:
+          type: integer
+          description: The ID of the class.
+        status:
+          type: string
+          enum:
+            - pending
+            - approved
+            - denied
+          description: The status of the join request.
+        student:
+          $ref: "#/components/schemas/Student"
+        class:
+          $ref: "#/components/schemas/Class"
+        
+    Invite:
+      type: object
+      properties:
+        inviteId:
+          type: integer
+          description: The ID of the invite.
+        otherTeacherId:
+          type: integer
+          description: The ID of the other teacher.
+        classTeacherId:
+          type: integer
+          description: The ID of the class teacher.
+        classId:
+          type: integer
+          description: The ID of the class.
+        status:
+          type: string
+          enum:
+            - pending
+            - approved
+            - denied
+          description: The status of the invite.
+        otherTeacher:
+          $ref: "#/components/schemas/Teacher"
+        classTeacher:
+          $ref: "#/components/schemas/ClassTeacher"
+        class: 
+          $ref: "#/components/schemas/Class"
+    
+    SelfmadeLearningObject:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique ID of the selfmade learning object.
+        title:
+          type: string
+          description: The title of the learning object.
+        description:
+          type: string
+          description: The description of the learning object.
+        contentType:
+          type: string
+          description: The content type of the learning object (e.g., "text/markdown", "interactive/quiz").
+        keywords:
+          type: array
+          items:
+            type: string
+          description: Keywords associated with the learning object (comma-separated or JSON).
+        targetAges:
+          type: array
+          items:
+            type: integer
+          description: Target age groups for the learning object (comma-separated or JSON).
+        teacherExclusive:
+          type: boolean
+          description: Whether the learning object is exclusive to teachers.
+        skosConcepts:
+          type: array
+          items:
+            type: string
+          description: SKOS concepts associated with the learning object.
+        copyright:
+          type: string
+          description: Copyright information for the learning object.
+        licence:
+          type: string
+          description: The licence under which the learning object is distributed.
+        difficulty:
+          type: integer
+          description: The difficulty level of the learning object.
+        estimatedTime:
+          type: integer
+          description: The estimated time to complete the learning object (in minutes).
+        available:
+          type: boolean
+          description: Whether the learning object is available.
+        contentLocation:
+          type: string
+          description: The location of the content (e.g., URL or file path).
+        createdAt:
+          type: string
+          format: date-time
+          description: The date and time the learning object was created.
+        updatedAt:
+          type: string
+          format: date-time
+          description: The date and time the learning object was last updated.
