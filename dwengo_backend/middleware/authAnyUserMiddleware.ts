@@ -1,8 +1,11 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
-import { PrismaClient, Role, Teacher, Student, User } from "@prisma/client";
-import { AuthenticatedRequest, AuthenticatedUser } from "../interfaces/extendedTypeInterfaces";
+import { PrismaClient, Teacher, Student, User } from "@prisma/client";
+import {
+  AuthenticatedRequest,
+  AuthenticatedUser,
+} from "../interfaces/extendedTypeInterfaces";
 const prisma = new PrismaClient();
 
 interface JwtPayload {
@@ -20,7 +23,7 @@ export const protectAnyUser = asyncHandler(
         token = req.headers.authorization.split(" ")[1];
         const decoded = jwt.verify(
           token,
-          process.env.JWT_SECRET as string
+          process.env.JWT_SECRET as string,
         ) as JwtPayload;
 
         // Zoek de gebruiker in de database
@@ -33,7 +36,11 @@ export const protectAnyUser = asyncHandler(
         }
 
         // Bouw het authUser object op met basisgegevens
-        const authUser: AuthenticatedUser = { id: user.id, role: user.role , email: user.email };
+        const authUser: AuthenticatedUser = {
+          id: user.id,
+          role: user.role,
+          email: user.email,
+        };
 
         // Als de gebruiker een teacher is, haal dan de teacher-specifieke data op
         if (user.role === "TEACHER") {
@@ -75,5 +82,5 @@ export const protectAnyUser = asyncHandler(
     } else {
       res.status(401).json({ error: "Geen token, niet geautoriseerd." });
     }
-  }
+  },
 );

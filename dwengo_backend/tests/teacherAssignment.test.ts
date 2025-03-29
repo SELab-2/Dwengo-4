@@ -11,7 +11,6 @@ import {
   createTeacher,
   stringToDate,
 } from "./helpers/testDataCreation";
-import { isExternal } from "util/types";
 
 describe("Tests for teacherAssignment", async () => {
   let teacher1: User & { teacher: Teacher; token: string };
@@ -25,14 +24,11 @@ describe("Tests for teacherAssignment", async () => {
 
   let lp1: LearningPath;
   let lp2: LearningPath;
-  let lp3: LearningPath;
   let lp4: LearningPath;
 
   let assignment1: Assignment;
   let assignment2: Assignment;
-  let assignment3: Assignment;
   let assignment4: Assignment;
-  let assignment5: Assignment;
 
   beforeEach(async () => {
     // create some classes
@@ -45,28 +41,23 @@ describe("Tests for teacherAssignment", async () => {
     teacher3 = await createTeacher(
       "Charlie",
       "Ceulemans",
-      "charlie.ceulemans@gmail.com"
+      "charlie.ceulemans@gmail.com",
     );
     // create some learning paths
     lp1 = await createLearningPath(
       "LP1",
       "Learning Path 1",
-      teacher1.teacher.userId
+      teacher1.teacher.userId,
     );
     lp2 = await createLearningPath(
       "LP2",
       "Learning Path 2",
-      teacher2.teacher.userId
-    );
-    lp3 = await createLearningPath(
-      "LP3",
-      "Learning Path 3",
-      teacher2.teacher.userId
+      teacher2.teacher.userId,
     );
     lp4 = await createLearningPath(
       "LP4",
       "Learning Path 4",
-      teacher3.teacher.userId
+      teacher3.teacher.userId,
     );
 
     // Add teacher to classes
@@ -80,28 +71,18 @@ describe("Tests for teacherAssignment", async () => {
     assignment1 = await createAssignment(
       class1.id,
       lp1.id,
-      new Date("2026-10-23")
+      new Date("2026-10-23"),
     );
     assignment2 = await createAssignment(
       class1.id,
       lp2.id,
-      new Date("2026-04-17")
-    );
-    assignment3 = await createAssignment(
-      class2.id,
-      lp3.id,
-      new Date("2026-10-19")
+      new Date("2026-04-17"),
     );
 
     assignment4 = await createAssignment(
       class2.id,
       lp4.id,
-      new Date("2026-10-17")
-    );
-    assignment5 = await createAssignment(
-      class2.id,
-      lp1.id,
-      new Date("2025-05-28")
+      new Date("2026-10-17"),
     );
   });
 
@@ -154,11 +135,11 @@ describe("Tests for teacherAssignment", async () => {
     });
 
     it("should respond with the same assignments for teachers that are members of the same class", async () => {
-      let req = await request(app)
+      const req = await request(app)
         .get(`/teacher/assignments/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher1.token}`);
 
-      let req2 = await request(app)
+      const req2 = await request(app)
         .get(`/teacher/assignments/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`);
 
@@ -196,7 +177,7 @@ describe("Tests for teacherAssignment", async () => {
       expect(status).toBe(201);
       const assignmentId = body.id;
 
-      let req = await request(app)
+      const req = await request(app)
         .patch(`/teacher/assignments/${assignmentId}`)
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
@@ -206,7 +187,7 @@ describe("Tests for teacherAssignment", async () => {
       expect(req.status).toBe(200);
       expect(req.body.pathRef).toBe(lp2.id);
       expect(req.body.deadline).toStrictEqual(
-        new Date("2026-10-23").toISOString()
+        new Date("2026-10-23").toISOString(),
       );
       expect(req.body.updatedAt).not.toStrictEqual(body.updatedAt);
     });
@@ -236,7 +217,7 @@ describe("Tests for teacherAssignment", async () => {
 
   describe("[DELETE] /teacher/assignments/:assignmentId", async () => {
     it("should respond with a `204` status code and delete the assignment", async () => {
-      const { status, body } = await request(app)
+      const { status } = await request(app)
         .delete(`/teacher/assignments/${assignment4.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`);
       expect(status).toBe(204);
