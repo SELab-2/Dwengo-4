@@ -46,10 +46,331 @@ tags:
 paths:
   /auth:
     $ref: "./routes/authentication/authenticationRoutes.yaml"
-  /class:
-    $ref: "./routes/class/classRoutes.yaml"
+
+  # Class routes
+  /class/student:
+    get:
+      tags:
+        - Class
+        - Student
+      summary: Get all classes for a student
+      description: Retrieve all classes that the authenticated student is a member of. Requires student authentication.
+      responses:
+        '200':
+          description: Classes retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Class'
+        '401':
+          description: Unauthorized access
+
+  /class/teacher:
+    post:
+      tags:
+        - Class
+        - Teacher
+      summary: Create a classroom
+      description: Allows a teacher to create a new classroom. Requires teacher authentication.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the classroom
+      responses:
+        '201':
+          description: Classroom created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Class'
+        '401':
+          description: Unauthorized access
+        '400':
+          description: Invalid request body
+
+    get:
+      tags:
+        - Class
+        - Teacher
+      summary: Get all classes for a teacher
+      description: Retrieve all classes created by the authenticated teacher. Requires teacher authentication.
+      responses:
+        '200':
+          description: Classes retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Class'
+        '401':
+          description: Unauthorized access
+
+  /class/teacher/{classId}:
+    get:
+      tags:
+        - Class
+        - Teacher
+      summary: Get all students in a classroom
+      description: Retrieve all students in a specific classroom. Requires teacher authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the classroom
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Students retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Student'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Classroom not found
+
+    delete:
+      tags:
+        - Class
+        - Teacher
+      summary: Delete a classroom
+      description: Allows a teacher to delete a specific classroom. Requires teacher authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the classroom
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Classroom deleted successfully
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Classroom not found
+
+  /class/teacher/{classId}/join-link:
+    get:
+      tags:
+        - Class
+        - Teacher
+      summary: Get the join link for a classroom
+      description: Retrieve the join link for a specific classroom. Requires teacher authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the classroom
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Join link retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  joinLink:
+                    type: string
+                    description: The join link for the classroom
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Classroom not found
+
+    patch:
+      tags:
+        - Class
+        - Teacher
+      summary: Regenerate the join link for a classroom
+      description: Allows a teacher to regenerate the join link for a specific classroom. Requires teacher authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the classroom
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Join link regenerated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  joinLink:
+                    type: string
+                    description: The new join link for the classroom
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Classroom not found
+
+  # Invite routes
   /invite:
-    $ref: "./routes/invite/inviteRoutes.yaml"
+    get:
+      tags:
+        - Invite
+        - Teacher
+      summary: Get all pending invites for a teacher
+      description: Retrieve all pending invites for the authenticated teacher. Requires teacher authentication.
+      responses:
+        '200':
+          description: Pending invites retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invite'
+        '401':
+          description: Unauthorized access
+
+  /invite/class/{classId}:
+    post:
+      tags:
+        - Invite
+        - Teacher
+      summary: Create an invite for a class
+      description: Allows a teacher to create an invite for another teacher to join a class. Requires teacher authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the class
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                otherTeacherId:
+                  type: integer
+                  description: The ID of the teacher being invited
+      responses:
+        '201':
+          description: Invite created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invite'
+        '401':
+          description: Unauthorized access
+        '400':
+          description: Invalid request body
+
+    get:
+      tags:
+        - Invite
+        - Teacher
+      summary: Get all pending invites for a class
+      description: Retrieve all pending invites for a specific class. Requires teacher authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the class
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Pending invites retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invite'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Class not found
+
+  /invite/{inviteId}:
+    patch:
+      tags:
+        - Invite
+        - Teacher
+      summary: Update an invite
+      description: Allows a teacher to update the status of an invite (accept or decline). Requires teacher authentication.
+      parameters:
+        - name: inviteId
+          in: path
+          required: true
+          description: The ID of the invite
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [accept, decline]
+                  description: The action to perform on the invite
+      responses:
+        '200':
+          description: Invite updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invite'
+        '401':
+          description: Unauthorized access
+        '400':
+          description: Invalid request body
+        '404':
+          description: Invite not found
+
+  /invite/{inviteId}/class/{classId}:
+    delete:
+      tags:
+        - Invite
+        - Teacher
+      summary: Delete an invite
+      description: Allows a teacher to delete a specific invite for a class. Requires teacher authentication.
+      parameters:
+        - name: inviteId
+          in: path
+          required: true
+          description: The ID of the invite
+          schema:
+            type: integer
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the class
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Invite deleted successfully
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Invite or class not found
 
   # Join request routes
   /join-request/student:
