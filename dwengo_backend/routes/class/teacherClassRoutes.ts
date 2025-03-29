@@ -6,6 +6,7 @@ import {
   getJoinLink,
   getTeacherClasses,
   regenerateJoinLink,
+  getClassByIdAndTeacherId,
 } from "../../controllers/teacher/teacherClassController";
 import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 
@@ -29,20 +30,12 @@ router.post("/", protectTeacher, createClassroom);
 router.get("/", protectTeacher, getTeacherClasses);
 
 /**
- * @route GET /class/teacher/:classId
+ * @route GET /class/teacher/:classId/student
  * @description Get all students in a classroom
- * @param classId: string
+ * @param classId: number
  * @access Teacher
  */
-router.get("/:classId", protectTeacher, getClassroomStudents);
-
-/**
- * @route DELETE /class/teacher/:classId
- * @description Delete a classroom
- * @param classId: string
- * @access Teacher
- */
-router.delete("/:classId", protectTeacher, deleteClassroom);
+router.get("/:classId/student", protectTeacher, getClassroomStudents);
 
 /**
  * @route GET /class/teacher/:classId/join-link
@@ -59,5 +52,21 @@ router.get("/:classId/join-link", protectTeacher, getJoinLink);
  * @access Teacher
  */
 router.patch("/:classId/join-link", protectTeacher, regenerateJoinLink);
+
+/**
+ * @route GET /class/teacher/:classId
+ * @description Get a classroom by ID
+ * @param classId: string
+ * @access Teacher
+ */
+router.get("/:classId", protectTeacher, getClassByIdAndTeacherId);
+
+/**
+ * @route DELETE /class/teacher/:classId
+ * @description Delete a classroom
+ * @param classId: string
+ * @access Teacher
+ */
+router.delete("/:classId", protectTeacher, deleteClassroom);
 
 export default router;

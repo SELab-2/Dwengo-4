@@ -274,7 +274,7 @@ paths:
         '401':
           description: Unauthorized access
 
-  /class/teacher/{classId}:
+  /class/teacher/{classId}/student:
     get:
       tags:
         - Class
@@ -302,6 +302,31 @@ paths:
         '404':
           description: Classroom not found
 
+  /class/teacher/{classId}:
+    get:
+      tags:
+        - Class
+        - Teacher
+      summary: Get a classroom by ID
+      description: Retrieve details of a specific classroom by its ID. Requires teacher authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the classroom
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Classroom retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Class'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Classroom not found
     delete:
       tags:
         - Class
@@ -2547,8 +2572,6 @@ paths:
           description: Assignment or team not found
 
 components:
-  # Removed duplicate securitySchemes definition
-
   schemas:
     Feedback:
       type: object
@@ -2627,6 +2650,12 @@ components:
         id:
           type: integer
           description: The ID of the assignment.
+        title:
+          type: string
+          description: The title of the assignment.
+        description:
+          type: string
+          description: The description of the assignment.
         pathRef:
           type: string
           description: The reference to the learning path.
