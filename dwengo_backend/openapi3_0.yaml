@@ -28,6 +28,8 @@ tags:
     description: Everything about join requests
   - name: Feedback
     description: Everything about feedback
+  - name: Submission
+    description: Everything about submissions
   - name: Student
     description: Routes only accessible for students
   - name: Teacher
@@ -738,8 +740,199 @@ paths:
           description: Forbidden access
   /progress:
     $ref: "./routes/progress/progressRoutes.yaml"
-  /submission:
-    $ref: "./routes/submission/submissionRoutes.yaml"
+
+  # Submission routes
+  /submission/student/assignment/{assignmentId}:
+    get:
+      tags:
+        - Submission
+        - Student
+      summary: Get all submissions for a specific assignment
+      description: Retrieve all submissions of the student and their team for a specific assignment. Requires student authentication.
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          description: The ID of the assignment
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Submissions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Assignment not found
+
+  /submission/student/assignment/{assignmentId}/evaluation/{evaluationId}:
+    post:
+      tags:
+        - Submission
+        - Student
+      summary: Create a submission for a specific evaluation
+      description: Allows a student to create a submission for a specific evaluation in an assignment. Requires student authentication.
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          description: The ID of the assignment
+          schema:
+            type: integer
+        - name: evaluationId
+          in: path
+          required: true
+          description: The ID of the evaluation
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileUrl:
+                  type: string
+                  description: The URL of the submitted file
+                description:
+                  type: string
+                  description: A description of the submission
+      responses:
+        '201':
+          description: Submission created successfully
+        '401':
+          description: Unauthorized access
+        '400':
+          description: Invalid request body
+
+    get:
+      tags:
+        - Submission
+        - Student
+      summary: Get all submissions for a specific evaluation
+      description: Retrieve all submissions of the student and their team for a specific evaluation in an assignment. Requires student authentication.
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          description: The ID of the assignment
+          schema:
+            type: integer
+        - name: evaluationId
+          in: path
+          required: true
+          description: The ID of the evaluation
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Submissions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Evaluation not found
+
+  /submission/teacher/student/{studentId}:
+    get:
+      tags:
+        - Submission
+        - Teacher
+      summary: Get all submissions of a student
+      description: Retrieve all submissions made by a specific student. Requires teacher authentication.
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          description: The ID of the student
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Submissions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Student not found
+
+  /submission/teacher/team/{teamId}:
+    get:
+      tags:
+        - Submission
+        - Teacher
+      summary: Get all submissions of a team
+      description: Retrieve all submissions made by a specific team. Requires teacher authentication.
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          description: The ID of the team
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Submissions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Team not found
+
+  /submission/teacher/assignment/{assignmentId}/team/{teamId}:
+    get:
+      tags:
+        - Submission
+        - Teacher
+      summary: Get all submissions of a team for a specific assignment
+      description: Retrieve all submissions made by a specific team for a specific assignment. Requires teacher authentication.
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          description: The ID of the assignment
+          schema:
+            type: integer
+        - name: teamId
+          in: path
+          required: true
+          description: The ID of the team
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Submissions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Assignment or team not found
 
 components:
   schemas:
