@@ -52,8 +52,130 @@ paths:
     $ref: "./routes/joinRequest/joinRequestRoutes.yaml"
   /pathByTeacher:
     $ref: "./routes/teacherMadeLearningPath/pathByTeacherRoutes.yaml"
-  /learningPath/:learningPathId/node:
-    $ref: "./routes/teacherMadeLearningPath/learningPathNodeRoutes.yaml"
+
+  # Selfmade Learning Path routes
+  /learningPath/{pathId}/node:
+    get:
+      tags:
+        - Selfmade learning path
+        - User
+      summary: Get all nodes for a learning path
+      description: Retrieve all nodes for a specific selfmade learning path. Accessible to any authenticated user (student or teacher).
+      parameters:
+        - name: pathId
+          in: path
+          required: true
+          description: The ID of the learning path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Nodes retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Node'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Learning path not found
+    post:
+      tags:
+        - Selfmade learning path
+        - Teacher
+      summary: Create a new node for a learning path
+      description: Allows a teacher to create a new node in a specific selfmade learning path. Requires teacher authentication.
+      parameters:
+        - name: pathId
+          in: path
+          required: true
+          description: The ID of the learning path
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodeMetadata'
+      responses:
+        '201':
+          description: Node created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+        '401':
+          description: Unauthorized access
+        '400':
+          description: Invalid request body
+
+  /learningPath/{pathId}/node/{nodeId}:
+    patch:
+      tags:
+        - Selfmade learning path
+        - Teacher
+      summary: Update a node in a learning path
+      description: Allows a teacher to update a specific node in a selfmade learning path. Requires teacher authentication.
+      parameters:
+        - name: pathId
+          in: path
+          required: true
+          description: The ID of the learning path
+          schema:
+            type: string
+        - name: nodeId
+          in: path
+          required: true
+          description: The ID of the node
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodeMetadata'
+      responses:
+        '200':
+          description: Node updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+        '401':
+          description: Unauthorized access
+        '400':
+          description: Invalid request body
+        '404':
+          description: Node not found
+
+    delete:
+      tags:
+        - Selfmade learning path
+        - Teacher
+      summary: Delete a node from a learning path
+      description: Allows a teacher to delete a specific node from a selfmade learning path. Requires teacher authentication.
+      parameters:
+        - name: pathId
+          in: path
+          required: true
+          description: The ID of the learning path
+          schema:
+            type: string
+        - name: nodeId
+          in: path
+          required: true
+          description: The ID of the node
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Node deleted successfully
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Node not found
 
   # Selfmade Learning Object routes
   /learningObjectByTeacher:
@@ -2427,3 +2549,32 @@ components:
           type: string
           format: date-time
           description: The date and time the learning object was last updated.
+
+    NodeMetadata:
+      type: object
+      properties:
+        isExternal:
+          type: boolean
+          description: Whether this node is linked to an external (Dwengo) learning object.
+        localLearningObjectId:
+          type: string
+          nullable: true
+          description: The ID of the local learning object associated with this node (if applicable).
+        dwengoHruid:
+          type: string
+          nullable: true
+          description: The human-readable ID of the Dwengo learning object (if applicable).
+        dwengoLanguage:
+          type: string
+          nullable: true
+          description: The language of the Dwengo learning object (if applicable).
+        dwengoVersion:
+          type: integer
+          nullable: true
+          description: The version of the Dwengo learning object (if applicable).
+        start_node:
+          type: boolean
+          nullable: true
+          description: Whether this node is the starting node of the learning path.
+      required:
+        - isExternal
