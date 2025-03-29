@@ -12,7 +12,7 @@ export default class inviteService {
                 inviteId,
                 otherTeacherId,
                 status: JoinRequestStatus.PENDING,
-            }
+            },
         });
         if (!invite) {
             throw new BadRequestError("Uitnodiging is niet pending of bestaat niet");
@@ -20,38 +20,47 @@ export default class inviteService {
         return invite;
     }
 
-    static async createInvite(classTeacherId: number, otherTeacherId: number, classId: number): Promise<Invite> {
-        // check if class exists
+    static async createInvite(classTeacherId: number, otherTeacherEmail: string, classId: number): Promise<Invite> {
+        // Check if de klas bestaat
         const classroom: Class | null = await classService.getClassById(classId);
         if (!classroom) {
             throw new NotFoundError("Klas niet gevonden");
         }
 
-        // check if teacher sending the invite is a teacher of the class
+        // Check of de leerkracht die de invite verstuurt beheerder is van de klas
         const isTeacher: boolean = await classService.isTeacherOfClass(classId, classTeacherId);
         if (!isTeacher) {
             throw new AccesDeniedError("Leerkracht is geen beheerder van de klas");
         }
 
-        // check if there's already a pending invite for this teacher and class
-        const invite: Invite | null = await prisma.invite.findFirst({
+        // Zoek de leerkracht op basis van het e-mailadres
+        const teacherUser = await prisma.user.findUnique({
+            where: { email: otherTeacherEmail },
+        });
+        if (!teacherUser || teacherUser.role !== "TEACHER") {
+            throw new NotFoundError("Leerkracht niet gevonden");
+        }
+        const otherTeacherId = teacherUser.id;
+
+        // Controleer of er al een pending invite bestaat voor deze teacher en klas
+        const existingInvite: Invite | null = await prisma.invite.findFirst({
             where: {
                 otherTeacherId,
                 classId,
                 status: JoinRequestStatus.PENDING,
             },
         });
-        if (invite) {
+        if (existingInvite) {
             throw new ConflictError("Er bestaat al een pending uitnodiging voor deze leerkracht en klas");
         }
 
-        // check if the teacher to be added is not already a member of the class
+        // Controleer of de teacher nog geen lid is van de klas
         const isAlreadyTeacher: boolean = await classService.isTeacherOfClass(classId, otherTeacherId);
         if (isAlreadyTeacher) {
             throw new BadRequestError("Leerkracht is al lid van de klas");
         }
 
-        // create the invite
+        // Maak de invite aan
         return await prisma.invite.create({
             data: {
                 otherTeacherId,
@@ -63,7 +72,7 @@ export default class inviteService {
     }
 
     static async getPendingInvitesForClass(classTeacherId: number, classId: number): Promise<Invite[]> {
-        // only a teacher of the class should be able to see the invites for the class
+        // Alleen een teacher van de klas mag de invites zien
         const isTeacher: boolean = await classService.isTeacherOfClass(classId, classTeacherId);
         if (!isTeacher) {
             throw new AccesDeniedError("Leerkracht is geen beheerder van de klas");
@@ -71,8 +80,8 @@ export default class inviteService {
         return await prisma.invite.findMany({
             where: {
                 classId,
-                status: JoinRequestStatus.PENDING
-            },  
+                status: JoinRequestStatus.PENDING,
+            },
         });
     }
 
@@ -80,66 +89,64 @@ export default class inviteService {
         return prisma.invite.findMany({
             where: {
                 otherTeacherId: teacherId,
-                status: JoinRequestStatus.PENDING   // i don't think a teacher would ever really need to see invites that they already accepted or declined
+                status: JoinRequestStatus.PENDING,
             },
         });
     }
 
     static async acceptInviteAndJoinClass(teacherId: number, inviteId: number): Promise<Invite> {
-        // check if invite is pending
+        // Check of de invite pending is
         let invite: Invite = await this.validateInvitePending(inviteId, teacherId);
-        
-        [ invite ] = await prisma.$transaction([
-            // accept invite
+
+        [invite] = await prisma.$transaction([
+            // Accept de invite
             prisma.invite.update({
                 where: {
-                    inviteId: invite.inviteId
+                    inviteId: invite.inviteId,
                 },
                 data: {
                     status: JoinRequestStatus.APPROVED,
                 },
             }),
-            // add the teacher to the class
+            // Voeg de teacher toe aan de klas
             prisma.classTeacher.create({
                 data: {
                     teacherId,
-                    classId: invite.classId
-                }
-            })
+                    classId: invite.classId,
+                },
+            }),
         ]);
         return invite;
     }
 
     static async declineInvite(teacherId: number, inviteId: number): Promise<Invite> {
-        // check if invite is pending
+        // Check of de invite pending is
         const invite: Invite = await this.validateInvitePending(inviteId, teacherId);
 
-        // decline the invite
+        // Decline de invite
         return prisma.invite.update({
             where: {
-                inviteId: invite.inviteId
+                inviteId: invite.inviteId,
             },
             data: {
                 status: JoinRequestStatus.DENIED,
-            }
+            },
         });
     }
 
     static async deleteInvite(classTeacherId: number, inviteId: number, classId: number): Promise<Invite> {
-        // check if teacher is a teacher of the class 
-        // (any teacher of the class can delete the invite, not just the one who created the invite)
+        // Check of de teacher een teacher van de klas is
         const isTeacher: boolean = await classService.isTeacherOfClass(classId, classTeacherId);
         if (!isTeacher) {
             throw new AccesDeniedError("Leerkracht is geen beheerder van de klas");
         }
 
-        // delete the invite
+        // Verwijder de invite
         return await prisma.invite.delete({
             where: {
                 inviteId,
-                classId   // added this to make sure the invite belongs to the class that was passed in the arguments
+                classId,
             },
         });
     }
-
 }

@@ -23,6 +23,11 @@ export const loginStudent = asyncHandler(
       res.status(400);
       throw new Error("Voer een geldig e-mailadres in");
     }
+    // Basisvalidatie voor e-mail
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      res.status(400);
+      throw new Error("Voer een geldig e-mailadres in");
+    }
 
     // Zoek eerst de gebruiker
     const user: User = await UserService.findUserByEmail(email);
@@ -53,6 +58,8 @@ export const loginStudent = asyncHandler(
 
     res.json({
       message: "Succesvol ingelogd",
+      firstName: user.firstName,
+      lastName: user.lastName,
       token: generateToken(student.userId),
     });
   }

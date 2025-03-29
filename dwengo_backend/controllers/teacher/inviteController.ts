@@ -12,14 +12,10 @@ import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 export const createInvite = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const classId: number = parseInt(req.params.classId);
-    const { otherTeacherId }: { otherTeacherId: number } = req.body;
+    const { otherTeacherEmail }: { otherTeacherEmail: string } = req.body;
     const classTeacherId: number = getUserFromAuthRequest(req).id;
-
-    const invite: Invite = await inviteService.createInvite(
-      classTeacherId,
-      otherTeacherId,
-      classId
-    );
+  
+    const invite: Invite = await inviteService.createInvite(classTeacherId, otherTeacherEmail, classId);
     res.status(201).json({ invite });
   }
 );

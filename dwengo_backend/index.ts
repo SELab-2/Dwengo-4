@@ -24,27 +24,35 @@ import authRoutes from "./routes/authentication/authRoutes";
 dotenv.config();
 
 const app: Express = express();
-const swaggerDocument = YAML.load("./openapi3_0.yaml");
+const swaggerDocument: any = YAML.load("./openapi3_0.yaml");
 
 // Stel CORS-headers in
 app.use((req: Request, res: Response, next: NextFunction): void => {
   const allowedOrigins: string[] = [
     "https://dwengo.org",
     "http://localhost:5173",
+    "http://localhost:5000",
   ];
-  const origin = req.headers.origin;
+  const origin: string | undefined = req.headers.origin;
   if (origin && allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
   res.setHeader(
     "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS"
+    "GET, POST, PUT, DELETE, OPTIONS, PATCH"
   );
   res.setHeader(
     "Access-Control-Allow-Headers",
     "X-Requested-With, Content-Type, Authorization"
   );
   next();
+});
+app.options("*", (req, res) => {
+  res.sendStatus(200);
+});
+
+app.options("*", (req, res) => {
+  res.sendStatus(200);
 });
 
 // JSON-parser middleware
@@ -96,7 +104,7 @@ app.use(errorHandler);
 if (process.env.NODE_ENV !== "test") {
   console.log(process.env.NODE_ENV);
   const PORT: string | number = process.env.PORT || 5000;
-  app.listen(PORT, () => console.log(`Server draait op poort ${PORT}`));
+  app.listen(PORT, (): void => console.log(`Server draait op poort ${PORT}`));
 }
 
 export default app;

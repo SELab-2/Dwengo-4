@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { Role, User } from "@prisma/client";
-import UserService from "../services/userService";
+import UserService, * as userService from "../services/userService";
 import bcrypt from "bcryptjs";
 import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
 import { Response } from "express";

@@ -1,12 +1,24 @@
 import asyncHandler from "express-async-handler";
 import { Response } from "express";
-import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
+import { AuthenticatedRequest } from "../../middleware/teacherAuthMiddleware";
 import classService from "../../services/classService";
 import { Student, User } from "@prisma/client";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 import { BadRequestError } from "../../errors/errors";
 
 const APP_URL = process.env.APP_URL || "http://localhost:5000";
+
+export const isTeacherValid = (
+  req: AuthenticatedRequest,
+  res: Response
+): boolean => {
+  const teacherId = req.user?.id;
+  if (!teacherId) {
+    res.status(400).json({ message: "Geen toegang" });
+    return false; // Teacher is not authorized
+  }
+  return true; // Teacher is authorized
+};
 
 export const isNameValid = (
   req: AuthenticatedRequest,
@@ -110,3 +122,40 @@ export const getClassroomStudents = asyncHandler(
     res.status(200).json({ students });
   }
 );
+
+/**
+ * Get all classrooms
+ * @route GET /teacher/classes
+ * returns a list of all classes for the authenticated teacher in the response body
+ */
+export const getAllClassrooms = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const teacherId: number = getUserFromAuthRequest(req).id;
+    const classrooms = await classService.getAllClassesByTeacher(teacherId);
+    res.status(200).json({ classrooms });
+  }
+);
+
+/**
+ * Get classroom by ID
+ * @route GET /teacher/classes/:classId
+ * @param classId - id of the class to be fetched
+ * returns the class details in the response body
+ */
+export const getClassByIdAndTeacherId = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const classId: number = parseInt(req.params.classId);
+    const teacherId: number = getUserFromAuthRequest(req).id;
+
+    const classroom = await classService.getClassByIdAndTeacherId(
+      classId,
+      teacherId
+    );
+    if (!classroom) {
+      throw new BadRequestError(`Klas met id ${classId} niet gevonden`);
+    }
+
+    res.status(200).json({ classroom });
+  }
+);
+

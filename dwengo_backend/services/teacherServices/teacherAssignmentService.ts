@@ -15,7 +15,9 @@ export default class TeacherAssignmentService {
     pathRef: string,
     pathLanguage: string,
     isExternal: boolean,
-    deadline: Date
+    deadline: Date,
+    title: string,
+    description: string
   ): Promise<Assignment> {
     // 1) check authorization
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
@@ -43,6 +45,8 @@ export default class TeacherAssignmentService {
             classId,
           },
         },
+        title,
+        description,
       },
     });
   }
@@ -96,7 +100,9 @@ export default class TeacherAssignmentService {
     assignmentId: number,
     pathRef: string,
     isExternal: boolean,
-    teacherId: number
+    teacherId: number,
+    title: string,
+    description: string
   ): Promise<Assignment> {
     // 1) autorisatie
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
@@ -112,6 +118,8 @@ export default class TeacherAssignmentService {
       data: {
         pathRef,
         isExternal,
+        title,
+        description,
       },
     });
   }

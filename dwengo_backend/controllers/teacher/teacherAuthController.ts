@@ -53,6 +53,8 @@ export const loginTeacher = asyncHandler(
 
     res.json({
       message: "Succesvol ingelogd",
+      firstName: user.firstName,
+      lastName: user.lastName,
       token: generateToken(teacher.userId),
     });
   }

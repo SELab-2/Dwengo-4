@@ -376,6 +376,10 @@ model Question {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
+  // Nieuw:
+  createdBy Int
+  isPrivate Boolean @default(false)
+
   // Een vraag is ofwel een specifieke vraag (bij leerobject),
   // een algemene vraag (bij leerpad) of
   // een bijvraag bij een antwoord
@@ -402,12 +406,14 @@ model QuestionMessage {
 ///
 /// Taken en indieningen
 model Assignment {
-  id         Int      @id @default(autoincrement())
-  pathRef    String
-  isExternal Boolean  @default(false)
-  deadline   DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  pathRef     String
+  isExternal  Boolean  @default(false)
+  deadline    DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   questions        Question[]
   classAssignments ClassAssignment[]

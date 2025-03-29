@@ -1,4 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
+import { getAuthToken } from "./authStudent";
 
 const BACKEND = "http://localhost:5000";
 
@@ -11,8 +12,8 @@ export const queryClient = new QueryClient({
 });
 
 interface AuthCredentials {
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   password: string;
 }
@@ -74,4 +75,28 @@ export async function signupStudent({
   }
 
   return await response.json();
+}
+
+/**
+ * Laat een student een klas joinen met een joinCode
+ * @param joinCode - De unieke code van de klas
+ */
+export async function joinClass({ joinCode }: { joinCode: string }): Promise<void> {
+  const response = await fetch(`${BACKEND}/student/classes/join`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+    body: JSON.stringify({ joinCode }),
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error("Er is iets misgegaan bij het joinen van de klas.");
+    error.code = response.status;
+    error.info = await response.json();
+
+    console.log(error.info)
+    throw error;
+  }
 }

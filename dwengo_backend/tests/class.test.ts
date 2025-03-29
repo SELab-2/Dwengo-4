@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import prisma from "./helpers/prisma";
 import app from "../index";
-import { Class, Student, Teacher, User } from "@prisma/client";
+import { Class, Teacher, User } from "@prisma/client";
 import {
   addStudentToClass,
   addTeacherToClass,
@@ -15,34 +15,28 @@ import {
 
 const APP_URL = process.env.APP_URL || "http://localhost:5000";
 
+let teacherUser1: User & { teacher: Teacher; token: string };
+let classroom: Class;
+
 describe("classroom tests", () => {
-  let teacherUser1: User & { teacher: Teacher; token: string };
-  let classroom: Class;
-  beforeEach(async () => {
-    // create a teacher
-    teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
-    // create a class
-    classroom = await createClass("5A", "ABCD");
-  });
-  describe("GET /class/teacher, GET /class/student", () => {
-    let classroom2: Class;
-    let studentUser: User & { student: Student; token: string };
+    
     beforeEach(async () => {
-      // add teacherUser1 to some classes
-      await addTeacherToClass(teacherUser1.id, classroom.id);
-      classroom2 = await createClass("6A", "EFGH");
-      await addTeacherToClass(teacherUser1.id, classroom2.id);
-      // create a student and add them to some classes
-      studentUser = await createStudent("Alice", "Anderson", "alan@gmail.com");
-      addStudentToClass(studentUser.id, classroom.id);
-      await addStudentToClass(studentUser.id, classroom2.id);
+        // create a teacher
+        teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
+        // create a class
+        classroom = await createClass("5A", "ABCD");
     });
     describe("GET /class/teacher", () => {
-      it("should respond with a `200` status code and a list of classes", async () => {
-        // now test getting the classes
-        const { status, body } = await request(app)
-          .get("/class/teacher")
-          .set("Authorization", `Bearer ${teacherUser1.token}`);
+        it("should respond with a `200` status code and a list of classes", async () => {
+            // add teacherUser1 to some classes
+            await addTeacherToClass(teacherUser1.id, classroom.id);
+            const classroom2: Class = await createClass("6A", "EFGH");
+            await addTeacherToClass(teacherUser1.id, classroom2.id);
+
+            // now test getting the classes
+            const { status, body } = await request(app)
+                .get("/class/teacher")
+                .set("Authorization", `Bearer ${teacherUser1.token}`);
 
         expect(status).toBe(200);
         expect(body.classes).toBeDefined();
@@ -58,6 +52,7 @@ describe("classroom tests", () => {
         );
       });
       it("shouldn't allow a student to get the classes via the teacher route", async () => {
+        const studentUser = await createStudent("Alice", "Anderson", "alan@gmail.com");
         const { status, body } = await request(app)
           .get("/class/teacher")
           .set("Authorization", `Bearer ${studentUser.token}`);
@@ -67,8 +62,16 @@ describe("classroom tests", () => {
         expect(body.error).toBe("Leerkracht niet gevonden.");
       });
     });
+
     describe("GET /class/student", () => {
       it("should respond with a `200` status code and a list of classes", async () => {
+        // create a student and add them to some classes
+        const studentUser = await createStudent("Alice", "Anderson", "alan@gmail.com");
+        await addStudentToClass(studentUser.id, classroom.id);
+        const classroom2: Class = await createClass("6A", "EFGH");
+        await addStudentToClass(studentUser.id, classroom2.id);
+
+        // now test getting the classes
         const { status, body } = await request(app)
           .get("/class/student")
           .set("Authorization", `Bearer ${studentUser.token}`);
@@ -97,6 +100,7 @@ describe("classroom tests", () => {
       });
     });
   });
+
   describe("POST /class/teacher", () => {
     it("should respond with a `201` status code and a created class", async () => {
       const { status, body } = await request(app)
@@ -366,7 +370,7 @@ describe("classroom tests", () => {
 
       // now test getting the students
       const { status, body } = await request(app)
-        .get(`/class/teacher/${classroom.id}`)
+        .get(`/class/teacher/${classroom.id}/student`)
         .set("Authorization", `Bearer ${teacherUser1.token}`); // teacherUser1 is associated with the class
 
       // verify the response
@@ -397,7 +401,7 @@ describe("classroom tests", () => {
     it("should respond with a `403` status code when the teacher is not associated with the class", async () => {
       // try getting the students for a class the teacher is not associated with
       const { status, body } = await request(app)
-        .get(`/class/teacher/${classroom.id}`)
+        .get(`/class/teacher/${classroom.id}/student`)
         .set("Authorization", `Bearer ${teacherUser1.token}`); // teacherUser1 is not associated with the class
 
       expect(status).toBe(403);
