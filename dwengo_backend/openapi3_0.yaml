@@ -28,6 +28,12 @@ tags:
     description: Everything about join requests
   - name: Feedback
     description: Everything about feedback
+  - name: Student
+    description: Routes only accessible for students
+  - name: Teacher
+    description: Routes only accessible for teachers
+  - name: User
+    description: Routes accessible for all users
 
 paths:
   /auth:
@@ -46,12 +52,223 @@ paths:
     $ref: "./routes/teacherMadeLearningObject/learningObjectByTeacherRoutes.yaml"
   /team:
     $ref: "./routes/team/teamRoutes.yaml"
-  /assignment:
-    $ref: "./routes/assignment/assignmentRoutes.yaml"
+  /assignment/{assignmentId}:
+    get:
+      tags:
+        - Assignment
+        - User
+      summary: Get an assignment by ID
+      description: Retrieve an assignment by its ID. Access is allowed for anyone, but it should be checked if the user is a teacher of the class or a student of the class.
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          description: The ID of the assignment
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Assignment retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+        '404':
+          description: Assignment not found
+        '403':
+          description: Unauthorized access
+
+  /assignment/student:
+    get:
+      tags:
+        - Assignment
+        - Student
+      summary: Get all assignments for a student
+      description: Retrieve all assignments available for a student. Requires student authentication.
+      parameters:
+        - name: sort
+          in: query
+          required: false
+          description: Sort order (asc or desc)
+          schema:
+            type: string
+            enum: [asc, desc]
+        - name: order
+          in: query
+          required: false
+          description: Field to order by (createdAt, updatedAt, or deadline)
+          schema:
+            type: string
+            enum: [createdAt, updatedAt, deadline]
+        - name: limit
+          in: query
+          required: false
+          description: Limit the number of assignments returned
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of assignments for the student
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Assignment'
+        '401':
+          description: Unauthorized access
+
+  /assignment/teacher:
+    get:
+      tags:
+        - Assignment
+        - Teacher
+      summary: Get all assignments created by the teacher
+      description: Retrieve all assignments that the teacher has created. Requires teacher authentication.
+      responses:
+        '200':
+          description: A list of assignments created by the teacher
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Assignment'
+        '401':
+          description: Unauthorized access
+
+    post:
+      tags:
+        - Assignment
+        - Teacher
+      summary: Create an assignment for a class
+      description: Allows a teacher to create an assignment for a class. Requires teacher authentication.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                classId:
+                  type: integer
+                  description: The ID of the class
+                pathRef:
+                  type: string
+                  description: The reference to the learning path
+                pathLanguage:
+                  type: string
+                  description: The language of the learning path
+                isExternal:
+                  type: boolean
+                  description: Whether the assignment is external
+                deadline:
+                  type: string
+                  format: date-time
+                  description: The deadline for the assignment
+      responses:
+        '201':
+          description: Assignment created successfully
+        '401':
+          description: Unauthorized access
+        '400':
+          description: Invalid request body
+
+  /assignment/teacher/class/{classId}:
+    get:
+      tags:
+        - Assignment
+        - Teacher
+      summary: Get all assignments for a class
+      description: Retrieve all assignments for a specific class. Requires teacher authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the class
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of assignments for the class
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Assignment'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Class not found
+
+  /assignment/teacher/{assignmentId}:
+    patch:
+      tags:
+        - Assignment
+        - Teacher
+      summary: Update an assignment
+      description: Allows a teacher to update an assignment. Requires teacher authentication.
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          description: The ID of the assignment
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pathRef:
+                  type: string
+                  description: The reference to the learning path
+                pathLanguage:
+                  type: string
+                  description: The language of the learning path
+                isExternal:
+                  type: boolean
+                  description: Whether the assignment is external
+                deadline:
+                  type: string
+                  format: date-time
+                  description: The deadline for the assignment
+      responses:
+        '200':
+          description: Assignment updated successfully
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Assignment not found
+
+    delete:
+      tags:
+        - Assignment
+        - Teacher
+      summary: Delete an assignment
+      description: Allows a teacher to delete an assignment. Requires teacher authentication.
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          description: The ID of the assignment
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Assignment deleted successfully
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Assignment not found
   /feedback:
     post:
       tags:
         - Feedback
+        - Teacher
       summary: Create feedback for a submission
       description: Create new feedback for a specific submission. Requires teacher authentication.
       requestBody:
@@ -83,6 +300,7 @@ paths:
     get:
       tags:
         - Feedback
+        - Teacher
       summary: Get feedback for a submission
       description: Retrieve feedback associated with a specific submission. Requires teacher authentication.
       parameters:
@@ -107,6 +325,7 @@ paths:
     patch:
       tags:
         - Feedback
+        - Teacher
       summary: Update feedback for a submission
       description: Update the feedback associated with a specific submission. Requires teacher authentication.
       parameters:
@@ -137,6 +356,7 @@ paths:
     delete:
       tags:
         - Feedback
+        - Teacher
       summary: Delete feedback for a submission
       description: Delete the feedback associated with a specific submission. Requires teacher authentication.
       parameters:
@@ -158,6 +378,7 @@ paths:
     get:
       tags:
         - Feedback
+        - Teacher
       summary: Get all feedback for an evaluation
       description: Retrieve all feedback associated with a specific evaluation for an assignment. Requires teacher authentication.
       parameters:
@@ -195,6 +416,7 @@ paths:
     get:
       tags:
         - Question
+        - User
       summary: Get a specific question
       description: Allows authorized users to retrieve a specific question.
       parameters:
@@ -219,6 +441,7 @@ paths:
     patch:
       tags:
         - Question
+        - User
       summary: Update a question
       description: Allows authorized users to update a specific question.
       parameters:
@@ -239,6 +462,7 @@ paths:
     delete:
       tags:
         - Question
+        - User
       summary: Delete a question
       description: Allows authorized users to delete a specific question.
       parameters:
@@ -260,6 +484,7 @@ paths:
     post:
       tags:
         - Question
+        - User
       summary: Create a message for a question
       description: Allows authorized users to create a message for a specific question.
       parameters:
@@ -281,6 +506,7 @@ paths:
     patch:
       tags:
         - Question
+        - User
       summary: Update a message for a question
       description: Allows authorized users to update a specific message for a question.
       parameters:
@@ -307,6 +533,7 @@ paths:
     delete:
       tags:
         - Question
+        - User
       summary: Delete a message for a question
       description: Allows authorized users to delete a specific message for a question.
       parameters:
@@ -334,6 +561,7 @@ paths:
     get:
       tags:
         - Question
+        - User
       summary: Get messages for a question
       description: Allows authorized users to retrieve all messages for a specific question.
       parameters:
@@ -361,6 +589,7 @@ paths:
     get:
       tags:
         - Question
+        - User
       summary: Get questions for a team
       description: Allows authorized users to retrieve all questions for a specific team.
       parameters:
@@ -388,6 +617,7 @@ paths:
     get:
       tags:
         - Question
+        - User
       summary: Get questions for a class
       description: Allows authorized users to retrieve all questions for a specific class.
       parameters:
@@ -415,6 +645,7 @@ paths:
     get:
       tags:
         - Question
+        - User
       summary: Get questions for an assignment in a class
       description: Allows authorized users to retrieve all questions for a specific assignment in a class.
       parameters:
@@ -448,6 +679,7 @@ paths:
     post:
       tags:
         - Question
+        - User
       summary: Create a general question for an assignment
       description: Allows a student in a team with an assignment to create a general question.
       parameters:
@@ -475,6 +707,7 @@ paths:
     post:
       tags:
         - Question
+        - User
       summary: Create a specific question for a learning object
       description: Allows a student in a team with an assignment to create a specific question for a learning object.
       parameters:
@@ -580,3 +813,86 @@ components:
           type: string
           format: date-time
           description: The date and time the message was last updated.
+
+    Assignment:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the assignment.
+        pathRef:
+          type: string
+          description: The reference to the learning path.
+        isExternal:
+          type: boolean
+          description: Whether the assignment needs to be fetched from Dwengo API or not.
+        deadline:
+          type: string
+          format: date-time
+          description: The deadline for the assignment.
+        createdAt:
+          type: string
+          format: date-time
+          description: The date and time the assignment was created.
+        updatedAt:
+          type: string
+          format: date-time
+          description: The date and time the assignment was last updated.
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Question"
+        classAssignemnts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassAssignment"
+        teamAssignments:
+          type: array
+          items:
+            $ref: "#/components/schemas/TeamAssignment"
+        submissions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Submission"
+
+    ClassAssignment:
+      type: object
+      properties:
+        classId:
+          type: integer
+          description: The ID of the class the assignment is linked to.
+        assignmentId: 
+          type: integer
+          description: The ID of the assignment.
+
+    TeamAssignment:
+      type: object
+      properties:
+        teamId:
+          type: integer
+          description: The ID of the team the assignment is linked to.
+        assignmentId: 
+          type: integer
+          description: The ID of the assignment.
+
+    Submission:
+      type: object
+      properties:
+        submissionId:
+          type: integer
+          description: The ID of the submission.
+        assignmentId:
+          type: integer
+          description: The ID of the assignment the submission is linked to.
+        evaluationId:
+          type: string
+          description: The ID of the evaluation the submission is linked to.
+        teamId:
+          type: integer
+          description: The ID of the team that made the submission.
+        submitted:
+          type: string,
+          format: date-time
+          description: The date and time the submission was made.
+        feedback:
+          $ref: "#/components/schemas/Feedback"
