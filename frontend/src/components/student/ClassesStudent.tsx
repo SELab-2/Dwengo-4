@@ -46,7 +46,7 @@ export default function ClassesStudent() {
                       <div className="flex mt-1 flex-row justify-between items-center text-sm">
                         <PrimaryButton
                           onClick={() =>
-                            navigate(`/student/classes/${classItem.id}`)
+                            navigate(`/student/class/${classItem.id}`)
                           }
                         >
                           <span className="">Klas bekijken</span>

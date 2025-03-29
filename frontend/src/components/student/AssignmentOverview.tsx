@@ -39,14 +39,8 @@ export default function AssignmentOverview() {
                 key={assignmentItem.id}
                 className="flex items-center flex-row py-2 px-3.5 w-[30rem] h-[11.5rem] justify-between bg-gray-100 rounded-lg shrink-0"
               >
-                <div className="flex flex-row h-36 w-36 rounded-lg">
-                  <img
-                    className="flex rounded-lg"
-                    src="img/anna-blue-annabiue.gif"
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex flex-row w-72 justify-between">
+                <div className="flex flex-col w-full">
+                  <div className="flex flex-row w-full justify-between">
                     <h3 className="text-2xl font-bold">
                       {assignmentItem.title}
                     </h3>
@@ -54,7 +48,7 @@ export default function AssignmentOverview() {
                       Deadline: {assignmentItem.deadline}{' '}
                     </p>
                   </div>
-                  <div className="w-64 h-20 mt-1 text-gray-500 line-clamp-3">
+                  <div className="h-20 mt-1 text-gray-500 line-clamp-3">
                     {assignmentItem.description}
                   </div>
                   <div className="flex mt-1 flex-row justify-between items-center text-sm">
