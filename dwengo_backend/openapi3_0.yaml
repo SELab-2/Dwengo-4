@@ -28,6 +28,8 @@ tags:
     description: Everything about join requests
   - name: Feedback
     description: Everything about feedback
+  - name: Progress
+    description: Everything about progress
   - name: Submission
     description: Everything about submissions
   - name: Student
@@ -738,8 +740,221 @@ paths:
           description: Unauthorized access
         "403":
           description: Forbidden access
-  /progress:
-    $ref: "./routes/progress/progressRoutes.yaml"
+
+  # Progress routes
+  /progress/student/learningObject/{learningObjectId}:
+    post:
+      tags:
+        - Progress
+        - Student
+      summary: Create progress for a learning object
+      description: Create a new progress entry for a student when they start a learning object. Requires student authentication.
+      parameters:
+        - name: learningObjectId
+          in: path
+          required: true
+          description: The ID of the learning object
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Progress created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningObjectProgress'
+        '401':
+          description: Unauthorized access
+
+    get:
+      tags:
+        - Progress
+        - Student
+      summary: Get progress for a learning object
+      description: Retrieve the current progress of a student for a specific learning object. Requires student authentication.
+      parameters:
+        - name: learningObjectId
+          in: path
+          required: true
+          description: The ID of the learning object
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Progress retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentProgress'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Learning object not found
+
+    patch:
+      tags:
+        - Progress
+        - Student
+      summary: Update progress for a learning object
+      description: Update the progress of a student for a specific learning object (e.g., mark it as completed). Requires student authentication.
+      parameters:
+        - name: learningObjectId
+          in: path
+          required: true
+          description: The ID of the learning object
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Progress updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningObjectProgress'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Learning object not found
+
+  /progress/student/team/{teamId}:
+    get:
+      tags:
+        - Progress
+        - Student
+      summary: Get team progress for a student
+      description: Retrieve the progress of a team for a specific assignment. Requires student authentication.
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          description: The ID of the team
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Team progress retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: number
+                min: 0
+                max: 100
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Team not found
+
+  /progress/student/assignment/{assignmentId}:
+    get:
+      tags:
+        - Progress
+        - Student
+      summary: Get student progress for an assignment
+      description: Retrieve the progress of a student for a specific assignment. Requires student authentication.
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          description: The ID of the assignment
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Assignment progress retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: number
+                min: 0
+                max: 100
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Assignment not found
+
+  /progress/student/learningPath/{learningPathId}:
+    get:
+      tags:
+        - Progress
+        - Student
+      summary: Get student progress for a learning path
+      description: Retrieve the progress of a student for a specific learning path. Requires student authentication.
+      parameters:
+        - name: learningPathId
+          in: path
+          required: true
+          description: The ID of the learning path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Learning path progress retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: number
+                min: 0
+                max: 100
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Learning path not found
+
+  /progress/teacher/team/{teamId}:
+    get:
+      tags:
+        - Progress
+        - Teacher
+      summary: Get team progress for a teacher
+      description: Retrieve the progress of a team for a specific assignment. Requires teacher authentication.
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          description: The ID of the team
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Team progress retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: number
+                min: 0
+                max: 100
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Team not found
+
+  /progress/teacher/assignment/{assignmentId}/average:
+    get:
+      tags:
+        - Progress
+        - Teacher
+      summary: Get average progress for an assignment
+      description: Calculate the average progress of a class for a specific assignment. Requires teacher authentication.
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          description: The ID of the assignment
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Average progress retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: number
+                min: 0
+                max: 100
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Assignment not found
 
   # Submission routes
   /submission/student/assignment/{assignmentId}:
@@ -1089,3 +1304,33 @@ components:
           description: The date and time the submission was made.
         feedback:
           $ref: "#/components/schemas/Feedback"
+      nullable: true
+
+    LearningObjectProgress:
+      type: object
+      properties:
+        id: 
+          type: integer
+          description: The ID of the progress entry.
+        learningObjectId:
+          type: string
+          description: The ID of the learning object.
+        done:
+          type: boolean
+          description: Whether the learning object is completed or not.
+        studentProgress:
+          type: array
+          items:
+            $ref: "#/components/schemas/StudentProgress"
+    
+    StudentProgress:
+      type: object
+      properties:
+        studentId: 
+          type: integer
+          description: The ID of the student.
+        progressId: 
+          type: integer
+          description: The ID of the progress entry.
+        progress:
+          $ref: "#/components/schemas/LearningObjectProgress"

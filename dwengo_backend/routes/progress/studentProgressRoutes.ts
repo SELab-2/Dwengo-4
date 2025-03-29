@@ -83,7 +83,7 @@ router.get(
 );
 
 /**
- * @route   PATCH /progress/student/learningPath/:learningPathId
+ * @route   GET /progress/student/learningPath/:learningPathId
  * @desc    Haal de voortgang op van de student bij een specifiek leerpad.
  *          Dit toont hoe ver de student zelf is gekomen in het leerpad.
  *          Geeft een percentage terug van hoeveel leerobjecten binnen het leerpad de student heeft voltooid.
