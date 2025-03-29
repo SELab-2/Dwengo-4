@@ -50,8 +50,114 @@ paths:
     $ref: "./routes/class/classRoutes.yaml"
   /invite:
     $ref: "./routes/invite/inviteRoutes.yaml"
-  /join-request:
-    $ref: "./routes/joinRequest/joinRequestRoutes.yaml"
+
+  # Join request routes
+  /join-request/student:
+    post:
+      tags:
+        - Join request
+        - Student
+      summary: Create a join request to join a class
+      description: Allows a student to create a join request to join a class. Requires student authentication.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                joinCode:
+                  type: string
+                  description: The join code of the class
+      responses:
+        '201':
+          description: Join request created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JoinRequest'
+        '401':
+          description: Unauthorized access
+        '400':
+          description: Invalid request body
+        '404':
+          description: Class not found
+
+  # Teacher Section
+  /join-request/teacher/class/{classId}:
+    get:
+      tags:
+        - Join request
+        - Teacher
+      summary: Get all join requests for a class
+      description: Retrieve all join requests for a specific class. Requires teacher authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the class
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Join requests retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JoinRequest'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Class not found
+
+  /join-request/{requestId}/class/{classId}:
+    patch:
+      tags:
+        - Join request
+        - Teacher
+      summary: Update the status of a join request
+      description: Allows a teacher to update the status of a join request (approve or deny). Requires teacher authentication.
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          description: The ID of the join request
+          schema:
+            type: integer
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the class
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum:
+                    - approve
+                    - deny
+                  description: The action to perform on the join request
+      responses:
+        '200':
+          description: Join request status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JoinRequest'
+        '401':
+          description: Unauthorized access
+        '400':
+          description: Invalid request body
+        '404':
+          description: Join request or class not found
 
   # Selfmade Learning Path routes
   /pathByTeacher:
