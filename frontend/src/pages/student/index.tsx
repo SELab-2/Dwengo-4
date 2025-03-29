@@ -2,6 +2,7 @@ import '../../index.css';
 import React from 'react';
 import ClassesStudent from '../../components/student/ClassesStudent';
 import AssignmentOverview from '../../components/student/AssignmentOverview';
+import { Link } from 'react-router-dom';
 
 export default function StudentIndex() {
   return (
@@ -16,15 +17,27 @@ export default function StudentIndex() {
           </div>
         </div>
 
-        <div className="flex flex-row justify-end w-full hover:cursor-pointer hover:underline">
-          <h2 className="font-bold">
-            View All Assignments
+        <div className="flex flex-row justify-end w-full ">
+          <Link
+            to="/assignment"
+            className="font-bold hover:cursor-pointer hover:underline"
+          >
+            Bekijk alle taken
             <i className="fa-solid ml-1.5 fa-arrow-right"></i>
-          </h2>
+          </Link>
         </div>
 
         <p className="text-2xl mt-8 font-bold">Klasgroepen</p>
         <ClassesStudent />
+        <div className="flex flex-row justify-end w-full ">
+          <Link
+            to="/class"
+            className="font-bold hover:cursor-pointer hover:underline"
+          >
+            Bekijk alle klassen
+            <i className="fa-solid ml-1.5 fa-arrow-right"></i>
+          </Link>
+        </div>
       </div>
     </>
   );
