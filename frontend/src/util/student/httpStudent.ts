@@ -156,27 +156,15 @@ export async function fetchAssignments(): Promise<AssignmentItem[]> {
 
   if (!response.ok) {
     const error: APIError = new Error(
-      'Er is iets misgegaan bij het ophalen van de taken.',
+      'Er is iets misgegaan bij het ophalen van de opdrachten.',
     );
     error.code = response.status;
     error.info = await response.json();
     throw error;
   }
 
-  const returner = await response.json();
-  const assignments = returner;
+  const assignments = await response.json();
   console.log('GETTING ASSIGNMENTS', assignments);
 
   return await assignments;
-  // return [{
-  //     id: '15',
-  //     title: 'Test',
-  //     description: 'Chew foot twitch tail in permanent irritation or play with\n' +
-  //         '                                        twist ties when owners are asleep, cry for no apparent\n' +
-  //         '                                        reason. Meow all night shove bum in owner\'s face like camera\n' +
-  //         '                                        lens check cat door for ambush 10 times before coming in yet\n' +
-  //         '                                        jump up to edge of bath, fall in then scramble in a mad\n' +
-  //         '                                        panic to get out cats are the world. Human is washing you',
-  //     deadline: '23/02/2025' // TODO hoe komt dit uit de database?
-  // }];
 }

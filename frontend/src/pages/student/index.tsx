@@ -10,7 +10,7 @@ export default function StudentIndex() {
       <div className="px-10 bg-gray-300">
         <div className="text-6xl pt-12 font-bold">Home</div>
 
-        <h2 className="mt-8 text-2xl font-bold">Assignments</h2>
+        <h2 className="mt-8 text-2xl font-bold">Opdrachten</h2>
         <div className="w-full mt-4 overflow-x-auto ">
           <div className="flex flex-row gap-x-5 h-[12.5rem]  ">
             <AssignmentOverview />
@@ -22,7 +22,7 @@ export default function StudentIndex() {
             to="/assignment"
             className="font-bold hover:cursor-pointer hover:underline"
           >
-            Bekijk alle taken
+            Bekijk alle opdrachten
             <i className="fa-solid ml-1.5 fa-arrow-right"></i>
           </Link>
         </div>
