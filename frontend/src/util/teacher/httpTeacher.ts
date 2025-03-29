@@ -57,7 +57,7 @@ export async function signupTeacher({
   email,
   password,
 }: AuthCredentials): Promise<AuthResponse> {
-  const response = await fetch(`${BACKEND}/auth/teacher/register`, {
+  const response = await fetch(`${BACKEND}/teacher/auth/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ interface ClassItem {
 }
 
 export async function fetchClasses(): Promise<ClassItem[]> {
-  const response = await fetch(`${BACKEND}/teacher/classes`, {
+  const response = await fetch(`${BACKEND}/class/teacher`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -115,7 +115,7 @@ interface CreateClassPayload {
 export async function createClass({
   name,
 }: CreateClassPayload): Promise<ClassItem> {
-  const response = await fetch(`${BACKEND}/teacher/classes`, {
+  const response = await fetch(`${BACKEND}/class/teacher`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -141,7 +141,7 @@ export async function fetchClass({
 }: {
   classId: number;
 }): Promise<ClassItem> {
-  const response = await fetch(`${BACKEND}/teacher/classes/${classId}`, {
+  const response = await fetch(`${BACKEND}/class/teacher/${classId}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -174,16 +174,13 @@ export async function fetchStudentsByClass({
 }: {
   classId: number;
 }): Promise<StudentItem[]> {
-  const response = await fetch(
-    `${BACKEND}/teacher/classes/${classId}/students`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
+  const response = await fetch(`${BACKEND}/class/teacher/${classId}/student`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getAuthToken()}`,
     },
-  );
+  });
 
   if (!response.ok) {
     const error: APIError = new Error(
@@ -206,7 +203,7 @@ interface LearningPath {
 
 //Haal de locale leerpaden op van de leerkracht op
 export async function fetchLearningPaths(): Promise<LearningPath[]> {
-  const response = await fetch(`${BACKEND}/teacher/learningPaths`, {
+  const response = await fetch(`${BACKEND}/pathByTeacher`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -243,7 +240,7 @@ export async function createAssignment({
   dueDate: string;
   description: string;
 }): Promise<void> {
-  const response = await fetch(`${BACKEND}/teacher/assignments`, {
+  const response = await fetch(`${BACKEND}/assignment/teacher`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -286,16 +283,13 @@ export interface Invite {
 export async function getPendingInvitesForClass(
   classId: string,
 ): Promise<Invite[]> {
-  const response = await fetch(
-    `${BACKEND}/teacher/classes/${classId}/invites`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
+  const response = await fetch(`${BACKEND}/invite/class/${classId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getAuthToken()}`,
     },
-  );
+  });
 
   if (!response.ok) {
     const error: APIError = new Error(
@@ -322,17 +316,14 @@ export async function createInvite({
   classId: string;
   otherTeacherEmail: string;
 }): Promise<Invite> {
-  const response = await fetch(
-    `${BACKEND}/teacher/classes/${classId}/invites`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
-      body: JSON.stringify({ otherTeacherEmail }),
+  const response = await fetch(`${BACKEND}/invite/class/${classId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getAuthToken()}`,
     },
-  );
+    body: JSON.stringify({ otherTeacherEmail }),
+  });
 
   if (!response.ok) {
     const error: APIError = new Error(
@@ -353,7 +344,7 @@ export async function createInvite({
  */
 export async function fetchJoinRequests(classId: string): Promise<any> {
   const response = await fetch(
-    `${BACKEND}/teacher/classes/${classId}/join-requests`,
+    `${BACKEND}/join-request/teacher/class/${classId}`,
     {
       method: 'GET',
       headers: {
@@ -384,7 +375,7 @@ export async function approveJoinRequest({
   requestId: number;
 }): Promise<any> {
   const response = await fetch(
-    `${BACKEND}/teacher/classes/${classId}/join-requests/${requestId}`,
+    `${BACKEND}/join-request/teacher/${requestId}/class/${classId}`,
     {
       method: 'PATCH',
       headers: {
@@ -418,7 +409,7 @@ export async function denyJoinRequest({
   requestId: number;
 }): Promise<any> {
   const response = await fetch(
-    `${BACKEND}/teacher/classes/${classId}/join-requests/${requestId}`,
+    `${BACKEND}/join-request/teacher/${requestId}/class/${classId}`,
     {
       method: 'PATCH',
       headers: {
