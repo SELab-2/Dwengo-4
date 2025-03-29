@@ -1,7 +1,9 @@
-import { QueryClient } from "@tanstack/react-query";
-import { getAuthToken } from "./authStudent";
+import { QueryClient } from '@tanstack/react-query';
+import { getAuthToken } from './authStudent';
 
-const BACKEND = "http://localhost:5000";
+const BACKEND = 'http://localhost:5000';
+
+//husky test
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,7 +26,7 @@ interface AuthResponse {
 
 interface APIError extends Error {
   code?: number;
-  info?: any;
+  info?: string;
 }
 
 export async function loginStudent({
@@ -32,16 +34,16 @@ export async function loginStudent({
   password,
 }: AuthCredentials): Promise<AuthResponse> {
   const response = await fetch(`${BACKEND}/auth/student/login`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ email, password }),
   });
 
   if (!response.ok) {
     const error: APIError = new Error(
-      "Er is iets misgegaan tijdens het inloggen."
+      'Er is iets misgegaan tijdens het inloggen.',
     );
     error.code = response.status;
     error.info = await response.json();
@@ -58,16 +60,16 @@ export async function signupStudent({
   password,
 }: AuthCredentials): Promise<AuthResponse> {
   const response = await fetch(`${BACKEND}/auth/student/register`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ firstName, lastName, email, password }),
   });
 
   if (!response.ok) {
     const error: APIError = new Error(
-      "Er is iets misgegaan tijdens het registreren."
+      'Er is iets misgegaan tijdens het registreren.',
     );
     error.code = response.status;
     error.info = await response.json();
@@ -81,22 +83,28 @@ export async function signupStudent({
  * Laat een student een klas joinen met een joinCode
  * @param joinCode - De unieke code van de klas
  */
-export async function joinClass({ joinCode }: { joinCode: string }): Promise<void> {
+export async function joinClass({
+  joinCode,
+}: {
+  joinCode: string;
+}): Promise<void> {
   const response = await fetch(`${BACKEND}/student/classes/join`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${getAuthToken()}`,
     },
     body: JSON.stringify({ joinCode }),
   });
 
   if (!response.ok) {
-    const error: APIError = new Error("Er is iets misgegaan bij het joinen van de klas.");
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het joinen van de klas.',
+    );
     error.code = response.status;
     error.info = await response.json();
 
-    console.log(error.info)
+    console.log(error.info);
     throw error;
   }
 }

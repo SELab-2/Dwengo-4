@@ -176,8 +176,8 @@ model LearningPath {
   updatedAt DateTime @updatedAt
   creatorId Int
   creator   Teacher  @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator", onDelete: Cascade)
-  //assignments     Assignment[]
-  //questionGeneral QuestionGeneral[]
+  // assignments     Assignment[]
+  // questionGeneral QuestionGeneral[]
 }
 
 model LearningPathNode {
@@ -217,7 +217,7 @@ model LearningPathTransition {
   nodeId String
   node   LearningPathNode @relation(fields: [nodeId], references: [nodeId], name: "TransitionNode")
 
-  // Next wijst in de Dwengo API naar de volgende node. 
+  // Next wijst in de Dwengo API naar de volgende node.
   // Als next leeg is, betekent dit dat de laatste node van het leerpad bereikt is.
   nextNodeId String?
   nextNode   LearningPathNode? @relation(fields: [nextNodeId], references: [nodeId], name: "NextNode")
@@ -243,7 +243,7 @@ model LearningObject {
   id               String      @id @default(uuid())
   uuid             String      @unique @default(cuid())
   // In de Dwengo API wordt er nog met een hruid gewerkt ook. Ik zou voorstellen om anders de titel van een leerobject uniek te maken.
-  // Op die manier kan de hruid ingesteld worden op de titel van het leerobject. 
+  // Op die manier kan de hruid ingesteld worden op de titel van het leerobject.
   // Ik ga dit voorlopig laten staan, maar misschien dat we dit nog moeten aanpassen.
   hruid            String      @unique
   title            String
@@ -273,7 +273,7 @@ model LearningObject {
   educationalGoals EducationalGoal[]
   returnValue      ReturnValue?
   progress         LearningObjectProgress[]
-  //QuestionSpecifics QuestionSpecific[]
+  // QuestionSpecifics QuestionSpecific[]
 }
 
 model EducationalGoal {
@@ -394,9 +394,9 @@ model Question {
 model QuestionMessage {
   id         Int      @id @default(autoincrement())
   questionId Int
-  //leerkracht of student
+  // leerkracht of student
   userId     Int
-  //de inhoud van de vraag dus
+  // de inhoud van de vraag dus
   text       String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -454,6 +454,7 @@ model TeamAssignment {
   team       Team       @relation(fields: [teamId], references: [id])
   assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 
+  // Dit is een unieke composite key
   @@id([teamId, assignmentId])
 }
 

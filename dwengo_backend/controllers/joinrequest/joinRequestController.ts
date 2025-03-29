@@ -7,7 +7,7 @@ import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 // Higher-order function to handle errors and reduce duplication
 const handleRequest =
-  (handler: (req: Request, res: Response) => Promise<void>) =>
+  (handler: (_req: Request, _res: Response) => Promise<void>) =>
   async (req: Request, res: Response): Promise<void> => {
     try {
       await handler(req, res);
@@ -31,7 +31,7 @@ export const createJoinRequest = handleRequest(
     const joinRequest: JoinRequest | undefined =
       await joinRequestService.createValidJoinRequest(studentId, joinCode);
     res.status(201).json({ joinRequest });
-  }
+  },
 );
 
 /**
@@ -54,21 +54,22 @@ export const updateJoinRequestStatus = handleRequest(
         await joinRequestService.approveRequestAndAddStudentToClass(
           requestId,
           teacherId,
-          classId
+          classId,
         );
       res.status(200).json({ joinRequest, message: "Join request approved." });
     } else if (action === "deny") {
       const joinRequest: JoinRequest = await joinRequestService.denyJoinRequest(
         requestId,
         teacherId,
-        classId
+        classId,
       );
       res.status(200).json({ joinRequest, message: "Join request denied." });
     }
-  }
+  },
 );
 
-/**Get the join requests for a class
+/**
+ * Get the join requests for a class
  * returns a list of all join requests for the class in the response body
  */
 export const getJoinRequestsByClass = handleRequest(
@@ -78,5 +79,5 @@ export const getJoinRequestsByClass = handleRequest(
     const joinRequests: JoinRequest[] =
       await joinRequestService.getJoinRequestsByClass(teacherId, classId);
     res.status(200).json({ joinRequests });
-  }
+  },
 );

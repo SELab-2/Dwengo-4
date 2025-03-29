@@ -189,6 +189,16 @@ export async function createSubmission(evaluationId: string, teamId: number, ass
   });
 }
 
+export async function giveFeedbackToSubmission(submissionId: number, teacherId: number, description: string) {
+  return prisma.feedback.create({
+    data: {
+      submissionId: submissionId,
+      teacherId: teacherId,
+      description: description,
+    },
+  });
+}
+
 export async function giveAssignmentToTeam(assignmentId: number, teamId: number): Promise<TeamAssignment> {
   return prisma.teamAssignment.create({
     data: {
@@ -196,6 +206,20 @@ export async function giveAssignmentToTeam(assignmentId: number, teamId: number)
       assignmentId: assignmentId,
     },
   });
+}
+
+// In ons prisma schema gaan we er van uit dat er een team wordt aangemaakt voor elke assignment
+// en dus ook dat er maar 1 TeamAssignment kan zijn per team
+// Dit wil zeggen dat "giveAssignmentToTeam" dan ook maar 1 keer opgeroepen kan worden
+export async function updateAssignmentForTeam(assignmentId: number, teamId: number): Promise<TeamAssignment> {
+  return prisma.teamAssignment.update({
+    where: {
+      teamId: teamId
+    },
+    data: {
+      assignmentId: assignmentId
+    }
+  })
 }
 
 export async function createEvaluation(learningObjectId: string, type: EvaluationType) {

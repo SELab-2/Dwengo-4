@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { Role, User } from "@prisma/client";
-import UserService, * as userService from "../services/userService";
+import UserService from "../services/userService";
 import bcrypt from "bcryptjs";
 import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
 import { Response } from "express";
@@ -16,7 +16,7 @@ const RegisterUserSchema = z.object({
 const registerUser = async (
   req: AuthenticatedRequest,
   res: Response,
-  role: Role
+  role: Role,
 ): Promise<void> => {
   // Validate the request body
   try {
@@ -56,7 +56,7 @@ const registerUser = async (
     lastName,
     email,
     hashedPassword,
-    role
+    role,
   );
 
   res.status(201).json({
@@ -72,7 +72,7 @@ const registerUser = async (
 export const registerTeacher = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     await registerUser(req, res, Role.TEACHER);
-  }
+  },
 );
 
 // @desc    Registreer een nieuwe leerling
@@ -81,5 +81,5 @@ export const registerTeacher = asyncHandler(
 export const registerStudent = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     await registerUser(req, res, Role.STUDENT);
-  }
+  },
 );
