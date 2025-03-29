@@ -12,9 +12,7 @@ export default function StudentIndex() {
 
         <h2 className="mt-8 text-2xl font-bold">Opdrachten</h2>
         <div className="w-full mt-4 overflow-x-auto ">
-          <div className="flex flex-row gap-x-5 h-[12.5rem]  ">
-            <AssignmentOverview />
-          </div>
+          <AssignmentOverview />
         </div>
 
         <div className="flex flex-row justify-end w-full ">
@@ -28,7 +26,9 @@ export default function StudentIndex() {
         </div>
 
         <p className="text-2xl mt-8 font-bold">Klasgroepen</p>
-        <ClassesStudent />
+        <div className="w-full mt-4">
+          <ClassesStudent />
+        </div>
         <div className="flex flex-row justify-end w-full ">
           <Link
             to="/class"

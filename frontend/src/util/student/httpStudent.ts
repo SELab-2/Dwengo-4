@@ -110,7 +110,6 @@ export async function joinClass({
 export interface ClassItem {
   id: string;
   name: string;
-  code: string;
 }
 
 export async function fetchClasses(): Promise<ClassItem[]> {
@@ -135,7 +134,7 @@ export async function fetchClasses(): Promise<ClassItem[]> {
   const classrooms = returner['classes'];
   console.log('GETTING CLASSES', classrooms);
 
-  return await classrooms;
+  return classrooms;
 }
 
 export interface AssignmentItem {
@@ -166,5 +165,5 @@ export async function fetchAssignments(): Promise<AssignmentItem[]> {
   const assignments = await response.json();
   console.log('GETTING ASSIGNMENTS', assignments);
 
-  return await assignments;
+  return assignments;
 }
