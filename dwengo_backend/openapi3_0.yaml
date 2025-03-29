@@ -414,8 +414,85 @@ paths:
 
   /learningObject:
     $ref: "./routes/learningObject/learningObjectRoutes.yaml"
+
+  # Learning Path routes  
   /learningPath:
-    $ref: "./routes/learningPath/learningPathRoutes.yaml"
+    get:
+      tags:
+        - Learning path
+        - User
+      summary: Search for learning paths
+      description: Search for learning paths based on query parameters. Accessible to any authenticated user (student or teacher).
+      parameters:
+        - name: language
+          in: query
+          required: false
+          description: The language of the learning path
+          schema:
+            type: string
+        - name: hruid
+          in: query
+          required: false
+          description: The human-readable ID of the learning path
+          schema:
+            type: string
+        - name: title
+          in: query
+          required: false
+          description: The title of the learning path
+          schema:
+            type: string
+        - name: description
+          in: query
+          required: false
+          description: The description of the learning path
+          schema:
+            type: string
+        - name: all
+          in: query
+          required: false
+          description: Search across all fields
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Learning paths retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LearningPath'
+        '401':
+          description: Unauthorized access
+
+  /learningPath/{pathId}:
+    get:
+      tags:
+        - Learning path
+        - User
+      summary: Get a specific learning path
+      description: Retrieve a specific learning path by its ID or human-readable ID. Accessible to any authenticated user (student or teacher).
+      parameters:
+        - name: pathId
+          in: path
+          required: true
+          description: The ID or human-readable ID of the learning path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Learning path retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningPath'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Learning path not found
+
+  # Question routes  
   /question/{questionId}:
     get:
       tags:
@@ -1304,7 +1381,6 @@ components:
           description: The date and time the submission was made.
         feedback:
           $ref: "#/components/schemas/Feedback"
-      nullable: true
 
     LearningObjectProgress:
       type: object
@@ -1334,3 +1410,115 @@ components:
           description: The ID of the progress entry.
         progress:
           $ref: "#/components/schemas/LearningObjectProgress"
+
+    LearningPath:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique ID of the learning path.
+        hruid:
+          type: string
+          description: The human-readable ID of the learning path.
+        title:
+          type: string
+          description: The title of the learning path.
+        language:
+          type: string
+          description: The language of the learning path.
+        description:
+          type: string
+          description: The description of the learning path.
+        image:
+          type: string
+          format: byte
+          description: The image associated with the learning path.
+        num_nodes:
+          type: integer
+          description: The number of nodes in the learning path.
+        num_nodes_left:
+          type: integer
+          description: The number of nodes left to complete the learning path.
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Node"
+        createdAt:
+          type: string
+          format: date-time
+          description: The date and time the learning path was created.
+        updatedAt:
+          type: string
+          format: date-time
+          description: The date and time the learning path was last updated.
+
+    Node:
+      type: object
+      properties:
+        nodeId:
+          type: string
+          description: The ID of the node.
+        learningPathId:
+          type: string
+          description: The ID of the learning path the node is linked to.
+        localLearningObjectId:
+          type: string
+          description: The ID of the local learning object the node is representing (could be empty).
+        dwengoHruid:
+          type: string
+          description: The human-readable ID of the learning object in Dwengo.
+        dwengoLanguage:
+          type: string
+          description: The language of the learning object in Dwengo.
+        dwengoVersion:
+          type: integer
+          description: The version of the learning object in Dwengo.
+        isExternal:
+          type: boolean
+          description: Whether the learning object the node is representing is external or not.
+        start_node:
+          type: boolean
+          description: Whether the node is a start node or not.
+        createdAt:
+          type: string
+          format: date-time
+          description: The date and time the node was created.
+        updatedAt:
+          type: string
+          format: date-time
+          description: The date and time the node was last updated.
+        transitions:
+          type: array
+          description: The node has transitions to other nodes.
+          items:
+            $ref: "#/components/schemas/Transition"
+        nextTransitions:
+          type: array
+          description: The transitions from this node to other nodes.
+          items:
+            $ref: "#/components/schemas/Transition"
+
+    Transition:
+      type: object
+      properties:
+        transitionId:
+          type: string
+          format: uuid
+          description: The ID of the transition.
+        default:
+          type: boolean
+          description: Whether the transition is a default transition or not.
+        condition:
+          type: string
+          description: The condition for the transition.
+        nodeId:
+          type: string
+          description: The ID of the node the transition is linked to.
+        node: 
+          $ref: "#/components/schemas/Node"
+        nextNodeId:
+          type: string
+          description: The ID of the next node the transition is linked to.
+        nextNode:
+          $ref: "#/components/schemas/Node"
+          
