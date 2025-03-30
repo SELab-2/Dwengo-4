@@ -22,7 +22,6 @@ import {
 import { action as studentLogoutAction } from '../pages/student/LogoutStudent';
 import StudentIndex from '../pages/student';
 import JoinClass from '../components/student/classes/JoinRequestForm';
-import PrimaryButton from '../components/shared/PrimaryButton';
 
 const HomePage: React.FC = () => {
   return (
@@ -63,14 +62,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: (
-          <h1>
-            Home teacher
-            <Link to="/teacher/classes">
-              <PrimaryButton>TEST</PrimaryButton>
-            </Link>
-          </h1>
-        ),
+        element: <h1>Home teacher</h1>,
       },
       {
         path: 'inloggen',
