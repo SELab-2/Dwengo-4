@@ -113,7 +113,7 @@ export interface ClassItem {
 }
 
 export async function fetchClasses(): Promise<ClassItem[]> {
-  const response = await fetch(`${BACKEND}/student/classes`, {
+  const response = await fetch(`${BACKEND}/class/student`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -145,7 +145,7 @@ export interface AssignmentItem {
 }
 
 export async function fetchAssignments(): Promise<AssignmentItem[]> {
-  const response = await fetch(`${BACKEND}/student/assignments`, {
+  const response = await fetch(`${BACKEND}/assignment/student`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
