@@ -1,7 +1,7 @@
 import { Assignment, PrismaClient, Role } from "@prisma/client";
 import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
 import ReferenceValidationService from "../../services/referenceValidationService";
-import { UnauthorizedError } from "../../errors/errors";
+import { AccesDeniedError } from "../../errors/errors";
 import handlePrismaQuery from "../../errors/prismaErrorHandler";
 // ^ let op: named import, géén "default" meer.
 
@@ -23,7 +23,7 @@ export default class TeacherAssignmentService {
   ): Promise<Assignment> {
     // 1) check authorization
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
-      throw new UnauthorizedError(
+      throw new AccesDeniedError(
         "The teacher is unauthorized to perform this action. Is this teacher a teacher of the class?",
       );
     }
@@ -65,7 +65,7 @@ export default class TeacherAssignmentService {
     teacherId: number,
   ): Promise<Assignment[]> {
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
-      throw new UnauthorizedError(
+      throw new AccesDeniedError(
         "The teacher is unauthorized to request the assignments. Is this teacher a teacher of the class?",
       );
     }
@@ -95,7 +95,9 @@ export default class TeacherAssignmentService {
   ): Promise<Assignment> {
     // 1) autorisatie
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
-      throw new Error("The teacher is unauthorized to update the assignment");
+      throw new AccesDeniedError(
+        "The teacher is unauthorized to update the assignment",
+      );
     }
 
     // 2) validate new pathRef
@@ -123,7 +125,9 @@ export default class TeacherAssignmentService {
     teacherId: number,
   ): Promise<Assignment> {
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
-      throw new Error("The teacher is unauthorized to delete the assignment");
+      throw new AccesDeniedError(
+        "The teacher is unauthorized to delete the assignment",
+      );
     }
 
     return handlePrismaQuery(() =>
