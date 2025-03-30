@@ -86,7 +86,7 @@ export async function joinClass({
 }: {
   joinCode: string;
 }): Promise<void> {
-  const response = await fetch(`${BACKEND}/student/classes/join`, {
+  const response = await fetch(`${BACKEND}/join-request/student`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

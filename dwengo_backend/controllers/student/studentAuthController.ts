@@ -12,13 +12,17 @@ interface LoginStudentBody {
 }
 
 // @desc    Inloggen van een leerling
-// @route   POST /student/auth/login
+// @route   POST /auth/student/login
 // @access  Public
-
 export const loginStudent = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body as LoginStudentBody;
 
+    // Basisvalidatie voor e-mail
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      res.status(400);
+      throw new Error("Voer een geldig e-mailadres in");
+    }
     // Basisvalidatie voor e-mail
     if (!/\S+@\S+\.\S+/.test(email)) {
       res.status(400);

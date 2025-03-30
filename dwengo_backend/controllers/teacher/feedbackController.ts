@@ -5,8 +5,6 @@ import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 export default class FeedbackController {
-  // route: "/teacher/feedback/assignment/:assignmentId/evaluation/:evaluationId"
-  // http-command: GET
   static async getAllFeedbackForEvaluation(
     req: AuthenticatedRequest,
     res: Response,
@@ -26,8 +24,6 @@ export default class FeedbackController {
     }
   }
 
-  // route: "/teacher/feedback/submission/:submissionId"
-  // http-command: POST
   static async createFeedback(
     req: AuthenticatedRequest,
     res: Response,
@@ -49,8 +45,6 @@ export default class FeedbackController {
     }
   }
 
-  // route: "/teacher/feedback/submission/:submissionId"
-  // http-command: GET
   static async getFeedbackForSubmission(
     req: AuthenticatedRequest,
     res: Response,
@@ -73,8 +67,6 @@ export default class FeedbackController {
     }
   }
 
-  // route: /teacher/feedback/submission/:submissionId
-  // http-command: PATCH
   static async updateFeedbackForSubmission(
     req: AuthenticatedRequest,
     res: Response,
@@ -95,8 +87,6 @@ export default class FeedbackController {
     }
   }
 
-  // route: /teacher/feedback/submission/:submissionId
-  // http-command: DELETE
   static async deleteFeedbackForSubmission(
     req: AuthenticatedRequest,
     res: Response,

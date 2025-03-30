@@ -1,14 +1,14 @@
 import express from "express";
 import { protectStudent } from "../../middleware/studentAuthMiddleware";
-import { createJoinRequest } from "../../controllers/joinrequest/joinRequestController";
 import { getStudentClasses } from "../../controllers/student/studentClassController";
 
 const router = express.Router();
 
-// Alleen studenten mogen deze route gebruiken
-router.use(protectStudent);
-
-router.post("/join", createJoinRequest);
-router.get("/", getStudentClasses);
+/**
+ * @route GET /class/student
+ * @description Get all classes for a student
+ * @access Student
+ */
+router.get("/", protectStudent, getStudentClasses);
 
 export default router;
