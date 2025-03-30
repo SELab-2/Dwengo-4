@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import { z } from "zod";
-import { AuthenticatedRequest } from "./teacherAuthMiddleware";
+import { AuthenticatedRequest } from "./authMiddleware/teacherAuthMiddleware";
 
 const formatZodErrors = (error: z.ZodError, source: string) => {
   return error.issues.map((issue) => ({
@@ -24,7 +24,7 @@ export const validateRequest =
     customErrorMessage?: string,
     bodySchema?: z.AnyZodObject | z.ZodOptional<z.AnyZodObject>,
     paramsSchema?: z.AnyZodObject | z.ZodOptional<z.AnyZodObject>,
-    querySchema?: z.AnyZodObject | z.ZodOptional<z.AnyZodObject>
+    querySchema?: z.AnyZodObject | z.ZodOptional<z.AnyZodObject>,
   ) =>
   (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const error_details: Array<{
