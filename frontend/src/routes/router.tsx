@@ -1,12 +1,7 @@
 import React from 'react';
-import {
-  createBrowserRouter,
-  RouteObject,
-  useNavigate,
-} from 'react-router-dom';
+import { createBrowserRouter, Link, RouteObject } from 'react-router-dom';
 
 // ==== TEACHER ROUTES ==== //
-
 import AssignmentPage from '../pages/teacher/AddAssignment';
 import RootLayoutTeacher from '../components/teacher/RootLayoutTeacher';
 import LoginTeacher from '../pages/teacher/LoginTeacher';
@@ -27,10 +22,9 @@ import {
 import { action as studentLogoutAction } from '../pages/student/LogoutStudent';
 import StudentIndex from '../pages/student';
 import JoinClass from '../components/student/classes/JoinRequestForm';
+import PrimaryButton from '../components/shared/PrimaryButton';
 
 const HomePage: React.FC = () => {
-  const navigate = useNavigate();
-
   return (
     <div className="flex flex-col justify-center items-center h-screen">
       <div className="-translate-y-20">
@@ -38,18 +32,20 @@ const HomePage: React.FC = () => {
           Kies een rol
         </h2>
         <div className="flex flex-row justify-center gap-x-10">
-          <button
-            onClick={() => navigate('/student')}
-            className={`px-7 text-4xl py-1.5 font-bold rounded-md  bg-dwengo-green hover:bg-dwengo-green-dark text-white  hover:cursor-pointer`}
-          >
-            Student
-          </button>
-          <button
-            className={`px-7 text-4xl py-1.5 font-bold rounded-md   text-white bg-dwengo-green hover:bg-dwengo-green-dark hover:cursor-pointer`}
-            onClick={() => navigate('/teacher')}
-          >
-            Teacher
-          </button>
+          <Link to="/student">
+            <button
+              className={`px-7 text-4xl py-1.5 font-bold rounded-md  bg-dwengo-green hover:bg-dwengo-green-dark text-white  hover:cursor-pointer`}
+            >
+              Student
+            </button>
+          </Link>
+          <Link to="/teacher">
+            <button
+              className={`px-7 text-4xl py-1.5 font-bold rounded-md   text-white bg-dwengo-green hover:bg-dwengo-green-dark hover:cursor-pointer`}
+            >
+              Teacher
+            </button>
+          </Link>
         </div>
       </div>
     </div>
@@ -67,7 +63,14 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <h1>Home teacher</h1>,
+        element: (
+          <h1>
+            Home teacher
+            <Link to="/teacher/classes">
+              <PrimaryButton>TEST</PrimaryButton>
+            </Link>
+          </h1>
+        ),
       },
       {
         path: 'inloggen',
