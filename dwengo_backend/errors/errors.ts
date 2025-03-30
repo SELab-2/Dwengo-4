@@ -42,3 +42,9 @@ export class DatabaseError extends AppError {
     super(message, 500);
   }
 }
+
+export class NetworkError extends AppError {
+  constructor(message: string) {
+    super(message, 502);
+  }
+}
