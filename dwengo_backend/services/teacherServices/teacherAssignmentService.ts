@@ -1,6 +1,8 @@
 import { Assignment, PrismaClient, Role } from "@prisma/client";
 import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
 import ReferenceValidationService from "../../services/referenceValidationService";
+import { UnauthorizedError } from "../../errors/errors";
+import handlePrismaQuery from "../../errors/prismaErrorHandler";
 // ^ let op: named import, géén "default" meer.
 
 const prisma = new PrismaClient();
@@ -17,11 +19,13 @@ export default class TeacherAssignmentService {
     isExternal: boolean,
     deadline: Date,
     title: string,
-    description: string
+    description: string,
   ): Promise<Assignment> {
     // 1) check authorization
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
-      throw new Error("The teacher is unauthorized to perform this action");
+      throw new UnauthorizedError(
+        "The teacher is unauthorized to perform this action. Is this teacher a teacher of the class?",
+      );
     }
 
     // 2) Valideer pathRef
@@ -31,24 +35,26 @@ export default class TeacherAssignmentService {
       isExternal,
       isExternal ? undefined : pathRef, // localId
       isExternal ? pathRef : undefined, // hruid
-      isExternal ? pathLanguage : undefined // language
+      isExternal ? pathLanguage : undefined, // language
     );
 
     // 3) Maak assignment
-    return prisma.assignment.create({
-      data: {
-        pathRef,
-        isExternal,
-        deadline,
-        classAssignments: {
-          create: {
-            classId,
+    return handlePrismaQuery(() =>
+      prisma.assignment.create({
+        data: {
+          pathRef,
+          isExternal,
+          deadline,
+          classAssignments: {
+            create: {
+              classId,
+            },
           },
+          title,
+          description,
         },
-        title,
-        description,
-      },
-    });
+      }),
+    );
   }
 
   /**
@@ -56,20 +62,24 @@ export default class TeacherAssignmentService {
    */
   static async getAssignmentsByClass(
     classId: number,
-    teacherId: number
+    teacherId: number,
   ): Promise<Assignment[]> {
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
-      throw new Error("The teacher is unauthorized to request the assignments");
+      throw new UnauthorizedError(
+        "The teacher is unauthorized to request the assignments. Is this teacher a teacher of the class?",
+      );
     }
-    return prisma.assignment.findMany({
-      where: {
-        classAssignments: {
-          some: {
-            classId,
+    return handlePrismaQuery(() =>
+      prisma.assignment.findMany({
+        where: {
+          classAssignments: {
+            some: {
+              classId,
+            },
           },
         },
-      },
-    });
+      }),
+    );
   }
 
   /**
@@ -81,7 +91,7 @@ export default class TeacherAssignmentService {
     isExternal: boolean,
     teacherId: number,
     title: string,
-    description: string
+    description: string,
   ): Promise<Assignment> {
     // 1) autorisatie
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
@@ -92,15 +102,17 @@ export default class TeacherAssignmentService {
     await ReferenceValidationService.validateLearningPath(isExternal, pathRef);
 
     // 3) update
-    return prisma.assignment.update({
-      where: { id: assignmentId },
-      data: {
-        pathRef,
-        isExternal,
-        title,
-        description,
-      },
-    });
+    return handlePrismaQuery(() =>
+      prisma.assignment.update({
+        where: { id: assignmentId },
+        data: {
+          pathRef,
+          isExternal,
+          title,
+          description,
+        },
+      }),
+    );
   }
 
   /**
@@ -108,14 +120,16 @@ export default class TeacherAssignmentService {
    */
   static async deleteAssignment(
     assignmentId: number,
-    teacherId: number
+    teacherId: number,
   ): Promise<Assignment> {
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
       throw new Error("The teacher is unauthorized to delete the assignment");
     }
 
-    return prisma.assignment.delete({
-      where: { id: assignmentId },
-    });
+    return handlePrismaQuery(() =>
+      prisma.assignment.delete({
+        where: { id: assignmentId },
+      }),
+    );
   }
 }
