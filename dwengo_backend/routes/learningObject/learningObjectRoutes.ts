@@ -7,7 +7,7 @@ import {
   // [NIEUW] importeer de extra controller-functie:
   getLearningObjectByHruidLangVersionController,
 } from "../../controllers/learningObject/learningObjectController";
-import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
+import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
 
 const router = express.Router();
 
@@ -23,7 +23,5 @@ router.get("/path/:pathId", getLearningObjectsForPathController);
 router.get("/lookup", getLearningObjectByHruidLangVersionController);
 
 router.get("/:id", getLearningObjectController);
-
-
 
 export default router;

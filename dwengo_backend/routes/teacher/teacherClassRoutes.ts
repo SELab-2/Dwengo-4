@@ -1,5 +1,5 @@
 import express from "express";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 import {
   createClassroom,
   deleteClassroom,
@@ -43,7 +43,7 @@ router.get("/:classId/join-link", protectTeacher, getJoinLink);
 router.post(
   "/:classId/regenerate-join-link",
   protectTeacher,
-  regenerateJoinLink
+  regenerateJoinLink,
 );
 router.get("/:classId/students", protectTeacher, getClassroomStudents);
 
@@ -53,36 +53,36 @@ router.post(
   validateRequest(
     "invalid request for invite creation",
     createInviteBodySchema,
-    createInviteParamsSchema
+    createInviteParamsSchema,
   ),
-  createInvite
+  createInvite,
 );
 router.get(
   "/:classId/invites",
   validateRequest(
     "invalid request params",
     undefined,
-    getClassInvitesParamsSchema
+    getClassInvitesParamsSchema,
   ),
-  getPendingInvitesForClass
+  getPendingInvitesForClass,
 );
 router.delete(
   "/:classId/invites/:inviteId",
   validateRequest(
     "invalid request params",
     undefined,
-    deleteInviteParamsSchema
+    deleteInviteParamsSchema,
   ),
-  deleteInvite
+  deleteInvite,
 );
 router.patch(
   "/invites/:inviteId",
   validateRequest(
     "invalid request for invite update",
     updateInviteBodySchema,
-    updateInviteParamsSchema
+    updateInviteParamsSchema,
   ),
-  updateInviteStatus
+  updateInviteStatus,
 );
 router.get("/invites", getPendingInvitesForTeacher);
 
@@ -92,36 +92,36 @@ router.post(
   validateRequest(
     "invalid request for invite creation",
     createInviteBodySchema,
-    createInviteParamsSchema
+    createInviteParamsSchema,
   ),
-  createInvite
+  createInvite,
 );
 router.get(
   "/:classId/invites",
   validateRequest(
     "invalid request params",
     undefined,
-    getClassInvitesParamsSchema
+    getClassInvitesParamsSchema,
   ),
-  getPendingInvitesForClass
+  getPendingInvitesForClass,
 );
 router.delete(
   "/:classId/invites/:inviteId",
   validateRequest(
     "invalid request params",
     undefined,
-    deleteInviteParamsSchema
+    deleteInviteParamsSchema,
   ),
-  deleteInvite
+  deleteInvite,
 );
 router.patch(
   "/invites/:inviteId",
   validateRequest(
     "invalid request for invite update",
     updateInviteBodySchema,
-    updateInviteParamsSchema
+    updateInviteParamsSchema,
   ),
-  updateInviteStatus
+  updateInviteStatus,
 );
 router.get("/invites", getPendingInvitesForTeacher);
 router.patch("/invites/:inviteId", updateInviteStatus);
