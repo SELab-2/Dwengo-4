@@ -1,16 +1,19 @@
 import { PrismaClient, Role } from "@prisma/client";
+import handlePrismaQuery from "../errors/prismaErrorHandler";
 
 const prisma = new PrismaClient();
 
 export const isAuthorized = async (
   userId: number,
   requiredRole: Role,
-  classId?: number
+  classId?: number,
 ): Promise<boolean> => {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { role: true, teacher: true, student: true },
-  });
+  const user = await handlePrismaQuery(() =>
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true, teacher: true, student: true },
+    }),
+  );
 
   if (!user) throw new Error("User not found");
 
@@ -22,17 +25,21 @@ export const isAuthorized = async (
 
   // Extra check for teachers: ensure they teach this class
   if (requiredRole === Role.TEACHER && classId) {
-    const teachesClass = await prisma.classTeacher.findFirst({
-      where: { teacherId: userId, classId },
-    });
+    const teachesClass = await handlePrismaQuery(() =>
+      prisma.classTeacher.findFirst({
+        where: { teacherId: userId, classId },
+      }),
+    );
     return teachesClass !== null;
   }
 
   // Extra check for students: ensure they are part of this class
   if (requiredRole === Role.STUDENT && classId) {
-    const enrolled = await prisma.classStudent.findFirst({
-      where: { studentId: userId, classId },
-    });
+    const enrolled = await handlePrismaQuery(() =>
+      prisma.classStudent.findFirst({
+        where: { studentId: userId, classId },
+      }),
+    );
     return enrolled !== null;
   }
 
@@ -41,24 +48,28 @@ export const isAuthorized = async (
 
 export const canUpdateOrDelete = async (
   userId: number,
-  assignmentId: number
+  assignmentId: number,
 ): Promise<boolean> => {
   if (!(await isAuthorized(userId, Role.TEACHER))) return false;
 
   // The teacher is authorized
   // Now there needs to be checked if the teacher has classes that have this assignment
-  const allClassesTeacher: { classId: number }[] =
-    await prisma.classTeacher.findMany({
+  const allClassesTeacher: { classId: number }[] = await handlePrismaQuery(() =>
+    prisma.classTeacher.findMany({
       where: { teacherId: userId },
       select: { classId: true },
-    });
+    }),
+  );
 
   // Check if at least one of the classes of the teacher has the assignment
-  const hasAssignment = await prisma.classAssignment.findFirst({
-    where: {
-      assignmentId,
-      classId: { in: allClassesTeacher.map((c) => c.classId) },
-    },
-  });
+  const hasAssignment = await handlePrismaQuery(() =>
+    prisma.classAssignment.findFirst({
+      where: {
+        assignmentId,
+        classId: { in: allClassesTeacher.map((c) => c.classId) },
+      },
+    }),
+  );
+
   return hasAssignment !== null;
 };
