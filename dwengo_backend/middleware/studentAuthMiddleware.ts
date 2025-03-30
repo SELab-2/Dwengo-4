@@ -1,7 +1,8 @@
-import jwt from 'jsonwebtoken';
-import asyncHandler from 'express-async-handler';
-import { PrismaClient } from '@prisma/client';
-import { Request, Response, NextFunction } from 'express';
+import jwt from "jsonwebtoken";
+import asyncHandler from "express-async-handler";
+import { PrismaClient } from "@prisma/client";
+import { Request, Response, NextFunction } from "express";
+import { UnauthorizedError } from "../errors/errors";
 
 const prisma = new PrismaClient();
 
@@ -17,7 +18,11 @@ interface JwtPayload {
 }
 
 export const protectStudent = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     let token: string | undefined;
 
     if (
@@ -34,25 +39,22 @@ export const protectStudent = asyncHandler(
 
         // Zoek de gebruiker (Student) en stel deze in op req.user
         const student = await prisma.student.findUnique({
-          where: { userId: decoded.id },  // Finding the student by userId
-          include: { user: { select: { id: true, email: true } } } // Fetching user details
+          where: { userId: decoded.id }, // Finding the student by userId
+          include: { user: { select: { id: true, email: true } } }, // Fetching user details
         });
 
         if (!student) {
-          res.status(401).json({ error: "Student niet gevonden." });
-          return; // Ensure no further execution after sending the response
+          throw new UnauthorizedError("Student not found.");
         }
 
         req.user = { id: student.userId, email: student.user.email };
         next();
       } catch (error) {
-        console.error(error);
-        res.status(401).json({ error: "Niet geautoriseerd, token mislukt." });
-        return; // Ensure no further execution after sending the response
+        throw new UnauthorizedError("Malformed authorization token.");
       }
     } else {
-      res.status(401).json({ error: "Geen token, niet geautoriseerd." });
-      return; // Ensure no further execution after sending the response
+      // No token provided
+      throw new UnauthorizedError("No authorization token.");
     }
   }
 );
