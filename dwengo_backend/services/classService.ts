@@ -294,7 +294,7 @@ export default class ClassService {
   // Get all classes from the same teacher
   static async getAllClassesByTeacher(
     teacherId: number,
-    includeStudents: boolean
+    includeStudents: boolean = false
   ): Promise<Class[]> {
     // Fetch all classes taught by the same teacher
     return prisma.class.findMany({

@@ -24,7 +24,7 @@ bv.
 in 1 keer aanpassen (pas op, leerkracht en student hebben een andere token als je van beide inlogged)
 
 # 1. Registreer een nieuwe student
-curl -X POST http://localhost:5000/student/auth/register \
+curl -X POST http://localhost:5000/auth/student/register \
   -H "Content-Type: application/json" \
   -d '{
         "firstName": "Jan",
@@ -34,7 +34,7 @@ curl -X POST http://localhost:5000/student/auth/register \
       }'
 
 #2. Registreer een nieuwe leerkracht
-curl -X POST http://localhost:5000/teacher/auth/register \
+curl -X POST http://localhost:5000/auth/teacher/register \
   -H "Content-Type: application/json" \
   -d '{
         "firstName": "Piet",
@@ -51,7 +51,7 @@ als nodig (bv als je bezig bent met vraag met id 2: "http://localhost:5000/quest
 
 
 #4. Log in en hou de token bij voor te testen
-curl -X POST http://localhost:5000/student/auth/login \
+curl -X POST http://localhost:5000/auth/student/login \
   -H "Content-Type: application/json" \
   -d '{
         "firstName": "Jan",

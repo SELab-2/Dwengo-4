@@ -33,7 +33,7 @@ export async function loginStudent({
   email,
   password,
 }: AuthCredentials): Promise<AuthResponse> {
-  const response = await fetch(`${BACKEND}/student/auth/login`, {
+  const response = await fetch(`${BACKEND}/auth/student/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ export async function signupStudent({
   email,
   password,
 }: AuthCredentials): Promise<AuthResponse> {
-  const response = await fetch(`${BACKEND}/student/auth/register`, {
+  const response = await fetch(`${BACKEND}/auth/student/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ export async function joinClass({
 }: {
   joinCode: string;
 }): Promise<void> {
-  const response = await fetch(`${BACKEND}/student/classes/join`, {
+  const response = await fetch(`${BACKEND}/join-request/student`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

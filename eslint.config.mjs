@@ -21,6 +21,7 @@ export default [
       },
     },
     rules: {
+      "@typescript-eslint/no-explicit-any": "off", // Allow 'any' type
       "no-unused-vars": [
         "error",
         {

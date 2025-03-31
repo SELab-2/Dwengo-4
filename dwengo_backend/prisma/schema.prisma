@@ -172,18 +172,18 @@ model LearningPath {
   ///
   /// Custom velden
   ///
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  creatorId       Int
-  creator         Teacher           @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator", onDelete: Cascade)
-  //assignments     Assignment[]
-  //questionGeneral QuestionGeneral[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  creatorId Int
+  creator   Teacher  @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator", onDelete: Cascade)
+  // assignments     Assignment[]
+  // questionGeneral QuestionGeneral[]
 }
 
 model LearningPathNode {
-  nodeId        String @id @default(uuid())
+  nodeId         String       @id @default(uuid())
   learningPathId String
-  learningPath  LearningPath @relation(fields: [learningPathId], references: [id])
+  learningPath   LearningPath @relation(fields: [learningPathId], references: [id])
 
   // Deze velden gebruik je voor lokale objecten:
   localLearningObjectId String? // bv. ID uit je eigen 'LearningObject' tabel
@@ -196,15 +196,13 @@ model LearningPathNode {
   // True als dit een extern (Dwengo) object is, false als lokaal
   isExternal Boolean @default(false)
 
-  start_node Boolean @default(false)
+  start_node Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
   transitions     LearningPathTransition[] @relation("TransitionNode")
   nextTransitions LearningPathTransition[] @relation("NextNode")
 }
-
-
 
 model LearningPathTransition {
   // _id bij Dwengo API
@@ -219,7 +217,7 @@ model LearningPathTransition {
   nodeId String
   node   LearningPathNode @relation(fields: [nodeId], references: [nodeId], name: "TransitionNode")
 
-  // Next wijst in de Dwengo API naar de volgende node. 
+  // Next wijst in de Dwengo API naar de volgende node.
   // Als next leeg is, betekent dit dat de laatste node van het leerpad bereikt is.
   nextNodeId String?
   nextNode   LearningPathNode? @relation(fields: [nextNodeId], references: [nodeId], name: "NextNode")
@@ -245,7 +243,7 @@ model LearningObject {
   id               String      @id @default(uuid())
   uuid             String      @unique @default(cuid())
   // In de Dwengo API wordt er nog met een hruid gewerkt ook. Ik zou voorstellen om anders de titel van een leerobject uniek te maken.
-  // Op die manier kan de hruid ingesteld worden op de titel van het leerobject. 
+  // Op die manier kan de hruid ingesteld worden op de titel van het leerobject.
   // Ik ga dit voorlopig laten staan, maar misschien dat we dit nog moeten aanpassen.
   hruid            String      @unique
   title            String
@@ -271,13 +269,11 @@ model LearningObject {
   creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningObjectCreator")
 
   // Binnen een leerobject kunnen er meerdere evaluaties zitten
-  evaluations       Evaluation[]
-  educationalGoals  EducationalGoal[]
-  returnValue       ReturnValue?
-  progress          LearningObjectProgress[]
-  //QuestionSpecifics QuestionSpecific[]
-
-
+  evaluations      Evaluation[]
+  educationalGoals EducationalGoal[]
+  returnValue      ReturnValue?
+  progress         LearningObjectProgress[]
+  // QuestionSpecifics QuestionSpecific[]
 }
 
 model EducationalGoal {
@@ -344,7 +340,7 @@ enum QuestionType {
 }
 
 model QuestionSpecific {
-  questionId Int @unique
+  questionId            Int     @unique
   // Lokaal leerobject
   localLearningObjectId String?
 
@@ -360,16 +356,13 @@ model QuestionSpecific {
   @@id([questionId])
 }
 
-
-
 model QuestionGeneral {
-  questionId     Int    @unique
-  pathRef   String
+  questionId Int     @unique
+  pathRef    String
   isExternal Boolean @default(false)
 
   // Een QuestionSpecific is een vraag
-  question     Question     @relation(fields: [questionId], references: [id])
-  
+  question Question @relation(fields: [questionId], references: [id])
 
   @@id([questionId])
 }
@@ -384,8 +377,8 @@ model Question {
   updatedAt    DateTime     @updatedAt
 
   // Nieuw:
-  createdBy  Int
-  isPrivate  Boolean @default(false)
+  createdBy Int
+  isPrivate Boolean @default(false)
 
   // Een vraag is ofwel een specifieke vraag (bij leerobject),
   // een algemene vraag (bij leerpad) of
@@ -401,9 +394,9 @@ model Question {
 model QuestionMessage {
   id         Int      @id @default(autoincrement())
   questionId Int
-  //leerkracht of student
+  // leerkracht of student
   userId     Int
-  //de inhoud van de vraag dus
+  // de inhoud van de vraag dus
   text       String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -413,7 +406,7 @@ model QuestionMessage {
 ///
 /// Taken en indieningen
 model Assignment {
-  id               Int               @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   title       String
   description String
   pathRef    String
@@ -445,7 +438,7 @@ model Team {
   classId  Int
 
   // Een team bestaat uit studenten
-  students        Student[]
+  students       Student[]
   // Een verwijzing naar de assignment van dit team
   teamAssignment TeamAssignment?
 
@@ -456,12 +449,13 @@ model Team {
 }
 
 model TeamAssignment {
-  teamId       Int  @unique
+  teamId       Int @unique
   assignmentId Int
 
   team       Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
   assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 
+  // Dit is een unieke composite key
   @@id([teamId, assignmentId])
 }
 
@@ -476,7 +470,7 @@ model Submission {
   feedback     Feedback?
 
   assignmentId Int
-  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 
   evaluation Evaluation @relation(fields: [evaluationId], references: [id])
   team       Team       @relation(fields: [teamId], references: [id])

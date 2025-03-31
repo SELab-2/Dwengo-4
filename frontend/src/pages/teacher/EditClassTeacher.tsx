@@ -67,7 +67,7 @@ const EditClassTeacher: React.FC = () => {
         console.log('Fetching class with ID:', classId);
 
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/teacher/classes`,
+          `${import.meta.env.VITE_API_URL}/class/teacher`,
           {
             method: 'GET',
             headers: {
@@ -117,7 +117,7 @@ const EditClassTeacher: React.FC = () => {
   const { mutate, isPending } = useMutation({
     mutationFn: async (newName: string) => {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/teacher/classes/${classId}`,
+        `${import.meta.env.VITE_API_URL}/class/teacher/${classId}`,
         {
           method: 'PATCH',
           headers: {
@@ -169,7 +169,7 @@ const EditClassTeacher: React.FC = () => {
     ) {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/teacher/classes/${classId}`,
+          `${import.meta.env.VITE_API_URL}/class/teacher/${classId}`,
           {
             method: 'DELETE',
             headers: {
@@ -285,7 +285,7 @@ const EditClassTeacher: React.FC = () => {
                       const response = await fetch(
                         `${
                           import.meta.env.VITE_API_URL
-                        }/teacher/classes/${classId}/regenerate-join-link`,
+                        }/class/teacher/${classId}/join-link`,
                         {
                           method: 'PATCH',
                           headers: {

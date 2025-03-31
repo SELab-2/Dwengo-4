@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import asyncHandler from "express-async-handler";
 import LocalLearningObjectService, {
   LocalLearningObjectData,
@@ -22,13 +22,13 @@ export const createLocalLearningObject = asyncHandler(
 
     const createdLO = await LocalLearningObjectService.createLearningObject(
       teacherId,
-      data
+      data,
     );
     res.status(201).json({
       message: "Leerobject aangemaakt",
       learningObject: createdLO,
     });
-  }
+  },
 );
 
 /**
@@ -45,10 +45,10 @@ export const getLocalLearningObjects = asyncHandler(
 
     const objects =
       await LocalLearningObjectService.getAllLearningObjectsByTeacher(
-        teacherId
+        teacherId,
       );
     res.json(objects);
-  }
+  },
 );
 
 /**
@@ -78,7 +78,7 @@ export const getLocalLearningObjectById = asyncHandler(
     }
 
     res.json(found);
-  }
+  },
 );
 
 /**
@@ -109,13 +109,13 @@ export const updateLocalLearningObject = asyncHandler(
 
     const updated = await LocalLearningObjectService.updateLearningObject(
       id,
-      data
+      data,
     );
     res.json({
       message: "Leerobject bijgewerkt",
       learningObject: updated,
     });
-  }
+  },
 );
 
 /**
@@ -143,5 +143,5 @@ export const deleteLocalLearningObject = asyncHandler(
 
     await LocalLearningObjectService.deleteLearningObject(id);
     res.json({ message: "Leerobject verwijderd" });
-  }
+  },
 );
