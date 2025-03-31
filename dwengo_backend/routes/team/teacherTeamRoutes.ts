@@ -15,6 +15,7 @@ import {
 import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 
 const router = Router();
+router.use(protectTeacher);
 
 //////////////////////
 /// TEACHER ROUTES ///
@@ -29,10 +30,9 @@ const router = Router();
  */
 router.post(
   "/class/:classId/assignment/:assignmentId",
-  protectTeacher,
   makeAssignmentIdParamValid,
   ensureTeamsParamValidTeamDivision,
-  createTeamInAssignment
+  createTeamInAssignment,
 );
 
 /**
@@ -43,9 +43,8 @@ router.post(
  */
 router.get(
   "/assignment/:assignmentId/all",
-  protectTeacher,
   makeAssignmentIdParamValid,
-  getTeamsInAssignment
+  getTeamsInAssignment,
 );
 
 /**
@@ -57,10 +56,9 @@ router.get(
  */
 router.patch(
   "/assignment/:assignmentId",
-  protectTeacher,
   makeAssignmentIdParamValid,
   ensureTeamParamValidIdentifiableTeamDivision,
-  updateTeamsInAssignment
+  updateTeamsInAssignment,
 );
 
 /**
@@ -72,9 +70,8 @@ router.patch(
  */
 router.delete(
   "/:teamId/assignment/:assignmentId",
-  protectTeacher,
   makeTeamIdParamValid,
-  deleteTeamInAssignment
+  deleteTeamInAssignment,
 );
 
 export default router;
