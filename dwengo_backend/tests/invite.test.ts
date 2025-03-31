@@ -59,12 +59,12 @@ describe("invite tests", async () => {
       // emphasis on the 'non-pending' here
       // set up scenario where teacher has rejected the invite
       await addTeacherToClass(teacherUser1.id, classroom.id);
-      let invite: Invite = await createInvite(
+      const invite: Invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
-        classroom.id
+        classroom.id,
       );
-      invite = await prisma.invite.update({
+      await prisma.invite.update({
         where: {
           inviteId: invite.inviteId,
         },
@@ -181,7 +181,7 @@ describe("invite tests", async () => {
       });
 
       expect(body.message).toBe(
-        "Er bestaat al een pending uitnodiging voor deze leerkracht en klas"
+        "Er bestaat al een pending uitnodiging voor deze leerkracht en klas",
       );
       expect(status).toBe(409);
     });
@@ -195,7 +195,9 @@ describe("invite tests", async () => {
         });
 
       expect(status).toBe(400);
-      expect(body.error).toBe("validation error");
+      expect(body.error).toBe(
+        "Bad request due to invalid syntax or data (validation error)",
+      );
       expect(body.message).toBe("invalid request for invite creation");
 
       expect(body.details).toEqual(
@@ -208,7 +210,7 @@ describe("invite tests", async () => {
             field: "classId",
             source: "params",
           }),
-        ])
+        ]),
       );
 
       // verify no invite was created
@@ -224,7 +226,9 @@ describe("invite tests", async () => {
         .send({}); // empty body
 
       expect(status).toBe(400);
-      expect(body.error).toBe("validation error");
+      expect(body.error).toBe(
+        "Bad request due to invalid syntax or data (validation error)",
+      );
       expect(body.message).toBe("invalid request for invite creation");
       expect(body.details).toEqual(
         expect.arrayContaining([
@@ -232,7 +236,7 @@ describe("invite tests", async () => {
             field: "otherTeacherId",
             source: "body",
           }),
-        ])
+        ]),
       );
 
       // verify no invite was created
@@ -250,12 +254,12 @@ describe("invite tests", async () => {
       const invite1: Invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
-        classroom.id
+        classroom.id,
       );
       const invite2: Invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
-        classroom2.id
+        classroom2.id,
       );
 
       const { status, body } = await request(app)
@@ -274,7 +278,7 @@ describe("invite tests", async () => {
       invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
-        classroom.id
+        classroom.id,
       );
     });
     it("should respond with a `200` status code and an updated invite when the action is `accept`", async () => {
@@ -329,7 +333,9 @@ describe("invite tests", async () => {
         });
 
       expect(status).toBe(400);
-      expect(body.error).toBe("validation error");
+      expect(body.error).toBe(
+        "Bad request due to invalid syntax or data (validation error)",
+      );
       expect(body.message).toBe("invalid request for invite update");
       expect(body.details).toEqual(
         expect.arrayContaining([
@@ -337,7 +343,7 @@ describe("invite tests", async () => {
             field: "action",
             source: "body",
           }),
-        ])
+        ]),
       );
 
       // verify that the invite was not updated
@@ -421,7 +427,9 @@ describe("invite tests", async () => {
         });
 
       expect(status).toBe(400);
-      expect(body.error).toBe("validation error");
+      expect(body.error).toBe(
+        "Bad request due to invalid syntax or data (validation error)",
+      );
       expect(body.message).toBe("invalid request for invite update");
       expect(body.details).toEqual(
         expect.arrayContaining([
@@ -429,7 +437,7 @@ describe("invite tests", async () => {
             field: "inviteId",
             source: "params",
           }),
-        ])
+        ]),
       );
     });
   });
@@ -441,7 +449,7 @@ describe("invite tests", async () => {
       invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
-        classroom.id
+        classroom.id,
       );
     });
     it("should respond with a `200` status code and the deleted invite", async () => {
@@ -510,7 +518,7 @@ describe("invite tests", async () => {
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(404);
-      expect(body.error).toBe("not found"); // this error message is defined in `errorMiddleware.ts`
+      expect(body.error).toBe("Resource not found"); // this error message is defined in `errorMiddleware.ts`
     });
     it("should respond with a `400` status code when the params are not correct", async () => {
       const { status, body } = await request(app)
@@ -518,7 +526,9 @@ describe("invite tests", async () => {
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(400);
-      expect(body.error).toBe("validation error");
+      expect(body.error).toBe(
+        "Bad request due to invalid syntax or data (validation error)",
+      );
       expect(body.message).toBe("invalid request params");
       expect(body.details).toEqual(
         expect.arrayContaining([
@@ -530,7 +540,7 @@ describe("invite tests", async () => {
             field: "inviteId",
             source: "params",
           }),
-        ])
+        ]),
       );
     });
   });
@@ -541,17 +551,17 @@ describe("invite tests", async () => {
       const teacherUser3: User & { teacher: Teacher } = await createTeacher(
         "Bleep",
         "Bloop",
-        "bleep.bloop@gmail.com"
+        "bleep.bloop@gmail.com",
       );
       const invite1: Invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
-        classroom.id
+        classroom.id,
       );
       const invite2: Invite = await createInvite(
         teacherUser1.id,
         teacherUser3.id,
-        classroom.id
+        classroom.id,
       );
 
       // test getting the invites
@@ -578,7 +588,9 @@ describe("invite tests", async () => {
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(400);
-      expect(body.error).toBe("validation error");
+      expect(body.error).toBe(
+        "Bad request due to invalid syntax or data (validation error)",
+      );
       expect(body.message).toBe("invalid request params");
       expect(body.details).toEqual(
         expect.arrayContaining([
@@ -586,7 +598,7 @@ describe("invite tests", async () => {
             field: "classId",
             source: "params",
           }),
-        ])
+        ]),
       );
     });
   });
