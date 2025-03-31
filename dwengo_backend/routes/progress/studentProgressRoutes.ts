@@ -10,6 +10,7 @@ import {
 import { protectStudent } from "../../middleware/studentAuthMiddleware";
 
 const router: Router = express.Router();
+router.use(protectStudent);
 
 /**
  * ===========================
@@ -24,11 +25,7 @@ const router: Router = express.Router();
  * @param  learningObjectId: string
  * @access  Student
  */
-router.post(
-  "/learningObject/:learningObjectId",
-  protectStudent,
-  createProgress
-);
+router.post("/learningObject/:learningObjectId", createProgress);
 
 /**
  * @route   GET /progress/student/learningObject/:learningObjectId
@@ -37,11 +34,7 @@ router.post(
  * @param  learningObjectId: string
  * @access  Student
  */
-router.get(
-  "/learningObject/:learningObjectId",
-  protectStudent,
-  getStudentProgress
-);
+router.get("/learningObject/:learningObjectId", getStudentProgress);
 
 /**
  * @route   PATCH /progress/student/learningObject/:learningObjectId
@@ -50,11 +43,7 @@ router.get(
  * @param  learningObjectId: string
  * @access  Student
  */
-router.patch(
-  "/learningObject/:learningObjectId",
-  protectStudent,
-  updateProgress
-);
+router.patch("/learningObject/:learningObjectId", updateProgress);
 
 /**
  * @route   GET /progress/student/team/:teamid
@@ -66,7 +55,7 @@ router.patch(
  * @param  teamid: number
  * @access  Student
  */
-router.get("/team/:teamid", protectStudent, getTeamProgressStudent);
+router.get("/team/:teamid", getTeamProgressStudent);
 
 /**
  * @route   GET /progress/student/assignment/:assignmentId
@@ -76,11 +65,7 @@ router.get("/team/:teamid", protectStudent, getTeamProgressStudent);
  * @param  assignmentId: number
  * @access  Student
  */
-router.get(
-  "/assignment/:assignmentId",
-  protectStudent,
-  getStudentAssignmentProgress
-);
+router.get("/assignment/:assignmentId", getStudentAssignmentProgress);
 
 /**
  * @route   GET /progress/student/learningPath/:learningPathId
@@ -90,10 +75,6 @@ router.get(
  * @param  learningPathId: string
  * @access  Student
  */
-router.get(
-  "/learningPath/:learningPathId/",
-  protectStudent,
-  getStudentLearningPathProgress
-);
+router.get("/learningPath/:learningPathId/", getStudentLearningPathProgress);
 
 export default router;
