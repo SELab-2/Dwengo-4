@@ -11,6 +11,7 @@ import {
 import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 
 const router = express.Router();
+router.use(protectTeacher);
 
 // routes for classes
 
@@ -20,14 +21,14 @@ const router = express.Router();
  * @body name: string
  * @access Teacher
  */
-router.post("/", protectTeacher, createClassroom);
+router.post("/", createClassroom);
 
 /**
  * @route GET /class/teacher
  * @description Get all classes for a teacher
  * @access Teacher
  */
-router.get("/", protectTeacher, getTeacherClasses);
+router.get("/", getTeacherClasses);
 
 /**
  * @route GET /class/teacher/:classId/student
@@ -35,7 +36,7 @@ router.get("/", protectTeacher, getTeacherClasses);
  * @param classId: number
  * @access Teacher
  */
-router.get("/:classId/student", protectTeacher, getClassroomStudents);
+router.get("/:classId/student", getClassroomStudents);
 
 /**
  * @route GET /class/teacher/:classId/join-link
@@ -43,7 +44,7 @@ router.get("/:classId/student", protectTeacher, getClassroomStudents);
  * @param classId: string
  * @access Teacher
  */
-router.get("/:classId/join-link", protectTeacher, getJoinLink);
+router.get("/:classId/join-link", getJoinLink);
 
 /**
  * @route PATCH /class/teacher/:classId/join-link
@@ -51,7 +52,7 @@ router.get("/:classId/join-link", protectTeacher, getJoinLink);
  * @param classId: string
  * @access Teacher
  */
-router.patch("/:classId/join-link", protectTeacher, regenerateJoinLink);
+router.patch("/:classId/join-link", regenerateJoinLink);
 
 /**
  * @route GET /class/teacher/:classId
@@ -59,7 +60,7 @@ router.patch("/:classId/join-link", protectTeacher, regenerateJoinLink);
  * @param classId: string
  * @access Teacher
  */
-router.get("/:classId", protectTeacher, getClassByIdAndTeacherId);
+router.get("/:classId", getClassByIdAndTeacherId);
 
 /**
  * @route DELETE /class/teacher/:classId
@@ -67,6 +68,6 @@ router.get("/:classId", protectTeacher, getClassByIdAndTeacherId);
  * @param classId: string
  * @access Teacher
  */
-router.delete("/:classId", protectTeacher, deleteClassroom);
+router.delete("/:classId", deleteClassroom);
 
 export default router;
