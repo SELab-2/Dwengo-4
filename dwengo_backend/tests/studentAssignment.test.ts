@@ -37,10 +37,10 @@ describe("[GET] /student/assignments", async () => {
 
   let assignment1: Assignment;
   let assignment2: Assignment;
-  let assignment3: Assignment;
+  //let assignment3: Assignment;
 
-  let assignment4: Assignment;
-  let assignment5: Assignment;
+  //let assignment4: Assignment;
+  //let assignment5: Assignment;
 
   beforeEach(async () => {
     // create some students
@@ -51,7 +51,7 @@ describe("[GET] /student/assignments", async () => {
     student5 = await createStudent(
       "Gertrude",
       "Truede",
-      "truede.gertrude@gmail.com"
+      "truede.gertrude@gmail.com",
     );
     // create some classes
     class1 = await createClass("1LA", "ABCD");
@@ -63,17 +63,17 @@ describe("[GET] /student/assignments", async () => {
     lp1 = await createLearningPath(
       "LP1",
       "Learning Path 1",
-      teacherUser1.teacher.userId
+      teacherUser1.teacher.userId,
     );
     lp2 = await createLearningPath(
       "LP2",
       "Learning Path 2",
-      teacherUser1.teacher.userId
+      teacherUser1.teacher.userId,
     );
     lp3 = await createLearningPath(
       "LP3",
       "Learning Path 3",
-      teacherUser1.teacher.userId
+      teacherUser1.teacher.userId,
     );
 
     // Add students to classes
@@ -90,12 +90,12 @@ describe("[GET] /student/assignments", async () => {
     assignment4 = await createAssignment(
       class3.id,
       lp2.id,
-      new Date("2026-10-17")
+      new Date("2026-10-17"),
     );
     assignment5 = await createAssignment(
       class3.id,
       lp3.id,
-      new Date("2025-05-28")
+      new Date("2025-05-28"),
     );
   });
 

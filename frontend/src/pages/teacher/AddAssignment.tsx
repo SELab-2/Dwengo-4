@@ -1,20 +1,17 @@
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   fetchClass,
   fetchStudentsByClass,
-} from "../../util/teacher/httpTeacher";
-import { SecondaryButton } from "../../components/shared/PrimaryButton";
-import CreateClass from "../../components/teacher/classes/CreateClassForm";
-import AddAssignmentForm from "../../components/teacher/assignment/AddAssignmentForm";
-import { useParams } from "react-router-dom";
+} from '../../util/teacher/httpTeacher';
+import AddAssignmentForm from '../../components/teacher/assignment/AddAssignmentForm';
+import { useParams } from 'react-router-dom';
 
 interface ClassItem {
   id: string;
   name: string;
   code: string;
 }
-
 const AddAssignment: React.FC = () => {
   const { classId } = useParams<{ classId: string }>();
 
@@ -24,7 +21,7 @@ const AddAssignment: React.FC = () => {
     isError: isClassError,
     error: classError,
   } = useQuery<ClassItem>({
-    queryKey: ["class", classId],
+    queryKey: ['class', classId],
     queryFn: () => fetchClass({ classId: Number(classId) }),
   });
 
@@ -34,7 +31,7 @@ const AddAssignment: React.FC = () => {
     isError: isStudentsError,
     error: studentsError,
   } = useQuery({
-    queryKey: ["students", classId],
+    queryKey: ['students', classId],
     queryFn: async () => fetchStudentsByClass({ classId: Number(classId) }),
   });
 
@@ -46,15 +43,15 @@ const AddAssignment: React.FC = () => {
     return <div>Error: {classError?.message || studentsError?.message}</div>;
   }
 
-  const studentsCorData = studentsData?.map((data: any) => ({
-    id: data.user.id,
-    firstName: data.user.firstName,
-    lastName: data.user.lastName,
-    email: data.user.email,
+  const studentsCorData = studentsData?.map((data) => ({
+    id: data.id,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    email: data.email,
   }));
 
   const formData = {
-    name: classData?.name || "",
+    name: classData?.name || '',
     students: studentsCorData || [],
   };
 

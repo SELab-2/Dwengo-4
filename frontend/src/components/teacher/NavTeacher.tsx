@@ -1,24 +1,24 @@
-import React, { useState, MouseEvent } from "react";
-import { NavLink, useSubmit, useLocation } from "react-router-dom";
-import Container from "../shared/Container";
-import styles from "./Nav.module.css";
-import NavButton from "../shared/NavButton";
+import React, { useState, MouseEvent } from 'react';
+import { useSubmit, useLocation } from 'react-router-dom';
+import Container from '../shared/Container';
+import styles from './Nav.module.css';
+import NavButton from '../shared/NavButton';
 
 const NavTeacher: React.FC = () => {
-  const [menuOpen, setMenuOpen] = useState<boolean>(false);
-  const [firstName, setFirstName] = useState<string | null>(
-    localStorage.getItem("firstName")
+  const [menuOpen] = useState<boolean>(false);
+  const [firstName] = useState<string | null>(
+    localStorage.getItem('firstName'),
   );
   const location = useLocation();
   const submit = useSubmit();
 
-  const toggleMenu = (): void => {
+  /*const toggleMenu = (): void => {
     setMenuOpen(!menuOpen);
-  };
+  };*/
 
   const handleLogout = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    submit(null, { action: "/teacher/logout", method: "post" });
+    submit(null, { action: '/teacher/logout', method: 'post' });
   };
 
   return (
@@ -29,27 +29,27 @@ const NavTeacher: React.FC = () => {
             <img
               className="h-8 lg:h-12 xl:h-16 w-fit"
               src="/img/dwengo-groen-zwart.png"
-              onClick={() => (window.location.href = "/teacher")}
+              onClick={() => (window.location.href = '/teacher')}
             />
             {firstName ? (
               <div className="flex space-x-4">
                 <NavButton
                   to="/teacher"
                   label="Home"
-                  isActive={(path) => location.pathname === "/teacher"}
+                  isActive={() => location.pathname === '/teacher'}
                 />
                 <NavButton
                   to="/teacher/classes"
                   label="Klassen"
-                  isActive={(path) =>
-                    location.pathname.includes("/teacher/classes")
+                  isActive={() =>
+                    location.pathname.includes('/teacher/classes')
                   }
                 />
                 <NavButton
                   to="/teacher/learning-paths"
                   label="Leerpaden"
-                  isActive={(path) =>
-                    location.pathname.includes("/teacher/learning-paths")
+                  isActive={() =>
+                    location.pathname.includes('/teacher/learning-paths')
                   }
                 />
               </div>
@@ -57,19 +57,17 @@ const NavTeacher: React.FC = () => {
               <div
                 className={`flex flex-row justify-end w-full ${
                   styles.navLinks
-                } ${menuOpen ? styles.open : ""}`}
+                } ${menuOpen ? styles.open : ''}`}
               >
                 <NavButton
                   to="/teacher/inloggen"
                   label="Inloggen"
-                  isActive={(path) => location.pathname === "/teacher/inloggen"}
+                  isActive={() => location.pathname === '/teacher/inloggen'}
                 />
                 <NavButton
                   to="/teacher/registreren"
                   label="Registreren"
-                  isActive={(path) =>
-                    location.pathname === "/teacher/registreren"
-                  }
+                  isActive={() => location.pathname === '/teacher/registreren'}
                 />
               </div>
             )}

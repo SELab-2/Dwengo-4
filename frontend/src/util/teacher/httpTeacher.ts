@@ -1,7 +1,7 @@
-import { QueryClient } from "@tanstack/react-query";
-import { getAuthToken } from "./authTeacher";
+import { QueryClient } from '@tanstack/react-query';
+import { getAuthToken } from './authTeacher';
 
-const BACKEND = "http://localhost:5000";
+const BACKEND = 'http://localhost:5000';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,16 +32,16 @@ export async function loginTeacher({
   password,
 }: AuthCredentials): Promise<AuthResponse> {
   const response = await fetch(`${BACKEND}/teacher/auth/login`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ email, password }),
   });
 
   if (!response.ok) {
     const error: APIError = new Error(
-      "Er is iets misgegaan tijdens het inloggen."
+      'Er is iets misgegaan tijdens het inloggen.',
     );
     error.code = response.status;
     error.info = await response.json();
@@ -58,16 +58,16 @@ export async function signupTeacher({
   password,
 }: AuthCredentials): Promise<AuthResponse> {
   const response = await fetch(`${BACKEND}/teacher/auth/register`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ firstName, lastName, email, password }),
   });
 
   if (!response.ok) {
     const error: APIError = new Error(
-      "Er is iets misgegaan tijdens het registreren."
+      'Er is iets misgegaan tijdens het registreren.',
     );
     error.code = response.status;
     error.info = await response.json();
@@ -85,16 +85,16 @@ interface ClassItem {
 
 export async function fetchClasses(): Promise<ClassItem[]> {
   const response = await fetch(`${BACKEND}/teacher/classes`, {
-    method: "GET",
+    method: 'GET',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${getAuthToken()}`,
     },
   });
 
   if (!response.ok) {
     const error: APIError = new Error(
-      "Er is iets misgegaan bij het ophalen van de klassen."
+      'Er is iets misgegaan bij het ophalen van de klassen.',
     );
     error.code = response.status;
     error.info = await response.json();
@@ -102,8 +102,8 @@ export async function fetchClasses(): Promise<ClassItem[]> {
   }
 
   const returner = await response.json();
-  const classrooms = returner["classrooms"];
-  console.log("GETTING CLASSES", classrooms);
+  const classrooms = returner['classrooms'];
+  console.log('GETTING CLASSES', classrooms);
 
   return await classrooms;
 }
@@ -116,9 +116,9 @@ export async function createClass({
   name,
 }: CreateClassPayload): Promise<ClassItem> {
   const response = await fetch(`${BACKEND}/teacher/classes`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${getAuthToken()}`,
     },
     body: JSON.stringify({ name }),
@@ -126,7 +126,7 @@ export async function createClass({
 
   if (!response.ok) {
     const error: APIError = new Error(
-      "Er is iets misgegaan bij het aanmaken van de klas."
+      'Er is iets misgegaan bij het aanmaken van de klas.',
     );
     error.code = response.status;
     error.info = await response.json();
@@ -142,16 +142,16 @@ export async function fetchClass({
   classId: number;
 }): Promise<ClassItem> {
   const response = await fetch(`${BACKEND}/teacher/classes/${classId}`, {
-    method: "GET",
+    method: 'GET',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${getAuthToken()}`,
     },
   });
 
   if (!response.ok) {
     const error: APIError = new Error(
-      "Er is iets misgegaan bij het ophalen van de klas."
+      'Er is iets misgegaan bij het ophalen van de klas.',
     );
     error.code = response.status;
     error.info = await response.json();
@@ -177,17 +177,17 @@ export async function fetchStudentsByClass({
   const response = await fetch(
     `${BACKEND}/teacher/classes/${classId}/students`,
     {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${getAuthToken()}`,
       },
-    }
+    },
   );
 
   if (!response.ok) {
     const error: APIError = new Error(
-      "Er is iets misgegaan bij het ophalen van de studenten."
+      'Er is iets misgegaan bij het ophalen van de studenten.',
     );
     error.code = response.status;
     error.info = await response.json();
@@ -207,29 +207,28 @@ interface LearningPath {
 //Haal de locale leerpaden op van de leerkracht op
 export async function fetchLearningPaths(): Promise<LearningPath[]> {
   const response = await fetch(`${BACKEND}/teacher/learningPaths`, {
-    method: "GET",
+    method: 'GET',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${getAuthToken()}`,
     },
   });
 
   if (!response.ok) {
     const error: APIError = new Error(
-      "Er is iets misgegaan bij het ophalen van de leerpaden."
+      'Er is iets misgegaan bij het ophalen van de leerpaden.',
     );
     error.code = response.status;
     error.info = await response.json();
     throw error;
   }
 
-  let learningPaths = await response.json();
-  learningPaths = learningPaths;
+  const learningPaths = await response.json();
   return learningPaths;
 }
 
 export async function createAssignment({
-  classes,
+  //classes, dit mag want de type is declared
   name,
   learningPathId,
   students,
@@ -244,9 +243,9 @@ export async function createAssignment({
   description: string;
 }): Promise<void> {
   const response = await fetch(`${BACKEND}/teacher/assignments`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${getAuthToken()}`,
     },
     body: JSON.stringify({
@@ -260,7 +259,7 @@ export async function createAssignment({
 
   if (!response.ok) {
     const error: APIError = new Error(
-      "Er is iets misgegaan bij het aanmaken van de opdracht."
+      'Er is iets misgegaan bij het aanmaken van de opdracht.',
     );
     error.code = response.status;
     error.info = await response.json();
@@ -270,7 +269,7 @@ export async function createAssignment({
 
 export interface Invite {
   inviteId: number;
-  status: "PENDING" | "APPROVED" | "DENIED";
+  status: 'PENDING' | 'APPROVED' | 'DENIED';
   otherTeacher: {
     firstName: string;
     lastName: string;
@@ -284,22 +283,22 @@ export interface Invite {
  * @returns Een lijst met alle invites voor de klas
  */
 export async function getPendingInvitesForClass(
-  classId: string
+  classId: string,
 ): Promise<Invite[]> {
   const response = await fetch(
     `${BACKEND}/teacher/classes/${classId}/invites`,
     {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${getAuthToken()}`,
       },
-    }
+    },
   );
 
   if (!response.ok) {
     const error: APIError = new Error(
-      "Er is iets misgegaan bij het ophalen van de invites."
+      'Er is iets misgegaan bij het ophalen van de invites.',
     );
     error.code = response.status;
     error.info = await response.json();
@@ -325,18 +324,18 @@ export async function createInvite({
   const response = await fetch(
     `${BACKEND}/teacher/classes/${classId}/invites`,
     {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${getAuthToken()}`,
       },
       body: JSON.stringify({ otherTeacherEmail }),
-    }
+    },
   );
 
   if (!response.ok) {
     const error: APIError = new Error(
-      "Er is iets misgegaan tijdens het uitnodigen."
+      'Er is iets misgegaan tijdens het uitnodigen.',
     );
     error.code = response.status;
     error.info = await response.json();
@@ -355,16 +354,16 @@ export async function fetchJoinRequests(classId: string): Promise<any> {
   const response = await fetch(
     `${BACKEND}/teacher/classes/${classId}/join-requests`,
     {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${getAuthToken()}`,
       },
-    }
+    },
   );
   if (!response.ok) {
     const error = new Error(
-      "Er is iets misgegaan bij het ophalen van de join requests."
+      'Er is iets misgegaan bij het ophalen van de join requests.',
     );
     throw error;
   }
@@ -386,17 +385,17 @@ export async function approveJoinRequest({
   const response = await fetch(
     `${BACKEND}/teacher/classes/${classId}/join-requests/${requestId}`,
     {
-      method: "PATCH",
+      method: 'PATCH',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${getAuthToken()}`,
       },
-      body: JSON.stringify({ action: "approve" }),
-    }
+      body: JSON.stringify({ action: 'approve' }),
+    },
   );
   if (!response.ok) {
     const error: APIError = new Error(
-      "Er is iets misgegaan bij het approven van de join request."
+      'Er is iets misgegaan bij het approven van de join request.',
     );
     error.code = response.status;
     error.info = await response.json();
@@ -420,17 +419,17 @@ export async function denyJoinRequest({
   const response = await fetch(
     `${BACKEND}/teacher/classes/${classId}/join-requests/${requestId}`,
     {
-      method: "PATCH",
+      method: 'PATCH',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${getAuthToken()}`,
       },
-      body: JSON.stringify({ action: "deny" }),
-    }
+      body: JSON.stringify({ action: 'deny' }),
+    },
   );
   if (!response.ok) {
     const error: APIError = new Error(
-      "Er is iets misgegaan bij het denyen van de join request."
+      'Er is iets misgegaan bij het denyen van de join request.',
     );
     error.code = response.status;
     error.info = await response.json();

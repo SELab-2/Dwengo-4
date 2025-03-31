@@ -1,5 +1,3 @@
-
-
 import { PrismaClient, LearningObject } from "@prisma/client";
 import { LearningObjectDto } from "./dwengoLearningObjectService";
 
@@ -9,7 +7,10 @@ const prisma = new PrismaClient();
  * Converteert een Prisma LearningObject record naar ons LearningObjectDto
  * (origin = "local")
  */
-function mapLocalToDto(localObj: LearningObject, isTeacher: boolean): LearningObjectDto {
+function mapLocalToDto(
+  localObj: LearningObject,
+  //_isTeacher: boolean
+): LearningObjectDto {
   return {
     id: localObj.id,
     uuid: localObj.uuid,
@@ -40,7 +41,7 @@ function mapLocalToDto(localObj: LearningObject, isTeacher: boolean): LearningOb
  * filter op teacherExclusive/available als de gebruiker geen teacher is.
  */
 export async function getLocalLearningObjects(
-  isTeacher: boolean
+  isTeacher: boolean,
 ): Promise<LearningObjectDto[]> {
   const whereClause = isTeacher
     ? {}
@@ -59,7 +60,7 @@ export async function getLocalLearningObjects(
  */
 export async function getLocalLearningObjectById(
   id: string,
-  isTeacher: boolean
+  isTeacher: boolean,
 ): Promise<LearningObjectDto | null> {
   const localObj = await prisma.learningObject.findUnique({ where: { id } });
   if (!localObj) return null;
@@ -75,7 +76,7 @@ export async function getLocalLearningObjectById(
  */
 export async function searchLocalLearningObjects(
   isTeacher: boolean,
-  searchTerm: string
+  searchTerm: string,
 ): Promise<LearningObjectDto[]> {
   const whereClause: any = {
     OR: [
@@ -102,18 +103,15 @@ export async function getLocalLearningObjectByHruidLangVersion(
   hruid: string,
   language: string,
   version: number,
-  isTeacher: boolean
+  isTeacher: boolean,
 ): Promise<LearningObjectDto | null> {
   const localObj = await prisma.learningObject.findUnique({
-    
-
-  
-     where: {
-       hruid,
-       language,
-       version,
-     },
-   });
+    where: {
+      hruid,
+      language,
+      version,
+    },
+  });
 
   if (!localObj) return null;
 

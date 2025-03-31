@@ -4,17 +4,17 @@ import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import { BadRequestError } from "../../errors/errors";
 import { Role } from "@prisma/client";
 
-const handleRequest = (
-  handler: (req: AuthenticatedRequest, res: Response) => Promise<void>
-) => async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-  try {
-    await handler(req, res);
-  } catch (err: any) {
-    const msg = err.message || "Unknown error";
-    const status = err.statusCode || 400;
-    res.status(status).json({ error: msg });
-  }
-};
+const handleRequest =
+  (handler: (_req: AuthenticatedRequest, _res: Response) => Promise<void>) =>
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      await handler(req, res);
+    } catch (err: any) {
+      const msg = err.message || "Unknown error";
+      const status = err.statusCode || 400;
+      res.status(status).json({ error: msg });
+    }
+  };
 
 // CREATE SPECIFIC
 export const createQuestionSpecific = handleRequest(async (req, res) => {
@@ -28,11 +28,13 @@ export const createQuestionSpecific = handleRequest(async (req, res) => {
     dwengoHruid,
     dwengoLanguage,
     dwengoVersion,
-    isPrivate
+    isPrivate,
   } = req.body;
 
   if (!assignmentId || !teamId || !title || !text) {
-    throw new BadRequestError("Missing required fields (assignmentId, teamId, title, text).");
+    throw new BadRequestError(
+      "Missing required fields (assignmentId, teamId, title, text).",
+    );
   }
   const userId = req.user!.id;
   const role: Role = req.user!.role || Role.STUDENT;
@@ -49,7 +51,7 @@ export const createQuestionSpecific = handleRequest(async (req, res) => {
     localLearningObjectId,
     dwengoHruid,
     dwengoLanguage,
-    dwengoVersion ? Number(dwengoVersion) : undefined
+    dwengoVersion ? Number(dwengoVersion) : undefined,
   );
 
   res.status(201).json(questionSpec);
@@ -65,11 +67,13 @@ export const createQuestionGeneral = handleRequest(async (req, res) => {
     isExternal,
     pathRef,
     dwengoLanguage,
-    isPrivate
+    isPrivate,
   } = req.body;
 
   if (!assignmentId || !teamId || !title || !text || !pathRef) {
-    throw new BadRequestError("Missing required fields (assignmentId, teamId, title, text, pathRef).");
+    throw new BadRequestError(
+      "Missing required fields (assignmentId, teamId, title, text, pathRef).",
+    );
   }
   const userId = req.user!.id;
   const role: Role = req.user!.role || Role.STUDENT;
@@ -84,7 +88,7 @@ export const createQuestionGeneral = handleRequest(async (req, res) => {
     !!isExternal,
     !!isPrivate,
     pathRef,
-    dwengoLanguage
+    dwengoLanguage,
   );
 
   res.status(201).json(questionGen);
@@ -100,7 +104,11 @@ export const createQuestionMessage = handleRequest(async (req, res) => {
   }
   const userId = req.user!.id;
 
-  const msg = await QuestionService.createQuestionMessage(Number(questionId), userId, text);
+  const msg = await QuestionService.createQuestionMessage(
+    Number(questionId),
+    userId,
+    text,
+  );
   res.status(201).json(msg);
 });
 
@@ -111,7 +119,10 @@ export const updateQuestion = handleRequest(async (req, res) => {
   if (!title) {
     throw new BadRequestError("Missing title");
   }
-  const updated = await QuestionService.updateQuestion(Number(questionId), title);
+  const updated = await QuestionService.updateQuestion(
+    Number(questionId),
+    title,
+  );
   res.status(200).json(updated);
 });
 
@@ -123,7 +134,10 @@ export const updateQuestionMessage = handleRequest(async (req, res) => {
   if (!text) {
     throw new BadRequestError("Missing text for question message update.");
   }
-  const updatedMsg = await QuestionService.updateQuestionMessage(Number(questionMessageId), text);
+  const updatedMsg = await QuestionService.updateQuestionMessage(
+    Number(questionMessageId),
+    text,
+  );
   res.status(200).json(updatedMsg);
 });
 
@@ -139,7 +153,7 @@ export const getQuestionsTeam = handleRequest(async (req, res) => {
   const { teamId } = req.params;
   const questions = await QuestionService.getQuestionsForTeam(
     Number(teamId),
-    req.user! // pass user => filtering
+    req.user!, // pass user => filtering
   );
   res.json(questions);
 });
@@ -149,7 +163,7 @@ export const getQuestionsClass = handleRequest(async (req, res) => {
   const { classId } = req.params;
   const questions = await QuestionService.getQuestionsForClass(
     Number(classId),
-    req.user!
+    req.user!,
   );
   res.json(questions);
 });
@@ -160,7 +174,7 @@ export const getQuestionsAssignment = handleRequest(async (req, res) => {
   const questions = await QuestionService.getQuestionsForAssignment(
     Number(assignmentId),
     Number(classId),
-    req.user!
+    req.user!,
   );
   res.json(questions);
 });
@@ -185,4 +199,3 @@ export const deleteQuestionMessage = handleRequest(async (req, res) => {
   await QuestionService.deleteQuestionMessage(Number(questionMessageId));
   res.status(204).end();
 });
-

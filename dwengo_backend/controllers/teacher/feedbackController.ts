@@ -21,7 +21,7 @@ export default class FeedbackController {
         teacherId,
       );
       res.status(200).json(feedback);
-    } catch (_error) {
+    } catch {
       res.status(500).json({ error: "Failed to retrieve feedback" });
     }
   }
@@ -44,7 +44,7 @@ export default class FeedbackController {
         description,
       );
       res.status(201).json(feedback);
-    } catch (_error) {
+    } catch {
       res.status(500).json({ error: "Failed to create feedback" });
     }
   }
@@ -68,7 +68,7 @@ export default class FeedbackController {
       } else {
         res.status(404).json({ error: "Feedback not found" });
       }
-    } catch (_error) {
+    } catch {
       res.status(500).json({ error: "Failed to retrieve feedback" });
     }
   }
@@ -90,7 +90,7 @@ export default class FeedbackController {
         teacherId,
       );
       res.json(feedback);
-    } catch (_error) {
+    } catch {
       res.status(500).json({ error: "Failed to update feedback" });
     }
   }
@@ -108,7 +108,7 @@ export default class FeedbackController {
       await service.deleteFeedbackForSubmission(submissionId, teacherId);
       // Status 204: successful deletion but no json body returned (no content).
       res.status(204).end();
-    } catch (_error) {
+    } catch {
       res.status(500).json({ error: "Failed to delete feedback" });
     }
   }

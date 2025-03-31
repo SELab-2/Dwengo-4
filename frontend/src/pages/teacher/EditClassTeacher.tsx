@@ -7,7 +7,6 @@ import InputWithChecks from '../../components/shared/InputWithChecks';
 import PrimaryButton from '../../components/shared/PrimaryButton';
 import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButton';
 import { validateRequired, validateForm } from '../../util/shared/validation';
-import NavButton from '../../components/shared/NavButton';
 
 interface ClassDetails {
   id: string;
@@ -76,7 +75,7 @@ const EditClassTeacher: React.FC = () => {
         console.log('Looking for class with ID:', targetClassId);
 
         const targetClass = classes.find(
-          (c: any) => String(c.id) === String(targetClassId),
+          (c: ClassDetails) => String(c.id) === String(targetClassId),
         );
         console.log('Found class:', targetClass);
 

@@ -1,20 +1,18 @@
 import React, { useState, MouseEvent } from 'react';
-import { NavLink, useSubmit, useLocation } from 'react-router-dom';
+import { useSubmit, useLocation } from 'react-router-dom';
 import Container from '../shared/Container';
 import styles from './Nav.module.css';
 import NavButton from '../shared/NavButton';
 
 const Navstudent: React.FC = () => {
-  const [menuOpen, setMenuOpen] = useState<boolean>(false);
-  const [firstName, setFirstName] = useState<string | null>(
-    localStorage.getItem('firstName'),
-  );
+  const [menuOpen] = useState<boolean>(false); //setter was unused
+  const firstName = localStorage.getItem('firstName');
   const location = useLocation();
   const submit = useSubmit();
 
-  const toggleMenu = (): void => {
+  /*const toggleMenu = (): void => {
     setMenuOpen(!menuOpen);
-  };
+  };*/
 
   const handleLogout = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -48,7 +46,7 @@ const Navstudent: React.FC = () => {
                   <NavButton
                     to={to}
                     label={label}
-                    isActive={(path) => location.pathname === to}
+                    isActive={() => location.pathname === to}
                   />
                 ))}
               </div>
@@ -61,14 +59,12 @@ const Navstudent: React.FC = () => {
                 <NavButton
                   to="/student/inloggen"
                   label="Inloggen"
-                  isActive={(path) => location.pathname === '/student/inloggen'}
+                  isActive={() => location.pathname === '/student/inloggen'}
                 />
                 <NavButton
                   to="/student/registreren"
                   label="Registreren"
-                  isActive={(path) =>
-                    location.pathname === '/student/registreren'
-                  }
+                  isActive={() => location.pathname === '/student/registreren'}
                 />
               </div>
             )}

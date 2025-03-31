@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useRef, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   fetchClasses,
   getPendingInvitesForClass,
@@ -7,12 +7,12 @@ import {
   fetchJoinRequests,
   approveJoinRequest,
   denyJoinRequest,
-} from "../../util/teacher/httpTeacher";
-import PrimaryButton from "../../components/shared/PrimaryButton";
-import CreateClass from "../../components/teacher/classes/CreateClassForm";
-import Modal from "../../components/shared/Modal";
-import SuccessMessage from "../../components/shared/SuccessMessage";
-import { useNavigate } from "react-router-dom";
+} from '../../util/teacher/httpTeacher';
+import PrimaryButton from '../../components/shared/PrimaryButton';
+import CreateClass from '../../components/teacher/classes/CreateClassForm';
+import Modal from '../../components/shared/Modal';
+import SuccessMessage from '../../components/shared/SuccessMessage';
+import { useNavigate } from 'react-router-dom';
 
 interface ClassItem {
   id: string;
@@ -22,7 +22,7 @@ interface ClassItem {
 
 interface TeacherInvite {
   inviteId: number;
-  status: "PENDING" | "APPROVED" | "DENIED";
+  status: 'PENDING' | 'APPROVED' | 'DENIED';
   otherTeacher: {
     firstName: string;
     lastName: string;
@@ -32,7 +32,7 @@ interface TeacherInvite {
 
 interface JoinRequest {
   requestId: number;
-  status: "PENDING" | "APPROVED" | "DENIED";
+  status: 'PENDING' | 'APPROVED' | 'DENIED';
   student: {
     firstName: string;
     lastName: string;
@@ -62,7 +62,7 @@ const ClassesPageTeacher: React.FC = () => {
   >(null);
 
   // State voor de mini-form in de teacher invites modal (nu op basis van email)
-  const [inviteTeacherEmail, setInviteTeacherEmail] = useState<string>("");
+  const [inviteTeacherEmail, setInviteTeacherEmail] = useState<string>('');
 
   // Query: Haal alle klassen op
   const {
@@ -71,7 +71,7 @@ const ClassesPageTeacher: React.FC = () => {
     isError,
     error,
   } = useQuery<ClassItem[]>({
-    queryKey: ["classes"],
+    queryKey: ['classes'],
     queryFn: fetchClasses,
   });
 
@@ -79,7 +79,7 @@ const ClassesPageTeacher: React.FC = () => {
   const { data: teacherInvites, isLoading: isInvitesLoading } = useQuery<
     TeacherInvite[]
   >({
-    queryKey: ["teacherInvites", selectedTeacherClassId],
+    queryKey: ['teacherInvites', selectedTeacherClassId],
     queryFn: () => getPendingInvitesForClass(selectedTeacherClassId!),
     enabled: !!selectedTeacherClassId,
   });
@@ -87,7 +87,7 @@ const ClassesPageTeacher: React.FC = () => {
   // Query: Haal student join requests voor de geselecteerde klas op
   const { data: studentJoinRequests, isLoading: isStudentJoinLoading } =
     useQuery<JoinRequest[]>({
-      queryKey: ["studentJoinRequests", selectedStudentClassId],
+      queryKey: ['studentJoinRequests', selectedStudentClassId],
       queryFn: () => fetchJoinRequests(selectedStudentClassId!),
       enabled: !!selectedStudentClassId,
     });
@@ -104,9 +104,9 @@ const ClassesPageTeacher: React.FC = () => {
     onSuccess: () => {
       if (selectedTeacherClassId) {
         queryClient.invalidateQueries({
-          queryKey: ["teacherInvites", selectedTeacherClassId],
+          queryKey: ['teacherInvites', selectedTeacherClassId],
         });
-        setInviteTeacherEmail(""); // Reset het form
+        setInviteTeacherEmail(''); // Reset het form
       }
     },
   });
@@ -123,7 +123,7 @@ const ClassesPageTeacher: React.FC = () => {
     onSuccess: () => {
       if (selectedStudentClassId) {
         queryClient.invalidateQueries({
-          queryKey: ["studentJoinRequests", selectedStudentClassId],
+          queryKey: ['studentJoinRequests', selectedStudentClassId],
         });
       }
     },
@@ -141,7 +141,7 @@ const ClassesPageTeacher: React.FC = () => {
     onSuccess: () => {
       if (selectedStudentClassId) {
         queryClient.invalidateQueries({
-          queryKey: ["studentJoinRequests", selectedStudentClassId],
+          queryKey: ['studentJoinRequests', selectedStudentClassId],
         });
       }
     },
@@ -149,7 +149,7 @@ const ClassesPageTeacher: React.FC = () => {
 
   const handleInviteSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (selectedTeacherClassId && inviteTeacherEmail.trim() !== "") {
+    if (selectedTeacherClassId && inviteTeacherEmail.trim() !== '') {
       createInviteMutation.mutate({
         classId: selectedTeacherClassId,
         otherTeacherEmail: inviteTeacherEmail,
@@ -188,8 +188,8 @@ const ClassesPageTeacher: React.FC = () => {
         {isLoading && <p>Loading...</p>}
         {isError && (
           <p className="c-r">
-            {(error as any)?.info?.message ||
-              "Er is iets fout gegaan bij het ophalen van de klassen."}
+            {error.message ||
+              'Er is iets fout gegaan bij het ophalen van de klassen.'}
           </p>
         )}
 
@@ -269,8 +269,8 @@ const ClassesPageTeacher: React.FC = () => {
           )}
           {createInviteMutation.isError && (
             <div className="c-r">
-              {(createInviteMutation.error as any)?.info?.message ||
-                "Er is iets fout gegaan bij het versturen van de invite."}
+              {createInviteMutation.error.message ||
+                'Er is iets fout gegaan bij het versturen van de invite.'}
             </div>
           )}
           {isInvitesLoading ? (
@@ -349,7 +349,7 @@ const ClassesPageTeacher: React.FC = () => {
                         </button>
                       </td>
                       <td>
-                        {request.status === "PENDING" && (
+                        {request.status === 'PENDING' && (
                           <div className="flex gap-2">
                             <PrimaryButton
                               onClick={() => handleApprove(request.requestId)}
@@ -363,7 +363,7 @@ const ClassesPageTeacher: React.FC = () => {
                             </PrimaryButton>
                           </div>
                         )}
-                        {request.status === "DENIED" && (
+                        {request.status === 'DENIED' && (
                           <PrimaryButton
                             onClick={() => handleApprove(request.requestId)}
                           >

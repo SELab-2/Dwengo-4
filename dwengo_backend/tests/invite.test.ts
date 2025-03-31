@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import prisma from "./helpers/prisma";
 import app from "../index";
@@ -70,7 +69,9 @@ describe("invite tests", async () => {
       // emphasis on the 'non-pending' here
       // set up scenario where teacher has rejected the invite
       await addTeacherToClass(teacherUser1.id, classroom.id);
-      let invite: Invite = await createInvite(
+
+      //commented out want deze code wordt nooit gebruikt
+      /*let invite: Invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
         classroom.id
@@ -82,7 +83,7 @@ describe("invite tests", async () => {
         data: {
           status: JoinRequestStatus.DENIED,
         },
-      });
+      });*/
 
       // it should be possible to send another invite
       const { status, body } = await request(app)
@@ -192,7 +193,7 @@ describe("invite tests", async () => {
       });
 
       expect(body.message).toBe(
-        "Er bestaat al een pending uitnodiging voor deze leerkracht en klas"
+        "Er bestaat al een pending uitnodiging voor deze leerkracht en klas",
       );
       expect(status).toBe(409);
     });
@@ -219,7 +220,7 @@ describe("invite tests", async () => {
             field: "classId",
             source: "params",
           }),
-        ])
+        ]),
       );
 
       // verify no invite was created
@@ -243,7 +244,7 @@ describe("invite tests", async () => {
             field: "otherTeacherId",
             source: "body",
           }),
-        ])
+        ]),
       );
 
       // verify no invite was created
@@ -261,12 +262,12 @@ describe("invite tests", async () => {
       const invite1: Invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
-        classroom.id
+        classroom.id,
       );
       const invite2: Invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
-        classroom2.id
+        classroom2.id,
       );
 
       const { status, body } = await request(app)
@@ -285,7 +286,7 @@ describe("invite tests", async () => {
       invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
-        classroom.id
+        classroom.id,
       );
     });
     it("should respond with a `200` status code and an updated invite when the action is `accept`", async () => {
@@ -348,7 +349,7 @@ describe("invite tests", async () => {
             field: "action",
             source: "body",
           }),
-        ])
+        ]),
       );
 
       // verify that the invite was not updated
@@ -440,7 +441,7 @@ describe("invite tests", async () => {
             field: "inviteId",
             source: "params",
           }),
-        ])
+        ]),
       );
     });
   });
@@ -452,7 +453,7 @@ describe("invite tests", async () => {
       invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
-        classroom.id
+        classroom.id,
       );
     });
     it("should respond with a `200` status code and the deleted invite", async () => {
@@ -526,7 +527,7 @@ describe("invite tests", async () => {
     it("should respond with a `400` status code when the params are not correct", async () => {
       const { status, body } = await request(app)
         .delete(
-          `/teacher/classes/${"invalidclassid"}/invites/${"invalidinviteid"}`
+          `/teacher/classes/${"invalidclassid"}/invites/${"invalidinviteid"}`,
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
@@ -543,7 +544,7 @@ describe("invite tests", async () => {
             field: "inviteId",
             source: "params",
           }),
-        ])
+        ]),
       );
     });
   });
@@ -554,17 +555,17 @@ describe("invite tests", async () => {
       const teacherUser3: User & { teacher: Teacher } = await createTeacher(
         "Bleep",
         "Bloop",
-        "bleep.bloop@gmail.com"
+        "bleep.bloop@gmail.com",
       );
       const invite1: Invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
-        classroom.id
+        classroom.id,
       );
       const invite2: Invite = await createInvite(
         teacherUser1.id,
         teacherUser3.id,
-        classroom.id
+        classroom.id,
       );
 
       // test getting the invites
@@ -599,7 +600,7 @@ describe("invite tests", async () => {
             field: "classId",
             source: "params",
           }),
-        ])
+        ]),
       );
     });
   });

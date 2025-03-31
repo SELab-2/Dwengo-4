@@ -1,13 +1,8 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { AppError } from "../errors/errors";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
-const errorHandler = (
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
+const errorHandler = (err: Error, _req: Request, res: Response): void => {
   if (err instanceof AppError) {
     res.status(err.statusCode);
   } else {

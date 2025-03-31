@@ -1,15 +1,15 @@
-import React, { useRef } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import InputWithChecks from "../../shared/InputWithChecks";
+import React, { useRef } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import InputWithChecks from '../../shared/InputWithChecks';
 import {
   validateRequired,
   validateForm,
-} from "../../../util/shared/validation";
-import Container from "../../shared/Container";
-import BoxBorder from "../../shared/BoxBorder";
-import { createClass } from "../../../util/teacher/httpTeacher";
-import LoadingIndicatorButton from "../../shared/LoadingIndicatorButton";
-import PrimaryButton from "../../shared/PrimaryButton";
+} from '../../../util/shared/validation';
+import Container from '../../shared/Container';
+import BoxBorder from '../../shared/BoxBorder';
+import { createClass } from '../../../util/teacher/httpTeacher';
+import LoadingIndicatorButton from '../../shared/LoadingIndicatorButton';
+import PrimaryButton from '../../shared/PrimaryButton';
 
 interface InputWithChecksRef {
   validateInput: () => boolean;
@@ -37,7 +37,7 @@ const CreateClass: React.FC = () => {
   >({
     mutationFn: createClass,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["classes"] });
+      queryClient.invalidateQueries({ queryKey: ['classes'] });
     },
   });
 
@@ -70,8 +70,8 @@ const CreateClass: React.FC = () => {
             />
             {isError && (
               <div className="c-r">
-                {(error as any)?.info?.message ||
-                  "Er is iets fout gelopen tijdens het aanmaken van de klas"}
+                {error.message ||
+                  'Er is iets fout gelopen tijdens het aanmaken van de klas'}
               </div>
             )}
             <div>
