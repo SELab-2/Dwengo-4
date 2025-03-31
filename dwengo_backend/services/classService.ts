@@ -12,7 +12,7 @@ import {
   BadRequestError,
   NotFoundError,
 } from "../errors/errors";
-import handlePrismaQuery from "../errors/prismaErrorHandler";
+import { handlePrismaQuery } from "../errors/errorFunctions";
 
 const prisma = new PrismaClient();
 

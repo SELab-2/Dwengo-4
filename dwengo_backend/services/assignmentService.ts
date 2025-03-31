@@ -1,5 +1,5 @@
 import { Assignment, PrismaClient } from "@prisma/client";
-import handlePrismaQuery from "../errors/prismaErrorHandler";
+import { handlePrismaQuery } from "../errors/errorFunctions";
 
 const prisma = new PrismaClient();
 

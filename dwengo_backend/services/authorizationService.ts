@@ -1,5 +1,5 @@
 import { PrismaClient, Role } from "@prisma/client";
-import handlePrismaQuery from "../errors/prismaErrorHandler";
+import { handlePrismaQuery } from "../errors/errorFunctions";
 
 const prisma = new PrismaClient();
 

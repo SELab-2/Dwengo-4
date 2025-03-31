@@ -2,7 +2,7 @@ import { Assignment, PrismaClient, Role } from "@prisma/client";
 import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
 import ReferenceValidationService from "../../services/referenceValidationService";
 import { AccesDeniedError } from "../../errors/errors";
-import handlePrismaQuery from "../../errors/prismaErrorHandler";
+import handlePrismaQuery from "../../errors/errorFunctions";
 // ^ let op: named import, géén "default" meer.
 
 const prisma = new PrismaClient();

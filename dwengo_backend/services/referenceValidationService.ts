@@ -1,7 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { dwengoAPI } from "../config/dwengoAPI";
-import { BadRequestError, NetworkError, NotFoundError } from "../errors/errors";
-import handlePrismaQuery from "../errors/prismaErrorHandler";
+import { BadRequestError, NotFoundError } from "../errors/errors";
+import {
+  handlePrismaQuery,
+  throwCorrectNetworkError,
+} from "../errors/errorFunctions";
 
 const prisma = new PrismaClient();
 
@@ -42,8 +45,9 @@ export default class ReferenceValidationService {
           `Dwengo learning object hruid=${hruid},language=${language},version=${version} not found.`,
         );
       }
-    } catch {
-      throw new NetworkError(
+    } catch (error) {
+      throwCorrectNetworkError(
+        error as Error,
         "Could not fetch the requested learning object from the Dwengo API.",
       );
     }
@@ -109,8 +113,9 @@ export default class ReferenceValidationService {
         );
       }
       // Eventueel checken of we exact 1 match hebben
-    } catch {
-      throw new NetworkError(
+    } catch (error) {
+      throwCorrectNetworkError(
+        error as Error,
         "Could not fetch the requested learning path from the Dwengo API.",
       );
     }
