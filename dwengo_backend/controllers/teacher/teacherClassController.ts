@@ -2,7 +2,7 @@ import asyncHandler from "express-async-handler";
 import { Response } from "express";
 import { AuthenticatedRequest } from "../../middleware/teacherAuthMiddleware";
 import classService from "../../services/classService";
-import { Student } from "@prisma/client";
+import { Student, User } from "@prisma/client";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 import { BadRequestError } from "../../errors/errors";
 
@@ -26,15 +26,13 @@ export const isNameValid = (
 ): boolean => {
   const { name } = req.body;
   if (!name || typeof name !== "string" || name.trim() === "") {
-    res.status(400).json({ message: "Vul een geldige klasnaam in" });
-    return false;
+    throw new BadRequestError("Vul een geldige klasnaam in");
   }
   return true;
 };
 
 /**
  * Get all classes that a teacher manages
- * @route GET /teacher/classes
  * returns a list of all classes in the response body
  */
 export const getTeacherClasses = asyncHandler(
@@ -47,7 +45,6 @@ export const getTeacherClasses = asyncHandler(
 
 /**
  * Create classroom
- * @route POST /teacher/classes
  * returns the created class in the response body
  */
 export const createClassroom = asyncHandler(
@@ -62,88 +59,67 @@ export const createClassroom = asyncHandler(
   }
 );
 
-// Delete classroom
+/**
+ * Delete a classroom
+ * @param classId - id of the class to be deleted
+ */
 export const deleteClassroom = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { classId } = req.params;
-    const teacherId = req.user?.id;
+    const classId: number = parseInt(req.params.classId);
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
-    if (!isTeacherValid(req, res)) return;
-
-    await classService.deleteClass(Number(classId), Number(teacherId));
-    res.json({ message: "Klas verwijderd" });
-  }
-);
-
-// Get join link
-export const getJoinLink = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { classId } = req.params;
-    const teacherId = req.user?.id as number;
-
-    if (!isTeacherValid(req, res)) return;
-
-    const joinCode = await classService.getJoinCode(Number(classId), teacherId);
-
-    const joinLink = `${APP_URL}/student/classes/join?joinCode=${joinCode}`;
-    res.status(200).json({ joinLink });
-  }
-);
-
-// Regenerate join link
-export const regenerateJoinLink = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { classId } = req.params;
-    const teacherId = req.user?.id as number;
-
-    if (!isTeacherValid(req, res)) return;
-
-    try {
-      const newJoinCode = await classService.regenerateJoinCode(
-        Number(classId),
-        teacherId
-      );
-      const joinLink = `${APP_URL}/student/classes/join?joinCode=${newJoinCode}`;
-      res.json({ joinLink });
-    } catch (error) {
-      res.status(403).json({ message: "Failed to regenerate joinLink" });
-      return;
-    }
-  }
-);
-
-// Get classroom students
-export const getClassroomStudents = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { classId } = req.params;
-    const teacherId = req.user?.id as number;
-
-    if (!isTeacherValid(req, res)) return;
-
-    const students: Student[] = await classService.getStudentsByClass(
-      Number(classId),
-      teacherId
-    );
-
-    if (!students) {
-      res.status(403).json({ message: "Toegang geweigerd" });
-      return;
-    }
-
-    res.json({ students });
+    await classService.deleteClass(classId, teacherId);
+    res.status(200).json({ message: `Klas met id ${classId} verwijderd` });
   }
 );
 
 /**
- * Get all classrooms
- * @route GET /teacher/classes
- * returns a list of all classes for the authenticated teacher in the response body
+ * Get join link
+ * returns the join link in the response body
  */
-export const getAllClassrooms = asyncHandler(
+export const getJoinLink = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const classId: number = parseInt(req.params.classId);
     const teacherId: number = getUserFromAuthRequest(req).id;
-    const classrooms = await classService.getAllClassesByTeacher(teacherId);
-    res.status(200).json({ classrooms });
+
+    const joinCode = await classService.getJoinCode(classId, teacherId);
+
+    const joinLink = `${APP_URL}/class/teacher/join?joinCode=${joinCode}`;
+    res.status(200).json({ joinLink });
+  }
+);
+
+/**
+ * Regenerate join link
+ * returns the new join link in the response body
+ */
+export const regenerateJoinLink = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const classId: number = parseInt(req.params.classId);
+    const teacherId: number = getUserFromAuthRequest(req).id;
+
+    const newJoinCode = await classService.regenerateJoinCode(
+      classId,
+      teacherId
+    );
+    const joinLink = `${APP_URL}/class/teacher/join?joinCode=${newJoinCode}`;
+    res.status(200).json({ joinLink });
+  }
+);
+
+/**
+ * Get classroom students
+ * returns a list of all students in the class in the response body
+ */
+export const getClassroomStudents = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const classId: number = parseInt(req.params.classId);
+    const teacherId: number = getUserFromAuthRequest(req).id;
+
+    // include user details of the students
+    const students: (Student & { user: User })[] =
+      await classService.getStudentsByClass(classId, teacherId);
+    res.status(200).json({ students });
   }
 );
 
@@ -169,3 +145,4 @@ export const getClassByIdAndTeacherId = asyncHandler(
     res.status(200).json({ classroom });
   }
 );
+

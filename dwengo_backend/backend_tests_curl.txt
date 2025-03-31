@@ -8,7 +8,7 @@
 ##############################
 
 # 1. Registreer een nieuwe student
-curl -X POST http://localhost:5000/student/auth/register \
+curl -X POST http://localhost:5000/auth/student/register \
   -H "Content-Type: application/json" \
   -d '{
         "firstName": "Jan",
@@ -18,7 +18,7 @@ curl -X POST http://localhost:5000/student/auth/register \
       }'
 
 # 2. Login met de geregistreerde student (correcte gegevens)
-curl -X POST http://localhost:5000/student/auth/login \
+curl -X POST http://localhost:5000/auth/student/login \
   -H "Content-Type: application/json" \
   -d '{
         "email": "student1@example.com",
@@ -27,7 +27,7 @@ curl -X POST http://localhost:5000/student/auth/login \
 
 
 # 3. Login met een niet-geregistreerd e-mailadres (verwacht fout: Ongeldige gebruiker)
-curl -X POST http://localhost:5000/student/auth/login \
+curl -X POST http://localhost:5000/auth/student/login \
   -H "Content-Type: application/json" \
   -d '{
         "email": "nietbestaande@student.com",
@@ -36,7 +36,7 @@ curl -X POST http://localhost:5000/student/auth/login \
 
 
 # 4. Login met een juist e-mailadres maar fout wachtwoord (verwacht fout: Ongeldig wachtwoord)
-curl -X POST http://localhost:5000/student/auth/login \
+curl -X POST http://localhost:5000/auth/student/login \
   -H "Content-Type: application/json" \
   -d '{
         "email": "student1@example.com",
@@ -49,7 +49,7 @@ curl -X POST http://localhost:5000/student/auth/login \
 ##############################
 
 # 5. Registreer een nieuwe leerkracht
-curl -X POST http://localhost:5000/teacher/auth/register \
+curl -X POST http://localhost:5000/auth/teacher/register \
   -H "Content-Type: application/json" \
   -d '{
         "firstName": "Piet",
@@ -60,7 +60,7 @@ curl -X POST http://localhost:5000/teacher/auth/register \
 
 
 # 6. Login met de geregistreerde leerkracht (correcte gegevens)
-curl -X POST http://localhost:5000/teacher/auth/login \
+curl -X POST http://localhost:5000/auth/teacher/login \
   -H "Content-Type: application/json" \
   -d '{
         "email": "teacher1@example.com",
@@ -69,7 +69,7 @@ curl -X POST http://localhost:5000/teacher/auth/login \
 
 
 # 7. Login met een niet-geregistreerd e-mailadres (verwacht fout: Ongeldige gebruiker)
-curl -X POST http://localhost:5000/teacher/auth/login \
+curl -X POST http://localhost:5000/auth/teacher/login \
   -H "Content-Type: application/json" \
   -d '{
         "email": "nietbestaande@teacher.com",
@@ -78,7 +78,7 @@ curl -X POST http://localhost:5000/teacher/auth/login \
 
 
 # 8. Login met een juist e-mailadres maar fout wachtwoord (verwacht fout: Ongeldig wachtwoord)
-curl -X POST http://localhost:5000/teacher/auth/login \
+curl -X POST http://localhost:5000/auth/teacher/login \
   -H "Content-Type: application/json" \
   -d '{
         "email": "teacher1@example.com",
