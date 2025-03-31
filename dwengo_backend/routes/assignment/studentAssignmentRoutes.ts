@@ -1,7 +1,6 @@
 import express, { Router } from "express";
 import { getStudentAssignments } from "../../controllers/student/studentAssignmentController";
 import { protectStudent } from "../../middleware/studentAuthMiddleware";
-import { AssignmentController } from "../../controllers/assignmentController";
 
 const router: Router = express.Router();
 
