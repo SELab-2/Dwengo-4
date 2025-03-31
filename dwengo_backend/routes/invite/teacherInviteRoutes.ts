@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Router } from "express";
 import {
   createInvite,
   getPendingInvitesForClass,
@@ -18,7 +18,7 @@ import {
 } from "../../zodSchemas/inviteSchemas";
 import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 router.use(protectTeacher);
 
@@ -27,75 +27,68 @@ router.use(protectTeacher);
 /**
  * @route GET /invite
  * @description Get all pending invites for a teacher
- * @access Teacher
  */
 router.get("/", getPendingInvitesForTeacher);
 
 /**
  * @route POST /invite/class/:classId
- * @description Create an invite for a class
+ * @description Create an invitation for a class
  * @body otherTeacherId: number
  * @param classId: number
- * @access Teacher
  */
 router.post(
   "/class/:classId",
-  validateRequest(
-    "invalid request for invite creation",
-    createInviteBodySchema,
-    createInviteParamsSchema
-  ),
-  createInvite
+  validateRequest({
+    customErrorMessage: "invalid request for invite creation",
+    bodySchema: createInviteBodySchema,
+    paramsSchema: createInviteParamsSchema,
+  }),
+  createInvite,
 );
 
 /**
  * @route GET /invite/class/:classId
  * @description Get all pending invites for a class
  * @param classId: number
- * @access Teacher
  */
 router.get(
   "/class/:classId",
-  validateRequest(
-    "invalid request params",
-    undefined,
-    getClassInvitesParamsSchema
-  ),
-  getPendingInvitesForClass
+  validateRequest({
+    customErrorMessage: "invalid request params",
+    paramsSchema: getClassInvitesParamsSchema,
+  }),
+  getPendingInvitesForClass,
 );
 
 /**
  * @route PATCH /invite/:inviteId
- * @description Update an invite
+ * @description Update an invitation
  * @body action: string {"accept", "decline"}
  * @param inviteId: number
- * @access Teacher
  */
 router.patch(
   "/:inviteId",
-  validateRequest(
-    "invalid request for invite update",
-    updateInviteBodySchema,
-    updateInviteParamsSchema
-  ),
-  updateInviteStatus
+  validateRequest({
+    customErrorMessage: "invalid request for invite update",
+    bodySchema: updateInviteBodySchema,
+    paramsSchema: updateInviteParamsSchema,
+  }),
+  updateInviteStatus,
 );
 
 /**
  * @route DELETE /invite/:inviteId/class/:classId
- * @description Delete an invite
+ * @description Delete an invitation
  * @param inviteId: number
  * @param classId: number
- * @access Teacher
  */
 router.delete(
   "/:inviteId/class/:classId",
-  validateRequest(
-    "invalid request params",
-    undefined,
-    deleteInviteParamsSchema
-  ),
-  deleteInvite
+  validateRequest({
+    customErrorMessage: "invalid request params",
+    paramsSchema: deleteInviteParamsSchema,
+  }),
+  deleteInvite,
 );
 
 export default router;
