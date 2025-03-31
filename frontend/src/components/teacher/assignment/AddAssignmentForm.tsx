@@ -1,12 +1,19 @@
-import React, { use, useEffect, useState } from "react";
-import styles from "./AddAssignmentForm.module.css";
-import TeamCreationModal from "./TeamCreationModal";
+import React, { use, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import styles from './AddAssignmentForm.module.css';
+import TeamCreationModal from './TeamCreationModal';
 import {
   fetchLearningPaths,
   postAssignment,
-} from "../../../util/teacher/httpTeacher";
-import { useQuery } from "@tanstack/react-query";
-import { ClassItem, LearningPath, Team } from "../../../types/type";
+  updateAssignment,
+} from '../../../util/teacher/httpTeacher';
+import { useQuery } from '@tanstack/react-query';
+import {
+  AssignmentPayload,
+  ClassItem,
+  LearningPath,
+  Team,
+} from '../../../types/type';
 
 const CustomDropdownMultiselect = ({
   options,
@@ -60,7 +67,7 @@ const CustomDropdownMultiselect = ({
                 <input
                   type="checkbox"
                   checked={selectedOptions.some(
-                    (item) => item.id === option.id
+                    (item) => item.id === option.id,
                   )}
                   onChange={() => handleOptionToggle(option)}
                 />
@@ -74,15 +81,25 @@ const CustomDropdownMultiselect = ({
   );
 };
 
-const AddAssignmentForm = ({ classesData }: { classesData: ClassItem[] }) => {
+const AddAssignmentForm = ({
+  classesData,
+  classId,
+  isEditing = false,
+  assignmentData,
+}: {
+  classesData: ClassItem[];
+  classId?: string;
+  isEditing?: boolean;
+  assignmentData?: AssignmentPayload;
+}) => {
   const [isTeamOpen, setIsTeamOpen] = useState<boolean>(false);
-  const [assignmentType, setAssignmentType] = useState<string>("");
+  const [assignmentType, setAssignmentType] = useState<string>('');
   const [teams, setTeams] = useState<Record<string, Team[]>>({});
   const [teamSize, setTeamSize] = useState<number>(0);
-  const [date, setDate] = useState<string>("");
+  const [date, setDate] = useState<string>('');
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
-  const [title, setTitle] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
+  const [title, setTitle] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
   const [selectedClasses, setSelectedClasses] = useState<ClassItem[]>([]);
   const [selectedLearningPath, setSelectedLearningPath] =
     useState<LearningPath>();
@@ -91,27 +108,63 @@ const AddAssignmentForm = ({ classesData }: { classesData: ClassItem[] }) => {
     teams?: string;
   }>({});
 
+  const navigate = useNavigate();
+
   const {
     data: learningPathsData,
     isLoading: isLearningPathsLoading,
     isError: isLearningPathsError,
     error: learningPathsError,
   } = useQuery<LearningPath[], Error>({
-    queryKey: ["learningPaths"],
+    queryKey: ['learningPaths'],
     queryFn: fetchLearningPaths,
   });
 
   useEffect(() => {
-    setLearningPaths(learningPathsData || []
-    );
-  }, [learningPathsData]);
+    if (isEditing && assignmentData) {
+      setTitle(assignmentData.title);
+      setDescription(assignmentData.description);
+      setDate(new Date(assignmentData.deadline).toISOString().split('T')[0]);
+      setSelectedClasses(
+        classesData.filter(
+          (c) =>
+            assignmentData.classAssignments &&
+            assignmentData.classAssignments.some((ca) => ca.class.id === c.id),
+        ) ?? [],
+      );
+      setTeamSize(Number(assignmentData.teamSize));
+      if (assignmentData.teamSize > 1) {
+        setAssignmentType('group');
+      } else {
+        setAssignmentType('individual');
+      }
+      setTeams(assignmentData.classTeams!);
+    }
+  }, [isEditing, classesData]);
+
+  // Add this useEffect to handle the selection after classesData is loaded
+  useEffect(() => {
+    if (classId && classesData?.length) {
+      const filtered = classesData.filter((c) => c.id.toString() === classId);
+      setSelectedClasses(filtered);
+    }
+  }, [classId, classesData]);
+
+  useEffect(() => {
+    setLearningPaths(learningPathsData || []);
+    if (isEditing && assignmentData) {
+      setSelectedLearningPath(
+        learningPathsData?.find((path) => path.id === assignmentData.pathRef),
+      );
+    }
+  }, [learningPathsData, isEditing]);
 
   const handleTeamClicks = () => {
     setIsTeamOpen(true);
   };
 
   const handleAssignmentTypeChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
+    e: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     setAssignmentType(e.target.value);
   };
@@ -124,7 +177,7 @@ const AddAssignmentForm = ({ classesData }: { classesData: ClassItem[] }) => {
   };
 
   const handleLearningPathChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
+    e: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     const pathId = e.target.value;
     const path = learningPaths.find((path) => path.id === pathId);
@@ -134,17 +187,17 @@ const AddAssignmentForm = ({ classesData }: { classesData: ClassItem[] }) => {
   //datum voor morgen instellen zodat mensen alleen deadlines kunnen kiezen vanaf morgen
   const today = new Date();
   today.setDate(today.getDate() + 1);
-  const formattedDate = today.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+  const formattedDate = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
 
   const validateForm = () => {
     const errors: { classes?: string; teams?: string } = {};
 
     if (selectedClasses.length === 0) {
-      errors.classes = "Please select at least one class";
+      errors.classes = 'Please select at least one class';
     }
 
-    if (assignmentType === "group" && Object.keys(teams).length === 0) {
-      errors.teams = "Please create teams before submitting";
+    if (assignmentType === 'group' && Object.keys(teams).length === 0) {
+      errors.teams = 'Please create teams before submitting';
     }
 
     setFormErrors(errors);
@@ -160,12 +213,14 @@ const AddAssignmentForm = ({ classesData }: { classesData: ClassItem[] }) => {
     // Convert teams object keys from string to number
     const teamsWithNumberKeys: Record<number, Team[]> = {};
 
-    if (assignmentType === "group") {
+    if (assignmentType === 'group') {
       Object.entries(teams).forEach(([key, team]) => {
-        teamsWithNumberKeys[Number(key)] = team.map(team => ({
+        teamsWithNumberKeys[Number(key)] = team.map((team) => ({
           ...team,
           teamName: team.id,
-          studentIds: team.members.map(member => member.id as unknown as number)
+          studentIds: team.students.map(
+            (member) => member.id as unknown as number,
+          ),
         }));
       });
     } else {
@@ -175,47 +230,57 @@ const AddAssignmentForm = ({ classesData }: { classesData: ClassItem[] }) => {
           id: 'null',
           teamName: `individual-${student.id}`,
           studentIds: [student.id],
-          members: [student], // Add members to team for easier access
+          students: [student], // Add members to team for easier access
         }));
         teamsWithNumberKeys[Number(classItem.id)] = individualTeams;
       });
     }
 
-    console.log("Submitting form with data:", {
-      title,
-      description,
-      pathLanguage: "nl", // default to English
-      isExternal: selectedLearningPath?.isExternal || false,
-      deadline: date,
-      learningPathId: selectedLearningPath?.id || "",
-      classTeams: teamsWithNumberKeys,
-    });
-
-
-    postAssignment({
-      title,
-      description,
-      pathLanguage: "nl", // default to English
-      isExternal: selectedLearningPath?.isExternal || false,
-      deadline: date,
-      learningPathId: selectedLearningPath?.id || "",
-      classTeams: teamsWithNumberKeys,
-    })
-      .then(() => {
-        // Handle success (e.g., show message, redirect)
-        console.log("Assignment created successfully");
+    if (isEditing) {
+      updateAssignment({
+        id: assignmentData?.id,
+        title,
+        description,
+        pathLanguage: 'nl',
+        isExternal: selectedLearningPath?.isExternal || false,
+        deadline: date,
+        pathRef: selectedLearningPath?.id || '',
+        classTeams: teamsWithNumberKeys,
+        teamSize: teamSize,
       })
-      .catch((error) => {
-        console.error("Error creating assignment:", error);
-        // Handle error (e.g., show error message)
-      });
-
-
+        .then(() => {
+          console.log('Assignment updated successfully');
+          navigate(`/teacher/assignments/${assignmentData?.id}`);
+        })
+        .catch((error) => {
+          console.error('Error updating assignment:', error);
+        });
+    } else {
+      postAssignment({
+        title,
+        description,
+        pathLanguage: 'nl',
+        isExternal: selectedLearningPath?.isExternal || false,
+        deadline: date,
+        pathRef: selectedLearningPath?.id || '',
+        classTeams: teamsWithNumberKeys,
+        teamSize: teamSize,
+      })
+        .then(() => {
+          console.log('Assignment created successfully');
+          navigate('/teacher/assignments');
+        })
+        .catch((error) => {
+          console.error('Error creating assignment:', error);
+        });
+    }
   };
 
   return (
     <section className={styles.wrapper}>
-      <h2 className={styles.header}>Assign Learning path to Classes:</h2>
+      <h2 className={styles.header}>
+        {isEditing ? 'Edit' : 'Assign'} Assignment to Classes:
+      </h2>
 
       <div className={styles.form}>
         <form onSubmit={handleSubmission}>
@@ -233,11 +298,15 @@ const AddAssignmentForm = ({ classesData }: { classesData: ClassItem[] }) => {
             )}
           </div>
           <div>
-            <label htmlFor="title">Add Title:</label>
+            <label htmlFor="title">
+              {' '}
+              {isEditing ? 'Edit Title:' : 'Add Title:'}
+            </label>
             <input
               type="text"
               id="title"
               name="title"
+              value={title}
               required
               onChange={(e) => setTitle(e.target.value)}
             />
@@ -247,14 +316,16 @@ const AddAssignmentForm = ({ classesData }: { classesData: ClassItem[] }) => {
             {isLearningPathsLoading ? (
               <div>Loading learning paths...</div>
             ) : isLearningPathsError ? (
-              <div>Error loading learning paths: {learningPathsError?.message}</div>
+              <div>
+                Error loading learning paths: {learningPathsError?.message}
+              </div>
             ) : (
               <select
                 required
                 id="learningPath"
                 name="learningPath"
                 onChange={handleLearningPathChange}
-                value={selectedLearningPath?.id || ""}
+                value={selectedLearningPath?.id || ''}
               >
                 <option value="">-Select a Path-</option>
                 {learningPaths.map((path) => (
@@ -267,12 +338,15 @@ const AddAssignmentForm = ({ classesData }: { classesData: ClassItem[] }) => {
           </div>
 
           <div>
-            <label htmlFor="description">Add Description:</label>
+            <label htmlFor="description">
+              {isEditing ? 'Edit Description:' : 'Add Description:'}
+            </label>
             <textarea
               id="description"
               name="description"
               required
               onChange={(e) => setDescription(e.target.value)}
+              value={description}
               rows={5}
               cols={50}
             ></textarea>
@@ -294,7 +368,7 @@ const AddAssignmentForm = ({ classesData }: { classesData: ClassItem[] }) => {
                   <option value="individual">Individual</option>
                 </select>
               </div>
-              {assignmentType === "group" && (
+              {assignmentType === 'group' && (
                 <div className={styles.inputTeam}>
                   <h6>Choose Team Size: </h6>
                   <input
@@ -308,19 +382,26 @@ const AddAssignmentForm = ({ classesData }: { classesData: ClassItem[] }) => {
                 </div>
               )}
             </div>
-            {assignmentType === "group" && teamSize > 0 && (
+            {assignmentType === 'group' && teamSize > 0 && (
               <div className={styles.rightSide}>
                 <h6>Teams:</h6>
                 <div className={styles.teamsList}>
                   {Object.entries(teams).map(([classId, classTeams]) => (
                     <div key={classId}>
-                      <h6>KLAS: {selectedClasses.find(c => c.id == classId)?.name}</h6>
+                      <h6>
+                        KLAS:{' '}
+                        {selectedClasses.find((c) => c.id == classId)?.name}
+                      </h6>
                       {classTeams.map((team) => (
                         <div key={team.id} className={styles.teamPreview}>
                           <p>
-                            {team.id}: {team.members.map(member =>
-                              `${member.firstName} ${member.lastName}`
-                            ).join(", ")}
+                            {team.id}:{' '}
+                            {team.students
+                              .map(
+                                (member) =>
+                                  `${member.firstName} ${member.lastName}`,
+                              )
+                              .join(', ')}
                           </p>
                         </div>
                       ))}
@@ -337,7 +418,7 @@ const AddAssignmentForm = ({ classesData }: { classesData: ClassItem[] }) => {
               </div>
             )}
           </div>
-          {assignmentType === "group" && formErrors.teams && (
+          {assignmentType === 'group' && formErrors.teams && (
             <div className={styles.error}>{formErrors.teams}</div>
           )}
 
@@ -350,6 +431,7 @@ const AddAssignmentForm = ({ classesData }: { classesData: ClassItem[] }) => {
               required
               min={formattedDate}
               onChange={(e) => setDate(e.target.value)}
+              value={date}
             />
           </div>
 

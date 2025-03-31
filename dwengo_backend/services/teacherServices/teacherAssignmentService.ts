@@ -22,7 +22,8 @@ export default class TeacherAssignmentService {
     isExternal: boolean,
     deadline: Date,
     title: string,
-    description: string
+    description: string,
+    teamSize: number
   ): Promise<Assignment> {
     // 1) check authorization
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
@@ -52,6 +53,7 @@ export default class TeacherAssignmentService {
         },
         title,
         description,
+        teamSize
       },
     });
 
@@ -88,7 +90,8 @@ export default class TeacherAssignmentService {
     isExternal: boolean,
     teacherId: number,
     title: string,
-    description: string
+    description: string,
+    teamSize: number
   ): Promise<Assignment> {
     // 1) autorisatie
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
@@ -106,6 +109,7 @@ export default class TeacherAssignmentService {
         isExternal,
         title,
         description,
+        teamSize
       },
     });
   }
@@ -137,7 +141,9 @@ export default class TeacherAssignmentService {
     deadline: Date,
     title: string,
     description: string,
-    classTeams: ClassTeams
+    classTeams: ClassTeams,
+    teamSize: number
+
   ): Promise<Assignment> {
     // 1) Check authorization for all classes
     for (const classId of Object.keys(classTeams)) {
@@ -158,7 +164,6 @@ export default class TeacherAssignmentService {
 
     // 3) Create assignment and teams in transaction
     return await prisma.$transaction(async (tx) => {
-      console.log("assignment");
 
       // Create the assignment
       const assignment = await tx.assignment.create({
@@ -168,25 +173,84 @@ export default class TeacherAssignmentService {
           deadline,
           title,
           description,
+          teamSize
         },
       });
 
-
-
-      console.log("assignment 2");
       // Create class assignments and teams
       for (const [classId, teams] of Object.entries(classTeams)) {
         console.log(classId)
-        await tx.classAssignment.create({
+        const assigndment = await tx.classAssignment.create({
           data: {
             assignmentId: assignment.id,
             classId: parseInt(classId),
           },
         });
+        await createTeamsInAssignment(assignment.id, parseInt(classId), teams,tx);
+      }
 
-        console.log("assignment 3");
+      return assignment;
+    });
+  }
 
-        await createTeamsInAssignment(assignment.id, parseInt(classId), teams);
+  /**
+   * Update an assignment and its team structure
+   */
+  static async updateAssignmentWithTeams(
+    assignmentId: number,
+    teacherId: number,
+    pathRef: string,
+    pathLanguage: string,
+    isExternal: boolean,
+    deadline: Date,
+    title: string,
+    description: string,
+    classTeams: ClassTeams,
+    teamSize: number
+  ): Promise<Assignment> {
+    // 1) Check authorization for all classes and assignment
+    if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
+      throw new Error("The teacher is unauthorized to update the assignment");
+    }
+    for (const classId of Object.keys(classTeams)) {
+      if (!(await isAuthorized(teacherId, Role.TEACHER, parseInt(classId)))) {
+        throw new Error("The teacher is unauthorized to perform this action");
+      }
+    }
+
+    // 2) Validate pathRef
+    await ReferenceValidationService.validateLearningPath(
+      isExternal,
+      isExternal ? undefined : pathRef, // localId
+      isExternal ? pathRef : undefined, // hruid
+      isExternal ? pathLanguage : undefined // language
+    );
+
+    // 3) Update assignment and teams in transaction
+    return await prisma.$transaction(async (tx) => {
+      // Update the assignment
+      const assignment = await tx.assignment.update({
+        where: { id: assignmentId },
+        data: {
+          pathRef,
+          isExternal,
+          deadline,
+          title,
+          description,
+          teamSize
+        },
+      });
+
+      // Delete existing teams
+      await tx.team.deleteMany({
+        where: { teamAssignment :{
+          assignmentId : assignmentId
+        } }
+      });
+
+      // Create new teams for each class
+      for (const [classId, teams] of Object.entries(classTeams)) {
+        await createTeamsInAssignment(assignment.id, parseInt(classId), teams, tx);
       }
 
       return assignment;

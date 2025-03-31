@@ -7,7 +7,10 @@ import {
 
 // ==== TEACHER ROUTES ==== //
 
-import AssignmentPage from '../pages/teacher/AddAssignment';
+import Assignment from '../pages/teacher/Assignment';
+import AssignmentAdd from '../pages/teacher/AssignmentAdd';
+import AssignmentEdit from '../pages/teacher/AssignmentEdit';
+
 import RootLayoutTeacher from '../components/teacher/RootLayoutTeacher';
 import LoginTeacher from '../pages/teacher/LoginTeacher';
 import ClassesPage from '../pages/teacher/ClassesTeacher';
@@ -91,7 +94,19 @@ export const router = createBrowserRouter([
       },
       {
         path: 'classes/:classId/add-assignment',
-        element: <AssignmentPage></AssignmentPage>,
+        element: <AssignmentAdd></AssignmentAdd>,
+      },
+      {
+        path: 'add-assignment',
+        element: <AssignmentAdd></AssignmentAdd>,
+      },
+      {
+        path: 'assignments/:assignmentId',
+        element: <Assignment></Assignment>,
+      },
+      {
+        path: 'assignments/:assignmentId/edit',
+        element: <AssignmentEdit></AssignmentEdit>,
       },
     ],
   },

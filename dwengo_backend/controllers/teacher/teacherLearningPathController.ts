@@ -4,7 +4,8 @@ import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import LocalLearningPathService from "../../services/localLearningPathService";
 import { getLocalLearningPaths } from "./teacherLocalLearningPathController";
 import { searchLearningPathsController } from "../learningPath/learningPathController";
-import { searchLearningPaths } from "../../services/learningPathService";
+import { searchLearningPaths, getLearningPathByIdOrHruid } from "../../services/learningPathService";
+import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 // Een interface om je body te structureren.
 // Je kunt er bijvoorbeeld nog meer velden in opnemen, afhankelijk van je noden.
@@ -41,3 +42,34 @@ export const getAllLearningPaths = asyncHandler(
     }
 );
 
+/**
+ * GET /teacher/learningPath/:learningPathId
+ * Gets a learning path by ID, either from local storage or API
+ */
+export const getLearningPathById = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            const pathId = req.params.pathId;
+            const { isExternal } = req.query; // Check if the path is external
+            let learningPath;
+            
+            // Check if it's a local path (UUID format)
+            if (isExternal === "false") {
+                learningPath = await LocalLearningPathService.getLearningPathById(pathId);
+            } else {
+                // If not local, fetch from API
+                learningPath = await getLearningPathByIdOrHruid(pathId);
+            }
+
+            if (!learningPath) {
+                res.status(404);
+                throw new Error("Learning path not found");
+            }
+
+            res.json(learningPath);
+        } catch (error) {
+            res.status(500);
+            throw new Error("Failed to fetch learning path: " + error);
+        }
+    }
+);

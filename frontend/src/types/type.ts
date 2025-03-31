@@ -9,6 +9,7 @@ interface LearningPath {
   id: string;
   title: string;
   isExternal: boolean;
+  description: string;
 }
 
 interface formData {
@@ -18,7 +19,7 @@ interface formData {
 
 interface Team {
   id: string;
-  members: StudentItem[];
+  students: StudentItem[];
 }
 
 interface ClassItem {
@@ -28,4 +29,40 @@ interface ClassItem {
   code: number;
 }
 
-export type { StudentItem, LearningPath, formData, Team, ClassItem };
+interface AssignmentPayload {
+  id?: number;
+  title: string;
+  description: string;
+  pathLanguage: string;
+  isExternal: boolean;
+  deadline: string;
+  pathRef: string;
+  classTeams?: Record<string, Team[]>;
+  classAssignments?: ClassAssignment[];
+  teamSize: number;
+}
+
+interface ClassAssignment {
+  assignmentId: number;
+  class: ClassItem;
+}
+
+interface TeamAssignment {
+  teamId: number;
+  assignmentId: number;
+  team: {
+    id: string;
+    students: StudentItem[];
+    classId: string;
+  };
+}
+
+export type {
+  StudentItem,
+  LearningPath,
+  formData,
+  Team,
+  ClassItem,
+  AssignmentPayload,
+  TeamAssignment,
+};

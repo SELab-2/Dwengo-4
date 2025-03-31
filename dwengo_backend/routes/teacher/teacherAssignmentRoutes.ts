@@ -9,6 +9,7 @@ router.post("/", protectTeacher, controller.createAssignmentForClass);
 router.post("/teams", protectTeacher, controller.createAssignmentWithTeams);
 router.get("/class/:classId", protectTeacher, controller.getAssignmentsByClass);
 router.patch("/:assignmentId", protectTeacher, controller.updateAssignment);
+router.patch("/teams/:assignmentId",protectTeacher, controller.updateAssignmentWithTeams)
 router.delete("/:assignmentId", protectTeacher, controller.deleteAssignment);
 
 export default router;

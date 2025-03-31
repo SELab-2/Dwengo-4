@@ -19,6 +19,7 @@ export class AssignmentTeacherController {
         deadline,
         title,
         description,
+        teamSize
       }: {
         classId: number;
         pathRef: string;
@@ -27,6 +28,7 @@ export class AssignmentTeacherController {
         deadline: string;
         title: string;
         description: string;
+        teamSize: number;
       } = req.body;
 
       const parsedDeadline = new Date(deadline);
@@ -40,7 +42,8 @@ export class AssignmentTeacherController {
           isExternal,
           parsedDeadline,
           title,
-          description
+          description,
+          teamSize
         );
       res.status(201).json(assignment);
     } catch (error) {
@@ -62,7 +65,9 @@ export class AssignmentTeacherController {
         title,
         description,
         classTeams,
+        teamSize
       } = req.body;
+
 
       const parsedDeadline = new Date(deadline);
 
@@ -74,7 +79,8 @@ export class AssignmentTeacherController {
         parsedDeadline,
         title,
         description,
-        classTeams
+        classTeams,
+        teamSize
       );
       res.status(201).json(assignment);
     } catch (error) {
@@ -105,7 +111,7 @@ export class AssignmentTeacherController {
   ): Promise<void> => {
     try {
       const assignmentId: number = parseInt(req.params.assignmentId);
-      const { pathRef, isExternal, title, description } = req.body;
+      const { pathRef, isExternal, title, description, teamSize } = req.body;
       const teacherId: number = getUserFromAuthRequest(req).id;
 
       const updatedAssignment = await teacherAssignmentService.updateAssignment(
@@ -114,7 +120,8 @@ export class AssignmentTeacherController {
         isExternal,
         teacherId,
         title,
-        description
+        description,
+        teamSize
       );
       res.json(updatedAssignment);
     } catch (error) {
@@ -133,6 +140,34 @@ export class AssignmentTeacherController {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete assignment" });
+    }
+  };
+
+  updateAssignmentWithTeams = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const assignmentId: number = parseInt(req.params.assignmentId);
+      const { pathRef, pathLanguage, isExternal, deadline, title, description, classTeams, teamSize } = req.body;
+      const teacherId: number = getUserFromAuthRequest(req).id;
+      const parsedDeadline = new Date(deadline);
+
+      const updatedAssignment = await teacherAssignmentService.updateAssignmentWithTeams(
+        assignmentId,
+        teacherId,
+        pathRef,
+        pathLanguage,
+        isExternal,
+        parsedDeadline,
+        title,
+        description,
+        classTeams,
+        teamSize
+      );
+      res.json(updatedAssignment);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update assignment and teams" });
     }
   };
 }

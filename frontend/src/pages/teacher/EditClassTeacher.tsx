@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { fetchAssignments } from '../../util/teacher/httpTeacher'; // Adjust the import path as needed
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Container from '../../components/shared/Container';
 import BoxBorder from '../../components/shared/BoxBorder';
@@ -28,11 +30,29 @@ const EditClassTeacher: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [className, setClassName] = useState('');
+  const [filteredAssignments, setFilteredAssignments] = useState<any[]>([]);
+
   const classNameRef = React.useRef<InputWithChecksRef | null>(null);
 
   // Add state for active sidebar section
   const [activeSection, setActiveSection] =
     useState<SidebarSection>('overview');
+
+  const {
+    data: assignments,
+    isLoading: assignmentsLoading,
+    isError: assignmentsError,
+    error: assignmentsErrorMessage,
+  } = useQuery({
+    queryKey: ['assignments', classId],
+    queryFn: async () => fetchAssignments(classId!),
+  });
+
+  useEffect(() => {
+    if (assignments) {
+      setFilteredAssignments(assignments);
+    }
+  }, [assignments]);
 
   // Fetch class details
   const {
@@ -305,21 +325,60 @@ const EditClassTeacher: React.FC = () => {
               <div className="flex justify-between items-center mb-4">
                 <h2>Opdrachten</h2>
                 <PrimaryButton
-                  onClick={
-                    () => navigate(`/teacher/classes/${classId}/add-assignment`)
-
-                    // http://localhost:5173/teacher/dashboard/1/add-assignment
+                  onClick={() =>
+                    navigate(`/teacher/classes/${classId}/add-assignment`)
                   }
                 >
                   Nieuwe Opdracht
                 </PrimaryButton>
               </div>
-              <p>Hier komen de opdrachten voor deze klas.</p>
-              {/* Placeholder for assignments list */}
-              <div className="bg-gray-100 p-4 rounded mt-4">
-                <p className="text-gray-500">
-                  Nog geen opdrachten beschikbaar.
-                </p>
+
+              <div>
+                <input
+                  type="text"
+                  placeholder="Zoek opdrachten..."
+                  className="w-full p-2 mb-4 border rounded"
+                  onChange={(e) => {
+                    const searchQuery = e.target.value.toLowerCase();
+                    const filtered = assignments?.filter((assignment: any) =>
+                      assignment.title.toLowerCase().includes(searchQuery),
+                    );
+                    setFilteredAssignments(filtered || []);
+                  }}
+                />
+
+                {assignmentsLoading ? (
+                  <div>Opdrachten laden...</div>
+                ) : assignmentsError ? (
+                  <div className="text-red-500">
+                    Error: {String(assignmentsErrorMessage)}
+                  </div>
+                ) : !filteredAssignments.length ? (
+                  <div className="bg-gray-100 p-4 rounded">
+                    <p className="text-gray-500">Geen opdrachten gevonden</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {filteredAssignments.map((assignment: any) => (
+                      <div
+                        key={assignment.id}
+                        onClick={() =>
+                          navigate(`/teacher/assignments/${assignment.id}`)
+                        }
+                        className="p-4 border rounded hover:bg-gray-50 cursor-pointer transition-colors"
+                      >
+                        <h3 className="font-bold">{assignment.title}</h3>
+                        <p className="text-gray-600">
+                          {assignment.description}
+                        </p>
+                        <div className="mt-2 text-sm text-gray-500">
+                          Deadline:{' '}
+                          {new Date(assignment.deadline).toLocaleDateString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </BoxBorder>
           </Container>

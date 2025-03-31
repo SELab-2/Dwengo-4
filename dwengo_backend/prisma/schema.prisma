@@ -421,10 +421,11 @@ model Assignment {
   deadline         DateTime
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
+  teamSize  Int 
   
   Questions        Question[]
-  classAssignments ClassAssignment[]
-  teamAssignments  TeamAssignment[]
+  classAssignments ClassAssignment[] @relation(onDelete: Cascade)
+  teamAssignments  TeamAssignment[]  @relation(onDelete: Cascade)
 
   submissions Submission[]
 }
@@ -458,7 +459,7 @@ model TeamAssignment {
   teamId       Int  @unique
   assignmentId Int
 
-  team       Team       @relation(fields: [teamId], references: [id])
+  team       Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
   assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 
   @@id([teamId, assignmentId])
