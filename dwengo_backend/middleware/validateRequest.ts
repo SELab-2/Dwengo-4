@@ -70,7 +70,6 @@ export const validateRequest =
     }
 
     if (error_details.length > 0) {
-      console.log("fjdklqfjkdlmqsfjkdlqsjmfkldsjqmkl");
       res.status(400).json({
         error: validationErrorMessage,
         message: customErrorMessage || "Invalid request body/params/query",
