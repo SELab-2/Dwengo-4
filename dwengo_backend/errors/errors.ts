@@ -19,6 +19,12 @@ export class AccesDeniedError extends AppError {
   }
 }
 
+export class ForbiddenActionError extends AppError {
+  constructor(message: string) {
+    super(message, 403);
+  }
+}
+
 export class BadRequestError extends AppError {
   constructor(message: string) {
     super(message, 400);
