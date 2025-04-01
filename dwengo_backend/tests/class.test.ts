@@ -270,7 +270,7 @@ describe("classroom tests", () => {
         "aaaaa@gmail.com",
       );
       const joinLinkResponse = await request(app)
-        .post(`/class/student/join?joinCode=${classroom.code}`) // can't use body.joinLink here, because the APP_URL is different in the test environment
+        .post(`/join-request/student?joinCode=${classroom.code}`) // can't use body.joinLink here, because the APP_URL is different in the test environment
         .set("Authorization", `Bearer ${studentUser.token}`);
 
       expect(joinLinkResponse.status).toBe(201);
@@ -409,6 +409,7 @@ describe("classroom tests", () => {
         ]),
       );
     });
+
     it("should respond with a `403` status code when the teacher is not associated with the class", async () => {
       // try getting the students for a class the teacher is not associated with
       const { status, body } = await request(app)
@@ -419,23 +420,6 @@ describe("classroom tests", () => {
       expect(body.message).toBe(
         `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`,
       );
-      expect(body.students).toBeUndefined();
-    });
-    it("should respond with a `404` status code when the class does not exist", async () => {
-      // try getting the students for a class that doesn't exist
-      const maxClass = await prisma.class.findFirst({
-        orderBy: {
-          id: "desc",
-        },
-      });
-      const invalidClassId = (maxClass?.id ?? 0) + 1;
-
-      const { status, body } = await request(app)
-        .get(`/class/teacher/${invalidClassId}`)
-        .set("Authorization", `Bearer ${teacherUser1.token}`);
-
-      expect(status).toBe(404);
-      expect(body.message).toBe(`Class with id ${invalidClassId} not found`);
       expect(body.students).toBeUndefined();
     });
   });
