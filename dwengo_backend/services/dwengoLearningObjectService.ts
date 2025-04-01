@@ -175,39 +175,6 @@ export async function fetchDwengoObjectById(
   throw new Error(); // Dit zou nooit mogen gebeuren
 }
 
-function checkFetchedObject(
-  dwengoObj: DwengoLearningObject | null,
-  notFoundMessage: string,
-) {
-  if (!dwengoObj) {
-    throw new NotFoundError(notFoundMessage);
-  }
-}
-
-function checkAvailabilityAndTeacherExclusive(
-  dwengoObj: DwengoLearningObject,
-  isTeacher: boolean,
-) {
-  if (!isTeacher && dwengoObj.teacher_exclusive) {
-    throw new UnauthorizedError("This learning object is only for teachers.");
-  }
-
-  if (!dwengoObj.available) {
-    throw new UnavailableError(
-      "This learning object is temporarily not available.",
-    );
-  }
-}
-
-function checkAll(
-  dwengoObj: DwengoLearningObject | null,
-  notFoundMessage: string,
-  isTeacher: boolean,
-) {
-  checkFetchedObject(dwengoObj, notFoundMessage);
-  checkAvailabilityAndTeacherExclusive(dwengoObj!, isTeacher);
-}
-
 // [NIEUW] Dwengo-object op basis van hruid, language, version
 export async function fetchDwengoObjectByHruidLangVersion(
   hruid: string,
@@ -340,4 +307,41 @@ export async function getDwengoObjectsForPath(
   // Dit is een fallback, maar zou nooit moeten gebeuren
   // Er wordt gereturned uit de try of er wordt een error opgegooid in de catch
   return [];
+}
+
+/////////////////////////////////////////
+// Helper functies voor error handling //
+/////////////////////////////////////////
+
+function checkFetchedObject<T>(
+  fetchedObject: T | null,
+  notFoundMessage: string,
+) {
+  if (!fetchedObject) {
+    throw new NotFoundError(notFoundMessage);
+  }
+}
+
+function checkAvailabilityAndTeacherExclusive(
+  dwengoObj: DwengoLearningObject,
+  isTeacher: boolean,
+) {
+  if (!isTeacher && dwengoObj.teacher_exclusive) {
+    throw new UnauthorizedError("This learning object is only for teachers.");
+  }
+
+  if (!dwengoObj.available) {
+    throw new UnavailableError(
+      "This learning object is temporarily not available.",
+    );
+  }
+}
+
+function checkAll(
+  dwengoObj: DwengoLearningObject | null,
+  notFoundMessage: string,
+  isTeacher: boolean,
+) {
+  checkFetchedObject(dwengoObj, notFoundMessage);
+  checkAvailabilityAndTeacherExclusive(dwengoObj!, isTeacher);
 }

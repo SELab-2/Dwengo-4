@@ -1,4 +1,3 @@
-import { throwCorrectNetworkError } from "../errors/errorFunctions";
 import { NotFoundError } from "../errors/errors";
 import {
   fetchAllDwengoObjects,
@@ -46,16 +45,22 @@ export async function searchLearningObjects(
 export async function getLearningObjectById(
   id: string,
   isTeacher: boolean,
-): Promise<LearningObjectDto | null> {
+): Promise<LearningObjectDto> {
   // Eerst Dwengo checken
-  const fromDwengo = await fetchDwengoObjectById(id, isTeacher);
-  if (fromDwengo) return fromDwengo;
-
-  // Anders lokaal checken
-  const fromLocal = await getLocalLearningObjectById(id, isTeacher);
-  if (fromLocal) return fromLocal;
-
-  return null;
+  // Deze functie zal een NotFoundError gooien als het object niet bestaat
+  // Anders zal het object teruggegeven worden
+  try {
+    return await fetchDwengoObjectById(id, isTeacher);
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      // Dwengo-object niet gevonden, ga verder met lokaal
+      // Deze functie zal ook een error opgooien als het object niet gevonden wordt of als er andere fouten zijn
+      // Dit zal dan door de error middleware opgevangen worden
+      return await getLocalLearningObjectById(id, isTeacher);
+    }
+    // Rethrow de error als het geen NotFoundError is
+    throw error;
+  }
 }
 
 /**
@@ -94,14 +99,9 @@ export async function getLearningObjectByHruidLangVersion(
         version,
         isTeacher,
       );
-    } else {
-      // Laat error middleware dit afhandelen
-      throwCorrectNetworkError(
-        error as Error,
-        "Could not fetch learning object from Dwengo API.",
-      );
     }
+    // Rethrow de error als het geen NotFoundError is
+    // Laat de error middleware dit afhandelen
+    throw error;
   }
-  // Dit zou nooit mogen gebeuren
-  throw new Error();
 }

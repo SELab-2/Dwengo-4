@@ -7,7 +7,7 @@ export default class AssignmentService {
   static async getAssignmentById(
     assignmentId: number,
   ): Promise<Assignment | null> {
-    return handlePrismaQuery(() =>
+    return await handlePrismaQuery(() =>
       prisma.assignment.findUnique({
         where: { id: assignmentId },
         // geen include meer, want there's no relation to learningPath
