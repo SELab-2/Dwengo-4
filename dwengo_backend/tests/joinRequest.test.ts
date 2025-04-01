@@ -359,8 +359,6 @@ describe("join request tests", async () => {
         .get(`/join-request/teacher/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`); // teacherUser1 is a teacher of the class
 
-      console.log(body);
-
       expect(status).toBe(200);
       expect(body).toHaveProperty("joinRequests");
       expect(body.joinRequests).toEqual(
@@ -388,7 +386,6 @@ describe("join request tests", async () => {
         .get(`/join-request/teacher/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser2.token}`); // teacherUser2 is not a teacher of the class
 
-      console.log(body);
       expect(status).toBe(403);
       expect(body.error).toBe(
         `Teacher ${teacherUser2.id} is not a teacher of class ${classroom.id}`,
