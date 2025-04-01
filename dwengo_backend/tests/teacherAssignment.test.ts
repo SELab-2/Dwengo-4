@@ -103,6 +103,8 @@ describe("Tests for teacherAssignment", async () => {
           pathRef: lp1.id,
           deadline: "2026-10-23",
           pathLanguage: "nl",
+          title: "Learning Path 1",
+          description: "description1",
         });
       expect(status).toBe(201);
       expect(body.deadline).toStrictEqual(new Date("2026-10-23").toISOString());
@@ -118,6 +120,8 @@ describe("Tests for teacherAssignment", async () => {
           pathRef: lp1.id,
           deadline: "2026-10-23",
           pathLanguage: "nl",
+          title: "Learning Path 1",
+          description: "description1",
         });
       expect(status).toBe(500);
       expect(body.error).toBe("Failed to create assignment");
@@ -178,6 +182,8 @@ describe("Tests for teacherAssignment", async () => {
           pathRef: lp1.id,
           deadline: "2026-10-23",
           pathLanguage: "nl",
+          title: "Learning Path 1",
+          description: "description1",
         });
 
       expect(status).toBe(201);

@@ -42,7 +42,8 @@ export class AssignmentTeacherController {
           description,
         );
       res.status(201).json(assignment);
-    } catch {
+    } catch (error) {
+      console.error("Error creating assignment", error);
       res.status(500).json({ error: "Failed to create assignment" });
     }
   };
