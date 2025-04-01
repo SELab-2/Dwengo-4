@@ -14,10 +14,14 @@ export const createInvite = asyncHandler(
     const classId: number = parseInt(req.params.classId);
     const { otherTeacherEmail }: { otherTeacherEmail: string } = req.body;
     const classTeacherId: number = getUserFromAuthRequest(req).id;
-  
-    const invite: Invite = await inviteService.createInvite(classTeacherId, otherTeacherEmail, classId);
+
+    const invite: Invite = await inviteService.createInvite(
+      classTeacherId,
+      otherTeacherEmail,
+      classId,
+    );
     res.status(201).json({ invite });
-  }
+  },
 );
 
 /**
@@ -31,10 +35,10 @@ export const getPendingInvitesForClass = asyncHandler(
 
     const invites: Invite[] = await inviteService.getPendingInvitesForClass(
       classTeacherId,
-      classId
+      classId,
     );
     res.status(200).json({ invites });
-  }
+  },
 );
 
 /**
@@ -45,11 +49,10 @@ export const getPendingInvitesForTeacher = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const teacherId: number = getUserFromAuthRequest(req).id;
 
-    const invites: Invite[] = await inviteService.getPendingInvitesForTeacher(
-      teacherId
-    );
+    const invites: Invite[] =
+      await inviteService.getPendingInvitesForTeacher(teacherId);
     res.status(200).json({ invites });
-  }
+  },
 );
 
 /**
@@ -65,18 +68,18 @@ export const updateInviteStatus = asyncHandler(
     if (action == "accept") {
       const invite: Invite = await inviteService.acceptInviteAndJoinClass(
         teacherId,
-        inviteId
+        inviteId,
       );
       res.status(200).json({ invite });
     } else {
       // action == "decline" (ensured by validation middleware)
       const invite: Invite = await inviteService.declineInvite(
         teacherId,
-        inviteId
+        inviteId,
       );
       res.status(200).json({ invite });
     }
-  }
+  },
 );
 
 /**
@@ -94,10 +97,10 @@ export const deleteInvite = asyncHandler(
     const invite: Invite = await inviteService.deleteInvite(
       classTeacherId,
       inviteId,
-      classId
+      classId,
     );
     res
       .status(200)
       .json({ invite: invite, message: "invite was succesfully deleted" });
-  }
+  },
 );
