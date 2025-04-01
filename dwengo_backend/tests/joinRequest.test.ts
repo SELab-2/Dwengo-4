@@ -157,7 +157,7 @@ describe("join request tests", async () => {
       });
     });
   });
-  describe("[PATCH] /join-request/:requestId/class/:classId", async () => {
+  describe("[PATCH] /join-request/teacher/:requestId/class/:classId", async () => {
     let joinRequest: JoinRequest;
     beforeEach(async () => {
       joinRequest = await createJoinRequest(studentUser1.id, classroom.id);

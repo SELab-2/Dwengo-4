@@ -58,7 +58,7 @@ describe("Submission tests", (): void => {
     await createSubmission(evalId, teamId, assignmentId);
   });
 
-  describe("POST /submissions/student/assignment/:assignmentId/evaluation/:evaluationId", (): void => {
+  describe("[POST] /submission/student/assignment/:assignmentId/evaluation/:evaluationId", (): void => {
     it("Should throw an error if the student is not yet part of the team with the assignment", async (): Promise<void> => {
       // Hiermee garandeer ik dat de student geen deel uitmaakt van de groep met de assignment
       await prisma.team.update({
@@ -102,7 +102,7 @@ describe("Submission tests", (): void => {
     });
   });
 
-  describe("GET /submission/student/assignment/:assignmentId", (): void => {
+  describe("[GET] /submission/student/assignment/:assignmentId", (): void => {
     it("Should respond with a `200` status code and return the submission for an assignment", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get(`/submission/student/assignment/${assignmentId}`)
@@ -112,7 +112,7 @@ describe("Submission tests", (): void => {
     });
   });
 
-  describe("GET /submissions/student/:studentId", (): void => {
+  describe("[GET] /submission/student/:studentId", (): void => {
     it("Should respond with a `401` status code because a teacher is unauthorized", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get(`/submission/student/${studentId}`)
@@ -123,7 +123,7 @@ describe("Submission tests", (): void => {
     });
   });
 
-  describe("GET /submission/student/assignment/:assignmentId/evaluation/:evaluationId", (): void => {
+  describe("[GET] /submission/student/assignment/:assignmentId/evaluation/:evaluationId", (): void => {
     it("Should respond with a `200` status code and return the submission for an evaluation", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get(
@@ -135,7 +135,7 @@ describe("Submission tests", (): void => {
     });
   });
 
-  describe("GET /teacher/submissions/student/:studentId", (): void => {
+  describe("[GET] /submissions/teacher/student/:studentId", (): void => {
     it("Should respond with a `401` status code because a student is unauthorized", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get(`/submission/teacher/student/${studentId}`)
@@ -146,7 +146,7 @@ describe("Submission tests", (): void => {
     });
   });
 
-  describe("GET /submission/teacher/student/:studentId", (): void => {
+  describe("[GET] /submission/teacher/student/:studentId", (): void => {
     it("Should respond with a `200` status code and return the submissions for a student", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get(`/submission/teacher/student/${studentId}`)
@@ -156,7 +156,7 @@ describe("Submission tests", (): void => {
     });
   });
 
-  describe("GET /submissions/teacher/team/:teamId", (): void => {
+  describe("[GET] /submission/teacher/team/:teamId", (): void => {
     it("Should respond with a `200` status code and return the submissions for a team", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get(`/submission/teacher/team/${teamId}`)
@@ -166,7 +166,7 @@ describe("Submission tests", (): void => {
     });
   });
 
-  describe("GET /submission/teacher/student/:studentId", (): void => {
+  describe("[GET] /submission/teacher/student/:studentId", (): void => {
     it("Should respond with a `200` status code and return the submissions for a specific assignment and student", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get(`/submission/teacher/student/${studentId}`)
@@ -176,7 +176,7 @@ describe("Submission tests", (): void => {
     });
   });
 
-  describe("GET /submission/teacher/team/:teamId", (): void => {
+  describe("[GET] /submission/teacher/team/:teamId", (): void => {
     it("Should respond with a `200` status code and return the submissions for a specific assignment and team", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get(`/submission/teacher/team/${teamId}`)

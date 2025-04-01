@@ -242,7 +242,7 @@ describe("invite tests", async () => {
       });
     });
   });
-  describe("[GET] /invite/class", async () => {
+  describe("[GET] /invite", async () => {
     it("should respond with a `200` status code and a list of invites", async () => {
       // set up scenario where a teacher has received a few invites
       await addTeacherToClass(teacherUser1.id, classroom.id);
@@ -541,7 +541,7 @@ describe("invite tests", async () => {
       );
     });
   });
-  describe("[GET] invite/class/:classId", async () => {
+  describe("[GET] /invite/class/:classId", async () => {
     it("should respond with a `200` status code and a list of invites", async () => {
       // set up scenario where there's some pending invites for a class
       await addTeacherToClass(teacherUser1.id, classroom.id);

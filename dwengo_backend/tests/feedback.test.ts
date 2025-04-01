@@ -96,7 +96,7 @@ describe("Feedback tests", (): void => {
     passedAssignmentSubmissionId = submissionForPassedAssignment.submissionId;
   });
 
-  describe("POST /feedback/submission/:submissionId", (): void => {
+  describe("[POST] /feedback/submission/:submissionId", (): void => {
     it("Should respond with a `500` status saying 'Failed to create feedback'", async (): Promise<void> => {
       // In deze test wordt nagegaan dat je geen feedback kan geven op een submission van een assignment
       // waarvan de deadline nog niet verstreken is
@@ -147,7 +147,7 @@ describe("Feedback tests", (): void => {
     });
   });
 
-  describe("GET /feedback/submission/:submissionId", (): void => {
+  describe("[GET] /feedback/submission/:submissionId", (): void => {
     it("Should respond with a `200` status and the fetched feedback", async (): Promise<void> => {
       // We first need to create feedback for a submission
       await giveFeedbackToSubmission(
@@ -201,7 +201,7 @@ describe("Feedback tests", (): void => {
     });
   });
 
-  describe("GET /feedback/assignment/:assignmentId/evaluation/:evaluationId", (): void => {
+  describe("[GET] /feedback/assignment/:assignmentId/evaluation/:evaluationId", (): void => {
     it("Should respond with a `500` status (the teacher can only access feedback from assignments that are given to classes he teaches)", async (): Promise<void> => {
       const assignmentIdFromOtherClass = 123;
       const { status, body } = await request(app)
@@ -268,7 +268,7 @@ describe("Feedback tests", (): void => {
     });
   });
 
-  describe("PATCH /teacher/feedback/submission/:submissionId", (): void => {
+  describe("[PATCH] /feedback/submission/:submissionId", (): void => {
     it("Should respond with a `401` status code (Unauthorized user - student)", async (): Promise<void> => {
       const { status, body } = await request(app)
         .patch(`/feedback/submission/:submissionId`)
@@ -316,7 +316,7 @@ describe("Feedback tests", (): void => {
     });
   });
 
-  describe("DELETE /feedback/submission/:submissionId", (): void => {
+  describe("[DELETE] /feedback/submission/:submissionId", (): void => {
     it("Should respond with a `204` status code and no content", async (): Promise<void> => {
       // We first need to create feedback for a submission
       await giveFeedbackToSubmission(
