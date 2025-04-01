@@ -24,11 +24,11 @@ describe("Tests for teacherAssignment", async () => {
 
   let lp1: LearningPath;
   let lp2: LearningPath;
-  let lp4: LearningPath;
+  let lp3: LearningPath;
 
   let assignment1: Assignment;
   let assignment2: Assignment;
-  let assignment4: Assignment;
+  let assignment3: Assignment;
 
   beforeEach(async () => {
     // create some classes
@@ -54,11 +54,12 @@ describe("Tests for teacherAssignment", async () => {
       "Learning Path 2",
       teacher2.teacher.userId,
     );
-    lp4 = await createLearningPath(
-      "LP4",
-      "Learning Path 4",
-      teacher3.teacher.userId,
+    lp3 = await createLearningPath(
+      "LP3",
+      "Learning Path 3",
+      teacher2.teacher.userId,
     );
+    await createLearningPath("LP4", "Learning Path 4", teacher3.teacher.userId);
 
     // Add teacher to classes
     await addTeacherToClass(teacher1.id, class1.id);
@@ -71,24 +72,23 @@ describe("Tests for teacherAssignment", async () => {
     assignment1 = await createAssignment(
       class1.id,
       lp1.id,
-      "title ass",
-      "description1 ass",
+      "title1",
+      "description1",
       new Date("2026-10-23"),
     );
     assignment2 = await createAssignment(
       class1.id,
       lp2.id,
-      "title ass",
-      "description2 ass",
+      "title2",
+      "description2",
       new Date("2026-04-17"),
     );
-
-    assignment4 = await createAssignment(
+    assignment3 = await createAssignment(
       class2.id,
-      lp4.id,
-      "title ass",
-      "description3 ass",
-      new Date("2026-10-17"),
+      lp3.id,
+      "title3",
+      "description3",
+      new Date("2026-10-19"),
     );
   });
 
@@ -224,13 +224,13 @@ describe("Tests for teacherAssignment", async () => {
   describe("[DELETE] /assignment/teacher/:assignmentId", async () => {
     it("should respond with a `204` status code and delete the assignment", async () => {
       const { status } = await request(app)
-        .delete(`/assignment/teacher/${assignment4.id}`)
+        .delete(`/assignment/teacher/${assignment3.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`);
       expect(status).toBe(204);
 
       // Check if assignment is actually gone from database
       const assignment = await prisma.assignment.findUnique({
-        where: { id: assignment4.id },
+        where: { id: assignment3.id },
       });
       expect(assignment).toBeNull();
     });
