@@ -114,9 +114,8 @@ export const regenerateJoinLink = asyncHandler(
  */
 export const getClassroomStudents = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const classId: number = parseInt(req.params.classId);
     const teacherId: number = getUserFromAuthRequest(req).id;
-    const classrooms = await classService.getAllClassesByTeacher(teacherId);
+    const classrooms = await classService.getAllClassesByTeacher(teacherId, true);
     res.status(200).json({ classrooms });
   }
 );

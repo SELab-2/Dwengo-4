@@ -36,7 +36,7 @@ router.get("/", getTeacherClasses);
  * @param classId: number
  * @access Teacher
  */
-router.get("/:classId/student", getClassroomStudents);
+router.get("/student", getClassroomStudents);
 
 /**
  * @route GET /class/teacher/:classId/join-link

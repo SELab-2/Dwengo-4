@@ -9,7 +9,6 @@ import {
 } from '../../types/type';
 
 const BACKEND = 'http://localhost:5000';
-const BACKEND = 'http://localhost:5000';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -85,20 +84,27 @@ export async function signupTeacher({
   return await response.json();
 }
 
-interface ClassItem {
-  id: string;
-  name: string;
-  code: string;
-}
-
-export async function fetchClasses(): Promise<ClassItem[]> {
-  const response = await fetch(`${BACKEND}/class/teacher`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
-  );
+export async function fetchClasses(
+  includeStudents: boolean = false,
+): Promise<ClassItem[]> {
+  let response;
+  if (includeStudents) {
+    response = await fetch(`${BACKEND}/class/teacher/student`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+    });
+  } else {
+    response = await fetch(`${BACKEND}/class/teacher`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+    });
+  }
 
   if (!response.ok) {
     const error: APIError = new Error(
@@ -108,6 +114,7 @@ export async function fetchClasses(): Promise<ClassItem[]> {
     error.info = await response.json();
     throw error;
   }
+
   let classrooms = await response.json();
   classrooms = classrooms.classrooms;
   if (includeStudents) {
@@ -117,6 +124,7 @@ export async function fetchClasses(): Promise<ClassItem[]> {
       );
     });
   }
+
   return classrooms;
 }
 
@@ -170,7 +178,7 @@ export async function fetchClass({
     throw error;
   }
   let classroom = await response.json();
-  classroom = classroom.classroom;
+  classroom = classroom;
   return classroom;
 }
 
@@ -210,7 +218,7 @@ export async function fetchStudentsByClass({
 
 //Haal de locale leerpaden op van de leerkracht op
 export async function fetchLearningPaths(): Promise<LearningPath[]> {
-  const response = await fetch(`${BACKEND}/pathByTeacher`, {
+  const response = await fetch(`${BACKEND}/pathByTeacher/all`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -241,7 +249,7 @@ export async function fetchLearningPath(
   isExternal: boolean = false,
 ): Promise<LearningPath> {
   const response = await fetch(
-    `${BACKEND}/teacher/learningPaths/all/${learningPathId}?isExternal=${isExternal}`,
+    `${BACKEND}/pathByTeacher/all/${learningPathId}?isExternal=${isExternal}`,
     {
       method: 'GET',
       headers: {
@@ -307,7 +315,7 @@ export async function createAssignment({
 
 export async function fetchAssignments(classId: string): Promise<any> {
   const response = await fetch(
-    `${BACKEND}/teacher/assignments/class/${classId}`,
+    `${BACKEND}/assignment/teacher/class/${classId}`,
     {
       method: 'GET',
       headers: {
@@ -337,7 +345,7 @@ export async function fetchAssignment(
   includeTeams: boolean = false,
 ): Promise<AssignmentPayload> {
   const response = await fetch(
-    `${BACKEND}/assignments/${assignmentId}?includeClass=${includeClass}&includeTeams=${includeTeams}`,
+    `${BACKEND}/assignment/${assignmentId}?includeClass=${includeClass}&includeTeams=${includeTeams}`,
     {
       method: 'GET',
       headers: {
@@ -455,7 +463,7 @@ export async function updateAssignment({
   teamSize,
 }: AssignmentPayload): Promise<void> {
   // Create group assignment with teams
-  const response = await fetch(`${BACKEND}/teacher/assignments/teams/${id}`, {
+  const response = await fetch(`${BACKEND}/assignment/teacher/teams/${id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -485,7 +493,6 @@ export async function updateAssignment({
 
 export interface Invite {
   inviteId: number;
-  status: 'PENDING' | 'APPROVED' | 'DENIED';
   status: 'PENDING' | 'APPROVED' | 'DENIED';
   otherTeacher: {
     firstName: string;
