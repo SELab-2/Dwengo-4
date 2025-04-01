@@ -10,17 +10,13 @@ import BoxBorder from "../../shared/BoxBorder";
 import { createClass } from "../../../util/teacher/httpTeacher";
 import LoadingIndicatorButton from "../../shared/LoadingIndicatorButton";
 import PrimaryButton from "../../shared/PrimaryButton";
+import { ClassItem } from "../../../types/type";
 
 interface InputWithChecksRef {
   validateInput: () => boolean;
   getValue: () => string;
 }
 
-interface ClassItem {
-  id: string;
-  name: string;
-  code: string;
-}
 
 interface CreateClassPayload {
   name: string;

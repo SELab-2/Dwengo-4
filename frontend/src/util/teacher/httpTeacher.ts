@@ -116,14 +116,17 @@ export async function fetchClasses(
   }
 
   let classrooms = await response.json();
-  classrooms = classrooms.classrooms;
+  classrooms = classrooms.classrooms
+
   if (includeStudents) {
+    classrooms = classrooms.classrooms;
     classrooms.forEach((classroom: any) => {
       classroom.students = classroom.classLinks.map(
         (link: any) => link.student.user,
       );
     });
   }
+
 
   return classrooms;
 }
@@ -135,6 +138,7 @@ interface CreateClassPayload {
 export async function createClass({
   name,
 }: CreateClassPayload): Promise<ClassItem> {
+  console.log('Creating class with name:', name);
   const response = await fetch(`${BACKEND}/class/teacher`, {
     method: 'POST',
     headers: {
@@ -143,6 +147,7 @@ export async function createClass({
     },
     body: JSON.stringify({ name }),
   });
+
 
   if (!response.ok) {
     const error: APIError = new Error(

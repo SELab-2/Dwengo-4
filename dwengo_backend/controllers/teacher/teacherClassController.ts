@@ -38,8 +38,8 @@ export const isNameValid = (
 export const getTeacherClasses = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const teacherId: number = getUserFromAuthRequest(req).id;
-    const classes = await classService.getClassesByTeacher(teacherId);
-    res.status(200).json({ classes });
+    const classrooms = await classService.getClassesByTeacher(teacherId);
+    res.status(200).json({ classrooms });
   }
 );
 

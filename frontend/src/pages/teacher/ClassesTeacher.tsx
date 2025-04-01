@@ -70,6 +70,9 @@ const ClassesPageTeacher: React.FC = () => {
     queryFn: () => fetchClasses(),
   });
 
+  console.log('Classes:', classes);
+
+
   // Query: Haal pending teacher invites voor de geselecteerde klas op
   const { data: teacherInvites, isLoading: isInvitesLoading } = useQuery<
     TeacherInvite[]
@@ -235,7 +238,7 @@ const ClassesPageTeacher: React.FC = () => {
             </table>
           </div>
         ) : (
-          !isLoading && <p>Geen klassen gevonden.</p>
+          !isLoading && isError && <p>Geen klassen gevonden.</p>
         )}
 
         {/* Modal voor teacher invites */}
