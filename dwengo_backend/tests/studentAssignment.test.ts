@@ -87,6 +87,14 @@ describe("[GET] /assignment/student", async () => {
       "description2",
       new Date(),
     );
+    // Assignment 3, wordt voor de rest niet gebruikt dus maak hier gaan var voor aan
+    await createAssignment(
+      class2.id,
+      lp2.id,
+      "title3",
+      "description3",
+      new Date(),
+    );
   });
 
   it("should respond with a `200` status code and a list of assignments,\
@@ -172,6 +180,8 @@ describe("[GET] /assignment/student", async () => {
       .get("/assignment/student")
       .query({ sort: "deadline", order: "desc" })
       .set("Authorization", `Bearer ${student5.token}`);
+
+    console.log(body);
 
     stringToDate(body, 2);
 
