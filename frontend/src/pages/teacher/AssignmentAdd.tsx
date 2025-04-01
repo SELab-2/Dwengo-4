@@ -9,6 +9,27 @@ import AddAssignmentForm from '../../components/teacher/assignment/AddAssignment
 import { useParams } from 'react-router-dom';
 import { ClassItem } from '../../types/type';
 
+/**
+ * AddAssignment Component
+ * 
+ * A React component that handles the creation of new assignments for a class.
+ * It fetches the available classes and renders a form to create an assignment.
+ * 
+ * @component
+ * @example
+ * ```tsx
+ * <AddAssignment />
+ * ```
+ * 
+ * URL Parameters:
+ * - classId?: string - Optional class ID from the URL params to pre-select a class
+ * 
+ * Features:
+ * - Fetches available classes using react-query
+ * - Displays loading state while fetching data
+ * - Handles error states
+ * - Renders AddAssignmentForm with fetched class data
+ */
 const AddAssignment: React.FC = () => {
   const { classId } = useParams<{ classId: string }>();
 
@@ -24,7 +45,13 @@ const AddAssignment: React.FC = () => {
 
   return (
     <div>
-      <AddAssignmentForm classesData={classesData ?? []} classId={classId} />
+      {isLoading ? (
+        <div>Loading...</div>
+      ) : isError ? (
+        <div>Error: {error?.message}</div>
+      ) : (
+        <AddAssignmentForm classesData={classesData ?? []} classId={classId} />
+      )}
     </div>
   );
 };

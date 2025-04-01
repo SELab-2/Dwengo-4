@@ -7,6 +7,7 @@ import {
   getTeacherClasses,
   regenerateJoinLink,
   getClassByIdAndTeacherId,
+  updateClassroom
 } from "../../controllers/teacher/teacherClassController";
 import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 
@@ -29,6 +30,16 @@ router.post("/", createClassroom);
  * @access Teacher
  */
 router.get("/", getTeacherClasses);
+
+
+/**
+ * @route PATCH /class/teacher/:classId
+ * @description Update a classroom
+ * @param classId: string
+ * @body name: string
+ * @access Teacher
+ */
+router.patch("/:classId", updateClassroom);
 
 /**
  * @route GET /class/teacher/:classId/student

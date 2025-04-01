@@ -15,6 +15,12 @@ import {
   Team,
 } from '../../../types/type';
 
+/**
+ * Custom multiselect dropdown component for selecting multiple classes
+ * @param options - Array of available classes to select from
+ * @param selectedOptions - Array of currently selected classes
+ * @param onChange - Callback function when selection changes
+ */
 const CustomDropdownMultiselect = ({
   options,
   selectedOptions,
@@ -81,6 +87,20 @@ const CustomDropdownMultiselect = ({
   );
 };
 
+/**
+ * Form component for creating or editing assignments
+ * Handles both individual and group assignments with features including:
+ * - Class selection
+ * - Assignment details (title, description)
+ * - Learning path selection
+ * - Team creation for group assignments
+ * - Deadline setting
+ * 
+ * @param classesData - Array of available classes
+ * @param classId - Optional ID of pre-selected class
+ * @param isEditing - Boolean indicating if form is in edit mode
+ * @param assignmentData - Existing assignment data when editing
+ */
 const AddAssignmentForm = ({
   classesData,
   classId,
@@ -92,6 +112,7 @@ const AddAssignmentForm = ({
   isEditing?: boolean;
   assignmentData?: AssignmentPayload;
 }) => {
+  // State declarations for form management
   const [isTeamOpen, setIsTeamOpen] = useState<boolean>(false);
   const [assignmentType, setAssignmentType] = useState<string>('');
   const [teams, setTeams] = useState<Record<string, Team[]>>({});
@@ -107,9 +128,15 @@ const AddAssignmentForm = ({
     classes?: string;
     teams?: string;
   }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
+  /**
+   * Fetches learning paths data using React Query
+   * Automatically handles loading, error states, and caching
+   */
   const {
     data: learningPathsData,
     isLoading: isLearningPathsLoading,
@@ -120,6 +147,9 @@ const AddAssignmentForm = ({
     queryFn: fetchLearningPaths,
   });
 
+  /**
+   * Populates form with existing assignment data when in edit mode
+   */
   useEffect(() => {
     if (isEditing && assignmentData) {
       setTitle(assignmentData.title);
@@ -189,6 +219,11 @@ const AddAssignmentForm = ({
   today.setDate(today.getDate() + 1);
   const formattedDate = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
 
+  /**
+   * Validates form data before submission
+   * Checks for required fields and team creation for group assignments
+   * @returns boolean indicating if form is valid
+   */
   const validateForm = () => {
     const errors: { classes?: string; teams?: string } = {};
 
@@ -204,11 +239,19 @@ const AddAssignmentForm = ({
     return Object.keys(errors).length === 0;
   };
 
+  /**
+   * Handles form submission for both create and edit modes
+   * Processes team data and makes appropriate API calls
+   * @param e - Form submission event
+   */
   const handleSubmission = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateForm()) {
       return;
     }
+
+    setIsSubmitting(true);
+    setSubmitError(null);
 
     // Convert teams object keys from string to number
     const teamsWithNumberKeys: Record<number, Team[]> = {};
@@ -254,6 +297,8 @@ const AddAssignmentForm = ({
         })
         .catch((error) => {
           console.error('Error updating assignment:', error);
+          setSubmitError(error.message || 'Failed to update assignment');
+          setIsSubmitting(false);
         });
     } else {
       postAssignment({
@@ -268,10 +313,12 @@ const AddAssignmentForm = ({
       })
         .then(() => {
           console.log('Assignment created successfully');
-          navigate('/teacher/assignments');
+          navigate('/teacher');
         })
         .catch((error) => {
           console.error('Error creating assignment:', error);
+          setSubmitError(error.message || 'Failed to create assignment');
+          setIsSubmitting(false);
         });
     }
   };
@@ -439,10 +486,19 @@ const AddAssignmentForm = ({
             <button className={styles.cancelButton} formNoValidate>
               Cancel
             </button>
-            <button className={styles.submitButton} type="submit">
-              Confirm
+            <button
+              className={styles.submitButton}
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Submitting...' : 'Confirm'}
             </button>
           </div>
+          {submitError && (
+            <div className={styles.error}>
+              {submitError}
+            </div>
+          )}
         </form>
       </div>
 

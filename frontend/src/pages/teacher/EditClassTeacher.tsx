@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchAssignments } from '../../util/teacher/httpTeacher'; // Adjust the import path as needed
+import { fetchAssignments, fetchClass, updateClass } from '../../util/teacher/httpTeacher'; // Adjust the import path as needed
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Container from '../../components/shared/Container';
@@ -10,12 +10,7 @@ import PrimaryButton from '../../components/shared/PrimaryButton';
 import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButton';
 import { validateRequired, validateForm } from '../../util/shared/validation';
 import NavButton from '../../components/shared/NavButton';
-
-interface ClassDetails {
-  id: string;
-  name: string;
-  code: string;
-}
+import { ClassItem } from '../../types/type';
 
 interface InputWithChecksRef {
   validateInput: () => boolean;
@@ -29,7 +24,7 @@ const EditClassTeacher: React.FC = () => {
   const { classId } = useParams<{ classId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [className, setClassName] = useState('');
+  const [className, setClassName] = useState<string>('');
   const [filteredAssignments, setFilteredAssignments] = useState<any[]>([]);
 
   const classNameRef = React.useRef<InputWithChecksRef | null>(null);
@@ -60,94 +55,25 @@ const EditClassTeacher: React.FC = () => {
     isLoading,
     isError,
     error,
-  } = useQuery<ClassDetails>({
+  } = useQuery<ClassItem>({
     queryKey: ['class', classId],
-    queryFn: async () => {
-      try {
-        console.log('Fetching class with ID:', classId);
-
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/class/teacher`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-          },
-        );
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('API Error:', response.status, errorText);
-          throw new Error(
-            `Er is iets misgegaan bij het ophalen van de klasgegevens. Status: ${response.status}`,
-          );
-        }
-
-        const data = await response.json();
-        console.log('All classes data:', data);
-
-        const classes = data.classes || [];
-        console.log('Classes array:', classes);
-
-        // Convert classId to string for comparison if needed
-        const targetClassId = classId;
-        console.log('Looking for class with ID:', targetClassId);
-
-        const targetClass = classes.find(
-          (c: any) => String(c.id) === String(targetClassId),
-        );
-        console.log('Found class:', targetClass);
-
-        if (!targetClass) {
-          console.error('Class not found in the list of classes');
-          throw new Error(`Klas met ID ${targetClassId} niet gevonden`);
-        }
-
-        return targetClass;
-      } catch (error) {
-        console.error('Error in queryFn:', error);
-        throw error;
-      }
-    },
+    queryFn: async () => fetchClass({ classId: Number(classId!) }),
   });
 
   // Update class name mutation
   const { mutate, isPending } = useMutation({
     mutationFn: async (newName: string) => {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/class/teacher/${classId}`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-          body: JSON.stringify({ name: newName }),
-        },
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message ||
-            'Er is iets misgegaan bij het bijwerken van de klasnaam.',
-        );
-      }
-
-      return response.json();
+      return updateClass({ classId: Number(classId), name: newName });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['classes'] });
       queryClient.invalidateQueries({ queryKey: ['class', classId] });
-      navigate('/teacher/classes');
+      navigate(`/teacher/classes/${classId}`);
     },
   });
 
   useEffect(() => {
     if (classData) {
-      console.log('Setting class name from data:', classData.name);
       setClassName(classData.name);
     }
   }, [classData]);
@@ -183,7 +109,7 @@ const EditClassTeacher: React.FC = () => {
           const errorData = await response.json();
           throw new Error(
             errorData.message ||
-              'Er is iets misgegaan bij het verwijderen van de klas.',
+            'Er is iets misgegaan bij het verwijderen van de klas.',
           );
         }
 
@@ -212,11 +138,10 @@ const EditClassTeacher: React.FC = () => {
     return (
       <button
         onClick={() => onClick(section)}
-        className={`px-7 h-10 font-bold rounded-md ${
-          isActive
-            ? 'bg-dwengo-green-darker pt-1 text-white border-gray-600 border-3'
-            : 'pt-1.5 bg-dwengo-green hover:bg-dwengo-green-dark text-white '
-        }`}
+        className={`px-7 h-10 font-bold rounded-md ${isActive
+          ? 'bg-dwengo-green-darker pt-1 text-white border-gray-600 border-3'
+          : 'pt-1.5 bg-dwengo-green hover:bg-dwengo-green-dark text-white '
+          }`}
       >
         {label}
       </button>
@@ -241,6 +166,9 @@ const EditClassTeacher: React.FC = () => {
         return (
           <>
             <Container>
+              <BoxBorder extraClasses="mxw-700 m-a g-20">
+                <h2>Huidige klasnaam: {className}</h2>
+              </BoxBorder>
               <BoxBorder>
                 <h1>Klas Bewerken</h1>
                 <form className="g-20" onSubmit={handleFormSubmit}>
@@ -283,8 +211,7 @@ const EditClassTeacher: React.FC = () => {
                   onClick={async () => {
                     try {
                       const response = await fetch(
-                        `${
-                          import.meta.env.VITE_API_URL
+                        `${import.meta.env.VITE_API_URL
                         }/class/teacher/${classId}/join-link`,
                         {
                           method: 'PATCH',

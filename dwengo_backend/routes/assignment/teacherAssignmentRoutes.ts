@@ -26,6 +26,22 @@ router.get("/", controller.getAllAssignments);
  */
 router.post("/", controller.createAssignmentForClass);
 
+
+/**
+ * @route POST /assignment/teacher/teams
+ * @description Create an assignment with teams for a class
+ * @body pathRef: string
+ * @body pathLanguage: string
+ * @body isExternal: boolean
+ * @body deadline: string
+ * @body title: string
+ * @body description: string
+ * @body teamSize: number
+ * @access Teacher
+ */
+router.post("/team", controller.createAssignmentWithTeams);
+
+
 /**
  * @route GET /assignment/teacher/class/:classId
  * @description Get all assignments for a class

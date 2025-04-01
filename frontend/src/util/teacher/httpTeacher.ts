@@ -34,6 +34,12 @@ interface APIError extends Error {
   info?: any;
 }
 
+/**
+ * Authenticates a teacher with email and password
+ * @param {AuthCredentials} credentials - The login credentials
+ * @returns {Promise<AuthResponse>} The authentication token
+ * @throws {APIError} When login fails
+ */
 export async function loginTeacher({
   email,
   password,
@@ -58,6 +64,12 @@ export async function loginTeacher({
   return await response.json();
 }
 
+/**
+ * Registers a new teacher account
+ * @param {AuthCredentials} credentials - The registration details
+ * @returns {Promise<AuthResponse>} The authentication token
+ * @throws {APIError} When registration fails
+ */
 export async function signupTeacher({
   firstName,
   lastName,
@@ -84,6 +96,12 @@ export async function signupTeacher({
   return await response.json();
 }
 
+/**
+ * Fetches all classes for the authenticated teacher
+ * @param {boolean} includeStudents - Whether to include student details
+ * @returns {Promise<ClassItem[]>} List of classes
+ * @throws {APIError} When fetching fails
+ */
 export async function fetchClasses(
   includeStudents: boolean = false,
 ): Promise<ClassItem[]> {
@@ -119,15 +137,12 @@ export async function fetchClasses(
   classrooms = classrooms.classrooms
 
   if (includeStudents) {
-    classrooms = classrooms.classrooms;
     classrooms.forEach((classroom: any) => {
       classroom.students = classroom.classLinks.map(
         (link: any) => link.student.user,
       );
     });
   }
-
-
   return classrooms;
 }
 
@@ -135,10 +150,15 @@ interface CreateClassPayload {
   name: string;
 }
 
+/**
+ * Creates a new class for the authenticated teacher
+ * @param {CreateClassPayload} payload - The class details
+ * @returns {Promise<ClassItem>} The created class
+ * @throws {APIError} When creation fails
+ */
 export async function createClass({
   name,
 }: CreateClassPayload): Promise<ClassItem> {
-  console.log('Creating class with name:', name);
   const response = await fetch(`${BACKEND}/class/teacher`, {
     method: 'POST',
     headers: {
@@ -161,6 +181,48 @@ export async function createClass({
   return await response.json();
 }
 
+export interface UpdateClassPayload {
+  name: string;
+  classId: number;
+}
+
+/**
+ * Updates an existing class
+ * @param {UpdateClassPayload} payload - The updated class details
+ * @returns {Promise<ClassItem>} The updated class
+ * @throws {APIError} When update fails
+ */
+export async function updateClass({
+  name,
+  classId,
+}: UpdateClassPayload): Promise<ClassItem> {
+  const response = await fetch(`${BACKEND}/class/teacher/${classId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+    body: JSON.stringify({ name }),
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het updaten van de klas.',
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  return await response.json();
+}
+
+/**
+ * Fetches a specific class by ID
+ * @param {number} classId - The ID of the class
+ * @returns {Promise<ClassItem>} The class details
+ * @throws {APIError} When fetching fails
+ */
 export async function fetchClass({
   classId,
 }: {
@@ -183,7 +245,7 @@ export async function fetchClass({
     throw error;
   }
   let classroom = await response.json();
-  classroom = classroom;
+  classroom = classroom.classroom;
   return classroom;
 }
 
@@ -194,6 +256,12 @@ interface StudentItem {
   email: string;
 }
 
+/**
+ * Fetches all students in a specific class
+ * @param {number} classId - The ID of the class
+ * @returns {Promise<StudentItem[]>} List of students
+ * @throws {APIError} When fetching fails
+ */
 export async function fetchStudentsByClass({
   classId,
 }: {
@@ -221,7 +289,11 @@ export async function fetchStudentsByClass({
   return students;
 }
 
-//Haal de locale leerpaden op van de leerkracht op
+/**
+ * Fetches all learning paths for the authenticated teacher
+ * @returns {Promise<LearningPath[]>} List of learning paths
+ * @throws {APIError} When fetching fails
+ */
 export async function fetchLearningPaths(): Promise<LearningPath[]> {
   const response = await fetch(`${BACKEND}/pathByTeacher/all`, {
     method: 'GET',
@@ -249,6 +321,13 @@ export async function fetchLearningPaths(): Promise<LearningPath[]> {
   return learningPaths;
 }
 
+/**
+ * Fetches a specific learning path
+ * @param {string} learningPathId - The ID of the learning path
+ * @param {boolean} isExternal - Whether the path is external
+ * @returns {Promise<LearningPath>} The learning path details
+ * @throws {APIError} When fetching fails
+ */
 export async function fetchLearningPath(
   learningPathId: string,
   isExternal: boolean = false,
@@ -278,6 +357,11 @@ export async function fetchLearningPath(
   return learningPath;
 }
 
+/**
+ * Creates a new assignment
+ * @param {Object} payload - The assignment details
+ * @throws {APIError} When creation fails
+ */
 export async function createAssignment({
   classes,
   name,
@@ -318,6 +402,12 @@ export async function createAssignment({
   }
 }
 
+/**
+ * Fetches all assignments for a class
+ * @param {string} classId - The ID of the class
+ * @returns {Promise<any>} List of assignments
+ * @throws {APIError} When fetching fails
+ */
 export async function fetchAssignments(classId: string): Promise<any> {
   const response = await fetch(
     `${BACKEND}/assignment/teacher/class/${classId}`,
@@ -344,6 +434,14 @@ export async function fetchAssignments(classId: string): Promise<any> {
   return assignments;
 }
 
+/**
+ * Fetches a specific assignment
+ * @param {string} assignmentId - The ID of the assignment
+ * @param {boolean} includeClass - Whether to include class details
+ * @param {boolean} includeTeams - Whether to include team details
+ * @returns {Promise<AssignmentPayload>} The assignment details
+ * @throws {APIError} When fetching fails
+ */
 export async function fetchAssignment(
   assignmentId: string,
   includeClass: boolean = false,
@@ -395,9 +493,14 @@ export async function fetchAssignment(
   return assignment;
 }
 
+/**
+ * Deletes an assignment
+ * @param {number} assignmentId - The ID of the assignment to delete
+ * @throws {APIError} When deletion fails
+ */
 export async function deleteAssignment(assignmentId: number): Promise<void> {
   const response = await fetch(
-    `${BACKEND}/teacher/assignments/${assignmentId}`,
+    `${BACKEND}/assignment/teacher/${assignmentId}`,
     {
       method: 'DELETE',
       headers: {
@@ -417,6 +520,11 @@ export async function deleteAssignment(assignmentId: number): Promise<void> {
   }
 }
 
+/**
+ * Creates a new group assignment
+ * @param {AssignmentPayload} payload - The assignment details
+ * @throws {APIError} When creation fails
+ */
 export async function postAssignment({
   title,
   description,
@@ -428,7 +536,7 @@ export async function postAssignment({
   teamSize,
 }: AssignmentPayload): Promise<void> {
   // Create group assignment with teams
-  const response = await fetch(`${BACKEND}/teacher/assignments/teams`, {
+  const response = await fetch(`${BACKEND}/assignment/teacher/team`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -456,6 +564,11 @@ export async function postAssignment({
   }
 }
 
+/**
+ * Updates an existing group assignment
+ * @param {AssignmentPayload} payload - The updated assignment details
+ * @throws {APIError} When update fails
+ */
 export async function updateAssignment({
   id,
   title,

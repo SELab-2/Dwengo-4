@@ -74,6 +74,23 @@ export const deleteClassroom = asyncHandler(
 );
 
 /**
+ * Update classroom
+ * returns the updated class in the response body
+ */
+export const updateClassroom = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { name } = req.body;
+    const classId: number = parseInt(req.params.classId);
+    const teacherId: number = getUserFromAuthRequest(req).id;
+
+    isNameValid(req, res); // if invalid, an error is thrown
+
+    const classroom = await classService.updateClass(classId, teacherId, name);
+    res.status(200).json({ message: "Klas bijgewerkt", classroom });
+  }
+);
+
+/**
  * Get join link
  * returns the join link in the response body
  */

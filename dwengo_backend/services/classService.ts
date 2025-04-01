@@ -98,6 +98,16 @@ export default class ClassService {
     });
   }
 
+  // Update a class's information
+  static async updateClass(classId: number, teacherId: number, name: string): Promise<Class> {
+    await this.verifyClassAndTeacher(classId, teacherId);
+
+    return prisma.class.update({
+      where: { id: classId },
+      data: { name }
+    });
+  }
+
   // Function to check if the requester is the teacher of the class
   static async isTeacherOfClass(
     classId: number,
