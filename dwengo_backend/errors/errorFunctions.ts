@@ -34,6 +34,30 @@ export async function handlePrismaQuery<T>(
 }
 
 /**
+ * This function is used to handle prisma transactions.
+ * If the transaction fails, the error will be thrown as a DatabaseError with the same message.
+ * If the transaction does not have a clear error message, a generic DatabaseError will be thrown.
+ */
+export async function handlePrismaTransaction<T>(
+  prisma: Prisma.TransactionClient,
+  transactionFunction: (_: Prisma.TransactionClient) => Promise<T>,
+): Promise<T> {
+  try {
+    return await transactionFunction(prisma);
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError ||
+      error instanceof Prisma.PrismaClientInitializationError ||
+      error instanceof Prisma.PrismaClientValidationError
+    ) {
+      throw new DatabaseError(error.message);
+    } else {
+      throw new DatabaseError("An unknown error occurred during transaction.");
+    }
+  }
+}
+
+/**
  * This function is used in a function where something is fetched from the Dwnengo API.
  * The flow is that the fetch is done in a try catch block.
  * In the try block, there could be errors thrown. If these errors are thrown, the catch will catch them.

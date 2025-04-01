@@ -5,7 +5,7 @@ import { ForbiddenActionError, UnauthorizedError } from "../errors/errors";
 const prisma = new PrismaClient();
 
 const unauthorizedMessage =
-  "The teacher is unauthorized to perform this action";
+  "The teacher is unauthorized to perform this action.";
 export default class FeedbackService {
   static async getAllFeedbackForEvaluation(
     assignmentId: number,
