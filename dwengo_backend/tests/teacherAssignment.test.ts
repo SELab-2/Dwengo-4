@@ -61,27 +61,33 @@ describe("Tests for teacherAssignment", async () => {
     );
 
     // Add teacher to classes
-    addTeacherToClass(teacher1.id, class1.id);
-    addTeacherToClass(teacher2.id, class1.id);
-    addTeacherToClass(teacher2.id, class2.id);
-    addTeacherToClass(teacher3.id, class2.id);
+    await addTeacherToClass(teacher1.id, class1.id);
+    await addTeacherToClass(teacher2.id, class1.id);
+    await addTeacherToClass(teacher2.id, class2.id);
+    await addTeacherToClass(teacher3.id, class2.id);
 
-    addTeacherToClass(teacher1.id, class3.id);
+    await addTeacherToClass(teacher1.id, class3.id);
     // Create assignments
     assignment1 = await createAssignment(
       class1.id,
       lp1.id,
+      "title ass",
+      "description1 ass",
       new Date("2026-10-23"),
     );
     assignment2 = await createAssignment(
       class1.id,
       lp2.id,
+      "title ass",
+      "description2 ass",
       new Date("2026-04-17"),
     );
 
     assignment4 = await createAssignment(
       class2.id,
       lp4.id,
+      "title ass",
+      "description3 ass",
       new Date("2026-10-17"),
     );
   });
@@ -135,11 +141,11 @@ describe("Tests for teacherAssignment", async () => {
     });
 
     it("should respond with the same assignments for teachers that are members of the same class", async () => {
-      let req = await request(app)
+      const req = await request(app)
         .get(`/assignment/teacher/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher1.token}`);
 
-      let req2 = await request(app)
+      const req2 = await request(app)
         .get(`/assignment/teacher/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`);
 
@@ -177,7 +183,7 @@ describe("Tests for teacherAssignment", async () => {
       expect(status).toBe(201);
       const assignmentId = body.id;
 
-      let req = await request(app)
+      const req = await request(app)
         .patch(`/assignment/teacher/${assignmentId}`)
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
@@ -217,7 +223,7 @@ describe("Tests for teacherAssignment", async () => {
 
   describe("[DELETE] /assignment/teacher/:assignmentId", async () => {
     it("should respond with a `204` status code and delete the assignment", async () => {
-      const { status, body } = await request(app)
+      const { status } = await request(app)
         .delete(`/assignment/teacher/${assignment4.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`);
       expect(status).toBe(204);
@@ -248,10 +254,10 @@ describe("Tests for teacherAssignment", async () => {
       expect(status).toBe(200);
       expect(body).toHaveLength(2);
       expect(body.map((elem: { id: number }) => elem.id)).toContain(
-        assignment1.id
+        assignment1.id,
       );
       expect(body.map((elem: { id: number }) => elem.id)).toContain(
-        assignment2.id
+        assignment2.id,
       );
     });
   });

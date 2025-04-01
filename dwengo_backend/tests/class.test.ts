@@ -19,85 +19,92 @@ let teacherUser1: User & { teacher: Teacher; token: string };
 let classroom: Class;
 
 describe("classroom tests", () => {
-    
-    beforeEach(async () => {
-        // create a teacher
-        teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
-        // create a class
-        classroom = await createClass("5A", "ABCD");
+  beforeEach(async () => {
+    // create a teacher
+    teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
+    // create a class
+    classroom = await createClass("5A", "ABCD");
+  });
+
+  describe("GET /class/teacher", () => {
+    it("should respond with a `200` status code and a list of classes", async () => {
+      // add teacherUser1 to some classes
+      await addTeacherToClass(teacherUser1.id, classroom.id);
+      const classroom2: Class = await createClass("6A", "EFGH");
+      await addTeacherToClass(teacherUser1.id, classroom2.id);
+
+      // now test getting the classes
+      const { status, body } = await request(app)
+        .get("/class/teacher")
+        .set("Authorization", `Bearer ${teacherUser1.token}`);
+
+      expect(status).toBe(200);
+      expect(body.classes).toBeDefined();
+      expect(body.classes).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: classroom.id,
+          }),
+          expect.objectContaining({
+            id: classroom2.id,
+          }),
+        ]),
+      );
     });
-    describe("GET /class/teacher", () => {
-        it("should respond with a `200` status code and a list of classes", async () => {
-            // add teacherUser1 to some classes
-            await addTeacherToClass(teacherUser1.id, classroom.id);
-            const classroom2: Class = await createClass("6A", "EFGH");
-            await addTeacherToClass(teacherUser1.id, classroom2.id);
+    it("shouldn't allow a student to get the classes via the teacher route", async () => {
+      const studentUser = await createStudent(
+        "Alice",
+        "Anderson",
+        "alan@gmail.com",
+      );
+      const { status, body } = await request(app)
+        .get("/class/teacher")
+        .set("Authorization", `Bearer ${studentUser.token}`);
 
-            // now test getting the classes
-            const { status, body } = await request(app)
-                .get("/class/teacher")
-                .set("Authorization", `Bearer ${teacherUser1.token}`);
-
-        expect(status).toBe(200);
-        expect(body.classes).toBeDefined();
-        expect(body.classes).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              id: classroom.id,
-            }),
-            expect.objectContaining({
-              id: classroom2.id,
-            }),
-          ])
-        );
-      });
-      it("shouldn't allow a student to get the classes via the teacher route", async () => {
-        const studentUser = await createStudent("Alice", "Anderson", "alan@gmail.com");
-        const { status, body } = await request(app)
-          .get("/class/teacher")
-          .set("Authorization", `Bearer ${studentUser.token}`);
-
-        expect(body.classes).not.toBeDefined();
-        expect(status).toBe(401);
-        expect(body.error).toBe("Leerkracht niet gevonden.");
-      });
+      expect(body.classes).not.toBeDefined();
+      expect(status).toBe(401);
+      expect(body.error).toBe("Leerkracht niet gevonden.");
     });
+  });
 
-    describe("GET /class/student", () => {
-      it("should respond with a `200` status code and a list of classes", async () => {
-        // create a student and add them to some classes
-        const studentUser = await createStudent("Alice", "Anderson", "alan@gmail.com");
-        await addStudentToClass(studentUser.id, classroom.id);
-        const classroom2: Class = await createClass("6A", "EFGH");
-        await addStudentToClass(studentUser.id, classroom2.id);
+  describe("GET /class/student", () => {
+    it("should respond with a `200` status code and a list of classes", async () => {
+      // create a student and add them to some classes
+      const studentUser = await createStudent(
+        "Alice",
+        "Anderson",
+        "alan@gmail.com",
+      );
+      await addStudentToClass(studentUser.id, classroom.id);
+      const classroom2: Class = await createClass("6A", "EFGH");
+      await addStudentToClass(studentUser.id, classroom2.id);
 
-        // now test getting the classes
-        const { status, body } = await request(app)
-          .get("/class/student")
-          .set("Authorization", `Bearer ${studentUser.token}`);
+      // now test getting the classes
+      const { status, body } = await request(app)
+        .get("/class/student")
+        .set("Authorization", `Bearer ${studentUser.token}`);
 
-        expect(status).toBe(200);
-        expect(body.classes).toBeDefined();
-        expect(body.classes).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              id: classroom.id,
-            }),
-            expect.objectContaining({
-              id: classroom2.id,
-            }),
-          ])
-        );
-      });
-      it("shouldn't allow a teacher to get the classes via the student route", async () => {
-        const { status, body } = await request(app)
-          .get("/class/student")
-          .set("Authorization", `Bearer ${teacherUser1.token}`);
+      expect(status).toBe(200);
+      expect(body.classes).toBeDefined();
+      expect(body.classes).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: classroom.id,
+          }),
+          expect.objectContaining({
+            id: classroom2.id,
+          }),
+        ]),
+      );
+    });
+    it("shouldn't allow a teacher to get the classes via the student route", async () => {
+      const { status, body } = await request(app)
+        .get("/class/student")
+        .set("Authorization", `Bearer ${teacherUser1.token}`);
 
-        expect(body.classes).not.toBeDefined();
-        expect(status).toBe(401);
-        expect(body.error).toBe("Student niet gevonden.");
-      });
+      expect(body.classes).not.toBeDefined();
+      expect(status).toBe(401);
+      expect(body.error).toBe("Student niet gevonden.");
     });
   });
 
@@ -132,7 +139,7 @@ describe("classroom tests", () => {
       const studentUser = await createStudent(
         "Alice",
         "Anderson",
-        "aaaaa@gmail.com"
+        "aaaaa@gmail.com",
       );
       const { status, body } = await request(app)
         .post("/class/teacher")
@@ -143,6 +150,7 @@ describe("classroom tests", () => {
       expect(body.error).toBe("Leerkracht niet gevonden.");
     });
   });
+
   describe("DELETE /class/teacher/:classId", () => {
     it("should respond with a `200` status code and a message when the class is deleted", async () => {
       // add teacherUser1 to class, so we can test deleting it
@@ -152,7 +160,7 @@ describe("classroom tests", () => {
       const studentUser1 = await createStudent(
         "Alice",
         "Anderson",
-        "aaaaa@gmail.com"
+        "aaaaa@gmail.com",
       );
       await addStudentToClass(studentUser1.id, classroom.id);
       await prisma.classStudent
@@ -163,7 +171,7 @@ describe("classroom tests", () => {
       const studentUser2 = await createStudent(
         "Bob",
         "Baker",
-        "bobbaker@gmail.com"
+        "bobbaker@gmail.com",
       );
       await createJoinRequest(studentUser2.id, classroom.id);
       await prisma.joinRequest
@@ -174,7 +182,7 @@ describe("classroom tests", () => {
       const teacherUser2 = await createTeacher(
         "Charlie",
         "Chaplin",
-        "char.ch@gmail.com"
+        "char.ch@gmail.com",
       );
       await createInvite(teacherUser1.id, teacherUser2.id, classroom.id);
       await prisma.invite
@@ -231,7 +239,7 @@ describe("classroom tests", () => {
 
       expect(status).toBe(403);
       expect(body.message).toBe(
-        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`
+        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`,
       );
       // verfiy that class not deleted
       await prisma.class
@@ -241,6 +249,7 @@ describe("classroom tests", () => {
         });
     });
   });
+
   describe("GET /class/teacher/:classId/join-link", () => {
     it("should respond with a `200` status code and a join link", async () => {
       // add teacherUser1 to class, so we can test getting the join link
@@ -251,14 +260,14 @@ describe("classroom tests", () => {
 
       expect(status).toBe(200);
       expect(body.joinLink).toStrictEqual(
-        `${APP_URL}/class/teacher/join?joinCode=${classroom.code}`
+        `${APP_URL}/class/teacher/join?joinCode=${classroom.code}`,
       );
 
       // also test if the join link works
       const studentUser = await createStudent(
         "Alice",
         "Anderson",
-        "aaaaa@gmail.com"
+        "aaaaa@gmail.com",
       );
       const joinLinkResponse = await request(app)
         .post(`/class/student/join?joinCode=${classroom.code}`) // can't use body.joinLink here, because the APP_URL is different in the test environment
@@ -268,11 +277,11 @@ describe("classroom tests", () => {
       expect(joinLinkResponse.body).toHaveProperty("joinRequest");
       expect(joinLinkResponse.body.joinRequest).toHaveProperty(
         "classId",
-        classroom.id
+        classroom.id,
       );
       expect(joinLinkResponse.body.joinRequest).toHaveProperty(
         "studentId",
-        studentUser.id
+        studentUser.id,
       );
     });
     it("should respond with a `403` status code and a message when the teacher is not associated with the class", async () => {
@@ -283,7 +292,7 @@ describe("classroom tests", () => {
 
       expect(status).toBe(403);
       expect(body.message).toBe(
-        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`
+        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`,
       );
       expect(body.joinLink).toBeUndefined();
     });
@@ -305,6 +314,7 @@ describe("classroom tests", () => {
       expect(body.joinLink).toBeUndefined();
     });
   });
+
   describe("PATCH /class/teacher/:classId/join-link", () => {
     it("should respond with a `200` status code and a new join link", async () => {
       // add teacherUser1 to class, so we can test regenerating the join link
@@ -321,7 +331,7 @@ describe("classroom tests", () => {
       expect(updatedClass).toBeDefined();
       expect(updatedClass!.code).not.toBe(classroom.code);
       expect(body.joinLink).toStrictEqual(
-        `${APP_URL}/class/teacher/join?joinCode=${updatedClass!.code}`
+        `${APP_URL}/class/teacher/join?joinCode=${updatedClass!.code}`,
       );
     });
     it("should respond with a `403` status code and a message when the teacher is not associated with the class", async () => {
@@ -331,7 +341,7 @@ describe("classroom tests", () => {
 
       expect(status).toBe(403);
       expect(body.message).toBe(
-        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`
+        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`,
       );
     });
     it("should respond with a `404` status code if the class does not exist", async () => {
@@ -351,6 +361,7 @@ describe("classroom tests", () => {
       expect(body.message).toBe(`Class with id ${invalidClassId} not found`);
     });
   });
+
   describe("GET /class/teacher/:classId", () => {
     it("should respond with a `200` status code and a list of students", async () => {
       await addTeacherToClass(teacherUser1.id, classroom.id);
@@ -358,12 +369,12 @@ describe("classroom tests", () => {
       const studentUser1 = await createStudent(
         "Steven",
         "Mcclure",
-        "velit.dui@hotmail.edu"
+        "velit.dui@hotmail.edu",
       );
       const studentUser2 = await createStudent(
         "Omar",
         "Hawkins",
-        "lobortis.quam@yahoo.couk"
+        "lobortis.quam@yahoo.couk",
       );
       await addStudentToClass(studentUser1.id, classroom.id);
       await addStudentToClass(studentUser2.id, classroom.id);
@@ -395,7 +406,7 @@ describe("classroom tests", () => {
               email: studentUser2.email,
             }),
           }),
-        ])
+        ]),
       );
     });
     it("should respond with a `403` status code when the teacher is not associated with the class", async () => {
@@ -406,7 +417,7 @@ describe("classroom tests", () => {
 
       expect(status).toBe(403);
       expect(body.message).toBe(
-        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`
+        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`,
       );
       expect(body.students).toBeUndefined();
     });
