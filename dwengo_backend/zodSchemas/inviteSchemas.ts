@@ -4,6 +4,7 @@ import { z } from "zod";
  * schemas for invite creation route (POST /teacher/classes/:classId/invites)
  */
 export const createInviteBodySchema = z.object({
+  // Hier wordt geen coerce gebruikt omdat req.body JSON-Parsed is door Express, dus het is al een getal
   otherTeacherId: z.number().int().positive(),
 });
 export const createInviteParamsSchema = z.object({
@@ -35,5 +36,5 @@ export const updateInviteParamsSchema = z.object({
  * schema for delete invite route (DELETE /teacher/classes/:classId/invites/:inviteId)
  */
 export const deleteInviteParamsSchema = createInviteParamsSchema.merge(
-  updateInviteParamsSchema
+  updateInviteParamsSchema,
 ); // classId and inviteId

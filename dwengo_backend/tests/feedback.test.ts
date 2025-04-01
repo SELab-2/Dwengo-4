@@ -56,6 +56,8 @@ describe("Feedback tests", (): void => {
     onGoingAssignment = await createAssignment(
       classroomId,
       learningPath.id,
+      "title ongoing ass",
+      "description ongoing ass",
       deadline,
     );
     onGoingAssignmentId = onGoingAssignment.id;
@@ -76,6 +78,8 @@ describe("Feedback tests", (): void => {
     passedAssignment = await createAssignment(
       classroomId,
       learningPath.id,
+      "title passed ass",
+      "description passed ass",
       passedDeadline,
     );
     passedAssignmentId = passedAssignment.id;

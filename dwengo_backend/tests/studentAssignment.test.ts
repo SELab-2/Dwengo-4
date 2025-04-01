@@ -33,14 +33,9 @@ describe("[GET] /assignment/student", async () => {
 
   let lp1: LearningPath;
   let lp2: LearningPath;
-  let lp3: LearningPath;
 
   let assignment1: Assignment;
   let assignment2: Assignment;
-  let assignment3: Assignment;
-
-  let assignment4: Assignment;
-  let assignment5: Assignment;
 
   beforeEach(async () => {
     // create some students
@@ -51,7 +46,7 @@ describe("[GET] /assignment/student", async () => {
     student5 = await createStudent(
       "Gertrude",
       "Truede",
-      "truede.gertrude@gmail.com"
+      "truede.gertrude@gmail.com",
     );
     // create some classes
     class1 = await createClass("1LA", "ABCD");
@@ -63,39 +58,34 @@ describe("[GET] /assignment/student", async () => {
     lp1 = await createLearningPath(
       "LP1",
       "Learning Path 1",
-      teacherUser1.teacher.userId
+      teacherUser1.teacher.userId,
     );
     lp2 = await createLearningPath(
       "LP2",
       "Learning Path 2",
-      teacherUser1.teacher.userId
-    );
-    lp3 = await createLearningPath(
-      "LP3",
-      "Learning Path 3",
-      teacherUser1.teacher.userId
+      teacherUser1.teacher.userId,
     );
 
     // Add students to classes
-    addStudentToClass(student2.id, class1.id);
-    addStudentToClass(student3.id, class1.id);
-    addStudentToClass(student4.id, class2.id);
-    addStudentToClass(student5.id, class3.id);
+    await addStudentToClass(student2.id, class1.id);
+    await addStudentToClass(student3.id, class1.id);
+    await addStudentToClass(student4.id, class2.id);
+    await addStudentToClass(student5.id, class3.id);
 
     // Create assignments
-    assignment1 = await createAssignment(class1.id, lp1.id, new Date());
-    assignment2 = await createAssignment(class1.id, lp2.id, new Date());
-    assignment3 = await createAssignment(class2.id, lp3.id, new Date());
-
-    assignment4 = await createAssignment(
-      class3.id,
-      lp2.id,
-      new Date("2026-10-17")
+    assignment1 = await createAssignment(
+      class1.id,
+      lp1.id,
+      "title1",
+      "description1",
+      new Date(),
     );
-    assignment5 = await createAssignment(
-      class3.id,
-      lp3.id,
-      new Date("2025-05-28")
+    assignment2 = await createAssignment(
+      class1.id,
+      lp2.id,
+      "title2",
+      "description2",
+      new Date(),
     );
   });
 

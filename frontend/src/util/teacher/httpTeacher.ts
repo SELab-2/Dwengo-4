@@ -31,7 +31,7 @@ export async function loginTeacher({
   email,
   password,
 }: AuthCredentials): Promise<AuthResponse> {
-  const response = await fetch(`${BACKEND}/teacher/auth/login`, {
+  const response = await fetch(`${BACKEND}/auth/teacher/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ export async function signupTeacher({
   email,
   password,
 }: AuthCredentials): Promise<AuthResponse> {
-  const response = await fetch(`${BACKEND}/teacher/auth/register`, {
+  const response = await fetch(`${BACKEND}/auth/teacher/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
