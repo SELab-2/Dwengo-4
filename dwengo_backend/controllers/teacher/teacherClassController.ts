@@ -127,9 +127,9 @@ export const regenerateJoinLink = asyncHandler(
 /**
  * Get all classrooms
  * @route GET /teacher/classes
- * returns a list of all classes for the authenticated teacher in the response body
+ * returns a list of all classes for the authenticated teacher in the response body with their students
  */
-export const getClassroomStudents = asyncHandler(
+export const getClassroomsStudents = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const teacherId: number = getUserFromAuthRequest(req).id;
     const classrooms = await classService.getAllClassesByTeacher(teacherId, true);

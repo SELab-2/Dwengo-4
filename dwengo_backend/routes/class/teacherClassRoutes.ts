@@ -2,7 +2,7 @@ import express from "express";
 import {
   createClassroom,
   deleteClassroom,
-  getClassroomStudents,
+  getClassroomsStudents,
   getJoinLink,
   getTeacherClasses,
   regenerateJoinLink,
@@ -47,7 +47,7 @@ router.patch("/:classId", updateClassroom);
  * @param classId: number
  * @access Teacher
  */
-router.get("/student", getClassroomStudents);
+router.get("/student", getClassroomsStudents);
 
 /**
  * @route GET /class/teacher/:classId/join-link
