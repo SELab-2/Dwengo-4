@@ -1,5 +1,4 @@
 import { 
-  PrismaClient, 
   Question, 
   QuestionType, 
   QuestionSpecific, 
@@ -12,7 +11,8 @@ import referenceValidationService from "./referenceValidationService";
 import { NotFoundError, BadRequestError } from "../errors/errors";
 import { AuthenticatedUser } from "../interfaces/extendedTypeInterfaces";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 /**
  * Helper: bepaal of een gegeven user deze vraag mag *zien* in een overzicht.

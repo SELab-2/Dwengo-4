@@ -1,7 +1,8 @@
-import { PrismaClient } from "@prisma/client";
+
 import { dwengoAPI } from "../config/dwengoAPI";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 /**
  * ReferenceValidationService:

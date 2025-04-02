@@ -1,6 +1,7 @@
-import {PrismaClient, Team} from "@prisma/client";
+import { Team} from "@prisma/client";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 export default class StudentTeamService {
     static async getStudentTeams(studentId: number): Promise<Team[]> {

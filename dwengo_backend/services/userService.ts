@@ -1,6 +1,7 @@
-import { PrismaClient, Role, User } from "@prisma/client";
+import {  Role, User } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 export default class UserService {
   static async findUser(email: string): Promise<User | null> {

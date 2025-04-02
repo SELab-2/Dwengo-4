@@ -1,7 +1,8 @@
-import {Assignment, Feedback, PrismaClient, Teacher} from '@prisma/client';
+import {Assignment, Feedback,  Teacher} from '@prisma/client';
 
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 export default class FeedbackService {
     static async getAllFeedbackForEvaluation(assignmentId: number, evaluationId: string, teacherId: number): Promise<Feedback[]> {

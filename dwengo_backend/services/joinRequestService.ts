@@ -1,4 +1,7 @@
-import { PrismaClient, JoinRequestStatus, JoinRequest } from "@prisma/client";
+
+import { JoinRequestStatus, JoinRequest} from "@prisma/client";
+
+
 import classService from "./classService";
 import { ClassWithLinks } from "./classService";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
@@ -8,7 +11,8 @@ import {
   NotFoundError,
 } from "../errors/errors";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 export default class joinRequestService {
   // Validate whether the class exists before proceeding
