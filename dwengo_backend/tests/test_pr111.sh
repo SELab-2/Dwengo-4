@@ -36,7 +36,7 @@ echo "==[ 0) (Optioneel) Opschonen - indien nodig ]====================="
 echo
 echo "==[ 1) Registreren van Teacher en Student ]========================"
 # --- Teacher register ---
-curl -i -X POST "$BASE_URL/teacher/auth/register" \
+curl -i -X POST "$BASE_URL/auth/teacher/register" \
      -H "Content-Type: application/json" \
      -d "{
        \"firstName\":\"$TEACHER_FIRSTNAME\",
@@ -46,7 +46,7 @@ curl -i -X POST "$BASE_URL/teacher/auth/register" \
      }" || true
 
 # --- Student register ---
-curl -i -X POST "$BASE_URL/student/auth/register" \
+curl -i -X POST "$BASE_URL/auth/student/register" \
      -H "Content-Type: application/json" \
      -d "{
        \"firstName\":\"$STUDENT_FIRSTNAME\",
@@ -58,7 +58,7 @@ curl -i -X POST "$BASE_URL/student/auth/register" \
 echo
 echo "==[ 2) Inloggen Teacher en Student ]==============================="
 # Inloggen Teacher
-TEACHER_TOKEN=$(curl -s -X POST "$BASE_URL/teacher/auth/login" \
+TEACHER_TOKEN=$(curl -s -X POST "$BASE_URL/auth/teacher/login" \
   -H "Content-Type: application/json" \
   -d "{
     \"email\":\"$TEACHER_EMAIL\",
@@ -68,7 +68,7 @@ TEACHER_TOKEN=$(curl -s -X POST "$BASE_URL/teacher/auth/login" \
 echo "Teacher token: $TEACHER_TOKEN"
 
 # Inloggen Student
-STUDENT_TOKEN=$(curl -s -X POST "$BASE_URL/student/auth/login" \
+STUDENT_TOKEN=$(curl -s -X POST "$BASE_URL/auth/student/login" \
   -H "Content-Type: application/json" \
   -d "{
     \"email\":\"$STUDENT_EMAIL\",
@@ -79,7 +79,7 @@ echo "Student token: $STUDENT_TOKEN"
 
 echo
 echo "==[ 3) Teacher maakt klas aan ]===================================="
-CLASS_CREATE_RESP=$(curl -s -X POST "$BASE_URL/teacher/classes" \
+CLASS_CREATE_RESP=$(curl -s -X POST "$BASE_URL/class/teacher" \
   -H "Authorization: Bearer $TEACHER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -92,7 +92,7 @@ echo "$CLASS_CREATE_RESP"
 
 echo
 echo "==[ 4) Teacher haalt de join link op ]============================="
-JOIN_LINK_RESP=$(curl -s -X GET "$BASE_URL/teacher/classes/$CLASS_ID/join-link" \
+JOIN_LINK_RESP=$(curl -s -X GET "$BASE_URL/class/teacher/$CLASS_ID/join-link" \
    -H "Authorization: Bearer $TEACHER_TOKEN")
 
 JOIN_LINK=$(echo "$JOIN_LINK_RESP" | jq -r '.joinLink')
@@ -104,7 +104,7 @@ echo "JoinCode is: $JOIN_CODE"
 
 echo
 echo "==[ 5) Student join request ]======================================"
-curl -i -X POST "$BASE_URL/student/classes/join" \
+curl -i -X POST "$BASE_URL/join-request/student" \
    -H "Authorization: Bearer $STUDENT_TOKEN" \
    -H "Content-Type: application/json" \
    -d "{
@@ -113,7 +113,7 @@ curl -i -X POST "$BASE_URL/student/classes/join" \
 
 echo
 echo "==[ 6) Teacher bekijkt join requests en approve ]=================="
-JOIN_REQS=$(curl -s -X GET "$BASE_URL/teacher/classes/$CLASS_ID/join-requests" \
+JOIN_REQS=$(curl -s -X GET "$BASE_URL/join-request/teacher/class/$CLASS_ID" \
   -H "Authorization: Bearer $TEACHER_TOKEN")
 
 echo "Join requests: $JOIN_REQS"
@@ -125,14 +125,14 @@ echo "Join requests: $JOIN_REQS"
 REQUEST_ID=$(echo "$JOIN_REQS" | jq -r '.joinRequests[0].requestId')
 echo "Approve requestId: $REQUEST_ID"
 
-curl -i -X PATCH "$BASE_URL/teacher/classes/$CLASS_ID/join-requests/$REQUEST_ID" \
+curl -i -X PATCH "$BASE_URL/join-request/teacher/$REQUEST_ID/class/$CLASS_ID" \
    -H "Authorization: Bearer $TEACHER_TOKEN" \
    -H "Content-Type: application/json" \
    -d '{"action":"approve"}'
 
 echo
 echo "==[ 7) Teacher maakt lokaal leerobject ]==========================="
-LOCAL_LO=$(curl -s -X POST "$BASE_URL/teacher/learningObjects" \
+LOCAL_LO=$(curl -s -X POST "$BASE_URL/learningObjectByTeacher" \
    -H "Authorization: Bearer $TEACHER_TOKEN" \
    -H "Content-Type: application/json" \
    -d '{
@@ -151,7 +151,7 @@ echo "$LOCAL_LO"
 
 echo
 echo "==[ 8) Teacher maakt lokaal leerpad ]=============================="
-LOCAL_LP_RESP=$(curl -s -X POST "$BASE_URL/teacher/learningPaths" \
+LOCAL_LP_RESP=$(curl -s -X POST "$BASE_URL/pathByTeacher" \
    -H "Authorization: Bearer $TEACHER_TOKEN" \
    -H "Content-Type: application/json" \
    -d '{
@@ -167,7 +167,7 @@ echo "$LOCAL_LP_RESP"
 
 echo
 echo "==[ 9) Teacher voegt node toe in leerpad (lokaal LO) ]============"
-LP_NODE_RESP=$(curl -s -X POST "$BASE_URL/teacher/learningPaths/$LP_ID/nodes" \
+LP_NODE_RESP=$(curl -s -X POST "$BASE_URL/learningPath/$LP_ID/node" \
    -H "Authorization: Bearer $TEACHER_TOKEN" \
    -H "Content-Type: application/json" \
    -d "{
@@ -188,7 +188,7 @@ echo "Node response: $LP_NODE_RESP"
 echo
 echo "==[ 9b) Teacher voegt TWEEDE node toe (extern Dwengo LO) ]========="
 # Voorbeeld: hruid= 'opdracht_leds', language='nl', version=2
-LP_NODE2_RESP=$(curl -s -X POST "$BASE_URL/teacher/learningPaths/$LP_ID/nodes" \
+LP_NODE2_RESP=$(curl -s -X POST "$BASE_URL/teacher/learningPath/$LP_ID/node" \
    -H "Authorization: Bearer $TEACHER_TOKEN" \
    -H "Content-Type: application/json" \
    -d "{
@@ -249,15 +249,10 @@ echo "Assignments for student:"
 echo "$STU_ASSIGNMENTS"
 
 echo
-echo "==[ 13) Student / Teacher bekijkt laatste 10 leerobjecten (combi) ]"
-echo "---- Student sees LO (limited fields) ----"
-ALL_LO_STUDENT=$(curl -s -X GET "$BASE_URL/learningObjects" \
-  -H "Authorization: Bearer $STUDENT_TOKEN" \
-  | jq '.[-10:] | map({title, id, hruid, language, teacherExclusive})')
-echo "$ALL_LO_STUDENT"
+echo "==[ 13) Teacher bekijkt laatste 10 leerobjecten (combi) ]"
 
 echo "---- Teacher sees LO (limited fields) ----"
-ALL_LO_TEACHER=$(curl -s -X GET "$BASE_URL/learningObjects" \
+ALL_LO_TEACHER=$(curl -s -X GET "$BASE_URL/learningObject/teacher" \
   -H "Authorization: Bearer $TEACHER_TOKEN" \
   | jq '.[-10:] | map({title, id, hruid, language, teacherExclusive})')
 echo "$ALL_LO_TEACHER"

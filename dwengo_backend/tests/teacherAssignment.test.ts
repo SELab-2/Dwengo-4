@@ -11,7 +11,6 @@ import {
   createTeacher,
   stringToDate,
 } from "./helpers/testDataCreation";
-import { isExternal } from "util/types";
 
 describe("Tests for teacherAssignment", async () => {
   let teacher1: User & { teacher: Teacher; token: string };
@@ -26,13 +25,10 @@ describe("Tests for teacherAssignment", async () => {
   let lp1: LearningPath;
   let lp2: LearningPath;
   let lp3: LearningPath;
-  let lp4: LearningPath;
 
   let assignment1: Assignment;
   let assignment2: Assignment;
   let assignment3: Assignment;
-  let assignment4: Assignment;
-  let assignment5: Assignment;
 
   beforeEach(async () => {
     // create some classes
@@ -45,77 +41,70 @@ describe("Tests for teacherAssignment", async () => {
     teacher3 = await createTeacher(
       "Charlie",
       "Ceulemans",
-      "charlie.ceulemans@gmail.com"
+      "charlie.ceulemans@gmail.com",
     );
     // create some learning paths
     lp1 = await createLearningPath(
       "LP1",
       "Learning Path 1",
-      teacher1.teacher.userId
+      teacher1.teacher.userId,
     );
     lp2 = await createLearningPath(
       "LP2",
       "Learning Path 2",
-      teacher2.teacher.userId
+      teacher2.teacher.userId,
     );
     lp3 = await createLearningPath(
       "LP3",
       "Learning Path 3",
-      teacher2.teacher.userId
+      teacher2.teacher.userId,
     );
-    lp4 = await createLearningPath(
-      "LP4",
-      "Learning Path 4",
-      teacher3.teacher.userId
-    );
+    await createLearningPath("LP4", "Learning Path 4", teacher3.teacher.userId);
 
     // Add teacher to classes
-    addTeacherToClass(teacher1.id, class1.id);
-    addTeacherToClass(teacher2.id, class1.id);
-    addTeacherToClass(teacher2.id, class2.id);
-    addTeacherToClass(teacher3.id, class2.id);
+    await addTeacherToClass(teacher1.id, class1.id);
+    await addTeacherToClass(teacher2.id, class1.id);
+    await addTeacherToClass(teacher2.id, class2.id);
+    await addTeacherToClass(teacher3.id, class2.id);
 
-    addTeacherToClass(teacher1.id, class3.id);
+    await addTeacherToClass(teacher1.id, class3.id);
     // Create assignments
     assignment1 = await createAssignment(
       class1.id,
       lp1.id,
-      new Date("2026-10-23")
+      "title1",
+      "description1",
+      new Date("2026-10-23"),
     );
     assignment2 = await createAssignment(
       class1.id,
       lp2.id,
-      new Date("2026-04-17")
+      "title2",
+      "description2",
+      new Date("2026-04-17"),
     );
     assignment3 = await createAssignment(
       class2.id,
       lp3.id,
-      new Date("2026-10-19")
-    );
-
-    assignment4 = await createAssignment(
-      class2.id,
-      lp4.id,
-      new Date("2026-10-17")
-    );
-    assignment5 = await createAssignment(
-      class2.id,
-      lp1.id,
-      new Date("2025-05-28")
+      "title3",
+      "description3",
+      new Date("2026-10-19"),
     );
   });
 
-  describe("[POST] /teacher/assignments", async () => {
+  describe("[POST] /assignment/teacher", async () => {
     it("should respond with a `201` status code and the newly created assignment", async () => {
       // class3 has no assignments
       const { status, body } = await request(app)
-        .post("/teacher/assignments/")
+        .post("/assignment/teacher")
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
           pathRef: lp1.id,
           deadline: "2026-10-23",
           pathLanguage: "nl",
+          title: "Learning Path 1",
+          description: "description1",
         });
       expect(status).toBe(201);
       expect(body.deadline).toStrictEqual(new Date("2026-10-23").toISOString());
@@ -124,23 +113,25 @@ describe("Tests for teacherAssignment", async () => {
     it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
       // class3 has no assignments
       const { status, body } = await request(app)
-        .post("/teacher/assignments/")
+        .post("/assignment/teacher")
         .set("Authorization", `Bearer ${teacher2.token}`)
         .send({
           classId: class3.id,
           pathRef: lp1.id,
           deadline: "2026-10-23",
           pathLanguage: "nl",
+          title: "Learning Path 1",
+          description: "description1",
         });
       expect(status).toBe(500);
       expect(body.error).toBe("Failed to create assignment");
     });
   });
 
-  describe("[GET] /teacher/assignments/class/:classId", async () => {
+  describe("[GET] /assignment/teacher/class/:classId", async () => {
     it("should respond with a `200` status code and a list of assignments for that class", async () => {
       const { status, body } = await request(app)
-        .get(`/teacher/assignments/class/${class1.id}`)
+        .get(`/assignment/teacher/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher1.token}`);
 
       expect(status).toBe(200);
@@ -154,12 +145,12 @@ describe("Tests for teacherAssignment", async () => {
     });
 
     it("should respond with the same assignments for teachers that are members of the same class", async () => {
-      let req = await request(app)
-        .get(`/teacher/assignments/class/${class1.id}`)
+      const req = await request(app)
+        .get(`/assignment/teacher/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher1.token}`);
 
-      let req2 = await request(app)
-        .get(`/teacher/assignments/class/${class1.id}`)
+      const req2 = await request(app)
+        .get(`/assignment/teacher/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`);
 
       expect(req.status).toBe(200);
@@ -173,31 +164,33 @@ describe("Tests for teacherAssignment", async () => {
 
     it("should respond with an error because the teacher is not part of the class", async () => {
       const { status, body } = await request(app)
-        .get(`/teacher/assignments/class/${class1.id}`)
+        .get(`/assignment/teacher/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher3.token}`);
       expect(status).toBe(500);
       expect(body.error).toBe("Failed to retrieve assignments");
     });
   });
 
-  describe("[PATCH] /teacher/assignments/:assignmentId", async () => {
+  describe("[PATCH] /assignment/teacher/:assignmentId", async () => {
     it("should respond with a `200` status code and the updated assignment", async () => {
       // First create assignment for class3
       const { status, body } = await request(app)
-        .post("/teacher/assignments/")
+        .post("/assignment/teacher")
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
           pathRef: lp1.id,
           deadline: "2026-10-23",
           pathLanguage: "nl",
+          title: "Learning Path 1",
+          description: "description1",
         });
 
       expect(status).toBe(201);
       const assignmentId = body.id;
 
-      let req = await request(app)
-        .patch(`/teacher/assignments/${assignmentId}`)
+      const req = await request(app)
+        .patch(`/assignment/teacher/${assignmentId}`)
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           pathRef: lp2.id,
@@ -206,7 +199,7 @@ describe("Tests for teacherAssignment", async () => {
       expect(req.status).toBe(200);
       expect(req.body.pathRef).toBe(lp2.id);
       expect(req.body.deadline).toStrictEqual(
-        new Date("2026-10-23").toISOString()
+        new Date("2026-10-23").toISOString(),
       );
       expect(req.body.updatedAt).not.toStrictEqual(body.updatedAt);
     });
@@ -214,7 +207,7 @@ describe("Tests for teacherAssignment", async () => {
     it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
       // First create assignment for class3
       await request(app)
-        .post("/teacher/assignments/")
+        .post("/assignment/teacher")
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
@@ -223,7 +216,7 @@ describe("Tests for teacherAssignment", async () => {
         });
 
       const { status, body } = await request(app)
-        .patch(`/teacher/assignments/${assignment1.id}`)
+        .patch(`/assignment/teacher/${assignment1.id}`)
         .set("Authorization", `Bearer ${teacher3.token}`)
         .send({
           learningPathId: lp2.id,
@@ -234,27 +227,44 @@ describe("Tests for teacherAssignment", async () => {
     });
   });
 
-  describe("[DELETE] /teacher/assignments/:assignmentId", async () => {
+  describe("[DELETE] /assignment/teacher/:assignmentId", async () => {
     it("should respond with a `204` status code and delete the assignment", async () => {
-      const { status, body } = await request(app)
-        .delete(`/teacher/assignments/${assignment4.id}`)
+      const { status } = await request(app)
+        .delete(`/assignment/teacher/${assignment3.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`);
       expect(status).toBe(204);
 
       // Check if assignment is actually gone from database
       const assignment = await prisma.assignment.findUnique({
-        where: { id: assignment4.id },
+        where: { id: assignment3.id },
       });
       expect(assignment).toBeNull();
     });
 
     it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
       const { status, body } = await request(app)
-        .delete(`/teacher/assignments/${assignment1.id}`)
+        .delete(`/assignment/teacher/${assignment1.id}`)
         .set("Authorization", `Bearer ${teacher3.token}`);
 
       expect(status).toBe(500);
       expect(body.error).toBe("Failed to delete assignment");
+    });
+  });
+
+  describe("[GET] /assignment/teacher", async () => {
+    it("should respond with a `200` status code and return all the assignments of the teacher", async () => {
+      const { status, body } = await request(app)
+        .get(`/assignment/teacher`)
+        .set("Authorization", `Bearer ${teacher1.token}`);
+
+      expect(status).toBe(200);
+      expect(body).toHaveLength(2);
+      expect(body.map((elem: { id: number }) => elem.id)).toContain(
+        assignment1.id,
+      );
+      expect(body.map((elem: { id: number }) => elem.id)).toContain(
+        assignment2.id,
+      );
     });
   });
 });

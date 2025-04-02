@@ -1,7 +1,8 @@
-import { Feedback, PrismaClient } from '@prisma/client';
+import {Assignment, Feedback,  Teacher} from '@prisma/client';
 
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 export default class FeedbackService {
     static async getAllFeedbackForEvaluation(assignmentId: number, evaluationId: string, teacherId: number): Promise<Feedback[]> {
@@ -28,19 +29,17 @@ export default class FeedbackService {
         }
 
         // aantal evaluaties met deadline in de toekomst
-        const deadline = await prisma.evaluation.findFirst({
+        const deadline: Assignment | null = await prisma.assignment.findFirst({
             where: {
                 submissions: {
                     some: {
                         submissionId: submissionId,
                     },
-                }
-
-                /*,
+                },
                 deadline: {
+                    // gte == Greater than equal
                     gte: new Date()
                 }
-                    */
             }
         });
 
@@ -98,9 +97,9 @@ export default class FeedbackService {
 
     }
 
-    static async hasAssignmentRights(assignmentId: number, teacherId: number) {
+    static async hasAssignmentRights(assignmentId: number, teacherId: number): Promise<boolean> {
         // Tel aantal leerkrachten die rechten hebben op de evaluatie
-        const teacherWithRights = await prisma.teacher.findFirst({
+        const teacherWithRights: Teacher | null = await prisma.teacher.findFirst({
             where: {
                 userId: teacherId,
                 teaches: {
@@ -117,15 +116,14 @@ export default class FeedbackService {
                     }
                 }
             }
-        }
-        );
+        });
 
         return teacherWithRights !== null;
     }
 
-    static async hasSubmissionRights(teacherId: number, submissionId: number) {
-        // Tel aantal leerkrachten die rechten hebben op de submission
-        const teacherWithRights: number = await prisma.teacher.count({
+    static async hasSubmissionRights(teacherId: number, submissionId: number): Promise<boolean> {
+        // Ga na of de leerkracht rechten heeft op de submission
+        const teacherWithRights: Teacher | null = await prisma.teacher.findFirst({
             where: {
                 userId: teacherId,
                 teaches: {
@@ -150,6 +148,6 @@ export default class FeedbackService {
         );
 
         // Return true als teacher rechten heeft
-        return teacherWithRights > 0;
+        return teacherWithRights !== null;
     }
 }

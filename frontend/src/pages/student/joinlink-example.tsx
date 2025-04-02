@@ -7,7 +7,7 @@ export default function JoinLink() {
     const url = import.meta.env.VITE_API_URL;
     const token =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OTAsImlhdCI6MTc0MjEyOTQ5NCwiZXhwIjoxNzQyNzM0Mjk0fQ.w6oHGhY0GsvcqEk70Y1fQmN8Xnp3rXYBwUUWlvBea4U";
-    const response = await fetch(`${url}/teacher/classes`, {
+    const response = await fetch(`${url}/class/teacher`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

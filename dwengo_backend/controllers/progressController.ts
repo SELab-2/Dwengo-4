@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { Assignment, LearningObjectProgress, PrismaClient } from "@prisma/client";
+import { LearningObjectProgress, PrismaClient } from "@prisma/client";
 import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
 import { getUserFromAuthRequest } from "../helpers/getUserFromAuthRequest";
 
@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
  */
 export const createProgress = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const studentId: number = getUserFromAuthRequest(req).id;
@@ -39,7 +39,9 @@ export const createProgress = async (
       return { progress };
     });
 
-    res.status(201).json({ message: "Progressie aangemaakt.", progress: result.progress });
+    res
+      .status(201)
+      .json({ message: "Progressie aangemaakt.", progress: result.progress });
     return;
   } catch (error) {
     console.error(error);
@@ -54,7 +56,7 @@ export const createProgress = async (
  */
 export const getStudentProgress = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const studentId: number = getUserFromAuthRequest(req).id;
@@ -85,7 +87,7 @@ export const getStudentProgress = async (
  */
 export const updateProgress = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const studentId: number = getUserFromAuthRequest(req).id;
@@ -121,11 +123,11 @@ export const updateProgress = async (
 };
 
 /**
- * (Voor STUDENT) Bepaal de team-voortgang. 
+ * (Voor STUDENT) Bepaal de team-voortgang.
  */
 export const getTeamProgressStudent = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     if (!req.user) {
@@ -153,7 +155,9 @@ export const getTeamProgressStudent = async (
     }
     const ta = team.teamAssignment;
     if (!ta) {
-      res.status(404).json({ error: "Geen assignment gekoppeld aan dit team." });
+      res
+        .status(404)
+        .json({ error: "Geen assignment gekoppeld aan dit team." });
       return;
     }
 
@@ -192,7 +196,7 @@ export const getTeamProgressStudent = async (
     });
     const objectIds = nodes
       .filter((n) => n.localLearningObjectId !== null)
-      .map((n) => n.localLearningObjectId!) ;
+      .map((n) => n.localLearningObjectId!);
 
     let maxPercentage = 0;
 
@@ -214,7 +218,9 @@ export const getTeamProgressStudent = async (
     res.status(200).json({ teamProgress: maxPercentage });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Fout bij ophalen van team progressie (studentversie)." });
+    res
+      .status(500)
+      .json({ error: "Fout bij ophalen van team progressie (studentversie)." });
   }
 };
 
@@ -223,7 +229,7 @@ export const getTeamProgressStudent = async (
  */
 export const getStudentAssignmentProgress = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const studentId: number = getUserFromAuthRequest(req).id;
@@ -264,7 +270,7 @@ export const getStudentAssignmentProgress = async (
     });
     const objectIds = nodes
       .filter((n) => n.localLearningObjectId)
-      .map((n) => n.localLearningObjectId!) ;
+      .map((n) => n.localLearningObjectId!);
 
     // Hoeveel done?
     const doneCount = await prisma.studentProgress.count({
@@ -278,17 +284,19 @@ export const getStudentAssignmentProgress = async (
     res.status(200).json({ assignmentProgress: percentage });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Fout bij ophalen van opdracht-voortgang (student)." });
+    res
+      .status(500)
+      .json({ error: "Fout bij ophalen van opdracht-voortgang (student)." });
   }
 };
 
 /**
- * Student: hoe ver staat hij/zij met *een volledig (lokaal) leerpad* 
+ * Student: hoe ver staat hij/zij met *een volledig (lokaal) leerpad*
  * (niet per se via assignment).
  */
 export const getStudentLearningPathProgress = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const studentId: number = getUserFromAuthRequest(req).id;
@@ -316,7 +324,7 @@ export const getStudentLearningPathProgress = async (
     });
     const objectIds = nodes
       .filter((n) => n.localLearningObjectId)
-      .map((n) => n.localLearningObjectId!) ;
+      .map((n) => n.localLearningObjectId!);
 
     // Hoeveel done?
     const doneCount = await prisma.studentProgress.count({
@@ -340,11 +348,11 @@ export const getStudentLearningPathProgress = async (
 };
 
 /**
- * (Voor TEACHER) De teamvoortgang. 
+ * (Voor TEACHER) De teamvoortgang.
  */
 export const getTeamProgressTeacher = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     if (!req.user) {
@@ -369,7 +377,9 @@ export const getTeamProgressTeacher = async (
       return;
     }
     if (!team.teamAssignment) {
-      res.status(404).json({ error: "Geen assignment gekoppeld aan dit team." });
+      res
+        .status(404)
+        .json({ error: "Geen assignment gekoppeld aan dit team." });
       return;
     }
 
@@ -405,7 +415,7 @@ export const getTeamProgressTeacher = async (
     });
     const objectIds = nodes
       .filter((n) => n.localLearningObjectId)
-      .map((n) => n.localLearningObjectId!) ;
+      .map((n) => n.localLearningObjectId!);
 
     let maxPercentage = 0;
     for (const student of team.students) {
@@ -430,11 +440,11 @@ export const getTeamProgressTeacher = async (
 };
 
 /**
- * (Voor TEACHER) Gemiddelde voortgang van een klas. 
+ * (Voor TEACHER) Gemiddelde voortgang van een klas.
  */
 export const getAssignmentAverageProgress = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     if (!req.user) {
@@ -478,7 +488,7 @@ export const getAssignmentAverageProgress = async (
     });
     const objectIds = nodes
       .filter((n) => n.localLearningObjectId)
-      .map((n) => n.localLearningObjectId!) ;
+      .map((n) => n.localLearningObjectId!);
 
     // alle teams
     const teamAssignments = await prisma.teamAssignment.findMany({
@@ -523,5 +533,3 @@ export const getAssignmentAverageProgress = async (
       .json({ error: "Fout bij berekenen van gemiddelde voortgang." });
   }
 };
-
-

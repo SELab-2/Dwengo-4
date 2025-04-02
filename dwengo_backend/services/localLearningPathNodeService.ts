@@ -1,8 +1,8 @@
-import { PrismaClient, LearningPathNode } from "@prisma/client";
-import localLearningPathService from "./localLearningPathService";
+import { LearningPathNode } from "@prisma/client";
 import { dwengoAPI } from "../config/dwengoAPI";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 /**
  * Data object om een node te maken/updaten.
@@ -42,7 +42,7 @@ class LocalLearningPathNodeService {
    */
   async getAllNodesForPath(
     teacherId: number,
-    pathId: string
+    pathId: string,
   ): Promise<LearningPathNode[]> {
     await this.checkTeacherOwnsPath(teacherId, pathId);
     return prisma.learningPathNode.findMany({
@@ -59,7 +59,7 @@ class LocalLearningPathNodeService {
   async createNodeForPath(
     teacherId: number,
     pathId: string,
-    data: NodeData
+    data: NodeData,
   ): Promise<LearningPathNode> {
     await this.checkTeacherOwnsPath(teacherId, pathId);
 
@@ -71,13 +71,13 @@ class LocalLearningPathNodeService {
         typeof data.dwengoVersion !== "number"
       ) {
         throw new Error(
-          "Missing Dwengo-fields: dwengoHruid, dwengoLanguage, dwengoVersion"
+          "Missing Dwengo-fields: dwengoHruid, dwengoLanguage, dwengoVersion",
         );
       }
       await this.validateDwengoObject(
         data.dwengoHruid,
         data.dwengoLanguage,
-        data.dwengoVersion
+        data.dwengoVersion,
       );
     } else {
       if (!data.localLearningObjectId) {
@@ -87,7 +87,7 @@ class LocalLearningPathNodeService {
     }
 
     // 2) Transactie:
-    const result = await prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx) => {
       // 2a) Node maken
       const newNode = await tx.learningPathNode.create({
         data: {
@@ -116,8 +116,6 @@ class LocalLearningPathNodeService {
 
       return newNode;
     });
-
-    return result;
   }
 
   /**
@@ -129,7 +127,7 @@ class LocalLearningPathNodeService {
     teacherId: number,
     pathId: string,
     nodeId: string,
-    data: NodeData
+    data: NodeData,
   ): Promise<LearningPathNode> {
     await this.checkTeacherOwnsPath(teacherId, pathId);
 
@@ -162,13 +160,13 @@ class LocalLearningPathNodeService {
           typeof data.dwengoVersion !== "number"
         ) {
           throw new Error(
-            "Missing Dwengo fields for external node: hruid, language, version"
+            "Missing Dwengo fields for external node: hruid, language, version",
           );
         }
         await this.validateDwengoObject(
           data.dwengoHruid,
           data.dwengoLanguage,
-          data.dwengoVersion
+          data.dwengoVersion,
         );
 
         // overschrijf
@@ -198,9 +196,13 @@ class LocalLearningPathNodeService {
         const newHruid =
           data.dwengoHruid !== undefined ? data.dwengoHruid : newDwengoHruid;
         const newLang =
-          data.dwengoLanguage !== undefined ? data.dwengoLanguage : newDwengoLanguage;
+          data.dwengoLanguage !== undefined
+            ? data.dwengoLanguage
+            : newDwengoLanguage;
         const newVer =
-          data.dwengoVersion !== undefined ? data.dwengoVersion : newDwengoVersion;
+          data.dwengoVersion !== undefined
+            ? data.dwengoVersion
+            : newDwengoVersion;
 
         if (
           data.dwengoHruid !== undefined ||
@@ -227,26 +229,24 @@ class LocalLearningPathNodeService {
       }
     }
 
-    const updatedNode = await prisma.learningPathNode.update({
+    // Aantal nodes blijft hetzelfde → geen updateNumNodes nodig
+    return prisma.learningPathNode.update({
       where: { nodeId },
       data: {
         isExternal: newIsExternal,
         localLearningObjectId: newIsExternal
           ? null
-          : newLocalLearningObjectId ?? null,
+          : (newLocalLearningObjectId ?? null),
         dwengoHruid: newIsExternal ? newDwengoHruid : null,
         dwengoLanguage: newIsExternal ? newDwengoLanguage : null,
         dwengoVersion: newIsExternal ? newDwengoVersion : null,
         start_node: data.start_node ?? node.start_node,
       },
     });
-
-    // Aantal nodes blijft hetzelfde → geen updateNumNodes nodig
-    return updatedNode;
   }
 
   /**
-   * Verwijder node. 
+   * Verwijder node.
    * Atomaire transactie (2 acties):
    *   1) Node verwijderen
    *   2) Aantal nodes herberekenen
@@ -254,7 +254,7 @@ class LocalLearningPathNodeService {
   async deleteNodeFromPath(
     teacherId: number,
     pathId: string,
-    nodeId: string
+    nodeId: string,
   ): Promise<void> {
     await this.checkTeacherOwnsPath(teacherId, pathId);
 
@@ -307,28 +307,28 @@ class LocalLearningPathNodeService {
   private async validateDwengoObject(
     hruid: string,
     language: string,
-    version: number
+    version: number,
   ): Promise<void> {
     try {
       const resp = await dwengoAPI.get(
-        `/api/learningObject/getMetadata?hruid=${hruid}&language=${language}&version=${version}`
+        `/api/learningObject/getMetadata?hruid=${hruid}&language=${language}&version=${version}`,
       );
       if (!resp.data) {
         throw new Error(
-          `Dwengo-object (hruid=${hruid}, lang=${language}, ver=${version}) niet gevonden (lege data).`
+          `Dwengo-object (hruid=${hruid}, lang=${language}, ver=${version}) niet gevonden (lege data).`,
         );
       }
     } catch (err: any) {
       if (err.response?.status === 404) {
         throw new Error(
-          `Dwengo-object (hruid=${hruid}, lang=${language}, ver=${version}) niet gevonden (404).`
+          `Dwengo-object (hruid=${hruid}, lang=${language}, ver=${version}) niet gevonden (404).`,
         );
       } else {
         console.error(err);
         throw new Error(
           `Fout bij Dwengo-check: ${
             (err.response && err.response.data) || err.message
-          }`
+          }`,
         );
       }
     }

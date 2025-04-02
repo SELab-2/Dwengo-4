@@ -9,10 +9,10 @@ import {
   validateMinLength,
 } from "../../util/shared/validation";
 import Container from "../../components/shared/Container";
-import PrimaryButton from "../../components/shared/PrimaryButton";
 import BoxBorder from "../../components/shared/BoxBorder";
 import { signupStudent } from "../../util/student/httpStudent";
 import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
+import PrimaryButton from "../../components/shared/PrimaryButton";
 
 interface SignupFormData {
   firstName: string;
@@ -56,8 +56,16 @@ const SignupStudent: React.FC = () => {
     const emailValid = emailRef.current?.validateInput() ?? false;
     const passwordValid = passwordRef.current?.validateInput() ?? false;
 
-    if (firstNameValid && lastNameValid && emailValid && passwordValid &&
-        firstNameRef.current && lastNameRef.current && emailRef.current && passwordRef.current) {
+    if (
+      firstNameValid &&
+      lastNameValid &&
+      emailValid &&
+      passwordValid &&
+      firstNameRef.current &&
+      lastNameRef.current &&
+      emailRef.current &&
+      passwordRef.current
+    ) {
       const formData: SignupFormData = {
         firstName: firstNameRef.current.getValue(),
         lastName: lastNameRef.current.getValue(),
@@ -79,33 +87,45 @@ const SignupStudent: React.FC = () => {
               ref={firstNameRef}
               label="Voornaam"
               inputType="text"
-              validate={(value: string) => validateForm(value, [validateRequired])}
+              validate={(value: string) =>
+                validateForm(value, [validateRequired])
+              }
               placeholder="Voer je voornaam in"
             />
             <InputWithChecks
               ref={lastNameRef}
               label="Achternaam"
               inputType="text"
-              validate={(value: string) => validateForm(value, [validateRequired])}
+              validate={(value: string) =>
+                validateForm(value, [validateRequired])
+              }
               placeholder="Voer je achternaam in"
             />
             <InputWithChecks
               ref={emailRef}
               label="E-mailadres"
               inputType="email"
-              validate={(value: string) => validateForm(value, [validateRequired, validateEmail])}
+              validate={(value: string) =>
+                validateForm(value, [validateRequired, validateEmail])
+              }
               placeholder="Voer je e-mailadres in"
             />
             <InputWithChecks
               ref={passwordRef}
               label="Wachtwoord"
               inputType="password"
-              validate={(value: string) => validateForm(value, [validateRequired, (v: string) => validateMinLength(v, 6)])}
+              validate={(value: string) =>
+                validateForm(value, [
+                  validateRequired,
+                  (v: string) => validateMinLength(v, 6),
+                ])
+              }
               placeholder="Voer je wachtwoord in"
             />
             {isError && (
               <div className="c-r">
-                {(error as any)?.info?.message || "Er is iets fout gelopen tijdens het registreren"}
+                {(error as any)?.info?.message ||
+                  "Er is iets fout gelopen tijdens het registreren"}
               </div>
             )}
             <div>

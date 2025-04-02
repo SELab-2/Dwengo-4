@@ -15,6 +15,8 @@ import {
     // [NIEUW] importeer de functie om lokaal LO op te halen via hruid/lang/version
     getLocalLearningObjectByHruidLangVersion,
   } from "./localDBLearningObjectService";
+ 
+
   
   /**
    * Haalt ALLE leerobjecten op: Dwengo + lokaal.

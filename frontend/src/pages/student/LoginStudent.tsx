@@ -8,11 +8,10 @@ import {
   validateForm,
   validateMinLength,
 } from "../../util/shared/validation";
-import Container from "../../components/shared/Container";
-import PrimaryButton from "../../components/shared/PrimaryButton";
 import BoxBorder from "../../components/shared/BoxBorder";
 import { loginStudent } from "../../util/student/httpStudent";
 import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
+import PrimaryButton from "../../components/shared/PrimaryButton";
 
 interface LoginFormData {
   email: string;
@@ -20,6 +19,8 @@ interface LoginFormData {
 }
 
 interface LoginResponse {
+  firstName: string;
+  lastName: string;
   token: string;
 }
 
@@ -44,6 +45,8 @@ const LoginStudent: React.FC = () => {
       const expires = new Date();
       expires.setDate(expires.getDate() + 7);
       localStorage.setItem("token", token);
+      localStorage.setItem("firstName", data.firstName);
+      localStorage.setItem("lastName", data.lastName);
       localStorage.setItem("expiration", expires.toISOString());
 
       navigate("/student/dashboard");
@@ -56,7 +59,12 @@ const LoginStudent: React.FC = () => {
     const emailValid = emailRef.current?.validateInput() ?? false;
     const passwordValid = passwordRef.current?.validateInput() ?? false;
 
-    if (emailValid && passwordValid && emailRef.current && passwordRef.current) {
+    if (
+      emailValid &&
+      passwordValid &&
+      emailRef.current &&
+      passwordRef.current
+    ) {
       const formData: LoginFormData = {
         email: emailRef.current.getValue(),
         password: passwordRef.current.getValue(),
@@ -91,7 +99,7 @@ const LoginStudent: React.FC = () => {
                   (v: string) => validateMinLength(v, 6),
                 ])
               }
-              placeholder="Voer je wachtwoord in" 
+              placeholder="Voer je wachtwoord in"
             />
             {isError && (
               <div className="c-r">
