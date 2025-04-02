@@ -27,20 +27,20 @@ describe("classroom tests", () => {
   });
 
   describe("[GET] /class/teacher", () => {
-    it("should respond with a `200` status code and a list of classes", async () => {
-      // add teacherUser1 to some classes
+    it("should respond with a `200` status code and a list of classrooms", async () => {
+      // add teacherUser1 to some classrooms
       await addTeacherToClass(teacherUser1.id, classroom.id);
       const classroom2: Class = await createClass("6A", "EFGH");
       await addTeacherToClass(teacherUser1.id, classroom2.id);
 
-      // now test getting the classes
+      // now test getting the classrooms
       const { status, body } = await request(app)
         .get("/class/teacher")
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
-      expect(body.classes).toBeDefined();
-      expect(body.classes).toEqual(
+      expect(body.classrooms).toBeDefined();
+      expect(body.classrooms).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             id: classroom.id,
@@ -51,7 +51,7 @@ describe("classroom tests", () => {
         ]),
       );
     });
-    it("shouldn't allow a student to get the classes via the teacher route", async () => {
+    it("shouldn't allow a student to get the classrooms via the teacher route", async () => {
       const studentUser = await createStudent(
         "Alice",
         "Anderson",
@@ -61,15 +61,15 @@ describe("classroom tests", () => {
         .get("/class/teacher")
         .set("Authorization", `Bearer ${studentUser.token}`);
 
-      expect(body.classes).not.toBeDefined();
+      expect(body.classrooms).not.toBeDefined();
       expect(status).toBe(401);
       expect(body.error).toBe("Leerkracht niet gevonden.");
     });
   });
 
   describe("[GET] /class/student", () => {
-    it("should respond with a `200` status code and a list of classes", async () => {
-      // create a student and add them to some classes
+    it("should respond with a `200` status code and a list of classrooms", async () => {
+      // create a student and add them to some classrooms
       const studentUser = await createStudent(
         "Alice",
         "Anderson",
@@ -79,14 +79,14 @@ describe("classroom tests", () => {
       const classroom2: Class = await createClass("6A", "EFGH");
       await addStudentToClass(studentUser.id, classroom2.id);
 
-      // now test getting the classes
+      // now test getting the classrooms
       const { status, body } = await request(app)
         .get("/class/student")
         .set("Authorization", `Bearer ${studentUser.token}`);
 
       expect(status).toBe(200);
-      expect(body.classes).toBeDefined();
-      expect(body.classes).toEqual(
+      expect(body.classrooms).toBeDefined();
+      expect(body.classrooms).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             id: classroom.id,
@@ -97,12 +97,12 @@ describe("classroom tests", () => {
         ]),
       );
     });
-    it("shouldn't allow a teacher to get the classes via the student route", async () => {
+    it("shouldn't allow a teacher to get the classrooms via the student route", async () => {
       const { status, body } = await request(app)
         .get("/class/student")
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
-      expect(body.classes).not.toBeDefined();
+      expect(body.classrooms).not.toBeDefined();
       expect(status).toBe(401);
       expect(body.error).toBe("Student niet gevonden.");
     });

@@ -46,18 +46,17 @@ const NavTeacher: React.FC = () => {
                   }
                 />
                 <NavButton
-                  to="/teacher/learning-paths"
+                  to="/learning-paths"
                   label="Leerpaden"
                   isActive={(path) =>
-                    location.pathname.includes("/teacher/learning-paths")
+                    location.pathname.includes("/learning-paths")
                   }
                 />
               </div>
             ) : (
               <div
-                className={`flex flex-row justify-end w-full ${
-                  styles.navLinks
-                } ${menuOpen ? styles.open : ""}`}
+                className={`flex flex-row justify-end w-full ${styles.navLinks
+                  } ${menuOpen ? styles.open : ""}`}
               >
                 <NavButton
                   to="/teacher/inloggen"

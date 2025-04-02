@@ -11,6 +11,7 @@ import {
   createTeacher,
   stringToDate,
 } from "./helpers/testDataCreation";
+import TeacherSubmissionController from "../controllers/teacher/teacherSubmissionController";
 
 describe("Tests for teacherAssignment", async () => {
   let teacher1: User & { teacher: Teacher; token: string };
@@ -105,6 +106,7 @@ describe("Tests for teacherAssignment", async () => {
           pathLanguage: "nl",
           title: "Learning Path 1",
           description: "description1",
+          teamSize: 2,
         });
       expect(status).toBe(201);
       expect(body.deadline).toStrictEqual(new Date("2026-10-23").toISOString());
@@ -184,6 +186,7 @@ describe("Tests for teacherAssignment", async () => {
           pathLanguage: "nl",
           title: "Learning Path 1",
           description: "description1",
+          teamSize: 2,
         });
 
       expect(status).toBe(201);

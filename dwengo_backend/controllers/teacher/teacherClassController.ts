@@ -138,6 +138,22 @@ export const getClassroomsStudents = asyncHandler(
 );
 
 /**
+ * Get all students in a classroom
+ * @route GET /teacher/classes/:classId/students
+ * @param classId - id of the class to be fetched
+ * returns a list of all students in the specified class in the response body
+ */
+export const getStudentsByClassId = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const classId: number = parseInt(req.params.classId);
+    const teacherId: number = getUserFromAuthRequest(req).id;
+
+    const students = await classService.getStudentsByClass(classId, teacherId);
+    res.status(200).json({ students });
+  }
+);
+
+/**
  * Get all classrooms
  * @route GET /teacher/classes
  * @query includeStudents - optional query parameter to include student details
