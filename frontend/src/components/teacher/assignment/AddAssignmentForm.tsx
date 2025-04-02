@@ -231,8 +231,14 @@ const AddAssignmentForm = ({
       errors.classes = 'Please select at least one class';
     }
 
-    if (assignmentType === 'group' && Object.keys(teams).length === 0) {
-      errors.teams = 'Please create teams before submitting';
+    if (assignmentType === 'group') {
+      // Check if teams exist for each selected class
+      const missingTeams = selectedClasses.some(
+        (classItem) => !teams[classItem.id] || teams[classItem.id].length === 0
+      );
+      if (missingTeams) {
+        errors.teams = 'Please create teams for all selected classes';
+      }
     }
 
     setFormErrors(errors);
