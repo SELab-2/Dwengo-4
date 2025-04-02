@@ -1,6 +1,6 @@
-import express, {Router} from 'express';
+import express, { Router } from "express";
 import { AssignmentTeacherController } from "../../controllers/teacher/teacherAssignmentController";
-import {protectTeacher} from "../../middleware/teacherAuthMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router: Router = express.Router();
 const controller = new AssignmentTeacherController();

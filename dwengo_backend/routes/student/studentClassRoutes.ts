@@ -1,5 +1,5 @@
 import express from "express";
-import { protectStudent } from "../../middleware/studentAuthMiddleware";
+import { protectStudent } from "../../middleware/authMiddleware/studentAuthMiddleware";
 import { createJoinRequest } from "../../controllers/joinrequest/joinRequestController";
 import { getStudentClasses } from "../../controllers/student/studentClassController";
 

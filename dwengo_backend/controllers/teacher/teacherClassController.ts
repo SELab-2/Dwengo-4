@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { Response } from "express";
-import { AuthenticatedRequest } from "../../middleware/teacherAuthMiddleware";
+import { AuthenticatedRequest } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 import classService from "../../services/classService";
 import { Student } from "@prisma/client";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
@@ -10,7 +10,7 @@ const APP_URL = process.env.APP_URL || "http://localhost:5000";
 
 export const isTeacherValid = (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): boolean => {
   const teacherId = req.user?.id;
   if (!teacherId) {
@@ -22,7 +22,7 @@ export const isTeacherValid = (
 
 export const isNameValid = (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): boolean => {
   const { name } = req.body;
   if (!name || typeof name !== "string" || name.trim() === "") {
@@ -42,7 +42,7 @@ export const getTeacherClasses = asyncHandler(
     const teacherId: number = getUserFromAuthRequest(req).id;
     const classes = await classService.getClassesByTeacher(teacherId);
     res.status(200).json({ classes });
-  }
+  },
 );
 
 /**
@@ -59,7 +59,7 @@ export const createClassroom = asyncHandler(
 
     const classroom = await classService.createClass(name, teacherId);
     res.status(201).json({ message: "Klas aangemaakt", classroom });
-  }
+  },
 );
 
 // Delete classroom
@@ -72,7 +72,7 @@ export const deleteClassroom = asyncHandler(
 
     await classService.deleteClass(Number(classId), Number(teacherId));
     res.json({ message: "Klas verwijderd" });
-  }
+  },
 );
 
 // Get join link
@@ -87,7 +87,7 @@ export const getJoinLink = asyncHandler(
 
     const joinLink = `${APP_URL}/student/classes/join?joinCode=${joinCode}`;
     res.status(200).json({ joinLink });
-  }
+  },
 );
 
 // Regenerate join link
@@ -101,15 +101,15 @@ export const regenerateJoinLink = asyncHandler(
     try {
       const newJoinCode = await classService.regenerateJoinCode(
         Number(classId),
-        teacherId
+        teacherId,
       );
       const joinLink = `${APP_URL}/student/classes/join?joinCode=${newJoinCode}`;
       res.json({ joinLink });
-    } catch (error) {
+    } catch {
       res.status(403).json({ message: "Failed to regenerate joinLink" });
       return;
     }
-  }
+  },
 );
 
 // Get classroom students
@@ -122,7 +122,7 @@ export const getClassroomStudents = asyncHandler(
 
     const students: Student[] = await classService.getStudentsByClass(
       Number(classId),
-      teacherId
+      teacherId,
     );
 
     if (!students) {
@@ -131,7 +131,7 @@ export const getClassroomStudents = asyncHandler(
     }
 
     res.json({ students });
-  }
+  },
 );
 
 /**
@@ -144,7 +144,7 @@ export const getAllClassrooms = asyncHandler(
     const teacherId: number = getUserFromAuthRequest(req).id;
     const classrooms = await classService.getAllClassesByTeacher(teacherId);
     res.status(200).json({ classrooms });
-  }
+  },
 );
 
 /**
@@ -160,12 +160,12 @@ export const getClassByIdAndTeacherId = asyncHandler(
 
     const classroom = await classService.getClassByIdAndTeacherId(
       classId,
-      teacherId
+      teacherId,
     );
     if (!classroom) {
       throw new BadRequestError(`Klas met id ${classId} niet gevonden`);
     }
 
     res.status(200).json({ classroom });
-  }
+  },
 );

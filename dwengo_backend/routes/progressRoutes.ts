@@ -6,10 +6,11 @@ import {
   getTeamProgressStudent,
   getStudentAssignmentProgress,
   getTeamProgressTeacher,
-  getAssignmentAverageProgress, getStudentLearningPathProgress,
+  getAssignmentAverageProgress,
+  getStudentLearningPathProgress,
 } from "../controllers/progressController";
-import { protectStudent } from "../middleware/studentAuthMiddleware";
-import { protectTeacher } from "../middleware/teacherAuthMiddleware";
+import { protectStudent } from "../middleware/authMiddleware/studentAuthMiddleware";
+import { protectTeacher } from "../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router: Router = express.Router();
 
@@ -47,7 +48,7 @@ router.patch("/student/:learningObjectId", protectStudent, updateProgress);
  * @route   GET /progress/student/:teamid
  * @desc    Haal de voortgang van een team op voor een specifieke opdracht.
  *          Dit betekent dat je de progressie van alle teamleden bekijkt en bepaalt
- *          wat de verste vooruitgang is die iemand binnen het team heeft bereikt. 
+ *          wat de verste vooruitgang is die iemand binnen het team heeft bereikt.
  *          Geeft een percentage terug van het verste dat iemand binnen een team is geraakt.
  *          Je rekent het percentage uit van het verste leerobject dat is bereikt binnen het leerpad van alle leerobjecten binnen dat leerpad
  * @access  Protected
@@ -61,7 +62,11 @@ router.get("/student/:teamid", protectStudent, getTeamProgressStudent);
  *          Geeft een percentage terug van hoeveel leerobjecten binnen het leerpad de student heeft voltooid.
  * @access  Protected
  */
-router.get("/student/assignment/:assignmentId", protectStudent, getStudentAssignmentProgress);
+router.get(
+  "/student/assignment/:assignmentId",
+  protectStudent,
+  getStudentAssignmentProgress,
+);
 
 /**
  * @route   PATCH /progress/student/:learningPathId
@@ -70,7 +75,11 @@ router.get("/student/assignment/:assignmentId", protectStudent, getStudentAssign
  *          Geeft een percentage terug van hoeveel leerobjecten binnen het leerpad de student heeft voltooid.
  * @access  Protected
  */
-router.get("/student/:learningPathId/", protectStudent, getStudentLearningPathProgress);
+router.get(
+  "/student/:learningPathId/",
+  protectStudent,
+  getStudentLearningPathProgress,
+);
 /**
  * ===========================
  *          TEACHER
@@ -81,7 +90,7 @@ router.get("/student/:learningPathId/", protectStudent, getStudentLearningPathPr
  * @route   GET /progress/teacher/:teamid
  * @desc    Haal de voortgang van een team op voor een specifieke opdracht.
  *          Dit betekent dat je de progressie van alle teamleden bekijkt en bepaalt
- *          wat de verste vooruitgang is die iemand binnen het team heeft bereikt. 
+ *          wat de verste vooruitgang is die iemand binnen het team heeft bereikt.
  *          Geeft een percentage terug van het verste dat iemand binnen een team is geraakt.
  *          Je rekent het percentage uit van het verste leerobject dat is bereikt binnen het leerpad van alle leerobjecten binnen dat leerpad
  * @access  Protected
@@ -95,6 +104,10 @@ router.get("/teacher/:teamid", protectTeacher, getTeamProgressTeacher);
  *          er wordt een gemiddelde berekend.
  * @access  Protected
  */
-router.get("/teacher/:assignmentId/average", protectTeacher, getAssignmentAverageProgress);
+router.get(
+  "/teacher/:assignmentId/average",
+  protectTeacher,
+  getAssignmentAverageProgress,
+);
 
 export default router;

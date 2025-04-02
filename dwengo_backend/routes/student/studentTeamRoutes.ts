@@ -1,10 +1,10 @@
 import express, { Router } from "express";
-import { 
-    getStudentTeams, 
-    getTeamByAssignment, 
-    getTeamMembers 
+import {
+  getStudentTeams,
+  getTeamByAssignment,
+  getTeamMembers,
 } from "../../controllers/student/studentTeamController";
-import { protectStudent } from "../../middleware/studentAuthMiddleware";
+import { protectStudent } from "../../middleware/authMiddleware/studentAuthMiddleware";
 
 const router: Router = express.Router();
 

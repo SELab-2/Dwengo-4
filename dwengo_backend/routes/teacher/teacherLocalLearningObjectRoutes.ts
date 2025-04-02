@@ -6,7 +6,7 @@ import {
   updateLocalLearningObject,
   deleteLocalLearningObject,
 } from "../../controllers/teacher/teacherLocalLearningObjectController";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router = express.Router();
 
@@ -17,10 +17,7 @@ router.use(protectTeacher);
  * POST /teacher/learningObjects -> nieuw leerobject aanmaken
  * GET  /teacher/learningObjects -> alle leerobjecten van deze teacher
  */
-router
-  .route("/")
-  .post(createLocalLearningObject)
-  .get(getLocalLearningObjects);
+router.route("/").post(createLocalLearningObject).get(getLocalLearningObjects);
 
 /**
  * GET    /teacher/learningObjects/:id -> 1 leerobject ophalen
