@@ -1,6 +1,7 @@
-import { PrismaClient, LearningPath } from "@prisma/client";
+import {  LearningPath } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 export interface LocalLearningPathData {
   title?: string;

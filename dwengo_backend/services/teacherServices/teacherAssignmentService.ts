@@ -1,10 +1,10 @@
-import { Assignment, PrismaClient, Role } from "@prisma/client";
+import { Assignment,  Role } from "@prisma/client";
 import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
 import ReferenceValidationService from "../../services/referenceValidationService";
 import { TeamDivision } from "../../interfaces/extendedTypeInterfaces";
 import { createTeamsInAssignment } from "../teacherTeamsService";
+import prisma from "../../config/prisma";
 
-const prisma = new PrismaClient();
 
 interface ClassTeams {
   [classId: number]: TeamDivision[];

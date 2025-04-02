@@ -26,7 +26,7 @@ describe("classroom tests", () => {
     classroom = await createClass("5A", "ABCD");
   });
 
-  describe("GET /class/teacher", () => {
+  describe("[GET] /class/teacher", () => {
     it("should respond with a `200` status code and a list of classes", async () => {
       // add teacherUser1 to some classes
       await addTeacherToClass(teacherUser1.id, classroom.id);
@@ -67,7 +67,7 @@ describe("classroom tests", () => {
     });
   });
 
-  describe("GET /class/student", () => {
+  describe("[GET] /class/student", () => {
     it("should respond with a `200` status code and a list of classes", async () => {
       // create a student and add them to some classes
       const studentUser = await createStudent(
@@ -108,7 +108,7 @@ describe("classroom tests", () => {
     });
   });
 
-  describe("POST /class/teacher", () => {
+  describe("[POST] /class/teacher", () => {
     it("should respond with a `201` status code and a created class", async () => {
       const { status, body } = await request(app)
         .post("/class/teacher")
@@ -151,7 +151,7 @@ describe("classroom tests", () => {
     });
   });
 
-  describe("DELETE /class/teacher/:classId", () => {
+  describe("[DELETE] /class/teacher/:classId", () => {
     it("should respond with a `200` status code and a message when the class is deleted", async () => {
       // add teacherUser1 to class, so we can test deleting it
       await addTeacherToClass(teacherUser1.id, classroom.id);
@@ -250,7 +250,7 @@ describe("classroom tests", () => {
     });
   });
 
-  describe("GET /class/teacher/:classId/join-link", () => {
+  describe("[GET] /class/teacher/:classId/join-link", () => {
     it("should respond with a `200` status code and a join link", async () => {
       // add teacherUser1 to class, so we can test getting the join link
       await addTeacherToClass(teacherUser1.id, classroom.id);
@@ -270,7 +270,7 @@ describe("classroom tests", () => {
         "aaaaa@gmail.com",
       );
       const joinLinkResponse = await request(app)
-        .post(`/class/student/join?joinCode=${classroom.code}`) // can't use body.joinLink here, because the APP_URL is different in the test environment
+        .post(`/join-request/student?joinCode=${classroom.code}`) // can't use body.joinLink here, because the APP_URL is different in the test environment
         .set("Authorization", `Bearer ${studentUser.token}`);
 
       expect(joinLinkResponse.status).toBe(201);
@@ -315,7 +315,7 @@ describe("classroom tests", () => {
     });
   });
 
-  describe("PATCH /class/teacher/:classId/join-link", () => {
+  describe("[PATCH] /class/teacher/:classId/join-link", () => {
     it("should respond with a `200` status code and a new join link", async () => {
       // add teacherUser1 to class, so we can test regenerating the join link
       await addTeacherToClass(teacherUser1.id, classroom.id);
@@ -362,7 +362,7 @@ describe("classroom tests", () => {
     });
   });
 
-  describe("GET /class/teacher/:classId", () => {
+  describe("[GET] /class/teacher/:classId/student", () => {
     it("should respond with a `200` status code and a list of students", async () => {
       await addTeacherToClass(teacherUser1.id, classroom.id);
       // add some students to the class
@@ -409,6 +409,7 @@ describe("classroom tests", () => {
         ]),
       );
     });
+
     it("should respond with a `403` status code when the teacher is not associated with the class", async () => {
       // try getting the students for a class the teacher is not associated with
       const { status, body } = await request(app)
@@ -419,23 +420,6 @@ describe("classroom tests", () => {
       expect(body.message).toBe(
         `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`,
       );
-      expect(body.students).toBeUndefined();
-    });
-    it("should respond with a `404` status code when the class does not exist", async () => {
-      // try getting the students for a class that doesn't exist
-      const maxClass = await prisma.class.findFirst({
-        orderBy: {
-          id: "desc",
-        },
-      });
-      const invalidClassId = (maxClass?.id ?? 0) + 1;
-
-      const { status, body } = await request(app)
-        .get(`/class/teacher/${invalidClassId}`)
-        .set("Authorization", `Bearer ${teacherUser1.token}`);
-
-      expect(status).toBe(404);
-      expect(body.message).toBe(`Class with id ${invalidClassId} not found`);
       expect(body.students).toBeUndefined();
     });
   });

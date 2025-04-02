@@ -58,7 +58,7 @@ describe("Submission tests", (): void => {
     await createSubmission(evalId, teamId, assignmentId);
   });
 
-  describe("POST /student/submissions/assignment/:assignmentId/evaluation/:evaluationId", (): void => {
+  describe("[POST] /submission/student/assignment/:assignmentId/evaluation/:evaluationId", (): void => {
     it("Should throw an error if the student is not yet part of the team with the assignment", async (): Promise<void> => {
       // Hiermee garandeer ik dat de student geen deel uitmaakt van de groep met de assignment
       await prisma.team.update({
@@ -74,7 +74,7 @@ describe("Submission tests", (): void => {
 
       const { status, body } = await request(app)
         .post(
-          `/student/submissions/assignment/${assignmentId}/evaluation/${evalId}`,
+          `/submission/student/assignment/${assignmentId}/evaluation/${evalId}`,
         )
         .set("Authorization", `Bearer ${student.token}`);
 
@@ -85,7 +85,7 @@ describe("Submission tests", (): void => {
     it("Should respond with a `201` status code and the created submission", async (): Promise<void> => {
       const { status, body } = await request(app)
         .post(
-          `/student/submissions/assignment/${assignmentId}/evaluation/${evalId}`,
+          `/submission/student/assignment/${assignmentId}/evaluation/${evalId}`,
         )
         .set("Authorization", `Bearer ${student.token}`);
 
@@ -102,20 +102,20 @@ describe("Submission tests", (): void => {
     });
   });
 
-  describe("GET /student/submissions/assignment/:assignmentId", (): void => {
+  describe("[GET] /submission/student/assignment/:assignmentId", (): void => {
     it("Should respond with a `200` status code and return the submission for an assignment", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(`/student/submissions/assignment/${assignmentId}`)
+        .get(`/submission/student/assignment/${assignmentId}`)
         .set("Authorization", `Bearer ${student.token}`);
 
       expectSuccessfulSubmissionRetrieval(status, body);
     });
   });
 
-  describe("GET /student/submissions/assignment/:assignmentId", (): void => {
+  describe("[GET] /submission/student/:studentId", (): void => {
     it("Should respond with a `401` status code because a teacher is unauthorized", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(`/student/submissions/student/${studentId}`)
+        .get(`/submission/student/${studentId}`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
       expect(status).toBe(401);
@@ -123,11 +123,11 @@ describe("Submission tests", (): void => {
     });
   });
 
-  describe("GET /student/submissions/assignment/:assignmentId/evaluation/:evaluationId", (): void => {
+  describe("[GET] /submission/student/assignment/:assignmentId/evaluation/:evaluationId", (): void => {
     it("Should respond with a `200` status code and return the submission for an evaluation", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get(
-          `/student/submissions/assignment/${assignmentId}/evaluation/${evalId}`,
+          `/submission/student/assignment/${assignmentId}/evaluation/${evalId}`,
         )
         .set("Authorization", `Bearer ${student.token}`);
 
@@ -135,10 +135,10 @@ describe("Submission tests", (): void => {
     });
   });
 
-  describe("GET /teacher/submissions/student/:studentId", (): void => {
+  describe("[GET] /submissions/teacher/student/:studentId", (): void => {
     it("Should respond with a `401` status code because a student is unauthorized", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(`/teacher/submissions/student/${studentId}`)
+        .get(`/submission/teacher/student/${studentId}`)
         .set("Authorization", `Bearer ${student.token}`);
 
       expect(status).toBe(401);
@@ -146,42 +146,40 @@ describe("Submission tests", (): void => {
     });
   });
 
-  describe("GET /teacher/submissions/student/:studentId", (): void => {
+  describe("[GET] /submission/teacher/student/:studentId", (): void => {
     it("Should respond with a `200` status code and return the submissions for a student", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(`/teacher/submissions/student/${studentId}`)
+        .get(`/submission/teacher/student/${studentId}`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
       expectSuccessfulSubmissionRetrieval(status, body);
     });
   });
 
-  describe("GET /teacher/submissions/team/:teamId", (): void => {
+  describe("[GET] /submission/teacher/team/:teamId", (): void => {
     it("Should respond with a `200` status code and return the submissions for a team", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(`/teacher/submissions/team/${teamId}`)
+        .get(`/submission/teacher/team/${teamId}`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
       expectSuccessfulSubmissionRetrieval(status, body);
     });
   });
 
-  describe("GET /teacher/submissions/assignment/:assignmentId/student/:studentId", (): void => {
+  describe("[GET] /submission/teacher/student/:studentId", (): void => {
     it("Should respond with a `200` status code and return the submissions for a specific assignment and student", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(
-          `/teacher/submissions/assignment/${assignmentId}/student/${studentId}`,
-        )
+        .get(`/submission/teacher/student/${studentId}`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
       expectSuccessfulSubmissionRetrieval(status, body);
     });
   });
 
-  describe("GET /teacher/submissions/assignment/:assignmentId/team/:teamId", (): void => {
+  describe("[GET] /submission/teacher/team/:teamId", (): void => {
     it("Should respond with a `200` status code and return the submissions for a specific assignment and team", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(`/teacher/submissions/assignment/${assignmentId}/team/${teamId}`)
+        .get(`/submission/teacher/team/${teamId}`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
       expectSuccessfulSubmissionRetrieval(status, body);

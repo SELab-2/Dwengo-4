@@ -1,7 +1,8 @@
-import { PrismaClient, Submission } from "@prisma/client";
+import {  Submission } from "@prisma/client";
 import { AccesDeniedError } from "../errors/errors";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 export default class submissionService {
   static async createSubmission(

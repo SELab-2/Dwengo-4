@@ -3,9 +3,10 @@ import { z } from "zod";
 /**
  * schemas for invite creation route (POST /teacher/classes/:classId/invites)
  */
+// Todo: check of dit een valid email is
 export const createInviteBodySchema = z.object({
   // Hier wordt geen coerce gebruikt omdat req.body JSON-Parsed is door Express, dus het is al een getal
-  otherTeacherId: z.number().int().positive(),
+  otherTeacherEmail: z.string(),
 });
 export const createInviteParamsSchema = z.object({
   classId: z.coerce
