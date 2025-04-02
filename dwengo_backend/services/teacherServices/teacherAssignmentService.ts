@@ -1,9 +1,8 @@
-import { Assignment, PrismaClient, Role } from "@prisma/client";
+import { Assignment,  Role } from "@prisma/client";
 import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
 import ReferenceValidationService from "../../services/referenceValidationService";
-// ^ let op: named import, géén "default" meer.
+import prisma from "../../config/prisma";
 
-const prisma = new PrismaClient();
 
 export default class TeacherAssignmentService {
   /**
@@ -47,6 +46,27 @@ export default class TeacherAssignmentService {
         },
         title,
         description,
+      },
+    });
+  }
+
+  /**
+   * Haal alle assignments op voor 1 teacher
+   */
+  static async getAllAssignments(teacherId: number): Promise<Assignment[]> {
+    return prisma.assignment.findMany({
+      where: {
+        classAssignments: {
+          some: {
+            class: {
+              ClassTeacher: {
+                some: {
+                  teacherId,
+                },
+              },
+            },
+          },
+        },
       },
     });
   }

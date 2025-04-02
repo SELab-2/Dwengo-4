@@ -22,7 +22,6 @@ const handleRequest =
 
 /**
  * Creates a join request for a student to join a class (class code in request body)
- * @route POST /student/classes/join
  * returns the created join request in the response body
  */
 export const createJoinRequest = handleRequest(
@@ -37,9 +36,6 @@ export const createJoinRequest = handleRequest(
 
 /**
  * Updates the status of a join request (approve or deny)
- * @route PATCH /teacher/classes/:classId/join-requests/:requestId
- * @param classId - id of the class for which the join request was sent
- * @param requestId - id of the join request to be updated
  * returns the updated join request in the response body
  */
 export const updateJoinRequestStatus = handleRequest(
@@ -73,8 +69,7 @@ export const updateJoinRequestStatus = handleRequest(
 );
 
 /**
- * @route GET /teacher/classes/:classId/join-requests
- * @param classId - id of the class for which the join requests are fetched
+ * Get the join requests for a class
  * returns a list of all join requests for the class in the response body
  */
 export const getJoinRequestsByClass = handleRequest(

@@ -1,9 +1,10 @@
 
 
-import { PrismaClient, LearningObject } from "@prisma/client";
+import { LearningObject } from "@prisma/client";
 import { LearningObjectDto } from "./dwengoLearningObjectService";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 /**
  * Converteert een Prisma LearningObject record naar ons LearningObjectDto

@@ -12,9 +12,8 @@ interface LoginTeacherBody {
 }
 
 // @desc    Inloggen van een leerkracht
-// @route   POST /teacher/auth/login
+// @route   POST /auth/teacher/login
 // @access  Public
-
 export const loginTeacher = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body as LoginTeacherBody;

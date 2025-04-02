@@ -67,7 +67,7 @@ const registerUser = async (
 };
 
 // @desc    Registreer een nieuwe leerling
-// @route   POST /teacher/auth/register
+// @route   POST /auth/student/register
 // @access  Public
 export const registerTeacher = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -76,7 +76,7 @@ export const registerTeacher = asyncHandler(
 );
 
 // @desc    Registreer een nieuwe leerling
-// @route   POST /student/auth/register
+// @route   POST /auth/student/register
 // @access  Public
 export const registerStudent = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {

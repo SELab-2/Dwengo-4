@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import prisma from "./helpers/prisma";
 import app from "../index";
@@ -17,16 +16,6 @@ import {
   createTeacher,
 } from "./helpers/testDataCreation";
 
-// mock the protectTeacher middleware, as it's not relevant for these tests
-// (protectTeacher should be tested seperately though, TODO)
-// vi.mock('../middleware/teacherAuthMiddleware', async () => {
-//     const actual = await vi.importActual("../middleware/teacherAuthMiddleware");
-//     return {
-//         ...actual,
-//         protectTeacher: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => next()
-//     };
-// });
-
 describe("invite tests", async () => {
   let teacherUser1: User & { teacher: Teacher; token: string };
   let teacherUser2: User & { teacher: Teacher; token: string };
@@ -39,17 +28,17 @@ describe("invite tests", async () => {
     classroom = await createClass("5A", "ABCD");
   });
 
-  describe("[POST] /teacher/classes/:classId/invites", async () => {
+  describe("[POST] /invite/class/:classId", async () => {
     it("should respond with a `201` status code and an invite", async () => {
       // set up scenario where there's two teachers and a class, the first one being a teacher of the class
       await addTeacherToClass(teacherUser1.id, classroom.id);
 
       // now we can test the invite creation
       const { status, body } = await request(app)
-        .post(`/teacher/classes/${classroom.id}/invites`)
+        .post(`/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
-          otherTeacherId: teacherUser2.id,
+          otherTeacherEmail: teacherUser2.email,
         });
 
       expect(status).toBe(201);
@@ -70,12 +59,12 @@ describe("invite tests", async () => {
       // emphasis on the 'non-pending' here
       // set up scenario where teacher has rejected the invite
       await addTeacherToClass(teacherUser1.id, classroom.id);
-      let invite: Invite = await createInvite(
+      const invite: Invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
-        classroom.id
+        classroom.id,
       );
-      invite = await prisma.invite.update({
+      await prisma.invite.update({
         where: {
           inviteId: invite.inviteId,
         },
@@ -86,10 +75,10 @@ describe("invite tests", async () => {
 
       // it should be possible to send another invite
       const { status, body } = await request(app)
-        .post(`/teacher/classes/${classroom.id}/invites`)
+        .post(`/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
-          otherTeacherId: teacherUser2.id,
+          otherTeacherEmail: teacherUser2.email,
         });
       expect(status).toBe(201);
       const newInvite = await prisma.invite.findFirst({
@@ -113,10 +102,10 @@ describe("invite tests", async () => {
       const invalidClassId = (maxClass?.id ?? 0) + 1;
       // try to create invite for non-existent class
       const { status, body } = await request(app)
-        .post(`/teacher/classes/${invalidClassId}/invites`)
+        .post(`/invite/class/${invalidClassId}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
-          otherTeacherId: teacherUser2.id,
+          otherTeacherEmail: teacherUser2.email,
         });
 
       expect(body.message).toBe("Klas niet gevonden");
@@ -130,10 +119,10 @@ describe("invite tests", async () => {
       // we can use the existing scenarion with two valid teachers and a class, but none of them are a teacher of the class
       // try to create invite for class where teacher1 is not a teacher
       const { status, body } = await request(app)
-        .post(`/teacher/classes/${classroom.id}/invites`)
+        .post(`/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
-          otherTeacherId: teacherUser2.id,
+          otherTeacherEmail: teacherUser2.email,
         });
 
       expect(body.message).toBe("Leerkracht is geen beheerder van de klas");
@@ -150,10 +139,10 @@ describe("invite tests", async () => {
 
       // try to create the invite
       const { status, body } = await request(app)
-        .post(`/teacher/classes/${classroom.id}/invites`)
+        .post(`/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
-          otherTeacherId: teacherUser2.id,
+          otherTeacherEmail: teacherUser2.email,
         });
 
       expect(body.message).toBe("Leerkracht is al lid van de klas");
@@ -168,10 +157,10 @@ describe("invite tests", async () => {
       await addTeacherToClass(teacherUser1.id, classroom.id);
       // send a first invite
       await request(app)
-        .post(`/teacher/classes/${classroom.id}/invites`)
+        .post(`/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
-          otherTeacherId: teacherUser2.id,
+          otherTeacherEmail: teacherUser2.email,
         });
 
       // verify an invite was created
@@ -181,10 +170,10 @@ describe("invite tests", async () => {
 
       // try to create another invite for the same class and teacher
       const { status, body } = await request(app)
-        .post(`/teacher/classes/${classroom.id}/invites`)
+        .post(`/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
-          otherTeacherId: teacherUser2.id,
+          otherTeacherEmail: teacherUser2.email,
         });
       // no new invite should have been created
       await prisma.invite.findMany().then((invites) => {
@@ -192,34 +181,33 @@ describe("invite tests", async () => {
       });
 
       expect(body.message).toBe(
-        "Er bestaat al een pending uitnodiging voor deze leerkracht en klas"
+        "Er bestaat al een pending uitnodiging voor deze leerkracht en klas",
       );
       expect(status).toBe(409);
     });
     it("should respond with a `400` status code when request body/params are incorrect", async () => {
       // try to create an invite with an invalid body and params
       const { status, body } = await request(app)
-        .post(`/teacher/classes/${"invalidid"}/invites`)
+        .post(`/invite/class/invalidid`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
-          otherTeacherId: "sldk",
+          otherTeacherEmail: "sldk",
         });
 
       expect(status).toBe(400);
-      expect(body.error).toBe("validation error");
+      expect(body.error).toBe(
+        "Bad request due to invalid syntax or data (validation error)",
+      );
       expect(body.message).toBe("invalid request for invite creation");
 
       expect(body.details).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            field: "otherTeacherId",
-            source: "body",
-          }),
-          expect.objectContaining({
             field: "classId",
+            message: "classId should be a number",
             source: "params",
           }),
-        ])
+        ]),
       );
 
       // verify no invite was created
@@ -230,20 +218,22 @@ describe("invite tests", async () => {
     it("should respond with a `400` status code when the request body is missing", async () => {
       await addTeacherToClass(teacherUser1.id, classroom.id);
       const { status: status, body: body } = await request(app)
-        .post(`/teacher/classes/${classroom.id}/invites`)
+        .post(`/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({}); // empty body
 
       expect(status).toBe(400);
-      expect(body.error).toBe("validation error");
+      expect(body.error).toBe(
+        "Bad request due to invalid syntax or data (validation error)",
+      );
       expect(body.message).toBe("invalid request for invite creation");
       expect(body.details).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            field: "otherTeacherId",
+            field: "otherTeacherEmail",
             source: "body",
           }),
-        ])
+        ]),
       );
 
       // verify no invite was created
@@ -252,7 +242,7 @@ describe("invite tests", async () => {
       });
     });
   });
-  describe("[GET] /teacher/classes/invites", async () => {
+  describe("[GET] /invite", async () => {
     it("should respond with a `200` status code and a list of invites", async () => {
       // set up scenario where a teacher has received a few invites
       await addTeacherToClass(teacherUser1.id, classroom.id);
@@ -261,23 +251,23 @@ describe("invite tests", async () => {
       const invite1: Invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
-        classroom.id
+        classroom.id,
       );
       const invite2: Invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
-        classroom2.id
+        classroom2.id,
       );
 
       const { status, body } = await request(app)
-        .get("/teacher/classes/invites")
+        .get("/invite")
         .set("Authorization", `Bearer ${teacherUser2.token}`);
 
       expect(status).toBe(200);
       expect(body.invites).toStrictEqual([invite1, invite2]);
     });
   });
-  describe("[PATCH] /teacher/classes/invites/:inviteId", async () => {
+  describe("[PATCH] /invite/:inviteId", async () => {
     let invite: Invite;
     beforeEach(async () => {
       // set up scenario with a valid pending invite
@@ -285,13 +275,13 @@ describe("invite tests", async () => {
       invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
-        classroom.id
+        classroom.id,
       );
     });
     it("should respond with a `200` status code and an updated invite when the action is `accept`", async () => {
       // we've got a scenario with a valid pending invite, test accepting it
       const { status, body } = await request(app)
-        .patch(`/teacher/classes/invites/${invite.inviteId}`)
+        .patch(`/invite/${invite.inviteId}`)
         .set("Authorization", `Bearer ${teacherUser2.token}`)
         .send({
           action: "accept",
@@ -313,7 +303,7 @@ describe("invite tests", async () => {
     it("should respond with a `200` status code and an updated invite when the action is `decline`", async () => {
       // we've got a scenario with a valid pending invite, test declining it
       const { status, body } = await request(app)
-        .patch(`/teacher/classes/invites/${invite.inviteId}`)
+        .patch(`/invite/${invite.inviteId}`)
         .set("Authorization", `Bearer ${teacherUser2.token}`)
         .send({
           action: "decline",
@@ -333,14 +323,16 @@ describe("invite tests", async () => {
     it("should respond with a `400` status code when the action is neither `accept` nor `decline`", async () => {
       // we've got a scenario with a valid pending invite, test invalid action
       const { status, body } = await request(app)
-        .patch(`/teacher/classes/invites/${invite.inviteId}`)
+        .patch(`/invite/${invite.inviteId}`)
         .set("Authorization", `Bearer ${teacherUser2.token}`)
         .send({
           action: "invalidaction",
         });
 
       expect(status).toBe(400);
-      expect(body.error).toBe("validation error");
+      expect(body.error).toBe(
+        "Bad request due to invalid syntax or data (validation error)",
+      );
       expect(body.message).toBe("invalid request for invite update");
       expect(body.details).toEqual(
         expect.arrayContaining([
@@ -348,7 +340,7 @@ describe("invite tests", async () => {
             field: "action",
             source: "body",
           }),
-        ])
+        ]),
       );
 
       // verify that the invite was not updated
@@ -378,7 +370,7 @@ describe("invite tests", async () => {
       });
       // now let's try to accept the non-existent invite
       const { status, body } = await request(app)
-        .patch(`/teacher/classes/invites/${invite.inviteId}`)
+        .patch(`/invite/${invite.inviteId}`)
         .set("Authorization", `Bearer ${teacherUser2.token}`)
         .send({
           action: "accept",
@@ -406,7 +398,7 @@ describe("invite tests", async () => {
       });
       // now let's try to accept the invite
       const { status, body } = await request(app)
-        .patch(`/teacher/classes/invites/${invite.inviteId}`)
+        .patch(`/invite/${invite.inviteId}`)
         .set("Authorization", `Bearer ${teacherUser2.token}`)
         .send({
           action: "accept",
@@ -425,14 +417,16 @@ describe("invite tests", async () => {
     it("should respond with a `400` status code when the inviteId param is not a positive integer", async () => {
       // try to update an invite with an invalid inviteId
       const { status, body } = await request(app)
-        .patch(`/teacher/classes/invites/${"invalidid"}`)
+        .patch(`/invite/${"invalidid"}`)
         .set("Authorization", `Bearer ${teacherUser2.token}`)
         .send({
           action: "accept",
         });
 
       expect(status).toBe(400);
-      expect(body.error).toBe("validation error");
+      expect(body.error).toBe(
+        "Bad request due to invalid syntax or data (validation error)",
+      );
       expect(body.message).toBe("invalid request for invite update");
       expect(body.details).toEqual(
         expect.arrayContaining([
@@ -440,11 +434,11 @@ describe("invite tests", async () => {
             field: "inviteId",
             source: "params",
           }),
-        ])
+        ]),
       );
     });
   });
-  describe("[DELETE] /teacher/classes/:classId/invites/:inviteId", async () => {
+  describe("[DELETE] /invite/:inviteId/class/:classId", async () => {
     let invite: Invite;
     beforeEach(async () => {
       // set up scenario with a valid invite
@@ -452,13 +446,13 @@ describe("invite tests", async () => {
       invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
-        classroom.id
+        classroom.id,
       );
     });
     it("should respond with a `200` status code and the deleted invite", async () => {
       // test deleting the invite
       const { status, body } = await request(app)
-        .delete(`/teacher/classes/${classroom.id}/invites/${invite.inviteId}`)
+        .delete(`/invite/${invite.inviteId}/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
@@ -476,7 +470,7 @@ describe("invite tests", async () => {
       const teacherUser3: User & { teacher: Teacher; token: string } =
         await createTeacher("Jane", "Doe", "jane.doe@gmail.com");
       const { status, body } = await request(app)
-        .delete(`/teacher/classes/${classroom.id}/invites/${invite.inviteId}`)
+        .delete(`/invite/${invite.inviteId}/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser3.token}`);
 
       expect(status).toBe(403);
@@ -494,7 +488,7 @@ describe("invite tests", async () => {
         await createTeacher("Jane", "Doe", "jane.doe@gmail.com");
       await addTeacherToClass(teacherUser3.id, classroom.id);
       const { status, body } = await request(app)
-        .delete(`/teacher/classes/${classroom.id}/invites/${invite.inviteId}`)
+        .delete(`/invite/${invite.inviteId}/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser3.token}`); // teacher3 didn't create the invite, but is part of the class
 
       expect(status).toBe(200);
@@ -517,7 +511,7 @@ describe("invite tests", async () => {
       });
       // now let's try to delete the non-existent invite using the route
       const { status, body } = await request(app)
-        .delete(`/teacher/classes/${classroom.id}/invites/${invite.inviteId}`)
+        .delete(`/invite/${invite.inviteId}/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(404);
@@ -525,13 +519,13 @@ describe("invite tests", async () => {
     });
     it("should respond with a `400` status code when the params are not correct", async () => {
       const { status, body } = await request(app)
-        .delete(
-          `/teacher/classes/${"invalidclassid"}/invites/${"invalidinviteid"}`
-        )
+        .delete(`/invite/${"invalidinvidteid"}/class/${"invalidclassid"}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(400);
-      expect(body.error).toBe("validation error");
+      expect(body.error).toBe(
+        "Bad request due to invalid syntax or data (validation error)",
+      );
       expect(body.message).toBe("invalid request params");
       expect(body.details).toEqual(
         expect.arrayContaining([
@@ -543,33 +537,33 @@ describe("invite tests", async () => {
             field: "inviteId",
             source: "params",
           }),
-        ])
+        ]),
       );
     });
   });
-  describe("[GET] /teacher/classes/:classId/invites", async () => {
+  describe("[GET] /invite/class/:classId", async () => {
     it("should respond with a `200` status code and a list of invites", async () => {
       // set up scenario where there's some pending invites for a class
       await addTeacherToClass(teacherUser1.id, classroom.id);
       const teacherUser3: User & { teacher: Teacher } = await createTeacher(
         "Bleep",
         "Bloop",
-        "bleep.bloop@gmail.com"
+        "bleep.bloop@gmail.com",
       );
       const invite1: Invite = await createInvite(
         teacherUser1.id,
         teacherUser2.id,
-        classroom.id
+        classroom.id,
       );
       const invite2: Invite = await createInvite(
         teacherUser1.id,
         teacherUser3.id,
-        classroom.id
+        classroom.id,
       );
 
       // test getting the invites
       const { status, body } = await request(app)
-        .get(`/teacher/classes/${classroom.id}/invites`)
+        .get(`/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
@@ -578,7 +572,7 @@ describe("invite tests", async () => {
     it("should respond with a `403` status code when the teacher is not part of the class", async () => {
       // try to get invites for a class where the teacher is part of the class
       const { status, body } = await request(app)
-        .get(`/teacher/classes/${classroom.id}/invites`)
+        .get(`/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(403);
@@ -587,11 +581,13 @@ describe("invite tests", async () => {
     });
     it("should respond with a `400` status code when the params are not correct", async () => {
       const { status, body } = await request(app)
-        .get(`/teacher/classes/${"invalidclassid"}/invites`)
+        .get(`/invite/class/${"invalidclassid"}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(400);
-      expect(body.error).toBe("validation error");
+      expect(body.error).toBe(
+        "Bad request due to invalid syntax or data (validation error)",
+      );
       expect(body.message).toBe("invalid request params");
       expect(body.details).toEqual(
         expect.arrayContaining([
@@ -599,7 +595,7 @@ describe("invite tests", async () => {
             field: "classId",
             source: "params",
           }),
-        ])
+        ]),
       );
     });
   });

@@ -2,7 +2,6 @@ import {
   Class,
   ClassStudent,
   ClassTeacher,
-  PrismaClient,
   Student,
   User,
 } from "@prisma/client";
@@ -13,7 +12,7 @@ import {
   NotFoundError,
 } from "../errors/errors";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
 
 export type ClassWithLinks = Class & { classLinks: ClassStudent[] };
 
@@ -291,17 +290,4 @@ export default class ClassService {
     return updatedClass.code;
   }
 
-  // Get all classes from the same teacher
-  static async getAllClassesByTeacher(teacherId: number): Promise<Class[]> {
-    // Fetch all classes taught by the same teacher
-    return prisma.class.findMany({
-      where: {
-        ClassTeacher: {
-          some: {
-            teacherId,
-          },
-        },
-      },
-    });
-  }
 }

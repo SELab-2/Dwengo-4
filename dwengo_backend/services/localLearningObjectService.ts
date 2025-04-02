@@ -1,6 +1,7 @@
-import {ContentType, LearningObject, PrismaClient} from "@prisma/client";
+import {ContentType, LearningObject} from "@prisma/client";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 export interface LocalLearningObjectData {
   // De data die een teacher kan opgeven bij het aanmaken of updaten
