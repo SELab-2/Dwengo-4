@@ -417,7 +417,7 @@ describe("invite tests", async () => {
     it("should respond with a `400` status code when the inviteId param is not a positive integer", async () => {
       // try to update an invite with an invalid inviteId
       const { status, body } = await request(app)
-        .patch(`/invite/${"invalidid"}`)
+        .patch(`/invite/invalidid`)
         .set("Authorization", `Bearer ${teacherUser2.token}`)
         .send({
           action: "accept",
@@ -519,7 +519,7 @@ describe("invite tests", async () => {
     });
     it("should respond with a `400` status code when the params are not correct", async () => {
       const { status, body } = await request(app)
-        .delete(`/invite/${"invalidinvidteid"}/class/${"invalidclassid"}`)
+        .delete(`/invite/invalidinvidteid/class/invalidclassid`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(400);
@@ -581,7 +581,7 @@ describe("invite tests", async () => {
     });
     it("should respond with a `400` status code when the params are not correct", async () => {
       const { status, body } = await request(app)
-        .get(`/invite/class/${"invalidclassid"}`)
+        .get(`/invite/class/invalidclassid`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(400);

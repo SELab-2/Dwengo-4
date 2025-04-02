@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import prisma from "./helpers/prisma";
 import app from "../index";
-import { Class, Teacher, User } from "@prisma/client";
+import { Class, Prisma, Teacher, User } from "@prisma/client";
 import {
   addStudentToClass,
   addTeacherToClass,
@@ -118,13 +118,18 @@ describe("classroom tests", () => {
       expect(status).toBe(201);
       expect(body.message).toBe("Klas aangemaakt");
       expect(body.classroom).toBeDefined();
+
       // verify that class was created
-      const createdClassroom = await prisma.class.findFirst({
+      const createdClassroom: Prisma.ClassGetPayload<{
+        include: { ClassTeacher: true };
+      }> | null = await prisma.class.findFirst({
         where: { name: "6A" },
         include: { ClassTeacher: true },
       });
+
       expect(createdClassroom).toBeDefined();
-      expect(createdClassroom!.ClassTeacher[0].teacherId).toBe(teacherUser1.id);
+      const classTeacher = createdClassroom!.ClassTeacher[0];
+      expect(classTeacher.teacherId).toBe(teacherUser1.id);
     });
     it("should respond with a `400` status code and a message when no valid class name is provided", async () => {
       const { status, body } = await request(app)
