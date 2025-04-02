@@ -38,7 +38,7 @@ describe("invite tests", async () => {
         .post(`/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
-          otherTeacherId: teacherUser2.id,
+          otherTeacherEmail: teacherUser2.email,
         });
 
       expect(status).toBe(201);
@@ -78,7 +78,7 @@ describe("invite tests", async () => {
         .post(`/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
-          otherTeacherId: teacherUser2.id,
+          otherTeacherEmail: teacherUser2.email,
         });
       expect(status).toBe(201);
       const newInvite = await prisma.invite.findFirst({
@@ -105,7 +105,7 @@ describe("invite tests", async () => {
         .post(`/invite/class/${invalidClassId}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
-          otherTeacherId: teacherUser2.id,
+          otherTeacherEmail: teacherUser2.email,
         });
 
       expect(body.message).toBe("Klas niet gevonden");
@@ -122,7 +122,7 @@ describe("invite tests", async () => {
         .post(`/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
-          otherTeacherId: teacherUser2.id,
+          otherTeacherEmail: teacherUser2.email,
         });
 
       expect(body.message).toBe("Leerkracht is geen beheerder van de klas");
@@ -142,7 +142,7 @@ describe("invite tests", async () => {
         .post(`/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
-          otherTeacherId: teacherUser2.id,
+          otherTeacherEmail: teacherUser2.email,
         });
 
       expect(body.message).toBe("Leerkracht is al lid van de klas");
@@ -160,7 +160,7 @@ describe("invite tests", async () => {
         .post(`/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
-          otherTeacherId: teacherUser2.id,
+          otherTeacherEmail: teacherUser2.email,
         });
 
       // verify an invite was created
@@ -173,7 +173,7 @@ describe("invite tests", async () => {
         .post(`/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
-          otherTeacherId: teacherUser2.id,
+          otherTeacherEmail: teacherUser2.email,
         });
       // no new invite should have been created
       await prisma.invite.findMany().then((invites) => {
@@ -191,7 +191,7 @@ describe("invite tests", async () => {
         .post(`/invite/class/invalidid`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
-          otherTeacherId: "sldk",
+          otherTeacherEmail: "sldk",
         });
 
       expect(status).toBe(400);
@@ -203,11 +203,8 @@ describe("invite tests", async () => {
       expect(body.details).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            field: "otherTeacherId",
-            source: "body",
-          }),
-          expect.objectContaining({
             field: "classId",
+            message: "classId should be a number",
             source: "params",
           }),
         ]),
@@ -233,7 +230,7 @@ describe("invite tests", async () => {
       expect(body.details).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            field: "otherTeacherId",
+            field: "otherTeacherEmail",
             source: "body",
           }),
         ]),
@@ -245,7 +242,7 @@ describe("invite tests", async () => {
       });
     });
   });
-  describe("[GET] /invite/class", async () => {
+  describe("[GET] /invite", async () => {
     it("should respond with a `200` status code and a list of invites", async () => {
       // set up scenario where a teacher has received a few invites
       await addTeacherToClass(teacherUser1.id, classroom.id);
@@ -544,7 +541,7 @@ describe("invite tests", async () => {
       );
     });
   });
-  describe("[GET] invite/class/:classId", async () => {
+  describe("[GET] /invite/class/:classId", async () => {
     it("should respond with a `200` status code and a list of invites", async () => {
       // set up scenario where there's some pending invites for a class
       await addTeacherToClass(teacherUser1.id, classroom.id);

@@ -33,6 +33,7 @@ describe("[GET] /assignment/student", async () => {
 
   let lp1: LearningPath;
   let lp2: LearningPath;
+  let lp3: LearningPath;
 
   let assignment1: Assignment;
   let assignment2: Assignment;
@@ -65,6 +66,11 @@ describe("[GET] /assignment/student", async () => {
       "Learning Path 2",
       teacherUser1.teacher.userId,
     );
+    lp3 = await createLearningPath(
+      "LP3",
+      "Learning Path 3",
+      teacherUser1.teacher.userId,
+    );
 
     // Add students to classes
     await addStudentToClass(student2.id, class1.id);
@@ -76,16 +82,38 @@ describe("[GET] /assignment/student", async () => {
     assignment1 = await createAssignment(
       class1.id,
       lp1.id,
-      "title1",
-      "description1",
+      "title",
+      "description",
       new Date(),
     );
     assignment2 = await createAssignment(
       class1.id,
       lp2.id,
-      "title2",
-      "description2",
+      "title",
+      "description",
       new Date(),
+    );
+    await createAssignment(
+      class2.id,
+      lp3.id,
+      "title",
+      "description",
+      new Date(),
+    );
+
+    await createAssignment(
+      class3.id,
+      lp2.id,
+      "title",
+      "description",
+      new Date("2026-10-17"),
+    );
+    await createAssignment(
+      class3.id,
+      lp3.id,
+      "title",
+      "description",
+      new Date("2025-05-28"),
     );
   });
 
