@@ -7,18 +7,18 @@ interface NavButtonProps {
   isActive?: (path: string) => boolean;
 }
 
-const NavButton: React.FC<NavButtonProps> = ({ to, label, isActive }) => {
+const NavButton: React.FC<NavButtonProps> = ({ to, label }) => {
   return (
     <NavLink
       to={to}
-      className={({ isActive: linkIsActive }) => {
-        const active = isActive ? isActive(to) : linkIsActive;
+      className={({ isActive }) => {
         return `px-7 font-bold rounded-md  ${
-          active
+          isActive
             ? 'bg-dwengo-green-darker pt-1 text-white border-gray-800 border-3'
             : 'py-1.5 bg-dwengo-green hover:bg-dwengo-green-dark text-white '
         }`;
       }}
+      end
     >
       {label}
     </NavLink>

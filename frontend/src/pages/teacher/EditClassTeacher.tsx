@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import { fetchAssignments, fetchClass, updateClass } from '../../util/teacher/httpTeacher'; // Adjust the import path as needed
 
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Container from '../../components/shared/Container';
 import BoxBorder from '../../components/shared/BoxBorder';
@@ -251,13 +251,9 @@ const EditClassTeacher: React.FC = () => {
             <BoxBorder extraClasses="mxw-700 m-a g-20">
               <div className="flex justify-between items-center mb-4">
                 <h2>Opdrachten</h2>
-                <PrimaryButton
-                  onClick={() =>
-                    navigate(`/teacher/classes/${classId}/add-assignment`)
-                  }
-                >
-                  Nieuwe Opdracht
-                </PrimaryButton>
+                <Link to={`/teacher/classes/${classId}/add-assignment`}>
+                  <PrimaryButton>Nieuwe Opdracht</PrimaryButton>
+                </Link>
               </div>
 
               <div>
@@ -329,13 +325,9 @@ const EditClassTeacher: React.FC = () => {
             <Container>
               <BoxBorder extraClasses="mxw-700 m-a g-20">
                 <h2>Beheer Leerlingen</h2>
-                <PrimaryButton
-                  onClick={() =>
-                    navigate(`/teacher/classes/${classId}/students`)
-                  }
-                >
-                  Bekijk Leerlingen
-                </PrimaryButton>
+                <Link to={`/teacher/classes/${classId}/students`}>
+                  <PrimaryButton>Bekijk Leerlingen</PrimaryButton>
+                </Link>
               </BoxBorder>
             </Container>
 
@@ -343,20 +335,12 @@ const EditClassTeacher: React.FC = () => {
               <BoxBorder extraClasses="mxw-700 m-a g-20">
                 <h2>Beheer Uitnodigingen</h2>
                 <div className="flex gap-4">
-                  <PrimaryButton
-                    onClick={() =>
-                      navigate(`/teacher/classes/${classId}/teacher-invites`)
-                    }
-                  >
-                    Leerkracht Uitnodigingen
-                  </PrimaryButton>
-                  <PrimaryButton
-                    onClick={() =>
-                      navigate(`/teacher/classes/${classId}/join-requests`)
-                    }
-                  >
-                    Leerling Verzoeken
-                  </PrimaryButton>
+                  <Link to={`/teacher/classes/${classId}/teacher-invites`}>
+                    <PrimaryButton>Leerkracht Uitnodigingen</PrimaryButton>
+                  </Link>
+                  <Link to={`/teacher/classes/${classId}/join-requests`}>
+                    <PrimaryButton>Leerling Verzoeken</PrimaryButton>
+                  </Link>
                 </div>
               </BoxBorder>
             </Container>
