@@ -1,6 +1,7 @@
 import express, { Router } from "express";
-import { loginStudent } from "../../controllers/student/studentAuthController";
-import { registerStudent } from "../../controllers/userController";
+import { registerStudent, loginStudent } from "../../controllers/userAuthController";
+import { loginBodySchema, registerBodySchema } from "../../zodSchemas/authSchemas";
+import { validateRequest } from "../../middleware/validateRequest";
 
 const router: Router = express.Router();
 
@@ -9,13 +10,27 @@ const router: Router = express.Router();
  * @desc Register a student
  * @access Public
  */
-router.post("/register", registerStudent);
+router.post(
+  "/register",
+  validateRequest({
+    customErrorMessage: "invalid request for student registration",
+    bodySchema: registerBodySchema,
+  }),
+  registerStudent
+);
 
 /**
  * @route POST /auth/student/login
  * @desc Login a student
  * @access Public
  */
-router.post("/login", loginStudent);
+router.post(
+  "/login",
+  validateRequest({
+    customErrorMessage: "invalid request for student login",
+    bodySchema: loginBodySchema,
+  }),
+  loginStudent
+);
 
 export default router;
