@@ -101,17 +101,7 @@ describe("classroom tests", (): void => {
         .set("Authorization", `Bearer ${studentUser.token}`);
 
       expect(status).toBe(200);
-      expect(body.classes).toBeDefined();
-      expect(body.classes).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            id: classroom.id,
-          }),
-          expect.objectContaining({
-            id: classroom2.id,
-          }),
-        ]),
-      );
+      expectClassRoomArrayBody(body, classroom2);
     });
 
     it("shouldn't allow a teacher to get the classes via the student route", async (): Promise<void> => {
@@ -415,6 +405,20 @@ describe("classroom tests", (): void => {
     });
   });
 });
+
+function expectClassRoomArrayBody(body: any, classroom2: Class): void {
+  expect(body.classes).toBeDefined();
+  expect(body.classes).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        id: classroom.id,
+      }),
+      expect.objectContaining({
+        id: classroom2.id,
+      }),
+    ]),
+  );
+}
 
 function expectValidStudentArrayBody(
   body: any,
