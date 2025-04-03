@@ -61,6 +61,7 @@ describe("classroom tests", (): void => {
         ]),
       );
     });
+
     it("shouldn't allow a student to get the classes via the teacher route", async (): Promise<void> => {
       const studentUser: Prisma.UserGetPayload<{
         include: { student: true };
@@ -112,6 +113,7 @@ describe("classroom tests", (): void => {
         ]),
       );
     });
+
     it("shouldn't allow a teacher to get the classes via the student route", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get("/class/student")
@@ -146,6 +148,7 @@ describe("classroom tests", (): void => {
       const classTeacher: ClassTeacher = createdClassroom!.ClassTeacher[0];
       expect(classTeacher.teacherId).toBe(teacherUser1.id);
     });
+
     it("should respond with a `400` status code and a message when no valid class name is provided", async (): Promise<void> => {
       const { status, body } = await request(app)
         .post("/class/teacher")
@@ -155,6 +158,7 @@ describe("classroom tests", (): void => {
       expect(status).toBe(400);
       expect(body.message).toBe("Vul een geldige klasnaam in");
     });
+
     it("should not allow a student to create a class", async (): Promise<void> => {
       const studentUser: Prisma.UserGetPayload<{
         include: { student: true };
@@ -233,32 +237,9 @@ describe("classroom tests", (): void => {
       expect(deletedClass).toBeNull();
 
       // verify that all associated records were also deleted
-      await prisma.classTeacher
-        .findMany({ where: { classId: classroom.id } })
-        .then((classTeachers: ClassTeacher[]): void => {
-          expect(classTeachers.length).toBe(0);
-        });
-      await prisma.classStudent
-        .findMany({ where: { classId: classroom.id } })
-        .then((classStudents: ClassStudent[]): void => {
-          expect(classStudents.length).toBe(0);
-        });
-      await prisma.invite
-        .findMany({ where: { classId: classroom.id } })
-        .then((invites: Invite[]): void => {
-          expect(invites.length).toBe(0);
-        });
-      await prisma.joinRequest
-        .findMany({ where: { classId: classroom.id } })
-        .then((joinRequests: JoinRequest[]): void => {
-          expect(joinRequests.length).toBe(0);
-        });
-      await prisma.classAssignment
-        .findMany({ where: { classId: classroom.id } })
-        .then((classAssignments: ClassAssignment[]): void => {
-          expect(classAssignments.length).toBe(0);
-        });
+      await verifyDeletionOfAllRelatedRecords();
     });
+
     it("should respond with a `403` status code and a message when the teacher is not associated with the class", async (): Promise<void> => {
       // try having a teacher delete a class they are not associated with
       const { status, body } = await request(app)
@@ -320,6 +301,7 @@ describe("classroom tests", (): void => {
       );
       expect(body.joinLink).toBeUndefined();
     });
+
     it("should respond with a `404` status code if the class does not exist", async (): Promise<void> => {
       // get an id that isn't used for any existing class in the database
       const maxClass: Class | null = await prisma.class.findFirst({
@@ -358,6 +340,7 @@ describe("classroom tests", (): void => {
         `${APP_URL}/class/teacher/join?joinCode=${updatedClass!.code}`,
       );
     });
+
     it("should respond with a `403` status code and a message when the teacher is not associated with the class", async (): Promise<void> => {
       const { status, body } = await request(app)
         .patch(`/class/teacher/${classroom.id}/join-link`)
@@ -368,6 +351,7 @@ describe("classroom tests", (): void => {
         `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`,
       );
     });
+
     it("should respond with a `404` status code if the class does not exist", async (): Promise<void> => {
       // get an id that isn't used for any existing class in the database
       const maxClass: Class | null = await prisma.class.findFirst({
@@ -414,28 +398,7 @@ describe("classroom tests", (): void => {
 
       // verify the response
       expect(status).toBe(200);
-      expect(body.students).toBeDefined();
-      expect(body.students.length).toBe(2);
-      expect(body.students).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            userId: studentUser1.id,
-            user: expect.objectContaining({
-              firstName: studentUser1.firstName,
-              lastName: studentUser1.lastName,
-              email: studentUser1.email,
-            }),
-          }),
-          expect.objectContaining({
-            userId: studentUser2.id,
-            user: expect.objectContaining({
-              firstName: studentUser2.firstName,
-              lastName: studentUser2.lastName,
-              email: studentUser2.email,
-            }),
-          }),
-        ]),
-      );
+      expectValidStudentArrayBody(body, studentUser1, studentUser2);
     });
 
     it("should respond with a `403` status code when the teacher is not associated with the class", async (): Promise<void> => {
@@ -452,3 +415,60 @@ describe("classroom tests", (): void => {
     });
   });
 });
+
+function expectValidStudentArrayBody(
+  body: any,
+  studentUser1: User,
+  studentUser2: User,
+): void {
+  expect(body.students).toBeDefined();
+  expect(body.students.length).toBe(2);
+  expect(body.students).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        userId: studentUser1.id,
+        user: expect.objectContaining({
+          firstName: studentUser1.firstName,
+          lastName: studentUser1.lastName,
+          email: studentUser1.email,
+        }),
+      }),
+      expect.objectContaining({
+        userId: studentUser2.id,
+        user: expect.objectContaining({
+          firstName: studentUser2.firstName,
+          lastName: studentUser2.lastName,
+          email: studentUser2.email,
+        }),
+      }),
+    ]),
+  );
+}
+
+async function verifyDeletionOfAllRelatedRecords(): Promise<void> {
+  await prisma.classTeacher
+    .findMany({ where: { classId: classroom.id } })
+    .then((classTeachers: ClassTeacher[]): void => {
+      expect(classTeachers.length).toBe(0);
+    });
+  await prisma.classStudent
+    .findMany({ where: { classId: classroom.id } })
+    .then((classStudents: ClassStudent[]): void => {
+      expect(classStudents.length).toBe(0);
+    });
+  await prisma.invite
+    .findMany({ where: { classId: classroom.id } })
+    .then((invites: Invite[]): void => {
+      expect(invites.length).toBe(0);
+    });
+  await prisma.joinRequest
+    .findMany({ where: { classId: classroom.id } })
+    .then((joinRequests: JoinRequest[]): void => {
+      expect(joinRequests.length).toBe(0);
+    });
+  await prisma.classAssignment
+    .findMany({ where: { classId: classroom.id } })
+    .then((classAssignments: ClassAssignment[]): void => {
+      expect(classAssignments.length).toBe(0);
+    });
+}
