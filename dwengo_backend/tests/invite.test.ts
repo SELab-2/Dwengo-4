@@ -102,7 +102,7 @@ describe("invite tests", async (): Promise<void> => {
       });
     });
     it("should respond with a `403` status code when the teacher making the invite is not a teacher of the class", async (): Promise<void> => {
-      // we can use the existing scenarion with two valid teachers and a class, but none of them are a teacher of the class
+      // we can use the existing scenario with two valid teachers and a class, but none of them are a teacher of the class
       // try to create invite for class where teacher1 is not a teacher
       const { status, body } = await request(app)
         .post(`/invite/class/${classroom.id}`)
@@ -139,7 +139,7 @@ describe("invite tests", async (): Promise<void> => {
       });
     });
     it("should respond with a `409` status code when the teacher already has a pending invite", async (): Promise<void> => {
-      // set up scenario where there's two valid teachers and a class, the first one being a teacher of the class, and the second one has already received an invite
+      // set up scenario where there's two valid teachers and a class, the first one being a teacher of the class, and the second one has already received an invitation
       await addTeacherToClass(teacherUser1.id, classroom.id);
       // send a first invite
       await request(app)
@@ -149,7 +149,7 @@ describe("invite tests", async (): Promise<void> => {
           otherTeacherEmail: teacherUser2.email,
         });
 
-      // verify an invite was created
+      // verify an invitation was created
       await prisma.invite.findMany().then((invites: Invite[]): void => {
         expect(invites.length).toBe(1);
       });
@@ -172,9 +172,9 @@ describe("invite tests", async (): Promise<void> => {
       expect(status).toBe(409);
     });
     it("should respond with a `400` status code when request body/params are incorrect", async (): Promise<void> => {
-      // try to create an invite with an invalid body and params
+      // try to create an invitation with an invalid body and params
       const { status, body } = await request(app)
-        .post(`/invite/class/invalidid`)
+        .post(`/invite/class/invalid_id`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
           otherTeacherEmail: "sldk",
@@ -314,7 +314,7 @@ describe("invite tests", async (): Promise<void> => {
         .patch(`/invite/${invite.inviteId}`)
         .set("Authorization", `Bearer ${teacherUser2.token}`)
         .send({
-          action: "invalidaction",
+          action: "invalid_action",
         });
 
       expect(status).toBe(400);
@@ -405,9 +405,9 @@ describe("invite tests", async (): Promise<void> => {
       expect(checkInvite!.status).toStrictEqual(invite.status);
     });
     it("should respond with a `400` status code when the inviteId param is not a positive integer", async (): Promise<void> => {
-      // try to update an invite with an invalid inviteId
+      // try to update an invitation with an invalid inviteId
       const { status, body } = await request(app)
-        .patch(`/invite/invalidid`)
+        .patch(`/invite/invalid_id`)
         .set("Authorization", `Bearer ${teacherUser2.token}`)
         .send({
           action: "accept",
@@ -447,7 +447,7 @@ describe("invite tests", async (): Promise<void> => {
 
       expect(status).toBe(200);
       expect(body.invite).toStrictEqual(invite);
-      expect(body.message).toBe("invite was succesfully deleted");
+      expect(body.message).toBe("invite was successfully deleted");
       // verify that the invite was deleted
       const deletedInvite = await prisma.invite.findUnique({
         where: {
@@ -483,7 +483,7 @@ describe("invite tests", async (): Promise<void> => {
 
       expect(status).toBe(200);
       expect(body.invite).toStrictEqual(invite);
-      expect(body.message).toBe("invite was succesfully deleted");
+      expect(body.message).toBe("invite was successfully deleted");
       // verify that the invite was deleted
       const deletedInvite = await prisma.invite.findUnique({
         where: {
@@ -509,7 +509,7 @@ describe("invite tests", async (): Promise<void> => {
     });
     it("should respond with a `400` status code when the params are not correct", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .delete(`/invite/invalidinvidteid/class/invalidclassid`)
+        .delete(`/invite/invalid_invite_id/class/invalid_class_id`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(400);
@@ -571,7 +571,7 @@ describe("invite tests", async (): Promise<void> => {
     });
     it("should respond with a `400` status code when the params are not correct", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(`/invite/class/invalidclassid`)
+        .get(`/invite/class/invalid_class_id`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(400);

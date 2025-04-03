@@ -25,17 +25,26 @@ describe("Feedback tests", (): void => {
 
   let teacher: User & { teacher: Teacher; token: string };
   let teacherId: number;
+
   let student: User & { student: Student; token: string };
+
   let classroomId: number;
+
   let teamId: number;
+
   let evalId: string;
+
   let learningPath: LearningPath;
+
   let onGoingAssignment: Assignment;
   let onGoingAssignmentId: number;
+
   let passedAssignment: Assignment;
   let passedAssignmentId: number;
+
   let submissionForOnGoingAssignment: Submission;
   let onGoingAssignmentSubmissionId: number;
+
   let submissionForPassedAssignment: Submission;
   let passedAssignmentSubmissionId: number;
 

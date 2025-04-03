@@ -19,7 +19,7 @@ import {
   stringToDate,
 } from "./helpers/testDataCreation";
 
-describe("[GET] /assignment/student", async () => {
+describe("[GET] /assignment/student", async (): Promise<void> => {
   let student1: User & { student: Student; token: string };
   let student2: User & { student: Student; token: string };
   let student3: User & { student: Student; token: string };
@@ -38,7 +38,7 @@ describe("[GET] /assignment/student", async () => {
   let assignment1: Assignment;
   let assignment2: Assignment;
 
-  beforeEach(async () => {
+  beforeEach(async (): Promise<void> => {
     // create some students
     student1 = await createStudent("Phret", "Pret", "phret.pret@gmail.com");
     student2 = await createStudent("Bleep", "Bloop", "bleep.bloop@gmail.com");
@@ -118,7 +118,7 @@ describe("[GET] /assignment/student", async () => {
   });
 
   it("should respond with a `200` status code and a list of assignments,\
-      this list will be empty because student doesn't have any assignments", async () => {
+      this list will be empty because student doesn't have any assignments", async (): Promise<void> => {
     // set up scenario where student has no assignments
     const { status, body } = await request(app)
       .get("/assignment/student")
@@ -128,7 +128,7 @@ describe("[GET] /assignment/student", async () => {
     expect(body).toStrictEqual([]);
   });
 
-  it("should respond with a `200` status code and a list of 2 assignments", async () => {
+  it("should respond with a `200` status code and a list of 2 assignments", async (): Promise<void> => {
     const { status, body } = await request(app)
       .get("/assignment/student")
       .set("Authorization", `Bearer ${student2.token}`);
@@ -144,7 +144,7 @@ describe("[GET] /assignment/student", async () => {
     expect(body[1]).toStrictEqual(assignment2);
   });
 
-  it("should return the same array of assignments for all students in the same class", async () => {
+  it("should return the same array of assignments for all students in the same class", async (): Promise<void> => {
     let req = await request(app)
       .get("/assignment/student")
       .set("Authorization", `Bearer ${student2.token}`);
@@ -169,7 +169,7 @@ describe("[GET] /assignment/student", async () => {
     expect(b1).toStrictEqual(b);
   });
 
-  it("should not return the same array of assignments for students in other classes", async () => {
+  it("should not return the same array of assignments for students in other classes", async (): Promise<void> => {
     let req = await request(app)
       .get("/assignment/student")
       .set("Authorization", `Bearer ${student2.token}`);
@@ -195,7 +195,7 @@ describe("[GET] /assignment/student", async () => {
     expect(b1 !== b);
   });
 
-  it("should return a sorted list of assignments in descending order based on the deadline", async () => {
+  it("should return a sorted list of assignments in descending order based on the deadline", async (): Promise<void> => {
     const { status, body } = await request(app)
       .get("/assignment/student")
       .query({ sort: "deadline", order: "desc" })
@@ -208,7 +208,7 @@ describe("[GET] /assignment/student", async () => {
     expect(body[0].deadline > body[1].deadline);
   });
 
-  it("should return a sorted list of assignments in ascending order based on the deadline", async () => {
+  it("should return a sorted list of assignments in ascending order based on the deadline", async (): Promise<void> => {
     const { status, body } = await request(app)
       .get("/assignment/student")
       .query({ sort: "deadline", order: "asc" })
@@ -221,7 +221,7 @@ describe("[GET] /assignment/student", async () => {
     expect(body[0].deadline < body[1].deadline);
   });
 
-  it("should return a sorted list of assignments in descending order based on createdAt", async () => {
+  it("should return a sorted list of assignments in descending order based on createdAt", async (): Promise<void> => {
     const { status, body } = await request(app)
       .get("/assignment/student")
       .query({ sort: "createdAt", order: "desc" })
@@ -234,7 +234,7 @@ describe("[GET] /assignment/student", async () => {
     expect(body[0].createdAt > body[1].createdAt);
   });
 
-  it("should return a sorted list of assignments in ascending order based on createdAt", async () => {
+  it("should return a sorted list of assignments in ascending order based on createdAt", async (): Promise<void> => {
     const { status, body } = await request(app)
       .get("/assignment/student")
       .query({ sort: "createdAt", order: "asc" })
@@ -247,7 +247,7 @@ describe("[GET] /assignment/student", async () => {
     expect(body[0].createdAt > body[1].createdAt);
   });
 
-  it("should return a sorted list of assignments in descending order based on updatedAt", async () => {
+  it("should return a sorted list of assignments in descending order based on updatedAt", async (): Promise<void> => {
     const { status, body } = await request(app)
       .get("/assignment/student")
       .query({ sort: "updatedAt", order: "desc" })
@@ -260,7 +260,7 @@ describe("[GET] /assignment/student", async () => {
     expect(body[0].updatedAt > body[1].updatedAt);
   });
 
-  it("should return a sorted list of assignments in ascending order based on updatedAt", async () => {
+  it("should return a sorted list of assignments in ascending order based on updatedAt", async (): Promise<void> => {
     const { status, body } = await request(app)
       .get("/assignment/student")
       .query({ sort: "updatedAt", order: "asc" })
@@ -273,7 +273,7 @@ describe("[GET] /assignment/student", async () => {
     expect(body[0].updatedAt < body[1].updatedAt);
   });
 
-  it("should return a sorted list of 1 assignment due to limit", async () => {
+  it("should return a sorted list of 1 assignment due to limit", async (): Promise<void> => {
     const { status, body } = await request(app)
       .get("/assignment/student")
       .query({ limit: 1 })
@@ -285,7 +285,7 @@ describe("[GET] /assignment/student", async () => {
     expect(body).toHaveLength(1);
   });
 
-  it("should only return 2 assignments even though limit is higher", async () => {
+  it("should only return 2 assignments even though limit is higher", async (): Promise<void> => {
     const { status, body } = await request(app)
       .get("/assignment/student")
       .query({ limit: 10 })
