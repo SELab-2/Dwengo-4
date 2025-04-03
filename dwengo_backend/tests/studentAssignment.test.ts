@@ -135,7 +135,7 @@ describe("[GET] /assignment/student", async (): Promise<void> => {
 
     expect(status).toBe(200);
     expect(body).toHaveLength(2);
-    for (let i = 0; i < 2; i += 1) {
+    for (let i: number = 0; i < 2; i += 1) {
       body[i].createdAt = new Date(body[i].createdAt);
       body[i].updatedAt = new Date(body[i].updatedAt);
       body[i].deadline = new Date(body[i].deadline);
@@ -149,7 +149,7 @@ describe("[GET] /assignment/student", async (): Promise<void> => {
       .get("/assignment/student")
       .set("Authorization", `Bearer ${student2.token}`);
 
-    const s = req.status;
+    const s: number = req.status;
     const b = req.body;
 
     expect(s).toBe(200);
@@ -159,11 +159,11 @@ describe("[GET] /assignment/student", async (): Promise<void> => {
       .get("/assignment/student")
       .set("Authorization", `Bearer ${student3.token}`);
 
-    const s1 = req.status;
+    const s1: number = req.status;
     const b1 = req.body;
 
-    b1.sort((o1: LearningPath, o2: LearningPath) => o1.id < o2.id);
-    b.sort((o1: LearningPath, o2: LearningPath) => o1.id < o2.id);
+    b1.sort((o1: LearningPath, o2: LearningPath): boolean => o1.id < o2.id);
+    b.sort((o1: LearningPath, o2: LearningPath): boolean => o1.id < o2.id);
 
     expect(s1).toBe(200);
     expect(b1).toStrictEqual(b);
@@ -174,7 +174,7 @@ describe("[GET] /assignment/student", async (): Promise<void> => {
       .get("/assignment/student")
       .set("Authorization", `Bearer ${student2.token}`);
 
-    const s = req.status;
+    const s: number = req.status;
     const b = req.body;
 
     expect(s).toBe(200);
@@ -184,11 +184,11 @@ describe("[GET] /assignment/student", async (): Promise<void> => {
       .get("/assignment/student")
       .set("Authorization", `Bearer ${student4.token}`);
 
-    const s1 = req.status;
+    const s1: number = req.status;
     const b1 = req.body;
 
-    b.sort((o1: LearningPath, o2: LearningPath) => o1.id < o2.id);
-    b1.sort((o1: LearningPath, o2: LearningPath) => o1.id < o2.id);
+    b.sort((o1: LearningPath, o2: LearningPath): boolean => o1.id < o2.id);
+    b1.sort((o1: LearningPath, o2: LearningPath): boolean => o1.id < o2.id);
 
     expect(s1).toBe(200);
     expect(b1).toHaveLength(1);
