@@ -4,6 +4,7 @@ import prisma from "./helpers/prisma";
 import app from "../index";
 import {
   Class,
+  ClassStudent,
   JoinRequest,
   JoinRequestStatus,
   Student,
@@ -19,11 +20,11 @@ import {
   createTeacher,
 } from "./helpers/testDataCreation";
 
-describe("join request tests", async () => {
+describe("join request tests", async (): Promise<void> => {
   let classroom: Class;
   let teacherUser1: User & { teacher: Teacher; token: string };
   let studentUser1: User & { student: Student; token: string };
-  beforeEach(async () => {
+  beforeEach(async (): Promise<void> => {
     // create test data
     classroom = await createClass("5A", "ABCDE");
     teacherUser1 = await createTeacher(
@@ -38,30 +39,37 @@ describe("join request tests", async () => {
       "piet.pieters@gmail.com",
     );
   });
-  describe("[POST] /join-request/student", async () => {
-    it("should respond with a `201` status code and return the created join request", async () => {
-      // we've got a scenario with a valid class and student, let's test a student creating a join request
-      const { status, body } = await request(app)
-        .post("/join-request/student")
-        .set("Authorization", `Bearer ${studentUser1.token}`)
-        .send({
-          joinCode: classroom.code,
-        });
 
-      expect(status).toBe(201);
-      expect(body).toHaveProperty("joinRequest");
-
-      // check if the join request is stored in the database
-      const joinRequest = await prisma.joinRequest.findFirst({
-        where: {
-          studentId: studentUser1.id,
-          classId: classroom.id,
-          status: JoinRequestStatus.PENDING,
-        },
+  async function createJoinCodeAndCheckExistence(): Promise<JoinRequest | null> {
+    const { status, body } = await request(app)
+      .post("/join-request/student")
+      .set("Authorization", `Bearer ${studentUser1.token}`)
+      .send({
+        joinCode: classroom.code,
       });
-      expect(body.joinRequest).toEqual(joinRequest);
+
+    expect(status).toBe(201);
+    expect(body).toHaveProperty("joinRequest");
+
+    // check if the join request is stored in the database
+    const joinRequest: JoinRequest | null = await prisma.joinRequest.findFirst({
+      where: {
+        studentId: studentUser1.id,
+        classId: classroom.id,
+        status: JoinRequestStatus.PENDING,
+      },
     });
-    it("should respond with a `201` status code and return the created join request, even when a previous join request was denied before", async () => {
+    expect(body.joinRequest).toEqual(joinRequest);
+
+    return joinRequest;
+  }
+
+  describe("[POST] /join-request/student", async (): Promise<void> => {
+    it("should respond with a `201` status code and return the created join request", async (): Promise<void> => {
+      // we've got a scenario with a valid class and student, let's test a student creating a join request
+      await createJoinCodeAndCheckExistence();
+    });
+    it("should respond with a `201` status code and return the created join request, even when a previous join request was denied before", async (): Promise<void> => {
       // set up scenario where a previous join request was denied
       let joinRequest: JoinRequest = await createJoinRequest(
         studentUser1.id,
@@ -76,28 +84,15 @@ describe("join request tests", async () => {
         },
       });
       // test creating a new join request
-      const { status, body } = await request(app)
-        .post("/join-request/student")
-        .set("Authorization", `Bearer ${studentUser1.token}`)
-        .send({
-          joinCode: classroom.code,
+      const bodyJoinRequest: JoinRequest | null =
+        await createJoinCodeAndCheckExistence();
+      await prisma.joinRequest
+        .findMany()
+        .then((joinRequests: JoinRequest[]): void => {
+          expect(joinRequests).toStrictEqual([joinRequest, bodyJoinRequest]);
         });
-      expect(status).toBe(201);
-      expect(body).toHaveProperty("joinRequest");
-      // verify that the join request was created
-      const newJoinRequest = await prisma.joinRequest.findFirst({
-        where: {
-          studentId: studentUser1.id,
-          classId: classroom.id,
-          status: JoinRequestStatus.PENDING,
-        },
-      });
-      expect(body.joinRequest).toStrictEqual(newJoinRequest);
-      await prisma.joinRequest.findMany().then((joinRequests) => {
-        expect(joinRequests).toStrictEqual([joinRequest, body.joinRequest]);
-      });
     });
-    it("should respond with a `404` status code when the class does not exist", async () => {
+    it("should respond with a `404` status code when the class does not exist", async (): Promise<void> => {
       // try to send a join request for a class with a non-existent class code
       const { status, body } = await request(app)
         .post("/join-request/student")
@@ -111,11 +106,13 @@ describe("join request tests", async () => {
         `Error creating join request: Class with code BLABLA not found.`,
       );
       // verify that no join request was created
-      await prisma.joinRequest.findMany().then((joinRequests) => {
-        expect(joinRequests.length).toBe(0);
-      });
+      await prisma.joinRequest
+        .findMany()
+        .then((joinRequests: JoinRequest[]): void => {
+          expect(joinRequests.length).toBe(0);
+        });
     });
-    it("should respond with a `400` status code when student is already a member of the class", async () => {
+    it("should respond with a `400` status code when student is already a member of the class", async (): Promise<void> => {
       await addStudentToClass(studentUser1.id, classroom.id);
       const { status, body } = await request(app)
         .post("/join-request/student")
@@ -128,7 +125,7 @@ describe("join request tests", async () => {
         `Error creating join request: Student ${studentUser1.id} is already a member of class ${classroom.id}`,
       );
     });
-    it("should respond with a `400` status code when there is already a pending join request for the student and class", async () => {
+    it("should respond with a `400` status code when there is already a pending join request for the student and class", async (): Promise<void> => {
       // send a first join request
       await request(app)
         .post("/join-request/student")
@@ -137,9 +134,11 @@ describe("join request tests", async () => {
           joinCode: classroom.code,
         });
       // verify that the join request was created
-      await prisma.joinRequest.findMany().then((joinRequests) => {
-        expect(joinRequests.length).toBe(1);
-      });
+      await prisma.joinRequest
+        .findMany()
+        .then((joinRequests: JoinRequest[]): void => {
+          expect(joinRequests.length).toBe(1);
+        });
       // send a second join request
       const { status, body } = await request(app)
         .post("/join-request/student")
@@ -152,17 +151,19 @@ describe("join request tests", async () => {
         `Error creating join request: There's already a pending join request for student ${studentUser1.id} and class ${classroom.id}`,
       );
       // verify no additional join request was created
-      await prisma.joinRequest.findMany().then((joinRequests) => {
-        expect(joinRequests.length).toBe(1);
-      });
+      await prisma.joinRequest
+        .findMany()
+        .then((joinRequests: JoinRequest[]): void => {
+          expect(joinRequests.length).toBe(1);
+        });
     });
   });
-  describe("[PATCH] /join-request/teacher/:requestId/class/:classId", async () => {
+  describe("[PATCH] /join-request/teacher/:requestId/class/:classId", async (): Promise<void> => {
     let joinRequest: JoinRequest;
-    beforeEach(async () => {
+    beforeEach(async (): Promise<void> => {
       joinRequest = await createJoinRequest(studentUser1.id, classroom.id);
     });
-    it("should respond with a `200` status code and an updated join request when the action is `approve`", async () => {
+    it("should respond with a `200` status code and an updated join request when the action is `approve`", async (): Promise<void> => {
       // test approving the join request
       const { status, body } = await request(app)
         .patch(
@@ -177,26 +178,28 @@ describe("join request tests", async () => {
       expect(body).toHaveProperty("joinRequest");
       expect(body).toHaveProperty("message", "Join request approved.");
       // verify that the join request was updated
-      const updatedJoinRequest = await prisma.joinRequest.findUnique({
-        where: {
-          requestId: joinRequest.requestId,
-        },
-      });
+      const updatedJoinRequest: JoinRequest | null =
+        await prisma.joinRequest.findUnique({
+          where: {
+            requestId: joinRequest.requestId,
+          },
+        });
       expect(updatedJoinRequest).not.toBeNull();
       expect(updatedJoinRequest).toStrictEqual(body.joinRequest);
       expect(updatedJoinRequest!.status).toBe(JoinRequestStatus.APPROVED);
       // verify that the student was added to the class
-      const classStudent = await prisma.classStudent.findUnique({
-        where: {
-          studentId_classId: {
-            studentId: studentUser1.id,
-            classId: classroom.id,
+      const classStudent: ClassStudent | null =
+        await prisma.classStudent.findUnique({
+          where: {
+            studentId_classId: {
+              studentId: studentUser1.id,
+              classId: classroom.id,
+            },
           },
-        },
-      });
+        });
       expect(classStudent).not.toBeNull();
     });
-    it("should respond with a `200` status code and an updated join request when the action is `deny`", async () => {
+    it("should respond with a `200` status code and an updated join request when the action is `deny`", async (): Promise<void> => {
       // test denying the join request
       const { status, body } = await request(app)
         .patch(
@@ -211,26 +214,28 @@ describe("join request tests", async () => {
       expect(body).toHaveProperty("joinRequest");
       expect(body).toHaveProperty("message", "Join request denied.");
       // verify that the join request was updated
-      const updatedJoinRequest = await prisma.joinRequest.findUnique({
-        where: {
-          requestId: joinRequest.requestId,
-        },
-      });
+      const updatedJoinRequest: JoinRequest | null =
+        await prisma.joinRequest.findUnique({
+          where: {
+            requestId: joinRequest.requestId,
+          },
+        });
       expect(updatedJoinRequest).not.toBeNull();
       expect(updatedJoinRequest).toStrictEqual(body.joinRequest);
       expect(updatedJoinRequest!.status).toBe(JoinRequestStatus.DENIED);
       // verify that the student was not added to the class
-      const classStudent = await prisma.classStudent.findUnique({
-        where: {
-          studentId_classId: {
-            studentId: studentUser1.id,
-            classId: classroom.id,
+      const classStudent: ClassStudent | null =
+        await prisma.classStudent.findUnique({
+          where: {
+            studentId_classId: {
+              studentId: studentUser1.id,
+              classId: classroom.id,
+            },
           },
-        },
-      });
+        });
       expect(classStudent).toBeNull();
     });
-    it("should respond with a `400` status code when the action is neither `approve` or `deny`", async () => {
+    it("should respond with a `400` status code when the action is neither `approve` or `deny`", async (): Promise<void> => {
       // test sending an invalid action
       const { status, body } = await request(app)
         .patch(
@@ -238,52 +243,47 @@ describe("join request tests", async () => {
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`) // teacherUser1 is a teacher of the class
         .send({
-          action: "invalidaction",
+          action: "invalid_action",
         });
 
       expect(status).toBe(400);
       expect(body.error).toBe("Action must be 'approve' or 'deny'");
+      await verifyJoinRequestNotUpdatedStudentNotAdded();
+    });
+
+    async function verifyJoinRequestNotUpdatedStudentNotAdded(): Promise<void> {
       // verify that the join request was not updated
-      const dbJoinRequest = await prisma.joinRequest.findUnique({
-        where: {
-          requestId: joinRequest.requestId,
-        },
-      });
+      const dbJoinRequest: JoinRequest | null =
+        await prisma.joinRequest.findUnique({
+          where: {
+            requestId: joinRequest.requestId,
+          },
+        });
       expect(dbJoinRequest).not.toBeNull();
       expect(dbJoinRequest).toStrictEqual(joinRequest);
       // verify that the student was not added to the class
-      const classStudent = await prisma.classStudent.findUnique({
-        where: {
-          studentId_classId: {
-            studentId: studentUser1.id,
-            classId: classroom.id,
+      const classStudent: ClassStudent | null =
+        await prisma.classStudent.findUnique({
+          where: {
+            studentId_classId: {
+              studentId: studentUser1.id,
+              classId: classroom.id,
+            },
           },
-        },
-      });
+        });
       expect(classStudent).toBeNull();
-    });
-    it("should respond with a `404` status code when the join request does not exist", async () => {
+    }
+
+    it("should respond with a `404` status code when the join request does not exist", async (): Promise<void> => {
       // let's delete the join request and then try accepting it
       await prisma.joinRequest.delete({
         where: {
           requestId: joinRequest.requestId,
         },
       });
-      const { status, body } = await request(app)
-        .patch(
-          `/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
-        )
-        .set("Authorization", `Bearer ${teacherUser1.token}`) // teacherUser1 is a teacher of the class
-        .send({
-          action: "approve",
-        });
-
-      expect(status).toBe(404);
-      expect(body.error).toBe(
-        `Error approving join request ${joinRequest.requestId} for class ${classroom.id}: Join request ${joinRequest.requestId} for class ${classroom.id} not found/not pending.`,
-      );
+      await approveAndVerifyJoinRequest();
     });
-    it("should respond with a `404` status code when the join request is not pending", async () => {
+    it("should respond with a `404` status code when the join request is not pending", async (): Promise<void> => {
       // update the status of the join request to denied
       await prisma.joinRequest.update({
         where: {
@@ -294,6 +294,10 @@ describe("join request tests", async () => {
         },
       });
       // now let's try approving it
+      await approveAndVerifyJoinRequest();
+    });
+
+    async function approveAndVerifyJoinRequest(): Promise<void> {
       const { status, body } = await request(app)
         .patch(
           `/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
@@ -307,8 +311,9 @@ describe("join request tests", async () => {
       expect(body.error).toBe(
         `Error approving join request ${joinRequest.requestId} for class ${classroom.id}: Join request ${joinRequest.requestId} for class ${classroom.id} not found/not pending.`,
       );
-    });
-    it("should respond with a `403` status code when the teacher is not allowed to approve/deny the request", async () => {
+    }
+
+    it("should respond with a `403` status code when the teacher is not allowed to approve/deny the request", async (): Promise<void> => {
       // create teacher that's not part of the class
       const teacherUser2: User & { teacher: Teacher; token: string } =
         await createTeacher("bleep", "blop", "bleep.blop@gmail.com");
@@ -326,34 +331,17 @@ describe("join request tests", async () => {
       expect(body.error).toBe(
         `Error approving join request ${joinRequest.requestId} for class ${classroom.id}: Teacher ${teacherUser2.id} is not a teacher of class ${classroom.id}`,
       );
-      // verify that the join request was not updated
-      const dbJoinRequest = await prisma.joinRequest.findUnique({
-        where: {
-          requestId: joinRequest.requestId,
-        },
-      });
-      expect(dbJoinRequest).not.toBeNull();
-      expect(dbJoinRequest).toStrictEqual(joinRequest);
-      // verify that student was not added to class
-      const classStudent = await prisma.classStudent.findUnique({
-        where: {
-          studentId_classId: {
-            studentId: studentUser1.id,
-            classId: classroom.id,
-          },
-        },
-      });
-      expect(classStudent).toBeNull();
+      await verifyJoinRequestNotUpdatedStudentNotAdded();
     });
   });
-  describe("[GET] /join-request/teacher/class/:classId", async () => {
+  describe("[GET] /join-request/teacher/class/:classId", async (): Promise<void> => {
     let studentUser2: User & { student: Student; token: string };
-    beforeEach(async () => {
+    beforeEach(async (): Promise<void> => {
       await createJoinRequest(studentUser1.id, classroom.id);
       studentUser2 = await createStudent("Meep", "Moop", "meep.moop@gmail.com");
       await createJoinRequest(studentUser2.id, classroom.id);
     });
-    it("should respond with a `200` status code and a list of join requests", async () => {
+    it("should respond with a `200` status code and a list of join requests", async (): Promise<void> => {
       // test getting the join requests
       const { status, body } = await request(app)
         .get(`/join-request/teacher/class/${classroom.id}`)
@@ -377,7 +365,7 @@ describe("join request tests", async () => {
         ]),
       );
     });
-    it("should respond with a `400` status code when the teacher is not allowed to view the join requests", async () => {
+    it("should respond with a `400` status code when the teacher is not allowed to view the join requests", async (): Promise<void> => {
       // create teacher that's not part of the class
       const teacherUser2: User & { teacher: Teacher; token: string } =
         await createTeacher("Hi", "Ho", "hiho@gmail.com");
