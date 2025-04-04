@@ -1,14 +1,42 @@
-import express, {Router} from 'express';
-import { loginStudent } from '../../controllers/student/studentAuthController';
-import { registerStudent } from '../../controllers/userController';
+import express, { Router } from "express";
+import {
+  registerStudent,
+  loginStudent,
+} from "../../controllers/userAuthController";
+import {
+  loginBodySchema,
+  registerBodySchema,
+} from "../../zodSchemas/authSchemas";
+import { validateRequest } from "../../middleware/validateRequest";
 
 const router: Router = express.Router();
 
-// Registreren van een leerling
-router.post("/register", registerStudent);
+/**
+ * @route POST /auth/student/register
+ * @desc Register a student
+ * @access Public
+ */
+router.post(
+  "/register",
+  validateRequest({
+    customErrorMessage: "invalid request for student registration",
+    bodySchema: registerBodySchema,
+  }),
+  registerStudent,
+);
 
-// Inloggen van een leerling
-router.post("/login", loginStudent);
+/**
+ * @route POST /auth/student/login
+ * @desc Login a student
+ * @access Public
+ */
+router.post(
+  "/login",
+  validateRequest({
+    customErrorMessage: "invalid request for student login",
+    bodySchema: loginBodySchema,
+  }),
+  loginStudent,
+);
 
 export default router;
-

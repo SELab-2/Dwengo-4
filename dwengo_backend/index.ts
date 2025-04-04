@@ -1,28 +1,25 @@
 import express, { Request, Response, NextFunction, Express } from "express";
 import dotenv from "dotenv";
 import errorHandler from "./middleware/errorMiddleware";
-import teacherAuthRoutes from "./routes/teacher/teacherAuthRoutes";
-import studentAuthRoutes from "./routes/student/studentAuthRoutes";
 import learningObjectRoutes from "./routes/learningObject/learningObjectRoutes";
 import QuestionRoutes from "./routes/question/questionRoutes";
 import learningPathRoutes from "./routes/learningPath/learningPathRoutes";
-import teacherLocalLearningObjectRoutes from "./routes/teacher/teacherLocalLearningObjectRoutes";
+import teacherLocalLearningObjectRoutes from "./routes/teacherMadeLearningObject/teacherLocalLearningObjectRoutes";
 
-import assignmentRoutes from "./routes/assignmentRoutes";
-import teacherAssignmentRoutes from "./routes/teacher/teacherAssignmentRoutes";
-import studentTeamRoutes from "./routes/student/studentTeamRoutes";
-import progressRoutes from "./routes/progressRoutes";
-import teacherClassRoutes from "./routes/teacher/teacherClassRoutes";
-import studentAssignmentRoutes from "./routes/student/studentAssignmentRoutes";
-import feedbackRoutes from "./routes/teacher/feedbackRoutes";
-import studentClassRoutes from "./routes/student/studentClassRoutes";
-import teacherSubmissionRoute from "./routes/teacher/teacherSubmissionRoute";
-import studentSubmissionRoute from "./routes/student/studentSubmissionRoute";
-import teacherLocalLearningPathRoutes from "./routes/teacher/teacherLocalLearningPathRoutes";
-import teacherLocalLearningPathNodesRoutes from "./routes/teacher/teacherLocalLearningPathNodesRoutes";
+import assignmentRoutes from "./routes/assignment/assignmentRoutes";
+import progressRoutes from "./routes/progress/progressRoutes";
+import feedbackRoutes from "./routes/feedback/feedbackRoutes";
+import submissionRoutes from "./routes/submission/submissionRoutes";
+import teacherLocalLearningPathRoutes from "./routes/teacherMadeLearningPath/teacherLocalLearningPathRoutes";
+import teacherLocalLearningPathNodesRoutes from "./routes/teacherMadeLearningPath/teacherLocalLearningPathNodesRoutes";
 
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
+import classRoutes from "./routes/class/classRoutes";
+import teacherInviteRoutes from "./routes/invite/teacherInviteRoutes";
+import joinRequestRoutes from "./routes/joinRequest/joinRequestRoutes";
+import teamRoutes from "./routes/team/teamRoutes";
+import authRoutes from "./routes/authentication/authRoutes";
 
 dotenv.config();
 
@@ -42,11 +39,11 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
   }
   res.setHeader(
     "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    "GET, POST, PUT, DELETE, OPTIONS, PATCH",
   );
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "X-Requested-With, Content-Type, Authorization"
+    "X-Requested-With, Content-Type, Authorization",
   );
   next();
 });
@@ -61,56 +58,45 @@ app.options("*", (req, res) => {
 // JSON-parser middleware
 app.use(express.json());
 
-// Routes voor Teacher (Classes)
-app.use("/teacher/classes", teacherClassRoutes);
+// Routes voor classes
+app.use("/class", classRoutes);
 
-// Routes voor student (Classes)
-app.use("/student/classes", studentClassRoutes);
+// Routes voor invites
+app.use("/invite", teacherInviteRoutes);
 
-// Routes voor Teacher (Auth)
-app.use("/teacher/auth", teacherAuthRoutes);
-app.use("/teacher/learningObjects", teacherLocalLearningObjectRoutes);
-app.use("/teacher/learningPaths", teacherLocalLearningPathRoutes);
-app.use("/teacher/learningPaths", teacherLocalLearningPathNodesRoutes);
+// Routes voor join requests
+app.use("/join-request", joinRequestRoutes);
 
 // Routes voor authentificatie
 app.use("/auth", authRoutes);
 app.use("/pathByTeacher", teacherLocalLearningPathRoutes);
 app.use(
   "learningPath/:learningPathId/node",
-  teacherLocalLearningPathNodesRoutes
+  teacherLocalLearningPathNodesRoutes,
 );
 app.use("/learningObjectByTeacher", teacherLocalLearningObjectRoutes);
 
-// Routes voor Student (Auth)
-app.use("/student/auth", studentAuthRoutes);
+// Routes voor teams
+app.use("/team", teamRoutes);
 
-// Routes voor de Assignments
-app.use("/assignments", assignmentRoutes);
-
-// Routes voor de aanpassingen op Assignments door teachers
-app.use("/teacher/assignments", teacherAssignmentRoutes);
-// Routes voor het opvragen van de Assignments door students
-app.use("/student/assignments", studentAssignmentRoutes);
+// Routes voor de assignments
+app.use("/assignment", assignmentRoutes);
 
 // Routes om feedback te geven
-app.use("/teacher/feedback", feedbackRoutes);
+app.use("/feedback", feedbackRoutes);
 
 // Nieuwe routes voor leerobjecten
-app.use("/learningObjects", learningObjectRoutes);
+app.use("/learningObject", learningObjectRoutes);
 
 app.use("/question", QuestionRoutes);
 
-app.use("/learningPaths", learningPathRoutes);
-
-app.use("/student/teams", studentTeamRoutes);
+app.use("/learningPath", learningPathRoutes);
 
 app.use("/progress", progressRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Routes voor indieningen
-app.use("/teacher/submissions", teacherSubmissionRoute);
-app.use("/student/submissions", studentSubmissionRoute);
+app.use("/submission", submissionRoutes);
 
 // Error Handler
 app.use(errorHandler);
