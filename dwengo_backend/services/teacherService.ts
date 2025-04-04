@@ -1,6 +1,7 @@
-import { PrismaClient, Teacher, User } from "@prisma/client";
+import {  Teacher, User } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 export default class TeacherService {
   static async findTeacherById(

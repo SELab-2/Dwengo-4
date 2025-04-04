@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Container from '../../components/shared/Container';
 import BoxBorder from '../../components/shared/BoxBorder';
 import InputWithChecks from '../../components/shared/InputWithChecks';
 import PrimaryButton from '../../components/shared/PrimaryButton';
 import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButton';
-import { validateRequired, validateForm } from '../../util/shared/validation';
-import NavButton from '../../components/shared/NavButton';
+import { validateForm, validateRequired } from '../../util/shared/validation';
 
 interface ClassDetails {
   id: string;
@@ -47,7 +46,7 @@ const EditClassTeacher: React.FC = () => {
         console.log('Fetching class with ID:', classId);
 
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/teacher/classes`,
+          `${import.meta.env.VITE_API_URL}/class/teacher`,
           {
             method: 'GET',
             headers: {
@@ -97,7 +96,7 @@ const EditClassTeacher: React.FC = () => {
   const { mutate, isPending } = useMutation({
     mutationFn: async (newName: string) => {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/teacher/classes/${classId}`,
+        `${import.meta.env.VITE_API_URL}/class/teacher/${classId}`,
         {
           method: 'PATCH',
           headers: {
@@ -149,7 +148,7 @@ const EditClassTeacher: React.FC = () => {
     ) {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/teacher/classes/${classId}`,
+          `${import.meta.env.VITE_API_URL}/class/teacher/${classId}`,
           {
             method: 'DELETE',
             headers: {
@@ -265,7 +264,7 @@ const EditClassTeacher: React.FC = () => {
                       const response = await fetch(
                         `${
                           import.meta.env.VITE_API_URL
-                        }/teacher/classes/${classId}/regenerate-join-link`,
+                        }/class/teacher/${classId}/join-link`,
                         {
                           method: 'PATCH',
                           headers: {
@@ -304,15 +303,9 @@ const EditClassTeacher: React.FC = () => {
             <BoxBorder extraClasses="mxw-700 m-a g-20">
               <div className="flex justify-between items-center mb-4">
                 <h2>Opdrachten</h2>
-                <PrimaryButton
-                  onClick={
-                    () => navigate(`/teacher/classes/${classId}/add-assignment`)
-
-                    // http://localhost:5173/teacher/dashboard/1/add-assignment
-                  }
-                >
-                  Nieuwe Opdracht
-                </PrimaryButton>
+                <Link to={`/teacher/classes/${classId}/add-assignment`}>
+                  <PrimaryButton>Nieuwe Opdracht</PrimaryButton>
+                </Link>
               </div>
               <p>Hier komen de opdrachten voor deze klas.</p>
               {/* Placeholder for assignments list */}
@@ -343,13 +336,9 @@ const EditClassTeacher: React.FC = () => {
             <Container>
               <BoxBorder extraClasses="mxw-700 m-a g-20">
                 <h2>Beheer Leerlingen</h2>
-                <PrimaryButton
-                  onClick={() =>
-                    navigate(`/teacher/classes/${classId}/students`)
-                  }
-                >
-                  Bekijk Leerlingen
-                </PrimaryButton>
+                <Link to={`/teacher/classes/${classId}/students`}>
+                  <PrimaryButton>Bekijk Leerlingen</PrimaryButton>
+                </Link>
               </BoxBorder>
             </Container>
 
@@ -357,20 +346,12 @@ const EditClassTeacher: React.FC = () => {
               <BoxBorder extraClasses="mxw-700 m-a g-20">
                 <h2>Beheer Uitnodigingen</h2>
                 <div className="flex gap-4">
-                  <PrimaryButton
-                    onClick={() =>
-                      navigate(`/teacher/classes/${classId}/teacher-invites`)
-                    }
-                  >
-                    Leerkracht Uitnodigingen
-                  </PrimaryButton>
-                  <PrimaryButton
-                    onClick={() =>
-                      navigate(`/teacher/classes/${classId}/join-requests`)
-                    }
-                  >
-                    Leerling Verzoeken
-                  </PrimaryButton>
+                  <Link to={`/teacher/classes/${classId}/teacher-invites`}>
+                    <PrimaryButton>Leerkracht Uitnodigingen</PrimaryButton>
+                  </Link>
+                  <Link to={`/teacher/classes/${classId}/join-requests`}>
+                    <PrimaryButton>Leerling Verzoeken</PrimaryButton>
+                  </Link>
                 </div>
               </BoxBorder>
             </Container>

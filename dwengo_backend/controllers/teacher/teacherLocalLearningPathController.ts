@@ -12,10 +12,7 @@ interface PathMetadata {
   image?: string | null;
 }
 
-/**
- * POST /teacher/learningPaths
- *   -> nieuw leerpad (zonder nodes)
- */
+// De leerkracht maak een nieuwe leerpad aan
 export const createLocalLearningPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     // Door protectTeacher in de routes weten we: role=TEACHER
@@ -46,10 +43,7 @@ export const createLocalLearningPath = asyncHandler(
   },
 );
 
-/**
- * GET /teacher/learningPaths
- *   -> haal alle leerpaden op van de ingelogde teacher
- */
+// haal alle leerpaden op van de ingelogde teacher
 export const getLocalLearningPaths = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = req.user!.id;
@@ -60,10 +54,7 @@ export const getLocalLearningPaths = asyncHandler(
   },
 );
 
-/**
- * GET /teacher/learningPaths/:pathId
- *   -> haal één leerpad op
- */
+// haal één leerpad op
 export const getLocalLearningPathById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = req.user!.id;
@@ -84,10 +75,7 @@ export const getLocalLearningPathById = asyncHandler(
   },
 );
 
-/**
- * PATCH /teacher/learningPaths/:pathId
- *   -> Update (gedeeltelijk) een leerpad
- */
+// Update (gedeeltelijk) een leerpad
 export const updateLocalLearningPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = req.user!.id;
@@ -126,9 +114,7 @@ export const updateLocalLearningPath = asyncHandler(
   },
 );
 
-/**
- * DELETE /teacher/learningPaths/:pathId
- */
+// Verwijder een leerpad
 export const deleteLocalLearningPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = req.user!.id;

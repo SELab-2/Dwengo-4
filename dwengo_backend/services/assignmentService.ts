@@ -1,6 +1,7 @@
-import { Assignment, PrismaClient } from "@prisma/client";
+import { Assignment } from "@prisma/client";
+import prisma from "../config/prisma";
 
-const prisma = new PrismaClient();
+
 
 export default class AssignmentService {
   static async getAssignmentById(assignmentId: number): Promise<Assignment | null> {
