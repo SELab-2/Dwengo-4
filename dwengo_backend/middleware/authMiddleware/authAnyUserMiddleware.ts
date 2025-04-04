@@ -5,7 +5,14 @@ import { PrismaClient, Teacher, Student, User } from "@prisma/client";
 import {
   AuthenticatedRequest,
   AuthenticatedUser,
-} from "../interfaces/extendedTypeInterfaces";
+} from "../../interfaces/extendedTypeInterfaces";
+import { UnauthorizedError } from "../../errors/errors";
+import {
+  invalidTokenMessage,
+  neitherTeacherNorStudentMessage,
+  noTokenProvidedMessage,
+  userNotFoundMessage,
+} from "./errorMessages";
 const prisma = new PrismaClient();
 
 interface JwtPayload {
@@ -31,8 +38,7 @@ export const protectAnyUser = asyncHandler(
           where: { id: decoded.id },
         });
         if (!user) {
-          res.status(401).json({ error: "Gebruiker niet gevonden." });
-          return;
+          throw new UnauthorizedError(userNotFoundMessage);
         }
 
         // Bouw het authUser object op met basisgegevens
@@ -73,14 +79,18 @@ export const protectAnyUser = asyncHandler(
           }
         }
 
+        if (!req.user?.teacher && !req.user?.student) {
+          // Make sure that user is either a teacher or a student
+          throw new UnauthorizedError(neitherTeacherNorStudentMessage);
+        }
+
         req.user = authUser;
         next();
-      } catch (error) {
-        console.error(error);
-        res.status(401).json({ error: "Niet geautoriseerd, token mislukt." });
+      } catch {
+        throw new UnauthorizedError(invalidTokenMessage);
       }
     } else {
-      res.status(401).json({ error: "Geen token, niet geautoriseerd." });
+      throw new UnauthorizedError(noTokenProvidedMessage);
     }
   },
 );

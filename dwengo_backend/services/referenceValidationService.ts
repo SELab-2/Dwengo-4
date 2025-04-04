@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+
 import { dwengoAPI } from "../config/dwengoAPI";
 import { BadRequestError, NotFoundError } from "../errors/errors";
 import {
@@ -6,7 +6,8 @@ import {
   throwCorrectNetworkError,
 } from "../errors/errorFunctions";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 /**
  * ReferenceValidationService:

@@ -23,7 +23,6 @@ import teacherLocalLearningPathNodesRoutes from "./routes/teacher/teacherLocalLe
 
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
-import teacherTeamsRoutes from "./routes/teacher/teacherTeamsRoutes";
 
 dotenv.config();
 
@@ -74,8 +73,14 @@ app.use("/teacher/learningObjects", teacherLocalLearningObjectRoutes);
 app.use("/teacher/learningPaths", teacherLocalLearningPathRoutes);
 app.use("/teacher/learningPaths", teacherLocalLearningPathNodesRoutes);
 
-// Routes voor Teacher (Teams)
-app.use("/teacher/assignments/:assignmentId/team", teacherTeamsRoutes);
+// Routes voor authentificatie
+app.use("/auth", authRoutes);
+app.use("/pathByTeacher", teacherLocalLearningPathRoutes);
+app.use(
+  "learningPath/:learningPathId/node",
+  teacherLocalLearningPathNodesRoutes
+);
+app.use("/learningObjectByTeacher", teacherLocalLearningObjectRoutes);
 
 // Routes voor Student (Auth)
 app.use("/student/auth", studentAuthRoutes);

@@ -60,3 +60,9 @@ export class NetworkError extends AppError {
     super(message, 502);
   }
 }
+
+export class InternalServerError extends AppError {
+    constructor(message: string) {
+        super(message, 500);
+    }
+}

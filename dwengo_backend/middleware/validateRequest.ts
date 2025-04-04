@@ -1,9 +1,9 @@
 import { Response, NextFunction } from "express";
-import { z } from "zod";
-import { AuthenticatedRequest } from "./teacherAuthMiddleware";
+import { z, ZodIssue } from "zod";
+import { AuthenticatedRequest } from "./authMiddleware/teacherAuthMiddleware";
 
 const formatZodErrors = (error: z.ZodError, source: string) => {
-  return error.issues.map((issue) => ({
+  return error.issues.map((issue: ZodIssue) => ({
     field: issue.path.join("."),
     message: issue.message,
     source: source, // body, params or query

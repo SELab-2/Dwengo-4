@@ -1,8 +1,8 @@
-import { Assignment, Feedback, PrismaClient, Teacher } from "@prisma/client";
 import { handlePrismaQuery } from "../errors/errorFunctions";
 import { ForbiddenActionError, UnauthorizedError } from "../errors/errors";
+import { Assignment, Feedback, Teacher } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
 
 const unauthorizedMessage =
   "The teacher is unauthorized to perform this action.";
@@ -10,7 +10,7 @@ export default class FeedbackService {
   static async getAllFeedbackForEvaluation(
     assignmentId: number,
     evaluationId: string,
-    teacherId: number,
+    teacherId: number
   ): Promise<Feedback[]> {
     if (!(await this.hasAssignmentRights(assignmentId, teacherId))) {
       throw new UnauthorizedError(unauthorizedMessage);
@@ -27,14 +27,14 @@ export default class FeedbackService {
         include: {
           submission: true,
         },
-      }),
+      })
     );
   }
 
   static async createFeedback(
     submissionId: number,
     teacherId: number,
-    description: string,
+    description: string
   ): Promise<Feedback> {
     if (!(await this.hasSubmissionRights(teacherId, submissionId))) {
       throw new UnauthorizedError(unauthorizedMessage);
@@ -54,7 +54,7 @@ export default class FeedbackService {
             gte: new Date(),
           },
         },
-      }),
+      })
     );
 
     // Als deadline in de toekomst ligt: error
@@ -69,13 +69,13 @@ export default class FeedbackService {
           teacherId: teacherId,
           description: description,
         },
-      }),
+      })
     );
   }
 
   static async getFeedbackForSubmission(
     submissionId: number,
-    teacherId: number,
+    teacherId: number
   ): Promise<Feedback | null> {
     if (!(await this.hasSubmissionRights(teacherId, submissionId))) {
       throw new UnauthorizedError(unauthorizedMessage);
@@ -86,14 +86,14 @@ export default class FeedbackService {
         where: {
           submissionId: submissionId,
         },
-      }),
+      })
     );
   }
 
   static async updateFeedbackForSubmission(
     submissionId: number,
     description: string,
-    teacherId: number,
+    teacherId: number
   ): Promise<Feedback> {
     if (!(await this.hasSubmissionRights(teacherId, submissionId))) {
       throw new UnauthorizedError(unauthorizedMessage);
@@ -107,13 +107,13 @@ export default class FeedbackService {
         data: {
           description: description,
         },
-      }),
+      })
     );
   }
 
   static async deleteFeedbackForSubmission(
     submissionId: number,
-    teacherId: number,
+    teacherId: number
   ): Promise<Feedback> {
     if (!(await this.hasSubmissionRights(teacherId, submissionId))) {
       throw new UnauthorizedError(unauthorizedMessage);
@@ -124,13 +124,13 @@ export default class FeedbackService {
         where: {
           submissionId: submissionId,
         },
-      }),
+      })
     );
   }
 
   static async hasAssignmentRights(
     assignmentId: number,
-    teacherId: number,
+    teacherId: number
   ): Promise<boolean> {
     // Tel aantal leerkrachten die rechten hebben op de evaluatie
     const teacherWithRights: Teacher | null = await handlePrismaQuery(() =>
@@ -151,7 +151,7 @@ export default class FeedbackService {
             },
           },
         },
-      }),
+      })
     );
 
     return teacherWithRights !== null;
@@ -159,7 +159,7 @@ export default class FeedbackService {
 
   static async hasSubmissionRights(
     teacherId: number,
-    submissionId: number,
+    submissionId: number
   ): Promise<boolean> {
     // Ga na of de leerkracht rechten heeft op de submission
     const teacherWithRights: Teacher | null = await handlePrismaQuery(() =>
@@ -184,7 +184,7 @@ export default class FeedbackService {
             },
           },
         },
-      }),
+      })
     );
 
     // Return true als teacher rechten heeft

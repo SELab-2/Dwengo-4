@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { Response } from "express";
-import { AuthenticatedRequest } from "../../middleware/teacherAuthMiddleware";
+import { AuthenticatedRequest } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 import classService from "../../services/classService";
 import { Student } from "@prisma/client";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";

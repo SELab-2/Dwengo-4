@@ -1,4 +1,4 @@
-import { Invite, JoinRequestStatus, Class, PrismaClient } from "@prisma/client";
+import { Invite, JoinRequestStatus, Class } from "@prisma/client";
 import classService from "./classService";
 import {
   AccesDeniedError,
@@ -12,7 +12,8 @@ import {
   handlePrismaTransaction,
 } from "../errors/errorFunctions";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 export default class inviteService {
   private static async validateInvitePending(

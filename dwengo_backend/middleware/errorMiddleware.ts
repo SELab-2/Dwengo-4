@@ -5,11 +5,13 @@ const errorHandler = (
   err: Error,
   req: Request,
   res: Response,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _next: NextFunction,
+  next: NextFunction
 ): void => {
   if (err instanceof AppError) {
-    res.status(err.statusCode);
+    res.status(err.statusCode).json({
+      error: err.name,
+      message: err.message,
+    });
   } else {
     const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
     res.status(statusCode);

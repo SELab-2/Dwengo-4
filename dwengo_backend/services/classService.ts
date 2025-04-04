@@ -2,7 +2,6 @@ import {
   Class,
   ClassStudent,
   ClassTeacher,
-  PrismaClient,
   Student,
   User,
 } from "@prisma/client";
@@ -14,7 +13,7 @@ import {
 } from "../errors/errors";
 import { handlePrismaQuery } from "../errors/errorFunctions";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
 
 export type ClassWithLinks = Class & { classLinks: ClassStudent[] };
 

@@ -1,15 +1,14 @@
-import React, { useState, MouseEvent } from 'react';
-import { NavLink, useSubmit, useLocation } from 'react-router-dom';
+import React, { MouseEvent, useState } from 'react';
+import { Link, useSubmit } from 'react-router-dom';
 import Container from '../shared/Container';
 import styles from './Nav.module.css';
 import NavButton from '../shared/NavButton';
 
 const Navstudent: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
-  const [firstName, setFirstName] = useState<string | null>(
+  const [firstName] = useState<string | null>(
     localStorage.getItem('firstName'),
   );
-  const location = useLocation();
   const submit = useSubmit();
 
   const toggleMenu = (): void => {
@@ -37,19 +36,16 @@ const Navstudent: React.FC = () => {
       <Container>
         <div className="flex text-sm lg:text-lg justify-between items-center">
           <div className="flex flex-row items-center justify-center">
-            <img
-              className="h-8 lg:h-12 xl:h-16 w-fit"
-              src="/img/dwengo-groen-zwart.png"
-              onClick={() => (window.location.href = '/student')}
-            />
+            <Link to={'/student'}>
+              <img
+                className="h-8 lg:h-12 xl:h-16 w-fit"
+                src="/img/dwengo-groen-zwart.png"
+              />
+            </Link>
             {firstName ? (
               <div className="flex space-x-4">
                 {routes.map(({ to, label }) => (
-                  <NavButton
-                    to={to}
-                    label={label}
-                    isActive={(path) => location.pathname === to}
-                  />
+                  <NavButton to={to} label={label} />
                 ))}
               </div>
             ) : (
@@ -58,18 +54,8 @@ const Navstudent: React.FC = () => {
                   styles.navLinks
                 } ${menuOpen ? styles.open : ''}`}
               >
-                <NavButton
-                  to="/student/inloggen"
-                  label="Inloggen"
-                  isActive={(path) => location.pathname === '/student/inloggen'}
-                />
-                <NavButton
-                  to="/student/registreren"
-                  label="Registreren"
-                  isActive={(path) =>
-                    location.pathname === '/student/registreren'
-                  }
-                />
+                <NavButton to="/student/inloggen" label="Inloggen" />
+                <NavButton to="/student/registreren" label="Registreren" />
               </div>
             )}
           </div>

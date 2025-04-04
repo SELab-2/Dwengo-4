@@ -1,4 +1,4 @@
-import { PrismaClient, LearningObject } from "@prisma/client";
+import { LearningObject } from "@prisma/client";
 import { LearningObjectDto } from "./dwengoLearningObjectService";
 import { handlePrismaQuery } from "../errors/errorFunctions";
 import {
@@ -7,17 +7,13 @@ import {
   UnavailableError,
 } from "../errors/errors";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
 
 /**
  * Converteert een Prisma LearningObject record naar ons LearningObjectDto
  * (origin = "local")
  */
-function mapLocalToDto(
-  localObj: LearningObject,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _isTeacher: boolean,
-): LearningObjectDto {
+function mapLocalToDto(localObj: LearningObject): LearningObjectDto {
   return {
     id: localObj.id,
     uuid: localObj.uuid,
@@ -48,7 +44,7 @@ function mapLocalToDto(
  * filter op teacherExclusive/available als de gebruiker geen teacher is.
  */
 export async function getLocalLearningObjects(
-  isTeacher: boolean,
+  isTeacher: boolean
 ): Promise<LearningObjectDto[]> {
   const whereClause = isTeacher
     ? {}
@@ -58,10 +54,10 @@ export async function getLocalLearningObjects(
     prisma.learningObject.findMany({
       where: whereClause,
       orderBy: { createdAt: "desc" },
-    }),
+    })
   );
 
-  return localObjects.map((obj) => mapLocalToDto(obj, isTeacher));
+  return localObjects.map((obj) => mapLocalToDto(obj));
 }
 
 /**
@@ -69,10 +65,10 @@ export async function getLocalLearningObjects(
  */
 export async function getLocalLearningObjectById(
   id: string,
-  isTeacher: boolean,
+  isTeacher: boolean
 ): Promise<LearningObjectDto> {
   const localObj = await handlePrismaQuery(() =>
-    prisma.learningObject.findUnique({ where: { id } }),
+    prisma.learningObject.findUnique({ where: { id } })
   );
 
   if (!localObj) {
@@ -81,17 +77,17 @@ export async function getLocalLearningObjectById(
 
   if (!isTeacher && localObj.teacherExclusive) {
     throw new UnauthorizedError(
-      `Local learning object with hruid=${localObj.hruid}, language=${localObj.language}, version=${localObj.version} is teacher exclusive.`,
+      `Local learning object with hruid=${localObj.hruid}, language=${localObj.language}, version=${localObj.version} is teacher exclusive.`
     );
   }
 
   if (!localObj.available) {
     throw new UnavailableError(
-      `Local learning object with hruid=${localObj.hruid}, language=${localObj.language}, version=${localObj.version} is temporarily not available.`,
+      `Local learning object with hruid=${localObj.hruid}, language=${localObj.language}, version=${localObj.version} is temporarily not available.`
     );
   }
 
-  return mapLocalToDto(localObj, isTeacher);
+  return mapLocalToDto(localObj);
 }
 
 /**
@@ -99,7 +95,7 @@ export async function getLocalLearningObjectById(
  */
 export async function searchLocalLearningObjects(
   isTeacher: boolean,
-  searchTerm: string,
+  searchTerm: string
 ): Promise<LearningObjectDto[]> {
   const whereClause: any = {
     OR: [
@@ -117,10 +113,10 @@ export async function searchLocalLearningObjects(
     prisma.learningObject.findMany({
       where: whereClause,
       orderBy: { createdAt: "desc" },
-    }),
+    })
   );
 
-  return localObjects.map((obj) => mapLocalToDto(obj, isTeacher));
+  return localObjects.map((obj) => mapLocalToDto(obj));
 }
 
 // [NIEUW] Haal lokaal leerobject op via hruid+language+version
@@ -128,7 +124,7 @@ export async function getLocalLearningObjectByHruidLangVersion(
   hruid: string,
   language: string,
   version: number,
-  isTeacher: boolean,
+  isTeacher: boolean
 ): Promise<LearningObjectDto> {
   const localObj = await handlePrismaQuery(() =>
     prisma.learningObject.findUnique({
@@ -137,26 +133,26 @@ export async function getLocalLearningObjectByHruidLangVersion(
         language,
         version,
       },
-    }),
+    })
   );
 
   if (!localObj) {
     throw new NotFoundError(
-      `Local learning object with hruid=${hruid}, language=${language}, version=${version} not found.`,
+      `Local learning object with hruid=${hruid}, language=${language}, version=${version} not found.`
     );
   }
 
   if (!isTeacher && localObj.teacherExclusive) {
     throw new UnauthorizedError(
-      `Local learning object with hruid=${hruid}, language=${language}, version=${version} is teacher exclusive.`,
+      `Local learning object with hruid=${hruid}, language=${language}, version=${version} is teacher exclusive.`
     );
   }
 
   if (!localObj.available) {
     throw new UnavailableError(
-      `Local learning object with hruid=${hruid}, language=${language}, version=${version} is temporarily not available.`,
+      `Local learning object with hruid=${hruid}, language=${language}, version=${version} is temporarily not available.`
     );
   }
 
-  return mapLocalToDto(localObj, isTeacher);
+  return mapLocalToDto(localObj);
 }

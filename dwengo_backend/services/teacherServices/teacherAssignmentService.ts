@@ -1,11 +1,10 @@
-import { Assignment, PrismaClient, Role } from "@prisma/client";
+import { Assignment, Role } from "@prisma/client";
 import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
 import ReferenceValidationService from "../../services/referenceValidationService";
 import { AccesDeniedError } from "../../errors/errors";
-import handlePrismaQuery from "../../errors/errorFunctions";
 // ^ let op: named import, géén "default" meer.
-
-const prisma = new PrismaClient();
+import prisma from "../../config/prisma";
+import { handlePrismaQuery } from "../../errors/errorFunctions";
 
 export default class TeacherAssignmentService {
   /**
@@ -19,12 +18,12 @@ export default class TeacherAssignmentService {
     isExternal: boolean,
     deadline: Date,
     title: string,
-    description: string,
+    description: string
   ): Promise<Assignment> {
     // 1) check authorization
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
       throw new AccesDeniedError(
-        "The teacher is unauthorized to perform this action. Is this teacher a teacher of the class?",
+        "The teacher is unauthorized to perform this action. Is this teacher a teacher of the class?"
       );
     }
 
@@ -35,7 +34,7 @@ export default class TeacherAssignmentService {
       isExternal,
       isExternal ? undefined : pathRef, // localId
       isExternal ? pathRef : undefined, // hruid
-      isExternal ? pathLanguage : undefined, // language
+      isExternal ? pathLanguage : undefined // language
     );
 
     // 3) Maak assignment
@@ -53,7 +52,7 @@ export default class TeacherAssignmentService {
           title,
           description,
         },
-      }),
+      })
     );
   }
 
@@ -62,11 +61,11 @@ export default class TeacherAssignmentService {
    */
   static async getAssignmentsByClass(
     classId: number,
-    teacherId: number,
+    teacherId: number
   ): Promise<Assignment[]> {
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
       throw new AccesDeniedError(
-        "The teacher is unauthorized to request the assignments. Is this teacher a teacher of the class?",
+        "The teacher is unauthorized to request the assignments. Is this teacher a teacher of the class?"
       );
     }
     return handlePrismaQuery(() =>
@@ -78,7 +77,7 @@ export default class TeacherAssignmentService {
             },
           },
         },
-      }),
+      })
     );
   }
 
@@ -91,12 +90,12 @@ export default class TeacherAssignmentService {
     isExternal: boolean,
     teacherId: number,
     title: string,
-    description: string,
+    description: string
   ): Promise<Assignment> {
     // 1) autorisatie
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
       throw new AccesDeniedError(
-        "The teacher is unauthorized to update the assignment",
+        "The teacher is unauthorized to update the assignment"
       );
     }
 
@@ -113,7 +112,7 @@ export default class TeacherAssignmentService {
           title,
           description,
         },
-      }),
+      })
     );
   }
 
@@ -122,18 +121,18 @@ export default class TeacherAssignmentService {
    */
   static async deleteAssignment(
     assignmentId: number,
-    teacherId: number,
+    teacherId: number
   ): Promise<Assignment> {
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
       throw new AccesDeniedError(
-        "The teacher is unauthorized to delete the assignment",
+        "The teacher is unauthorized to delete the assignment"
       );
     }
 
     return handlePrismaQuery(() =>
       prisma.assignment.delete({
         where: { id: assignmentId },
-      }),
+      })
     );
   }
 }
