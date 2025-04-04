@@ -16,7 +16,7 @@ import {
   updateInviteBodySchema,
   updateInviteParamsSchema,
 } from "../../zodSchemas/inviteSchemas";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router: Router = express.Router();
 

@@ -1,6 +1,6 @@
 import express, { Router } from "express";
 import controller from "../../controllers/student/studentSubmissionController";
-import { protectStudent } from "../../middleware/studentAuthMiddleware";
+import { protectStudent } from "../../middleware/authMiddleware/studentAuthMiddleware";
 
 const router: Router = express.Router();
 
@@ -14,7 +14,7 @@ router.use(protectStudent);
  */
 router.get(
   "/assignment/:assignmentId/",
-  controller.getSubmissionsForAssignment
+  controller.getSubmissionsForAssignment,
 );
 
 /**
@@ -26,7 +26,7 @@ router.get(
  */
 router.post(
   "/assignment/:assignmentId/evaluation/:evaluationId",
-  controller.createSubmission
+  controller.createSubmission,
 );
 
 /**
@@ -38,7 +38,7 @@ router.post(
  */
 router.get(
   "/assignment/:assignmentId/evaluation/:evaluationId",
-  controller.getSubmissionsForEvaluation
+  controller.getSubmissionsForEvaluation,
 );
 
 export default router;

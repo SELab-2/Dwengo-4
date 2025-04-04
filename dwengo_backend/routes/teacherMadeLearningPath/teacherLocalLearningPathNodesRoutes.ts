@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 import {
   getNodesForPath,
   createNodeForPath,
   updateNodeForPath,
   deleteNodeFromPath,
 } from "../../controllers/teacher/teacherLocalLearningPathNodesController";
-import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
+import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router = Router();
 

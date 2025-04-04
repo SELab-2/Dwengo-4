@@ -1,6 +1,6 @@
 import express, { Router } from "express";
 import controller from "../../controllers/teacher/teacherSubmissionController";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router: Router = express.Router();
 
@@ -31,7 +31,7 @@ router.get("/team/:teamId", controller.getSubmissionsForTeam);
  */
 router.get(
   "/assignment/:assignmentId/team/:teamId",
-  controller.getAssignmentSubmissionsForTeam
+  controller.getAssignmentSubmissionsForTeam,
 );
 
 export default router;

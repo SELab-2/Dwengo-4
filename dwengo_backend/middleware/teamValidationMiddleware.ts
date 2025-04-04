@@ -54,12 +54,12 @@ const IdentifiableTeamDivisionSchema = TeamDivisionSchema.extend({
  * Check if the parameter teams conforms to the TeamDivision interface.
  * This is nothing more than an interface specifying how a class of students gets divided into teams.
  * */
-export const ensureTeamsParamValidTeamDivision = validateRequest(
-  "Invalid division of teams.",
-  z.object({
+export const ensureTeamsParamValidTeamDivision = validateRequest({
+  customErrorMessage: "Invalid division of teams.",
+  bodySchema: z.object({
     teams: z.array(TeamDivisionSchema),
   }),
-);
+});
 
 /*
  * Check if the parameter teams conforms to the IdentifiableTeamDivision interface
@@ -68,9 +68,9 @@ export const ensureTeamsParamValidTeamDivision = validateRequest(
  * an ID. Meaning that when you are creating, TeamDivision is all the info you need.
  * On an update however, you need to somehow find the team, which is why IdentifiableTeamDivision exists.
  * */
-export const ensureTeamParamValidIdentifiableTeamDivision = validateRequest(
-  "Invalid identifiable division of teams.",
-  z.object({
+export const ensureTeamParamValidIdentifiableTeamDivision = validateRequest({
+  customErrorMessage: "Invalid identifiable division of teams.",
+  bodySchema: z.object({
     teams: z.array(IdentifiableTeamDivisionSchema),
   }),
-);
+});

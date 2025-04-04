@@ -8,7 +8,7 @@ import {
   regenerateJoinLink,
   getClassByIdAndTeacherId,
 } from "../../controllers/teacher/teacherClassController";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router = express.Router();
 router.use(protectTeacher);

@@ -1,6 +1,6 @@
 import express from "express";
 import controller from "../../controllers/teacher/feedbackController";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router = express.Router();
 
