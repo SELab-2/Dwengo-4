@@ -14,7 +14,6 @@ import {
 
 import prisma from "../config/prisma";
 
-
 export default class inviteService {
   private static async validateInvitePending(
     inviteId: number,
@@ -46,8 +45,6 @@ export default class inviteService {
       throw new NotFoundError("Class not found.");
     }
 
-    console.log(`classroom: ${classroom.name}`);
-
     // Check of de leerkracht die de invite verstuurt beheerder is van de klas
     const isTeacher: boolean = await classService.isTeacherOfClass(
       classId,
@@ -70,7 +67,7 @@ export default class inviteService {
     }
     if (teacherUser.role !== "TEACHER") {
       throw new UnauthorizedError(
-        "User is not a teacher. Only teachers can be invited.",
+        "User is not a teacher. Only teachers can receive invites.",
       );
     }
     const otherTeacherId = teacherUser.id;
@@ -190,14 +187,16 @@ export default class inviteService {
     );
 
     // Decline de invite
-    return prisma.invite.update({
-      where: {
-        inviteId: invite.inviteId,
-      },
-      data: {
-        status: JoinRequestStatus.DENIED,
-      },
-    });
+    return await handlePrismaQuery(() =>
+      prisma.invite.update({
+        where: {
+          inviteId: invite.inviteId,
+        },
+        data: {
+          status: JoinRequestStatus.DENIED,
+        },
+      }),
+    );
   }
 
   static async deleteInvite(
@@ -215,11 +214,13 @@ export default class inviteService {
     }
 
     // Verwijder de invite
-    return await prisma.invite.delete({
-      where: {
-        inviteId,
-        classId,
-      },
-    });
+    return await handlePrismaQuery(() =>
+      prisma.invite.delete({
+        where: {
+          inviteId,
+          classId,
+        },
+      }),
+    );
   }
 }
