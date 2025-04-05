@@ -2,6 +2,7 @@ import { Response } from "express";
 import asyncHandler from "express-async-handler";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import LocalLearningPathService from "../../services/localLearningPathService";
+import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 // Een interface om je body te structureren.
 // Je kunt er bijvoorbeeld nog meer velden in opnemen, afhankelijk van je noden.
@@ -16,7 +17,7 @@ interface PathMetadata {
 export const createLocalLearningPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     // Door protectTeacher in de routes weten we: role=TEACHER
-    const teacherId = req.user!.id; // null-check niet nodig
+    const teacherId = getUserFromAuthRequest(req).id;
 
     const { title, language, description, image } = req.body as PathMetadata;
     if (!title || !language) {
@@ -46,7 +47,7 @@ export const createLocalLearningPath = asyncHandler(
 // haal alle leerpaden op van de ingelogde teacher
 export const getLocalLearningPaths = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user!.id;
+    const teacherId = getUserFromAuthRequest(req).id;
 
     const paths =
       await LocalLearningPathService.getAllLearningPathsByTeacher(teacherId);
@@ -57,7 +58,7 @@ export const getLocalLearningPaths = asyncHandler(
 // haal één leerpad op
 export const getLocalLearningPathById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user!.id;
+    const teacherId = getUserFromAuthRequest(req).id;
 
     const { pathId } = req.params;
     const path = await LocalLearningPathService.getLearningPathById(pathId);
@@ -78,7 +79,7 @@ export const getLocalLearningPathById = asyncHandler(
 // Update (gedeeltelijk) een leerpad
 export const updateLocalLearningPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user!.id;
+    const teacherId = getUserFromAuthRequest(req).id;
 
     const { pathId } = req.params;
     const existingPath =
@@ -117,7 +118,7 @@ export const updateLocalLearningPath = asyncHandler(
 // Verwijder een leerpad
 export const deleteLocalLearningPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user!.id;
+    const teacherId = getUserFromAuthRequest(req).id;
 
     const { pathId } = req.params;
     const existingPath =

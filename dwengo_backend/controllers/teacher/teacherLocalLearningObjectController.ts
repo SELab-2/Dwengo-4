@@ -4,6 +4,7 @@ import LocalLearningObjectService, {
   LocalLearningObjectData,
 } from "../../services/localLearningObjectService";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
+import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 /**
  * Maak een nieuw leerobject.
@@ -11,11 +12,7 @@ import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
  */
 export const createLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user?.id;
-    if (!teacherId) {
-      res.status(401);
-      throw new Error("Geen geldige teacher-gebruiker.");
-    }
+    const teacherId = getUserFromAuthRequest(req).id;
 
     const data: LocalLearningObjectData = req.body;
     // Eventuele extra validatie (bv. velden checken) kan hier
@@ -37,11 +34,7 @@ export const createLocalLearningObject = asyncHandler(
  */
 export const getLocalLearningObjects = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user?.id;
-    if (!teacherId) {
-      res.status(401);
-      throw new Error("Geen geldige teacher-gebruiker.");
-    }
+    const teacherId = getUserFromAuthRequest(req).id;
 
     const objects =
       await LocalLearningObjectService.getAllLearningObjectsByTeacher(
@@ -57,11 +50,7 @@ export const getLocalLearningObjects = asyncHandler(
  */
 export const getLocalLearningObjectById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user?.id;
-    if (!teacherId) {
-      res.status(401);
-      throw new Error("Geen geldige teacher-gebruiker.");
-    }
+    const teacherId = getUserFromAuthRequest(req).id;
 
     const { id } = req.params;
     const found = await LocalLearningObjectService.getLearningObjectById(id);
@@ -87,11 +76,7 @@ export const getLocalLearningObjectById = asyncHandler(
  */
 export const updateLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user?.id;
-    if (!teacherId) {
-      res.status(401);
-      throw new Error("Geen geldige teacher-gebruiker.");
-    }
+    const teacherId = getUserFromAuthRequest(req).id;
 
     const { id } = req.params;
     const data: Partial<LocalLearningObjectData> = req.body;
@@ -124,11 +109,7 @@ export const updateLocalLearningObject = asyncHandler(
  */
 export const deleteLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user?.id;
-    if (!teacherId) {
-      res.status(401);
-      throw new Error("Geen geldige teacher-gebruiker.");
-    }
+    const teacherId = getUserFromAuthRequest(req).id;
 
     const { id } = req.params;
     const existing = await LocalLearningObjectService.getLearningObjectById(id);

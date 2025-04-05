@@ -2,10 +2,11 @@ import { Response } from "express";
 import asyncHandler from "express-async-handler";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import localLearningPathNodeService from "../../services/localLearningPathNodeService";
+import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 // Interface voor node-updates
 export interface NodeMetadata {
-  isExternal: boolean;  
+  isExternal: boolean;
   localLearningObjectId?: string;
   dwengoHruid?: string;
   dwengoLanguage?: string;
@@ -18,15 +19,15 @@ export interface NodeMetadata {
  */
 export const getNodesForPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user!.id; // we weten: TEACHER
+    const teacherId = getUserFromAuthRequest(req).id; // we weten: TEACHER
     const { pathId } = req.params;
 
     const nodes = await localLearningPathNodeService.getAllNodesForPath(
       teacherId,
-      pathId
+      pathId,
     );
     res.json(nodes);
-  }
+  },
 );
 
 /**
@@ -35,7 +36,7 @@ export const getNodesForPath = asyncHandler(
  */
 export const createNodeForPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user!.id;
+    const teacherId = getUserFromAuthRequest(req).id;
     const { pathId } = req.params;
     const body: NodeMetadata = req.body;
 
@@ -49,14 +50,14 @@ export const createNodeForPath = asyncHandler(
         dwengoLanguage: body.dwengoLanguage,
         dwengoVersion: body.dwengoVersion,
         start_node: !!body.start_node,
-      }
+      },
     );
 
     res.status(201).json({
       message: "Node aangemaakt",
       node: newNode,
     });
-  }
+  },
 );
 
 /**
@@ -65,7 +66,7 @@ export const createNodeForPath = asyncHandler(
  */
 export const updateNodeForPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user!.id;
+    const teacherId = getUserFromAuthRequest(req).id;
     const { pathId, nodeId } = req.params;
     const body: NodeMetadata = req.body;
 
@@ -80,14 +81,14 @@ export const updateNodeForPath = asyncHandler(
         dwengoLanguage: body.dwengoLanguage,
         dwengoVersion: body.dwengoVersion,
         start_node: body.start_node,
-      }
+      },
     );
 
     res.json({
       message: "Node bijgewerkt",
       node: updatedNode,
     });
-  }
+  },
 );
 
 /**
@@ -95,10 +96,14 @@ export const updateNodeForPath = asyncHandler(
  */
 export const deleteNodeFromPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user!.id;
+    const teacherId = getUserFromAuthRequest(req).id;
     const { pathId, nodeId } = req.params;
 
-    await localLearningPathNodeService.deleteNodeFromPath(teacherId, pathId, nodeId);
+    await localLearningPathNodeService.deleteNodeFromPath(
+      teacherId,
+      pathId,
+      nodeId,
+    );
     res.json({ message: "Node verwijderd uit leerpad" });
-  }
+  },
 );
