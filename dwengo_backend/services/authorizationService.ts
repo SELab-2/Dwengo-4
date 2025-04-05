@@ -1,20 +1,21 @@
 import { handlePrismaQuery } from "../errors/errorFunctions";
 import { Role } from "@prisma/client";
 import prisma from "../config/prisma";
+import { NotFoundError } from "../errors/errors";
 
 export const isAuthorized = async (
   userId: number,
   requiredRole: Role,
-  classId?: number
+  classId?: number,
 ): Promise<boolean> => {
   const user = await handlePrismaQuery(() =>
     prisma.user.findUnique({
       where: { id: userId },
       select: { role: true, teacher: true, student: true },
-    })
+    }),
   );
 
-  if (!user) throw new Error("User not found");
+  if (!user) throw new NotFoundError("User not found.");
 
   // Admins are always authorized
   if (user.role === Role.ADMIN) return true;
@@ -27,7 +28,7 @@ export const isAuthorized = async (
     const teachesClass = await handlePrismaQuery(() =>
       prisma.classTeacher.findFirst({
         where: { teacherId: userId, classId },
-      })
+      }),
     );
     return teachesClass !== null;
   }
@@ -37,7 +38,7 @@ export const isAuthorized = async (
     const enrolled = await handlePrismaQuery(() =>
       prisma.classStudent.findFirst({
         where: { studentId: userId, classId },
-      })
+      }),
     );
     return enrolled !== null;
   }
@@ -47,7 +48,7 @@ export const isAuthorized = async (
 
 export const canUpdateOrDelete = async (
   userId: number,
-  assignmentId: number
+  assignmentId: number,
 ): Promise<boolean> => {
   if (!(await isAuthorized(userId, Role.TEACHER))) return false;
 
@@ -57,8 +58,10 @@ export const canUpdateOrDelete = async (
     prisma.classTeacher.findMany({
       where: { teacherId: userId },
       select: { classId: true },
-    })
+    }),
   );
+
+  if (allClassesTeacher.length === 0) return false;
 
   // Check if at least one of the classes of the teacher has the assignment
   const hasAssignment = await handlePrismaQuery(() =>
@@ -67,7 +70,7 @@ export const canUpdateOrDelete = async (
         assignmentId,
         classId: { in: allClassesTeacher.map((c) => c.classId) },
       },
-    })
+    }),
   );
 
   return hasAssignment !== null;
