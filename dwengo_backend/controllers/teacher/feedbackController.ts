@@ -9,7 +9,7 @@ export default class FeedbackController {
   // http-command: GET
   static async getAllFeedbackForEvaluation(
     req: AuthenticatedRequest,
-    res: Response,
+    res: Response
   ): Promise<void> {
     try {
       const { assignmentId, evaluationId } = req.params;
@@ -18,7 +18,7 @@ export default class FeedbackController {
       const feedback: Feedback[] = await service.getAllFeedbackForEvaluation(
         Number(assignmentId),
         evaluationId,
-        teacherId,
+        teacherId
       );
       res.status(200).json(feedback);
     } catch (_error) {
@@ -30,7 +30,7 @@ export default class FeedbackController {
   // http-command: POST
   static async createFeedback(
     req: AuthenticatedRequest,
-    res: Response,
+    res: Response
   ): Promise<void> {
     try {
       const teacherId: number = getUserFromAuthRequest(req).id;
@@ -41,7 +41,7 @@ export default class FeedbackController {
       const feedback: Feedback = await service.createFeedback(
         submissionId,
         teacherId,
-        description,
+        description
       );
       res.status(201).json(feedback);
     } catch (_error) {
@@ -53,21 +53,17 @@ export default class FeedbackController {
   // http-command: GET
   static async getFeedbackForSubmission(
     req: AuthenticatedRequest,
-    res: Response,
+    res: Response
   ): Promise<void> {
     try {
       const submissionId: number = Number(req.params.submissionId);
       const teacherId: number = getUserFromAuthRequest(req).id;
 
-      const feedback: Feedback | null = await service.getFeedbackForSubmission(
+      const feedback: Feedback = await service.getFeedbackForSubmission(
         submissionId,
-        teacherId,
+        teacherId
       );
-      if (feedback) {
-        res.status(200).json(feedback);
-      } else {
-        res.status(404).json({ error: "Feedback not found" });
-      }
+      res.status(200).json(feedback);
     } catch (_error) {
       res.status(500).json({ error: "Failed to retrieve feedback" });
     }
@@ -77,7 +73,7 @@ export default class FeedbackController {
   // http-command: PATCH
   static async updateFeedbackForSubmission(
     req: AuthenticatedRequest,
-    res: Response,
+    res: Response
   ): Promise<void> {
     try {
       const submissionId: number = Number(req.params.submissionId);
@@ -87,7 +83,7 @@ export default class FeedbackController {
       const feedback: Feedback = await service.updateFeedbackForSubmission(
         submissionId,
         description,
-        teacherId,
+        teacherId
       );
       res.json(feedback);
     } catch (_error) {
@@ -99,7 +95,7 @@ export default class FeedbackController {
   // http-command: DELETE
   static async deleteFeedbackForSubmission(
     req: AuthenticatedRequest,
-    res: Response,
+    res: Response
   ): Promise<void> {
     try {
       const submissionId: number = Number(req.params.submissionId);

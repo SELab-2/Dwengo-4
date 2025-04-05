@@ -1,20 +1,23 @@
 import { handlePrismaQuery } from "../errors/errorFunctions";
-import { ForbiddenActionError, UnauthorizedError } from "../errors/errors";
+import {
+  AccesDeniedError,
+  ForbiddenActionError,
+  NotFoundError,
+  UnauthorizedError,
+} from "../errors/errors";
 import { Assignment, Feedback, Teacher } from "@prisma/client";
 
 import prisma from "../config/prisma";
 
-const unauthorizedMessage =
-  "The teacher is unauthorized to perform this action.";
+const teacherAccessDeniedMessage =
+  "The teacher is unauthorized to do this action.";
 export default class FeedbackService {
   static async getAllFeedbackForEvaluation(
     assignmentId: number,
     evaluationId: string,
     teacherId: number
   ): Promise<Feedback[]> {
-    if (!(await this.hasAssignmentRights(assignmentId, teacherId))) {
-      throw new UnauthorizedError(unauthorizedMessage);
-    }
+    await this.hasAssignmentRights(assignmentId, teacherId);
 
     return await handlePrismaQuery(() =>
       prisma.feedback.findMany({
@@ -36,9 +39,7 @@ export default class FeedbackService {
     teacherId: number,
     description: string
   ): Promise<Feedback> {
-    if (!(await this.hasSubmissionRights(teacherId, submissionId))) {
-      throw new UnauthorizedError(unauthorizedMessage);
-    }
+    await this.hasSubmissionRights(teacherId, submissionId);
 
     // aantal evaluaties met deadline in de toekomst
     const deadline: Assignment | null = await handlePrismaQuery(() =>
@@ -76,18 +77,20 @@ export default class FeedbackService {
   static async getFeedbackForSubmission(
     submissionId: number,
     teacherId: number
-  ): Promise<Feedback | null> {
-    if (!(await this.hasSubmissionRights(teacherId, submissionId))) {
-      throw new UnauthorizedError(unauthorizedMessage);
-    }
+  ): Promise<Feedback> {
+    await this.hasSubmissionRights(teacherId, submissionId);
 
-    return handlePrismaQuery(() =>
+    const feedback: Feedback | null = await handlePrismaQuery(() =>
       prisma.feedback.findUnique({
         where: {
           submissionId: submissionId,
         },
       })
     );
+    if (feedback === null) {
+      throw new NotFoundError("Feedback not found for this submission.");
+    }
+    return feedback;
   }
 
   static async updateFeedbackForSubmission(
@@ -95,9 +98,7 @@ export default class FeedbackService {
     description: string,
     teacherId: number
   ): Promise<Feedback> {
-    if (!(await this.hasSubmissionRights(teacherId, submissionId))) {
-      throw new UnauthorizedError(unauthorizedMessage);
-    }
+    await this.hasSubmissionRights(teacherId, submissionId);
 
     return await handlePrismaQuery(() =>
       prisma.feedback.update({
@@ -115,9 +116,7 @@ export default class FeedbackService {
     submissionId: number,
     teacherId: number
   ): Promise<Feedback> {
-    if (!(await this.hasSubmissionRights(teacherId, submissionId))) {
-      throw new UnauthorizedError(unauthorizedMessage);
-    }
+    await this.hasSubmissionRights(teacherId, submissionId);
 
     return await handlePrismaQuery(() =>
       prisma.feedback.delete({
@@ -154,7 +153,12 @@ export default class FeedbackService {
       })
     );
 
-    return teacherWithRights !== null;
+    if (teacherWithRights === null) {
+      // The teacher has no rights
+      throw new AccesDeniedError(teacherAccessDeniedMessage);
+    }
+
+    return true;
   }
 
   static async hasSubmissionRights(
@@ -187,7 +191,11 @@ export default class FeedbackService {
       })
     );
 
-    // Return true als teacher rechten heeft
-    return teacherWithRights !== null;
+    if (teacherWithRights === null) {
+      // The teacher has no rights
+      throw new AccesDeniedError(teacherAccessDeniedMessage);
+    }
+
+    return true;
   }
 }
