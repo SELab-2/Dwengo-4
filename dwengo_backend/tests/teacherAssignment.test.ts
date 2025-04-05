@@ -13,7 +13,7 @@ import {
 } from "./helpers/testDataCreation";
 import TeacherSubmissionController from "../controllers/teacher/teacherSubmissionController";
 
-describe("Tests for teacherAssignment", async () => {
+describe("Tests for teacherAssignment", async (): Promise<void> => {
   let teacher1: User & { teacher: Teacher; token: string };
   let teacher2: User & { teacher: Teacher; token: string };
   let teacher3: User & { teacher: Teacher; token: string };
@@ -31,7 +31,7 @@ describe("Tests for teacherAssignment", async () => {
   let assignment2: Assignment;
   let assignment3: Assignment;
 
-  beforeEach(async () => {
+  beforeEach(async (): Promise<void> => {
     // create some classes
     class1 = await createClass("1LA", "ABCD");
     class2 = await createClass("3LAWI", "EFGH");
@@ -93,8 +93,8 @@ describe("Tests for teacherAssignment", async () => {
     );
   });
 
-  describe("[POST] /assignment/teacher", async () => {
-    it("should respond with a `201` status code and the newly created assignment", async () => {
+  describe("[POST] /assignment/teacher", async (): Promise<void> => {
+    it("should respond with a `201` status code and the newly created assignment", async (): Promise<void> => {
       // class3 has no assignments
       const { status, body } = await request(app)
         .post("/assignment/teacher")
@@ -112,7 +112,8 @@ describe("Tests for teacherAssignment", async () => {
       expect(body.deadline).toStrictEqual(new Date("2026-10-23").toISOString());
       expect(body.pathRef).toBe(lp1.id);
     });
-    it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
+
+    it("should respond with a `500` status code because the teacher is not a member of the class", async (): Promise<void> => {
       // class3 has no assignments
       const { status, body } = await request(app)
         .post("/assignment/teacher")
@@ -130,8 +131,8 @@ describe("Tests for teacherAssignment", async () => {
     });
   });
 
-  describe("[GET] /assignment/teacher/class/:classId", async () => {
-    it("should respond with a `200` status code and a list of assignments for that class", async () => {
+  describe("[GET] /assignment/teacher/class/:classId", async (): Promise<void> => {
+    it("should respond with a `200` status code and a list of assignments for that class", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get(`/assignment/teacher/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher1.token}`);
@@ -146,7 +147,7 @@ describe("Tests for teacherAssignment", async () => {
       expect(body[1].deadline).toStrictEqual(assignment2.deadline);
     });
 
-    it("should respond with the same assignments for teachers that are members of the same class", async () => {
+    it("should respond with the same assignments for teachers that are members of the same class", async (): Promise<void> => {
       const req = await request(app)
         .get(`/assignment/teacher/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher1.token}`);
@@ -164,7 +165,7 @@ describe("Tests for teacherAssignment", async () => {
       expect(req.body).toStrictEqual(req2.body);
     });
 
-    it("should respond with an error because the teacher is not part of the class", async () => {
+    it("should respond with an error because the teacher is not part of the class", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get(`/assignment/teacher/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher3.token}`);
@@ -173,8 +174,8 @@ describe("Tests for teacherAssignment", async () => {
     });
   });
 
-  describe("[PATCH] /assignment/teacher/:assignmentId", async () => {
-    it("should respond with a `200` status code and the updated assignment", async () => {
+  describe("[PATCH] /assignment/teacher/:assignmentId", async (): Promise<void> => {
+    it("should respond with a `200` status code and the updated assignment", async (): Promise<void> => {
       // First create assignment for class3
       const { status, body } = await request(app)
         .post("/assignment/teacher")
@@ -190,7 +191,7 @@ describe("Tests for teacherAssignment", async () => {
         });
 
       expect(status).toBe(201);
-      const assignmentId = body.id;
+      const assignmentId: number = body.id;
 
       const req = await request(app)
         .patch(`/assignment/teacher/${assignmentId}`)
@@ -207,7 +208,7 @@ describe("Tests for teacherAssignment", async () => {
       expect(req.body.updatedAt).not.toStrictEqual(body.updatedAt);
     });
 
-    it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
+    it("should respond with a `500` status code because the teacher is not a member of the class", async (): Promise<void> => {
       // First create assignment for class3
       await request(app)
         .post("/assignment/teacher")
@@ -230,21 +231,21 @@ describe("Tests for teacherAssignment", async () => {
     });
   });
 
-  describe("[DELETE] /assignment/teacher/:assignmentId", async () => {
-    it("should respond with a `204` status code and delete the assignment", async () => {
+  describe("[DELETE] /assignment/teacher/:assignmentId", async (): Promise<void> => {
+    it("should respond with a `204` status code and delete the assignment", async (): Promise<void> => {
       const { status } = await request(app)
         .delete(`/assignment/teacher/${assignment3.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`);
       expect(status).toBe(204);
 
       // Check if assignment is actually gone from database
-      const assignment = await prisma.assignment.findUnique({
+      const assignment: Assignment | null = await prisma.assignment.findUnique({
         where: { id: assignment3.id },
       });
       expect(assignment).toBeNull();
     });
 
-    it("should respond with a `500` status code because the teacher is not a member of the class", async () => {
+    it("should respond with a `500` status code because the teacher is not a member of the class", async (): Promise<void> => {
       const { status, body } = await request(app)
         .delete(`/assignment/teacher/${assignment1.id}`)
         .set("Authorization", `Bearer ${teacher3.token}`);
@@ -254,18 +255,18 @@ describe("Tests for teacherAssignment", async () => {
     });
   });
 
-  describe("[GET] /assignment/teacher", async () => {
-    it("should respond with a `200` status code and return all the assignments of the teacher", async () => {
+  describe("[GET] /assignment/teacher", async (): Promise<void> => {
+    it("should respond with a `200` status code and return all the assignments of the teacher", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get(`/assignment/teacher`)
         .set("Authorization", `Bearer ${teacher1.token}`);
 
       expect(status).toBe(200);
       expect(body).toHaveLength(2);
-      expect(body.map((elem: { id: number }) => elem.id)).toContain(
+      expect(body.map((elem: { id: number }): number => elem.id)).toContain(
         assignment1.id,
       );
-      expect(body.map((elem: { id: number }) => elem.id)).toContain(
+      expect(body.map((elem: { id: number }): number => elem.id)).toContain(
         assignment2.id,
       );
     });
