@@ -25,17 +25,26 @@ describe("Feedback tests", (): void => {
 
   let teacher: User & { teacher: Teacher; token: string };
   let teacherId: number;
+
   let student: User & { student: Student; token: string };
+
   let classroomId: number;
+
   let teamId: number;
+
   let evalId: string;
+
   let learningPath: LearningPath;
+
   let onGoingAssignment: Assignment;
   let onGoingAssignmentId: number;
+
   let passedAssignment: Assignment;
   let passedAssignmentId: number;
+
   let submissionForOnGoingAssignment: Submission;
   let onGoingAssignmentSubmissionId: number;
+
   let submissionForPassedAssignment: Submission;
   let passedAssignmentSubmissionId: number;
 
@@ -232,12 +241,14 @@ describe("Feedback tests", (): void => {
         teacherId,
         "Netjes!",
       );
+
       // Now we create an extra submission to the list will be 2 items long
       const newSubmission: Submission = await createSubmission(
         evalId,
         teamId,
         passedAssignmentId,
       );
+
       await giveFeedbackToSubmission(
         newSubmission.submissionId,
         teacherId,
@@ -249,22 +260,7 @@ describe("Feedback tests", (): void => {
         .set("Authorization", `Bearer ${teacher.token}`);
 
       expect(status).toBe(200);
-      expect(body).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            submissionId: expect.any(Number),
-            teacherId: expect.any(Number),
-            description: expect.any(String),
-            submission: expect.objectContaining({
-              submissionId: expect.any(Number),
-              evaluationId: expect.any(String),
-              teamId: expect.any(Number),
-              submitted: expect.any(String),
-              assignmentId: expect.any(Number),
-            }),
-          }),
-        ]),
-      );
+      expectBodyToBeListOfFeedBackObjects(body);
     });
   });
 
@@ -370,6 +366,25 @@ describe("Feedback tests", (): void => {
     });
   });
 });
+
+function expectBodyToBeListOfFeedBackObjects(body: any) {
+  expect(body).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        submissionId: expect.any(Number),
+        teacherId: expect.any(Number),
+        description: expect.any(String),
+        submission: expect.objectContaining({
+          submissionId: expect.any(Number),
+          evaluationId: expect.any(String),
+          teamId: expect.any(Number),
+          submitted: expect.any(String),
+          assignmentId: expect.any(Number),
+        }),
+      }),
+    ]),
+  );
+}
 
 async function findFeedback(id: number): Promise<Feedback | null> {
   return prisma.feedback.findUnique({
