@@ -129,32 +129,34 @@ export async function fetchAllDwengoObjects(
   }
 }
 
+// Since the dwengo API doesn't implement this correctly, comment out this code
+// this may be only be used once the dwengo API is fixed
 // Eén Dwengo-object op basis van _id
-export async function fetchDwengoObjectById(
-  id: string,
-  isTeacher: boolean,
-): Promise<LearningObjectDto | null> {
-  try {
-    const params = { _id: id };
-    const response = await dwengoAPI.get("/api/learningObject/getMetadata", {
-      params,
-    });
+// export async function fetchDwengoObjectById(
+//   id: string,
+//   isTeacher: boolean
+// ): Promise<LearningObjectDto | null> {
+//   try {
+//     const params = { _id: id };
+//     const response = await dwengoAPI.get("/api/learningObject/getMetadata", {
+//       params,
+//     });
 
-    const dwengoObj: DwengoLearningObject = response.data;
-    const mapped = mapDwengoToLocal(dwengoObj);
+//     const dwengoObj: DwengoLearningObject = response.data;
+//     const mapped = mapDwengoToLocal(dwengoObj);
 
-    if (!isTeacher && (mapped.teacherExclusive || !mapped.available)) {
-      return null;
-    }
-    return mapped;
-  } catch (error: any) {
-    if (error.response && error.response.status === 404) {
-      return null;
-    }
-    console.error("Fout bij fetchDwengoObjectById:", error);
-    return null;
-  }
-}
+//     if (!isTeacher && (mapped.teacherExclusive || !mapped.available)) {
+//       return null;
+//     }
+//     return mapped;
+//   } catch (error: any) {
+//     if (error.response && error.response.status === 404) {
+//       return null;
+//     }
+//     console.error("Fout bij fetchDwengoObjectById:", error);
+//     return null;
+//   }
+// }
 
 // [NIEUW] Dwengo-object op basis van hruid, language, version
 export async function fetchDwengoObjectByHruidLangVersion(

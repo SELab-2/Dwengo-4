@@ -38,10 +38,10 @@ export const getLearningObjectController = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { learningObjectId } = req.params;
     const isTeacher: boolean = userIsTeacherOrAdmin(req);
     const lo: LearningObjectDto | null = await getLearningObjectById(
-      id,
+      learningObjectId,
       isTeacher,
     );
     if (!lo) {
@@ -50,7 +50,7 @@ export const getLearningObjectController = async (
         .json({ error: "Leerobject niet gevonden of geen toegang" });
       return;
     }
-    res.json(lo);
+    res.json({ learningObject: lo });
   } catch (error) {
     console.error(error);
     res

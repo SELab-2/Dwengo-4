@@ -10,29 +10,29 @@ import { LearningObject, Student, Teacher, User } from "@prisma/client";
 import { LocalLearningObjectData } from "../services/localLearningObjectService";
 
 // TODO: once request validation with zod has been added, add tests for that as well
-// TODO: create mock of dwengo API for these tests (keep in tests that use actual API calls, but add a mock version as well
-// to easily detect if a change in the dwengo API is causing our code to break)
+// TODO: learning objects and paths definitely need unit tests, where the dwengo API is mocked
 
 describe("learning object tests", async () => {
   let teacherUser1: User & { teacher: Teacher; token: string };
   let studentUser1: User & { student: Student; token: string };
+  let lo: LearningObject;
   beforeEach(async () => {
     teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
     studentUser1 = await createStudent("Alice", "Anderson", "alan@gmail.com");
+
+    // create local learning object
+    const data: LocalLearningObjectData = {
+      title: "Mijn lokaal leerobject",
+      description: "Korte beschrijving",
+      contentType: "TEXT_MARKDOWN",
+      teacherExclusive: false,
+      keywords: ["nieuw", "test"],
+    };
+    lo = await createLearningObject(teacherUser1.id, data);
   });
 
   describe("[GET] learningObject/teacher", async () => {
     it("should return all learning objects", async () => {
-      // create local learning object for this teacher
-      const data: LocalLearningObjectData = {
-        title: "Mijn lokaal leerobject",
-        description: "Korte beschrijving",
-        contentType: "TEXT_MARKDOWN",
-        teacherExclusive: false,
-        keywords: ["nieuw", "voorbeeld"],
-      };
-      await createLearningObject(teacherUser1.id, data);
-
       const { status, body } = await request(app)
         .get("/learningObject/teacher")
         .set("Authorization", `Bearer ${teacherUser1.token}`);
@@ -88,7 +88,7 @@ describe("learning object tests", async () => {
     it("should work the same if search term is uppercase", async () => {
       // create local learning object with the search term
       const data: LocalLearningObjectData = {
-        title: "Mijn lokaal leerobject",
+        title: "test lokaal leerobject",
         description: "VooRBeelD", // search term with mixed upper and lowercase
         contentType: "TEXT_MARKDOWN",
         teacherExclusive: false,
@@ -115,7 +115,8 @@ describe("learning object tests", async () => {
       expect(res1.body.results).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            origin: "local", // there's only one local object in the db (the one with the search term)
+            origin: "local",
+            description: "VooRBeelD",
           }),
         ]),
       );
@@ -133,19 +134,6 @@ describe("learning object tests", async () => {
 
   describe("[GET] learningObject/teacher/lookup", async () => {
     it("should return the local learning object with the given hruid, language and version", async () => {
-      // create local learning object
-      const data: LocalLearningObjectData = {
-        title: "Mijn lokaal leerobject",
-        description: "Korte beschrijving",
-        contentType: "TEXT_MARKDOWN",
-        teacherExclusive: false,
-        keywords: ["nieuw", "voorbeeld"],
-      };
-      const lo: LearningObject = await createLearningObject(
-        teacherUser1.id,
-        data,
-      );
-
       const { status, body } = await request(app)
         .get(
           `/learningObject/teacher/lookup?hruid=${lo.hruid}&language=${lo.language}&version=${lo.version}`,
@@ -164,23 +152,56 @@ describe("learning object tests", async () => {
       const res1 = await request(app)
         .get("/learningObject/teacher")
         .set("Authorization", `Bearer ${teacherUser1.token}`);
-      const lo: LearningObject = res1.body.objects[0]; // get first dwengo learning object
+      const dwengo_lo: LearningObject = res1.body.objects[0]; // get first dwengo learning object
 
       const { status, body } = await request(app)
         .get(
-          `/learningObject/teacher/lookup?hruid=${lo.hruid}&language=${lo.language}&version=${lo.version}`,
+          `/learningObject/teacher/lookup?hruid=${dwengo_lo.hruid}&language=${dwengo_lo.language}&version=${dwengo_lo.version}`,
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
       expect(body.learningObject).toBeDefined();
-      expect(body.learningObject.hruid).toEqual(lo.hruid);
-      expect(body.learningObject.language).toEqual(lo.language);
-      expect(body.learningObject.version).toEqual(lo.version);
+      expect(body.learningObject.hruid).toEqual(dwengo_lo.hruid);
+      expect(body.learningObject.language).toEqual(dwengo_lo.language);
+      expect(body.learningObject.version).toEqual(dwengo_lo.version);
+    });
+
+    it("shouldn't let a student access this route", async () => {
+      const { status, body } = await request(app)
+        .get(
+          "/learningObject/teacher/lookup?hruid=test-v1&language=nl&version=3",
+        )
+        .set("Authorization", `Bearer ${studentUser1.token}`);
+
+      expect(status).toBe(401);
+      expect(body.learningObject).toBeUndefined();
     });
   });
 
-  // describe("[GET] /learningObject/:learningObjectId", async () => {});
+  describe("[GET] /learningObject/:learningObjectId", async () => {
+    // there should ideally be a test for a dwengo learning object as well, but
+    // the dwengo API doesn't implement this correctly, so it won't work
+    // if this is fixed in the future, this test case should be added
+    it("should return the local learning object with the given id", async () => {
+      const { status, body } = await request(app)
+        .get(`/learningObject/${lo.id}`)
+        .set("Authorization", `Bearer ${teacherUser1.token}`);
+
+      expect(status).toBe(200);
+      expect(body.learningObject).toBeDefined();
+      expect(body.learningObject.id).toEqual(lo.id);
+    });
+
+    it("shouldn't let an unauthorized user use this route", async () => {
+      const { status, body } = await request(app).get(
+        `/learningObject/${lo.id}`,
+      ); // don't add auth header
+
+      expect(status).toBe(401);
+      expect(body.learningObject).toBeUndefined();
+    });
+  });
 
   // describe("[GET] /learningObject/learningPath/:pathId", async () => {});
 });

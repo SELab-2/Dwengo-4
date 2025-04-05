@@ -37,7 +37,7 @@ router.get("/teacher/search", protectTeacher, searchLearningObjectsController);
 router.get(
   "/teacher/lookup",
   protectTeacher,
-  getLearningObjectByHruidLangVersionController
+  getLearningObjectByHruidLangVersionController,
 );
 
 /**
@@ -45,6 +45,8 @@ router.get(
  * @description Haal bepaald leerobject op
  * @param learningObjectId: string
  * @access Teacher/Student
+ * DON'T USE THIS ROUTE: SINCE THE DWENGO API DOESN'T IMPLEMENT SEARCHING BY ID CORRECTLY,
+ * THIS ROUTE ONLY CHECKS LOCAL LEARNING OBJECTS. (it's kept in in case the Dwengo API is fixed in the future)
  */
 router.get("/:learningObjectId", protectAnyUser, getLearningObjectController);
 
@@ -60,7 +62,7 @@ router.get("/:learningObjectId", protectAnyUser, getLearningObjectController);
 router.get(
   "/learningPath/learningPathId",
   protectAnyUser,
-  getLearningObjectByHruidLangVersionController
+  getLearningObjectByHruidLangVersionController,
 );
 
 export default router;
