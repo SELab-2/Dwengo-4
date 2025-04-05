@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
-import { searchLearningPaths, getLearningPathByIdOrHruid, LearningPathDto } from "../../services/learningPathService";
+import {
+  searchLearningPaths,
+  getLearningPathByIdOrHruid,
+  LearningPathDto,
+} from "../../services/learningPathService";
 
 interface LearningPathFilters {
   language?: string;
@@ -18,7 +22,10 @@ interface LearningPathFilters {
  *  ?description=...
  *  ?all=  (leeg om alles op te halen)
  */
-export const searchLearningPathsController = async (req: Request, res: Response): Promise<void> => {
+export const searchLearningPathsController = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const filters: LearningPathFilters = {
       language: req.query.language?.toString(),
@@ -29,7 +36,7 @@ export const searchLearningPathsController = async (req: Request, res: Response)
     };
 
     const results: LearningPathDto[] = await searchLearningPaths(filters);
-    res.json(results);
+    res.json({ results });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Fout bij zoeken naar leerpaden" });
@@ -40,10 +47,14 @@ export const searchLearningPathsController = async (req: Request, res: Response)
  * Haalt 1 leerpad op (op basis van _id of hruid).
  * We gebruiken de service getLearningPathByIdOrHruid voor 'idOrHruid'
  */
-export const getLearningPathByIdController = async (req: Request, res: Response): Promise<void> => {
+export const getLearningPathByIdController = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const { pathId } = req.params; // pathId is een string
-    const path: LearningPathDto | null = await getLearningPathByIdOrHruid(pathId);
+    const path: LearningPathDto | null =
+      await getLearningPathByIdOrHruid(pathId);
 
     if (!path) {
       res.status(404).json({ error: "Leerpad niet gevonden" });

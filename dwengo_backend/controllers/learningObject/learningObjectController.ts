@@ -92,7 +92,7 @@ export const getLearningObjectsForPathController = async (
       pathId,
       isTeacher,
     );
-    res.json(objects);
+    res.json({ objects });
   } catch (error) {
     console.error(error);
     res
