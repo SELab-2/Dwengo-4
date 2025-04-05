@@ -8,7 +8,6 @@ export default class AssignmentService {
     const assignment: Assignment | null = await handlePrismaQuery(() =>
       prisma.assignment.findUnique({
         where: { id: assignmentId },
-        // geen include meer, want there's no relation to learningPath
       }),
     );
     if (!assignment) {
