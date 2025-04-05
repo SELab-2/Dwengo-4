@@ -2,6 +2,7 @@ import { Role, Student, Teacher, User } from "@prisma/client";
 
 import prisma from "../config/prisma";
 import { handlePrismaQuery } from "../errors/errorFunctions";
+import { NotFoundError } from "../errors/errors";
 
 export default class UserService {
   static async findUser(email: string): Promise<User | null> {
@@ -38,30 +39,44 @@ export default class UserService {
   }
 
   static async findUserByEmail(email: string): Promise<User> {
-    return await handlePrismaQuery(() =>
-      prisma.user.findUniqueOrThrow({ where: { email } }),
+    const user: User | null = await handlePrismaQuery(() =>
+      prisma.user.findFirst({ where: { email } }),
     );
+    if (!user) {
+      throw new NotFoundError("User not found.");
+    }
+    return user;
   }
 
   static async findTeacherUserById(
     userId: number,
   ): Promise<(Teacher & { user: User }) | null> {
-    return await handlePrismaQuery(() =>
-      prisma.teacher.findUnique({
-        where: { userId },
-        include: { user: true },
-      }),
+    const teacher: (Teacher & { user: User }) | null = await handlePrismaQuery(
+      () =>
+        prisma.teacher.findUnique({
+          where: { userId },
+          include: { user: true },
+        }),
     );
+    if (!teacher) {
+      throw new NotFoundError("Teacher not found.");
+    }
+    return teacher;
   }
 
   static async findStudentUserById(
     userId: number,
   ): Promise<(Student & { user: User }) | null> {
-    return await handlePrismaQuery(() =>
-      prisma.student.findUnique({
-        where: { userId },
-        include: { user: true },
-      }),
+    const student: (Student & { user: User }) | null = await handlePrismaQuery(
+      () =>
+        prisma.student.findUnique({
+          where: { userId },
+          include: { user: true },
+        }),
     );
+    if (!student) {
+      throw new NotFoundError("Student not found.");
+    }
+    return student;
   }
 }
