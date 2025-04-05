@@ -3,6 +3,7 @@ import asyncHandler from "express-async-handler";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import LocalLearningPathService from "../../services/localLearningPathService";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
+import { AccesDeniedError, NotFoundError } from "../../errors/errors";
 
 // Een interface om je body te structureren.
 // Je kunt er bijvoorbeeld nog meer velden in opnemen, afhankelijk van je noden.
@@ -63,13 +64,11 @@ export const getLocalLearningPathById = asyncHandler(
     const { pathId } = req.params;
     const path = await LocalLearningPathService.getLearningPathById(pathId);
     if (!path) {
-      res.status(404);
-      throw new Error("Leerpad niet gevonden");
+      throw new NotFoundError("Leerpad niet gevonden");
     }
     // Domein-check: Is dit path van deze teacher?
     if (path.creatorId !== teacherId) {
-      res.status(403);
-      throw new Error("Je bent niet de eigenaar van dit leerpad.");
+      throw new AccesDeniedError("Je bent niet de eigenaar van dit leerpad.");
     }
 
     res.json(path);
@@ -85,12 +84,10 @@ export const updateLocalLearningPath = asyncHandler(
     const existingPath =
       await LocalLearningPathService.getLearningPathById(pathId);
     if (!existingPath) {
-      res.status(404);
-      throw new Error("Leerpad niet gevonden");
+      throw new NotFoundError("Leerpad niet gevonden");
     }
     if (existingPath.creatorId !== teacherId) {
-      res.status(403);
-      throw new Error("Je bent niet de eigenaar van dit leerpad.");
+      throw new AccesDeniedError("Je bent niet de eigenaar van dit leerpad.");
     }
 
     // Hier kun je gedeeltelijk updaten
@@ -124,12 +121,10 @@ export const deleteLocalLearningPath = asyncHandler(
     const existingPath =
       await LocalLearningPathService.getLearningPathById(pathId);
     if (!existingPath) {
-      res.status(404);
-      throw new Error("Leerpad niet gevonden");
+      throw new NotFoundError("Leerpad niet gevonden");
     }
     if (existingPath.creatorId !== teacherId) {
-      res.status(403);
-      throw new Error("Je bent niet de eigenaar van dit leerpad.");
+      throw new AccesDeniedError("Je bent niet de eigenaar van dit leerpad.");
     }
 
     await LocalLearningPathService.deleteLearningPath(pathId);

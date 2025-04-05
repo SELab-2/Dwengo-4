@@ -1,4 +1,5 @@
 import { Response } from "express";
+import asyncHandler from "express-async-handler";
 import {
   getAllLearningObjects,
   getLearningObjectByHruidLangVersion,
@@ -16,28 +17,17 @@ function userIsTeacherOrAdmin(req: AuthenticatedRequest): boolean {
 }
 
 // Haal alle leerobjecten (Dwengo + lokaal)
-export const getAllLearningObjectsController = async (
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> => {
-  try {
+export const getAllLearningObjectsController = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const isTeacher: boolean = userIsTeacherOrAdmin(req);
     const objects: LearningObjectDto[] = await getAllLearningObjects(isTeacher);
     res.json({ objects });
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ error: "Fout bij ophalen leerobjecten (combi Dwengo + local)" });
-  }
-};
+  },
+);
 
 // Haal één leerobject op (via :id)
-export const getLearningObjectController = async (
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> => {
-  try {
+export const getLearningObjectController = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { learningObjectId } = req.params;
     const isTeacher: boolean = userIsTeacherOrAdmin(req);
     const lo: LearningObjectDto | null = await getLearningObjectById(
@@ -51,20 +41,12 @@ export const getLearningObjectController = async (
       return;
     }
     res.json({ learningObject: lo });
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ error: "Fout bij ophalen leerobject (combi Dwengo + local)" });
-  }
-};
+  },
+);
 
 // Zoeken naar leerobjecten (Dwengo + lokaal)
-export const searchLearningObjectsController = async (
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> => {
-  try {
+export const searchLearningObjectsController = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const searchTerm: string = req.query.q?.toString() || "";
     const isTeacher: boolean = userIsTeacherOrAdmin(req);
     const results: LearningObjectDto[] = await searchLearningObjects(
@@ -72,20 +54,12 @@ export const searchLearningObjectsController = async (
       searchTerm,
     );
     res.json({ results });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      error: "Fout bij zoeken naar leerobjecten (combi Dwengo + local)",
-    });
-  }
-};
+  },
+);
 
 // Haal alle leerobjecten op die horen bij een specifiek leerpad (op basis van pathId)
-export const getLearningObjectsForPathController = async (
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> => {
-  try {
+export const getLearningObjectsForPathController = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { pathId } = req.params;
     const isTeacher: boolean = userIsTeacherOrAdmin(req);
     const objects: LearningObjectDto[] = await getLearningObjectsForPath(
@@ -93,20 +67,12 @@ export const getLearningObjectsForPathController = async (
       isTeacher,
     );
     res.json({ objects });
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ error: "Fout bij ophalen leerobjecten voor leerpad (Dwengo)" });
-  }
-};
+  },
+);
 
 // [NIEUW] Haal één leerobject op basis van hruid + language + version
-export const getLearningObjectByHruidLangVersionController = async (
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> => {
-  try {
+export const getLearningObjectByHruidLangVersionController = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { hruid, language, version } = req.query;
     if (!hruid || !language || !version) {
       res.status(400).json({
@@ -140,10 +106,5 @@ export const getLearningObjectByHruidLangVersionController = async (
     }
 
     res.json({ learningObject: lo });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      error: "Fout bij ophalen leerobject op basis van hruid-language-version",
-    });
-  }
-};
+  },
+);
