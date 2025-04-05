@@ -130,7 +130,7 @@ export async function fetchAllDwengoObjects(
     });
     checkAll(
       response.data,
-      "Something went wrong when searching for learning objects.",
+      "Something went wrong while searching for learning objects.",
       isTeacher,
     );
     const dwengoData: DwengoLearningObject[] = response.data;
