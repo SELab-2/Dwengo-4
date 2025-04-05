@@ -40,18 +40,10 @@ export default class inviteService {
     classId: number
   ): Promise<Invite> {
     // Check if de klas bestaat
-    const classroom: Class = await classService.getClassById(classId);
+    await classService.getClassById(classId);
 
     // Check of de leerkracht die de invite verstuurt beheerder is van de klas
-    const isTeacher: boolean = await classService.isTeacherOfClass(
-      classId,
-      classTeacherId
-    );
-    if (!isTeacher) {
-      throw new UnauthorizedError("Teacher is not a teacher of this class.");
-    }
-
-    console.log(`isTeacher: ${isTeacher}`);
+    await classService.isTeacherOfClass(classId, classTeacherId);
 
     // Zoek de leerkracht op basis van het e-mailadres
     const teacherUser = await handlePrismaQuery(() =>
@@ -60,7 +52,9 @@ export default class inviteService {
       })
     );
     if (!teacherUser) {
-      throw new NotFoundError("Teacher not found.");
+      throw new NotFoundError(
+        "Given email doesn't correspond to any existing teachers."
+      );
     }
     if (teacherUser.role !== "TEACHER") {
       throw new UnauthorizedError(
@@ -116,9 +110,7 @@ export default class inviteService {
       classId,
       classTeacherId
     );
-    if (!isTeacher) {
-      throw new UnauthorizedError("Teacher is not a teacher of this class.");
-    }
+
     return await handlePrismaQuery(() =>
       prisma.invite.findMany({
         where: {
@@ -132,7 +124,7 @@ export default class inviteService {
   static async getPendingInvitesForTeacher(
     teacherId: number
   ): Promise<Invite[]> {
-    return handlePrismaQuery(() =>
+    return await handlePrismaQuery(() =>
       prisma.invite.findMany({
         where: {
           otherTeacherId: teacherId,
@@ -202,13 +194,7 @@ export default class inviteService {
     classId: number
   ): Promise<Invite> {
     // Check of de teacher een teacher van de klas is
-    const isTeacher: boolean = await classService.isTeacherOfClass(
-      classId,
-      classTeacherId
-    );
-    if (!isTeacher) {
-      throw new AccesDeniedError("Leerkracht is geen beheerder van de klas");
-    }
+    await classService.isTeacherOfClass(classId, classTeacherId);
 
     // Verwijder de invite
     return await handlePrismaQuery(() =>

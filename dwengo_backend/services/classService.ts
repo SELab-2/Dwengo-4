@@ -125,7 +125,10 @@ export default class ClassService {
         },
       })
     );
-    return classTeacher !== null;
+    if (!classTeacher) {
+      throw new AccesDeniedError("Teacher is not part of this class.");
+    }
+    return true;
   }
 
   // Get all students from a given class
