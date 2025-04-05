@@ -74,11 +74,9 @@ export const searchLearningObjectsController = async (
     res.json({ results });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        error: "Fout bij zoeken naar leerobjecten (combi Dwengo + local)",
-      });
+    res.status(500).json({
+      error: "Fout bij zoeken naar leerobjecten (combi Dwengo + local)",
+    });
   }
 };
 
@@ -141,7 +139,7 @@ export const getLearningObjectByHruidLangVersionController = async (
       return;
     }
 
-    res.json(lo);
+    res.json({ learningObject: lo });
   } catch (error) {
     console.error(error);
     res.status(500).json({

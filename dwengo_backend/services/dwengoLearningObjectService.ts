@@ -139,6 +139,7 @@ export async function fetchDwengoObjectById(
     const response = await dwengoAPI.get("/api/learningObject/getMetadata", {
       params,
     });
+
     const dwengoObj: DwengoLearningObject = response.data;
     const mapped = mapDwengoToLocal(dwengoObj);
 
@@ -165,11 +166,16 @@ export async function fetchDwengoObjectByHruidLangVersion(
   try {
     // Dwengo-API: /api/learningObject/getMetadata?hruid=...&language=...&version=...
     const params = { hruid, language, version };
-    console.log("Dwengo params:", params);
 
     const response = await dwengoAPI.get("/api/learningObject/getMetadata", {
       params,
     });
+
+    // if the dwengo API can't find the requested learning object, it returns a 200 status code
+    // and an error message in the `data` field..., so this check is needed
+    if (typeof response.data !== "object") {
+      return null;
+    }
     const dwengoObj: DwengoLearningObject = response.data;
     const mapped = mapDwengoToLocal(dwengoObj);
 
@@ -238,7 +244,9 @@ export async function getDwengoObjectsForPath(
         };
         const response = await dwengoAPI.get(
           "/api/learningObject/getMetadata",
-          { params },
+          {
+            params,
+          },
         );
         const dwengoObj: DwengoLearningObject = response.data;
         const mapped = mapDwengoToLocal(dwengoObj);
