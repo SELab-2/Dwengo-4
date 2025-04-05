@@ -17,7 +17,7 @@ import prisma from "../config/prisma";
 export default class inviteService {
   private static async validateInvitePending(
     inviteId: number,
-    otherTeacherId: number,
+    otherTeacherId: number
   ): Promise<Invite> {
     const invite: Invite | null = await handlePrismaQuery(() =>
       prisma.invite.findFirst({
@@ -26,7 +26,7 @@ export default class inviteService {
           otherTeacherId,
           status: JoinRequestStatus.PENDING,
         },
-      }),
+      })
     );
     if (!invite) {
       throw new BadRequestError("Invite is not pending or does not exist.");
@@ -37,18 +37,15 @@ export default class inviteService {
   static async createInvite(
     classTeacherId: number,
     otherTeacherEmail: string,
-    classId: number,
+    classId: number
   ): Promise<Invite> {
     // Check if de klas bestaat
-    const classroom: Class | null = await classService.getClassById(classId);
-    if (!classroom) {
-      throw new NotFoundError("Class not found.");
-    }
+    const classroom: Class = await classService.getClassById(classId);
 
     // Check of de leerkracht die de invite verstuurt beheerder is van de klas
     const isTeacher: boolean = await classService.isTeacherOfClass(
       classId,
-      classTeacherId,
+      classTeacherId
     );
     if (!isTeacher) {
       throw new UnauthorizedError("Teacher is not a teacher of this class.");
@@ -60,14 +57,14 @@ export default class inviteService {
     const teacherUser = await handlePrismaQuery(() =>
       prisma.user.findUnique({
         where: { email: otherTeacherEmail },
-      }),
+      })
     );
     if (!teacherUser) {
       throw new NotFoundError("Teacher not found.");
     }
     if (teacherUser.role !== "TEACHER") {
       throw new UnauthorizedError(
-        "User is not a teacher. Only teachers can receive invites.",
+        "User is not a teacher. Only teachers can receive invites."
       );
     }
     const otherTeacherId = teacherUser.id;
@@ -80,18 +77,18 @@ export default class inviteService {
           classId,
           status: JoinRequestStatus.PENDING,
         },
-      }),
+      })
     );
     if (existingInvite) {
       throw new ConflictError(
-        "There is already a pending invite for this teacher and class.",
+        "There is already a pending invite for this teacher and class."
       );
     }
 
     // Controleer of de teacher nog geen lid is van de klas
     const isAlreadyTeacher: boolean = await classService.isTeacherOfClass(
       classId,
-      otherTeacherId,
+      otherTeacherId
     );
     if (isAlreadyTeacher) {
       throw new BadRequestError("Teacher is already a member of this class.");
@@ -106,18 +103,18 @@ export default class inviteService {
           classId,
           status: JoinRequestStatus.PENDING,
         },
-      }),
+      })
     );
   }
 
   static async getPendingInvitesForClass(
     classTeacherId: number,
-    classId: number,
+    classId: number
   ): Promise<Invite[]> {
     // Alleen een teacher van de klas mag de invites zien
     const isTeacher: boolean = await classService.isTeacherOfClass(
       classId,
-      classTeacherId,
+      classTeacherId
     );
     if (!isTeacher) {
       throw new UnauthorizedError("Teacher is not a teacher of this class.");
@@ -128,12 +125,12 @@ export default class inviteService {
           classId,
           status: JoinRequestStatus.PENDING,
         },
-      }),
+      })
     );
   }
 
   static async getPendingInvitesForTeacher(
-    teacherId: number,
+    teacherId: number
   ): Promise<Invite[]> {
     return handlePrismaQuery(() =>
       prisma.invite.findMany({
@@ -141,18 +138,18 @@ export default class inviteService {
           otherTeacherId: teacherId,
           status: JoinRequestStatus.PENDING,
         },
-      }),
+      })
     );
   }
 
   static async acceptInviteAndJoinClass(
     teacherId: number,
-    inviteId: number,
+    inviteId: number
   ): Promise<Invite> {
     // Check of de invite pending is
     const invite: Invite = await this.validateInvitePending(
       inviteId,
-      teacherId,
+      teacherId
     );
 
     return await handlePrismaTransaction(prisma, async (tx) => {
@@ -178,12 +175,12 @@ export default class inviteService {
 
   static async declineInvite(
     teacherId: number,
-    inviteId: number,
+    inviteId: number
   ): Promise<Invite> {
     // Check of de invite pending is
     const invite: Invite = await this.validateInvitePending(
       inviteId,
-      teacherId,
+      teacherId
     );
 
     // Decline de invite
@@ -195,19 +192,19 @@ export default class inviteService {
         data: {
           status: JoinRequestStatus.DENIED,
         },
-      }),
+      })
     );
   }
 
   static async deleteInvite(
     classTeacherId: number,
     inviteId: number,
-    classId: number,
+    classId: number
   ): Promise<Invite> {
     // Check of de teacher een teacher van de klas is
     const isTeacher: boolean = await classService.isTeacherOfClass(
       classId,
-      classTeacherId,
+      classTeacherId
     );
     if (!isTeacher) {
       throw new AccesDeniedError("Leerkracht is geen beheerder van de klas");
@@ -220,7 +217,7 @@ export default class inviteService {
           inviteId,
           classId,
         },
-      }),
+      })
     );
   }
 }
