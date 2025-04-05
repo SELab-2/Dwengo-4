@@ -148,7 +148,7 @@ export default class TeacherAssignmentService {
   ): Promise<Assignment> {
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
       throw new AccesDeniedError(
-        "The teacher is unauthorized to delete the assignment",
+        "The teacher is unauthorized to delete the assignment.",
       );
     }
 
