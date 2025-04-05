@@ -11,7 +11,7 @@ export default class AssignmentService {
       }),
     );
     if (!assignment) {
-      throw new NotFoundError(`Assignment with id ${assignmentId} not found.`);
+      throw new NotFoundError(`Assignment not found.`);
     }
     // There is an assignment
     return assignment;
