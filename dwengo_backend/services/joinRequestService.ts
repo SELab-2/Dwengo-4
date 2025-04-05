@@ -85,7 +85,7 @@ export default class joinRequestService {
     );
     if (existingRequest) {
       throw new ConflictError(
-        `There's already a pending join request for student ${studentId} and class ${classroom.id}`
+        `There's already a pending join request for this student and this class.`
       );
     }
 
