@@ -27,15 +27,7 @@ export default class joinRequestService {
     status: JoinRequestStatus
   ): Promise<JoinRequest> {
     // check if teacher is allowed to approve/deny the request
-    const isTeacher: boolean = await classService.isTeacherOfClass(
-      classId,
-      teacherId
-    );
-    if (!isTeacher) {
-      throw new AccesDeniedError(
-        `Teacher ${teacherId} is not a teacher of class ${classId}.`
-      );
-    }
+    await classService.isTeacherOfClass(classId, teacherId);
 
     const joinRequest: JoinRequest | null = await handlePrismaQuery(() =>
       prisma.joinRequest.findFirst({
@@ -44,19 +36,17 @@ export default class joinRequestService {
     );
     if (!joinRequest) {
       throw new NotFoundError(
-        `Join request ${requestId} for class ${classId} not found/not pending.`
+        `Join request for this class is not found or is not pending.`
       );
     }
 
     // Update the join request status
-    const updatedRequest = await handlePrismaQuery(() =>
+    return await handlePrismaQuery(() =>
       prisma.joinRequest.update({
         where: { requestId },
         data: { status: status },
       })
     );
-
-    return updatedRequest;
   }
 
   static async createJoinRequest(
@@ -81,11 +71,7 @@ export default class joinRequestService {
     const classroom: ClassWithLinks = await this.validateClassExists(joinCode);
 
     // check if the student is already a member of the class
-    if (await classService.isStudentInClass(classroom, studentId)) {
-      throw new ConflictError(
-        `Student ${studentId} is already a member of class ${classroom.id}.`
-      );
-    }
+    classService.isStudentInClass(classroom, studentId);
 
     // check if there's already a pending join request for this student and class
     const existingRequest: JoinRequest | null = await handlePrismaQuery(() =>
@@ -144,11 +130,6 @@ export default class joinRequestService {
       classId,
       teacherId
     );
-    if (!isTeacher) {
-      throw new AccesDeniedError(
-        `Teacher ${teacherId} is not a teacher of class ${classId}.`
-      );
-    }
 
     return await handlePrismaQuery(() =>
       prisma.joinRequest.findMany({

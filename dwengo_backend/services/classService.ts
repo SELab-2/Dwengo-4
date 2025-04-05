@@ -166,13 +166,17 @@ export default class ClassService {
   }
 
   // Check if student is already in the class
-  static async isStudentInClass(
+  static isStudentInClass(
     classroom: ClassWithLinks,
     studentId: number
-  ): Promise<boolean> {
-    return classroom.classLinks.some(
+  ): boolean {
+    const inClass: boolean = classroom.classLinks.some(
       (link: ClassStudent) => link.studentId === studentId
     );
+    if (!inClass) {
+      throw new AccesDeniedError(`Student is not a part of this class.`);
+    }
+    return inClass;
   }
 
   static async removeStudentFromClass(
