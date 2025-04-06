@@ -9,7 +9,7 @@ import { AccesDeniedError, NotFoundError } from "../../errors/errors";
 
 /**
  * Maak een nieuw leerobject.
- * POST /teacher/learningObjects
+ * POST /learningObjectByTeacher
  */
 export const createLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -31,7 +31,7 @@ export const createLocalLearningObject = asyncHandler(
 
 /**
  * Haal alle leerobjecten op van deze teacher.
- * GET /teacher/learningObjects
+ * GET /learningObjectByTeacher
  */
 export const getLocalLearningObjects = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -47,7 +47,7 @@ export const getLocalLearningObjects = asyncHandler(
 
 /**
  * Haal één leerobject op.
- * GET /teacher/learningObjects/:id
+ * GET /learningObjectByTeacher/:createdLearningObjectId
  */
 export const getLocalLearningObjectById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -67,13 +67,13 @@ export const getLocalLearningObjectById = asyncHandler(
       throw new AccesDeniedError("Je bent niet de eigenaar van dit leerobject");
     }
 
-    res.json(found);
+    res.status(200).json({ learningObject: found });
   },
 );
 
 /**
  * Update een leerobject.
- * PUT /teacher/learningObjects/:id
+ * PUT /learningObjectByTeacher/:createdLearningObjectId
  */
 export const updateLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -106,7 +106,7 @@ export const updateLocalLearningObject = asyncHandler(
 
 /**
  * Verwijder een leerobject.
- * DELETE /teacher/learningObjects/:id
+ * DELETE /learningObjectByTeacher/:createdLearningObjectId
  */
 export const deleteLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {

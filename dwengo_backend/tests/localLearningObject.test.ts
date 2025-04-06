@@ -118,7 +118,46 @@ describe("local learning object tests", async () => {
     });
   });
 
-  //describe("[GET] /learningObjectByTeacher/:createdLearningObjectId, async () => {});
+  describe("[GET] /learningObjectByTeacher/:createdLearningObjectId", async () => {
+    let lo: LearningObject;
+    beforeEach(async () => {
+      // create learning object for teacher1
+      lo = await createLearningObject(teacherUser1.id, data);
+    });
+    it("should return the learning object with the given id", async () => {
+      const { status, body } = await request(app)
+        .get(`/learningObjectByTeacher/${lo.id}`)
+        .set("Authorization", `Bearer ${teacherUser1.token}`);
+
+      expect(status).toBe(200);
+      expect(body.learningObject).toBeDefined();
+      expect(body.learningObject).toMatchObject(data);
+    });
+    it("should return an error if the learning object doesn't exist", async () => {
+      const { status, body } = await request(app)
+        .get("/learningObjectByTeacher/123456789") // non-existing learning object id
+        .set("Authorization", `Bearer ${teacherUser1.token}`);
+
+      expect(status).toBe(404);
+      expect(body.learningObject).toBeUndefined();
+    });
+    it("shouldn't let a student access this route", async () => {
+      const { status, body } = await request(app)
+        .get(`/learningObjectByTeacher/${lo.id}`)
+        .set("Authorization", `Bearer ${studentUser1.token}`);
+
+      expect(status).toBe(401);
+      expect(body.learningObject).toBeUndefined();
+    });
+    it("shouldn't let another teacher get the learning object", async () => {
+      const { status, body } = await request(app)
+        .get(`/learningObjectByTeacher/${lo.id}`)
+        .set("Authorization", `Bearer ${teacherUser2.token}`);
+
+      expect(status).toBe(403);
+      expect(body.learningObject).toBeUndefined();
+    });
+  });
 
   //describe("[PATCH] /learningObjectByTeacher/:createdLearningObjectId", async () => {});
 

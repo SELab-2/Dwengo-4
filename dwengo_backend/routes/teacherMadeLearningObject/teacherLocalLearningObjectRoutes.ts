@@ -25,18 +25,18 @@ router.use(protectTeacher);
 router.route("/").post(createLocalLearningObject).get(getLocalLearningObjects);
 
 /**
- * @route GET    /learningObjectByTeacher/createdLearningObjectId
+ * @route GET    /learningObjectByTeacher/:createdLearningObjectId
  * @description Specifiek leerobject ophalen
  * @param createdLearningObjectId: string
  * @access Teacher
  *
- * @route PATCH   /learningObjectByTeacher/createdLearningObjectId
+ * @route PATCH   /learningObjectByTeacher/:createdLearningObjectId
  * @description Leerobject updaten
  * @param createdLearningObjectId: string
  * @body LocalLearningObjectData (optioneel)
  * @access Teacher
  *
- * @route DELETE /learningObjectByTeacher/createdLearningObjectId
+ * @route DELETE /learningObjectByTeacher/:createdLearningObjectId
  * @description Leerobject verwijderen
  * @param createdLearningObjectId: string
  * @access Teacher
