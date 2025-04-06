@@ -6,7 +6,12 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
 import { Request, Response } from "express";
-import { ConflictError, UnauthorizedError } from "../errors/errors";
+import {
+  BadRequestError,
+  ConflictError,
+  InternalServerError,
+  UnauthorizedError,
+} from "../errors/errors";
 
 // Functie om een JWT-token te genereren
 const generateToken = (id: number | string): string => {
@@ -14,7 +19,7 @@ const generateToken = (id: number | string): string => {
     if (process.env.NODE_ENV === "test") {
       return crypto.randomBytes(32).toString("hex");
     } else {
-      throw new Error(
+      throw new InternalServerError(
         "JWT_SECRET is niet gedefinieerd in de omgevingsvariabelen"
       );
     }
@@ -45,7 +50,7 @@ const registerUser = async (
   );
 
   res.status(201).json({
-    message: `${role === Role.TEACHER ? "Leerkracht" : "Leerling"} succesvol geregistreerd`,
+    message: `${role === Role.TEACHER ? "Teacher" : "Student"} successfully registered.`,
   });
 };
 
@@ -59,8 +64,11 @@ const loginUser = async (
 
   // Zoek eerst de gebruiker
   const user = await UserService.findUser(email);
-  if (user.role !== role) {
-    throw new UnauthorizedError("Invalid user");
+  if (user.role === Role.STUDENT && role === Role.TEACHER) {
+    throw new BadRequestError("Student cannot login as teacher.");
+  }
+  if (user.role === Role.TEACHER && role === Role.STUDENT) {
+    throw new BadRequestError("Teacher cannot login as student.");
   }
 
   // Haal het gekoppelde teacher/student record op
