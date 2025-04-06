@@ -70,10 +70,6 @@ export const getLocalLearningPathById = asyncHandler(
 
     const { pathId } = req.params;
     const path = await LocalLearningPathService.getLearningPathById(pathId);
-    if (!path) {
-      res.status(404);
-      throw new Error("Leerpad niet gevonden");
-    }
     // Domein-check: Is dit path van deze teacher?
     if (path.creatorId !== teacherId) {
       res.status(403);
@@ -95,10 +91,6 @@ export const updateLocalLearningPath = asyncHandler(
     const { pathId } = req.params;
     const existingPath =
       await LocalLearningPathService.getLearningPathById(pathId);
-    if (!existingPath) {
-      res.status(404);
-      throw new Error("Leerpad niet gevonden");
-    }
     if (existingPath.creatorId !== teacherId) {
       res.status(403);
       throw new Error("Je bent niet de eigenaar van dit leerpad.");
@@ -136,10 +128,6 @@ export const deleteLocalLearningPath = asyncHandler(
     const { pathId } = req.params;
     const existingPath =
       await LocalLearningPathService.getLearningPathById(pathId);
-    if (!existingPath) {
-      res.status(404);
-      throw new Error("Leerpad niet gevonden");
-    }
     if (existingPath.creatorId !== teacherId) {
       res.status(403);
       throw new Error("Je bent niet de eigenaar van dit leerpad.");
