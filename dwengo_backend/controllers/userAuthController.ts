@@ -1,5 +1,5 @@
 import asyncHandler from "express-async-handler";
-import { Role, User } from "@prisma/client";
+import { Role } from "@prisma/client";
 import UserService from "../services/userService";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
@@ -8,7 +8,6 @@ import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
 import { Request, Response } from "express";
 import {
   BadRequestError,
-  ConflictError,
   InternalServerError,
   UnauthorizedError,
 } from "../errors/errors";
@@ -20,7 +19,7 @@ const generateToken = (id: number | string): string => {
       return crypto.randomBytes(32).toString("hex");
     } else {
       throw new InternalServerError(
-        "JWT_SECRET is niet gedefinieerd in de omgevingsvariabelen"
+        "JWT_SECRET is niet gedefinieerd in de omgevingsvariabelen",
       );
     }
   }
@@ -30,12 +29,12 @@ const generateToken = (id: number | string): string => {
 const registerUser = async (
   req: AuthenticatedRequest,
   res: Response,
-  role: Role
+  role: Role,
 ): Promise<void> => {
   const { firstName, lastName, email, password } = req.body;
 
   // Controleer of er al een gebruiker bestaat met dit e-mailadres
-  const existingUser: User = await UserService.findUser(email);
+  await UserService.findUser(email);
 
   // Hash het wachtwoord
   const hashedPassword: string = await bcrypt.hash(password, 10);
@@ -46,7 +45,7 @@ const registerUser = async (
     lastName,
     email.toLowerCase(),
     hashedPassword,
-    role
+    role,
   );
 
   res.status(201).json({
@@ -57,9 +56,10 @@ const registerUser = async (
 const loginUser = async (
   req: Request,
   res: Response,
-  role: Role
+  role: Role,
 ): Promise<void> => {
-  let { email, password } = req.body;
+  let email = req.body.email;
+  const password = req.body.password;
   email = email.toLowerCase();
 
   // Zoek eerst de gebruiker
@@ -79,57 +79,53 @@ const loginUser = async (
     studentOrTeacherRecord = await UserService.findStudentUserById(user.id);
   }
 
-  if (!studentOrTeacherRecord || !studentOrTeacherRecord.user) {
-    throw new UnauthorizedError("Invalid user");
-  }
-
   // Vergelijk het opgegeven wachtwoord met de opgeslagen hash
   const passwordMatches = await bcrypt.compare(
     password,
-    studentOrTeacherRecord.user.password
+    studentOrTeacherRecord.user.password,
   );
   if (!passwordMatches) {
-    throw new UnauthorizedError("Incorrect password");
+    throw new UnauthorizedError("Incorrect password.");
   }
 
   res.json({
-    message: "Succesvol ingelogd",
+    message: "Successfully logged in.",
     token: generateToken(studentOrTeacherRecord.userId),
   });
 };
 
 // @desc    Registreer een nieuwe leerling
-// @route   POST /teacher/auth/register
+// @route   POST /auth/teacher/register
 // @access  Public
 export const registerTeacher = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     await registerUser(req, res, Role.TEACHER);
-  }
+  },
 );
 
 // @desc    Inloggen van een leerkracht
-// @route   POST /teacher/auth/login
+// @route   POST /auth/teacher/login
 // @access  Public
 export const loginTeacher = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     await loginUser(req, res, Role.TEACHER);
-  }
+  },
 );
 
 // @desc    Registreer een nieuwe leerling
-// @route   POST /student/auth/register
+// @route   POST /auth/student/register
 // @access  Public
 export const registerStudent = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     await registerUser(req, res, Role.STUDENT);
-  }
+  },
 );
 
 // @desc    Inloggen van een leerling
-// @route   POST /student/auth/login
+// @route   POST /auth/student/login
 // @access  Public
 export const loginStudent = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     await loginUser(req, res, Role.STUDENT);
-  }
+  },
 );
