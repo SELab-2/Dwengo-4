@@ -5,8 +5,14 @@ import { handlePrismaQuery } from "../errors/errorFunctions";
 import { NotFoundError } from "../errors/errors";
 
 export default class UserService {
-  static async findUser(email: string): Promise<User | null> {
-    return prisma.user.findUnique({ where: { email } });
+  static async findUser(email: string): Promise<User> {
+    const user: User | null = await prisma.user.findUnique({
+      where: { email },
+    });
+    if (!user) {
+      throw new NotFoundError("User not found.");
+    }
+    return user;
   }
 
   static async createUser(
@@ -14,7 +20,7 @@ export default class UserService {
     lastName: string,
     email: string,
     hashedPassword: string,
-    role: Role,
+    role: Role
   ): Promise<User> {
     return await handlePrismaQuery(() =>
       prisma.user.create({
@@ -34,13 +40,13 @@ export default class UserService {
           student: true,
           admin: true,
         },
-      }),
+      })
     );
   }
 
   static async findUserByEmail(email: string): Promise<User> {
     const user: User | null = await handlePrismaQuery(() =>
-      prisma.user.findFirst({ where: { email } }),
+      prisma.user.findFirst({ where: { email } })
     );
     if (!user) {
       throw new NotFoundError("User not found.");
@@ -49,14 +55,14 @@ export default class UserService {
   }
 
   static async findTeacherUserById(
-    userId: number,
+    userId: number
   ): Promise<(Teacher & { user: User }) | null> {
     const teacher: (Teacher & { user: User }) | null = await handlePrismaQuery(
       () =>
         prisma.teacher.findUnique({
           where: { userId },
           include: { user: true },
-        }),
+        })
     );
     if (!teacher) {
       throw new NotFoundError("Teacher not found.");
@@ -65,14 +71,14 @@ export default class UserService {
   }
 
   static async findStudentUserById(
-    userId: number,
+    userId: number
   ): Promise<(Student & { user: User }) | null> {
     const student: (Student & { user: User }) | null = await handlePrismaQuery(
       () =>
         prisma.student.findUnique({
           where: { userId },
           include: { user: true },
-        }),
+        })
     );
     if (!student) {
       throw new NotFoundError("Student not found.");
