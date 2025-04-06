@@ -62,6 +62,15 @@ router.get("/class/:classId", controller.getAssignmentsByClass);
 router.patch("/:assignmentId", controller.updateAssignment);
 
 /**
+ 
+@route PATCH /assignment/teacher/team/:assignmentId
+@description Update a team assignment
+@param assignmentId: number
+@body teamSize: number
+@access Teacher*/
+router.patch("/team/:assignmentId", controller.updateAssignmentWithTeams);
+
+/**
  * @route DELETE /assignment/teacher/:assignmentId
  * @description Delete an assignment
  * @param assignmentId: number

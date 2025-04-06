@@ -134,7 +134,7 @@ export async function fetchClasses(
   }
 
   let classrooms = await response.json();
-  classrooms = classrooms.classrooms
+  classrooms = classrooms.classrooms;
 
   if (includeStudents) {
     classrooms.forEach((classroom: any) => {
@@ -167,7 +167,6 @@ export async function createClass({
     },
     body: JSON.stringify({ name }),
   });
-
 
   if (!response.ok) {
     const error: APIError = new Error(
@@ -581,7 +580,7 @@ export async function updateAssignment({
   teamSize,
 }: AssignmentPayload): Promise<void> {
   // Create group assignment with teams
-  const response = await fetch(`${BACKEND}/assignment/teacher/teams/${id}`, {
+  const response = await fetch(`${BACKEND}/assignment/teacher/team/${id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
