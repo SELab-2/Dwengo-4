@@ -97,7 +97,7 @@ export const updateLocalLearningObject = asyncHandler(
       createdLearningObjectId,
       data,
     );
-    res.json({
+    res.status(200).json({
       message: "Leerobject bijgewerkt",
       learningObject: updated,
     });

@@ -10,6 +10,9 @@ import {
 } from "./helpers/testDataCreation";
 import { LocalLearningObjectData } from "../services/localLearningObjectService";
 
+// TODO: once zod validation and error handling is added, add tests for those things aswell
+// or existing tests might need to be updated
+
 describe("local learning object tests", async () => {
   let teacherUser1: User & { teacher: Teacher; token: string };
   let teacherUser2: User & { teacher: Teacher; token: string };
@@ -159,7 +162,92 @@ describe("local learning object tests", async () => {
     });
   });
 
-  //describe("[PATCH] /learningObjectByTeacher/:createdLearningObjectId", async () => {});
+  describe("[PATCH] /learningObjectByTeacher/:createdLearningObjectId", async () => {
+    const updatedData = {
+      title: "Bijgewerkt leerobject",
+      description: "Bijgewerkt leerobject",
+      contentType: "TEXT_PLAIN",
+      keywords: ["bijgewerkt", "voorbeeld"],
+    };
+    it("should update the learning object", async () => {
+      const lo = await createLearningObject(teacherUser1.id, data);
+
+      const { status, body } = await request(app)
+        .patch(`/learningObjectByTeacher/${lo.id}`)
+        .set("Authorization", `Bearer ${teacherUser1.token}`)
+        .send(updatedData);
+
+      expect(status).toBe(200);
+      expect(body.learningObject).toBeDefined();
+      expect(body.learningObject.id).toEqual(lo.id);
+      expect(body.learningObject).toMatchObject(updatedData);
+
+      // verify that learning object was updated in the database
+      await prisma.learningObject
+        .findUnique({
+          where: {
+            id: lo.id,
+          },
+        })
+        .then((lo) => {
+          expect(lo).toBeDefined();
+          expect(lo).toMatchObject(updatedData);
+        });
+    });
+    it("should return an error if the learning object doesn't exist", async () => {
+      const { status, body } = await request(app)
+        .patch("/learningObjectByTeacher/123456789") // non-existing learning object id
+        .set("Authorization", `Bearer ${teacherUser1.token}`)
+        .send(updatedData);
+
+      expect(status).toBe(404);
+      expect(body.learningObject).toBeUndefined();
+    });
+    it("shouldn't let a student update a learning object", async () => {
+      const lo = await createLearningObject(teacherUser1.id, data);
+      const { status, body } = await request(app)
+        .patch(`/learningObjectByTeacher/${lo.id}`)
+        .set("Authorization", `Bearer ${studentUser1.token}`)
+        .send(updatedData);
+
+      expect(status).toBe(401);
+      expect(body.learningObject).toBeUndefined();
+
+      // verify that learning object was not updated in the database
+      await prisma.learningObject
+        .findUnique({
+          where: {
+            id: lo.id,
+          },
+        })
+        .then((lo) => {
+          expect(lo).toBeDefined();
+          expect(lo).toMatchObject(data);
+        });
+    });
+    it("shouldn't let another teacher update the learning object", async () => {
+      const lo = await createLearningObject(teacherUser1.id, data);
+      const { status, body } = await request(app)
+        .patch(`/learningObjectByTeacher/${lo.id}`)
+        .set("Authorization", `Bearer ${teacherUser2.token}`) // another teacher tries to update the learning object
+        .send(updatedData);
+
+      expect(status).toBe(403);
+      expect(body.learningObject).toBeUndefined();
+
+      // verify that learning object was not updated in the database
+      await prisma.learningObject
+        .findUnique({
+          where: {
+            id: lo.id,
+          },
+        })
+        .then((lo) => {
+          expect(lo).toBeDefined();
+          expect(lo).toMatchObject(data);
+        });
+    });
+  });
 
   //describe("[DELETE] /learningObjectByTeacher/:createdLearningObjectId", async () => {});
 });
