@@ -2,7 +2,17 @@ import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import prisma from "./helpers/prisma";
 import app from "../index";
-import { Class, Teacher, User } from "@prisma/client";
+import {
+  Class,
+  ClassAssignment,
+  ClassStudent,
+  ClassTeacher,
+  Invite,
+  JoinRequest,
+  Prisma,
+  Teacher,
+  User,
+} from "@prisma/client";
 import {
   addStudentToClass,
   addTeacherToClass,
@@ -13,96 +23,103 @@ import {
   createTeacher,
 } from "./helpers/testDataCreation";
 
-const APP_URL = process.env.APP_URL || "http://localhost:5000";
+const APP_URL: string = process.env.APP_URL || "http://localhost:5000";
 
 let teacherUser1: User & { teacher: Teacher; token: string };
 let classroom: Class;
 
-describe("classroom tests", () => {
-    
-    beforeEach(async () => {
-        // create a teacher
-        teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
-        // create a class
-        classroom = await createClass("5A", "ABCD");
-    });
-    describe("GET /class/teacher", () => {
-        it("should respond with a `200` status code and a list of classes", async () => {
-            // add teacherUser1 to some classes
-            await addTeacherToClass(teacherUser1.id, classroom.id);
-            const classroom2: Class = await createClass("6A", "EFGH");
-            await addTeacherToClass(teacherUser1.id, classroom2.id);
+describe("classroom tests", (): void => {
+  beforeEach(async (): Promise<void> => {
+    // create a teacher
+    teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
+    // create a class
+    classroom = await createClass("5A", "ABCD");
+  });
 
-            // now test getting the classes
-            const { status, body } = await request(app)
-                .get("/class/teacher")
-                .set("Authorization", `Bearer ${teacherUser1.token}`);
 
-        expect(status).toBe(200);
-        expect(body.classes).toBeDefined();
-        expect(body.classes).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              id: classroom.id,
-            }),
-            expect.objectContaining({
-              id: classroom2.id,
-            }),
-          ])
-        );
-      });
-      it("shouldn't allow a student to get the classes via the teacher route", async () => {
-        const studentUser = await createStudent("Alice", "Anderson", "alan@gmail.com");
-        const { status, body } = await request(app)
-          .get("/class/teacher")
-          .set("Authorization", `Bearer ${studentUser.token}`);
+  describe("[GET] /class/teacher", (): void => {
+    it("should respond with a `200` status code and a list of classes", async (): Promise<void> => {
+      // add teacherUser1 to some classes
+      await addTeacherToClass(teacherUser1.id, classroom.id);
+      const classroom2: Class = await createClass("6A", "EFGH");
+      await addTeacherToClass(teacherUser1.id, classroom2.id);
 
-        expect(body.classes).not.toBeDefined();
-        expect(status).toBe(401);
-        expect(body.error).toBe("Leerkracht niet gevonden.");
-      });
+      // now test getting the classrooms
+      const { status, body } = await request(app)
+        .get("/class/teacher")
+        .set("Authorization", `Bearer ${teacherUser1.token}`);
+
+      expect(status).toBe(200);
+      expect(body.classrooms).toBeDefined();
+      expect(body.classrooms).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: classroom.id,
+          }),
+          expect.objectContaining({
+            id: classroom2.id,
+          }),
+        ]),
+      );
     });
 
-    describe("GET /class/student", () => {
-      it("should respond with a `200` status code and a list of classes", async () => {
-        // create a student and add them to some classes
-        const studentUser = await createStudent("Alice", "Anderson", "alan@gmail.com");
-        await addStudentToClass(studentUser.id, classroom.id);
-        const classroom2: Class = await createClass("6A", "EFGH");
-        await addStudentToClass(studentUser.id, classroom2.id);
 
-        // now test getting the classes
-        const { status, body } = await request(app)
-          .get("/class/student")
-          .set("Authorization", `Bearer ${studentUser.token}`);
+    it("shouldn't allow a student to get the classes via the teacher route", async (): Promise<void> => {
+      const studentUser: Prisma.UserGetPayload<{
+        include: { student: true };
+      }> & { token: string } = await createStudent(
+        "Alice",
+        "Anderson",
+        "alan@gmail.com",
+      );
 
-        expect(status).toBe(200);
-        expect(body.classes).toBeDefined();
-        expect(body.classes).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              id: classroom.id,
-            }),
-            expect.objectContaining({
-              id: classroom2.id,
-            }),
-          ])
-        );
-      });
-      it("shouldn't allow a teacher to get the classes via the student route", async () => {
-        const { status, body } = await request(app)
-          .get("/class/student")
-          .set("Authorization", `Bearer ${teacherUser1.token}`);
+      const { status, body } = await request(app)
+        .get("/class/teacher")
+        .set("Authorization", `Bearer ${studentUser.token}`);
 
-        expect(body.classes).not.toBeDefined();
-        expect(status).toBe(401);
-        expect(body.error).toBe("Student niet gevonden.");
-      });
+      expect(body.classrooms).not.toBeDefined();
+      expect(status).toBe(401);
+      expect(body.error).toBe("Leerkracht niet gevonden.");
     });
   });
 
-  describe("POST /class/teacher", () => {
-    it("should respond with a `201` status code and a created class", async () => {
+  describe("[GET] /class/student", (): void => {
+    it("should respond with a `200` status code and a list of classes", async (): Promise<void> => {
+      // create a student and add them to some classes
+      const studentUser: Prisma.UserGetPayload<{
+        include: { student: true };
+      }> & { token: string } = await createStudent(
+        "Alice",
+        "Anderson",
+        "alan@gmail.com",
+      );
+      await addStudentToClass(studentUser.id, classroom.id);
+      const classroom2: Class = await createClass("6A", "EFGH");
+      await addStudentToClass(studentUser.id, classroom2.id);
+
+      // now test getting the classrooms
+      const { status, body } = await request(app)
+        .get("/class/student")
+        .set("Authorization", `Bearer ${studentUser.token}`);
+
+      expect(status).toBe(200);
+
+      expectClassRoomArrayBody(body, classroom2);
+    });
+
+    it("shouldn't allow a teacher to get the classes via the student route", async (): Promise<void> => {
+      const { status, body } = await request(app)
+        .get("/class/student")
+        .set("Authorization", `Bearer ${teacherUser1.token}`);
+
+      expect(body.classrooms).not.toBeDefined();
+      expect(status).toBe(401);
+      expect(body.error).toBe("Student niet gevonden.");
+    });
+  });
+
+  describe("[POST] /class/teacher", (): void => {
+    it("should respond with a `201` status code and a created class", async (): Promise<void> => {
       const { status, body } = await request(app)
         .post("/class/teacher")
         .set("Authorization", `Bearer ${teacherUser1.token}`)
@@ -111,15 +128,21 @@ describe("classroom tests", () => {
       expect(status).toBe(201);
       expect(body.message).toBe("Klas aangemaakt");
       expect(body.classroom).toBeDefined();
+
       // verify that class was created
-      const createdClassroom = await prisma.class.findFirst({
+      const createdClassroom: Prisma.ClassGetPayload<{
+        include: { ClassTeacher: true };
+      }> | null = await prisma.class.findFirst({
         where: { name: "6A" },
         include: { ClassTeacher: true },
       });
+
       expect(createdClassroom).toBeDefined();
-      expect(createdClassroom!.ClassTeacher[0].teacherId).toBe(teacherUser1.id);
+      const classTeacher: ClassTeacher = createdClassroom!.ClassTeacher[0];
+      expect(classTeacher.teacherId).toBe(teacherUser1.id);
     });
-    it("should respond with a `400` status code and a message when no valid class name is provided", async () => {
+
+    it("should respond with a `400` status code and a message when no valid class name is provided", async (): Promise<void> => {
       const { status, body } = await request(app)
         .post("/class/teacher")
         .set("Authorization", `Bearer ${teacherUser1.token}`)
@@ -128,11 +151,14 @@ describe("classroom tests", () => {
       expect(status).toBe(400);
       expect(body.message).toBe("Vul een geldige klasnaam in");
     });
-    it("should not allow a student to create a class", async () => {
-      const studentUser = await createStudent(
+
+    it("should not allow a student to create a class", async (): Promise<void> => {
+      const studentUser: Prisma.UserGetPayload<{
+        include: { student: true };
+      }> & { token: string } = await createStudent(
         "Alice",
         "Anderson",
-        "aaaaa@gmail.com"
+        "aaaaa@gmail.com",
       );
       const { status, body } = await request(app)
         .post("/class/teacher")
@@ -143,43 +169,50 @@ describe("classroom tests", () => {
       expect(body.error).toBe("Leerkracht niet gevonden.");
     });
   });
-  describe("DELETE /class/teacher/:classId", () => {
-    it("should respond with a `200` status code and a message when the class is deleted", async () => {
+
+  describe("[DELETE] /class/teacher/:classId", (): void => {
+    it("should respond with a `200` status code and a message when the class is deleted", async (): Promise<void> => {
       // add teacherUser1 to class, so we can test deleting it
       await addTeacherToClass(teacherUser1.id, classroom.id);
 
       // also add some records related to the class, so we can test if they all get deleted when the class is deleted
-      const studentUser1 = await createStudent(
+      const studentUser1: Prisma.UserGetPayload<{
+        include: { student: true };
+      }> & { token: string } = await createStudent(
         "Alice",
         "Anderson",
-        "aaaaa@gmail.com"
+        "aaaaa@gmail.com",
       );
       await addStudentToClass(studentUser1.id, classroom.id);
       await prisma.classStudent
         .findMany({ where: { classId: classroom.id } })
-        .then((classStudents) => {
+        .then((classStudents: ClassStudent[]): void => {
           expect(classStudents.length).toBe(1);
         });
-      const studentUser2 = await createStudent(
+      const studentUser2: Prisma.UserGetPayload<{
+        include: { student: true };
+      }> & { token: string } = await createStudent(
         "Bob",
         "Baker",
-        "bobbaker@gmail.com"
+        "bobbaker@gmail.com",
       );
       await createJoinRequest(studentUser2.id, classroom.id);
       await prisma.joinRequest
         .findMany({ where: { classId: classroom.id } })
-        .then((joinRequests) => {
+        .then((joinRequests: ClassStudent[]): void => {
           expect(joinRequests.length).toBe(1);
         });
-      const teacherUser2 = await createTeacher(
+      const teacherUser2: Prisma.UserGetPayload<{
+        include: { teacher: true };
+      }> & { token: string } = await createTeacher(
         "Charlie",
         "Chaplin",
-        "char.ch@gmail.com"
+        "char.ch@gmail.com",
       );
       await createInvite(teacherUser1.id, teacherUser2.id, classroom.id);
       await prisma.invite
         .findMany({ where: { classId: classroom.id } })
-        .then((invites) => {
+        .then((invites: Invite[]): void => {
           expect(invites.length).toBe(1);
         });
 
@@ -191,39 +224,16 @@ describe("classroom tests", () => {
       expect(status).toBe(200);
       expect(body.message).toBe(`Klas met id ${classroom.id} verwijderd`);
       // verify that class was deleted
-      const deletedClass = await prisma.class.findFirst({
+      const deletedClass: Class | null = await prisma.class.findFirst({
         where: { id: classroom.id },
       });
       expect(deletedClass).toBeNull();
 
       // verify that all associated records were also deleted
-      await prisma.classTeacher
-        .findMany({ where: { classId: classroom.id } })
-        .then((classTeachers) => {
-          expect(classTeachers.length).toBe(0);
-        });
-      await prisma.classStudent
-        .findMany({ where: { classId: classroom.id } })
-        .then((classStudents) => {
-          expect(classStudents.length).toBe(0);
-        });
-      await prisma.invite
-        .findMany({ where: { classId: classroom.id } })
-        .then((invites) => {
-          expect(invites.length).toBe(0);
-        });
-      await prisma.joinRequest
-        .findMany({ where: { classId: classroom.id } })
-        .then((joinRequests) => {
-          expect(joinRequests.length).toBe(0);
-        });
-      await prisma.classAssignment
-        .findMany({ where: { classId: classroom.id } })
-        .then((classAssignments) => {
-          expect(classAssignments.length).toBe(0);
-        });
+      await verifyDeletionOfAllRelatedRecords();
     });
-    it("should respond with a `403` status code and a message when the teacher is not associated with the class", async () => {
+
+    it("should respond with a `403` status code and a message when the teacher is not associated with the class", async (): Promise<void> => {
       // try having a teacher delete a class they are not associated with
       const { status, body } = await request(app)
         .delete(`/class/teacher/${classroom.id}`)
@@ -231,51 +241,48 @@ describe("classroom tests", () => {
 
       expect(status).toBe(403);
       expect(body.message).toBe(
-        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`
+        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`,
       );
       // verfiy that class not deleted
       await prisma.class
         .findUnique({ where: { id: classroom.id } })
-        .then((classroom) => {
+        .then((classroom: Class | null): void => {
           expect(classroom).toBeDefined();
         });
     });
   });
-  describe("GET /class/teacher/:classId/join-link", () => {
-    it("should respond with a `200` status code and a join link", async () => {
+
+  describe("[GET] /class/teacher/:classId/join-link", (): void => {
+    it("should respond with a `200` status code and a join link", async (): Promise<void> => {
       // add teacherUser1 to class, so we can test getting the join link
       await addTeacherToClass(teacherUser1.id, classroom.id);
-      const { status, body } = await request(app)
+      let { status, body } = await request(app)
         .get(`/class/teacher/${classroom.id}/join-link`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
       expect(body.joinLink).toStrictEqual(
-        `${APP_URL}/class/teacher/join?joinCode=${classroom.code}`
+        `${APP_URL}/class/teacher/join?joinCode=${classroom.code}`,
       );
 
       // also test if the join link works
-      const studentUser = await createStudent(
+      const studentUser: Prisma.UserGetPayload<{
+        include: { student: true };
+      }> & { token: string } = await createStudent(
         "Alice",
         "Anderson",
-        "aaaaa@gmail.com"
+        "aaaaa@gmail.com",
       );
-      const joinLinkResponse = await request(app)
-        .post(`/class/student/join?joinCode=${classroom.code}`) // can't use body.joinLink here, because the APP_URL is different in the test environment
-        .set("Authorization", `Bearer ${studentUser.token}`);
+      ({ status, body } = await request(app)
+        .post(`/join-request/student?joinCode=${classroom.code}`) // can't use body.joinLink here, because the APP_URL is different in the test environment
+        .set("Authorization", `Bearer ${studentUser.token}`));
 
-      expect(joinLinkResponse.status).toBe(201);
-      expect(joinLinkResponse.body).toHaveProperty("joinRequest");
-      expect(joinLinkResponse.body.joinRequest).toHaveProperty(
-        "classId",
-        classroom.id
-      );
-      expect(joinLinkResponse.body.joinRequest).toHaveProperty(
-        "studentId",
-        studentUser.id
-      );
+      expect(status).toBe(201);
+      expect(body).toHaveProperty("joinRequest");
+      expect(body.joinRequest).toHaveProperty("classId", classroom.id);
+      expect(body.joinRequest).toHaveProperty("studentId", studentUser.id);
     });
-    it("should respond with a `403` status code and a message when the teacher is not associated with the class", async () => {
+    it("should respond with a `403` status code and a message when the teacher is not associated with the class", async (): Promise<void> => {
       // try getting the join link for a class the teacher is not associated with
       const { status, body } = await request(app)
         .get(`/class/teacher/${classroom.id}/join-link`)
@@ -283,18 +290,19 @@ describe("classroom tests", () => {
 
       expect(status).toBe(403);
       expect(body.message).toBe(
-        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`
+        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`,
       );
       expect(body.joinLink).toBeUndefined();
     });
-    it("should respond with a `404` status code if the class does not exist", async () => {
+
+    it("should respond with a `404` status code if the class does not exist", async (): Promise<void> => {
       // get an id that isn't used for any existing class in the database
-      const maxClass = await prisma.class.findFirst({
+      const maxClass: Class | null = await prisma.class.findFirst({
         orderBy: {
           id: "desc",
         },
       });
-      const invalidClassId = (maxClass?.id ?? 0) + 1;
+      const invalidClassId: number = (maxClass?.id ?? 0) + 1;
 
       const { status, body } = await request(app)
         .get(`/class/teacher/${invalidClassId}/join-link`)
@@ -305,8 +313,9 @@ describe("classroom tests", () => {
       expect(body.joinLink).toBeUndefined();
     });
   });
-  describe("PATCH /class/teacher/:classId/join-link", () => {
-    it("should respond with a `200` status code and a new join link", async () => {
+
+  describe("[PATCH] /class/teacher/:classId/join-link", (): void => {
+    it("should respond with a `200` status code and a new join link", async (): Promise<void> => {
       // add teacherUser1 to class, so we can test regenerating the join link
       await addTeacherToClass(teacherUser1.id, classroom.id);
       const { status, body } = await request(app)
@@ -315,33 +324,35 @@ describe("classroom tests", () => {
 
       expect(status).toBe(200);
       // verify that join code was updated in database
-      const updatedClass = await prisma.class.findUnique({
+      const updatedClass: Class | null = await prisma.class.findUnique({
         where: { id: classroom.id },
       });
       expect(updatedClass).toBeDefined();
       expect(updatedClass!.code).not.toBe(classroom.code);
       expect(body.joinLink).toStrictEqual(
-        `${APP_URL}/class/teacher/join?joinCode=${updatedClass!.code}`
+        `${APP_URL}/class/teacher/join?joinCode=${updatedClass!.code}`,
       );
     });
-    it("should respond with a `403` status code and a message when the teacher is not associated with the class", async () => {
+
+    it("should respond with a `403` status code and a message when the teacher is not associated with the class", async (): Promise<void> => {
       const { status, body } = await request(app)
         .patch(`/class/teacher/${classroom.id}/join-link`)
         .set("Authorization", `Bearer ${teacherUser1.token}`); // teacherUser1 is not associated with the class
 
       expect(status).toBe(403);
       expect(body.message).toBe(
-        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`
+        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`,
       );
     });
-    it("should respond with a `404` status code if the class does not exist", async () => {
+
+    it("should respond with a `404` status code if the class does not exist", async (): Promise<void> => {
       // get an id that isn't used for any existing class in the database
-      const maxClass = await prisma.class.findFirst({
+      const maxClass: Class | null = await prisma.class.findFirst({
         orderBy: {
           id: "desc",
         },
       });
-      const invalidClassId = (maxClass?.id ?? 0) + 1;
+      const invalidClassId: number = (maxClass?.id ?? 0) + 1;
 
       const { status, body } = await request(app)
         .patch(`/class/teacher/${invalidClassId}/join-link`)
@@ -351,19 +362,24 @@ describe("classroom tests", () => {
       expect(body.message).toBe(`Class with id ${invalidClassId} not found`);
     });
   });
-  describe("GET /class/teacher/:classId", () => {
-    it("should respond with a `200` status code and a list of students", async () => {
+
+  describe("[GET] /class/teacher/:classId/student", (): void => {
+    it("should respond with a `200` status code and a list of students", async (): Promise<void> => {
       await addTeacherToClass(teacherUser1.id, classroom.id);
       // add some students to the class
-      const studentUser1 = await createStudent(
+      const studentUser1: Prisma.UserGetPayload<{
+        include: { student: true };
+      }> & { token: string } = await createStudent(
         "Steven",
         "Mcclure",
-        "velit.dui@hotmail.edu"
+        "velit.dui@hotmail.edu",
       );
-      const studentUser2 = await createStudent(
+      const studentUser2: Prisma.UserGetPayload<{
+        include: { student: true };
+      }> & { token: string } = await createStudent(
         "Omar",
         "Hawkins",
-        "lobortis.quam@yahoo.couk"
+        "lobortis.quam@yahoo.couk",
       );
       await addStudentToClass(studentUser1.id, classroom.id);
       await addStudentToClass(studentUser2.id, classroom.id);
@@ -375,30 +391,10 @@ describe("classroom tests", () => {
 
       // verify the response
       expect(status).toBe(200);
-      expect(body.students).toBeDefined();
-      expect(body.students.length).toBe(2);
-      expect(body.students).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            userId: studentUser1.id,
-            user: expect.objectContaining({
-              firstName: studentUser1.firstName,
-              lastName: studentUser1.lastName,
-              email: studentUser1.email,
-            }),
-          }),
-          expect.objectContaining({
-            userId: studentUser2.id,
-            user: expect.objectContaining({
-              firstName: studentUser2.firstName,
-              lastName: studentUser2.lastName,
-              email: studentUser2.email,
-            }),
-          }),
-        ])
-      );
+      expectValidStudentArrayBody(body, studentUser1, studentUser2);
     });
-    it("should respond with a `403` status code when the teacher is not associated with the class", async () => {
+
+    it("should respond with a `403` status code when the teacher is not associated with the class", async (): Promise<void> => {
       // try getting the students for a class the teacher is not associated with
       const { status, body } = await request(app)
         .get(`/class/teacher/${classroom.id}/student`)
@@ -406,26 +402,80 @@ describe("classroom tests", () => {
 
       expect(status).toBe(403);
       expect(body.message).toBe(
-        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`
+        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`,
       );
-      expect(body.students).toBeUndefined();
-    });
-    it("should respond with a `404` status code when the class does not exist", async () => {
-      // try getting the students for a class that doesn't exist
-      const maxClass = await prisma.class.findFirst({
-        orderBy: {
-          id: "desc",
-        },
-      });
-      const invalidClassId = (maxClass?.id ?? 0) + 1;
-
-      const { status, body } = await request(app)
-        .get(`/class/teacher/${invalidClassId}`)
-        .set("Authorization", `Bearer ${teacherUser1.token}`);
-
-      expect(status).toBe(404);
-      expect(body.message).toBe(`Class with id ${invalidClassId} not found`);
       expect(body.students).toBeUndefined();
     });
   });
 });
+
+function expectClassRoomArrayBody(body: any, classroom2: Class): void {
+  expect(body.classes).toBeDefined();
+  expect(body.classes).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        id: classroom.id,
+      }),
+      expect.objectContaining({
+        id: classroom2.id,
+      }),
+    ]),
+  );
+}
+
+function expectValidStudentArrayBody(
+  body: any,
+  studentUser1: User,
+  studentUser2: User,
+): void {
+  expect(body.students).toBeDefined();
+  expect(body.students.length).toBe(2);
+  expect(body.students).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        userId: studentUser1.id,
+        user: expect.objectContaining({
+          firstName: studentUser1.firstName,
+          lastName: studentUser1.lastName,
+          email: studentUser1.email,
+        }),
+      }),
+      expect.objectContaining({
+        userId: studentUser2.id,
+        user: expect.objectContaining({
+          firstName: studentUser2.firstName,
+          lastName: studentUser2.lastName,
+          email: studentUser2.email,
+        }),
+      }),
+    ]),
+  );
+}
+
+async function verifyDeletionOfAllRelatedRecords(): Promise<void> {
+  await prisma.classTeacher
+    .findMany({ where: { classId: classroom.id } })
+    .then((classTeachers: ClassTeacher[]): void => {
+      expect(classTeachers.length).toBe(0);
+    });
+  await prisma.classStudent
+    .findMany({ where: { classId: classroom.id } })
+    .then((classStudents: ClassStudent[]): void => {
+      expect(classStudents.length).toBe(0);
+    });
+  await prisma.invite
+    .findMany({ where: { classId: classroom.id } })
+    .then((invites: Invite[]): void => {
+      expect(invites.length).toBe(0);
+    });
+  await prisma.joinRequest
+    .findMany({ where: { classId: classroom.id } })
+    .then((joinRequests: JoinRequest[]): void => {
+      expect(joinRequests.length).toBe(0);
+    });
+  await prisma.classAssignment
+    .findMany({ where: { classId: classroom.id } })
+    .then((classAssignments: ClassAssignment[]): void => {
+      expect(classAssignments.length).toBe(0);
+    });
+}

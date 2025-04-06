@@ -5,16 +5,31 @@ import {
   fetchAssignment,
   deleteAssignment,
 } from '../../util/teacher/httpTeacher';
-import CreateClass from '../../components/teacher/classes/CreateClassForm';
-import AddAssignmentForm from '../../components/teacher/assignment/AddAssignmentForm';
+
 import { useParams } from 'react-router-dom';
-import { ClassItem, LearningPath, Team } from '../../types/type';
-import { c } from 'vite/dist/node/moduleRunnerTransport.d-CXw_Ws6P';
+import { LearningPath } from '../../types/type';
 import { AssignmentPayload } from '../../types/type';
 
+/**
+ * Assignment component for teachers to view and manage individual assignments.
+ * Displays assignment details, associated learning path information, and provides
+ * options to edit or delete the assignment.
+ * 
+ * Features:
+ * - Displays assignment title, description, language, and deadline
+ * - Shows associated learning path details
+ * - Provides edit and delete functionality
+ * - Handles loading and error states
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered Assignment component
+ */
 const Assignment: React.FC = () => {
   const { assignmentId } = useParams<{ assignmentId: string }>();
 
+  /**
+   * Query hook to fetch assignment data
+   */
   const {
     data: assignmentData,
     isLoading,
@@ -26,6 +41,9 @@ const Assignment: React.FC = () => {
     enabled: !!assignmentId,
   });
 
+  /**
+   * Query hook to fetch associated learning path data
+   */
   const {
     data: learningPathData,
     isLoading: isLearningPathLoading,
@@ -42,6 +60,9 @@ const Assignment: React.FC = () => {
     enabled: !!assignmentData?.pathRef,
   });
 
+  /**
+   * Mutation hook for deleting an assignment
+   */
   const deleteAssignmentMutation = useMutation({
     mutationFn: (id: string) => deleteAssignment(Number(id)),
     onSuccess: () => {
@@ -49,6 +70,9 @@ const Assignment: React.FC = () => {
     },
   });
 
+  /**
+   * Handles the deletion of an assignment with confirmation
+   */
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to delete this assignment?')) {
       deleteAssignmentMutation.mutate(assignmentId!);

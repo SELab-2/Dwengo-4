@@ -2,7 +2,6 @@ import {
   Class,
   ClassStudent,
   ClassTeacher,
-  PrismaClient,
   Student,
   User,
 } from "@prisma/client";
@@ -13,7 +12,7 @@ import {
   NotFoundError,
 } from "../errors/errors";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
 
 export type ClassWithLinks = Class & { classLinks: ClassStudent[] };
 
@@ -95,6 +94,16 @@ export default class ClassService {
           },
         },
       },
+    });
+  }
+
+  // Update a class's information
+  static async updateClass(classId: number, teacherId: number, name: string): Promise<Class> {
+    await this.verifyClassAndTeacher(classId, teacherId);
+
+    return prisma.class.update({
+      where: { id: classId },
+      data: { name }
     });
   }
 

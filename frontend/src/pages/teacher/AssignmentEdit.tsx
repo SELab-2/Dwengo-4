@@ -11,9 +11,18 @@ import AddAssignmentForm from '../../components/teacher/assignment/AddAssignment
 import { useParams } from 'react-router-dom';
 import { AssignmentPayload, ClassItem, LearningPath } from '../../types/type';
 
+/**
+ * Assignment edit component that allows teachers to modify existing assignments.
+ * It fetches the assignment details, available classes, and associated learning path.
+ * @returns React component for editing assignments
+ */
 const AddAssignment: React.FC = () => {
   const { assignmentId } = useParams<{ assignmentId: string }>();
 
+  /**
+   * Query hook to fetch the assignment data
+   * Enabled only when assignmentId is available
+   */
   const {
     data: assignmentData,
     isLoading,
@@ -25,6 +34,9 @@ const AddAssignment: React.FC = () => {
     enabled: !!assignmentId,
   });
 
+  /**
+   * Query hook to fetch all available classes
+   */
   const {
     data: classesData,
     isLoading: isClassLoading,
@@ -35,21 +47,6 @@ const AddAssignment: React.FC = () => {
     queryFn: () => fetchClasses(true),
   });
 
-  const {
-    data: learningPathData,
-    isLoading: isLearningPathLoading,
-    isError: isLearningPathError,
-    error: learningPathError,
-  } = useQuery<LearningPath>({
-    queryKey: [
-      'learningPath',
-      assignmentData?.pathRef,
-      assignmentData?.isExternal,
-    ],
-    queryFn: () =>
-      fetchLearningPath(assignmentData?.pathRef!, assignmentData?.isExternal!),
-    enabled: !!assignmentData?.pathRef,
-  });
   return (
     <div>
       {isLoading && isClassLoading ? (

@@ -1,6 +1,7 @@
-import { PrismaClient, Student, User } from "@prisma/client";
+import {  Student, User } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 export default class StudentService {
   static async findStudentById(

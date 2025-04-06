@@ -14,7 +14,7 @@ router.use(protectTeacher);
  * @access Teacher
  */
 router.get(
-  "assignment/:assignmentId/evaluation/:evaluationId",
+  "/assignment/:assignmentId/evaluation/:evaluationId",
   controller.getAllFeedbackForEvaluation,
 );
 
@@ -24,7 +24,7 @@ router.get(
  * @param submissionId: number
  * @access Teacher
  */
-router.get("submission/:submissionId", controller.getFeedbackForSubmission);
+router.get("/submission/:submissionId", controller.getFeedbackForSubmission);
 
 /**
  * @route PATCH /feedback/submission/:submissionId
@@ -33,7 +33,7 @@ router.get("submission/:submissionId", controller.getFeedbackForSubmission);
  * @access Teacher
  */
 router.patch(
-  "submission/:submissionId",
+  "/submission/:submissionId",
   controller.updateFeedbackForSubmission,
 );
 
@@ -44,7 +44,7 @@ router.patch(
  * @access Teacher
  */
 router.delete(
-  "submission/:submissionId",
+  "/submission/:submissionId",
   controller.deleteFeedbackForSubmission,
 );
 
@@ -55,6 +55,6 @@ router.delete(
  * @body description: string
  * @access Teacher
  */
-router.post("/", controller.createFeedback);
+router.post("/submission/:submissionId", controller.createFeedback);
 
 export default router;

@@ -1,8 +1,10 @@
 import { ClassAssignment, ClassStudent, PrismaClient, Student, Team, User } from "@prisma/client";
 import { IdentifiableTeamDivision, TeamDivision } from "../interfaces/extendedTypeInterfaces"
+
 import _ from "lodash";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 /**
  * This function assumes that the division of a group of people into teams has already been done

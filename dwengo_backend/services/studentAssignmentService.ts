@@ -1,6 +1,7 @@
-import { Assignment, PrismaClient } from "@prisma/client";
+import { Assignment } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 /**
  * Haalt alle assignments op die een student (studentId) kan zien,

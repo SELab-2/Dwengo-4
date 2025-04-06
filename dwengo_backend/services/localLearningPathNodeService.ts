@@ -1,7 +1,8 @@
-import { LearningPathNode, PrismaClient } from "@prisma/client";
+import { LearningPathNode } from "@prisma/client";
 import { dwengoAPI } from "../config/dwengoAPI";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+
 
 /**
  * Data object om een node te maken/updaten.

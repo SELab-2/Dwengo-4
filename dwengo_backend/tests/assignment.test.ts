@@ -6,7 +6,7 @@ import request from "supertest";
 import prisma from "./helpers/prisma";
 
 const getAuthHeaders = (
-  user: User & { token: string }
+  user: User & { token: string },
 ): { Authorization: string } => ({
   Authorization: `Bearer ${user.token}`,
 });
@@ -18,7 +18,7 @@ describe("Assignment test", (): void => {
     teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
   });
 
-  describe("GET assignment/:assignmentId", (): void => {
+  describe("[GET] /assignment/:assignmentId", (): void => {
     const nonExistentId = 123;
     it("should return 400 when the assignment isn't found", async (): Promise<void> => {
       const { status, body } = await request(app)

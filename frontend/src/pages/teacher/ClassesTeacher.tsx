@@ -1,12 +1,12 @@
 import React, { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  fetchClasses,
-  getPendingInvitesForClass,
-  createInvite,
-  fetchJoinRequests,
   approveJoinRequest,
+  createInvite,
   denyJoinRequest,
+  fetchClasses,
+  fetchJoinRequests,
+  getPendingInvitesForClass,
 } from '../../util/teacher/httpTeacher';
 import PrimaryButton from '../../components/shared/PrimaryButton';
 import CreateClass from '../../components/teacher/classes/CreateClassForm';
@@ -14,6 +14,8 @@ import Modal from '../../components/shared/Modal';
 import SuccessMessage from '../../components/shared/SuccessMessage';
 import { useNavigate } from 'react-router-dom';
 import { ClassItem } from '../../types/type';
+import { Link } from 'react-router-dom';
+
 
 interface TeacherInvite {
   inviteId: number;
@@ -67,7 +69,8 @@ const ClassesPageTeacher: React.FC = () => {
     error,
   } = useQuery<ClassItem[]>({
     queryKey: ['classes'],
-    queryFn: () => fetchClasses(),
+
+    queryFn: fetchClasses,
   });
 
   // Query: Haal pending teacher invites voor de geselecteerde klas op
@@ -173,7 +176,6 @@ const ClassesPageTeacher: React.FC = () => {
     setSelectedStudentClassId(classId);
     studentJoinModalRef.current?.open();
   };
-  const navigate = useNavigate();
 
   return (
     <div className="flex flex-row justify-center w-full">
@@ -204,13 +206,9 @@ const ClassesPageTeacher: React.FC = () => {
               <tbody className="">
                 {classes.map((classItem) => (
                   <tr key={classItem.id}>
-                    <PrimaryButton
-                      onClick={() =>
-                        navigate(`/teacher/classes/${classItem.id}`)
-                      }
-                    >
-                      Beheer
-                    </PrimaryButton>
+                    <Link to={`/teacher/classes/${classItem.id}`}>
+                      <PrimaryButton>Beheer</PrimaryButton>
+                    </Link>
                     <td className="px-4 py-2">{classItem.name}</td>
                     <td className="px-4 py-2">{classItem.code}</td>
                     <td>
@@ -235,7 +233,7 @@ const ClassesPageTeacher: React.FC = () => {
             </table>
           </div>
         ) : (
-          !isLoading && <p>Geen klassen gevonden.</p>
+          !isLoading && isError && <p>Geen klassen gevonden.</p>
         )}
 
         {/* Modal voor teacher invites */}
