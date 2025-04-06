@@ -1,4 +1,3 @@
-
 import { dwengoAPI } from "../config/dwengoAPI";
 import { BadRequestError, NotFoundError } from "../errors/errors";
 import {
@@ -7,7 +6,7 @@ import {
 } from "../errors/errorFunctions";
 
 import prisma from "../config/prisma";
-
+import { LearningObject } from "@prisma/client";
 
 /**
  * ReferenceValidationService:
@@ -21,13 +20,13 @@ export default class ReferenceValidationService {
    *  ===========================
    */
   static async validateLocalLearningObject(localId: string): Promise<void> {
-    const lo = await handlePrismaQuery(() =>
+    const lo: LearningObject | null = await handlePrismaQuery(() =>
       prisma.learningObject.findUnique({
         where: { id: localId },
       }),
     );
     if (!lo) {
-      throw new NotFoundError(`Local learning object '${localId}' not found.`);
+      throw new NotFoundError(`Local learning object not found.`);
     }
   }
 
@@ -94,7 +93,7 @@ export default class ReferenceValidationService {
       }),
     );
     if (!lp) {
-      throw new NotFoundError(`Learning path '${localId}' not found.`);
+      throw new NotFoundError(`Learning path not found.`);
     }
   }
 
@@ -108,7 +107,9 @@ export default class ReferenceValidationService {
       const resp = await dwengoAPI.get(
         `/api/learningPath/search?hruid=${hruid}&language=${language}`,
       );
-      if (!resp.data || !Array.isArray(resp.data) || resp.data.length === 0) {
+      // Dwengo API geeft een array terug, met 0 of meer items
+      // Lege lijsten worden teruggegeven, zoals afgesproken in de Discord
+      if (!resp.data || !Array.isArray(resp.data)) {
         throw new NotFoundError(
           `Dwengo learning path (hruid=${hruid}, language=${language}) not found.`,
         );
