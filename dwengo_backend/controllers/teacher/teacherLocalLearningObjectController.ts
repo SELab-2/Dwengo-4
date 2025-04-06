@@ -41,7 +41,7 @@ export const getLocalLearningObjects = asyncHandler(
       await LocalLearningObjectService.getAllLearningObjectsByTeacher(
         teacherId,
       );
-    res.json(objects);
+    res.status(200).json({ objects });
   },
 );
 

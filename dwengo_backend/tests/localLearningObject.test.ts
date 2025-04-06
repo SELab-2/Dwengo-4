@@ -3,11 +3,16 @@ import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import prisma from "./helpers/prisma";
 import app from "../index";
-import { createStudent, createTeacher } from "./helpers/testDataCreation";
+import {
+  createLearningObject,
+  createStudent,
+  createTeacher,
+} from "./helpers/testDataCreation";
 import { LocalLearningObjectData } from "../services/localLearningObjectService";
 
 describe("local learning object tests", async () => {
   let teacherUser1: User & { teacher: Teacher; token: string };
+  let teacherUser2: User & { teacher: Teacher; token: string };
   let studentUser1: User & { student: Student; token: string };
   const data: LocalLearningObjectData = {
     title: "Mijn lokaal leerobject",
@@ -18,11 +23,56 @@ describe("local learning object tests", async () => {
   };
   beforeEach(async () => {
     teacherUser1 = await createTeacher("John", "Doe", "john.doe@gmail.com");
+    teacherUser2 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
     studentUser1 = await createStudent("Alice", "Anderson", "alan@gmail.com");
   });
-  // describe("[GET] /learningObjectByTeacher", async () => {
-  //     it("should return all learning objects of the teacher", async () => {});
-  // });
+
+  describe("[GET] /learningObjectByTeacher", async () => {
+    beforeEach(async () => {
+      // create a few learning objects for the teacher
+      await createLearningObject(teacherUser1.id, data);
+      await createLearningObject(teacherUser1.id, {
+        ...data,
+        title: "Een ander lokaal leerobject",
+      });
+    });
+    it("should return all learning objects of the teacher", async () => {
+      const { status, body } = await request(app)
+        .get("/learningObjectByTeacher")
+        .set("Authorization", `Bearer ${teacherUser1.token}`);
+
+      expect(status).toBe(200);
+      expect(body.objects).toBeDefined();
+      expect(body.objects.length).toBe(2);
+      expect(body.objects).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining(data),
+          expect.objectContaining({
+            ...data,
+            title: "Een ander lokaal leerobject",
+          }),
+        ]),
+      );
+    });
+    it("shouldn't let a student access this route", async () => {
+      const { status, body } = await request(app)
+        .get("/learningObjectByTeacher")
+        .set("Authorization", `Bearer ${studentUser1.token}`);
+
+      expect(status).toBe(401);
+      expect(body.objects).toBeUndefined();
+    });
+    it("should only show the learning objects of the teacher", async () => {
+      // there are some local learning objects created by another teacher
+      // test that another teacher can't see them
+      const { status, body } = await request(app)
+        .get("/learningObjectByTeacher")
+        .set("Authorization", `Bearer ${teacherUser2.token}`);
+
+      expect(status).toBe(200);
+      expect(body.objects).toEqual([]);
+    });
+  });
 
   describe("[POST] /learningObjectByTeacher", async () => {
     it("should create a new learning object", async () => {
