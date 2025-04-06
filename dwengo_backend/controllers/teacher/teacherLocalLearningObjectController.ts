@@ -117,7 +117,7 @@ export const deleteLocalLearningObject = asyncHandler(
       createdLearningObjectId,
     );
     if (!existing) {
-      throw new NotFoundError("Leerobject niet gevonden");
+      throw new NotFoundError("Learning object not found");
     }
     if (existing.creatorId !== teacherId) {
       throw new AccesDeniedError("Je bent niet de eigenaar van dit leerobject");
@@ -126,6 +126,6 @@ export const deleteLocalLearningObject = asyncHandler(
     await LocalLearningObjectService.deleteLearningObject(
       createdLearningObjectId,
     );
-    res.json({ message: "Leerobject verwijderd" });
+    res.status(200).json({ message: "Learning object deleted" });
   },
 );

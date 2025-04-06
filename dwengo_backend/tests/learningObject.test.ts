@@ -12,6 +12,10 @@ import { LearningPathDto } from "../services/learningPathService";
 
 // TODO: once request validation with zod has been added, add tests for that as well
 // TODO: learning objects and paths definitely need unit tests, where the dwengo API is mocked
+// if we have both integration tests that make use of the actual dwengo API and unit tests that mock the API
+// we can easily detect if a failing test is due to a bug in our code or a change in the dwengo API
+
+// note: since these tests make use of the actual dwengo API, they can be quite slow
 
 describe("learning object tests", async () => {
   let teacherUser1: User & { teacher: Teacher; token: string };

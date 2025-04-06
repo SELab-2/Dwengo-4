@@ -190,7 +190,6 @@ describe("local learning object tests", async () => {
           },
         })
         .then((lo) => {
-          expect(lo).toBeDefined();
           expect(lo).toMatchObject(updatedData);
         });
     });
@@ -221,7 +220,6 @@ describe("local learning object tests", async () => {
           },
         })
         .then((lo) => {
-          expect(lo).toBeDefined();
           expect(lo).toMatchObject(data);
         });
     });
@@ -243,11 +241,78 @@ describe("local learning object tests", async () => {
           },
         })
         .then((lo) => {
-          expect(lo).toBeDefined();
           expect(lo).toMatchObject(data);
         });
     });
   });
 
-  //describe("[DELETE] /learningObjectByTeacher/:createdLearningObjectId", async () => {});
+  describe("[DELETE] /learningObjectByTeacher/:createdLearningObjectId", async () => {
+    it("should delete the learning object", async () => {
+      const lo = await createLearningObject(teacherUser1.id, data);
+
+      const { status, body } = await request(app)
+        .delete(`/learningObjectByTeacher/${lo.id}`)
+        .set("Authorization", `Bearer ${teacherUser1.token}`);
+
+      expect(status).toBe(200);
+      expect(body.message).toBe("Learning object deleted");
+
+      // verify that learning object was deleted in the database
+      await prisma.learningObject
+        .findUnique({
+          where: {
+            id: lo.id,
+          },
+        })
+        .then((lo) => {
+          expect(lo).toBeNull();
+        });
+    });
+    it("should return an error if the learning object doesn't exist", async () => {
+      const { status, body } = await request(app)
+        .delete("/learningObjectByTeacher/123456789") // non-existing learning object id
+        .set("Authorization", `Bearer ${teacherUser1.token}`);
+
+      expect(status).toBe(404);
+      expect(body.message).toBe("Learning object not found");
+    });
+    it("shouldn't let a student delete a learning object", async () => {
+      const lo = await createLearningObject(teacherUser1.id, data);
+      const response = await request(app)
+        .delete(`/learningObjectByTeacher/${lo.id}`)
+        .set("Authorization", `Bearer ${studentUser1.token}`);
+
+      expect(response.status).toBe(401);
+
+      // verify that learning object was not deleted in the database
+      await prisma.learningObject
+        .findUnique({
+          where: {
+            id: lo.id,
+          },
+        })
+        .then((lo) => {
+          expect(lo).not.toBeNull();
+        });
+    });
+    it("shouldn't let another teacher delete the learning object", async () => {
+      const lo = await createLearningObject(teacherUser1.id, data);
+      const response = await request(app)
+        .delete(`/learningObjectByTeacher/${lo.id}`)
+        .set("Authorization", `Bearer ${teacherUser2.token}`); // another teacher tries to delete the learning object
+
+      expect(response.status).toBe(403);
+
+      // verify that learning object was not deleted in the database
+      await prisma.learningObject
+        .findUnique({
+          where: {
+            id: lo.id,
+          },
+        })
+        .then((lo) => {
+          expect(lo).not.toBeNull();
+        });
+    });
+  });
 });
