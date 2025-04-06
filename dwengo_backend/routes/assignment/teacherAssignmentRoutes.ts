@@ -28,7 +28,7 @@ router.post("/", controller.createAssignmentForClass);
 
 
 /**
- * @route POST /assignment/teacher/teams
+ * @route POST /assignment/teacher/team
  * @description Create an assignment with teams for a class
  * @body pathRef: string
  * @body pathLanguage: string
