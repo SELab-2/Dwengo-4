@@ -172,7 +172,7 @@ export async function fetchDwengoObjectById(
       "Unable to fetch the learning object from the Dwengo API.",
     );
   }
-  throw new Error(); // Dit zou nooit mogen gebeuren
+  throw new Error("Unexpected state reached in fetchDwengoObjectById."); // Dit zou nooit mogen gebeuren
 }
 
 // [NIEUW] Dwengo-object op basis van hruid, language, version
