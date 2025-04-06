@@ -71,7 +71,7 @@ app.use("/join-request", joinRequestRoutes);
 app.use("/auth", authRoutes);
 app.use("/pathByTeacher", teacherLocalLearningPathRoutes);
 app.use(
-  "learningPath/:learningPathId/node",
+  "/learningPath/:learningPathId/node",
   teacherLocalLearningPathNodesRoutes,
 );
 app.use("/learningObjectByTeacher", teacherLocalLearningObjectRoutes);
