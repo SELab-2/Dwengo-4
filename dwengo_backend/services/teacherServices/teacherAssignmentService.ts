@@ -173,8 +173,6 @@ export default class TeacherAssignmentService {
       }
     }
 
-    console.log(pathRef);
-
     // 2) Validate pathRef
     await ReferenceValidationService.validateLearningPath(
       isExternal,
@@ -200,7 +198,6 @@ export default class TeacherAssignmentService {
 
       // Create class assignments and teams
       for (const [classId, teams] of Object.entries(classTeams)) {
-        console.log(classId)
         const assigndment = await tx.classAssignment.create({
           data: {
             assignmentId: assignment.id,

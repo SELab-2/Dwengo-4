@@ -268,7 +268,7 @@ const AddAssignmentForm = ({
       })
         .then(() => {
           console.log('Assignment created successfully');
-          navigate('/teacher/assignments');
+          navigate(`/teacher/classes/${classId}`);
         })
         .catch((error) => {
           console.error('Error creating assignment:', error);

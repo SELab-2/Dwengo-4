@@ -417,8 +417,8 @@ model Assignment {
   teamSize  Int 
   
   Questions        Question[]
-  classAssignments ClassAssignment[] @relation(onDelete: Cascade)
-  teamAssignments  TeamAssignment[]  @relation(onDelete: Cascade)
+  classAssignments ClassAssignment[] 
+  teamAssignments  TeamAssignment[] 
 
   submissions Submission[]
 }
