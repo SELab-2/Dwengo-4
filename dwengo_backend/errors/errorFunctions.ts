@@ -58,7 +58,7 @@ export async function handlePrismaTransaction<T>(
 }
 
 /**
- * This function is used in a function where something is fetched from the Dwnengo API.
+ * This function is used in a function where something is fetched from the Dwengo API.
  * The flow is that the fetch is done in a try catch block.
  * In the try block, there could be errors thrown. If these errors are thrown, the catch will catch them.
  * In the catch block, the error that are thrown in the try block should be rethrown. Only other errors should
