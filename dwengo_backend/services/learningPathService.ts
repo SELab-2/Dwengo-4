@@ -1,4 +1,6 @@
 import { dwengoAPI } from "../config/dwengoAPI";
+import { throwCorrectNetworkError } from "../errors/errorFunctions";
+import { NotFoundError } from "../errors/errors";
 
 export interface LearningPathDto {
   _id: string; // Dwengo gebruikt _id
@@ -46,7 +48,7 @@ export async function searchLearningPaths(
     title?: string;
     description?: string;
     all?: string; // leeg string => alles
-  } = {}
+  } = {},
 ): Promise<LearningPathDto[]> {
   try {
     // Zet de filters om naar Dwengo queryparams
@@ -69,15 +71,25 @@ export async function searchLearningPaths(
     const response = await dwengoAPI.get("/api/learningPath/search", {
       params,
     });
+
+    if (!Array.isArray(response.data)) {
+      throw new NotFoundError(
+        `Dwengo learning path with specified filters not found.`,
+      );
+    }
+
     const dwengoData = response.data; // array van leerpaden
 
     // Map elk item naar LearningPathDto
-    const results = dwengoData.map(mapDwengoPathToLocal);
-    return results;
+    return dwengoData.map(mapDwengoPathToLocal);
   } catch (error) {
-    console.error("Fout bij searchLearningPaths:", error);
-    throw new Error("Dwengo API call voor leerpaden mislukt.");
+    throwCorrectNetworkError(
+      error as Error,
+      "Something went wrong when communicating with the Dwengo API.",
+    );
   }
+  // Dit zou nooit mogen gebeuren
+  return [];
 }
 
 /**
@@ -88,25 +100,38 @@ export async function searchLearningPaths(
  * je zoekt typically via search + hruid=... of all=...
  */
 export async function getLearningPathByIdOrHruid(
-  idOrHruid: string
-): Promise<LearningPathDto | null> {
+  idOrHruid: string,
+): Promise<LearningPathDto> {
   try {
     // Probeer te zoeken met hruid=... of als je _id hebt, moet je 'all=' gebruiken en local filteren
     const params = { all: "" };
     const response = await dwengoAPI.get("/api/learningPath/search", {
       params,
     });
+
+    if (!Array.isArray(response.data)) {
+      throw new NotFoundError("Dwengo learning paths not found.");
+    }
+
     const allPaths = response.data;
 
     // Zoeken in array op basis van _id of hruid
     const found = allPaths.find(
-      (lp: any) => lp._id === idOrHruid || lp.hruid === idOrHruid
+      (lp: any) => lp._id === idOrHruid || lp.hruid === idOrHruid,
     );
-    if (!found) return null;
+    if (!found) {
+      throw new NotFoundError(
+        `Learning path with id/hruid "${idOrHruid}" not found.`,
+      );
+    }
 
     return mapDwengoPathToLocal(found);
   } catch (error) {
-    console.error("Fout bij getLearningPathByIdOrHruid:", error);
-    return null;
+    throwCorrectNetworkError(
+      error as Error,
+      "Something went wrong when communicating with the Dwengo API.",
+    );
   }
+  // Dit zou nooit mogen gebeuren
+  return {} as LearningPathDto;
 }

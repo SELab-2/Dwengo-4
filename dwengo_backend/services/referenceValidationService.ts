@@ -109,7 +109,7 @@ export default class ReferenceValidationService {
       );
       // Dwengo API geeft een array terug, met 0 of meer items
       // Lege lijsten worden teruggegeven, zoals afgesproken in de Discord
-      if (!resp.data || !Array.isArray(resp.data)) {
+      if (!Array.isArray(resp.data)) {
         throw new NotFoundError(
           `Dwengo learning path (hruid=${hruid}, language=${language}) not found.`,
         );
