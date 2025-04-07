@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import {
+  BadRequestError,
   DatabaseError,
   NetworkError,
   NotFoundError,
@@ -14,7 +15,7 @@ import {
  */
 
 export async function handlePrismaQuery<T>(
-  queryFunction: () => Promise<T>,
+  queryFunction: () => Promise<T>
 ): Promise<T> {
   try {
     return await queryFunction();
@@ -40,7 +41,7 @@ export async function handlePrismaQuery<T>(
  */
 export async function handlePrismaTransaction<T>(
   prisma: Prisma.TransactionClient,
-  transactionFunction: (_: Prisma.TransactionClient) => Promise<T>,
+  transactionFunction: (_: Prisma.TransactionClient) => Promise<T>
 ): Promise<T> {
   try {
     return await transactionFunction(prisma);
@@ -66,7 +67,7 @@ export async function handlePrismaTransaction<T>(
  */
 export function throwCorrectNetworkError(
   error: Error,
-  networkErrorMessage: string,
+  networkErrorMessage: string
 ): void {
   if (
     error instanceof NotFoundError ||
@@ -77,4 +78,17 @@ export function throwCorrectNetworkError(
   } else {
     throw new NetworkError(networkErrorMessage);
   }
+}
+
+/**
+ * This function checks if a parameter can actually be parsed to a number.
+ * This function also checks if the parameter is not null or undefined.
+ * If this is not the case, it throws a BadRequestError.
+ * It eventually returns the parsed number.
+ */
+export function convertToNumber(toCheck: string, message: string): number {
+  if (!toCheck || isNaN(parseInt(toCheck))) {
+    throw new BadRequestError(message);
+  }
+  return parseInt(toCheck);
 }
