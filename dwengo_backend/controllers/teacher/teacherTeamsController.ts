@@ -24,7 +24,10 @@ export const createTeamInAssignment = async (
       classId,
       teams,
     );
-    res.status(201).json({ createdTeams });
+    res.status(201).json({
+      message: "Teams successfully created.",
+      createdTeams,
+    });
   } catch (error) {
     next(error);
   }
@@ -57,7 +60,10 @@ export const updateTeamsInAssignment = async (
       assignmentId,
       teams,
     );
-    res.status(200).json(updatedTeams);
+    res.status(200).json({
+      message: "Teams successfully updated.",
+      updatedTeams: updatedTeams,
+    });
   } catch (error) {
     next(error);
   }
