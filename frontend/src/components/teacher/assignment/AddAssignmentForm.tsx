@@ -13,6 +13,7 @@ import {
   ClassItem,
   LearningPath,
   Team,
+  StudentItem,
 } from '../../../types/type';
 
 /**
@@ -116,7 +117,7 @@ const AddAssignmentForm = ({
   const [isTeamOpen, setIsTeamOpen] = useState<boolean>(false);
   const [assignmentType, setAssignmentType] = useState<string>('');
   const [teams, setTeams] = useState<Record<string, Team[]>>({});
-  const [teamSize, setTeamSize] = useState<number>(0);
+  const [teamSize, setTeamSize] = useState<number>(2);
   const [date, setDate] = useState<string>('');
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
   const [title, setTitle] = useState<string>('');
@@ -130,6 +131,7 @@ const AddAssignmentForm = ({
   }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [individualStudents, setIndividualStudents] = useState<Record<string, StudentItem[]>>({});
 
   const navigate = useNavigate();
 
@@ -169,6 +171,15 @@ const AddAssignmentForm = ({
         setAssignmentType('individual');
       }
       setTeams(assignmentData.classTeams!);
+
+      // Initialize individual students from existing teams
+      if (assignmentData.teamSize === 1) {
+        const studentsPerClass: Record<string, StudentItem[]> = {};
+        Object.entries(assignmentData.classTeams || {}).forEach(([classId, teams]) => {
+          studentsPerClass[classId] = teams.flatMap(team => team.students);
+        });
+        setIndividualStudents(studentsPerClass);
+      }
     }
   }, [isEditing, classesData]);
 
@@ -189,6 +200,17 @@ const AddAssignmentForm = ({
     }
   }, [learningPathsData, isEditing]);
 
+  // Add effect to initialize all students when switching to individual
+  useEffect(() => {
+    if (assignmentType === 'individual') {
+      const allStudents: Record<string, StudentItem[]> = {};
+      selectedClasses.forEach(classItem => {
+        allStudents[classItem.id] = classItem.students;
+      });
+      setIndividualStudents(allStudents);
+    }
+  }, [assignmentType, selectedClasses]);
+
   const handleTeamClicks = () => {
     setIsTeamOpen(true);
   };
@@ -197,11 +219,16 @@ const AddAssignmentForm = ({
     e: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     setAssignmentType(e.target.value);
+    if (e.target.value === 'group') {
+      setTeamSize(2); // Set default team size to 2 when switching to group
+    } else {
+      setTeamSize(1); // Set team size to 1 for individual assignments
+    }
   };
 
   const handleTeamSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const size = parseInt(e.target.value);
-    if (size > 0) {
+    if (size > 1) {
       setTeamSize(size);
     }
   };
@@ -239,6 +266,13 @@ const AddAssignmentForm = ({
       if (missingTeams) {
         errors.teams = 'Please create teams for all selected classes';
       }
+    } else if (assignmentType === 'individual') {
+      const missingStudents = selectedClasses.some(
+        (classItem) => !individualStudents[classItem.id] || individualStudents[classItem.id].length === 0
+      );
+      if (missingStudents) {
+        errors.teams = 'Please select at least one student for each class';
+      }
     }
 
     setFormErrors(errors);
@@ -262,28 +296,38 @@ const AddAssignmentForm = ({
     // Convert teams object keys from string to number
     const teamsWithNumberKeys: Record<number, Team[]> = {};
 
+    // Handle both group and individual assignments
     if (assignmentType === 'group') {
       Object.entries(teams).forEach(([key, team]) => {
         teamsWithNumberKeys[Number(key)] = team.map((team) => ({
           ...team,
           teamName: team.id,
-          studentIds: team.students.map(
-            (member) => member.id as unknown as number,
-          ),
+          studentIds: team.students.map((member) => member.id as unknown as number),
         }));
       });
     } else {
-      // Create individual teams for non-group assignments
-      selectedClasses.forEach((classItem: ClassItem) => {
-        const individualTeams = classItem.students.map((student) => ({
-          id: 'null',
+      // For individual assignments
+      selectedClasses.forEach((classItem) => {
+        const selectedStudents = individualStudents[classItem.id] || [];
+        teamsWithNumberKeys[Number(classItem.id)] = selectedStudents.map((student) => ({
+          id: `individual-${student.id}`,
           teamName: `individual-${student.id}`,
-          studentIds: [student.id],
-          students: [student], // Add members to team for easier access
+          studentIds: [student.id as unknown as number],
+          students: [student],
         }));
-        teamsWithNumberKeys[Number(classItem.id)] = individualTeams;
       });
     }
+
+    const payload = {
+      title,
+      description,
+      pathLanguage: 'nl',
+      isExternal: selectedLearningPath?.isExternal || false,
+      deadline: date,
+      pathRef: selectedLearningPath?.id || '',
+      classTeams: teamsWithNumberKeys,
+      teamSize: assignmentType === 'individual' ? 1 : teamSize,
+    };
 
     if (isEditing) {
       updateAssignment({
@@ -295,7 +339,7 @@ const AddAssignmentForm = ({
         deadline: date,
         pathRef: selectedLearningPath?.id || '',
         classTeams: teamsWithNumberKeys,
-        teamSize: teamSize,
+        teamSize: assignmentType === 'individual' ? 1 : teamSize, // Fix team size here
       })
         .then(() => {
           console.log('Assignment updated successfully');
@@ -327,6 +371,16 @@ const AddAssignmentForm = ({
           setIsSubmitting(false);
         });
     }
+  };
+
+  // Add handler for individual student selection
+  const handleIndividualStudentToggle = (classId: string, student: StudentItem) => {
+    setIndividualStudents(prev => ({
+      ...prev,
+      [classId]: prev[classId]?.includes(student)
+        ? prev[classId].filter(s => s.id !== student.id)
+        : [...(prev[classId] || []), student]
+    }));
   };
 
   return (
@@ -470,6 +524,33 @@ const AddAssignmentForm = ({
                 </button>
               </div>
             )}
+            {assignmentType === 'individual' && (
+              <div className={styles.rightSide}>
+                <h6>Select Students:</h6>
+                <div className={styles.teamsList}>
+                  {selectedClasses.map((classItem) => (
+                    <div key={classItem.id}>
+                      <h6>CLASS: {classItem.name}</h6>
+                      <div className={styles.selectedCount}>
+                        Selected: {individualStudents[classItem.id]?.length || 0} / {classItem.students.length}
+                      </div>
+                      {individualStudents[classItem.id]?.map((student) => (
+                        <div key={student.id} className={styles.teamPreview}>
+                          <p>{`${student.firstName} ${student.lastName}`}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+                <button
+                  className={styles.editButton}
+                  type="button"
+                  onClick={() => handleTeamClicks()}
+                >
+                  Edit Students
+                </button>
+              </div>
+            )}
           </div>
           {assignmentType === 'group' && formErrors.teams && (
             <div className={styles.error}>{formErrors.teams}</div>
@@ -489,7 +570,12 @@ const AddAssignmentForm = ({
           </div>
 
           <div className={styles.buttonFooter}>
-            <button className={styles.cancelButton} formNoValidate>
+            <button
+              type="button"
+              className={styles.cancelButton}
+              formNoValidate
+              onClick={() => navigate(-1)}
+            >
               Cancel
             </button>
             <button
@@ -512,6 +598,9 @@ const AddAssignmentForm = ({
           setTeams={setTeams}
           teamSize={teamSize}
           selectedClasses={selectedClasses}
+          isIndividual={assignmentType === 'individual'}
+          individualStudents={individualStudents}
+          setIndividualStudents={setIndividualStudents}
         />
       )}
     </section>

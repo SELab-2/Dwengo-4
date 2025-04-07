@@ -41,35 +41,78 @@
 .middle {
   display: flex;
   gap: 32px;
+  justify-content: space-between;
+}
+
+.leftSide {
+  width: 30%;
+
 }
 
 .rightSide {
   padding: 12px;
   border-radius: 4px;
-  background-color: #ddd;
-  width: 70%;
+  background-color: #f1f3f5;
+  width: 100%;
+  flex: 1;
 }
 
 .inputTeam {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .inputTeam h6 {
   margin: 0;
   font-size: 16px;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .inputTeam input {
   width: 80px;
+  min-width: 80px;
 }
 
 .teamsList {
   overflow-y: scroll;
-  height: 15vh;
+  height: 200px;
+  /* Fixed height instead of vh for consistency */
   width: 100%;
+  background-color: white;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 12px;
+}
+
+.teamsList h6 {
+  margin: 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.teamPreview {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 8px;
+  margin: 4px 0;
+}
+
+.teamPreview p {
+  margin: 0;
+  font-size: 14px;
+  color: #495057;
+}
+
+.selectedCount {
+  font-size: 12px;
+  color: #6c757d;
+  margin-bottom: 4px;
 }
 
 form button {
@@ -81,9 +124,10 @@ form button {
   background: #007bff;
   color: white;
   padding: 12px 24px;
-
   font-size: 16px;
   transition: background 0.2s ease;
+  width: 100%;
+  margin-top: 8px;
 }
 
 .editButton:hover {
@@ -103,7 +147,6 @@ form button {
   background: #dc3545;
   color: white;
   padding: 12px 24px;
-
   font-size: 16px;
 }
 
@@ -111,7 +154,6 @@ form button {
   background: #007bff;
   color: white;
   padding: 12px 24px;
-
   font-size: 16px;
 }
 
