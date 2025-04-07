@@ -1,39 +1,33 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import joinRequestService from "../../services/joinRequestService";
 import { JoinRequest } from "@prisma/client";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
-import { AppError } from "../../errors/errors";
+import { BadRequestError } from "../../errors/errors";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
-
-// Higher-order function to handle errors and reduce duplication
-const handleRequest =
-  (handler: (_req: Request, _res: Response) => Promise<void>) =>
-  async (req: Request, res: Response): Promise<void> => {
-    try {
-      await handler(req, res);
-    } catch (error) {
-      const message: string =
-        error instanceof Error ? error.message : "An unknown error occurred";
-      res
-        .status(error instanceof AppError ? error.statusCode : 400)
-        .json({ error: message });
-    }
-  };
+import { NextFunction } from "express-serve-static-core";
 
 /**
  * Creates a join request for a student to join a class (class code in request body)
  * @route POST /student/classes/join
  * returns the created join request in the response body
  */
-export const createJoinRequest = handleRequest(
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const createJoinRequest = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
     const joinCode = req.body.joinCode || (req.query.joinCode as string);
     const studentId: number = getUserFromAuthRequest(req).id;
-    const joinRequest: JoinRequest | undefined =
+    const joinRequest: JoinRequest =
       await joinRequestService.createValidJoinRequest(studentId, joinCode);
-    res.status(201).json({ joinRequest });
-  },
-);
+    res
+      .status(201)
+      .json({ message: "Join request succesfully created.", joinRequest });
+  } catch (error) {
+    next(error);
+  }
+};
 
 /**
  * Updates the status of a join request (approve or deny)
@@ -42,15 +36,19 @@ export const createJoinRequest = handleRequest(
  * @param requestId - id of the join request to be updated
  * returns the updated join request in the response body
  */
-export const updateJoinRequestStatus = handleRequest(
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const updateJoinRequestStatus = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
     const classId: number = parseInt(req.params.classId);
     const requestId: number = parseInt(req.params.requestId);
     const { action }: { action: string } = req.body; // 'approve' or 'deny' from the request body
     const teacherId: number = getUserFromAuthRequest(req).id;
 
     if (!action || (action !== "approve" && action !== "deny")) {
-      res.status(400).json({ error: "Action must be 'approve' or 'deny'" });
+      throw new BadRequestError("Action must be 'approve' or 'deny'.");
     }
 
     if (action === "approve") {
@@ -69,20 +67,28 @@ export const updateJoinRequestStatus = handleRequest(
       );
       res.status(200).json({ joinRequest, message: "Join request denied." });
     }
-  },
-);
+  } catch (error) {
+    next(error);
+  }
+};
 
 /**
  * @route GET /teacher/classes/:classId/join-requests
  * @param classId - id of the class for which the join requests are fetched
  * returns a list of all join requests for the class in the response body
  */
-export const getJoinRequestsByClass = handleRequest(
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const getJoinRequestsByClass = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
     const classId: number = parseInt(req.params.classId);
     const teacherId: number = getUserFromAuthRequest(req).id;
     const joinRequests: JoinRequest[] =
       await joinRequestService.getJoinRequestsByClass(teacherId, classId);
     res.status(200).json({ joinRequests });
-  },
-);
+  } catch (error) {
+    next(error);
+  }
+};
