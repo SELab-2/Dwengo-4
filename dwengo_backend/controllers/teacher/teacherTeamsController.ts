@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { NextFunction, Response } from "express";
 import {
   createTeamsInAssignment,
   getTeamsThatHaveAssignment,
@@ -7,66 +7,92 @@ import {
 } from "../../services/teacherTeamsService";
 import { Team } from "@prisma/client";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
+import { convertToNumber } from "../../errors/errorFunctions";
+
+const invalidAssignmentIdMessage = "Invalid assignment id.";
 
 export const createTeamInAssignment = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
+  next: NextFunction,
 ): Promise<void> => {
-  // This is guaranteed to be possible by "makeAssignmentIdParamValid" in middleware/teamValidationMiddleware.ts
-  const assignmentId: number = Number(req.params.assignmentId);
-  const classId: number = Number(req.params.classId);
-  const { teams } = req.body;
+  try {
+    // This is guaranteed to be possible by "makeAssignmentIdParamValid" in middleware/teamValidationMiddleware.ts
+    const assignmentId: number = convertToNumber(
+      req.params.assignmentId,
+      invalidAssignmentIdMessage,
+    );
+    const classId: number = convertToNumber(
+      req.params.classId,
+      "Invalid class id.",
+    );
+    const { teams } = req.body;
 
-  const createdTeams: Team[] = await createTeamsInAssignment(
-    assignmentId,
-    classId,
-    teams
-  );
-  res.status(201).json({ createdTeams });
+    const createdTeams: Team[] = await createTeamsInAssignment(
+      assignmentId,
+      classId,
+      teams,
+    );
+    res.status(201).json({ createdTeams });
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const getTeamsInAssignment = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
+  next: NextFunction,
 ): Promise<void> => {
   try {
-    const assignmentId: number = Number(req.params.assignmentId);
+    const assignmentId: number = convertToNumber(
+      req.params.assignmentId,
+      invalidAssignmentIdMessage,
+    );
     const teams: Team[] = await getTeamsThatHaveAssignment(assignmentId);
     res.status(200).json(teams);
   } catch (error) {
-    res.status(500).json({ error: "Error fetching teams for assignment." });
+    next(error);
   }
 };
 
 export const updateTeamsInAssignment = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
+  next: NextFunction,
 ): Promise<void> => {
   try {
-    const assignmentId: number = Number(req.params.assignmentId);
+    const assignmentId: number = convertToNumber(
+      req.params.assignmentId,
+      invalidAssignmentIdMessage,
+    );
     const { teams } = req.body;
 
     const updatedTeams: Team[] = await updateTeamsForAssignment(
       assignmentId,
-      teams
+      teams,
     );
     res.status(200).json(updatedTeams);
   } catch (error) {
-    res.status(500).json({ error: "Error updating teams for assignment." });
+    next(error);
   }
 };
 
 export const deleteTeamInAssignment = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
+  next: NextFunction,
 ): Promise<void> => {
   try {
     // This is guaranteed to be possible by "makeTeamIdParamValid" in middleware/teamValidationMiddleware.ts
-    const teamId: number = Number(req.params.teamId);
+    const teamId: number = convertToNumber(
+      req.params.teamId,
+      "Invalid team id.",
+    );
 
     await deleteTeam(teamId);
     res.status(200).json({ message: "Team successfully deleted." });
   } catch (error) {
-    res.status(500).json({ error: "Error deleting team from assignment." });
+    next(error);
   }
 };
