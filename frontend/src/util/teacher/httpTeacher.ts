@@ -243,7 +243,6 @@ export async function createAssignment({
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Content-Type': 'application/json',
       Authorization: `Bearer ${getAuthToken()}`,
     },
     body: JSON.stringify({
@@ -258,7 +257,6 @@ export async function createAssignment({
   if (!response.ok) {
     const error: APIError = new Error(
       'Er is iets misgegaan bij het aanmaken van de opdracht.',
-      'Er is iets misgegaan bij het aanmaken van de opdracht.',
     );
     error.code = response.status;
     error.info = await response.json();
@@ -268,7 +266,6 @@ export async function createAssignment({
 
 export interface Invite {
   inviteId: number;
-  status: 'PENDING' | 'APPROVED' | 'DENIED';
   status: 'PENDING' | 'APPROVED' | 'DENIED';
   otherTeacher: {
     firstName: string;
@@ -283,7 +280,6 @@ export interface Invite {
  * @returns Een lijst met alle invites voor de klas
  */
 export async function getPendingInvitesForClass(
-  classId: string,
   classId: string,
 ): Promise<Invite[]> {
   const response = await fetch(`${BACKEND}/invite/class/${classId}`, {

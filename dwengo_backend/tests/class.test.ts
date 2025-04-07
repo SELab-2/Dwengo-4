@@ -21,13 +21,6 @@ import {
   createJoinRequest,
   createStudent,
   createTeacher,
-  addStudentToClass,
-  addTeacherToClass,
-  createClass,
-  createInvite,
-  createJoinRequest,
-  createStudent,
-  createTeacher,
 } from "./helpers/testDataCreation";
 
 const APP_URL: string = process.env.APP_URL || "http://localhost:5000";

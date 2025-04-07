@@ -48,7 +48,6 @@ describe("[GET] /assignment/student", async (): Promise<void> => {
       "Gertrude",
       "Truede",
       "truede.gertrude@gmail.com",
-      "truede.gertrude@gmail.com",
     );
     // create some classes
     class1 = await createClass("1LA", "ABCD");
@@ -61,18 +60,15 @@ describe("[GET] /assignment/student", async (): Promise<void> => {
       "LP1",
       "Learning Path 1",
       teacherUser1.teacher.userId,
-      teacherUser1.teacher.userId,
     );
     lp2 = await createLearningPath(
       "LP2",
       "Learning Path 2",
       teacherUser1.teacher.userId,
-      teacherUser1.teacher.userId,
     );
     lp3 = await createLearningPath(
       "LP3",
       "Learning Path 3",
-      teacherUser1.teacher.userId,
       teacherUser1.teacher.userId,
     );
 
