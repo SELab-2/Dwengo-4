@@ -41,6 +41,14 @@ router.post("/", controller.createAssignmentForClass);
  */
 router.post("/team", controller.createAssignmentWithTeams);
 
+/**
+ * @route PATCH /assignment/teacher/team/:assignmentId
+ * @description Update a team assignment
+ * @param assignmentId: number
+ * @body teamSize: number
+ * @access Teacher
+ */
+router.patch("/team/:assignmentId", controller.updateAssignmentWithTeams);
 
 /**
  * @route GET /assignment/teacher/class/:classId

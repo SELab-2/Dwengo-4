@@ -581,7 +581,7 @@ export async function updateAssignment({
   teamSize,
 }: AssignmentPayload): Promise<void> {
   // Create group assignment with teams
-  const response = await fetch(`${BACKEND}/assignment/teacher/teams/${id}`, {
+  const response = await fetch(`${BACKEND}/assignment/teacher/team/${id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
