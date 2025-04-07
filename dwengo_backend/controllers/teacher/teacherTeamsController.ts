@@ -7,9 +7,6 @@ import {
 } from "../../services/teacherTeamsService";
 import { Team } from "@prisma/client";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
-import { convertToNumber } from "../../errors/errorFunctions";
-
-const invalidAssignmentIdMessage = "Invalid assignment id.";
 
 export const createTeamInAssignment = async (
   req: AuthenticatedRequest,
@@ -18,14 +15,8 @@ export const createTeamInAssignment = async (
 ): Promise<void> => {
   try {
     // This is guaranteed to be possible by "makeAssignmentIdParamValid" in middleware/teamValidationMiddleware.ts
-    const assignmentId: number = convertToNumber(
-      req.params.assignmentId,
-      invalidAssignmentIdMessage,
-    );
-    const classId: number = convertToNumber(
-      req.params.classId,
-      "Invalid class id.",
-    );
+    const assignmentId: number = parseInt(req.params.assignmentId);
+    const classId: number = parseInt(req.params.classId);
     const { teams } = req.body;
 
     const createdTeams: Team[] = await createTeamsInAssignment(
@@ -45,10 +36,7 @@ export const getTeamsInAssignment = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const assignmentId: number = convertToNumber(
-      req.params.assignmentId,
-      invalidAssignmentIdMessage,
-    );
+    const assignmentId: number = parseInt(req.params.assignmentId);
     const teams: Team[] = await getTeamsThatHaveAssignment(assignmentId);
     res.status(200).json(teams);
   } catch (error) {
@@ -62,10 +50,7 @@ export const updateTeamsInAssignment = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const assignmentId: number = convertToNumber(
-      req.params.assignmentId,
-      invalidAssignmentIdMessage,
-    );
+    const assignmentId: number = parseInt(req.params.assignmentId);
     const { teams } = req.body;
 
     const updatedTeams: Team[] = await updateTeamsForAssignment(
@@ -85,10 +70,7 @@ export const deleteTeamInAssignment = async (
 ): Promise<void> => {
   try {
     // This is guaranteed to be possible by "makeTeamIdParamValid" in middleware/teamValidationMiddleware.ts
-    const teamId: number = convertToNumber(
-      req.params.teamId,
-      "Invalid team id.",
-    );
+    const teamId: number = parseInt(req.params.teamId);
 
     await deleteTeam(teamId);
     res.status(200).json({ message: "Team successfully deleted." });

@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import assignmentService from "../services/assignmentService";
 import { Assignment } from "@prisma/client";
-import { convertToNumber } from "../errors/errorFunctions";
 
 export class AssignmentController {
   async getAssignmentsById(
@@ -11,10 +10,7 @@ export class AssignmentController {
   ): Promise<void> {
     try {
       // 1) Validatie param
-      const assignmentId: number = convertToNumber(
-        req.params.assignmentId,
-        "Invalid assignment ID.",
-      );
+      const assignmentId: number = parseInt(req.params.assignmentId);
 
       // 2) Opvragen assignment (als er geen error wordt opgegooid, zijn we zeker dat het bestaat)
       const assignment: Assignment =
