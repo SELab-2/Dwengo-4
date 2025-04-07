@@ -1,7 +1,9 @@
-import { Response } from "express";
+import { NextFunction, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import LocalLearningPathService from "../../services/localLearningPathService";
+import { BadRequestError } from "../../errors/errors";
+import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 // Een interface om je body te structureren.
 // Je kunt er bijvoorbeeld nog meer velden in opnemen, afhankelijk van je noden.
@@ -16,18 +18,21 @@ interface PathMetadata {
  * POST /teacher/learningPaths
  *   -> nieuw leerpad (zonder nodes)
  */
-export const createLocalLearningPath = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
+export const createLocalLearningPath = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
     // Door protectTeacher in de routes weten we: role=TEACHER
-    const teacherId = req.user!.id; // null-check niet nodig
+    const teacherId = getUserFromAuthRequest(req).id;
+
+    if (!req.body.title || !req.body.language) {
+      res.status(400);
+      throw new BadRequestError("Title and language are required fields.");
+    }
 
     const { title, language, description, image } = req.body as PathMetadata;
-    if (!title || !language) {
-      res.status(400);
-      throw new Error(
-        "Vereiste velden: title, language (optioneel: description, image).",
-      );
-    }
 
     const newPath = await LocalLearningPathService.createLearningPath(
       teacherId,
@@ -40,11 +45,13 @@ export const createLocalLearningPath = asyncHandler(
     );
 
     res.status(201).json({
-      message: "Leerpad aangemaakt",
+      message: "Learning path successfully created.",
       learningPath: newPath,
     });
-  },
-);
+  } catch (error) {
+    next(error);
+  }
+};
 
 /**
  * GET /teacher/learningPaths
