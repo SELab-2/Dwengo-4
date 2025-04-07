@@ -173,8 +173,6 @@ export default class TeacherAssignmentService {
       }
     }
 
-    console.log(pathRef);
-
     // 2) Validate pathRef
     await ReferenceValidationService.validateLearningPath(
       isExternal,
@@ -200,7 +198,6 @@ export default class TeacherAssignmentService {
 
       // Create class assignments and teams
       for (const [classId, teams] of Object.entries(classTeams)) {
-        console.log(classId)
         const assigndment = await tx.classAssignment.create({
           data: {
             assignmentId: assignment.id,
@@ -258,20 +255,46 @@ export default class TeacherAssignmentService {
           deadline,
           title,
           description,
-          teamSize
+          teamSize,
         },
       });
 
       // Delete existing teams
       await tx.team.deleteMany({
-        where: { teamAssignment :{
-          assignmentId : assignmentId
-        } }
+        where: {
+          teamAssignment: {
+            assignmentId: assignmentId,
+          },
+        },
       });
+
+      // Ensure all classAssignments exist for the provided classes
+      for (const classId of Object.keys(classTeams)) {
+        const existingClassAssignment = await tx.classAssignment.findFirst({
+          where: {
+            assignmentId: assignmentId,
+            classId: parseInt(classId),
+          },
+        });
+
+        if (!existingClassAssignment) {
+          await tx.classAssignment.create({
+            data: {
+              assignmentId: assignment.id,
+              classId: parseInt(classId),
+            },
+          });
+        }
+      }
 
       // Create new teams for each class
       for (const [classId, teams] of Object.entries(classTeams)) {
-        await createTeamsInAssignment(assignment.id, parseInt(classId), teams, tx);
+        await createTeamsInAssignment(
+          assignment.id,
+          parseInt(classId),
+          teams,
+          tx
+        );
       }
 
       return assignment;

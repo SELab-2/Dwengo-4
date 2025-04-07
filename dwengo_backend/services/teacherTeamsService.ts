@@ -25,15 +25,19 @@ export const createTeamsInAssignment = async (
     if (!tx) {
         tx = prisma;
     }
+    console.log("AssignmentId: 5 ", classId);
     const classAssignments: ClassAssignment[] = await tx.classAssignment.findMany({
         where: {
             assignmentId: assignmentId,
             classId: classId,
         }
     });
+    console.log("AssignmentId: 5.5 ", classAssignments );
     if (classAssignments.length === 0) {
         throw new Error("Assignment not found or not linked to any class.");
     }
+
+    console.log("AssignmentId: 6 ");
 
     // Create teams in the database
     for (const team of teams) {

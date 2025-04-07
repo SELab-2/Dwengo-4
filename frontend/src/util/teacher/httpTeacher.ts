@@ -134,7 +134,7 @@ export async function fetchClasses(
   }
 
   let classrooms = await response.json();
-  classrooms = classrooms.classrooms
+  classrooms = classrooms.classrooms;
 
   if (includeStudents) {
     classrooms.forEach((classroom: any) => {
@@ -167,7 +167,6 @@ export async function createClass({
     },
     body: JSON.stringify({ name }),
   });
-
 
   if (!response.ok) {
     const error: APIError = new Error(

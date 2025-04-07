@@ -417,8 +417,9 @@ model Assignment {
   teamSize  Int 
   
   Questions        Question[]
-  classAssignments ClassAssignment[]
-  teamAssignments  TeamAssignment[]  
+  classAssignments ClassAssignment[] 
+  teamAssignments  TeamAssignment[] 
+
   submissions Submission[]
 }
 

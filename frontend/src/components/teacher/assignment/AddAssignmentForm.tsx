@@ -95,7 +95,7 @@ const CustomDropdownMultiselect = ({
  * - Learning path selection
  * - Team creation for group assignments
  * - Deadline setting
- * 
+ *
  * @param classesData - Array of available classes
  * @param classId - Optional ID of pre-selected class
  * @param isEditing - Boolean indicating if form is in edit mode
@@ -234,7 +234,7 @@ const AddAssignmentForm = ({
     if (assignmentType === 'group') {
       // Check if teams exist for each selected class
       const missingTeams = selectedClasses.some(
-        (classItem) => !teams[classItem.id] || teams[classItem.id].length === 0
+        (classItem) => !teams[classItem.id] || teams[classItem.id].length === 0,
       );
       if (missingTeams) {
         errors.teams = 'Please create teams for all selected classes';
@@ -319,7 +319,7 @@ const AddAssignmentForm = ({
       })
         .then(() => {
           console.log('Assignment created successfully');
-          navigate('/teacher');
+          navigate(`/teacher/classes/${classId}`);
         })
         .catch((error) => {
           console.error('Error creating assignment:', error);
@@ -500,11 +500,7 @@ const AddAssignmentForm = ({
               {isSubmitting ? 'Submitting...' : 'Confirm'}
             </button>
           </div>
-          {submitError && (
-            <div className={styles.error}>
-              {submitError}
-            </div>
-          )}
+          {submitError && <div className={styles.error}>{submitError}</div>}
         </form>
       </div>
 

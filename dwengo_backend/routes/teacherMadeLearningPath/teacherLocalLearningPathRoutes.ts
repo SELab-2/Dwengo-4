@@ -30,16 +30,20 @@ router.post("/", createLocalLearningPath);
 router.get("/", getLocalLearningPaths);
 
 /**
- * GET /teacher/learningPaths/all
- *   -> haalt alle leerpaden op (zowel van de teacher als van de API)
+ * @route GET /pathByTeacher/all
+ * @description Haal alle leerpaden op (zowel van de teacher als van de API)
+ * @access Teacher
  */
 router.get("/all", getAllLearningPaths);
 
 /**
- * GET /teacher/learningPaths/search
- *   -> zoek leerpaden op basis van een query
+ * @route GET /pathByTeacher/all/:pathId
+ * @description Haal één leerpad op (van teacher of API)
+ * @param pathId: string
+ * @access Teacher
  */
 router.get("/all/:pathId", getLearningPathById);
+
 
 /**
  * GET /teacher/learningPaths/:pathId

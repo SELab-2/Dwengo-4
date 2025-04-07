@@ -167,6 +167,7 @@ export class AssignmentTeacherController {
       const teacherId: number = getUserFromAuthRequest(req).id;
       const parsedDeadline = new Date(deadline);
 
+      console.log("Parsed deadline:", parsedDeadline);
       const updatedAssignment = await teacherAssignmentService.updateAssignmentWithTeams(
         assignmentId,
         teacherId,
