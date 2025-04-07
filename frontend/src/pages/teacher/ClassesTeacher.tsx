@@ -1,3 +1,4 @@
+import React, { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   approveJoinRequest,
@@ -11,6 +12,7 @@ import PrimaryButton from '../../components/shared/PrimaryButton';
 import CreateClass from '../../components/teacher/classes/CreateClassForm';
 import Modal from '../../components/shared/Modal';
 import SuccessMessage from '../../components/shared/SuccessMessage';
+import { Link } from 'react-router-dom';
 
 interface ClassItem {
   id: string;
@@ -70,7 +72,6 @@ const ClassesPageTeacher: React.FC = () => {
     error,
   } = useQuery<ClassItem[]>({
     queryKey: ['classes'],
-    queryKey: ['classes'],
     queryFn: fetchClasses,
   });
 
@@ -86,7 +87,6 @@ const ClassesPageTeacher: React.FC = () => {
   // Query: Haal student join requests voor de geselecteerde klas op
   const { data: studentJoinRequests, isLoading: isStudentJoinLoading } =
     useQuery<JoinRequest[]>({
-      queryKey: ['studentJoinRequests', selectedStudentClassId],
       queryKey: ['studentJoinRequests', selectedStudentClassId],
       queryFn: () => fetchJoinRequests(selectedStudentClassId!),
       enabled: !!selectedStudentClassId,
