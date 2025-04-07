@@ -1,12 +1,12 @@
-import React, { use, useEffect, useState } from "react";
-import styles from "./AddAssignmentForm.module.css";
-import TeamCreationModal from "./TeamCreationModal";
+import React, { useEffect, useState } from 'react';
+import styles from './AddAssignmentForm.module.css';
+import TeamCreationModal from './TeamCreationModal';
 import {
   fetchLearningPaths,
   fetchClasses,
-} from "../../../util/teacher/httpTeacher";
-import { useQuery } from "@tanstack/react-query";
-import { MultiSelect } from "primereact/multiselect";
+} from '../../../util/teacher/httpTeacher';
+import { useQuery } from '@tanstack/react-query';
+import { MultiSelect } from 'primereact/multiselect';
 
 interface StudentItem {
   id: string;
@@ -37,13 +37,13 @@ interface ClassItem {
 
 const AddAssignmentForm = ({ formData }: { formData: formData }) => {
   const [isTeamOpen, setIsTeamOpen] = useState<boolean>(false);
-  const [assignmentType, setAssignmentType] = useState<string>("");
+  const [assignmentType, setAssignmentType] = useState<string>('');
   const [Teams, setTeams] = useState<Team[]>([]);
   const [teamSize, setTeamSize] = useState<number>(0);
-  const [date, setDate] = useState<string>("");
+  const [, setDate] = useState<string>(''); //getter unused
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
-  const [title, setTitle] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
+  const [, setTitle] = useState<string>(''); //getter unused
+  const [, setDescription] = useState<string>(''); //getter unused
   const [selectedClasses, setSelectedClasses] = useState<ClassItem[]>([]);
   const [selectedLearningPath, setSelectedLearningPath] =
     useState<LearningPath>();
@@ -54,7 +54,7 @@ const AddAssignmentForm = ({ formData }: { formData: formData }) => {
     isError,
     error,
   } = useQuery<ClassItem[]>({
-    queryKey: ["classes"],
+    queryKey: ['classes'],
     queryFn: fetchClasses,
   });
 
@@ -64,16 +64,16 @@ const AddAssignmentForm = ({ formData }: { formData: formData }) => {
     isError: isLearningPathsError,
     error: learningPathsError,
   } = useQuery<LearningPath[]>({
-    queryKey: ["learningPaths"],
+    queryKey: ['learningPaths'],
     queryFn: fetchLearningPaths,
   });
 
   useEffect(() => {
     setLearningPaths(
-      learningPathsData?.map((data: any) => ({
+      learningPathsData?.map((data) => ({
         id: data.id,
         title: data.title,
-      })) || []
+      })) || [],
     );
   }, [learningPathsData]);
 
@@ -91,7 +91,7 @@ const AddAssignmentForm = ({ formData }: { formData: formData }) => {
   };
 
   const handleAssignmentTypeChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
+    e: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     setAssignmentType(e.target.value);
   };
@@ -104,7 +104,7 @@ const AddAssignmentForm = ({ formData }: { formData: formData }) => {
   };
 
   const handleLearningPathChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
+    e: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     const pathId = e.target.value;
     const path = learningPaths.find((path) => path.id === pathId);
@@ -115,12 +115,12 @@ const AddAssignmentForm = ({ formData }: { formData: formData }) => {
   //datum voor morgen instellen zodat mensen alleen deadlines kunnen kiezen vanaf morgen
   const today = new Date();
   today.setDate(today.getDate() + 1);
-  const formattedDate = today.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+  const formattedDate = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
 
-  const handleSubmission = (e: React.FormEvent<HTMLFormElement>) => {
+  /*const handleSubmission = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form submitted");
-  };
+    console.log('Form submitted');
+  };*/
   return (
     <section className={styles.wrapper}>
       <h2 className={styles.header}>
@@ -171,7 +171,7 @@ const AddAssignmentForm = ({ formData }: { formData: formData }) => {
               id="learningPath"
               name="learningPath"
               onChange={handleLearningPathChange}
-              value={selectedLearningPath?.id || ""}
+              value={selectedLearningPath?.id || ''}
             >
               <option value="">-Select a Path-</option>
               {learningPaths.map((path) => (
@@ -210,7 +210,7 @@ const AddAssignmentForm = ({ formData }: { formData: formData }) => {
                   <option value="individual">Individual</option>
                 </select>
               </div>
-              {assignmentType === "group" && (
+              {assignmentType === 'group' && (
                 <div className={styles.inputTeam}>
                   <h6>Choose Team Size: </h6>
                   <input
@@ -224,20 +224,20 @@ const AddAssignmentForm = ({ formData }: { formData: formData }) => {
                 </div>
               )}
             </div>
-            {assignmentType === "group" && teamSize > 0 && (
+            {assignmentType === 'group' && teamSize > 0 && (
               <div className={styles.rightSide}>
                 <h6>Teams:</h6>
                 <div className={styles.teamsList}>
-                  {Teams.map((team: any) => (
+                  {Teams.map((team) => (
                     <div key={team.id} className={styles.teamPreview}>
                       <p>
-                        Team-{team.id}:{" "}
+                        Team-{team.id}:{' '}
                         {team.members
                           .map(
-                            (member: any) =>
-                              `${member.firstName} ${member.lastName}`
+                            (member) =>
+                              `${member.firstName} ${member.lastName}`,
                           )
-                          .join(", ")}
+                          .join(', ')}
                       </p>
                     </div>
                   ))}

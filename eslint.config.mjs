@@ -3,10 +3,12 @@ import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
 import unusedImports from "eslint-plugin-unused-imports"; // <– Add this import
+import { defineConfig, globalIgnores } from "eslint/config";
 
-export default [
+export default defineConfig([
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
+  globalIgnores(["frontend/dist/"]),
   {
     files: ["**/*.{js,ts}"],
     // Add plugin to the configuration object
@@ -35,4 +37,4 @@ export default [
     },
   },
   prettierConfig,
-];
+]);

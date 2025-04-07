@@ -10,7 +10,7 @@ const APP_URL = process.env.APP_URL || "http://localhost:5000";
 
 export const isTeacherValid = (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): boolean => {
   const teacherId = req.user?.id;
   if (!teacherId) {
@@ -20,10 +20,7 @@ export const isTeacherValid = (
   return true; // Teacher is authorized
 };
 
-export const isNameValid = (
-  req: AuthenticatedRequest,
-  res: Response
-): boolean => {
+export const isNameValid = (req: AuthenticatedRequest): boolean => {
   const { name } = req.body;
   if (!name || typeof name !== "string" || name.trim() === "") {
     throw new BadRequestError("Vul een geldige klasnaam in");
@@ -40,7 +37,7 @@ export const getTeacherClasses = asyncHandler(
     const teacherId: number = getUserFromAuthRequest(req).id;
     const classes = await classService.getClassesByTeacher(teacherId);
     res.status(200).json({ classes });
-  }
+  },
 );
 
 /**
@@ -56,7 +53,7 @@ export const createClassroom = asyncHandler(
 
     const classroom = await classService.createClass(name, teacherId);
     res.status(201).json({ message: "Klas aangemaakt", classroom });
-  }
+  },
 );
 
 /**
@@ -70,7 +67,7 @@ export const deleteClassroom = asyncHandler(
 
     await classService.deleteClass(classId, teacherId);
     res.status(200).json({ message: `Klas met id ${classId} verwijderd` });
-  }
+  },
 );
 
 /**
@@ -86,7 +83,7 @@ export const getJoinLink = asyncHandler(
 
     const joinLink = `${APP_URL}/class/teacher/join?joinCode=${joinCode}`;
     res.status(200).json({ joinLink });
-  }
+  },
 );
 
 /**
@@ -100,11 +97,11 @@ export const regenerateJoinLink = asyncHandler(
 
     const newJoinCode = await classService.regenerateJoinCode(
       classId,
-      teacherId
+      teacherId,
     );
     const joinLink = `${APP_URL}/class/teacher/join?joinCode=${newJoinCode}`;
     res.status(200).json({ joinLink });
-  }
+  },
 );
 
 /**
@@ -120,7 +117,7 @@ export const getClassroomStudents = asyncHandler(
     const students: (Student & { user: User })[] =
       await classService.getStudentsByClass(classId, teacherId);
     res.status(200).json({ students });
-  }
+  },
 );
 
 /**
@@ -136,13 +133,12 @@ export const getClassByIdAndTeacherId = asyncHandler(
 
     const classroom = await classService.getClassByIdAndTeacherId(
       classId,
-      teacherId
+      teacherId,
     );
     if (!classroom) {
       throw new BadRequestError(`Klas met id ${classId} niet gevonden`);
     }
 
     res.status(200).json({ classroom });
-  }
+  },
 );
-

@@ -6,7 +6,10 @@ export class AssignmentController {
   async getAssignmentsById(req: Request, res: Response): Promise<void> {
     try {
       // 1) Validatie param
-      if (!req.params.assignmentId || isNaN(parseInt(req.params.assignmentId))) {
+      if (
+        !req.params.assignmentId ||
+        isNaN(parseInt(req.params.assignmentId))
+      ) {
         res.status(400).json({ error: "Invalid assignment ID" });
         return;
       }
@@ -14,7 +17,8 @@ export class AssignmentController {
       const assignmentId: number = parseInt(req.params.assignmentId);
 
       // 2) Opvragen assignment
-      const assignment: Assignment | null = await assignmentService.getAssignmentById(assignmentId);
+      const assignment: Assignment | null =
+        await assignmentService.getAssignmentById(assignmentId);
 
       // 3) Bestaat het wel?
       if (!assignment) {
@@ -24,12 +28,8 @@ export class AssignmentController {
 
       // 4) OK → 200 + assignment
       res.status(200).json(assignment);
-
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: "Failed to retrieve assignment" });
     }
   }
 }
-
-
-

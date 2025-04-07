@@ -1,18 +1,18 @@
-import React, { useRef } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import InputWithChecks from "../../components/shared/InputWithChecks";
+import React, { useRef } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import InputWithChecks from '../../components/shared/InputWithChecks';
 import {
   validateEmail,
   validateRequired,
   validateForm,
   validateMinLength,
-} from "../../util/shared/validation";
-import Container from "../../components/shared/Container";
-import BoxBorder from "../../components/shared/BoxBorder";
-import { signupTeacher } from "../../util/teacher/httpTeacher";
-import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
-import PrimaryButton from "../../components/shared/PrimaryButton";
+} from '../../util/shared/validation';
+import Container from '../../components/shared/Container';
+import BoxBorder from '../../components/shared/BoxBorder';
+import { signupTeacher } from '../../util/teacher/httpTeacher';
+import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButton';
+import PrimaryButton from '../../components/shared/PrimaryButton';
 
 interface SignupFormData {
   firstName: string;
@@ -44,7 +44,7 @@ const SignupTeacher: React.FC = () => {
   >({
     mutationFn: signupTeacher,
     onSuccess: () => {
-      navigate("/teacher/inloggen");
+      navigate('/teacher/inloggen');
     },
   });
 
@@ -124,8 +124,8 @@ const SignupTeacher: React.FC = () => {
             />
             {isError && (
               <div className="c-r">
-                {(error as any)?.info?.message ||
-                  "Er is iets fout gelopen tijdens het registreren"}
+                {error.message ||
+                  'Er is iets fout gelopen tijdens het registreren'}
               </div>
             )}
             <div>

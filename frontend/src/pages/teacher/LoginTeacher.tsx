@@ -104,7 +104,7 @@ const LoginTeacher: React.FC = () => {
             />
             {isError && (
               <div className="c-r">
-                {(error as any)?.info?.message ||
+                {error.message ||
                   'Er is iets fout gelopen tijdens het inloggen'}
               </div>
             )}
