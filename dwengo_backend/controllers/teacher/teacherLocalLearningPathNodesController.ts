@@ -1,11 +1,12 @@
-import { Response } from "express";
+import { NextFunction, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import localLearningPathNodeService from "../../services/localLearningPathNodeService";
+import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 // Interface voor node-updates
 export interface NodeMetadata {
-  isExternal: boolean;  
+  isExternal: boolean;
   localLearningObjectId?: string;
   dwengoHruid?: string;
   dwengoLanguage?: string;
@@ -17,16 +18,20 @@ export interface NodeMetadata {
  * GET /teacher/learningPaths/:pathId/nodes
  */
 export const getNodesForPath = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user!.id; // we weten: TEACHER
-    const { pathId } = req.params;
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      const teacherId = getUserFromAuthRequest(req).id; // we weten: TEACHER
+      const { pathId } = req.params;
 
-    const nodes = await localLearningPathNodeService.getAllNodesForPath(
-      teacherId,
-      pathId
-    );
-    res.json(nodes);
-  }
+      const nodes = await localLearningPathNodeService.getAllNodesForPath(
+        teacherId,
+        pathId,
+      );
+      res.json(nodes);
+    } catch (error) {
+      next(error);
+    }
+  },
 );
 
 /**
@@ -34,29 +39,33 @@ export const getNodesForPath = asyncHandler(
  * Body: NodeMetadata (zie interface), minimal required fields
  */
 export const createNodeForPath = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user!.id;
-    const { pathId } = req.params;
-    const body: NodeMetadata = req.body;
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      const teacherId = getUserFromAuthRequest(req).id;
+      const { pathId } = req.params;
+      const body: NodeMetadata = req.body;
 
-    const newNode = await localLearningPathNodeService.createNodeForPath(
-      teacherId,
-      pathId,
-      {
-        isExternal: !!body.isExternal,
-        localLearningObjectId: body.localLearningObjectId,
-        dwengoHruid: body.dwengoHruid,
-        dwengoLanguage: body.dwengoLanguage,
-        dwengoVersion: body.dwengoVersion,
-        start_node: !!body.start_node,
-      }
-    );
+      const newNode = await localLearningPathNodeService.createNodeForPath(
+        teacherId,
+        pathId,
+        {
+          isExternal: !!body.isExternal,
+          localLearningObjectId: body.localLearningObjectId,
+          dwengoHruid: body.dwengoHruid,
+          dwengoLanguage: body.dwengoLanguage,
+          dwengoVersion: body.dwengoVersion,
+          start_node: !!body.start_node,
+        },
+      );
 
-    res.status(201).json({
-      message: "Node aangemaakt",
-      node: newNode,
-    });
-  }
+      res.status(201).json({
+        message: "Node successfully created.",
+        node: newNode,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 );
 
 /**
@@ -64,41 +73,53 @@ export const createNodeForPath = asyncHandler(
  * -> partial update of node
  */
 export const updateNodeForPath = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user!.id;
-    const { pathId, nodeId } = req.params;
-    const body: NodeMetadata = req.body;
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      const teacherId = getUserFromAuthRequest(req).id;
+      const { pathId, nodeId } = req.params;
+      const body: NodeMetadata = req.body;
 
-    const updatedNode = await localLearningPathNodeService.updateNodeForPath(
-      teacherId,
-      pathId,
-      nodeId,
-      {
-        isExternal: body.isExternal,
-        localLearningObjectId: body.localLearningObjectId,
-        dwengoHruid: body.dwengoHruid,
-        dwengoLanguage: body.dwengoLanguage,
-        dwengoVersion: body.dwengoVersion,
-        start_node: body.start_node,
-      }
-    );
+      const updatedNode = await localLearningPathNodeService.updateNodeForPath(
+        teacherId,
+        pathId,
+        nodeId,
+        {
+          isExternal: body.isExternal,
+          localLearningObjectId: body.localLearningObjectId,
+          dwengoHruid: body.dwengoHruid,
+          dwengoLanguage: body.dwengoLanguage,
+          dwengoVersion: body.dwengoVersion,
+          start_node: body.start_node,
+        },
+      );
 
-    res.json({
-      message: "Node bijgewerkt",
-      node: updatedNode,
-    });
-  }
+      res.json({
+        message: "Node successfully updated.",
+        node: updatedNode,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 );
 
 /**
  * DELETE /teacher/learningPaths/:pathId/nodes/:nodeId
  */
 export const deleteNodeFromPath = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user!.id;
-    const { pathId, nodeId } = req.params;
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      const teacherId = getUserFromAuthRequest(req).id;
+      const { pathId, nodeId } = req.params;
 
-    await localLearningPathNodeService.deleteNodeFromPath(teacherId, pathId, nodeId);
-    res.json({ message: "Node verwijderd uit leerpad" });
-  }
+      await localLearningPathNodeService.deleteNodeFromPath(
+        teacherId,
+        pathId,
+        nodeId,
+      );
+      res.json({ message: "Node successfully deleted." });
+    } catch (error) {
+      next(error);
+    }
+  },
 );
