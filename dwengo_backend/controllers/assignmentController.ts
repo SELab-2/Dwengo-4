@@ -13,8 +13,13 @@ export class AssignmentController {
 
       const assignmentId: number = parseInt(req.params.assignmentId);
 
+      const includeClass = req.query.includeClass === 'true';
+      const includeTeams = req.query.includeTeams === 'true';
+      
+
+
       // 2) Opvragen assignment
-      const assignment: Assignment | null = await assignmentService.getAssignmentById(assignmentId);
+      const assignment: Assignment | null = await assignmentService.getAssignmentById(assignmentId, includeClass, includeTeams);
 
       // 3) Bestaat het wel?
       if (!assignment) {

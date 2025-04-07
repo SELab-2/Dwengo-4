@@ -2,11 +2,13 @@ import express from "express";
 import {
   createClassroom,
   deleteClassroom,
-  getClassroomStudents,
+  getClassroomsStudents,
   getJoinLink,
   getTeacherClasses,
   regenerateJoinLink,
   getClassByIdAndTeacherId,
+  updateClassroom,
+  getStudentsByClassId
 } from "../../controllers/teacher/teacherClassController";
 import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 
@@ -30,13 +32,31 @@ router.post("/", createClassroom);
  */
 router.get("/", getTeacherClasses);
 
+
+/**
+ * @route PATCH /class/teacher/:classId
+ * @description Update a classroom
+ * @param classId: string
+ * @body name: string
+ * @access Teacher
+ */
+router.patch("/:classId", updateClassroom);
+
+/**
+ * @route GET /class/teacher/:classId/student
+ * @description Get all students in all classroom
+ * @param classId: number
+ * @access Teacher
+ */
+router.get("/student", getClassroomsStudents);
+
 /**
  * @route GET /class/teacher/:classId/student
  * @description Get all students in a classroom
  * @param classId: number
  * @access Teacher
  */
-router.get("/:classId/student", getClassroomStudents);
+router.get("/:classId/student", getStudentsByClassId);
 
 /**
  * @route GET /class/teacher/:classId/join-link

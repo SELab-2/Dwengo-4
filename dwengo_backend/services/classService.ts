@@ -97,6 +97,16 @@ export default class ClassService {
     });
   }
 
+  // Update a class's information
+  static async updateClass(classId: number, teacherId: number, name: string): Promise<Class> {
+    await this.verifyClassAndTeacher(classId, teacherId);
+
+    return prisma.class.update({
+      where: { id: classId },
+      data: { name }
+    });
+  }
+
   // Function to check if the requester is the teacher of the class
   static async isTeacherOfClass(
     classId: number,
@@ -290,4 +300,34 @@ export default class ClassService {
     return updatedClass.code;
   }
 
+  // Get all classes from the same teacher
+  static async getAllClassesByTeacher(
+    teacherId: number,
+    includeStudents: boolean = false
+  ): Promise<Class[]> {
+    // Fetch all classes taught by the same teacher
+    return prisma.class.findMany({
+      where: {
+        ClassTeacher: {
+          some: {
+            teacherId,
+          },
+        },
+      },
+      include: includeStudents
+        ? {
+          classLinks: {
+            include: {
+              student: {
+                include: {
+                  user: true,
+                },
+              },
+            },
+          },
+        }
+        : undefined,
+    });
+  }
 }
+

@@ -409,15 +409,16 @@ model Assignment {
   id          Int      @id @default(autoincrement())
   title       String
   description String
-  pathRef     String
-  isExternal  Boolean  @default(false)
-  deadline    DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  questions        Question[]
-  classAssignments ClassAssignment[]
-  teamAssignments  TeamAssignment[]
+  pathRef    String
+  isExternal Boolean @default(false)
+  deadline         DateTime
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  teamSize  Int 
+  
+  Questions        Question[]
+  classAssignments ClassAssignment[] 
+  teamAssignments  TeamAssignment[] 
 
   submissions Submission[]
 }
@@ -451,7 +452,7 @@ model TeamAssignment {
   teamId       Int @unique
   assignmentId Int
 
-  team       Team       @relation(fields: [teamId], references: [id])
+  team       Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
   assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 
   // Dit is een unieke composite key

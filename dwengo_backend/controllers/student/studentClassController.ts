@@ -12,7 +12,7 @@ import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 export const getStudentClasses = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
         const studentId: number = getUserFromAuthRequest(req).id;
-        const classes = await classService.getClassesByStudent(studentId);
-        res.status(200).json({ classes });
+        const classrooms = await classService.getClassesByStudent(studentId);
+        res.status(200).json({ classrooms });
     }
 );

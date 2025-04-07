@@ -1,3 +1,4 @@
+import { isExternal } from "util/types";
 import { dwengoAPI } from "../config/dwengoAPI";
 
 export interface LearningPathDto {
@@ -12,6 +13,7 @@ export interface LearningPathDto {
   nodes: any[]; // Array van nodes (zie Dwengo docs), elk met transitions, etc.
   createdAt?: string; // Als Dwengo 'created_at' meegeeft
   updatedAt?: string; // Als Dwengo 'updatedAt' meegeeft
+  isExternal: boolean; // Dwengo API
 }
 
 /**
@@ -30,6 +32,7 @@ function mapDwengoPathToLocal(dwengoPath: any): LearningPathDto {
     nodes: dwengoPath.nodes ?? [],
     createdAt: dwengoPath.created_at ?? "",
     updatedAt: dwengoPath.updatedAt ?? "",
+    isExternal: true, // Dwengo API
   };
 }
 

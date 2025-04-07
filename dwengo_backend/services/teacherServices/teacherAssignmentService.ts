@@ -1,8 +1,14 @@
 import { Assignment,  Role } from "@prisma/client";
 import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
 import ReferenceValidationService from "../../services/referenceValidationService";
+import { TeamDivision } from "../../interfaces/extendedTypeInterfaces";
+import { createTeamsInAssignment } from "../teacherTeamsService";
 import prisma from "../../config/prisma";
 
+
+interface ClassTeams {
+  [classId: number]: TeamDivision[];
+}
 
 export default class TeacherAssignmentService {
   /**
@@ -16,7 +22,8 @@ export default class TeacherAssignmentService {
     isExternal: boolean,
     deadline: Date,
     title: string,
-    description: string
+    description: string,
+    teamSize: number
   ): Promise<Assignment> {
     // 1) check authorization
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
@@ -46,8 +53,11 @@ export default class TeacherAssignmentService {
         },
         title,
         description,
+        teamSize
       },
     });
+
+
   }
 
   /**
@@ -101,7 +111,8 @@ export default class TeacherAssignmentService {
     isExternal: boolean,
     teacherId: number,
     title: string,
-    description: string
+    description: string,
+    teamSize: number
   ): Promise<Assignment> {
     // 1) autorisatie
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
@@ -119,6 +130,7 @@ export default class TeacherAssignmentService {
         isExternal,
         title,
         description,
+        teamSize
       },
     });
   }
@@ -136,6 +148,156 @@ export default class TeacherAssignmentService {
 
     return prisma.assignment.delete({
       where: { id: assignmentId },
+    });
+  }
+
+  /**
+   * Create an assignment with class teams structure
+   */
+  static async createAssignmentWithTeams(
+    teacherId: number,
+    pathRef: string,
+    pathLanguage: string,
+    isExternal: boolean,
+    deadline: Date,
+    title: string,
+    description: string,
+    classTeams: ClassTeams,
+    teamSize: number
+
+  ): Promise<Assignment> {
+    // 1) Check authorization for all classes
+    for (const classId of Object.keys(classTeams)) {
+      if (!(await isAuthorized(teacherId, Role.TEACHER, parseInt(classId)))) {
+        throw new Error("The teacher is unauthorized to perform this action");
+      }
+    }
+
+    // 2) Validate pathRef
+    await ReferenceValidationService.validateLearningPath(
+      isExternal,
+      isExternal ? undefined : pathRef, // localId
+      isExternal ? pathRef : undefined, // hruid
+      isExternal ? pathLanguage : undefined // language
+    );
+
+    // 3) Create assignment and teams in transaction
+    return await prisma.$transaction(async (tx) => {
+
+      // Create the assignment
+      const assignment = await tx.assignment.create({
+        data: {
+          pathRef,
+          isExternal,
+          deadline,
+          title,
+          description,
+          teamSize
+        },
+      });
+
+      // Create class assignments and teams
+      for (const [classId, teams] of Object.entries(classTeams)) {
+        const assigndment = await tx.classAssignment.create({
+          data: {
+            assignmentId: assignment.id,
+            classId: parseInt(classId),
+          },
+        });
+        await createTeamsInAssignment(assignment.id, parseInt(classId), teams,tx);
+      }
+
+      return assignment;
+    });
+  }
+
+  /**
+   * Update an assignment and its team structure
+   */
+  static async updateAssignmentWithTeams(
+    assignmentId: number,
+    teacherId: number,
+    pathRef: string,
+    pathLanguage: string,
+    isExternal: boolean,
+    deadline: Date,
+    title: string,
+    description: string,
+    classTeams: ClassTeams,
+    teamSize: number
+  ): Promise<Assignment> {
+    // 1) Check authorization for all classes and assignment
+    if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
+      throw new Error("The teacher is unauthorized to update the assignment");
+    }
+    for (const classId of Object.keys(classTeams)) {
+      if (!(await isAuthorized(teacherId, Role.TEACHER, parseInt(classId)))) {
+        throw new Error("The teacher is unauthorized to perform this action");
+      }
+    }
+
+    // 2) Validate pathRef
+    await ReferenceValidationService.validateLearningPath(
+      isExternal,
+      isExternal ? undefined : pathRef, // localId
+      isExternal ? pathRef : undefined, // hruid
+      isExternal ? pathLanguage : undefined // language
+    );
+
+    // 3) Update assignment and teams in transaction
+    return await prisma.$transaction(async (tx) => {
+      // Update the assignment
+      const assignment = await tx.assignment.update({
+        where: { id: assignmentId },
+        data: {
+          pathRef,
+          isExternal,
+          deadline,
+          title,
+          description,
+          teamSize,
+        },
+      });
+
+      // Delete existing teams
+      await tx.team.deleteMany({
+        where: {
+          teamAssignment: {
+            assignmentId: assignmentId,
+          },
+        },
+      });
+
+      // Ensure all classAssignments exist for the provided classes
+      for (const classId of Object.keys(classTeams)) {
+        const existingClassAssignment = await tx.classAssignment.findFirst({
+          where: {
+            assignmentId: assignmentId,
+            classId: parseInt(classId),
+          },
+        });
+
+        if (!existingClassAssignment) {
+          await tx.classAssignment.create({
+            data: {
+              assignmentId: assignment.id,
+              classId: parseInt(classId),
+            },
+          });
+        }
+      }
+
+      // Create new teams for each class
+      for (const [classId, teams] of Object.entries(classTeams)) {
+        await createTeamsInAssignment(
+          assignment.id,
+          parseInt(classId),
+          teams,
+          tx
+        );
+      }
+
+      return assignment;
     });
   }
 }

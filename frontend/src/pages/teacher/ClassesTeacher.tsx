@@ -12,13 +12,10 @@ import PrimaryButton from '../../components/shared/PrimaryButton';
 import CreateClass from '../../components/teacher/classes/CreateClassForm';
 import Modal from '../../components/shared/Modal';
 import SuccessMessage from '../../components/shared/SuccessMessage';
+import { useNavigate } from 'react-router-dom';
+import { ClassItem } from '../../types/type';
 import { Link } from 'react-router-dom';
 
-interface ClassItem {
-  id: string;
-  name: string;
-  code: string;
-}
 
 interface TeacherInvite {
   inviteId: number;
@@ -72,6 +69,7 @@ const ClassesPageTeacher: React.FC = () => {
     error,
   } = useQuery<ClassItem[]>({
     queryKey: ['classes'],
+
     queryFn: fetchClasses,
   });
 
@@ -235,7 +233,7 @@ const ClassesPageTeacher: React.FC = () => {
             </table>
           </div>
         ) : (
-          !isLoading && <p>Geen klassen gevonden.</p>
+          !isLoading && isError && <p>Geen klassen gevonden.</p>
         )}
 
         {/* Modal voor teacher invites */}

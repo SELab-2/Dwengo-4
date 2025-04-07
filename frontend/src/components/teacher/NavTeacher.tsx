@@ -32,9 +32,10 @@ const NavTeacher: React.FC = () => {
             />
             {firstName ? (
               <div className="flex space-x-4">
+
                 <NavButton to="/teacher" label="Home" />
                 <NavButton to="/teacher/classes" label="Klassen" />
-                <NavButton to="/teacher/learning-paths" label="Leerpaden" />
+                <NavButton to="/learning-paths" label="Leerpaden" />
               </div>
             ) : (
               <div
