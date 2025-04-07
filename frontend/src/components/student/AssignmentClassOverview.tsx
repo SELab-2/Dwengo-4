@@ -1,12 +1,10 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  AssignmentItem,
-  fetchAssignmentsForClass,
-} from '../../util/student/httpStudent';
 import { Link } from 'react-router-dom';
 import PrimaryButton from '../shared/PrimaryButton';
 import { useTranslation } from 'react-i18next';
+import { AssignmentItem } from '@/util/student/classJoin';
+import { fetchAssignmentsForClass } from '@/util/student/assignment';
 
 export default function AssignmentsForClassOverview({
   classId,

@@ -117,11 +117,11 @@ export const router = createBrowserRouter([
         element: <AssignmentAdd></AssignmentAdd>,
       },
       {
-        path: 'assignments/:assignmentId',
+        path: 'assignment/:assignmentId',
         element: <Assignment></Assignment>,
       },
       {
-        path: 'assignments/:assignmentId/edit',
+        path: 'assignment/:assignmentId/edit',
         element: <AssignmentEdit></AssignmentEdit>,
       },
       {

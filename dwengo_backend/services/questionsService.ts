@@ -8,10 +8,15 @@ import {
 } from "@prisma/client";
 
 import referenceValidationService from "./referenceValidationService";
-import { BadRequestError, NotFoundError } from "../errors/errors";
+import { BadRequestError } from "../errors/errors";
 import { AuthenticatedUser } from "../interfaces/extendedTypeInterfaces";
 
 import prisma from "../config/prisma";
+import {
+  handlePrismaQuery,
+  handlePrismaTransaction,
+  handleQueryWithExistenceCheck,
+} from "../errors/errorFunctions";
 
 /**
  * Helper: bepaal of een gegeven user deze vraag mag *zien* in een overzicht.
@@ -78,43 +83,47 @@ export default class QuestionService {
     isPrivate: boolean,
   ): Promise<Question> {
     // 1) Check assignment
-    const assignment = await prisma.assignment.findUnique({
-      where: { id: assignmentId },
-    });
-    if (!assignment) {
-      throw new NotFoundError("Assignment not found.");
-    }
+    await handleQueryWithExistenceCheck(
+      () =>
+        prisma.assignment.findUnique({
+          where: { id: assignmentId },
+        }),
+      "Assignment not found.",
+    );
 
     // 2) Check team
-    const team = await prisma.team.findUnique({
-      where: { id: teamId },
-      include: {
-        teamAssignment: true,
-        students: true,
-      },
-    });
-    if (!team) {
-      throw new BadRequestError("Team niet gevonden.");
-    }
+    const team = await handleQueryWithExistenceCheck(
+      () =>
+        prisma.team.findUnique({
+          where: { id: teamId },
+          include: {
+            teamAssignment: true,
+            students: true,
+          },
+        }),
+      "Team not found.",
+    );
 
     // Check of team bij deze assignment hoort
     if (
       !team.teamAssignment ||
       team.teamAssignment.assignmentId !== assignmentId
     ) {
-      throw new BadRequestError("Team is niet gekoppeld aan deze assignment.");
+      throw new BadRequestError(
+        "The specified team wasn't assigned to this assignment.",
+      );
     }
 
     // Indien student => check of hij/zij in team zit
     if (!isTeacher) {
       const studentInTeam = team.students.some((s) => s.userId === creatorId);
       if (!studentInTeam) {
-        throw new BadRequestError("Student zit niet in dit team.");
+        throw new BadRequestError("Student is not part of the team.");
       }
     }
 
     // 3) Transactie: Question + eerste message
-    return prisma.$transaction(async (tx) => {
+    return await handlePrismaTransaction(prisma, async (tx) => {
       const q = await tx.question.create({
         data: {
           title,
@@ -168,7 +177,7 @@ export default class QuestionService {
     if (isExternal) {
       if (!dwengoHruid || !dwengoLanguage || dwengoVersion == null) {
         throw new BadRequestError(
-          "Dwengo fields missing: hruid, language, version",
+          "Dwengo mandatory fields missing: hruid, language, version.",
         );
       }
       await referenceValidationService.validateDwengoLearningObject(
@@ -179,7 +188,7 @@ export default class QuestionService {
     } else {
       if (!localLearningObjectId) {
         throw new BadRequestError(
-          "localLearningObjectId is missing for local question",
+          "LocalLearningObjectId is missing for local question.",
         );
       }
       await referenceValidationService.validateLocalLearningObject(
@@ -187,16 +196,18 @@ export default class QuestionService {
       );
     }
 
-    return prisma.questionSpecific.create({
-      data: {
-        questionId: baseQuestion.id,
-        isExternal,
-        localLearningObjectId: isExternal ? undefined : localLearningObjectId,
-        dwengoHruid: isExternal ? dwengoHruid : undefined,
-        dwengoLanguage: isExternal ? dwengoLanguage : undefined,
-        dwengoVersion: isExternal ? dwengoVersion : undefined,
-      },
-    });
+    return await handlePrismaQuery(() =>
+      prisma.questionSpecific.create({
+        data: {
+          questionId: baseQuestion.id,
+          isExternal,
+          localLearningObjectId: isExternal ? undefined : localLearningObjectId,
+          dwengoHruid: isExternal ? dwengoHruid : undefined,
+          dwengoLanguage: isExternal ? dwengoLanguage : undefined,
+          dwengoVersion: isExternal ? dwengoVersion : undefined,
+        },
+      }),
+    );
   }
 
   /**
@@ -229,7 +240,7 @@ export default class QuestionService {
     if (isExternal) {
       if (!dwengoLanguage) {
         throw new BadRequestError(
-          "Dwengo language is missing for external path question",
+          "Dwengo language is missing for external path question.",
         );
       }
       await referenceValidationService.validateDwengoLearningPath(
@@ -240,13 +251,15 @@ export default class QuestionService {
       await referenceValidationService.validateLocalLearningPath(pathRef);
     }
 
-    return prisma.questionGeneral.create({
-      data: {
-        questionId: baseQuestion.id,
-        pathRef,
-        isExternal,
-      },
-    });
+    return await handlePrismaQuery(() =>
+      prisma.questionGeneral.create({
+        data: {
+          questionId: baseQuestion.id,
+          pathRef,
+          isExternal,
+        },
+      }),
+    );
   }
 
   /**
@@ -258,22 +271,26 @@ export default class QuestionService {
     text: string,
   ): Promise<QuestionMessage> {
     if (!text.trim()) {
-      throw new BadRequestError("Message cannot be empty");
-    }
-    const question = await prisma.question.findUnique({
-      where: { id: questionId },
-    });
-    if (!question) {
-      throw new NotFoundError("Question not found");
+      throw new BadRequestError("Message cannot be empty.");
     }
 
-    return prisma.questionMessage.create({
-      data: {
-        questionId,
-        userId,
-        text,
-      },
-    });
+    await handleQueryWithExistenceCheck(
+      () =>
+        prisma.question.findUnique({
+          where: { id: questionId },
+        }),
+      "Question not found.",
+    );
+
+    return await handlePrismaQuery(() =>
+      prisma.questionMessage.create({
+        data: {
+          questionId,
+          userId,
+          text,
+        },
+      }),
+    );
   }
 
   /**
@@ -284,16 +301,19 @@ export default class QuestionService {
     newTitle: string,
   ): Promise<Question> {
     if (!newTitle.trim()) {
-      throw new BadRequestError("Title mag niet leeg zijn");
+      throw new BadRequestError("Title cannot be empty.");
     }
-    const q = await prisma.question.findUnique({ where: { id: questionId } });
-    if (!q) {
-      throw new NotFoundError("Question not found");
-    }
-    return prisma.question.update({
-      where: { id: questionId },
-      data: { title: newTitle },
-    });
+    await handleQueryWithExistenceCheck(
+      () => prisma.question.findUnique({ where: { id: questionId } }),
+      "Question not found.",
+    );
+
+    return handlePrismaQuery(() =>
+      prisma.question.update({
+        where: { id: questionId },
+        data: { title: newTitle },
+      }),
+    );
   }
 
   /**
@@ -304,18 +324,22 @@ export default class QuestionService {
     newText: string,
   ): Promise<QuestionMessage> {
     if (!newText.trim()) {
-      throw new BadRequestError("Message cannot be empty");
+      throw new BadRequestError("Message cannot be empty.");
     }
-    const msg = await prisma.questionMessage.findUnique({
-      where: { id: questionMessageId },
-    });
-    if (!msg) {
-      throw new NotFoundError("QuestionMessage not found");
-    }
-    return prisma.questionMessage.update({
-      where: { id: questionMessageId },
-      data: { text: newText },
-    });
+    await handleQueryWithExistenceCheck(
+      () =>
+        prisma.questionMessage.findUnique({
+          where: { id: questionMessageId },
+        }),
+      "QuestionMessage not found.",
+    );
+
+    return handlePrismaQuery(() =>
+      prisma.questionMessage.update({
+        where: { id: questionMessageId },
+        data: { text: newText },
+      }),
+    );
   }
 
   /**
@@ -323,18 +347,18 @@ export default class QuestionService {
    * (De authorizeQuestion middleware checkt of user mag inzien.)
    */
   static async getQuestion(questionId: number): Promise<Question> {
-    const question = await prisma.question.findUnique({
-      where: { id: questionId },
-      include: {
-        specific: true,
-        general: true,
-        questionConversation: true,
-      },
-    });
-    if (!question) {
-      throw new NotFoundError("Question not found");
-    }
-    return question;
+    return await handleQueryWithExistenceCheck(
+      () =>
+        prisma.question.findUnique({
+          where: { id: questionId },
+          include: {
+            specific: true,
+            general: true,
+            questionConversation: true,
+          },
+        }),
+      "Question not found.",
+    );
   }
 
   /**
@@ -345,21 +369,23 @@ export default class QuestionService {
     teamId: number,
     user: AuthenticatedUser,
   ): Promise<Question[]> {
-    const allQs = await prisma.question.findMany({
-      where: { teamId },
-      include: {
-        team: {
-          include: {
-            students: true,
-            class: { include: { ClassTeacher: true } },
+    const allQs = await handlePrismaQuery(() =>
+      prisma.question.findMany({
+        where: { teamId },
+        include: {
+          team: {
+            include: {
+              students: true,
+              class: { include: { ClassTeacher: true } },
+            },
           },
+          specific: true,
+          general: true,
+          questionConversation: true,
         },
-        specific: true,
-        general: true,
-        questionConversation: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
+        orderBy: { createdAt: "desc" },
+      }),
+    );
     return allQs.filter((q) => canUserSeeQuestionInList(q, user));
   }
 
@@ -370,23 +396,25 @@ export default class QuestionService {
     classId: number,
     user: AuthenticatedUser,
   ): Promise<Question[]> {
-    const allQs = await prisma.question.findMany({
-      where: {
-        team: { classId },
-      },
-      include: {
-        team: {
-          include: {
-            students: true,
-            class: { include: { ClassTeacher: true } },
-          },
+    const allQs = await handlePrismaQuery(() =>
+      prisma.question.findMany({
+        where: {
+          team: { classId },
         },
-        specific: true,
-        general: true,
-        questionConversation: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
+        include: {
+          team: {
+            include: {
+              students: true,
+              class: { include: { ClassTeacher: true } },
+            },
+          },
+          specific: true,
+          general: true,
+          questionConversation: true,
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+    );
     return allQs.filter((q) => canUserSeeQuestionInList(q, user));
   }
 
@@ -398,26 +426,28 @@ export default class QuestionService {
     classId: number,
     user: AuthenticatedUser,
   ): Promise<Question[]> {
-    const allQs = await prisma.question.findMany({
-      where: {
-        assignmentId,
-        team: {
-          classId,
-        },
-      },
-      include: {
-        team: {
-          include: {
-            students: true,
-            class: { include: { ClassTeacher: true } },
+    const allQs = await handlePrismaQuery(() =>
+      prisma.question.findMany({
+        where: {
+          assignmentId,
+          team: {
+            classId,
           },
         },
-        specific: true,
-        general: true,
-        questionConversation: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
+        include: {
+          team: {
+            include: {
+              students: true,
+              class: { include: { ClassTeacher: true } },
+            },
+          },
+          specific: true,
+          general: true,
+          questionConversation: true,
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+    );
     return allQs.filter((q) => canUserSeeQuestionInList(q, user));
   }
 
@@ -429,32 +459,38 @@ export default class QuestionService {
     questionId: number,
   ): Promise<QuestionMessage[]> {
     await this.getQuestion(questionId); // check existence
-    return prisma.questionMessage.findMany({
-      where: { questionId },
-      orderBy: { createdAt: "asc" },
-      include: {
-        user: {
-          select: {
-            firstName: true,
-            lastName: true,
-            role: true,
+    return await handlePrismaQuery(() =>
+      prisma.questionMessage.findMany({
+        where: { questionId },
+        orderBy: { createdAt: "asc" },
+        include: {
+          user: {
+            select: {
+              firstName: true,
+              lastName: true,
+              role: true,
+            },
           },
         },
-      },
-    });
+      }),
+    );
   }
 
   /**
    * DELETE vraag (cascade messages)
    */
   static async deleteQuestion(questionId: number): Promise<Question> {
-    const question = await prisma.question.findUnique({
-      where: { id: questionId },
-    });
-    if (!question) {
-      throw new NotFoundError("Question not found");
-    }
-    return prisma.question.delete({ where: { id: questionId } });
+    await handleQueryWithExistenceCheck(
+      () =>
+        prisma.question.findUnique({
+          where: { id: questionId },
+        }),
+      "Question not found.",
+    );
+
+    return handlePrismaQuery(() =>
+      prisma.question.delete({ where: { id: questionId } }),
+    );
   }
 
   /**
@@ -463,12 +499,16 @@ export default class QuestionService {
   static async deleteQuestionMessage(
     questionMessageId: number,
   ): Promise<QuestionMessage> {
-    const msg = await prisma.questionMessage.findUnique({
-      where: { id: questionMessageId },
-    });
-    if (!msg) {
-      throw new NotFoundError("QuestionMessage not found");
-    }
-    return prisma.questionMessage.delete({ where: { id: questionMessageId } });
+    await handleQueryWithExistenceCheck(
+      () =>
+        prisma.questionMessage.findUnique({
+          where: { id: questionMessageId },
+        }),
+      "QuestionMessage not found.",
+    );
+
+    return handlePrismaQuery(() =>
+      prisma.questionMessage.delete({ where: { id: questionMessageId } }),
+    );
   }
 }

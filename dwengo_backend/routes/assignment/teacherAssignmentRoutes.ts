@@ -1,6 +1,6 @@
 import express, { Router } from "express";
 import { AssignmentTeacherController } from "../../controllers/teacher/teacherAssignmentController";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router: Router = express.Router();
 const controller = new AssignmentTeacherController();
@@ -25,7 +25,6 @@ router.get("/", controller.getAllAssignments);
  * @access Teacher
  */
 router.post("/", controller.createAssignmentForClass);
-
 
 /**
  * @route POST /assignment/teacher/team
@@ -59,6 +58,15 @@ router.patch("/team/:assignmentId", controller.updateAssignmentWithTeams);
 router.get("/class/:classId", controller.getAssignmentsByClass);
 
 /**
+ * @route PATCH /assignment/teacher/team/:assignmentId
+ * @description Update a team assignment
+ * @param assignmentId: number
+ * @body teamSize: number
+ * @access Teacher
+ */
+router.patch("/team/:assignmentId", controller.updateAssignmentWithTeams);
+
+/**
  * @route PATCH /assignment/teacher/:assignmentId
  * @description Update an assignment
  * @param pathRef: string (optional)
@@ -68,15 +76,6 @@ router.get("/class/:classId", controller.getAssignmentsByClass);
  * @access Teacher
  */
 router.patch("/:assignmentId", controller.updateAssignment);
-
-/**
- 
-@route PATCH /assignment/teacher/team/:assignmentId
-@description Update a team assignment
-@param assignmentId: number
-@body teamSize: number
-@access Teacher*/
-router.patch("/team/:assignmentId", controller.updateAssignmentWithTeams);
 
 /**
  * @route DELETE /assignment/teacher/:assignmentId

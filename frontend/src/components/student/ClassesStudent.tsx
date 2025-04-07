@@ -1,9 +1,10 @@
 import PrimaryButton from '../shared/PrimaryButton';
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ClassItem, fetchClasses } from '../../util/student/httpStudent';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { ClassItem } from '@/types/type';
+import { fetchClasses } from '@/util/student/class';
 
 export default function ClassesStudent() {
   // Query: Haal alle klassen op

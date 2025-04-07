@@ -7,8 +7,8 @@ import {
   getLearningObjectByHruidLangVersionController,
   getLearningObjectsForPathController,
 } from "../../controllers/learningObject/learningObjectController";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
-import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
+import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router = express.Router();
 
