@@ -1,16 +1,13 @@
-import { NextFunction, Response } from "express";
+import { Response } from "express";
 import service from "../../services/submissionService";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import { Submission } from "@prisma/client";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
+import asyncHandler from "express-async-handler";
 
 export default class TeacherSubmissionController {
-  static async getSubmissionsForStudent(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
-    try {
+  getSubmissionsForStudent = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
       const studentId: number = parseInt(req.params.studentId);
       const teacherId: number = getUserFromAuthRequest(req).id;
 
@@ -18,17 +15,11 @@ export default class TeacherSubmissionController {
         await service.teacherGetSubmissionsForStudent(studentId, teacherId);
 
       res.status(200).json(submissions);
-    } catch (error) {
-      next(error);
-    }
-  }
+    },
+  );
 
-  static async getSubmissionsForTeam(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
-    try {
+  getSubmissionsForTeam = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
       const teamId: number = Number(req.params.teamId);
       const teacherId: number = getUserFromAuthRequest(req).id;
 
@@ -36,17 +27,11 @@ export default class TeacherSubmissionController {
         await service.teacherGetSubmissionsForTeam(teamId, teacherId);
 
       res.status(200).json(submissions);
-    } catch (error) {
-      next(error);
-    }
-  }
+    },
+  );
 
-  static async getAssignmentSubmissionsForStudent(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
-    try {
+  getAssignmentSubmissionsForStudent = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
       const { studentId, assignmentId } = req.params;
       const teacherId: number = getUserFromAuthRequest(req).id;
 
@@ -58,17 +43,11 @@ export default class TeacherSubmissionController {
         );
 
       res.status(200).json(submissions);
-    } catch (error) {
-      next(error);
-    }
-  }
+    },
+  );
 
-  static async getAssignmentSubmissionsForTeam(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
-    try {
+  getAssignmentSubmissionsForTeam = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
       const { teamId, assignmentId } = req.params;
       const teacherId: number = getUserFromAuthRequest(req).id;
 
@@ -80,8 +59,6 @@ export default class TeacherSubmissionController {
         );
 
       res.status(200).json(submissions);
-    } catch (error) {
-      next(error);
-    }
-  }
+    },
+  );
 }

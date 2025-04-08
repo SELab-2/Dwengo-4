@@ -1,8 +1,10 @@
 import express, { Router } from "express";
-import controller from "../../controllers/teacher/teacherSubmissionController";
+import TeacherSubmissionController from "../../controllers/teacher/teacherSubmissionController";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router: Router = express.Router();
+const controller: TeacherSubmissionController =
+  new TeacherSubmissionController();
 
 router.use(protectTeacher);
 
