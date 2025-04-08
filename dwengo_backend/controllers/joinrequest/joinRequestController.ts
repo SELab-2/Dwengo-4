@@ -19,7 +19,7 @@ export const createJoinRequest = asyncHandler(
       await joinRequestService.createValidJoinRequest(studentId, joinCode);
     res
       .status(201)
-      .json({ message: "Join request succesfully created.", joinRequest });
+      .json({ message: "Join request successfully created.", joinRequest });
   },
 );
 

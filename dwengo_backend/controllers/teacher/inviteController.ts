@@ -115,6 +115,6 @@ export const deleteInvite = asyncHandler(
     );
     res
       .status(200)
-      .json({ invite: invite, message: "invite succesfully deleted." });
+      .json({ invite: invite, message: "Invite succesfully deleted." });
   },
 );
