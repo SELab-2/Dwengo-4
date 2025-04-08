@@ -35,13 +35,12 @@ const NavTeacher: React.FC = () => {
 
                 <NavButton to="/teacher" label="Home" />
                 <NavButton to="/teacher/classes" label="Klassen" />
-                <NavButton to="/learning-paths" label="Leerpaden" />
+                <NavButton to="/teacher/learning-paths" label="Leerpaden" />
               </div>
             ) : (
               <div
-                className={`flex flex-row justify-end w-full ${
-                  styles.navLinks
-                } ${menuOpen ? styles.open : ''}`}
+                className={`flex flex-row justify-end w-full ${styles.navLinks
+                  } ${menuOpen ? styles.open : ''}`}
               >
                 <NavButton to="/teacher/inloggen" label="Inloggen" />
                 <NavButton to="/teacher/registreren" label="Registreren" />

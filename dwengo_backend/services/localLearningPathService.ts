@@ -1,4 +1,4 @@
-import {  LearningPath } from "@prisma/client";
+import { LearningPath } from "@prisma/client";
 
 import prisma from "../config/prisma";
 
@@ -38,6 +38,13 @@ class LocalLearningPathService {
     return prisma.learningPath.findMany({
       where: { creatorId: teacherId },
       orderBy: { createdAt: "desc" },
+      include: {
+        creator: {
+          include: {
+            user: true,
+          }
+        },
+      },
     });
   }
 

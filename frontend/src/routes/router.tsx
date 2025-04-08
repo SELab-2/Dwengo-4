@@ -27,6 +27,10 @@ import { action as studentLogoutAction } from '../pages/student/LogoutStudent';
 import StudentIndex from '../pages/student';
 import JoinClass from '../components/student/classes/JoinRequestForm';
 
+// ==== LEARNING PATHS ==== //
+import LearningPaths from '../pages/learningPath/learningPaths';
+import LearningPath from '../pages/learningPath/learningPaths';
+
 const HomePage: React.FC = () => {
   return (
     <div className="flex flex-col justify-center items-center h-screen">
@@ -61,8 +65,8 @@ export const router = createBrowserRouter([
     element: <HomePage />,
   },
   {
-    path: '/learning-paths',
-    element: <div>Learning Path</div>,
+    path: '/learning-path/:pathId',
+    element: <LearningPath />,
   },
   {
     path: 'teacher',
@@ -107,6 +111,10 @@ export const router = createBrowserRouter([
       {
         path: 'assignments/:assignmentId/edit',
         element: <AssignmentEdit></AssignmentEdit>,
+      },
+      {
+        path: 'learning-paths',
+        element: <LearningPaths />,
       },
     ],
   },

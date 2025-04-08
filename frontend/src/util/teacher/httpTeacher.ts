@@ -312,10 +312,13 @@ export async function fetchLearningPaths(): Promise<LearningPath[]> {
   }
 
   let learningPaths = await response.json();
-  learningPaths = learningPaths.map((path: any) => ({
-    ...path,
-    id: path._id || path.id,
-  })) as LearningPath[];
+  learningPaths = learningPaths
+    .map((path: any) => ({
+      ...path,
+      id: path._id || path.id,
+    }))
+    .sort((a: LearningPath, b: LearningPath) => a.title.localeCompare(b.title)) as LearningPath[];
+
 
   return learningPaths;
 }
