@@ -1,14 +1,11 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import assignmentService from "../services/assignmentService";
 import { Assignment } from "@prisma/client";
+import asyncHandler from "express-async-handler";
 
 export class AssignmentController {
-  async getAssignmentsById(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
-    try {
+  getAssignmentsById = asyncHandler(
+    async (req: Request, res: Response): Promise<void> => {
       // 1) Validatie param
       const assignmentId: number = parseInt(req.params.assignmentId);
 
@@ -18,9 +15,6 @@ export class AssignmentController {
 
       // 3) OK → 200 + assignment
       res.status(200).json(assignment);
-    } catch (error) {
-      // Stuur error door naar error middleware
-      next(error);
-    }
-  }
+    },
+  );
 }
