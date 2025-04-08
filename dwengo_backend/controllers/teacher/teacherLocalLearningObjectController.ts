@@ -4,18 +4,14 @@ import LocalLearningObjectService, {
   LocalLearningObjectData,
 } from "../../services/localLearningObjectService";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
+import { getTeacherFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 /**
  * Maak een nieuw leerobject.
- * POST /teacher/learningObjects
  */
 export const createLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user?.id;
-    if (!teacherId) {
-      res.status(401);
-      throw new Error("Geen geldige teacher-gebruiker.");
-    }
+    const teacherId = getTeacherFromAuthRequest(req).id;
 
     const data: LocalLearningObjectData = req.body;
     // Eventuele extra validatie (bv. velden checken) kan hier
@@ -25,7 +21,7 @@ export const createLocalLearningObject = asyncHandler(
       data,
     );
     res.status(201).json({
-      message: "Leerobject aangemaakt",
+      message: "Learning object successfully created.",
       learningObject: createdLO,
     });
   },
@@ -33,16 +29,10 @@ export const createLocalLearningObject = asyncHandler(
 
 /**
  * Haal alle leerobjecten op van deze teacher.
- * GET /teacher/learningObjects
  */
 export const getLocalLearningObjects = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user?.id;
-    if (!teacherId) {
-      res.status(401);
-      throw new Error("Geen geldige teacher-gebruiker.");
-    }
-
+    const teacherId = getTeacherFromAuthRequest(req).id;
     const objects =
       await LocalLearningObjectService.getAllLearningObjectsByTeacher(
         teacherId,
@@ -53,23 +43,12 @@ export const getLocalLearningObjects = asyncHandler(
 
 /**
  * Haal één leerobject op.
- * GET /teacher/learningObjects/:id
  */
 export const getLocalLearningObjectById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = req.user?.id;
-    if (!teacherId) {
-      res.status(401);
-      throw new Error("Geen geldige teacher-gebruiker.");
-    }
-
+    const teacherId = getTeacherFromAuthRequest(req).id;
     const { id } = req.params;
     const found = await LocalLearningObjectService.getLearningObjectById(id);
-
-    if (!found) {
-      res.status(404);
-      throw new Error("Leerobject niet gevonden");
-    }
 
     // Check of deze teacher de eigenaar is
     if (found.creatorId !== teacherId) {
@@ -83,7 +62,6 @@ export const getLocalLearningObjectById = asyncHandler(
 
 /**
  * Update een leerobject.
- * PUT /teacher/learningObjects/:id
  */
 export const updateLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -120,7 +98,6 @@ export const updateLocalLearningObject = asyncHandler(
 
 /**
  * Verwijder een leerobject.
- * DELETE /teacher/learningObjects/:id
  */
 export const deleteLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
