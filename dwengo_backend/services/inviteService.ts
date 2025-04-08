@@ -79,13 +79,7 @@ export default class inviteService {
     }
 
     // Controleer of de teacher nog geen lid is van de klas
-    const isAlreadyTeacher: boolean = await classService.isTeacherOfClass(
-      classId,
-      otherTeacherId,
-    );
-    if (isAlreadyTeacher) {
-      throw new BadRequestError("Teacher is already a member of this class.");
-    }
+    await classService.isTeacherOfClass(classId, otherTeacherId);
 
     // Maak de invite aan
     return await handlePrismaQuery(() =>

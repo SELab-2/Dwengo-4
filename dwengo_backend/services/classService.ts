@@ -61,11 +61,7 @@ export default class ClassService {
     }
 
     // Check if the teacher is associated with the class
-    const isTeacher = await this.isTeacherOfClass(classId, teacherId);
-    if (!isTeacher) {
-      throw new AccesDeniedError(`Teacher is not part of this class.`);
-    }
-    return;
+    await this.isTeacherOfClass(classId, teacherId);
   }
 
   // Delete a class by ID
@@ -112,7 +108,7 @@ export default class ClassService {
   static async isTeacherOfClass(
     classId: number,
     teacherId: number,
-  ): Promise<boolean> {
+  ): Promise<void> {
     const classTeacher: ClassTeacher | null = await handlePrismaQuery(() =>
       prisma.classTeacher.findUnique({
         where: {
@@ -126,7 +122,6 @@ export default class ClassService {
     if (!classTeacher) {
       throw new AccesDeniedError("Teacher is not part of this class.");
     }
-    return true;
   }
 
   // Get all students from a given class
@@ -218,10 +213,7 @@ export default class ClassService {
     teacherId: number,
   ): Promise<Class> {
     // Verify if the teacher is associated with the class
-    const isTeacher = await this.isTeacherOfClass(classId, teacherId);
-    if (!isTeacher) {
-      throw new AccesDeniedError(`Teacher is not part of this class.`);
-    }
+    await this.isTeacherOfClass(classId, teacherId);
 
     // Fetch the class by ID
     const classroom: Class | null = await handlePrismaQuery(() =>
@@ -284,12 +276,7 @@ export default class ClassService {
     }
 
     // Check if the teacher is associated with the class
-    const isTeacher = await this.isTeacherOfClass(classId, teacherId);
-    if (!isTeacher) {
-      throw new AccesDeniedError(
-        `Teacher ${teacherId} is not part of class ${classId}`,
-      );
-    }
+    await this.isTeacherOfClass(classId, teacherId);
 
     return classroom.code;
   }

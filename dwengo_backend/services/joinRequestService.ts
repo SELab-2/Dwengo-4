@@ -1,11 +1,7 @@
 import { JoinRequestStatus, JoinRequest } from "@prisma/client";
 import classService from "./classService";
 import { ClassWithLinks } from "./classService";
-import {
-  AccesDeniedError,
-  ConflictError,
-  NotFoundError,
-} from "../errors/errors";
+import { ConflictError, NotFoundError } from "../errors/errors";
 
 import prisma from "../config/prisma";
 import { handlePrismaQuery } from "../errors/errorFunctions";
@@ -13,7 +9,7 @@ import { handlePrismaQuery } from "../errors/errorFunctions";
 export default class joinRequestService {
   // Validate whether the class exists before proceeding
   private static async validateClassExists(
-    joinCode: string
+    joinCode: string,
   ): Promise<ClassWithLinks> {
     const classroom: ClassWithLinks =
       await classService.getClassByJoinCode(joinCode);
@@ -24,7 +20,7 @@ export default class joinRequestService {
     requestId: number,
     teacherId: number,
     classId: number,
-    status: JoinRequestStatus
+    status: JoinRequestStatus,
   ): Promise<JoinRequest> {
     // check if teacher is allowed to approve/deny the request
     await classService.isTeacherOfClass(classId, teacherId);
@@ -32,11 +28,11 @@ export default class joinRequestService {
     const joinRequest: JoinRequest | null = await handlePrismaQuery(() =>
       prisma.joinRequest.findFirst({
         where: { requestId, classId, status: JoinRequestStatus.PENDING },
-      })
+      }),
     );
     if (!joinRequest) {
       throw new NotFoundError(
-        `Join request for this class is not found or is not pending.`
+        `Join request for this class is not found or is not pending.`,
       );
     }
 
@@ -45,13 +41,13 @@ export default class joinRequestService {
       prisma.joinRequest.update({
         where: { requestId },
         data: { status: status },
-      })
+      }),
     );
   }
 
   static async createJoinRequest(
     studentId: number,
-    classId: number
+    classId: number,
   ): Promise<JoinRequest> {
     return await handlePrismaQuery(() =>
       prisma.joinRequest.create({
@@ -60,13 +56,13 @@ export default class joinRequestService {
           classId: classId,
           status: JoinRequestStatus.PENDING,
         },
-      })
+      }),
     );
   }
 
   static async createValidJoinRequest(
     studentId: number,
-    joinCode: string
+    joinCode: string,
   ): Promise<JoinRequest> {
     const classroom: ClassWithLinks = await this.validateClassExists(joinCode);
 
@@ -81,11 +77,11 @@ export default class joinRequestService {
           classId: classroom.id,
           status: JoinRequestStatus.PENDING,
         },
-      })
+      }),
     );
     if (existingRequest) {
       throw new ConflictError(
-        `There's already a pending join request for this student and this class.`
+        `There's already a pending join request for this student and this class.`,
       );
     }
 
@@ -95,13 +91,13 @@ export default class joinRequestService {
   static async approveRequestAndAddStudentToClass(
     requestId: number,
     teacherId: number,
-    classId: number
+    classId: number,
   ): Promise<JoinRequest> {
     const updatedRequest: JoinRequest = await this.updateAndValidateRequest(
       requestId,
       teacherId,
       classId,
-      JoinRequestStatus.APPROVED
+      JoinRequestStatus.APPROVED,
     );
 
     // Add the student to the class
@@ -112,24 +108,21 @@ export default class joinRequestService {
   static async denyJoinRequest(
     requestId: number,
     teacherId: number,
-    classId: number
+    classId: number,
   ): Promise<JoinRequest> {
     return await this.updateAndValidateRequest(
       requestId,
       teacherId,
       classId,
-      JoinRequestStatus.DENIED
+      JoinRequestStatus.DENIED,
     );
   }
 
   static async getJoinRequestsByClass(
     teacherId: number,
-    classId: number
+    classId: number,
   ): Promise<JoinRequest[]> {
-    const isTeacher: boolean = await classService.isTeacherOfClass(
-      classId,
-      teacherId
-    );
+    await classService.isTeacherOfClass(classId, teacherId);
 
     return await handlePrismaQuery(() =>
       prisma.joinRequest.findMany({
@@ -147,7 +140,7 @@ export default class joinRequestService {
             },
           },
         },
-      })
+      }),
     ).then((requests) =>
       requests.map((request) => ({
         requestId: request.requestId,
@@ -161,7 +154,7 @@ export default class joinRequestService {
               email: request.student.user.email,
             }
           : undefined,
-      }))
+      })),
     );
   }
 }
