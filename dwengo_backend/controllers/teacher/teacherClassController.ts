@@ -8,33 +8,16 @@ import { BadRequestError } from "../../errors/errors";
 
 const APP_URL = process.env.APP_URL || "http://localhost:5000";
 
-export const isTeacherValid = (
-  req: AuthenticatedRequest,
-  res: Response
-): boolean => {
-  const teacherId = req.user?.id;
-  if (!teacherId) {
-    res.status(400).json({ message: "Geen toegang" });
-    return false; // Teacher is not authorized
-  }
-  return true; // Teacher is authorized
-};
-
-export const isNameValid = (
-  req: AuthenticatedRequest,
-  res: Response
-): boolean => {
+export const isNameValid = (req: AuthenticatedRequest): void => {
   const { name } = req.body;
   if (!name || typeof name !== "string" || name.trim() === "") {
-    res.status(400).json({ message: "Vul een geldige klasnaam in" });
-    return false;
+    throw new BadRequestError("Class name is not valid.");
   }
-  return true;
 };
 
 /**
  * Get all classes that a teacher manages
- * @route GET /teacher/classes
+ * @route GET /class/teacher
  * returns a list of all classes in the response body
  */
 export const getTeacherClasses = asyncHandler(
@@ -42,12 +25,12 @@ export const getTeacherClasses = asyncHandler(
     const teacherId: number = getUserFromAuthRequest(req).id;
     const classes = await classService.getClassesByTeacher(teacherId);
     res.status(200).json({ classes });
-  }
+  },
 );
 
 /**
  * Create classroom
- * @route POST /teacher/classes
+ * @route POST /class/teacher
  * returns the created class in the response body
  */
 export const createClassroom = asyncHandler(
@@ -55,83 +38,80 @@ export const createClassroom = asyncHandler(
     const { name } = req.body;
     const teacherId: number = getUserFromAuthRequest(req).id;
 
-    isNameValid(req, res); // if invalid, an error is thrown
+    isNameValid(req); // if invalid, an error is thrown
 
     const classroom = await classService.createClass(name, teacherId);
-    res.status(201).json({ message: "Klas aangemaakt", classroom });
-  }
+    res.status(201).json({ message: "Class successfully created.", classroom });
+  },
 );
 
-// Delete classroom
+/**
+ * Delete classroom
+ * @route DELETE /class/teacher/:classId
+ * deletes the classroom with the given ID
+ */
 export const deleteClassroom = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { classId } = req.params;
-    const teacherId = req.user?.id;
-
-    if (!isTeacherValid(req, res)) return;
+    const teacherId = getUserFromAuthRequest(req).id;
 
     await classService.deleteClass(Number(classId), Number(teacherId));
-    res.json({ message: "Klas verwijderd" });
-  }
+    res.json({ message: "Class successfully deleted." });
+  },
 );
 
-// Get join link
+/**
+ * Get join link
+ * @route GET /class/teacher/:classId/join-link
+ * returns the join link for the class
+ */
 export const getJoinLink = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { classId } = req.params;
-    const teacherId = req.user?.id as number;
-
-    if (!isTeacherValid(req, res)) return;
+    const teacherId = getUserFromAuthRequest(req).id;
 
     const joinCode = await classService.getJoinCode(Number(classId), teacherId);
 
-    const joinLink = `${APP_URL}/student/classes/join?joinCode=${joinCode}`;
+    const joinLink = `${APP_URL}/join-request/student/join?joinCode=${joinCode}`;
     res.status(200).json({ joinLink });
-  }
+  },
 );
 
-// Regenerate join link
+/**
+ * Regenerate join link
+ * @route PATCH /class/teacher/:classId/join-link
+ * returns the new join link for the class
+ */
 export const regenerateJoinLink = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { classId } = req.params;
-    const teacherId = req.user?.id as number;
-
-    if (!isTeacherValid(req, res)) return;
-
-    try {
-      const newJoinCode = await classService.regenerateJoinCode(
-        Number(classId),
-        teacherId
-      );
-      const joinLink = `${APP_URL}/student/classes/join?joinCode=${newJoinCode}`;
-      res.json({ joinLink });
-    } catch (error) {
-      res.status(403).json({ message: "Failed to regenerate joinLink" });
-      return;
-    }
-  }
+    const teacherId = getUserFromAuthRequest(req).id;
+    const newJoinCode = await classService.regenerateJoinCode(
+      Number(classId),
+      teacherId,
+    );
+    const joinLink = `${APP_URL}/join-request/student/join?joinCode=${newJoinCode}`;
+    res.json({ message: "Join link successfully recreated.", joinLink });
+  },
 );
 
-// Get classroom students
+/**
+ * Get classroom students
+ * @route GET /class/teacher/:classId/student
+ * returns a list of all students in the class
+ */
 export const getClassroomStudents = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { classId } = req.params;
-    const teacherId = req.user?.id as number;
-
-    if (!isTeacherValid(req, res)) return;
+    const teacherId = getUserFromAuthRequest(req).id;
 
     const students: Student[] = await classService.getStudentsByClass(
       Number(classId),
-      teacherId
+      teacherId,
     );
 
-    if (!students) {
-      res.status(403).json({ message: "Toegang geweigerd" });
-      return;
-    }
-
     res.json({ students });
-  }
+  },
 );
 
 /**
@@ -144,12 +124,12 @@ export const getAllClassrooms = asyncHandler(
     const teacherId: number = getUserFromAuthRequest(req).id;
     const classrooms = await classService.getAllClassesByTeacher(teacherId);
     res.status(200).json({ classrooms });
-  }
+  },
 );
 
 /**
  * Get classroom by ID
- * @route GET /teacher/classes/:classId
+ * @route GET /class/teacher/:classId
  * @param classId - id of the class to be fetched
  * returns the class details in the response body
  */
@@ -160,12 +140,9 @@ export const getClassByIdAndTeacherId = asyncHandler(
 
     const classroom = await classService.getClassByIdAndTeacherId(
       classId,
-      teacherId
+      teacherId,
     );
-    if (!classroom) {
-      throw new BadRequestError(`Klas met id ${classId} niet gevonden`);
-    }
 
     res.status(200).json({ classroom });
-  }
+  },
 );
