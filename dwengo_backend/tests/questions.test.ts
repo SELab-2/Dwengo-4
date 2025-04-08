@@ -272,24 +272,31 @@ describe("Question Endpoints Tests", () => {
     it("should delete a question message", async () => {
       // add a message
       const addMsg = await request(app)
-        .post(`/question/${specQId}/message`)
-        .set("Authorization", `Bearer ${teacherUser.token}`)
-        .send({ text: "Message to be deleted" });
+      .post(`/question/${specQId}/message`)
+      .set("Authorization", `Bearer ${teacherUser.token}`)
+      .send({ text: "Message to be deleted" });
       expect(addMsg.status).toBe(201);
       const msgIdDel = addMsg.body.id;
 
       // delete
       const delMsg = await request(app)
-        .delete(`/question/${specQId}/message/${msgIdDel}`)
-        .set("Authorization", `Bearer ${teacherUser.token}`)
-        .send({});
+      .delete(`/question/${specQId}/message/${msgIdDel}`)
+      .set("Authorization", `Bearer ${teacherUser.token}`)
+      .send({});
       expect(delMsg.status).toBe(204);
 
       // verify
       const getM = await request(app)
-        .get(`/question/${specQId}/messages`)
-        .set("Authorization", `Bearer ${teacherUser.token}`);
-      const found = getM.body.find((m: any) => m.id === msgIdDel);
+      .get(`/question/${specQId}/messages`)
+      .set("Authorization", `Bearer ${teacherUser.token}`);
+
+      interface Message {
+      id: number;
+      text: string;
+      }
+
+      const messages: Message[] = getM.body;
+      const found = messages.find((m) => m.id === msgIdDel);
       expect(found).toBeUndefined();
     });
 
