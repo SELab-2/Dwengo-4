@@ -50,7 +50,7 @@ router.delete(
 );
 
 /**
- * @route POST /feedback
+ * @route POST /feedback/submission/:submissionId
  * @desc Create feedback for a submission
  * @body submissionId: number
  * @body description: string

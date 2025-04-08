@@ -6,7 +6,7 @@ import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 import asyncHandler from "express-async-handler";
 
 export default class FeedbackController {
-  // route: "/teacher/feedback/assignment/:assignmentId/evaluation/:evaluationId"
+  // route: /feedback/assignment/:assignmentId/evaluation/:evaluationId
   // http-command: GET
   getAllFeedbackForEvaluation = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -22,7 +22,7 @@ export default class FeedbackController {
     },
   );
 
-  // route: "/teacher/feedback/submission/:submissionId"
+  // route: /feedback/submission/:submissionId
   // http-command: POST
   createFeedback = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -42,7 +42,7 @@ export default class FeedbackController {
     },
   );
 
-  // route: "/teacher/feedback/submission/:submissionId"
+  // route: /feedback/submission/:submissionId
   // http-command: GET
   getFeedbackForSubmission = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -57,7 +57,7 @@ export default class FeedbackController {
     },
   );
 
-  // route: /teacher/feedback/submission/:submissionId
+  // route: /feedback/submission/:submissionId
   // http-command: PATCH
   updateFeedbackForSubmission = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -74,7 +74,7 @@ export default class FeedbackController {
     },
   );
 
-  // route: /teacher/feedback/submission/:submissionId
+  // route: /feedback/submission/:submissionId
   // http-command: DELETE
   deleteFeedbackForSubmission = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
