@@ -1,19 +1,16 @@
-import { NextFunction, Response } from "express";
+import { Response } from "express";
 import {
   createTeamsInAssignment,
   getTeamsThatHaveAssignment,
   updateTeamsForAssignment,
   deleteTeam,
 } from "../../services/teacherTeamsService";
+import asyncHandler from "express-async-handler";
 import { Team } from "@prisma/client";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 
-export const createTeamInAssignment = async (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
+export const createTeamInAssignment = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     // This is guaranteed to be possible by "makeAssignmentIdParamValid" in middleware/teamValidationMiddleware.ts
     const assignmentId: number = parseInt(req.params.assignmentId);
     const classId: number = parseInt(req.params.classId);
@@ -28,31 +25,19 @@ export const createTeamInAssignment = async (
       message: "Teams successfully created.",
       createdTeams,
     });
-  } catch (error) {
-    next(error);
-  }
-};
+  },
+);
 
-export const getTeamsInAssignment = async (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
+export const getTeamsInAssignment = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const assignmentId: number = parseInt(req.params.assignmentId);
     const teams: Team[] = await getTeamsThatHaveAssignment(assignmentId);
     res.status(200).json(teams);
-  } catch (error) {
-    next(error);
-  }
-};
+  },
+);
 
-export const updateTeamsInAssignment = async (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
+export const updateTeamsInAssignment = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const assignmentId: number = parseInt(req.params.assignmentId);
     const { teams } = req.body;
 
@@ -64,23 +49,15 @@ export const updateTeamsInAssignment = async (
       message: "Teams successfully updated.",
       updatedTeams: updatedTeams,
     });
-  } catch (error) {
-    next(error);
-  }
-};
+  },
+);
 
-export const deleteTeamInAssignment = async (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
+export const deleteTeamInAssignment = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     // This is guaranteed to be possible by "makeTeamIdParamValid" in middleware/teamValidationMiddleware.ts
     const teamId: number = parseInt(req.params.teamId);
 
     await deleteTeam(teamId);
     res.status(200).json({ message: "Team successfully deleted." });
-  } catch (error) {
-    next(error);
-  }
-};
+  },
+);
