@@ -1,8 +1,9 @@
 import express from "express";
-import controller from "../../controllers/teacher/feedbackController";
+import FeedbackController from "../../controllers/teacher/feedbackController";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router = express.Router();
+const controller = new FeedbackController();
 
 router.use(protectTeacher);
 
