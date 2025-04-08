@@ -4,16 +4,16 @@ import LocalLearningObjectService, {
   LocalLearningObjectData,
 } from "../../services/localLearningObjectService";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
-import { getTeacherFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 import { LearningObject } from "@prisma/client";
-import { AccesDeniedError } from "../../errors/errors";
+import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
+import { Property, checkIfTeacherIsCreator } from "./teacherChecks";
 
 /**
  * Maak een nieuw leerobject.
  */
 export const createLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = getTeacherFromAuthRequest(req).id;
+    const teacherId = getUserFromAuthRequest(req).id;
 
     const data: LocalLearningObjectData = req.body;
     // Eventuele extra validatie (bv. velden checken) kan hier
@@ -34,7 +34,7 @@ export const createLocalLearningObject = asyncHandler(
  */
 export const getLocalLearningObjects = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = getTeacherFromAuthRequest(req).id;
+    const teacherId = getUserFromAuthRequest(req).id;
     const objects =
       await LocalLearningObjectService.getAllLearningObjectsByTeacher(
         teacherId,
@@ -48,13 +48,17 @@ export const getLocalLearningObjects = asyncHandler(
  */
 export const getLocalLearningObjectById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = getTeacherFromAuthRequest(req).id;
+    const teacherId = getUserFromAuthRequest(req).id;
     const { id } = req.params;
     const found: LearningObject =
       await LocalLearningObjectService.getLearningObjectById(id);
 
     // Check of deze teacher de eigenaar is
-    checkIfTeacherIsCreator(teacherId, found.creatorId);
+    checkIfTeacherIsCreator(
+      teacherId,
+      found.creatorId,
+      Property.LearningObject,
+    );
 
     res.json(found);
   },
@@ -65,7 +69,7 @@ export const getLocalLearningObjectById = asyncHandler(
  */
 export const updateLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = getTeacherFromAuthRequest(req).id;
+    const teacherId = getUserFromAuthRequest(req).id;
 
     const { id } = req.params;
     const data: Partial<LocalLearningObjectData> = req.body;
@@ -73,7 +77,11 @@ export const updateLocalLearningObject = asyncHandler(
     // Check of leerobject bestaat en van deze teacher is
     const existing = await LocalLearningObjectService.getLearningObjectById(id);
 
-    checkIfTeacherIsCreator(teacherId, existing.creatorId);
+    checkIfTeacherIsCreator(
+      teacherId,
+      existing.creatorId,
+      Property.LearningObject,
+    );
 
     const updated = await LocalLearningObjectService.updateLearningObject(
       id,
@@ -91,27 +99,17 @@ export const updateLocalLearningObject = asyncHandler(
  */
 export const deleteLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = getTeacherFromAuthRequest(req).id;
+    const teacherId = getUserFromAuthRequest(req).id;
 
     const { id } = req.params;
     const existing = await LocalLearningObjectService.getLearningObjectById(id);
 
-    checkIfTeacherIsCreator(teacherId, existing.creatorId);
+    checkIfTeacherIsCreator(
+      teacherId,
+      existing.creatorId,
+      Property.LearningObject,
+    );
     await LocalLearningObjectService.deleteLearningObject(id);
     res.json({ message: "Learning object successfully deleted." });
   },
 );
-
-/**
- * Check if a teacher is the creator of a learning object.
- */
-const checkIfTeacherIsCreator = function (
-  teacherId: number,
-  loCreatorId: number,
-) {
-  if (teacherId !== loCreatorId) {
-    throw new AccesDeniedError(
-      "Teacher is not the creator of this learning object.",
-    );
-  }
-};
