@@ -2,6 +2,7 @@ import { ContentType, LearningObject } from "@prisma/client";
 
 import prisma from "../config/prisma";
 import { handlePrismaQuery } from "../errors/errorFunctions";
+import { NotFoundError } from "../errors/errors";
 
 export interface LocalLearningObjectData {
   // De data die een teacher kan opgeven bij het aanmaken of updaten
@@ -58,7 +59,9 @@ export default class LocalLearningObjectService {
    * Geeft alle leerobjecten terug die door een bepaalde teacher zijn aangemaakt.
    * Of (afhankelijk van je wensen) alle leerobjecten in de DB als je dat wilt.
    */
-  static async getAllLearningObjectsByTeacher(teacherId: number) {
+  static async getAllLearningObjectsByTeacher(
+    teacherId: number,
+  ): Promise<LearningObject[]> {
     return await handlePrismaQuery(() =>
       prisma.learningObject.findMany({
         where: { creatorId: teacherId },
@@ -71,12 +74,16 @@ export default class LocalLearningObjectService {
    * Haalt één leerobject op. Optioneel kun je checken of de aanvrager
    * wel de creator is, als je dat in de controller wilt enforce'n.
    */
-  static async getLearningObjectById(id: string) {
-    return await handlePrismaQuery(() =>
+  static async getLearningObjectById(id: string): Promise<LearningObject> {
+    const lo: LearningObject | null = await handlePrismaQuery(() =>
       prisma.learningObject.findUnique({
         where: { id },
       }),
     );
+    if (!lo) {
+      throw new NotFoundError("Learning object not found.");
+    }
+    return lo;
   }
 
   /**
@@ -86,7 +93,7 @@ export default class LocalLearningObjectService {
   static async updateLearningObject(
     id: string,
     data: Partial<LocalLearningObjectData>,
-  ) {
+  ): Promise<LearningObject> {
     // Prisma update
     return await handlePrismaQuery(() =>
       prisma.learningObject.update({
@@ -115,7 +122,7 @@ export default class LocalLearningObjectService {
   /**
    * Verwijdert een leerobject op basis van zijn id.
    */
-  static async deleteLearningObject(id: string) {
+  static async deleteLearningObject(id: string): Promise<LearningObject> {
     return await handlePrismaQuery(() =>
       prisma.learningObject.delete({
         where: { id },
