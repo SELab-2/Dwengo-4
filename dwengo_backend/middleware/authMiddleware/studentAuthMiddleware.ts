@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 import { PrismaClient } from "@prisma/client";
 import { Request, Response, NextFunction } from "express";
-import { UnauthorizedError } from "../../errors/errors";
+import { AppError, UnauthorizedError } from "../../errors/errors";
 import {
   invalidTokenMessage,
   noTokenProvidedMessage,
@@ -54,8 +54,11 @@ export const protectStudent = asyncHandler(
 
         req.user = { id: student.userId, email: student.user.email };
         next();
-      } catch {
-        throw new UnauthorizedError(invalidTokenMessage);
+      } catch (error) {
+        if (!(error instanceof AppError)) {
+          throw new UnauthorizedError(invalidTokenMessage);
+        }
+        throw error; // Rethrow the error if it's an AppError
       }
     } else {
       // No token provided
