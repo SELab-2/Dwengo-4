@@ -3,36 +3,29 @@ import service from "../../services/feedbackService";
 import { Feedback } from "@prisma/client";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
+import asyncHandler from "express-async-handler";
 
 export default class FeedbackController {
   // route: "/teacher/feedback/assignment/:assignmentId/evaluation/:evaluationId"
   // http-command: GET
-  static async getAllFeedbackForEvaluation(
-    req: AuthenticatedRequest,
-    res: Response
-  ): Promise<void> {
-    try {
+  getAllFeedbackForEvaluation = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
       const { assignmentId, evaluationId } = req.params;
       const teacherId: number = getUserFromAuthRequest(req).id;
 
       const feedback: Feedback[] = await service.getAllFeedbackForEvaluation(
         Number(assignmentId),
         evaluationId,
-        teacherId
+        teacherId,
       );
       res.status(200).json(feedback);
-    } catch (_error) {
-      res.status(500).json({ error: "Failed to retrieve feedback" });
-    }
-  }
+    },
+  );
 
   // route: "/teacher/feedback/submission/:submissionId"
   // http-command: POST
-  static async createFeedback(
-    req: AuthenticatedRequest,
-    res: Response
-  ): Promise<void> {
-    try {
+  createFeedback = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
       const teacherId: number = getUserFromAuthRequest(req).id;
       const submissionId: number = Number(req.params.submissionId);
 
@@ -41,41 +34,33 @@ export default class FeedbackController {
       const feedback: Feedback = await service.createFeedback(
         submissionId,
         teacherId,
-        description
+        description,
       );
-      res.status(201).json(feedback);
-    } catch (_error) {
-      res.status(500).json({ error: "Failed to create feedback" });
-    }
-  }
+      res
+        .status(201)
+        .json({ message: "Feedback successfully created.", feedback });
+    },
+  );
 
   // route: "/teacher/feedback/submission/:submissionId"
   // http-command: GET
-  static async getFeedbackForSubmission(
-    req: AuthenticatedRequest,
-    res: Response
-  ): Promise<void> {
-    try {
+  getFeedbackForSubmission = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
       const submissionId: number = Number(req.params.submissionId);
       const teacherId: number = getUserFromAuthRequest(req).id;
 
       const feedback: Feedback = await service.getFeedbackForSubmission(
         submissionId,
-        teacherId
+        teacherId,
       );
       res.status(200).json(feedback);
-    } catch (_error) {
-      res.status(500).json({ error: "Failed to retrieve feedback" });
-    }
-  }
+    },
+  );
 
   // route: /teacher/feedback/submission/:submissionId
   // http-command: PATCH
-  static async updateFeedbackForSubmission(
-    req: AuthenticatedRequest,
-    res: Response
-  ): Promise<void> {
-    try {
+  updateFeedbackForSubmission = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
       const submissionId: number = Number(req.params.submissionId);
       const teacherId: number = getUserFromAuthRequest(req).id;
 
@@ -83,29 +68,22 @@ export default class FeedbackController {
       const feedback: Feedback = await service.updateFeedbackForSubmission(
         submissionId,
         description,
-        teacherId
+        teacherId,
       );
-      res.json(feedback);
-    } catch (_error) {
-      res.status(500).json({ error: "Failed to update feedback" });
-    }
-  }
+      res.json({ message: "Feedback successfully updated.", feedback });
+    },
+  );
 
   // route: /teacher/feedback/submission/:submissionId
   // http-command: DELETE
-  static async deleteFeedbackForSubmission(
-    req: AuthenticatedRequest,
-    res: Response
-  ): Promise<void> {
-    try {
+  deleteFeedbackForSubmission = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
       const submissionId: number = Number(req.params.submissionId);
       const teacherId: number = getUserFromAuthRequest(req).id;
 
       await service.deleteFeedbackForSubmission(submissionId, teacherId);
       // Status 204: successful deletion but no json body returned (no content).
-      res.status(204).end();
-    } catch (_error) {
-      res.status(500).json({ error: "Failed to delete feedback" });
-    }
-  }
+      res.status(204).json({ message: "Feedback successfully deleted." }).end();
+    },
+  );
 }
