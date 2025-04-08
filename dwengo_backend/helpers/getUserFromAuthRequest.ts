@@ -36,23 +36,3 @@ export function getUserFromAuthRequest(
     throw error;
   }
 }
-
-export function getTeacherFromAuthRequest(
-  req: AuthenticatedRequest,
-): AuthenticatedUser {
-  const user = getUserFromAuthRequest(req);
-  if (user.role !== Role.TEACHER) {
-    throw new UnauthorizedError("Teacher authentication required.");
-  }
-  return user;
-}
-
-export function getStudentFromAuthRequest(
-  req: AuthenticatedRequest,
-): AuthenticatedUser {
-  const user = getUserFromAuthRequest(req);
-  if (user.role !== Role.STUDENT) {
-    throw new UnauthorizedError("Student authentication required.");
-  }
-  return user;
-}
