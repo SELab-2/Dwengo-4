@@ -1,4 +1,4 @@
-import { NextFunction, Response } from "express";
+import { Response } from "express";
 import asyncHandler from "express-async-handler";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import LocalLearningPathService from "../../services/localLearningPathService";
@@ -18,12 +18,8 @@ interface PathMetadata {
  * POST /teacher/learningPaths
  *   -> nieuw leerpad (zonder nodes)
  */
-export const createLocalLearningPath = async (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
+export const createLocalLearningPath = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
     // Door protectTeacher in de routes weten we: role=TEACHER
     const teacherId = getUserFromAuthRequest(req).id;
 
@@ -48,10 +44,8 @@ export const createLocalLearningPath = async (
       message: "Learning path successfully created.",
       learningPath: newPath,
     });
-  } catch (error) {
-    next(error);
-  }
-};
+  },
+);
 
 /**
  * GET /teacher/learningPaths
