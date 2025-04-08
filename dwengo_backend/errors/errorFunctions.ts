@@ -19,17 +19,8 @@ export async function handlePrismaQuery<T>(
   try {
     return await queryFunction();
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError ||
-      error instanceof Prisma.PrismaClientInitializationError ||
-      error instanceof Prisma.PrismaClientValidationError
-    ) {
-      // Handle prisma errors that have clear error messages
-      // Throw a new error, this error will propagate up the call stack and be caught by the error middleware.
-      throw new DatabaseError(error.message);
-    } else {
-      throw new DatabaseError("An unknown error occurred.");
-    }
+    console.error("Prisma error:", error);
+    throw new DatabaseError("Something went wrong.");
   }
 }
 
@@ -45,15 +36,8 @@ export async function handlePrismaTransaction<T>(
   try {
     return await transactionFunction(prisma);
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError ||
-      error instanceof Prisma.PrismaClientInitializationError ||
-      error instanceof Prisma.PrismaClientValidationError
-    ) {
-      throw new DatabaseError(error.message);
-    } else {
-      throw new DatabaseError("An unknown error occurred during transaction.");
-    }
+    console.error("Prisma transaction error:", error);
+    throw new DatabaseError("Something went wrong.");
   }
 }
 
