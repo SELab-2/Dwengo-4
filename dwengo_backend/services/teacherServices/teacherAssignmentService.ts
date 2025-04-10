@@ -1,10 +1,9 @@
-import { Assignment,  Role } from "@prisma/client";
+import { Assignment, Role } from "@prisma/client";
 import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
 import ReferenceValidationService from "../../services/referenceValidationService";
 import { TeamDivision } from "../../interfaces/extendedTypeInterfaces";
 import { createTeamsInAssignment } from "../teacherTeamsService";
 import prisma from "../../config/prisma";
-
 
 interface ClassTeams {
   [classId: number]: TeamDivision[];
@@ -23,7 +22,7 @@ export default class TeacherAssignmentService {
     deadline: Date,
     title: string,
     description: string,
-    teamSize: number
+    teamSize: number,
   ): Promise<Assignment> {
     // 1) check authorization
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
@@ -37,27 +36,27 @@ export default class TeacherAssignmentService {
       isExternal,
       isExternal ? undefined : pathRef, // localId
       isExternal ? pathRef : undefined, // hruid
-      isExternal ? pathLanguage : undefined // language
+      isExternal ? pathLanguage : undefined, // language
     );
 
     // 3) Maak assignment
-    return prisma.assignment.create({
+    return await prisma.assignment.create({
       data: {
-        pathRef,
-        isExternal,
-        deadline,
+        title: title,
+        description: description,
+        pathRef: pathRef,
+        isExternal: isExternal,
+        deadline: deadline,
+        teamSize: teamSize,
         classAssignments: {
-          create: {
-            classId,
-          },
+          create: [
+            {
+              classId,
+            },
+          ],
         },
-        title,
-        description,
-        teamSize
       },
     });
-
-
   }
 
   /**
@@ -86,7 +85,7 @@ export default class TeacherAssignmentService {
    */
   static async getAssignmentsByClass(
     classId: number,
-    teacherId: number
+    teacherId: number,
   ): Promise<Assignment[]> {
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
       throw new Error("The teacher is unauthorized to request the assignments");
@@ -112,7 +111,7 @@ export default class TeacherAssignmentService {
     teacherId: number,
     title: string,
     description: string,
-    teamSize: number
+    teamSize: number,
   ): Promise<Assignment> {
     // 1) autorisatie
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
@@ -130,7 +129,7 @@ export default class TeacherAssignmentService {
         isExternal,
         title,
         description,
-        teamSize
+        teamSize,
       },
     });
   }
@@ -140,7 +139,7 @@ export default class TeacherAssignmentService {
    */
   static async deleteAssignment(
     assignmentId: number,
-    teacherId: number
+    teacherId: number,
   ): Promise<Assignment> {
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
       throw new Error("The teacher is unauthorized to delete the assignment");
@@ -163,8 +162,7 @@ export default class TeacherAssignmentService {
     title: string,
     description: string,
     classTeams: ClassTeams,
-    teamSize: number
-
+    teamSize: number,
   ): Promise<Assignment> {
     // 1) Check authorization for all classes
     for (const classId of Object.keys(classTeams)) {
@@ -178,12 +176,11 @@ export default class TeacherAssignmentService {
       isExternal,
       isExternal ? undefined : pathRef, // localId
       isExternal ? pathRef : undefined, // hruid
-      isExternal ? pathLanguage : undefined // language
+      isExternal ? pathLanguage : undefined, // language
     );
 
     // 3) Create assignment and teams in transaction
     return await prisma.$transaction(async (tx) => {
-
       // Create the assignment
       const assignment = await tx.assignment.create({
         data: {
@@ -192,19 +189,24 @@ export default class TeacherAssignmentService {
           deadline,
           title,
           description,
-          teamSize
+          teamSize,
         },
       });
 
       // Create class assignments and teams
       for (const [classId, teams] of Object.entries(classTeams)) {
-        const assigndment = await tx.classAssignment.create({
+        await tx.classAssignment.create({
           data: {
             assignmentId: assignment.id,
             classId: parseInt(classId),
           },
         });
-        await createTeamsInAssignment(assignment.id, parseInt(classId), teams,tx);
+        await createTeamsInAssignment(
+          assignment.id,
+          parseInt(classId),
+          teams,
+          tx,
+        );
       }
 
       return assignment;
@@ -224,7 +226,7 @@ export default class TeacherAssignmentService {
     title: string,
     description: string,
     classTeams: ClassTeams,
-    teamSize: number
+    teamSize: number,
   ): Promise<Assignment> {
     // 1) Check authorization for all classes and assignment
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
@@ -241,7 +243,7 @@ export default class TeacherAssignmentService {
       isExternal,
       isExternal ? undefined : pathRef, // localId
       isExternal ? pathRef : undefined, // hruid
-      isExternal ? pathLanguage : undefined // language
+      isExternal ? pathLanguage : undefined, // language
     );
 
     // 3) Update assignment and teams in transaction
@@ -293,7 +295,7 @@ export default class TeacherAssignmentService {
           assignment.id,
           parseInt(classId),
           teams,
-          tx
+          tx,
         );
       }
 

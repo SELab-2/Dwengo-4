@@ -219,7 +219,10 @@ ASSIGN_LOCAL_RESP=$(curl -s -X POST "$BASE_URL/assignment/teacher" \
      \"pathRef\": \"$LP_ID\",
      \"pathLanguage\": \"\",  
      \"isExternal\": false,
-     \"deadline\": \"2025-05-30T23:59:59.000Z\"
+     \"deadline\": \"2025-05-30T23:59:59.000Z\",
+     \"title\":\"Mijn Lokaal Pad\",
+     \"description\":\"Een test-leerpad\",
+     \"teamSize\": 1
    }")
 
 echo "Assignment response: $ASSIGN_LOCAL_RESP"
@@ -235,7 +238,10 @@ ASSIGN_DWENGO_RESP=$(curl -s -X POST "$BASE_URL/assignment/teacher" \
      \"pathRef\": \"test-v1\",
      \"pathLanguage\": \"nl\",
      \"isExternal\": true,
-     \"deadline\": \"2025-05-30T23:59:59.000Z\"
+     \"deadline\": \"2025-05-30T23:59:59.000Z\",
+     \"title\":\"Mijn extern Dwengo pad\",
+     \"description\":\"Een test-leerpad\",
+     \"teamSize\": 1
    }")
 
 echo "Dwengo assignment response: $ASSIGN_DWENGO_RESP"
