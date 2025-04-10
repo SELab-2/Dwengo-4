@@ -29,13 +29,20 @@ export const createTeamsInAssignment = async (
 
   // Check if a class has been assigned an Assignment before splitting this class up into
   // Teams to solve this assignment.
-  const classAssignments: ClassAssignment[] =
-    await prisma.classAssignment.findMany({
+  const classAssignment: ClassAssignment | null =
+    await prisma.classAssignment.findUnique({
       where: {
-        assignmentId: assignmentId,
-        classId: classId,
+        classId_assignmentId: {
+          classId: classId,
+          assignmentId: assignmentId,
+        },
       },
     });
+  if (!classAssignment) {
+    throw new NotFoundError(
+      "This assignment has not been assigned to this class yet."
+    );
+  }
 
   // Create teams in the database
   for (const team of teams) {
