@@ -36,7 +36,6 @@ describe("classroom tests", (): void => {
     classroom = await createClass("5A", "ABCD");
   });
 
-
   describe("[GET] /class/teacher", (): void => {
     it("should respond with a `200` status code and a list of classes", async (): Promise<void> => {
       // add teacherUser1 to some classes
@@ -62,7 +61,6 @@ describe("classroom tests", (): void => {
         ]),
       );
     });
-
 
     it("shouldn't allow a student to get the classes via the teacher route", async (): Promise<void> => {
       const studentUser: Prisma.UserGetPayload<{
@@ -103,7 +101,6 @@ describe("classroom tests", (): void => {
         .set("Authorization", `Bearer ${studentUser.token}`);
 
       expect(status).toBe(200);
-
       expectClassRoomArrayBody(body, classroom2);
     });
 
@@ -410,8 +407,8 @@ describe("classroom tests", (): void => {
 });
 
 function expectClassRoomArrayBody(body: any, classroom2: Class): void {
-  expect(body.classes).toBeDefined();
-  expect(body.classes).toEqual(
+  expect(body.classrooms).toBeDefined();
+  expect(body.classrooms).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         id: classroom.id,
