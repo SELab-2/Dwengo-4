@@ -188,7 +188,7 @@ echo "Node response: $LP_NODE_RESP"
 echo
 echo "==[ 9b) Teacher voegt TWEEDE node toe (extern Dwengo LO) ]========="
 # Voorbeeld: hruid= 'opdracht_leds', language='nl', version=2
-LP_NODE2_RESP=$(curl -s -X POST "$BASE_URL/teacher/learningPath/$LP_ID/node" \
+LP_NODE2_RESP=$(curl -s -X POST "$BASE_URL/learningPath/$LP_ID/node" \
    -H "Authorization: Bearer $TEACHER_TOKEN" \
    -H "Content-Type: application/json" \
    -d "{
@@ -211,7 +211,7 @@ echo "Second node response (Dwengo LO): $LP_NODE2_RESP"
 
 echo
 echo "==[ 10) Teacher maakt assignment met LOKAAL leerpad ]============="
-ASSIGN_LOCAL_RESP=$(curl -s -X POST "$BASE_URL/teacher/assignments" \
+ASSIGN_LOCAL_RESP=$(curl -s -X POST "$BASE_URL/assignment/teacher" \
    -H "Authorization: Bearer $TEACHER_TOKEN" \
    -H "Content-Type: application/json" \
    -d "{
@@ -225,9 +225,9 @@ ASSIGN_LOCAL_RESP=$(curl -s -X POST "$BASE_URL/teacher/assignments" \
 echo "Assignment response: $ASSIGN_LOCAL_RESP"
 
 echo
-echo "==[ 11) Teacher maakt assignment met EXTERN Dwengo lerpad]=============="
+echo "==[ 11) Teacher maakt assignment met EXTERN Dwengo leerpad]=============="
 # Voorbeeld: hruid= 'test-v1', language='nl'
-ASSIGN_DWENGO_RESP=$(curl -s -X POST "$BASE_URL/teacher/assignments" \
+ASSIGN_DWENGO_RESP=$(curl -s -X POST "$BASE_URL/assignment/teacher" \
    -H "Authorization: Bearer $TEACHER_TOKEN" \
    -H "Content-Type: application/json" \
    -d "{
@@ -242,7 +242,7 @@ echo "Dwengo assignment response: $ASSIGN_DWENGO_RESP"
 
 echo
 echo "==[ 12) Student haalt eigen assignments op ]======================"
-STU_ASSIGNMENTS=$(curl -s -X GET "$BASE_URL/student/assignments?sort=deadline" \
+STU_ASSIGNMENTS=$(curl -s -X GET "$BASE_URL/assignment/student?sort=deadline" \
    -H "Authorization: Bearer $STUDENT_TOKEN")
 
 echo "Assignments for student:"
