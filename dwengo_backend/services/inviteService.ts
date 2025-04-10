@@ -1,4 +1,4 @@
-import { Invite, JoinRequestStatus } from "@prisma/client";
+import { ClassTeacher, Invite, JoinRequestStatus } from "@prisma/client";
 import classService from "./classService";
 import {
   BadRequestError,
@@ -79,7 +79,17 @@ export default class inviteService {
     }
 
     // Controleer of de teacher nog geen lid is van de klas
-    await classService.isTeacherOfClass(classId, otherTeacherId);
+    const alreadyInClass: ClassTeacher | null = await handlePrismaQuery(() =>
+      prisma.classTeacher.findFirst({
+        where: {
+          teacherId: otherTeacherId,
+          classId,
+        },
+      }),
+    );
+    if (alreadyInClass) {
+      throw new BadRequestError("Teacher is already a member of this class.");
+    }
 
     // Maak de invite aan
     return await handlePrismaQuery(() =>
