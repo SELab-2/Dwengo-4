@@ -1,5 +1,8 @@
 import express, { Router } from "express";
-import { getStudentAssignments } from "../../controllers/student/studentAssignmentController";
+import {
+  getStudentAssignments,
+  getStudentAssignmentsInClass,
+} from "../../controllers/student/studentAssignmentController";
 import { protectStudent } from "../../middleware/studentAuthMiddleware";
 
 const router: Router = express.Router();
@@ -13,5 +16,7 @@ const router: Router = express.Router();
  * @access Student
  */
 router.get("/", protectStudent, getStudentAssignments);
+
+router.get("/:classId", protectStudent, getStudentAssignmentsInClass);
 
 export default router;
