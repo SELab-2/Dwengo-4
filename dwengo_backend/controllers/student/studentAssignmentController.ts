@@ -62,7 +62,7 @@ export const getStudentAssignmentsInClass = async (
 ): Promise<void> => {
   try {
     const studentId: number = getUserFromAuthRequest(req).id;
-    const classId: number = parseInt(req.params.assignmentId);
+    const classId: number = parseInt(req.params.classId);
 
     // Sorteer standaard de deadline, extra velden kunnen meegegeven worden
     const sortFields: string[] = extractSortableFields(
