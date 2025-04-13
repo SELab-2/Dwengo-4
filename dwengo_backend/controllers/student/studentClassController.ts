@@ -16,3 +16,18 @@ export const getStudentClasses = asyncHandler(
     res.status(200).json({ classrooms });
   },
 );
+
+export const getStudentClassById = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const studentId: number = getUserFromAuthRequest(req).id;
+    const classId: number = parseInt(req.params.classId);
+    const classgroup = await classService.getStudentClassByClassId(
+      studentId,
+      classId,
+    );
+    if (!classgroup) {
+      res.status(404).json({ message: "Class not found" });
+    }
+    res.status(200).json(classgroup);
+  },
+);
