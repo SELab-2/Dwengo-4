@@ -29,15 +29,6 @@ export default function StudentIndex() {
         <div className="w-full mt-4">
           <ClassesStudent />
         </div>
-        <div className="flex flex-row justify-end w-full ">
-          <Link
-            to="/class"
-            className="font-bold hover:cursor-pointer hover:underline"
-          >
-            Bekijk alle klassen
-            <i className="fa-solid ml-1.5 fa-arrow-right"></i>
-          </Link>
-        </div>
       </div>
     </>
   );
