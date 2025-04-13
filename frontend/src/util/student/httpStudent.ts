@@ -195,3 +195,31 @@ export async function fetchAssignmentsForClass({
 
   return assignments;
 }
+
+export async function fetchClass({
+  classId,
+}: {
+  classId: string;
+}): Promise<ClassItem> {
+  const response = await fetch(`${BACKEND}/class/student/${classId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het ophalen van de klasnaam.',
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  const classData = await response.json();
+  console.log('GETTING CLASSDATA', classData);
+
+  return classData;
+}
