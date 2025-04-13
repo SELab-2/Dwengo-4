@@ -36,7 +36,7 @@ const Navstudent: React.FC = () => {
   ];
 
   return (
-    <nav className="bg-gray-200 py-2">
+    <nav className=" py-2">
       <Container>
         <div className="flex text-sm lg:text-lg justify-between items-center">
           <div className="flex flex-row items-center justify-center">

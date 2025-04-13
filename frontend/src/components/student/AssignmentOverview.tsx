@@ -41,21 +41,21 @@ export default function AssignmentOverview() {
               return (
                 <div
                   key={assignmentItem.id}
-                  className="flex items-center flex-row py-2 px-3.5 w-[30rem] h-[11.5rem] justify-between bg-gray-100 rounded-lg shrink-0"
+                  className="flex items-center flex-row py-2 px-3.5 w-[30rem] h-[11.5rem] justify-between bg-white shadow rounded-lg shrink-0"
                 >
-                  <div className="flex flex-col w-full">
-                    <div className="flex flex-row w-full justify-between">
-                      <h3 className="text-2xl font-bold">
+                  <div className="flex flex-col w-full bg-white">
+                    <div className="flex flex-row w-full justify-between bg-white">
+                      <h3 className="text-2xl font-bold bg-white">
                         {assignmentItem.title}
                       </h3>
-                      <p className="text-sm text-gray-700 translate-y-1.5">
+                      <p className="text-sm text-gray-700 translate-y-1.5 bg-white">
                         Deadline: {formattedDate}
                       </p>
                     </div>
-                    <div className="h-20 mt-1 text-gray-500 line-clamp-3">
+                    <div className="h-20 mt-1 text-gray-500 line-clamp-3 bg-white">
                       {assignmentItem.description}
                     </div>
-                    <div className="flex mt-1 flex-row justify-between items-center text-sm">
+                    <div className="flex mt-1 flex-row justify-between items-center text-sm bg-white">
                       <PrimaryButton
                         onClick={() =>
                           navigate(`/student/assignment/${assignmentItem.id}`)

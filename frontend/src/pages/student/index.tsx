@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 export default function StudentIndex() {
   return (
     <>
-      <div className="px-10 bg-gray-300">
+      <div className="px-10">
         <div className="text-6xl pt-12 font-bold">Home</div>
 
         <h2 className="mt-8 text-2xl font-bold">Opdrachten</h2>

@@ -14,13 +14,13 @@ import { AssignmentPayload } from '../../types/type';
  * Assignment component for teachers to view and manage individual assignments.
  * Displays assignment details, associated learning path information, and provides
  * options to edit or delete the assignment.
- * 
+ *
  * Features:
  * - Displays assignment title, description, language, and deadline
  * - Shows associated learning path details
  * - Provides edit and delete functionality
  * - Handles loading and error states
- * 
+ *
  * @component
  * @returns {JSX.Element} The rendered Assignment component
  */
@@ -37,7 +37,7 @@ const Assignment: React.FC = () => {
     error,
   } = useQuery<AssignmentPayload>({
     queryKey: ['classes', assignmentId],
-    queryFn: () => fetchAssignment(assignmentId!),
+    queryFn: () => fetchAssignment(assignmentId ?? ''),
     enabled: !!assignmentId,
   });
 
@@ -55,9 +55,19 @@ const Assignment: React.FC = () => {
       assignmentData?.pathRef,
       assignmentData?.isExternal,
     ],
-    queryFn: () =>
-      fetchLearningPath(assignmentData?.pathRef!, assignmentData?.isExternal!),
-    enabled: !!assignmentData?.pathRef,
+    queryFn: () => {
+      // Only proceed if both values are defined
+      if (assignmentData?.pathRef && assignmentData?.isExternal !== undefined) {
+        return fetchLearningPath(
+          assignmentData.pathRef,
+          assignmentData.isExternal,
+        );
+      }
+      throw new Error('Missing learning path reference or external flag');
+    },
+    enabled: !!(
+      assignmentData?.pathRef && assignmentData?.isExternal !== undefined
+    ),
   });
 
   /**
@@ -75,7 +85,7 @@ const Assignment: React.FC = () => {
    */
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to delete this assignment?')) {
-      deleteAssignmentMutation.mutate(assignmentId!);
+      deleteAssignmentMutation.mutate(assignmentId ?? '');
     }
   };
 

@@ -5,15 +5,11 @@ import styles from './Nav.module.css';
 import NavButton from '../shared/NavButton';
 
 const NavTeacher: React.FC = () => {
-  const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const [menuOpen] = useState<boolean>(false);
   const [firstName] = useState<string | null>(
     localStorage.getItem('firstName'),
   );
   const submit = useSubmit();
-
-  const toggleMenu = (): void => {
-    setMenuOpen(!menuOpen);
-  };
 
   const handleLogout = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -21,7 +17,7 @@ const NavTeacher: React.FC = () => {
   };
 
   return (
-    <nav className="bg-gray-200 py-2">
+    <nav className="py-2">
       <Container>
         <div className="flex text-sm lg:text-lg justify-between items-center">
           <div className="flex flex-row items-center justify-center">
@@ -32,7 +28,6 @@ const NavTeacher: React.FC = () => {
             />
             {firstName ? (
               <div className="flex space-x-4">
-
                 <NavButton to="/teacher" label="Home" />
                 <NavButton to="/teacher/classes" label="Klassen" />
                 <NavButton to="/learning-paths" label="Leerpaden" />
