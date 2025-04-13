@@ -27,7 +27,7 @@ export default function AssignmentsForClassOverview({
 
   return (
     <>
-      <div className="flex flex-row gap-x-5 h-[12.5rem]  ">
+      <div className="flex flex-row flex-wrap gap-5 h-[12.5rem]  ">
         {isLoading && <p>Laden ...</p>}
         {isError && (
           <p className="c-r">

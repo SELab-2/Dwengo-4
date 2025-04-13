@@ -20,7 +20,7 @@ const StudentClassIndex: React.FC = () => {
 
   return (
     <>
-      <div className="px-10 bg-gray-300">
+      <div className="px-10">
         <div className="text-6xl pt-12 font-bold">
           {isLoading && <p>Laden ...</p>}
           {isError && (
@@ -33,7 +33,7 @@ const StudentClassIndex: React.FC = () => {
         </div>
 
         <h2 className="mt-8 text-2xl font-bold">Opdrachten</h2>
-        <div className="w-full mt-4 overflow-x-auto ">
+        <div className="w-full mt-4 ">
           <AssignmentsForClassOverview classId={classId} />
         </div>
       </div>
