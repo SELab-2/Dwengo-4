@@ -1,4 +1,4 @@
-import {Response} from "express";
+import { Response } from "express";
 import {
   getAllLearningObjects,
   getLearningObjectByHruidLangVersion,
@@ -6,9 +6,9 @@ import {
   getLearningObjectsForPath,
   searchLearningObjects,
 } from "../../services/combinedLearningObjectService";
-import {LearningObjectDto} from "../../services/dwengoLearningObjectService";
-import {getUserFromAuthRequest} from "../../helpers/getUserFromAuthRequest";
-import {AuthenticatedRequest} from "../../interfaces/extendedTypeInterfaces";
+import { LearningObjectDto } from "../../services/dwengoLearningObjectService";
+import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
+import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 
 function userIsTeacherOrAdmin(req: AuthenticatedRequest): boolean {
   const role: string | undefined = getUserFromAuthRequest(req).role;
@@ -87,7 +87,6 @@ export const getLearningObjectByHruidLangVersionController = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
-  
   try {
     const { hruid, language, version } = req.query;
     if (!hruid || !language || !version) {

@@ -360,6 +360,34 @@ export async function fetchLearningPath(
 }
 
 /**
+ * Fetches all learning objects for a specific learning path
+ * @param {string} pathId - The ID of the learning path
+ * @returns {Promise<any>} List of learning objects
+ * @throws {APIError} When fetching fails
+ */
+export async function fetchLearningObjectsByLearningPath(pathId: string): Promise<any> {
+
+  const response = await fetch(`${BACKEND}/learningObject/learningPath/${pathId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het ophalen van de leerobjecten.',
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  return await response.json();
+}
+
+/**
  * Creates a new assignment
  * @param {Object} payload - The assignment details
  * @throws {APIError} When creation fails

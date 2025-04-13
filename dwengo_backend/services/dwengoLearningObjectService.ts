@@ -90,7 +90,7 @@ function mapDwengoToLocal(dwengoObj: DwengoLearningObject): LearningObjectDto {
     description: dwengoObj.description ?? "",
     contentType:
       permittedContentTypes[
-        (dwengoObj.content_type as keyof typeof permittedContentTypes) ?? ""
+      (dwengoObj.content_type as keyof typeof permittedContentTypes) ?? ""
       ] ?? ContentType._TEXT_PLAIN,
     keywords: dwengoObj.keywords ?? [],
     targetAges: dwengoObj.target_ages ?? [],
@@ -137,6 +137,32 @@ export async function fetchDwengoObjectById(
   try {
     const params = { _id: id };
     const response = await dwengoAPI.get("/api/learningObject/getMetadata", {
+      params,
+    });
+    const dwengoObj: DwengoLearningObject = response.data;
+    const mapped = mapDwengoToLocal(dwengoObj);
+
+    if (!isTeacher && (mapped.teacherExclusive || !mapped.available)) {
+      return null;
+    }
+    return mapped;
+  } catch (error: any) {
+    if (error.response && error.response.status === 404) {
+      return null;
+    }
+    console.error("Fout bij fetchDwengoObjectById:", error);
+    return null;
+  }
+}
+
+// Eén Dwengo-object op basis van _id
+export async function fetchDwengoObjectByIdRaw(
+  id: string,
+  isTeacher: boolean,
+): Promise<LearningObjectDto | null> {
+  try {
+    const params = { _id: id };
+    const response = await dwengoAPI.get("/api/learningObject/getRaw", {
       params,
     });
     const dwengoObj: DwengoLearningObject = response.data;
@@ -237,7 +263,7 @@ export async function getDwengoObjectsForPath(
           language: node.language,
         };
         const response = await dwengoAPI.get(
-          "/api/learningObject/getMetadata",
+          "/api/learningObject/",
           { params },
         );
         const dwengoObj: DwengoLearningObject = response.data;
@@ -255,5 +281,24 @@ export async function getDwengoObjectsForPath(
   } catch (error) {
     console.error("Fout bij getDwengoObjectsForPath:", error);
     return [];
+  }
+}
+
+// Dwengo-object op basis van hruid (raw)
+export async function fetchDwengoObjectRawByHruid(
+  hruid: string,
+): Promise<DwengoLearningObject | null> {
+  try {
+    const params = { hruid };
+    const response = await dwengoAPI.get("/api/learningObject/getRaw", {
+      params,
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.status === 404) {
+      return null;
+    }
+    console.error("Fout bij fetchDwengoObjectRawByHruid:", error);
+    return null;
   }
 }

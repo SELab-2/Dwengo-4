@@ -32,7 +32,7 @@ export const getAllLearningPaths = asyncHandler(
 
             // Combine local and API paths into a single array
             const combinedPaths = [...localPaths, ...apiPaths];
-            
+
             // Return combined results
             res.json(combinedPaths);
         } catch (error) {
@@ -52,7 +52,7 @@ export const getLearningPathById = asyncHandler(
             const pathId = req.params.pathId;
             const { isExternal } = req.query; // Check if the path is external
             let learningPath;
-            
+
             // Check if it's a local path (UUID format)
             if (isExternal === "false") {
                 learningPath = await LocalLearningPathService.getLearningPathById(pathId);

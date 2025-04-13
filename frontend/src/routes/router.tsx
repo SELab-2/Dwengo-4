@@ -29,7 +29,7 @@ import JoinClass from '../components/student/classes/JoinRequestForm';
 
 // ==== LEARNING PATHS ==== //
 import LearningPaths from '../pages/learningPath/learningPaths';
-import LearningPath from '../pages/learningPath/learningPaths';
+import LearningPath from '../pages/learningPath/learningPath';
 
 const HomePage: React.FC = () => {
   return (
