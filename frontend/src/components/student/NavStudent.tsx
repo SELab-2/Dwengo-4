@@ -5,15 +5,15 @@ import styles from './Nav.module.css';
 import NavButton from '../shared/NavButton';
 
 const Navstudent: React.FC = () => {
-  const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const [menuOpen] = useState<boolean>(false);
   const [firstName] = useState<string | null>(
     localStorage.getItem('firstName'),
   );
   const submit = useSubmit();
 
-  const toggleMenu = (): void => {
+  /*const toggleMenu = (): void => {
     setMenuOpen(!menuOpen);
-  };
+  };*/
 
   const handleLogout = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -28,6 +28,10 @@ const Navstudent: React.FC = () => {
     {
       to: '/student/klassen',
       label: 'Klassen',
+    },
+    {
+      to: '/student/assignments',
+      label: 'Assignments',
     },
   ];
 

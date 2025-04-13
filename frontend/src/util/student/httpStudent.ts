@@ -1,5 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
 import { getAuthToken } from './authStudent';
+import { AssignmentPayload, LearningPath } from '../../types/type';
 
 const BACKEND = 'http://localhost:5000';
 
@@ -166,4 +167,66 @@ export async function fetchAssignments(): Promise<AssignmentItem[]> {
   console.log('GETTING ASSIGNMENTS', assignments);
 
   return assignments;
+}
+/*
+ * Fetches a specific assignment by ID for a student
+ * @param {string} assignmentId - The ID of the assignment
+ * @returns {Promise<AssignmentPayload>} The assignment details
+ * @throws {APIError} When fetching fails
+ */
+export async function fetchAssignment(
+  assignmentId: string,
+): Promise<AssignmentPayload> {
+  const response = await fetch(`${BACKEND}/assignment/${assignmentId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het ophalen van de opdracht.',
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  return await response.json();
+}
+
+/**
+ * Fetches a specific learning path for a student
+ * @param {string} learningPathId - The ID of the learning path
+ * @param {boolean} isExternal - Whether the path is external
+ * @returns {Promise<LearningPath>} The learning path details
+ * @throws {APIError} When fetching fails
+ */
+export async function fetchLearningPath(
+  learningPathId: string,
+  isExternal: boolean = false,
+): Promise<LearningPath> {
+  const response = await fetch(
+    `${BACKEND}/path/all/${learningPathId}?isExternal=${isExternal}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het ophalen van het leerpad.',
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  return await response.json();
 }
