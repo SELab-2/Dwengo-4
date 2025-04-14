@@ -5,6 +5,7 @@ import {
   searchLearningObjectsController,
   // [NIEUW] importeer de extra controller-functie:
   getLearningObjectByHruidLangVersionController,
+  getLearningObjectsForPathController,
 } from "../../controllers/learningObject/learningObjectController";
 import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
@@ -37,7 +38,7 @@ router.get("/teacher/search", protectTeacher, searchLearningObjectsController);
 router.get(
   "/teacher/lookup",
   protectTeacher,
-  getLearningObjectByHruidLangVersionController
+  getLearningObjectByHruidLangVersionController,
 );
 
 /**
@@ -58,9 +59,9 @@ router.get("/:learningObjectId", protectAnyUser, getLearningObjectController);
  * @access Teacher/Student
  */
 router.get(
-  "/learningPath/learningPathId",
+  "/learningPath/:learningPathId",
   protectAnyUser,
-  getLearningObjectByHruidLangVersionController
+  getLearningObjectsForPathController,
 );
 
 export default router;
