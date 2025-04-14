@@ -1,6 +1,9 @@
 import express from "express";
 import { protectStudent } from "../../middleware/studentAuthMiddleware";
-import { getStudentClasses } from "../../controllers/student/studentClassController";
+import {
+  getStudentClasses,
+  leaveClass,
+} from "../../controllers/student/studentClassController";
 
 const router = express.Router();
 router.use(protectStudent);
@@ -11,5 +14,7 @@ router.use(protectStudent);
  * @access Student
  */
 router.get("/", getStudentClasses);
+
+router.delete("/:classId", leaveClass);
 
 export default router;
