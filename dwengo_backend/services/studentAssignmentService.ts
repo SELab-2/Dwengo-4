@@ -40,8 +40,9 @@ export const getAssignmentsForStudentInClass = async (
   classId: number,
   sortFields: string[],
   order: "asc" | "desc",
+  limit: number,
 ): Promise<Assignment[]> => {
-  return prisma.assignment.findMany({
+  return await prisma.assignment.findMany({
     where: {
       classAssignments: {
         some: {
@@ -57,5 +58,6 @@ export const getAssignmentsForStudentInClass = async (
       },
     },
     orderBy: sortFields.map((field: string) => ({ [field]: order })),
+    take: limit,
   });
 };
