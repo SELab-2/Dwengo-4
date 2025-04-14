@@ -50,7 +50,7 @@ router.get(
 router.get("/:learningObjectId", protectAnyUser, getLearningObjectController);
 
 /**
- * @route GET /learningObject/learningPath/:pathId
+ * @route GET /learningObject/learningPath/:learningPathId
  * @description Haal alle leerobjecten op die horen bij een specifiek leerpad
  * @param pathId: string
  * @queryparam language: string
