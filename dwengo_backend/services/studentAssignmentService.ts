@@ -75,6 +75,6 @@ export const isStudentInClass = async (
   });
 
   if (!studentInClass) {
-    throw new AccesDeniedError("Student is not a part of the class.");
+    throw new AccesDeniedError("Student is not a part of this class.");
   }
 };
