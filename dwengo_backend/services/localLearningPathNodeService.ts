@@ -3,7 +3,6 @@ import { dwengoAPI } from "../config/dwengoAPI";
 
 import prisma from "../config/prisma";
 
-
 /**
  * Data object om een node te maken/updaten.
  */

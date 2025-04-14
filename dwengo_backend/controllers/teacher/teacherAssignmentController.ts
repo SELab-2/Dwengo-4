@@ -4,7 +4,6 @@ import teacherAssignmentService from "../../services/teacherServices/teacherAssi
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 export class AssignmentTeacherController {
-
   createAssignmentForClass = async (
     req: AuthenticatedRequest,
     res: Response,
@@ -19,7 +18,7 @@ export class AssignmentTeacherController {
         deadline,
         title,
         description,
-        teamSize
+        teamSize,
       }: {
         classId: number;
         pathRef: string;
@@ -43,7 +42,7 @@ export class AssignmentTeacherController {
           parsedDeadline,
           title,
           description,
-          teamSize
+          teamSize,
         );
       res.status(201).json(assignment);
     } catch {
@@ -53,7 +52,7 @@ export class AssignmentTeacherController {
 
   createAssignmentWithTeams = async (
     req: AuthenticatedRequest,
-    res: Response
+    res: Response,
   ): Promise<void> => {
     try {
       const teacherId: number = getUserFromAuthRequest(req).id;
@@ -65,25 +64,25 @@ export class AssignmentTeacherController {
         title,
         description,
         classTeams,
-        teamSize
+        teamSize,
       } = req.body;
-
 
       const parsedDeadline = new Date(deadline);
 
-      const assignment = await teacherAssignmentService.createAssignmentWithTeams(
-        teacherId,
-        pathRef,
-        pathLanguage,
-        isExternal,
-        parsedDeadline,
-        title,
-        description,
-        classTeams,
-        teamSize
-      );
+      const assignment =
+        await teacherAssignmentService.createAssignmentWithTeams(
+          teacherId,
+          pathRef,
+          pathLanguage,
+          isExternal,
+          parsedDeadline,
+          title,
+          description,
+          classTeams,
+          teamSize,
+        );
       res.status(201).json(assignment);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: "Failed to create assignment with teams" });
     }
   };
@@ -135,7 +134,7 @@ export class AssignmentTeacherController {
         teacherId,
         title,
         description,
-        teamSize
+        teamSize,
       );
       res.json(updatedAssignment);
     } catch {
@@ -159,32 +158,39 @@ export class AssignmentTeacherController {
 
   updateAssignmentWithTeams = async (
     req: AuthenticatedRequest,
-    res: Response
+    res: Response,
   ): Promise<void> => {
     try {
       const assignmentId: number = parseInt(req.params.assignmentId);
-      const { pathRef, pathLanguage, isExternal, deadline, title, description, classTeams, teamSize } = req.body;
-      const teacherId: number = getUserFromAuthRequest(req).id;
-      const parsedDeadline = new Date(deadline);
-
-      console.log("Parsed deadline:", parsedDeadline);
-      const updatedAssignment = await teacherAssignmentService.updateAssignmentWithTeams(
-        assignmentId,
-        teacherId,
+      const {
         pathRef,
         pathLanguage,
         isExternal,
-        parsedDeadline,
+        deadline,
         title,
         description,
         classTeams,
-        teamSize
-      );
+        teamSize,
+      } = req.body;
+      const teacherId: number = getUserFromAuthRequest(req).id;
+      const parsedDeadline = new Date(deadline);
+
+      const updatedAssignment =
+        await teacherAssignmentService.updateAssignmentWithTeams(
+          assignmentId,
+          teacherId,
+          pathRef,
+          pathLanguage,
+          isExternal,
+          parsedDeadline,
+          title,
+          description,
+          classTeams,
+          teamSize,
+        );
       res.json(updatedAssignment);
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: "Failed to update assignment and teams" });
     }
   };
 }
-
-

@@ -10,9 +10,9 @@ import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
  * returns a list of all classes the student is partaking in in the response body
  */
 export const getStudentClasses = asyncHandler(
-    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-        const studentId: number = getUserFromAuthRequest(req).id;
-        const classrooms = await classService.getClassesByStudent(studentId);
-        res.status(200).json({ classrooms });
-    }
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const studentId: number = getUserFromAuthRequest(req).id;
+    const classrooms = await classService.getClassesByStudent(studentId);
+    res.status(200).json({ classrooms });
+  },
 );

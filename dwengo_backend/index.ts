@@ -37,8 +37,14 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
   if (origin && allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
-  res.setHeader("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Authorization");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS, PATCH",
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "X-Requested-With, Content-Type, Authorization",
+  );
   next();
 });
 app.options("*", (req, res) => {
@@ -64,7 +70,10 @@ app.use("/join-request", joinRequestRoutes);
 // Routes voor authentificatie
 app.use("/auth", authRoutes);
 app.use("/pathByTeacher", teacherLocalLearningPathRoutes);
-app.use("learningPath/:learningPathId/node", teacherLocalLearningPathNodesRoutes);
+app.use(
+  "/learningPath/:learningPathId/node",
+  teacherLocalLearningPathNodesRoutes,
+);
 app.use("/learningObjectByTeacher", teacherLocalLearningObjectRoutes);
 
 // Routes voor teams
