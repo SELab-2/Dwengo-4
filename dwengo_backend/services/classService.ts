@@ -100,9 +100,9 @@ export default class ClassService {
   static async getStudentClassByClassId(
     studentId: number,
     classId: number,
-  ): Promise<Class | null> {
+  ): Promise<Class> {
     // Fetch all classes where the student is enrolled
-    return prisma.class.findUnique({
+    const c: Class | null = await prisma.class.findUnique({
       where: {
         id: classId,
         classLinks: {
@@ -112,6 +112,10 @@ export default class ClassService {
         },
       },
     });
+    if (!c) {
+      throw new NotFoundError(`Class not found for this student.`);
+    }
+    return c;
   }
 
   // Update a class's information
