@@ -227,6 +227,30 @@ paths:
         '401':
           description: Unauthorized access
 
+  /class/student/{classId}:
+    get:
+      tags:
+        - Class
+        - Student
+      summary: Get a classroom by ID for a student.
+      description: Retrieve details of a specific classroom by its ID. Requires student authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the classroom
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Classroom retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Class'
+        '404':
+          description: Classroom not found
+
   /class/teacher:
     post:
       tags:
