@@ -3,6 +3,7 @@ import asyncHandler from "express-async-handler";
 import {
   getAssignmentsForStudent,
   getAssignmentsForStudentInClass,
+  isStudentInClass,
 } from "../../services/studentAssignmentService";
 import { Assignment } from "@prisma/client";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
@@ -61,6 +62,9 @@ export const getStudentAssignmentsInClass = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const studentId: number = getUserFromAuthRequest(req).id;
     const classId: number = parseInt(req.params.classId);
+
+    // Controleer of student wel in gegeven klas zit
+    await isStudentInClass(studentId, classId);
 
     // Sorteer standaard de deadline, extra velden kunnen meegegeven worden
     const sortFields: string[] = extractSortableFields(

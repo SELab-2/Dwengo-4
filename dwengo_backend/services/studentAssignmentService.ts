@@ -1,6 +1,7 @@
 import { Assignment } from "@prisma/client";
 
 import prisma from "../config/prisma";
+import { AccesDeniedError } from "../errors/errors";
 
 /**
  * Haalt alle assignments op die een student (studentId) kan zien,
@@ -60,4 +61,20 @@ export const getAssignmentsForStudentInClass = async (
     orderBy: sortFields.map((field: string) => ({ [field]: order })),
     take: limit,
   });
+};
+
+export const isStudentInClass = async (
+  studentId: number,
+  classId: number,
+): Promise<void> => {
+  const studentInClass = await prisma.classStudent.findFirst({
+    where: {
+      studentId: studentId,
+      classId: classId,
+    },
+  });
+
+  if (!studentInClass) {
+    throw new AccesDeniedError("Student is not a part of the class.");
+  }
 };
