@@ -223,3 +223,15 @@ export async function fetchClass({
 
   return classData;
 }
+
+export async function fetchLeaveClass({ classId }: { classId: string }) {
+  const response = await fetch(`${BACKEND}/class/student/${classId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+  });
+
+  return response;
+}
