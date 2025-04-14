@@ -18,7 +18,7 @@ const router: Router = express.Router();
 router.get("/", protectStudent, getStudentAssignments);
 
 /**
- * @route GET /assignment/student/:classId
+ * @route GET /assignment/student/class/:classId
  * @description Get all assignments for a student in a class
  * @param classId: number
  * @queryparam sort: string {asc, desc}
@@ -26,6 +26,6 @@ router.get("/", protectStudent, getStudentAssignments);
  * @queryparam limit: number
  * @access Student
  */
-router.get("/:classId", protectStudent, getStudentAssignmentsInClass);
+router.get("/class/:classId", protectStudent, getStudentAssignmentsInClass);
 
 export default router;
