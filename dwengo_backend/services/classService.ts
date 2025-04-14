@@ -114,6 +114,20 @@ export default class ClassService {
     });
   }
 
+  static async leaveClassAsStudent(
+    studentId: number,
+    classId: number,
+  ): Promise<ClassStudent> {
+    return prisma.classStudent.delete({
+      where: {
+        studentId_classId: {
+          studentId: studentId,
+          classId: classId,
+        },
+      },
+    });
+  }
+
   // Update a class's information
   static async updateClass(
     classId: number,
