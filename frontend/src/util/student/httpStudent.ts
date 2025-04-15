@@ -173,13 +173,16 @@ export async function fetchAssignmentsForClass({
 }: {
   classId: string;
 }): Promise<AssignmentItem[]> {
-  const response = await fetch(`${BACKEND}/assignment/student/${classId}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthToken()}`,
+  const response = await fetch(
+    `${BACKEND}/assignment/student/class/${classId}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
     },
-  });
+  );
 
   if (!response.ok) {
     const error: APIError = new Error(
