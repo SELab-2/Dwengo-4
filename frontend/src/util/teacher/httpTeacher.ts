@@ -436,7 +436,7 @@ export async function fetchAssignments(classId: string): Promise<any> {
  * @throws {APIError} When fetching fails
  */
 export async function fetchAllAssignments(): Promise<any> {
-  const response = await fetch(`${BACKEND}/assignment/teacher/`, {
+  const response = await fetch(`${BACKEND}/assignment/teacher?limit=5`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
