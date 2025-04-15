@@ -101,7 +101,7 @@ export default class ClassService {
     studentId: number,
     classId: number,
   ): Promise<ClassStudent> {
-    return prisma.classStudent.delete({
+    return await prisma.classStudent.delete({
       where: {
         studentId_classId: {
           studentId: studentId,

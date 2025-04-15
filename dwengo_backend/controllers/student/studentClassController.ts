@@ -19,14 +19,10 @@ export const getStudentClasses = asyncHandler(
 
 export const leaveClass = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    try {
-      const studentId: number = getUserFromAuthRequest(req).id;
-      const classId: number = parseInt(req.params.classId);
+    const studentId: number = getUserFromAuthRequest(req).id;
+    const classId: number = parseInt(req.params.classId);
 
-      await classService.leaveClassAsStudent(studentId, classId);
-      res.status(204).json();
-    } catch {
-      res.status(500).json({ message: "Failed to leave class" });
-    }
+    await classService.leaveClassAsStudent(studentId, classId);
+    res.status(204).json();
   },
 );
