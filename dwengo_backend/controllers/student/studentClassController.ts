@@ -23,6 +23,6 @@ export const leaveClass = asyncHandler(
     const classId: number = parseInt(req.params.classId);
 
     await classService.leaveClassAsStudent(studentId, classId);
-    res.status(204).json();
+    res.status(204).json({ message: "Student successfully left class." });
   },
 );
