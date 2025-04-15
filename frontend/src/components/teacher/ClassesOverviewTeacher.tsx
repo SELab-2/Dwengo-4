@@ -38,13 +38,19 @@ export default function ClassesOverviewTeacher() {
                 className="flex items-center flex-row w-[20rem] p-4 justify-between bg-gray-100 rounded-lg shrink-0"
               >
                 <div className="flex flex-col">
-                  <div className="flex flex-row w-full justify-between">
+                  <div className="flex flex-row w-full justify-between mb-1">
                     <h3 className="text-2xl font-bold">{classItem.name}</h3>
                   </div>
 
+                  <p>
+                    <b>Code:</b> {classItem.code}
+                  </p>
+
                   <div className="flex mt-4 flex-row justify-between items-center text-sm">
                     <PrimaryButton
-                      onClick={() => navigate(`/student/class/${classItem.id}`)}
+                      onClick={() =>
+                        navigate(`/teacher/classes/${classItem.id}`)
+                      }
                     >
                       <span className="">Klas bekijken</span>
                     </PrimaryButton>
