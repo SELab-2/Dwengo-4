@@ -374,6 +374,7 @@ export async function fetchLearningObjectsByLearningPath(pathId: string): Promis
       Authorization: `Bearer ${getAuthToken()}`,
     },
   });
+  console.log("fet  ")
 
   if (!response.ok) {
     const error: APIError = new Error(

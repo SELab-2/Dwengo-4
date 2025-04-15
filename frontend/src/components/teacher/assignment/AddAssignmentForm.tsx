@@ -351,6 +351,7 @@ const AddAssignmentForm = ({
           setIsSubmitting(false);
         });
     } else {
+      console.log("hi")
       postAssignment({
         title,
         description,
@@ -552,7 +553,7 @@ const AddAssignmentForm = ({
               </div>
             )}
           </div>
-          {assignmentType === 'group' && formErrors.teams && (
+          {formErrors.teams && (
             <div className={styles.error}>{formErrors.teams}</div>
           )}
 
