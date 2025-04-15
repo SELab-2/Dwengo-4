@@ -1457,6 +1457,13 @@ paths:
                   $ref: '#/components/schemas/Assignment'
         '401':
           description: Unauthorized access
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: false
+          description: Limit the number of assignments returned
 
     post:
       tags:
