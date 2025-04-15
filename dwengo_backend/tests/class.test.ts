@@ -10,6 +10,7 @@ import {
   Invite,
   JoinRequest,
   Prisma,
+  Student,
   Teacher,
   User,
 } from "@prisma/client";
@@ -28,12 +29,31 @@ const APP_URL: string = process.env.APP_URL || "http://localhost:5000";
 let teacherUser1: User & { teacher: Teacher; token: string };
 let classroom: Class;
 
+let student1: User & { student: Student; token: string };
+let student2: User & { student: Student; token: string };
+let classroom1: Class;
+let classroom2: Class;
+
 describe("classroom tests", (): void => {
   beforeEach(async (): Promise<void> => {
     // create a teacher
     teacherUser1 = await createTeacher("Bob", "Boons", "bob.boons@gmail.com");
     // create a class
     classroom = await createClass("5A", "ABCD");
+
+    student1 = await createStudent("Bert", "Plank", "bert.plank@gmail.com");
+    student2 = await createStudent(
+      "Ferdinand",
+      "De Muis",
+      "rip_ferdinand.de_muis@gmail.com",
+    );
+
+    classroom1 = await createClass("WEWI", "HIJM");
+    classroom2 = await createClass("LAWI", "MIJN");
+
+    await addStudentToClass(student1.id, classroom1.id);
+    await addStudentToClass(student2.id, classroom1.id);
+    await addStudentToClass(student1.id, classroom2.id);
   });
 
   describe("[GET] /class/teacher", (): void => {
@@ -402,6 +422,42 @@ describe("classroom tests", (): void => {
         `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`,
       );
       expect(body.students).toBeUndefined();
+    });
+  });
+
+  describe("[GET] /class/student/:classId", async (): Promise<void> => {
+    beforeEach(async (): Promise<void> => {});
+
+    it("should respond with a `200` status code and the specified class", async (): Promise<void> => {
+      const { status, body } = await request(app)
+        .get(`/class/student/${classroom1.id}`)
+        .set("Authorization", `Bearer ${student1.token}`);
+      expect(status).toBe(200);
+      expect(body.name).toBe(classroom1.name);
+      expect(body.code).toBe(classroom1.code);
+      expect(body.id).toBe(classroom1.id);
+    });
+
+    it("should return the same class for students that are in the same class", async (): Promise<void> => {
+      const res = await request(app)
+        .get(`/class/student/${classroom1.id}`)
+        .set("Authorization", `Bearer ${student1.token}`);
+      expect(res.status).toBe(200);
+
+      const res2 = await request(app)
+        .get(`/class/student/${classroom1.id}`)
+        .set("Authorization", `Bearer ${student2.token}`);
+      expect(res2.status).toBe(200);
+      expect(res2.body).toEqual(res.body);
+    });
+
+    it("should respond with a `403` status code because the student is not a part of the class", async (): Promise<void> => {
+      const { status, body } = await request(app)
+        .get(`/class/student/${classroom2.id}`)
+        .set("Authorization", `Bearer ${student2.token}`);
+
+      expect(status).toBe(403);
+      expect(body.message).toBe("Student is not a part of the given class.");
     });
   });
 });

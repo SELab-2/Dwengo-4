@@ -113,7 +113,7 @@ export default class ClassService {
       },
     });
     if (!c) {
-      throw new NotFoundError(`Class not found for this student.`);
+      throw new AccesDeniedError(`Student is not a part of the given class.`);
     }
     return c;
   }
