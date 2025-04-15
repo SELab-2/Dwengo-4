@@ -230,3 +230,17 @@ export async function fetchLearningPath(
 
   return await response.json();
 }
+
+export async function fetchQuestion(questionId: string) {
+  const response = await fetch(`${BACKEND}/question/${questionId}/messages`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+
+  if (!response.ok) throw new Error('Failed to fetch questions');
+  //console.log(await response.json());
+  return response.json();
+}

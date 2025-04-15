@@ -67,7 +67,7 @@ const AssignmentStudent: React.FC = () => {
                   {assignment.title}
                 </h2>
                 <div>
-                  <Link to={`/student/question/new/${assignment.id}`}>
+                  <Link to={`/student/question/${assignment.id}/`}>
                     <div className="bg-dwengo-green hover:opacity-80 px-3.5 hover:cursor-pointer py-2 rounded-xl text-xl w-min">
                       <p className="bg-dwengo-green">?</p>
                     </div>
