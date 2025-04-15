@@ -15,6 +15,12 @@ router.use(protectStudent);
  */
 router.get("/", getStudentClasses);
 
+/**
+ * @route DELETE /class/student/:classId
+ * @description Leave a class
+ * @param classId: number
+ * @access Student
+ */
 router.delete("/:classId", leaveClass);
 
 export default router;
