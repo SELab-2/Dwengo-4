@@ -76,10 +76,14 @@ export interface LearningObjectDto {
   origin: "dwengo" | "local";
 }
 
+export interface LearningObjectDtoWithRaw extends LearningObjectDto {
+  raw?: string;
+}
+
 /**
  * Converteer Dwengo-object naar onze LearningObjectDto
  */
-function mapDwengoToLocal(dwengoObj: DwengoLearningObject): LearningObjectDto {
+function mapDwengoToLocal(dwengoObj: DwengoLearningObject): LearningObjectDtoWithRaw {
   return {
     id: dwengoObj._id ?? "",
     uuid: dwengoObj.uuid ?? "",
@@ -241,7 +245,7 @@ export async function searchDwengoObjects(
 export async function getDwengoObjectsForPath(
   pathId: string,
   isTeacher: boolean,
-): Promise<LearningObjectDto[]> {
+): Promise<LearningObjectDtoWithRaw[]> {
   try {
     const pathResp = await dwengoAPI.get("/api/learningPath/search", {
       params: { all: "" },
@@ -253,7 +257,7 @@ export async function getDwengoObjectsForPath(
       return [];
     }
     const nodes = learningPath.nodes || [];
-    const results: LearningObjectDto[] = [];
+    const results: LearningObjectDtoWithRaw[] = [];
 
     for (const node of nodes) {
       try {
@@ -262,17 +266,24 @@ export async function getDwengoObjectsForPath(
           version: node.version,
           language: node.language,
         };
-        const response = await dwengoAPI.get(
+        const responseMetadata = await dwengoAPI.get(
           "/api/learningObject/getMetadata",
           { params },
         );
-        const dwengoObj: DwengoLearningObject = response.data;
-        const mapped = mapDwengoToLocal(dwengoObj);
+        const dwengoObject: LearningObjectDtoWithRaw = responseMetadata.data;
+        let mappedMD = mapDwengoToLocal(dwengoObject);
 
-        if (!isTeacher && (mapped.teacherExclusive || !mapped.available)) {
+        const responseRaw = await dwengoAPI.get(
+          "/api/learningObject/getRaw",
+          { params },
+        );
+
+        mappedMD.raw = responseRaw.data;
+
+        if (!isTeacher && (mappedMD.teacherExclusive || !mappedMD.available)) {
           continue;
         }
-        results.push(mapped);
+        results.push(mappedMD);
       } catch (err) {
         console.error("Fout bij ophalen node:");
       }
