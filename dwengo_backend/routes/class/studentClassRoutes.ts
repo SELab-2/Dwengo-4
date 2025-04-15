@@ -16,6 +16,12 @@ router.use(protectStudent);
  */
 router.get("/", getStudentClasses);
 
+/**
+ * @route GET /class/student/:classId
+ * @description Get a specific class for a student
+ * @param classId: number
+ * @access Student
+ */
 router.get("/:classId", getStudentClassById);
 
 /**
