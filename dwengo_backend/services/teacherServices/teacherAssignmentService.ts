@@ -80,6 +80,9 @@ export default class TeacherAssignmentService {
           },
         },
       },
+      orderBy: {
+        deadline: "desc",
+      },
       take: limit,
     });
   }
