@@ -1,17 +1,17 @@
-import React, { useRef } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import InputWithChecks from "../../components/shared/InputWithChecks";
+import React, { useRef } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import InputWithChecks from '../../components/shared/InputWithChecks';
 import {
   validateEmail,
   validateRequired,
   validateForm,
   validateMinLength,
-} from "../../util/shared/validation";
-import BoxBorder from "../../components/shared/BoxBorder";
-import { loginStudent } from "../../util/student/httpStudent";
-import LoadingIndicatorButton from "../../components/shared/LoadingIndicatorButton";
-import PrimaryButton from "../../components/shared/PrimaryButton";
+} from '../../util/shared/validation';
+import BoxBorder from '../../components/shared/BoxBorder';
+import { loginStudent } from '../../util/student/httpStudent';
+import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButton';
+import PrimaryButton from '../../components/shared/PrimaryButton';
 
 interface LoginFormData {
   email: string;
@@ -44,12 +44,13 @@ const LoginStudent: React.FC = () => {
       const token = data.token;
       const expires = new Date();
       expires.setDate(expires.getDate() + 7);
-      localStorage.setItem("token", token);
-      localStorage.setItem("firstName", data.firstName);
-      localStorage.setItem("lastName", data.lastName);
-      localStorage.setItem("expiration", expires.toISOString());
+      console.log(data);
+      localStorage.setItem('token', token);
+      localStorage.setItem('firstName', data.firstName);
+      localStorage.setItem('lastName', data.lastName);
+      localStorage.setItem('expiration', expires.toISOString());
 
-      navigate("/student/dashboard");
+      navigate('/student/dashboard');
     },
   });
 
@@ -103,8 +104,8 @@ const LoginStudent: React.FC = () => {
             />
             {isError && (
               <div className="c-r">
-                {(error as any)?.info?.message ||
-                  "Er is iets fout gelopen tijdens het inloggen"}
+                {error.message ||
+                  'Er is iets fout gelopen tijdens het inloggen'}
               </div>
             )}
             <div>
