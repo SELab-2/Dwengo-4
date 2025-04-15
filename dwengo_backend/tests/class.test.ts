@@ -425,6 +425,63 @@ describe("classroom tests", (): void => {
     });
   });
 
+  describe("[DELETE] /class/student/:classId", async (): Promise<void> => {
+    it("should respond with a `204` status code when the student leaves the class", async (): Promise<void> => {
+      const s: User & { student: Student; token: string } = await createStudent(
+        "Bilbo",
+        "Baggins",
+        "bilbo.baggins@gmail.com",
+      );
+      const c: Class = await createClass("LATA", "EFGH");
+
+      await addStudentToClass(s.id, c.id);
+
+      // now test leaving the class
+      const { status, body } = await request(app)
+        .delete(`/class/student/${c.id}`)
+        .set("Authorization", `Bearer ${s.token}`);
+      expect(status).toBe(204);
+      expect(body).toEqual({});
+
+      const temp: ClassStudent | null = await prisma.classStudent.findUnique({
+        where: {
+          studentId_classId: {
+            studentId: s.id,
+            classId: c.id,
+          },
+        },
+      });
+      expect(temp).toBeNull();
+
+      // Make sure user still exists
+      const t: Student | null = await prisma.student.findUnique({
+        where: {
+          userId: s.id,
+        },
+      });
+      expect(t).toBeDefined();
+    });
+
+    it("should respond with a `400` status code when the student is not in the class", async (): Promise<void> => {
+      const s: User & { student: Student; token: string } = await createStudent(
+        "Bilbo",
+        "Baggins",
+        "bilbo.baggins@gmail.com",
+      );
+
+      const c: Class = await createClass("LATA", "EFGH");
+
+      const { status, body } = await request(app)
+        .delete(`/class/student/${c.id}`)
+        .set("Authorization", `Bearer ${s.token}`);
+
+      expect(status).toBe(400);
+      expect(body.message).toBe(
+        "Student is not a part of this class and is therefore not able to leave it.",
+      );
+    });
+  });
+
   describe("[GET] /class/student/:classId", async (): Promise<void> => {
     beforeEach(async (): Promise<void> => {});
 

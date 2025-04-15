@@ -3,6 +3,7 @@ import { protectStudent } from "../../middleware/studentAuthMiddleware";
 import {
   getStudentClassById,
   getStudentClasses,
+  leaveClass,
 } from "../../controllers/student/studentClassController";
 
 const router = express.Router();
@@ -22,5 +23,13 @@ router.get("/", getStudentClasses);
  * @access Student
  */
 router.get("/:classId", getStudentClassById);
+
+/**
+ * @route DELETE /class/student/:classId
+ * @description Leave a class
+ * @param classId: number
+ * @access Student
+ */
+router.delete("/:classId", leaveClass);
 
 export default router;
