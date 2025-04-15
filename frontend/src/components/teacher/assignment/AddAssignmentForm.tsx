@@ -172,11 +172,15 @@ const AddAssignmentForm = ({
       }
       setTeams(assignmentData.classTeams!);
 
-      // Initialize individual students from existing teams
+      // Only set selected students from existing teams for individual assignments
       if (assignmentData.teamSize === 1) {
         const studentsPerClass: Record<string, StudentItem[]> = {};
         Object.entries(assignmentData.classTeams || {}).forEach(([classId, teams]) => {
-          studentsPerClass[classId] = teams.flatMap(team => team.students);
+          // Only include students that were actually in teams
+          const selectedStudents = teams.flatMap(team => team.students);
+          if (selectedStudents.length > 0) {
+            studentsPerClass[classId] = selectedStudents;
+          }
         });
         setIndividualStudents(studentsPerClass);
       }
@@ -202,14 +206,14 @@ const AddAssignmentForm = ({
 
   // Add effect to initialize all students when switching to individual
   useEffect(() => {
-    if (assignmentType === 'individual') {
+    if (assignmentType === 'individual' && !isEditing) {
       const allStudents: Record<string, StudentItem[]> = {};
       selectedClasses.forEach(classItem => {
-        allStudents[classItem.id] = classItem.students;
+        allStudents[classItem.id] = [];  // Initialize empty array instead of all students
       });
       setIndividualStudents(allStudents);
     }
-  }, [assignmentType, selectedClasses]);
+  }, [assignmentType, selectedClasses, isEditing]);
 
   const handleTeamClicks = () => {
     setIsTeamOpen(true);
