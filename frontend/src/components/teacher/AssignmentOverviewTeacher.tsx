@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAllAssignments } from '../../util/teacher/httpTeacher';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import PrimaryButton from '../shared/PrimaryButton';
 import { AssignmentItem } from '../../util/student/httpStudent';
 
@@ -16,8 +16,6 @@ export default function AssignmentOverviewTeacher() {
     queryKey: ['assignments'],
     queryFn: fetchAllAssignments,
   });
-
-  const navigate = useNavigate();
 
   return (
     <>
@@ -54,13 +52,9 @@ export default function AssignmentOverviewTeacher() {
                       {assignmentItem.description}
                     </div>
                     <div className="flex mt-1 flex-row justify-between items-center text-sm">
-                      <PrimaryButton
-                        onClick={() =>
-                          navigate(`/student/assignment/${assignmentItem.id}`)
-                        }
-                      >
-                        Leerpad bekijken
-                      </PrimaryButton>
+                      <Link to={`/teacher/assignment/${assignmentItem.id}`}>
+                        <PrimaryButton>Leerpad bekijken</PrimaryButton>
+                      </Link>
                       {/*<p>12/50 completed</p> Replace with actual progress*/}
                     </div>
                   </div>

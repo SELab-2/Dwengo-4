@@ -4,7 +4,7 @@ import {
   AssignmentItem,
   fetchAssignments,
 } from '../../util/student/httpStudent';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import PrimaryButton from '../shared/PrimaryButton';
 
 export default function AssignmentOverview() {
@@ -18,8 +18,6 @@ export default function AssignmentOverview() {
     queryKey: ['assignments'],
     queryFn: fetchAssignments,
   });
-
-  const navigate = useNavigate();
 
   return (
     <>
@@ -56,13 +54,9 @@ export default function AssignmentOverview() {
                       {assignmentItem.description}
                     </div>
                     <div className="flex mt-1 flex-row justify-between items-center text-sm">
-                      <PrimaryButton
-                        onClick={() =>
-                          navigate(`/student/assignment/${assignmentItem.id}`)
-                        }
-                      >
-                        Leerpad bekijken
-                      </PrimaryButton>
+                      <Link to={`/student/assignment/${assignmentItem.id}`}>
+                        <PrimaryButton>Leerpad bekijken</PrimaryButton>
+                      </Link>
                       {/*<p>12/50 completed</p> Replace with actual progress*/}
                     </div>
                   </div>
