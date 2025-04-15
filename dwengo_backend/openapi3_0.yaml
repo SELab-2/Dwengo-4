@@ -1482,6 +1482,53 @@ paths:
         '401':
           description: Unauthorized access
 
+  /assignment/student/class/{classId}:
+    get:
+      tags:
+        - Assignment
+        - Student
+      summary: Get all assignments for a class
+      description: Retrieve all assignments for a specific class. Requires student authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the class
+          schema:
+            type: integer
+        - name: sort
+          in: query
+          required: false
+          description: Sort order (asc or desc)
+          schema:
+            type: string
+            enum: [asc, desc]
+        - name: order
+          in: query
+          required: false
+          description: Field to order by (createdAt, updatedAt, or deadline)
+          schema:
+            type: string
+            enum: [createdAt, updatedAt, deadline]
+        - name: limit
+          in: query
+          required: false
+          description: Limit the number of assignments returned
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of assignments for the student
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Assignment'
+        '403':
+          description: Access denied, student is not a part of the class.
+        
+
   /assignment/teacher:
     get:
       tags:
