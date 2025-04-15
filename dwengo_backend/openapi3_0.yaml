@@ -228,6 +228,28 @@ paths:
           description: Unauthorized access
 
   /class/student/{classId}:
+    get:
+      tags:
+        - Class
+        - Student
+      summary: Get a classroom by ID for a student.
+      description: Retrieve details of a specific classroom by its ID. Requires student authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the classroom
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Classroom retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Class'
+        '404':
+          description: Classroom not found
     delete:
       tags:
         - Class
@@ -246,6 +268,7 @@ paths:
           description: Classroom left successfully
         '400':
           description: Student is not a part of this class and is therefore not able to leave it.
+
 
   /class/teacher:
     post:

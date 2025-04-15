@@ -97,6 +97,27 @@ export default class ClassService {
     });
   }
 
+  static async getStudentClassByClassId(
+    studentId: number,
+    classId: number,
+  ): Promise<Class> {
+    // Fetch all classes where the student is enrolled
+    const c: Class | null = await prisma.class.findUnique({
+      where: {
+        id: classId,
+        classLinks: {
+          some: {
+            studentId: studentId, // Filter for the given studentId
+          },
+        },
+      },
+    });
+    if (!c) {
+      throw new AccesDeniedError(`Student is not a part of the given class.`);
+    }
+    return c;
+  }
+
   static async leaveClassAsStudent(
     studentId: number,
     classId: number,
