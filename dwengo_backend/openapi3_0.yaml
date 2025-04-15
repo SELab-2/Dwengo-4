@@ -227,6 +227,26 @@ paths:
         '401':
           description: Unauthorized access
 
+  /class/student/{classId}:
+    delete:
+      tags:
+        - Class
+        - Student
+      summary: Leave a classroom
+      description: Allows a student to leave a specific classroom. Requires student authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the classroom
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Classroom left successfully
+        '400':
+          description: Student is not a part of this class and is therefore not able to leave it.
+
   /class/teacher:
     post:
       tags:
