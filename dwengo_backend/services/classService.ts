@@ -101,6 +101,20 @@ export default class ClassService {
     studentId: number,
     classId: number,
   ): Promise<ClassStudent> {
+    const inClass = await prisma.classStudent.findUnique({
+      where: {
+        studentId_classId: {
+          studentId: studentId,
+          classId: classId,
+        },
+      },
+    });
+    if (!inClass) {
+      throw new BadRequestError(
+        "Student is not a part of this class and is therefore not able to leave it.",
+      );
+    }
+
     return await prisma.classStudent.delete({
       where: {
         studentId_classId: {
