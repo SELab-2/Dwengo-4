@@ -1,8 +1,8 @@
 import React from 'react';
 import { createBrowserRouter, Link, RouteObject } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 // ==== TEACHER ROUTES ==== //
-
 import Assignment from '../pages/teacher/Assignment';
 import AssignmentAdd from '../pages/teacher/AssignmentAdd';
 import AssignmentEdit from '../pages/teacher/AssignmentEdit';
@@ -28,25 +28,26 @@ import StudentIndex from '../pages/student';
 import JoinClass from '../components/student/classes/JoinRequestForm';
 
 const HomePage: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col justify-center items-center h-screen">
       <div className="-translate-y-20">
         <h2 className="justify-center flex flex-row font-bold text-5xl mb-8">
-          Kies een rol
+          {t('Kies een rol')}
         </h2>
         <div className="flex flex-row justify-center gap-x-10">
           <Link to="/student">
             <button
               className={`px-7 text-4xl py-1.5 font-bold rounded-md  bg-dwengo-green hover:bg-dwengo-green-dark text-white  hover:cursor-pointer`}
             >
-              Student
+              {t('student')}
             </button>
           </Link>
           <Link to="/teacher">
             <button
               className={`px-7 text-4xl py-1.5 font-bold rounded-md   text-white bg-dwengo-green hover:bg-dwengo-green-dark hover:cursor-pointer`}
             >
-              Teacher
+              {t('teacher')}
             </button>
           </Link>
         </div>

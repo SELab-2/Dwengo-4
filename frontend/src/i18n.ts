@@ -13,11 +13,9 @@ const resources = {
   nl: {
     translation: {
       'Welcome to React': 'Welcome to React and react-i18next',
-    },
-  },
-  fr: {
-    translation: {
-      'Welcome to React': 'Bienvenue à React et react-i18next',
+      'Kies een rol': 'Kies een rol',
+      student: 'Leerling',
+      teacher: 'Lesgever',
     },
   },
 };
