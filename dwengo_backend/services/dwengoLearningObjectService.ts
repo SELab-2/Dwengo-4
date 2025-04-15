@@ -263,7 +263,7 @@ export async function getDwengoObjectsForPath(
           language: node.language,
         };
         const response = await dwengoAPI.get(
-          "/api/learningObject/",
+          "/api/learningObject/getMetadata",
           { params },
         );
         const dwengoObj: DwengoLearningObject = response.data;
@@ -274,7 +274,7 @@ export async function getDwengoObjectsForPath(
         }
         results.push(mapped);
       } catch (err) {
-        console.error("Fout bij ophalen node:", err);
+        console.error("Fout bij ophalen node:");
       }
     }
     return results;
