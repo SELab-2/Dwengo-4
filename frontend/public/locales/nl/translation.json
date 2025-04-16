@@ -39,5 +39,14 @@
     "classes": "Klassen",
     "learning_paths": "Leerpaden",
     "logged_in_as": "Ingelogd als {{name}}"
+  },
+  "class": {
+    "create": "Nieuwe klas aanmaken",
+    "name": {
+      "label": "Klasnaam",
+      "placeholder": "Voer de klasnaam in"
+    },
+    "error": "Er is iets fout gelopen tijdens het aanmaken van de klas",
+    "submit": "Aanmaken"
   }
 }
