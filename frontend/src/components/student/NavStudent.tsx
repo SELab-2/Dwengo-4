@@ -4,8 +4,10 @@ import Container from '../shared/Container';
 import styles from './Nav.module.css';
 import NavButton from '../shared/NavButton';
 import LanguageChooser from '../shared/LanguageChooser';
+import { useTranslation } from 'react-i18next';
 
 const Navstudent: React.FC = () => {
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [firstName] = useState<string | null>(
     localStorage.getItem('firstName'),
@@ -24,11 +26,11 @@ const Navstudent: React.FC = () => {
   const routes = [
     {
       to: '/student',
-      label: 'Home',
+      label: t('nav.home'),
     },
     {
       to: '/student/klassen',
-      label: 'Klassen',
+      label: t('nav.classes'),
     },
   ];
 
@@ -55,8 +57,11 @@ const Navstudent: React.FC = () => {
                   styles.navLinks
                 } ${menuOpen ? styles.open : ''}`}
               >
-                <NavButton to="/student/inloggen" label="Inloggen" />
-                <NavButton to="/student/registreren" label="Registreren" />
+                <NavButton to="/student/inloggen" label={t('nav.login')} />
+                <NavButton
+                  to="/student/registreren"
+                  label={t('nav.register')}
+                />
               </div>
             )}
           </div>
@@ -64,7 +69,7 @@ const Navstudent: React.FC = () => {
           {/* Right side icons */}
           {firstName && (
             <div className="flex items-center space-x-4">
-              <span>Logged in as {firstName}</span>
+              <span>{t('nav.logged_in_as', { name: firstName })}</span>
               <LanguageChooser />
               <button
                 className="text-gray-700 hover:cursor-pointer hover:text-gray-600"
