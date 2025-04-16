@@ -33,4 +33,12 @@ i18n
     debug: true,
   });
 
+// Om te checken welke strings in de frontend vertaald zijn
+// i18n
+//   .use(initReactI18next) // passes i18n down to react-i18next
+//   .use(emoji)
+//   .init({
+//     postProcess: 'emoji',
+//   });
+
 export default i18n;
