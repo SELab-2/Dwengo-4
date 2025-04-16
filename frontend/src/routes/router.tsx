@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBrowserRouter, Link, RouteObject } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import LanguageChooser from '../components/shared/LanguageChooser';
 
 // ==== TEACHER ROUTES ==== //
 import Assignment from '../pages/teacher/Assignment';
@@ -13,6 +14,7 @@ import ClassesPage from '../pages/teacher/ClassesTeacher';
 import SignupTeacher from '../pages/teacher/SignupTeacher';
 import { action as teacherLogoutAction } from '../pages/teacher/LogoutTeacher';
 import EditClassTeacher from '../pages/teacher/EditClassTeacher';
+import TeacherIndex from '../pages/teacher/TeacherIndex';
 
 // ==== STUDENT ROUTES ==== //
 import RootLayoutStudent from '../components/student/RootLayoutStudent';
@@ -26,7 +28,7 @@ import {
 import { action as studentLogoutAction } from '../pages/student/LogoutStudent';
 import StudentIndex from '../pages/student';
 import JoinClass from '../components/student/classes/JoinRequestForm';
-import LanguageChooser from '../components/shared/LanguageChooser';
+import StudentClassIndex from '../pages/student/StudentClassIndex';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
@@ -77,7 +79,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <h1>Home teacher</h1>,
+        element: <TeacherIndex />,
       },
       {
         path: 'inloggen',
@@ -125,6 +127,10 @@ export const router = createBrowserRouter([
         index: true,
         // Je kunt hier eventueel een aparte HomeStudent-component gebruiken
         element: <StudentIndex />,
+      },
+      {
+        path: 'class/:classId',
+        element: <StudentClassIndex />,
       },
       {
         path: 'klassen',

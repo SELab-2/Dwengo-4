@@ -62,7 +62,10 @@ export default class TeacherAssignmentService {
   /**
    * Haal alle assignments op voor 1 teacher
    */
-  static async getAllAssignments(teacherId: number): Promise<Assignment[]> {
+  static async getAllAssignments(
+    teacherId: number,
+    limit: number | undefined,
+  ): Promise<Assignment[]> {
     return prisma.assignment.findMany({
       where: {
         classAssignments: {
@@ -77,6 +80,10 @@ export default class TeacherAssignmentService {
           },
         },
       },
+      orderBy: {
+        deadline: "desc",
+      },
+      take: limit,
     });
   }
 
