@@ -2,5 +2,18 @@
   "Welcome to React": "Welcome to React and react-i18next",
   "Kies een rol": "Kies een rol",
   "student": "Leerling",
-  "teacher": "Lesgever"
+  "teacher": "Lesgever",
+  "login": {
+    "teacher": "Inloggen als lesgever",
+    "email": {
+      "label": "E-mailadres",
+      "placeholder": "Voer je e-mailadres in"
+    },
+    "password": {
+      "label": "Wachtwoord",
+      "placeholder": "Voer je wachtwoord in"
+    },
+    "error": "Er is iets fout gelopen tijdens het inloggen",
+    "submit": "Inloggen"
+  }
 }
