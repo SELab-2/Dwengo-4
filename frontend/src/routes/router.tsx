@@ -12,6 +12,7 @@ import ClassesPage from '../pages/teacher/ClassesTeacher';
 import SignupTeacher from '../pages/teacher/SignupTeacher';
 import { action as teacherLogoutAction } from '../pages/teacher/LogoutTeacher';
 import EditClassTeacher from '../pages/teacher/EditClassTeacher';
+import TeacherIndex from '../pages/teacher/TeacherIndex';
 
 // ==== STUDENT ROUTES ==== //
 import RootLayoutStudent from '../components/student/RootLayoutStudent';
@@ -70,7 +71,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <h1>Home teacher</h1>,
+        element: <TeacherIndex />,
       },
       {
         path: 'inloggen',

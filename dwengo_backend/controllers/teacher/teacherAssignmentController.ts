@@ -93,8 +93,15 @@ export class AssignmentTeacherController {
   ): Promise<void> => {
     try {
       const teacherId: number = getUserFromAuthRequest(req).id;
-      const assignments =
-        await teacherAssignmentService.getAllAssignments(teacherId);
+      const limit: number | undefined = req.query.limit
+        ? parseInt(req.query.limit as string)
+        : undefined;
+
+      const assignments = await teacherAssignmentService.getAllAssignments(
+        teacherId,
+        limit,
+      );
+
       res.status(200).json(assignments);
     } catch {
       res.status(500).json({ error: "Failed to retrieve assignments" });
