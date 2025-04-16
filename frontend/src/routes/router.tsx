@@ -12,6 +12,7 @@ import ClassesPage from '../pages/teacher/ClassesTeacher';
 import SignupTeacher from '../pages/teacher/SignupTeacher';
 import { action as teacherLogoutAction } from '../pages/teacher/LogoutTeacher';
 import EditClassTeacher from '../pages/teacher/EditClassTeacher';
+import TeacherIndex from '../pages/teacher/TeacherIndex';
 
 // ==== STUDENT ROUTES ==== //
 import RootLayoutStudent from '../components/student/RootLayoutStudent';
@@ -25,7 +26,7 @@ import {
 import { action as studentLogoutAction } from '../pages/student/LogoutStudent';
 import StudentIndex from '../pages/student';
 import JoinClass from '../components/student/classes/JoinRequestForm';
-import TeacherIndex from '../pages/teacher/TeacherIndex';
+import StudentClassIndex from '../pages/student/StudentClassIndex';
 
 const HomePage: React.FC = () => {
   return (
@@ -118,6 +119,10 @@ export const router = createBrowserRouter([
         index: true,
         // Je kunt hier eventueel een aparte HomeStudent-component gebruiken
         element: <StudentIndex />,
+      },
+      {
+        path: 'class/:classId',
+        element: <StudentClassIndex />,
       },
       {
         path: 'klassen',
