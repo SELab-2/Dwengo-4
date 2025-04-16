@@ -35,6 +35,7 @@ i18n
   });
 
 // Om te checken welke strings in de frontend vertaald zijn
+// import emoji from 'i18next-emoji-postprocessor';
 // i18n
 //   .use(initReactI18next) // passes i18n down to react-i18next
 //   .use(emoji)
