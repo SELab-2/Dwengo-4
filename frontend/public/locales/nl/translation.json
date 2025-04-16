@@ -28,5 +28,16 @@
     "teacher": "Registreren als lesgever",
     "submit": "Registreren",
     "error": "Er is iets fout gelopen tijdens het registreren"
+  },
+  "nav": {
+    "home": "Home",
+    "login": "Inloggen",
+    "register": "Registreren",
+    "logout": "Uitloggen",
+    "profile": "Profiel",
+    "settings": "Instellingen",
+    "classes": "Klassen",
+    "learning_paths": "Leerpaden",
+    "logged_in_as": "Ingelogd als {{name}}"
   }
 }

@@ -3,8 +3,10 @@ import { useSubmit } from 'react-router-dom';
 import Container from '../shared/Container';
 import styles from './Nav.module.css';
 import NavButton from '../shared/NavButton';
+import { useTranslation } from 'react-i18next';
 
 const NavTeacher: React.FC = () => {
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [firstName] = useState<string | null>(
     localStorage.getItem('firstName'),
@@ -32,10 +34,12 @@ const NavTeacher: React.FC = () => {
             />
             {firstName ? (
               <div className="flex space-x-4">
-
-                <NavButton to="/teacher" label="Home" />
-                <NavButton to="/teacher/classes" label="Klassen" />
-                <NavButton to="/learning-paths" label="Leerpaden" />
+                <NavButton to="/teacher" label={t('nav.home')} />
+                <NavButton to="/teacher/classes" label={t('nav.classes')} />
+                <NavButton
+                  to="/learning-paths"
+                  label={t('nav.learning_paths')}
+                />
               </div>
             ) : (
               <div
@@ -43,8 +47,11 @@ const NavTeacher: React.FC = () => {
                   styles.navLinks
                 } ${menuOpen ? styles.open : ''}`}
               >
-                <NavButton to="/teacher/inloggen" label="Inloggen" />
-                <NavButton to="/teacher/registreren" label="Registreren" />
+                <NavButton to="/teacher/inloggen" label={t('nav.login')} />
+                <NavButton
+                  to="/teacher/registreren"
+                  label={t('nav.register')}
+                />
               </div>
             )}
           </div>
@@ -52,7 +59,7 @@ const NavTeacher: React.FC = () => {
           {/* Right side icons */}
           {firstName && (
             <div className="flex items-center space-x-4">
-              <span>Logged in as {firstName}</span>
+              <span>{t('nav.logged_in_as', { name: firstName })}</span>
               <button
                 className="text-gray-700 hover:cursor-pointer hover:text-gray-600"
                 aria-label="Notifications"
