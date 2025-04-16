@@ -26,33 +26,39 @@ import {
 import { action as studentLogoutAction } from '../pages/student/LogoutStudent';
 import StudentIndex from '../pages/student';
 import JoinClass from '../components/student/classes/JoinRequestForm';
+import LanguageChooser from '../components/shared/LanguageChooser';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
   return (
-    <div className="flex flex-col justify-center items-center h-screen">
-      <div className="-translate-y-20">
-        <h2 className="justify-center flex flex-row font-bold text-5xl mb-8">
-          {t('Kies een rol')}
-        </h2>
-        <div className="flex flex-row justify-center gap-x-10">
-          <Link to="/student">
-            <button
-              className={`px-7 text-4xl py-1.5 font-bold rounded-md  bg-dwengo-green hover:bg-dwengo-green-dark text-white  hover:cursor-pointer`}
-            >
-              {t('student')}
-            </button>
-          </Link>
-          <Link to="/teacher">
-            <button
-              className={`px-7 text-4xl py-1.5 font-bold rounded-md   text-white bg-dwengo-green hover:bg-dwengo-green-dark hover:cursor-pointer`}
-            >
-              {t('teacher')}
-            </button>
-          </Link>
+    <>
+      <div className="absolute top-4 right-4">
+        <LanguageChooser />
+      </div>
+      <div className="flex flex-col justify-center items-center h-screen">
+        <div className="-translate-y-20">
+          <h2 className="justify-center flex flex-row font-bold text-5xl mb-8">
+            {t('Kies een rol')}
+          </h2>
+          <div className="flex flex-row justify-center gap-x-10">
+            <Link to="/student">
+              <button
+                className={`px-7 text-4xl py-1.5 font-bold rounded-md  bg-dwengo-green hover:bg-dwengo-green-dark text-white  hover:cursor-pointer`}
+              >
+                {t('student')}
+              </button>
+            </Link>
+            <Link to="/teacher">
+              <button
+                className={`px-7 text-4xl py-1.5 font-bold rounded-md   text-white bg-dwengo-green hover:bg-dwengo-green-dark hover:cursor-pointer`}
+              >
+                {t('teacher')}
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
