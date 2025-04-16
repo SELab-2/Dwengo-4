@@ -2,7 +2,6 @@ import React from 'react';
 import { createBrowserRouter, Link, RouteObject } from 'react-router-dom';
 
 // ==== TEACHER ROUTES ==== //
-
 import Assignment from '../pages/teacher/Assignment';
 import AssignmentAdd from '../pages/teacher/AssignmentAdd';
 import AssignmentEdit from '../pages/teacher/AssignmentEdit';
@@ -26,6 +25,7 @@ import {
 import { action as studentLogoutAction } from '../pages/student/LogoutStudent';
 import StudentIndex from '../pages/student';
 import JoinClass from '../components/student/classes/JoinRequestForm';
+import StudentClassIndex from '../pages/student/StudentClassIndex';
 
 const HomePage: React.FC = () => {
   return (
@@ -118,6 +118,10 @@ export const router = createBrowserRouter([
         index: true,
         // Je kunt hier eventueel een aparte HomeStudent-component gebruiken
         element: <StudentIndex />,
+      },
+      {
+        path: 'class/:classId',
+        element: <StudentClassIndex />,
       },
       {
         path: 'klassen',
