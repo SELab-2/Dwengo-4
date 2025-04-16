@@ -34,14 +34,6 @@ const LearningPaths: React.FC = () => {
         gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
     });
 
-    useEffect(() => {
-        if (learningPaths) {
-            const module4 = learningPaths.find(path => path.title === 'Module 4');
-            if (module4) {
-                console.log('Module 4 learning path:', module4);
-            }
-        }
-    }, [learningPaths]);
 
     const uniqueCreators = useMemo(() => {
         if (!learningPaths) return [];

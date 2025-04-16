@@ -46,9 +46,20 @@ const LearningPath: React.FC = () => {
         staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
         gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
     });
+    console.log('learningObjectsData', learningObjectsData);
+    console.log('learningPathData', learningPathData);
+    const getNextLearningObject = () => {
+        if (!selectedLearningObject || !learningObjectsData) return null;
+        const currentIndex = learningObjectsData.findIndex(obj => obj.id === selectedLearningObject.id);
+        return learningObjectsData[currentIndex + 1] || null;
+    };
 
-    console.log('Learning Path:', learningPathData);
-
+    const handleNextClick = () => {
+        const nextObject = getNextLearningObject();
+        if (nextObject) {
+            setSelectedLearningObject(nextObject);
+        }
+    };
     useEffect(() => {
         if (learningPathData) {
             setLearningPath(learningPathData);
@@ -56,37 +67,44 @@ const LearningPath: React.FC = () => {
     }, [learningPathData]);
 
     return (
-        <div className="flex ">
+        <div className={styles.main}>
             {/* Sidebar */}
-            <div className="w-64 bg-gray-100 p-4 min-h-[calc(100vh-80px)]">
-                {isLoadingLearningObjects ? (
-                    <p>Loading learning objects...</p>
-                ) : isErrorLearningObjects ? (
-                    <p>Error: {errorLearningObjects.message}</p>
-                ) : (
-                    <div className="flex flex-col gap-2">
-                        {learningObjectsData?.map((learningObject) => (
-                            <button
-                                key={learningObject.id}
-                                className={`text-left p-2 hover:bg-gray-200 rounded transition-colors ${selectedLearningObject?.id === learningObject.id ? 'bg-gray-200' : ''
-                                    }`}
-                                onClick={() => setSelectedLearningObject(learningObject)}
-                            >
-                                {learningObject.title}
-                            </button>
-                        ))}
-                    </div>
-                )}
+            <div className={styles.sidebarWrapper}>
+
+
+                <div className={styles.sidebar}>
+                    {isLoadingLearningObjects ? (
+                        <p>Loading learning objects...</p>
+                    ) : isErrorLearningObjects ? (
+                        <p>Error: {errorLearningObjects.message}</p>
+                    ) : (
+                        <><div className={styles.title}>
+                            <h2 className={styles.titleH2}>{learningPath?.title}</h2>
+                        </div><div className={styles.buttons}>
+                                {learningObjectsData?.map((learningObject) => (
+                                    <button
+                                        className={`${styles.button} ${selectedLearningObject?.id === learningObject.id ? styles.active : ''
+                                            }`}
+                                        key={learningObject.id}
+                                        onClick={() => setSelectedLearningObject(learningObject)}
+                                    >
+                                        {learningObject.title}
+                                    </button>
+                                ))}
+                            </div></>
+                    )}
+                </div>
             </div>
 
+
             {/* Main content */}
-            <div className="w-full pl-5">
-                <div className="flex flex-col gap-8  pb-10 mt-8 w-fit mx-auto">
+            <div className={styles.rightSide} >
+                <div className={styles.header}>
 
                     {!selectedLearningObject ? (
                         <>
-                            <h3 className="text-6xl mx-auto text-center">{learningPath?.title}</h3>
-                            <p className="mx-auto">{learningPath?.description}</p>
+                            <h3 className={styles.headerContent}>{learningPath?.title}</h3>
+                            <p className={styles.headerDescription}>{learningPath?.description}</p>
                         </>
 
                     ) : (
@@ -98,13 +116,26 @@ const LearningPath: React.FC = () => {
                             />
                         </div>
                     )}
-
                 </div>
+                <div className={styles.footer}>
+                    <button
+                        className={styles.footerButton}
+                        onClick={handleNextClick}
+                        disabled={!getNextLearningObject()}
+                    >
+                        {getNextLearningObject()
+                            ? `Up Next: ${getNextLearningObject()?.title}`
+                            : 'End of Path'}
+                    </button>
+                </div>
+
+
+
 
             </div>
 
 
-        </div>
+        </div >
     );
 };
 
