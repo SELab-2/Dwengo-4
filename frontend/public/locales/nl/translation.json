@@ -47,6 +47,11 @@
       "placeholder": "Voer de klasnaam in"
     },
     "error": "Er is iets fout gelopen tijdens het aanmaken van de klas",
-    "submit": "Aanmaken"
+    "submit": "Aanmaken",
+    "my_classes": "Mijn klassen"
+  },
+  "loading": {
+    "loading": "Laden...",
+    "error": "Er is iets fout gelopen tijdens het laden van de gegevens"
   }
 }
