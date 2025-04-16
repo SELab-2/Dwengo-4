@@ -1,0 +1,512 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+/// Enums: aanpassing besproken: minder 1-1-relaties
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum JoinRequestStatus {
+  PENDING
+  APPROVED
+  DENIED
+}
+
+enum EvaluationType {
+  OPEN
+  MULTIPLE
+}
+
+/// Gebruiker – enkele tabel met rol (aangepast)
+
+model User {
+  id        Int      @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  admin   Admin?
+  teacher Teacher?
+  student Student?
+}
+
+model Admin {
+  userId Int  @id
+  user   User @relation(fields: [userId], references: [id])
+}
+
+model Teacher {
+  userId Int  @id
+  user   User @relation(fields: [userId], references: [id])
+
+  teacherFeedbacks Feedback[]
+  // Uitnodigingen om een klas mee te beheren
+  invite           Invite[]
+
+  // Door deze gebruiker (als teacher) aangemaakte leerpaden en leerobjecten
+  createdLearningPaths   LearningPath[]   @relation("LearningPathCreator")
+  createdLearningObjects LearningObject[] @relation("LearningObjectCreator")
+
+  teaches ClassTeacher[]
+}
+
+model Student {
+  userId Int  @id
+  user   User @relation(fields: [userId], references: [id])
+
+  // Voortgang van studenten
+  progress StudentProgress[]
+
+  // Verzoeken om lid te worden van een klas
+  joinRequests JoinRequest[]
+
+  // Relaties naar klassen (veel-op-veel)
+  classes ClassStudent[]
+
+  // Teams waarvan de student lid is
+  Team Team[]
+}
+
+model Class {
+  id        Int      @id @default(autoincrement())
+  name      String
+  code      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  classLinks   ClassStudent[]
+  joinRequests JoinRequest[]
+  assignments  ClassAssignment[]
+  Invite       Invite[]
+  ClassTeacher ClassTeacher[]
+  teams        Team[]
+}
+
+///
+/// Tussentabel om een Student aan een Class te koppelen
+///
+model ClassStudent {
+  studentId Int
+  classId   Int
+
+  student Student @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@id([studentId, classId])
+}
+
+///
+/// Tussentabel om een Teacher aan een Class te koppelen
+///
+model ClassTeacher {
+  teacherId Int
+  classId   Int
+
+  teacher Teacher  @relation(fields: [teacherId], references: [userId], onDelete: Cascade)
+  class   Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  invites Invite[] // the invites that the teacher has sent
+
+  @@id([teacherId, classId])
+}
+
+///
+/// JoinRequest – voor verzoeken om een klas te joinen
+
+model JoinRequest {
+  // Op deze manier kan een leerling meer dan 1 keer een verzoek sturen naar een klas
+  requestId Int               @id @default(autoincrement())
+  studentId Int
+  classId   Int
+  status    JoinRequestStatus
+
+  student Student @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+}
+
+model Invite {
+  inviteId       Int               @id @default(autoincrement())
+  otherTeacherId Int
+  classTeacherId Int
+  classId        Int
+  status         JoinRequestStatus
+
+  otherTeacher Teacher      @relation(fields: [otherTeacherId], references: [userId], onDelete: Cascade)
+  classTeacher ClassTeacher @relation(fields: [classTeacherId, classId], references: [teacherId, classId], onDelete: Cascade)
+  class        Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+}
+
+model LearningPath {
+  ///
+  /// Velden uit de Dwengo API
+  ///
+
+  // _id bij Dwengo API
+  id             String  @id @default(uuid())
+  hruid          String  @unique
+  title          String
+  language       String
+  description    String
+  // Base 64 encoding van de cover afbeelding
+  image          String?
+  // Aantal nodes in het leerpad
+  num_nodes      Int?
+  // Ik ga ervan uit dat dit is hoeveel nodes een leerling nog moet doorlopen? Hier kunnen we misschien iets mee doen om de progressie bij te houden?
+  num_nodes_left Int?
+
+  // De nodes van het leerpad
+  nodes LearningPathNode[]
+
+  ///
+  /// Custom velden
+  ///
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  creatorId Int
+  creator   Teacher  @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator", onDelete: Cascade)
+  // assignments     Assignment[]
+  // questionGeneral QuestionGeneral[]
+}
+
+model LearningPathNode {
+  nodeId         String       @id @default(uuid())
+  learningPathId String
+  learningPath   LearningPath @relation(fields: [learningPathId], references: [id])
+
+  // Deze velden gebruik je voor lokale objecten:
+  localLearningObjectId String? // bv. ID uit je eigen 'LearningObject' tabel
+
+  // Deze velden gebruik je voor Dwengo-objecten:
+  dwengoHruid    String?
+  dwengoLanguage String?
+  dwengoVersion  Int?
+
+  // True als dit een extern (Dwengo) object is, false als lokaal
+  isExternal Boolean @default(false)
+
+  start_node Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  transitions     LearningPathTransition[] @relation("TransitionNode")
+  nextTransitions LearningPathTransition[] @relation("NextNode")
+}
+
+model LearningPathTransition {
+  // _id bij Dwengo API
+  transitionId String  @id @default(uuid())
+  // Ik ben niet 100% zeker waarvoor default staat in de Dwengo API, maar ik denk dat het betekent dat er geen conditie is.
+  // Er wordt dus standaard naar de volgende node gegaan.
+  default      Boolean @default(true)
+  // Een eventuele conditie die aan deze transitie vasthangt.
+  condition    String?
+
+  // Een transitie hoort bij een node
+  nodeId String
+  node   LearningPathNode @relation(fields: [nodeId], references: [nodeId], name: "TransitionNode")
+
+  // Next wijst in de Dwengo API naar de volgende node.
+  // Als next leeg is, betekent dit dat de laatste node van het leerpad bereikt is.
+  nextNodeId String?
+  nextNode   LearningPathNode? @relation(fields: [nextNodeId], references: [nodeId], name: "NextNode")
+}
+
+///
+/// Content types van leerobjecten; kan altijd nog uitgebreid worden
+enum ContentType {
+  // Dwengo API
+  TEXT_PLAIN
+  TEXT_MARKDOWN
+  IMAGE_IMAGE_BLOCK
+  IMAGE_IMAGE
+  AUDIO_MPEG
+  // Eigen toevoegingen
+  VIDEO
+  EVAL_MULTIPLE_CHOICE
+  EVAL_OPEN_QUESTION
+}
+
+model LearningObject {
+  // _id bij Dwengo APi
+  id               String      @id @default(uuid())
+  uuid             String      @unique @default(cuid())
+  // In de Dwengo API wordt er nog met een hruid gewerkt ook. Ik zou voorstellen om anders de titel van een leerobject uniek te maken.
+  // Op die manier kan de hruid ingesteld worden op de titel van het leerobject.
+  // Ik ga dit voorlopig laten staan, maar misschien dat we dit nog moeten aanpassen.
+  hruid            String      @unique
+  title            String
+  version          Int         @default(1)
+  language         String
+  description      String
+  contentType      ContentType
+  estimatedTime    Int // In minuten
+  keywords         String[]    @default([])
+  targetAges       Int[]
+  teacherExclusive Boolean
+  skosConcepts     String[]    @default([])
+  copyright        String      @default("CC BY Dwengo")
+  licence          String      @default("dwengo")
+  difficulty       Int
+  available        Boolean     @default(true)
+  // Link to external content
+  contentLocation  String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  creatorId Int
+  creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningObjectCreator")
+
+  // Binnen een leerobject kunnen er meerdere evaluaties zitten
+  evaluations      Evaluation[]
+  educationalGoals EducationalGoal[]
+  returnValue      ReturnValue?
+  progress         LearningObjectProgress[]
+  // QuestionSpecifics QuestionSpecific[]
+}
+
+model EducationalGoal {
+  id               String  @id
+  learningObjectId String
+  source           String?
+  goalId           String?
+
+  learningObject LearningObject @relation(fields: [learningObjectId], references: [id])
+}
+
+model ReturnValue {
+  id               Int    @id @default(autoincrement())
+  learningObjectId String @unique
+  callbackUrl      String
+  callbackSchema   Json
+
+  learningObject LearningObject @relation(fields: [learningObjectId], references: [id])
+}
+
+model Evaluation {
+  id             String         @id
+  nrOfQuestions  Int
+  evaluationType EvaluationType
+
+  learningObject LearningObject       @relation(fields: [id], references: [id])
+  questions      EvaluationQuestion[]
+  // Een evaluatie kan meerdere inzendingen hebben
+  submissions    Submission[]
+}
+
+model EvaluationQuestion {
+  id           Int    @id @default(autoincrement())
+  evaluationId String
+  questionId   Int
+  question     String
+
+  evaluation Evaluation             @relation(fields: [evaluationId], references: [id])
+  // Indien de evaluatie multiple choice, kunnen hier opties gekoppeld worden.
+  options    MultipleChoiceOption[]
+
+  @@unique([evaluationId, questionId])
+}
+
+model MultipleChoiceOption {
+  id                   Int     @id @default(autoincrement())
+  evaluationQuestionId Int
+  option               String
+  isCorrect            Boolean
+
+  evaluationQuestion EvaluationQuestion @relation(fields: [evaluationQuestionId], references: [id])
+}
+
+///
+/// Vragen en antwoorden
+
+enum QuestionType {
+  // SPECIFIC representeert specifieke vragen die door studenten worden gesteld
+  // bij het overlopen van een leerobject (deel van een leerpad)
+  SPECIFIC
+  // GENERAL representeert algemene vragen die door studenten worden gesteld
+  // bij het doorlopen van een leerpad
+  GENERAL
+}
+
+model QuestionSpecific {
+  questionId            Int     @unique
+  // Lokaal leerobject
+  localLearningObjectId String?
+
+  // Dwengo-velden
+  dwengoHruid    String?
+  dwengoLanguage String?
+  dwengoVersion  Int?
+
+  isExternal Boolean @default(false)
+
+  question Question @relation(fields: [questionId], references: [id])
+
+  @@id([questionId])
+}
+
+model QuestionGeneral {
+  questionId Int     @unique
+  pathRef    String
+  isExternal Boolean @default(false)
+
+  // Een QuestionSpecific is een vraag
+  question Question @relation(fields: [questionId], references: [id])
+
+  @@id([questionId])
+}
+
+model Question {
+  id           Int          @id @default(autoincrement())
+  teamId       Int
+  title        String
+  assignmentId Int
+  type         QuestionType
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  // Nieuw:
+  createdBy Int
+  isPrivate Boolean @default(false)
+
+  // Een vraag is ofwel een specifieke vraag (bij leerobject),
+  // een algemene vraag (bij leerpad) of
+  // een bijvraag bij een antwoord
+  specific QuestionSpecific?
+  general  QuestionGeneral?
+
+  assignment           Assignment        @relation(fields: [assignmentId], references: [id])
+  team                 Team              @relation(fields: [teamId], references: [id])
+  questionConversation QuestionMessage[]
+}
+
+model QuestionMessage {
+  id         Int      @id @default(autoincrement())
+  questionId Int
+  // leerkracht of student
+  userId     Int
+  // de inhoud van de vraag dus
+  text       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  Questions  Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+///
+/// Taken en indieningen
+model Assignment {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  pathRef    String
+  isExternal Boolean @default(false)
+  deadline         DateTime
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  teamSize  Int 
+  
+  Questions        Question[]
+  classAssignments ClassAssignment[] 
+  teamAssignments  TeamAssignment[] 
+
+  submissions Submission[]
+}
+
+model ClassAssignment {
+  classId      Int
+  assignmentId Int
+  class        Class      @relation(fields: [classId], references: [id], onDelete: Cascade)
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  @@id([classId, assignmentId])
+}
+
+model Team {
+  id       Int    @id @default(autoincrement())
+  teamname String
+  classId  Int
+
+  // Een team bestaat uit studenten
+  students       Student[]
+  // Een verwijzing naar de assignment van dit team
+  teamAssignment TeamAssignment?
+
+  // De indieningen van een team
+  class       Class        @relation(fields: [classId], references: [id])
+  submissions Submission[]
+  Questions   Question[]
+}
+
+model TeamAssignment {
+  teamId       Int @unique
+  assignmentId Int
+
+  team       Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  // Dit is een unieke composite key
+  @@id([teamId, assignmentId])
+}
+
+model Submission {
+  submissionId Int       @id @default(autoincrement())
+  // Een inzending hoort bij een evaluatie
+  evaluationId String
+  // Een inzending is van een team
+  teamId       Int
+  submitted    DateTime  @default(now())
+  // Er kan feedback komen op een inzending
+  feedback     Feedback?
+
+  assignmentId Int
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  evaluation Evaluation @relation(fields: [evaluationId], references: [id])
+  team       Team       @relation(fields: [teamId], references: [id])
+}
+
+model Feedback {
+  // Feedback hoort bij een inzending
+  // Er kan maar 1 keer feedback gegeven worden op een inzending
+  submissionId Int    @unique
+  // Feedback kan gegeven worden door een teacher
+  teacherId    Int
+  // De feedback zelf
+  description  String
+
+  teacher    Teacher    @relation(fields: [teacherId], references: [userId], onDelete: Cascade)
+  submission Submission @relation(fields: [submissionId], references: [submissionId], onDelete: Cascade)
+
+  // Feedback wordt uniek bepaald door deze attributen
+  @@id([submissionId, teacherId])
+}
+
+model LearningObjectProgress {
+  id               Int     @id @default(autoincrement())
+  learningObjectId String
+  done             Boolean
+
+  learningObject  LearningObject    @relation(fields: [learningObjectId], references: [id])
+  studentProgress StudentProgress[]
+}
+
+model StudentProgress {
+  studentId  Int
+  progressId Int
+
+  student  Student                @relation(fields: [studentId], references: [userId])
+  progress LearningObjectProgress @relation(fields: [progressId], references: [id])
+
+  @@id([studentId, progressId])
+}

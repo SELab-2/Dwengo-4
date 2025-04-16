@@ -116,6 +116,10 @@ export const router = createBrowserRouter([
         path: 'learning-paths',
         element: <LearningPaths />,
       },
+      {
+        path: 'learning-path/:pathId',
+        element: <LearningPath />,
+      },
     ],
   },
   {
