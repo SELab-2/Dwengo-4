@@ -31,6 +31,7 @@ i18n
       escapeValue: false, // react already safes from xss
     },
     debug: true,
+    saveMissing: true,
   });
 
 // Om te checken welke strings in de frontend vertaald zijn

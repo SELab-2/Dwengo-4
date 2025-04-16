@@ -13,7 +13,19 @@
       "label": "Wachtwoord",
       "placeholder": "Voer je wachtwoord in"
     },
+    "firstName": {
+      "label": "Voornaam",
+      "placeholder": "Voer je voornaam in"
+    },
+    "lastName": {
+      "label": "Achternaam",
+      "placeholder": "Voer je achternaam in"
+    },
     "error": "Er is iets fout gelopen tijdens het inloggen",
     "submit": "Inloggen"
+  },
+  "register": {
+    "teacher": "Registreren als lesgever",
+    "submit": "Registreren"
   }
 }
