@@ -632,15 +632,6 @@ export async function updateAssignment({
   }
 }
 
-export interface Invite {
-  inviteId: number;
-  status: 'PENDING' | 'APPROVED' | 'DENIED';
-  otherTeacher: {
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-}
 
 /**
  * Haal alle pending invites voor een klas op
@@ -796,3 +787,179 @@ export async function denyJoinRequest({
   }
   return await response.json();
 }
+
+
+
+export interface Invite {
+  inviteId: number;
+  status: "PENDING" | "APPROVED" | "DENIED";
+  otherTeacher: {
+    user: {
+      firstName: string;
+      lastName: string;
+      email: string;
+    };
+  };
+  // Indien beschikbaar, ook info over de klas
+  class: {
+    id: string;
+    name: string;
+  };
+
+  classTeacher: {
+    teacher: {
+      firstName: string;
+      lastName: string;
+      email: string;
+    };
+  };
+}
+
+/**
+ * Haal alle pending invites voor de ingelogde teacher op
+ * @returns Een lijst met invites
+ */
+export async function fetchTeacherInvites(): Promise<Invite[]> {
+  const response = await fetch(`${BACKEND}/invite/`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error("Er is iets misgegaan bij het ophalen van de invites.");
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  const data = await response.json();
+  return data.invites;
+}
+
+/**
+ * Update de status van een invite (accepteer of weiger)
+ * @param inviteId - het id van de invite
+ * @param action - "accept" of "decline"
+ * @returns De bijgewerkte invite
+ */
+export async function updateInviteStatus(inviteId: number, action: "accept" | "decline"): Promise<Invite> {
+  const response = await fetch(`${BACKEND}/invite/${inviteId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+    body: JSON.stringify({ action }),
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error("Er is iets misgegaan bij het bijwerken van de invite.");
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  const data = await response.json();
+  return data.invite;
+}
+
+
+
+/**
+ * Haal een enkele klas op via het klas-ID.
+ */
+export async function getClassById({ classId }: { classId: string }): Promise<ClassItem> {
+  const response = await fetch(`${BACKEND}/class/teacher/${classId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error("Er is iets misgegaan bij het ophalen van de klas.");
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  const data = await response.json();
+  // Aangenomen dat de backend een object { classroom: ClassItem } retourneert:
+  return data.classroom;
+}
+
+/**
+ * Werk de klasnaam bij.
+ */
+export async function updateClassName({
+  classId,
+  newName,
+}: {
+  classId: string;
+  newName: string;
+}): Promise<any> {
+  const response = await fetch(`${BACKEND}/class/teacher/${classId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+    body: JSON.stringify({ name: newName }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Er is iets misgegaan bij het bijwerken van de klasnaam.");
+  }
+  return await response.json();
+}
+
+/**
+ * Verwijder een klas.
+ */
+export async function deleteClass({
+  classId,
+}: {
+  classId: string;
+}): Promise<any> {
+  const response = await fetch(`${BACKEND}/class/teacher/${classId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Er is iets misgegaan bij het verwijderen van de klas.");
+  }
+  return await response.json();
+}
+
+/**
+ * Genereer een nieuwe join link voor de klas.
+ */
+export async function regenerateJoinLink({
+  classId,
+}: {
+  classId: string;
+}): Promise<any> {
+  const response = await fetch(`${BACKEND}/class/teacher/${classId}/join-link`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Kon de klascode niet vernieuwen");
+  }
+  return await response.json();
+}
+
