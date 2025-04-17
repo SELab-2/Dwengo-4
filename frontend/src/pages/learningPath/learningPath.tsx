@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchLearningPath, fetchLearningObjectsByLearningPath } from '../../util/teacher/httpTeacher';
 import { LearningPath } from '../../types/type';
 import { useParams } from 'react-router-dom';
-import { LearningObject } from '@prisma/client'
-import styles from './learningPath.module.css';
+import { LearningObject } from '@prisma/client';
+
 /**
  * LearningPaths component displays all available learning paths.
  * 
@@ -46,8 +46,10 @@ const LearningPath: React.FC = () => {
         staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
         gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
     });
+
     console.log('learningObjectsData', learningObjectsData);
     console.log('learningPathData', learningPathData);
+
     const getNextLearningObject = () => {
         if (!selectedLearningObject || !learningObjectsData) return null;
         const currentIndex = learningObjectsData.findIndex(obj => obj.id === selectedLearningObject.id);
@@ -60,6 +62,7 @@ const LearningPath: React.FC = () => {
             setSelectedLearningObject(nextObject);
         }
     };
+
     useEffect(() => {
         if (learningPathData) {
             setLearningPath(learningPathData);
@@ -67,23 +70,25 @@ const LearningPath: React.FC = () => {
     }, [learningPathData]);
 
     return (
-        <div className={styles.main}>
+        <div className="flex max-h-[calc(100vh-80px)]">
             {/* Sidebar */}
-            <div className={styles.sidebarWrapper}>
-
-
-                <div className={styles.sidebar}>
+            <div className="p-4 max-w-[416px] w-full bg-gray-50  max-h-[calc(100vh-80px)] min-h-[calc(100vh-80px)] overflow-y-scroll ">
+                <div className="rounded-lg border border-gray-200 p-2.5 bg-white">
                     {isLoadingLearningObjects ? (
                         <p>Loading learning objects...</p>
                     ) : isErrorLearningObjects ? (
                         <p>Error: {errorLearningObjects.message}</p>
                     ) : (
-                        <><div className={styles.title}>
-                            <h2 className={styles.titleH2}>{learningPath?.title}</h2>
-                        </div><div className={styles.buttons}>
+                        <>
+                            <div className="flex gap-2.5 -m-2.5 p-2.5 border-b border-gray-200">
+                                <h2 className="text-xl font-bold">{learningPath?.title}</h2>
+                            </div>
+                            <div className="flex flex-col">
                                 {learningObjectsData?.map((learningObject) => (
                                     <button
-                                        className={`${styles.button} ${selectedLearningObject?.id === learningObject.id ? styles.active : ''
+                                        className={`p-4 text-base font-normal border-b border-gray-200 text-left bg-transparent transition-colors duration-200 ${selectedLearningObject?.id === learningObject.id
+                                            ? 'bg-blue-50 text-blue-600 font-medium border-l-[3px] border-l-blue-600'
+                                            : ''
                                             }`}
                                         key={learningObject.id}
                                         onClick={() => setSelectedLearningObject(learningObject)}
@@ -91,22 +96,20 @@ const LearningPath: React.FC = () => {
                                         {learningObject.title}
                                     </button>
                                 ))}
-                            </div></>
+                            </div>
+                        </>
                     )}
                 </div>
             </div>
 
-
             {/* Main content */}
-            <div className={styles.rightSide} >
-                <div className={styles.header}>
-
+            <div className="border-l border-gray-200 w-full p-6 pb-[74px] max-h-[calc(100vh-80px)] overflow-y-scroll">
+                <div className="header">
                     {!selectedLearningObject ? (
                         <>
-                            <h3 className={styles.headerContent}>{learningPath?.title}</h3>
-                            <p className={styles.headerDescription}>{learningPath?.description}</p>
+                            <h3 className="w-fit mx-auto font-bold text-2xl">{learningPath?.title}</h3>
+                            <p className="py-2 pb-6 w-fit mx-auto">{learningPath?.description}</p>
                         </>
-
                     ) : (
                         <div className="w-full max-w-3xl">
                             <h4 className="text-2xl mb-4">{selectedLearningObject.title}</h4>
@@ -117,9 +120,9 @@ const LearningPath: React.FC = () => {
                         </div>
                     )}
                 </div>
-                <div className={styles.footer}>
+                <div className="fixed bottom-0 right-0 flex p-4 justify-end border-t border-l border-gray-200 bg-white w-[calc(100%-416px)] z-10">
                     <button
-                        className={styles.footerButton}
+                        className="px-4 py-2 text-base font-normal rounded bg-blue-600 text-white border-none cursor-pointer transition-opacity duration-200 disabled:opacity-50"
                         onClick={handleNextClick}
                         disabled={!getNextLearningObject()}
                     >
@@ -128,14 +131,8 @@ const LearningPath: React.FC = () => {
                             : 'End of Path'}
                     </button>
                 </div>
-
-
-
-
             </div>
-
-
-        </div >
+        </div>
     );
 };
 

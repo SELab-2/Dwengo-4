@@ -37,24 +37,24 @@ interface LearningPathFilterProps {
     creators?: {
         name: string;
     }[];
+    languages?: {
+        name: string;
+    }[];
 }
 
-export function LearningPathFilter({ filters, setFilters, creators }: LearningPathFilterProps) {
+export function LearningPathFilter({ filters, setFilters, creators, languages }: LearningPathFilterProps) {
     const [open, setOpen] = React.useState(false);
     const [selectedView, setSelectedView] = React.useState<FilterType | null>(null);
     const [commandInput, setCommandInput] = React.useState("");
     const commandInputRef = React.useRef<HTMLInputElement>(null);
 
-
-    // Update filterViewToFilterOptions when creators change or filters change
+    // Update filterViewToFilterOptions when creators or languages change
     React.useEffect(() => {
         if (creators?.length) {
-            // Get currently selected creator names from filters
             const selectedCreators = filters
                 .filter(f => f.type === FilterType.CREATOR)
                 .flatMap(f => f.value);
 
-            // Filter out already selected creators
             filterViewToFilterOptions[FilterType.CREATOR] = creators
                 .filter(creator => !selectedCreators.includes(creator.name))
                 .map(creator => ({
@@ -62,7 +62,20 @@ export function LearningPathFilter({ filters, setFilters, creators }: LearningPa
                     icon: <User className="size-3" />,
                 }));
         }
-    }, [creators, filters]);
+
+        if (languages?.length) {
+            const selectedLanguages = filters
+                .filter(f => f.type === FilterType.LANGUAGE)
+                .flatMap(f => f.value);
+
+            filterViewToFilterOptions[FilterType.LANGUAGE] = languages
+                .filter(language => !selectedLanguages.includes(language.name))
+                .map(language => ({
+                    name: language.name,
+                    icon: undefined,
+                }));
+        }
+    }, [creators, languages, filters]);
 
     return (
         <div className="flex gap-2 flex-wrap">

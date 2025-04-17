@@ -234,26 +234,7 @@ export const filterViewOptions: FilterOption[][] = [
       icon: <FilterIcon type={FilterType.CREATOR} />,
     },
   ],
-  [
-    {
-      name: FilterType.DUE_DATE,
-      icon: <FilterIcon type={FilterType.DUE_DATE} />,
-    },
-    {
-      name: FilterType.CREATED_DATE,
-      icon: <FilterIcon type={FilterType.CREATED_DATE} />,
-    },
-    {
-      name: FilterType.UPDATED_DATE,
-      icon: <FilterIcon type={FilterType.UPDATED_DATE} />,
-    },
-  ],
-  [
-    {
-      name: FilterType.CREATOR,
-      icon: <User className="size-3" />,
-    }
-  ],
+
 ];
 
 export const statusFilterOptions: FilterOption[] = Object.values(Status).map(

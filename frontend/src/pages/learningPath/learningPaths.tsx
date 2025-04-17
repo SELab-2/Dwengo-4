@@ -34,7 +34,6 @@ const LearningPaths: React.FC = () => {
         gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
     });
 
-
     const uniqueCreators = useMemo(() => {
         if (!learningPaths) return [];
         return Array.from(new Set(learningPaths
@@ -42,6 +41,18 @@ const LearningPaths: React.FC = () => {
             .map(path => ({
                 name: `${path.creator?.user.firstName} ${path.creator?.user.lastName}`
             }))))
+            .sort((a, b) => a.name.localeCompare(b.name));
+    }, [learningPaths]);
+
+    const uniqueLanguages = useMemo(() => {
+        if (!learningPaths) return [];
+        const languages = new Set(learningPaths
+            .filter(path => path.language !== null && path.language !== undefined)
+            .map(path => path.language));
+        return Array.from(languages)
+            .map(language => ({
+                name: language
+            }))
             .sort((a, b) => a.name.localeCompare(b.name));
     }, [learningPaths]);
 
@@ -113,50 +124,53 @@ const LearningPaths: React.FC = () => {
                     filters={filters}
                     setFilters={setFilters}
                     creators={uniqueCreators}
+                    languages={uniqueLanguages}
                 />
             </div>
 
             {isLoading && <p className="text-gray-600">Loading...</p>}
             {isError && <p className="text-red-500">Error: {error.message}</p>}
 
-            {!isLoading && !isError && filteredPaths.length === 0 ? (
-                <p className="text-gray-600">No learning paths found matching your filters.</p>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-10/12 mx-auto">
-                    {filteredPaths.map((path) => (
-                        <div key={path.id} className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-120">
-                            <div className="w-full h-80 flex items-center justify-center">
-                                {path.image ? (
-                                    <img
-                                        src={`data:image/png;base64,${path.image}`}
-                                        alt={`${path.title} thumbnail`}
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <div
-                                        className="w-full h-full flex items-center justify-center object-fit-cover"
-                                        style={{
-                                            backgroundColor: `hsl(${Math.random() * 360}, 70%, 80%)`
-                                        }}
+            {!isLoading && !isError && (
+                filteredPaths.length === 0 ? (
+                    <p className="text-gray-600">No learning paths found matching your filters.</p>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-10/12 mx-auto">
+                        {filteredPaths.map((path) => (
+                            <div key={path.id} className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-128">
+                                <div className="w-full h-80 flex items-center justify-center">
+                                    {path.image ? (
+                                        <img
+                                            src={`data:image/png;base64,${path.image}`}
+                                            alt={`${path.title} thumbnail`}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <div
+                                            className="w-full h-full flex items-center justify-center object-fit-cover"
+                                            style={{
+                                                backgroundColor: `hsl(${Math.random() * 360}, 70%, 80%)`
+                                            }}
+                                        >
+                                            <span className="text-gray-700 text-xl font-semibold">
+                                                {path.title}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="p-6 flex-grow h-40 border-t-2 border-gray-200">
+                                    <a
+                                        href={`/learning-path/${path.id}`}
+                                        className="text-blue-600 hover:text-blue-800"
                                     >
-                                        <span className="text-gray-700 text-xl font-semibold">
-                                            {path.title}
-                                        </span>
-                                    </div>
-                                )}
+                                        <h2 className="text-xl font-semibold mb-2">{path.title}</h2>
+                                    </a>
+                                    <p className="text-gray-700 h-[77px] overflow-hidden line-clamp-3">{path.description}</p>
+                                </div>
                             </div>
-                            <div className="p-6 flex-grow h-40 border-t-2 border-gray-200">
-                                <a
-                                    href={`/learning-path/${path.id}`}
-                                    className="text-blue-600 hover:text-blue-800"
-                                >
-                                    <h2 className="text-xl font-semibold mb-2">{path.title}</h2>
-                                </a>
-                                <p className="text-gray-700">{path.description}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )
             )}
         </div>
     );
