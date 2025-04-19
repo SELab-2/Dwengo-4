@@ -67,7 +67,7 @@ export default class joinRequestService {
     const classroom: ClassWithLinks = await this.validateClassExists(joinCode);
 
     // check if the student is already a member of the class
-    classService.isStudentInClass(classroom, studentId);
+    classService.alreadyMemberOfClass(classroom, studentId);
 
     // check if there's already a pending join request for this student and class
     const existingRequest: JoinRequest | null = await handlePrismaQuery(() =>

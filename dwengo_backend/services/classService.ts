@@ -222,17 +222,29 @@ export default class ClassService {
   }
 
   // Check if student is already in the class
-  static isStudentInClass(
-    classroom: ClassWithLinks,
-    studentId: number,
-  ): boolean {
+  static isStudentInClass(classroom: ClassWithLinks, studentId: number): void {
     const inClass: boolean = classroom.classLinks.some(
       (link: ClassStudent) => link.studentId === studentId,
     );
     if (!inClass) {
       throw new AccessDeniedError(`Student is not a part of this class.`);
     }
-    return inClass;
+  }
+
+  static alreadyMemberOfClass(
+    classroom: ClassWithLinks,
+    studentId: number,
+  ): void {
+    try {
+      this.isStudentInClass(classroom, studentId);
+    } catch (error) {
+      if (error instanceof AccessDeniedError) {
+        // Student is not in the class, so we can proceed
+        return;
+      }
+    }
+    // The student is already in the class
+    throw new BadRequestError(`Student is already a member of this class.`);
   }
 
   static async removeStudentFromClass(
