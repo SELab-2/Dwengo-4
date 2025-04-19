@@ -183,6 +183,7 @@ export async function createAssignment(
           classId, // This will automatically link to the created Assignment
         },
       },
+      teamSize: 2,
     },
   });
 }

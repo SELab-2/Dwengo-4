@@ -1,10 +1,10 @@
 import '../../index.css';
 import React from 'react';
-import ClassesStudent from '../../components/student/ClassesStudent';
-import AssignmentOverview from '../../components/student/AssignmentOverview';
 import { Link } from 'react-router-dom';
+import AssignmentOverviewTeacher from '../../components/teacher/AssignmentOverviewTeacher';
+import ClassesOverviewTeacher from '../../components/teacher/ClassesOverviewTeacher';
 
-export default function StudentIndex() {
+export default function TeacherIndex() {
   return (
     <>
       <div className="px-10 bg-gray-300">
@@ -12,7 +12,7 @@ export default function StudentIndex() {
 
         <h2 className="mt-8 text-2xl font-bold">Opdrachten</h2>
         <div className="w-full mt-4 overflow-x-auto ">
-          <AssignmentOverview />
+          <AssignmentOverviewTeacher />
         </div>
 
         <div className="flex flex-row justify-end w-full ">
@@ -27,7 +27,7 @@ export default function StudentIndex() {
 
         <p className="text-2xl mt-8 font-bold">Klasgroepen</p>
         <div className="w-full mt-4">
-          <ClassesStudent />
+          <ClassesOverviewTeacher />
         </div>
       </div>
     </>

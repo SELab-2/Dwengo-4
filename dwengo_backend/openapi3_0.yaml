@@ -227,6 +227,49 @@ paths:
         '401':
           description: Unauthorized access
 
+  /class/student/{classId}:
+    get:
+      tags:
+        - Class
+        - Student
+      summary: Get a classroom by ID for a student.
+      description: Retrieve details of a specific classroom by its ID. Requires student authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the classroom
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Classroom retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Class'
+        '404':
+          description: Classroom not found
+    delete:
+      tags:
+        - Class
+        - Student
+      summary: Leave a classroom
+      description: Allows a student to leave a specific classroom. Requires student authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the classroom
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Classroom left successfully
+        '400':
+          description: Student is not a part of this class and is therefore not able to leave it.
+
+
   /class/teacher:
     post:
       tags:
@@ -347,6 +390,74 @@ paths:
           description: Unauthorized access
         '404':
           description: Classroom not found
+
+    patch:
+      tags:
+        - Class
+        - Teacher
+      summary: Update a classroom
+      description: Allows a teacher to update the name of a specific classroom. Requires teacher authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the classroom to update
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The new name of the classroom
+              required:
+                - name
+      responses:
+        '200':
+          description: Classroom updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Klas bijgewerkt
+                  classroom:
+                    $ref: '#/components/schemas/Class'
+        '400':
+          description: Invalid classroom name
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Classroom not found or teacher not authorized
+
+  /class/teacher/student:
+    get:
+      tags:
+        - Class
+        - Teacher
+      summary: Get all classrooms with students for the authenticated teacher
+      description: Retrieves all classrooms that the authenticated teacher is responsible for, including the students in each classroom.
+      responses:
+        '200':
+          description: A list of classrooms with enrolled students
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  classrooms:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Class'
+        '401':
+          description: Unauthorized access
+
 
   /class/teacher/{classId}/join-link:
     get:
@@ -845,6 +956,65 @@ paths:
         '400':
           description: Invalid request body
 
+
+  /pathByTeacher/all:
+    get:
+      tags:
+        - Learning path
+        - Teacher
+      summary: Get all learning paths (local + external)
+      description: Retrieves all learning paths available to the teacher, including both locally created and API-fetched learning paths.
+      responses:
+        '200':
+          description: A list of local and external learning paths
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LearningPath'
+        '401':
+          description: Unauthorized access
+        '500':
+          description: Failed to fetch learning paths
+  
+  /pathByTeacher/all/{pathId}:
+    get:
+      tags:
+        - Learning path
+        - Teacher
+      summary: Get a specific learning path by ID
+      description: Retrieve a specific learning path by ID. Supports fetching either from local storage or the external API depending on the `isExternal` query parameter.
+      parameters:
+        - name: pathId
+          in: path
+          required: true
+          description: The ID or human-readable ID of the learning path
+          schema:
+            type: string
+        - name: isExternal
+          in: query
+          required: false
+          description: Whether the path should be fetched externally (true) or locally (false)
+          schema:
+            type: string
+            enum: [true, false]
+      responses:
+        '200':
+          description: Learning path retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningPath'
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Learning path not found
+        '500':
+          description: Failed to fetch learning path
+
+
+
   /learningPath/{pathId}/node/{nodeId}:
     patch:
       tags:
@@ -1312,6 +1482,53 @@ paths:
         '401':
           description: Unauthorized access
 
+  /assignment/student/class/{classId}:
+    get:
+      tags:
+        - Assignment
+        - Student
+      summary: Get all assignments for a class
+      description: Retrieve all assignments for a specific class. Requires student authentication.
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          description: The ID of the class
+          schema:
+            type: integer
+        - name: sort
+          in: query
+          required: false
+          description: Sort order (asc or desc)
+          schema:
+            type: string
+            enum: [asc, desc]
+        - name: order
+          in: query
+          required: false
+          description: Field to order by (createdAt, updatedAt, or deadline)
+          schema:
+            type: string
+            enum: [createdAt, updatedAt, deadline]
+        - name: limit
+          in: query
+          required: false
+          description: Limit the number of assignments returned
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of assignments for the student
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Assignment'
+        '403':
+          description: Access denied, student is not a part of the class.
+        
+
   /assignment/teacher:
     get:
       tags:
@@ -1330,6 +1547,13 @@ paths:
                   $ref: '#/components/schemas/Assignment'
         '401':
           description: Unauthorized access
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: false
+          description: Limit the number of assignments returned
 
     post:
       tags:
@@ -1367,6 +1591,74 @@ paths:
           description: Unauthorized access
         '400':
           description: Invalid request body
+
+  /assignment/teacher/team:
+    post:
+      tags:
+        - Assignment
+        - Teacher
+        - Team
+      summary: Create an assignment with teams for a class
+      description: Allows a teacher to create a new assignment with a defined team structure for multiple classes. Requires teacher authentication.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pathRef:
+                  type: string
+                  description: The reference to the learning path
+                pathLanguage:
+                  type: string
+                  description: The language of the learning path
+                isExternal:
+                  type: boolean
+                  description: Whether the learning path is external
+                deadline:
+                  type: string
+                  format: date-time
+                  description: The deadline for the assignment
+                title:
+                  type: string
+                  description: The title of the assignment
+                description:
+                  type: string
+                  description: The description of the assignment
+                teamSize:
+                  type: integer
+                  description: The intended team size for the assignment
+                classTeams:
+                  type: object
+                  additionalProperties:
+                    type: array
+                    items:
+                      type: string
+                  description: An object mapping class IDs to arrays of student IDs for each team
+              required:
+                - pathRef
+                - pathLanguage
+                - isExternal
+                - deadline
+                - title
+                - description
+                - classTeams
+                - teamSize
+      responses:
+        '201':
+          description: Assignment with teams created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+        '401':
+          description: Unauthorized access
+        '400':
+          description: Invalid request body
+        '500':
+          description: Failed to create assignment with teams
+
 
   /assignment/teacher/class/{classId}:
     get:

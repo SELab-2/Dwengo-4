@@ -1,27 +1,14 @@
 import { Request, Response } from "express";
 import {
-  searchLearningPaths,
-  getLearningPathByIdOrHruid,
-  LearningPathDto,
-} from "../../services/learningPathService";
+  searchAllLearningPaths,
+  getCombinedLearningPathByIdOrHruid,
+} from "../../services/combinedLearningPathService";
+import { LearningPathDto } from "../../services/learningPathService";
 import asyncHandler from "express-async-handler";
 
-interface LearningPathFilters {
-  language?: string;
-  hruid?: string;
-  title?: string;
-  description?: string;
-  all?: string;
-}
-
 /**
- * Zoekt leerpaden via Dwengo-API.
- * Mogelijke queryparams:
- *  ?language=nl
- *  ?hruid=...
- *  ?title=...
- *  ?description=...
- *  ?all=  (leeg om alles op te halen)
+ * GET /learningPath?language=...&hruid=...&title=...&description=...&all=
+ * Zoekt in Dwengo + lokale leerpaden
  */
 export const searchLearningPathsController = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
@@ -33,19 +20,21 @@ export const searchLearningPathsController = asyncHandler(
       all: req.query.all?.toString(),
     };
 
-    const results: LearningPathDto[] = await searchLearningPaths(filters);
+    const results: LearningPathDto[] = await searchAllLearningPaths(filters);
     res.json(results);
-  },
+  }
 );
 
 /**
- * Haalt 1 leerpad op (op basis van _id of hruid).
- * We gebruiken de service getLearningPathByIdOrHruid voor 'idOrHruid'
+ * GET /learningPath/:pathId
+ * Haalt 1 leerpad op (Dwengo of lokaal).
  */
 export const getLearningPathByIdController = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { pathId } = req.params; // pathId is een string
-    const path: LearningPathDto = await getLearningPathByIdOrHruid(pathId);
+    const path: LearningPathDto =
+      await getCombinedLearningPathByIdOrHruid(pathId);
+
     res.json(path);
-  },
+  }
 );

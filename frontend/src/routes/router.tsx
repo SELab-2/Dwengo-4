@@ -2,13 +2,17 @@ import React from 'react';
 import { createBrowserRouter, Link, RouteObject } from 'react-router-dom';
 
 // ==== TEACHER ROUTES ==== //
-import AssignmentPage from '../pages/teacher/AddAssignment';
+import Assignment from '../pages/teacher/Assignment';
+import AssignmentAdd from '../pages/teacher/AssignmentAdd';
+import AssignmentEdit from '../pages/teacher/AssignmentEdit';
+
 import RootLayoutTeacher from '../components/teacher/RootLayoutTeacher';
 import LoginTeacher from '../pages/teacher/LoginTeacher';
 import ClassesPage from '../pages/teacher/ClassesTeacher';
 import SignupTeacher from '../pages/teacher/SignupTeacher';
 import { action as teacherLogoutAction } from '../pages/teacher/LogoutTeacher';
 import EditClassTeacher from '../pages/teacher/EditClassTeacher';
+import TeacherIndex from '../pages/teacher/TeacherIndex';
 
 // ==== STUDENT ROUTES ==== //
 import RootLayoutStudent from '../components/student/RootLayoutStudent';
@@ -22,6 +26,7 @@ import {
 import { action as studentLogoutAction } from '../pages/student/LogoutStudent';
 import StudentIndex from '../pages/student';
 import JoinClass from '../components/student/classes/JoinRequestForm';
+import StudentClassIndex from '../pages/student/StudentClassIndex';
 
 const HomePage: React.FC = () => {
   return (
@@ -57,12 +62,16 @@ export const router = createBrowserRouter([
     element: <HomePage />,
   },
   {
+    path: '/learning-paths',
+    element: <div>Learning Path</div>,
+  },
+  {
     path: 'teacher',
     element: <RootLayoutTeacher />,
     children: [
       {
         index: true,
-        element: <h1>Home teacher</h1>,
+        element: <TeacherIndex />,
       },
       {
         path: 'inloggen',
@@ -86,7 +95,19 @@ export const router = createBrowserRouter([
       },
       {
         path: 'classes/:classId/add-assignment',
-        element: <AssignmentPage></AssignmentPage>,
+        element: <AssignmentAdd></AssignmentAdd>,
+      },
+      {
+        path: 'add-assignment',
+        element: <AssignmentAdd></AssignmentAdd>,
+      },
+      {
+        path: 'assignments/:assignmentId',
+        element: <Assignment></Assignment>,
+      },
+      {
+        path: 'assignments/:assignmentId/edit',
+        element: <AssignmentEdit></AssignmentEdit>,
       },
     ],
   },
@@ -98,6 +119,10 @@ export const router = createBrowserRouter([
         index: true,
         // Je kunt hier eventueel een aparte HomeStudent-component gebruiken
         element: <StudentIndex />,
+      },
+      {
+        path: 'class/:classId',
+        element: <StudentClassIndex />,
       },
       {
         path: 'klassen',

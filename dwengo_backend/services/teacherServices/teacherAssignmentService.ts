@@ -3,8 +3,13 @@ import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
 import ReferenceValidationService from "../../services/referenceValidationService";
 import { AccesDeniedError } from "../../errors/errors";
 // ^ let op: named import, géén "default" meer.
+import { TeamDivision } from "../../interfaces/extendedTypeInterfaces";
+import { createTeamsInAssignment } from "../teacherTeamsService";
 import prisma from "../../config/prisma";
 import { handlePrismaQuery } from "../../errors/errorFunctions";
+interface ClassTeams {
+  [classId: number]: TeamDivision[];
+}
 
 export default class TeacherAssignmentService {
   /**
@@ -19,11 +24,12 @@ export default class TeacherAssignmentService {
     deadline: Date,
     title: string,
     description: string,
+    teamSize: number
   ): Promise<Assignment> {
     // 1) check authorization
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
       throw new AccesDeniedError(
-        "The teacher is unauthorized to perform this action. Is this teacher a teacher of the class?",
+        "The teacher is unauthorized to perform this action. Is this teacher a teacher of the class?"
       );
     }
 
@@ -34,7 +40,7 @@ export default class TeacherAssignmentService {
       isExternal,
       isExternal ? undefined : pathRef, // localId
       isExternal ? pathRef : undefined, // hruid
-      isExternal ? pathLanguage : undefined, // language
+      isExternal ? pathLanguage : undefined // language
     );
 
     // 3) Maak assignment
@@ -51,15 +57,19 @@ export default class TeacherAssignmentService {
           },
           title,
           description,
+          teamSize,
         },
-      }),
+      })
     );
   }
 
   /**
    * Haal alle assignments op voor 1 teacher
    */
-  static async getAllAssignments(teacherId: number): Promise<Assignment[]> {
+  static async getAllAssignments(
+    teacherId: number,
+    limit: number | undefined
+  ): Promise<Assignment[]> {
     return handlePrismaQuery(() =>
       prisma.assignment.findMany({
         where: {
@@ -75,7 +85,11 @@ export default class TeacherAssignmentService {
             },
           },
         },
-      }),
+        orderBy: {
+          deadline: "desc",
+        },
+        take: limit,
+      })
     );
   }
 
@@ -84,11 +98,11 @@ export default class TeacherAssignmentService {
    */
   static async getAssignmentsByClass(
     classId: number,
-    teacherId: number,
+    teacherId: number
   ): Promise<Assignment[]> {
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
       throw new AccesDeniedError(
-        "The teacher is unauthorized to request the assignments. Is this teacher a teacher of the class?",
+        "The teacher is unauthorized to request the assignments. Is this teacher a teacher of the class?"
       );
     }
     return handlePrismaQuery(() =>
@@ -100,7 +114,7 @@ export default class TeacherAssignmentService {
             },
           },
         },
-      }),
+      })
     );
   }
 
@@ -114,11 +128,12 @@ export default class TeacherAssignmentService {
     teacherId: number,
     title: string,
     description: string,
+    teamSize: number
   ): Promise<Assignment> {
     // 1) autorisatie
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
       throw new AccesDeniedError(
-        "The teacher is unauthorized to update the assignment",
+        "The teacher is unauthorized to update the assignment"
       );
     }
 
@@ -134,8 +149,9 @@ export default class TeacherAssignmentService {
           isExternal,
           title,
           description,
+          teamSize,
         },
-      }),
+      })
     );
   }
 
@@ -144,18 +160,171 @@ export default class TeacherAssignmentService {
    */
   static async deleteAssignment(
     assignmentId: number,
-    teacherId: number,
+    teacherId: number
   ): Promise<Assignment> {
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
       throw new AccesDeniedError(
-        "The teacher is unauthorized to delete the assignment.",
+        "The teacher is unauthorized to delete the assignment."
       );
     }
 
     return handlePrismaQuery(() =>
       prisma.assignment.delete({
         where: { id: assignmentId },
-      }),
+      })
     );
+  }
+
+  /**
+   * Create an assignment with class teams structure
+   */
+  static async createAssignmentWithTeams(
+    teacherId: number,
+    pathRef: string,
+    pathLanguage: string,
+    isExternal: boolean,
+    deadline: Date,
+    title: string,
+    description: string,
+    classTeams: ClassTeams,
+    teamSize: number
+  ): Promise<Assignment> {
+    // 1) Check authorization for all classes
+    for (const classId of Object.keys(classTeams)) {
+      if (!(await isAuthorized(teacherId, Role.TEACHER, parseInt(classId)))) {
+        throw new Error("The teacher is unauthorized to perform this action");
+      }
+    }
+
+    // 2) Validate pathRef
+    await ReferenceValidationService.validateLearningPath(
+      isExternal,
+      isExternal ? undefined : pathRef, // localId
+      isExternal ? pathRef : undefined, // hruid
+      isExternal ? pathLanguage : undefined // language
+    );
+
+    // 3) Create assignment and teams in transaction
+    return await prisma.$transaction(async (tx) => {
+      // Create the assignment
+      const assignment = await tx.assignment.create({
+        data: {
+          pathRef,
+          isExternal,
+          deadline,
+          title,
+          description,
+          teamSize,
+        },
+      });
+
+      // Create class assignments and teams
+      for (const [classId, teams] of Object.entries(classTeams)) {
+        await tx.classAssignment.create({
+          data: {
+            assignmentId: assignment.id,
+            classId: parseInt(classId),
+          },
+        });
+        await createTeamsInAssignment(
+          assignment.id,
+          parseInt(classId),
+          teams,
+          tx
+        );
+      }
+
+      return assignment;
+    });
+  }
+
+  /**
+   * Update an assignment and its team structure
+   */
+  static async updateAssignmentWithTeams(
+    assignmentId: number,
+    teacherId: number,
+    pathRef: string,
+    pathLanguage: string,
+    isExternal: boolean,
+    deadline: Date,
+    title: string,
+    description: string,
+    classTeams: ClassTeams,
+    teamSize: number
+  ): Promise<Assignment> {
+    // 1) Check authorization for all classes and assignment
+    if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
+      throw new Error("The teacher is unauthorized to update the assignment");
+    }
+    for (const classId of Object.keys(classTeams)) {
+      if (!(await isAuthorized(teacherId, Role.TEACHER, parseInt(classId)))) {
+        throw new Error("The teacher is unauthorized to perform this action");
+      }
+    }
+
+    // 2) Validate pathRef
+    await ReferenceValidationService.validateLearningPath(
+      isExternal,
+      isExternal ? undefined : pathRef, // localId
+      isExternal ? pathRef : undefined, // hruid
+      isExternal ? pathLanguage : undefined // language
+    );
+
+    // 3) Update assignment and teams in transaction
+    return await prisma.$transaction(async (tx) => {
+      // Update the assignment
+      const assignment = await tx.assignment.update({
+        where: { id: assignmentId },
+        data: {
+          pathRef,
+          isExternal,
+          deadline,
+          title,
+          description,
+          teamSize,
+        },
+      });
+
+      // Delete existing teams
+      await tx.team.deleteMany({
+        where: {
+          teamAssignment: {
+            assignmentId: assignmentId,
+          },
+        },
+      });
+
+      // Ensure all classAssignments exist for the provided classes
+      for (const classId of Object.keys(classTeams)) {
+        const existingClassAssignment = await tx.classAssignment.findFirst({
+          where: {
+            assignmentId: assignmentId,
+            classId: parseInt(classId),
+          },
+        });
+
+        if (!existingClassAssignment) {
+          await tx.classAssignment.create({
+            data: {
+              assignmentId: assignment.id,
+              classId: parseInt(classId),
+            },
+          });
+        }
+      }
+
+      // Create new teams for each class
+      for (const [classId, teams] of Object.entries(classTeams)) {
+        await createTeamsInAssignment(
+          assignment.id,
+          parseInt(classId),
+          teams,
+          tx
+        );
+      }
+
+      return assignment;
+    });
   }
 }

@@ -1,19 +1,23 @@
 import { Response } from "express";
-import { getAssignmentsForStudent } from "../../services/studentAssignmentService";
+import asyncHandler from "express-async-handler";
+import {
+  getAssignmentsForStudent,
+  getAssignmentsForStudentInClass,
+  isStudentInClass,
+} from "../../services/studentAssignmentService";
 import { Assignment } from "@prisma/client";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 import asyncHandler from "express-async-handler";
 import { BadRequestError } from "../../errors/errors";
 
-const allowedSortFields: string[] = ["deadline", "createdAt", "updatedAt"];
-
 function extractSortableFields(input: string): string[] {
+  const allowedSortFields: string[] = ["deadline", "createdAt", "updatedAt"];
   return (
     input
       ?.split(",")
       .filter((field: string): boolean =>
-        allowedSortFields.includes(field),
+        allowedSortFields.includes(field)
       ) || ["deadline"]
   );
 }
@@ -26,7 +30,7 @@ export const getStudentAssignments = asyncHandler(
 
     // Sorteer standaard de deadline, extra velden kunnen meegegeven worden
     const sortFields: string[] = extractSortableFields(
-      req.query.sort as string,
+      req.query.sort as string
     );
     const order: "desc" | "asc" = req.query.order === "desc" ? "desc" : "asc";
     // Sorteer standaard ascending, descending kan ook
@@ -41,8 +45,40 @@ export const getStudentAssignments = asyncHandler(
       studentId,
       sortFields,
       order,
-      limit,
+      limit
     );
     res.status(200).json(assignments);
-  },
+  }
+);
+
+export const getStudentAssignmentsInClass = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const studentId: number = getUserFromAuthRequest(req).id;
+    const classId: number = parseInt(req.params.classId);
+
+    // Controleer of student wel in gegeven klas zit
+    await isStudentInClass(studentId, classId);
+
+    // Sorteer standaard de deadline, extra velden kunnen meegegeven worden
+    const sortFields: string[] = extractSortableFields(
+      req.query.sort as string
+    );
+    const order: "desc" | "asc" = req.query.order === "desc" ? "desc" : "asc";
+    // Sorteer standaard ascending, descending kan ook
+    const limit: number = Number(req.query.limit) || 5;
+    // Haal standaard 5 assignments op, andere hoeveelheden kunnen ook
+
+    if (isNaN(limit) || limit <= 0) {
+      throw new BadRequestError("Limit wasn't a valid number.");
+    }
+
+    const assignments: Assignment[] = await getAssignmentsForStudentInClass(
+      studentId,
+      classId,
+      sortFields,
+      order,
+      limit
+    );
+    res.status(200).json(assignments);
+  }
 );

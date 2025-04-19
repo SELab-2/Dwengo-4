@@ -3,22 +3,24 @@ import { throwCorrectNetworkError } from "../errors/errorFunctions";
 import { NotFoundError } from "../errors/errors";
 
 export interface LearningPathDto {
-  _id: string; // Dwengo gebruikt _id
-  hruid: string; // Human readable unique id
+  _id: string; // Dwengo gebruikt _id of in onze DB is het id
+  hruid: string;
   language: string;
   title: string;
   description: string;
   image?: string;
-  num_nodes?: number; // Aantal nodes in het pad
+  num_nodes?: number;
   num_nodes_left: number;
-  nodes: any[]; // Array van nodes (zie Dwengo docs), elk met transitions, etc.
-  createdAt?: string; // Als Dwengo 'created_at' meegeeft
-  updatedAt?: string; // Als Dwengo 'updatedAt' meegeeft
+  nodes: any[];
+  createdAt?: string;
+  updatedAt?: string;
+
+  // ===== BELANGRIJK =====
+  // Zodat we Dwengo vs. lokaal kunnen onderscheiden in 1 type:
+  isExternal: boolean;
 }
 
-/**
- * Hulpfunctie om JSON van Dwengo te mappen naar een LearningPathDto
- */
+// Dwengo -> Local mapping
 function mapDwengoPathToLocal(dwengoPath: any): LearningPathDto {
   return {
     _id: dwengoPath._id ?? "",
@@ -32,14 +34,14 @@ function mapDwengoPathToLocal(dwengoPath: any): LearningPathDto {
     nodes: dwengoPath.nodes ?? [],
     createdAt: dwengoPath.created_at ?? "",
     updatedAt: dwengoPath.updatedAt ?? "",
+    // Nieuw: Dwengo => altijd true
+    isExternal: true,
   };
 }
 
 /**
- * Haalt alle leerpaden op via Dwengo API: /api/learningPath/search
- * - Je kunt filteren met all, language, title, description, hruid, ...
- *   (zie Dwengo docs)
- * @param filters Object met mogelijke zoekfilters
+ * De exports om naar Dwengo te zoeken en op te halen.
+ * (ongewijzigd, behalve dat mapDwengoPathToLocal nu isExternal=true zet)
  */
 export async function searchLearningPaths(
   filters: {
@@ -48,22 +50,15 @@ export async function searchLearningPaths(
     title?: string;
     description?: string;
     all?: string; // leeg string => alles
-  } = {},
+  } = {}
 ): Promise<LearningPathDto[]> {
   try {
-    // Zet de filters om naar Dwengo queryparams
     const params: Record<string, any> = {};
-
-    // Dwengo-API ondersteunt: all, language, hruid, title, description
-    // (zie docs: <dwengo-host>/api/learningPath/search?all=&language=nl&hruid=... etc.)
     if (filters.language) params.language = filters.language;
     if (filters.hruid) params.hruid = filters.hruid;
     if (filters.title) params.title = filters.title;
     if (filters.description) params.description = filters.description;
-
-    // 'all=' => om alle paden op te halen
     if (filters.all !== undefined) {
-      // Bijv. filters.all = "" → ?all=
       params.all = filters.all;
     }
 
@@ -74,7 +69,7 @@ export async function searchLearningPaths(
 
     if (!Array.isArray(response.data)) {
       throw new NotFoundError(
-        `Dwengo learning path with specified filters not found.`,
+        `Dwengo learning path with specified filters not found.`
       );
     }
 
@@ -85,7 +80,7 @@ export async function searchLearningPaths(
   } catch (error) {
     throwCorrectNetworkError(
       error as Error,
-      "Something went wrong when communicating with the Dwengo API.",
+      "Something went wrong when communicating with the Dwengo API."
     );
   }
   // Dit zou nooit mogen gebeuren
@@ -100,10 +95,10 @@ export async function searchLearningPaths(
  * je zoekt typically via search + hruid=... of all=...
  */
 export async function getLearningPathByIdOrHruid(
-  idOrHruid: string,
+  idOrHruid: string
 ): Promise<LearningPathDto> {
   try {
-    // Probeer te zoeken met hruid=... of als je _id hebt, moet je 'all=' gebruiken en local filteren
+    // Dwengo heeft geen echte "getById", we doen search + filteren
     const params = { all: "" };
     const response = await dwengoAPI.get("/api/learningPath/search", {
       params,
@@ -117,19 +112,20 @@ export async function getLearningPathByIdOrHruid(
 
     // Zoeken in array op basis van _id of hruid
     const found = allPaths.find(
-      (lp: any) => lp._id === idOrHruid || lp.hruid === idOrHruid,
+      (lp: any) => lp._id === idOrHruid || lp.hruid === idOrHruid
     );
     if (!found) {
       throw new NotFoundError(
-        `Learning path with id/hruid "${idOrHruid}" not found.`,
+        `Learning path with id/hruid "${idOrHruid}" not found.`
       );
     }
 
+    // map + isExternal = true
     return mapDwengoPathToLocal(found);
   } catch (error) {
     throwCorrectNetworkError(
       error as Error,
-      "Something went wrong when communicating with the Dwengo API.",
+      "Something went wrong when communicating with the Dwengo API."
     );
   }
   // Dit zou nooit mogen gebeuren

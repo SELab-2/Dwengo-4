@@ -139,3 +139,32 @@
   width: 14px;
   height: 14px;
 }
+
+.studentCheckboxList {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.studentCheckboxItem {
+  padding: 8px;
+  background: white;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.studentCheckboxItem:hover {
+  background: #e9ecef;
+}
+
+.studentCheckboxItem.selected {
+  background: #007bff;
+  color: white;
+}
+
+.selectedCount {
+  margin: 10px 0;
+  font-weight: bold;
+  color: #666;
+}

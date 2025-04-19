@@ -23,9 +23,9 @@ export const isNameValid = (req: AuthenticatedRequest): void => {
 export const getTeacherClasses = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const teacherId: number = getUserFromAuthRequest(req).id;
-    const classes = await classService.getClassesByTeacher(teacherId);
-    res.status(200).json({ classes });
-  },
+    const classrooms = await classService.getClassesByTeacher(teacherId);
+    res.status(200).json({ classrooms });
+  }
 );
 
 /**
@@ -42,7 +42,7 @@ export const createClassroom = asyncHandler(
 
     const classroom = await classService.createClass(name, teacherId);
     res.status(201).json({ message: "Class successfully created.", classroom });
-  },
+  }
 );
 
 /**
@@ -57,12 +57,28 @@ export const deleteClassroom = asyncHandler(
 
     await classService.deleteClass(Number(classId), Number(teacherId));
     res.json({ message: "Class successfully deleted." });
-  },
+  }
+);
+
+/**
+ * Update classroom
+ * returns the updated class in the response body
+ */
+export const updateClassroom = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { name } = req.body;
+    const classId: number = parseInt(req.params.classId);
+    const teacherId: number = getUserFromAuthRequest(req).id;
+
+    isNameValid(req); // if invalid, an error is thrown
+
+    const classroom = await classService.updateClass(classId, teacherId, name);
+    res.status(200).json({ message: "Class successfully updated.", classroom });
+  }
 );
 
 /**
  * Get join link
- * @route GET /class/teacher/:classId/join-link
  * returns the join link for the class
  */
 export const getJoinLink = asyncHandler(
@@ -74,12 +90,11 @@ export const getJoinLink = asyncHandler(
 
     const joinLink = `${APP_URL}/join-request/student/join?joinCode=${joinCode}`;
     res.status(200).json({ joinLink });
-  },
+  }
 );
 
 /**
  * Regenerate join link
- * @route PATCH /class/teacher/:classId/join-link
  * returns the new join link for the class
  */
 export const regenerateJoinLink = asyncHandler(
@@ -88,11 +103,25 @@ export const regenerateJoinLink = asyncHandler(
     const teacherId = getUserFromAuthRequest(req).id;
     const newJoinCode = await classService.regenerateJoinCode(
       Number(classId),
-      teacherId,
+      teacherId
     );
     const joinLink = `${APP_URL}/join-request/student/join?joinCode=${newJoinCode}`;
     res.json({ message: "Join link successfully recreated.", joinLink });
-  },
+  }
+);
+
+/**
+ * returns a list of all classes for the authenticated teacher in the response body with their students
+ */
+export const getClassroomsStudents = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const teacherId: number = getUserFromAuthRequest(req).id;
+    const classrooms = await classService.getAllClassesByTeacher(
+      teacherId,
+      true
+    );
+    res.status(200).json({ classrooms });
+  }
 );
 
 /**
@@ -100,31 +129,35 @@ export const regenerateJoinLink = asyncHandler(
  * @route GET /class/teacher/:classId/student
  * returns a list of all students in the class
  */
-export const getClassroomStudents = asyncHandler(
+export const getStudentsByClassId = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { classId } = req.params;
     const teacherId = getUserFromAuthRequest(req).id;
 
     const students: Student[] = await classService.getStudentsByClass(
       Number(classId),
-      teacherId,
+      teacherId
     );
 
     res.json({ students });
-  },
+  }
 );
 
 /**
  * Get all classrooms
- * @route GET /teacher/classes
+ * @query includeStudents - optional query parameter to include student details
  * returns a list of all classes for the authenticated teacher in the response body
  */
 export const getAllClassrooms = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const teacherId: number = getUserFromAuthRequest(req).id;
-    const classrooms = await classService.getAllClassesByTeacher(teacherId);
+    const includeStudents = req.query.includeStudents === "true";
+    const classrooms = await classService.getAllClassesByTeacher(
+      teacherId,
+      includeStudents
+    );
     res.status(200).json({ classrooms });
-  },
+  }
 );
 
 /**
@@ -140,9 +173,9 @@ export const getClassByIdAndTeacherId = asyncHandler(
 
     const classroom = await classService.getClassByIdAndTeacherId(
       classId,
-      teacherId,
+      teacherId
     );
 
     res.status(200).json({ classroom });
-  },
+  }
 );

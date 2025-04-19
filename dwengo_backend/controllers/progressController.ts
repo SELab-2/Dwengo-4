@@ -1,9 +1,7 @@
 import { Response } from "express";
-import { LearningObjectProgress, PrismaClient } from "@prisma/client";
 import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
 import { getUserFromAuthRequest } from "../helpers/getUserFromAuthRequest";
-
-const prisma = new PrismaClient();
+import progressService from "../services/progressService";
 
 /**
  * Creëert een nieuw progressie-record voor een student bij een (lokaal) leerobject.
@@ -15,39 +13,19 @@ export const createProgress = async (
 ): Promise<void> => {
   try {
     const studentId: number = getUserFromAuthRequest(req).id;
-    const learningObjectId: string = req.params.learningObjectId; // ID van het LOCAL learningObject
+    const learningObjectId: string = req.params.learningObjectId;
 
-    // Atomaire transactie
-    const result = await prisma.$transaction(async (transactionPrisma) => {
-      // Maak een nieuw progressie-record (aanvankelijk niet voltooid)
-      const progress: LearningObjectProgress =
-        await transactionPrisma.learningObjectProgress.create({
-          data: {
-            learningObjectId,
-            done: false,
-          },
-        });
+    const progress = await progressService.createProgress(studentId, learningObjectId);
 
-      // Koppel de progressie aan de ingelogde student
-      await transactionPrisma.studentProgress.create({
-        data: {
-          studentId: studentId,
-          progressId: progress.id,
-        },
-      });
-
-      return { progress };
+    res.status(201).json({
+      message: "Progressie aangemaakt.",
+      progress: progress,
     });
-
-    res
-      .status(201)
-      .json({ message: "Progressie aangemaakt.", progress: result.progress });
-    return;
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ error: "Er is iets misgegaan bij het aanmaken van progressie." });
+    res.status(500).json({
+      error: "Er is iets misgegaan bij het aanmaken van progressie.",
+    });
   }
 };
 
@@ -60,15 +38,12 @@ export const getStudentProgress = async (
 ): Promise<void> => {
   try {
     const studentId: number = getUserFromAuthRequest(req).id;
-    const { learningObjectId } = req.params; // local ID
+    const { learningObjectId } = req.params;
 
-    const studentProgress = await prisma.studentProgress.findFirst({
-      where: {
-        studentId: studentId,
-        progress: { learningObjectId },
-      },
-      include: { progress: true },
-    });
+    const studentProgress = await progressService.getStudentProgress(
+      studentId,
+      learningObjectId,
+    );
 
     if (!studentProgress) {
       res.status(404).json({ error: "Progressie niet gevonden." });
@@ -91,16 +66,13 @@ export const updateProgress = async (
 ): Promise<void> => {
   try {
     const studentId: number = getUserFromAuthRequest(req).id;
-    const { learningObjectId } = req.params; // local ID
+    const { learningObjectId } = req.params;
 
-    // Zoek de StudentProgress
-    const studentProgress = await prisma.studentProgress.findFirst({
-      where: {
-        studentId: studentId,
-        progress: { learningObjectId },
-      },
-      include: { progress: true },
-    });
+    // Zoeken of er al een studentProgress is
+    const studentProgress = await progressService.getStudentProgress(
+      studentId,
+      learningObjectId,
+    );
 
     if (!studentProgress) {
       res.status(404).json({ error: "Progressie niet gevonden." });
@@ -108,14 +80,14 @@ export const updateProgress = async (
     }
 
     // Markeer als done
-    const updatedProgress = await prisma.learningObjectProgress.update({
-      where: { id: studentProgress.progress.id },
-      data: { done: true },
-    });
+    const updatedProgress = await progressService.updateProgressToDone(
+      studentProgress.progress.id,
+    );
 
-    res
-      .status(200)
-      .json({ message: "Progressie bijgewerkt.", progress: updatedProgress });
+    res.status(200).json({
+      message: "Progressie bijgewerkt.",
+      progress: updatedProgress,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Fout bij bijwerken van progressie." });
@@ -142,85 +114,53 @@ export const getTeamProgressStudent = async (
     }
 
     // Haal team + assignment
-    const team = await prisma.team.findUnique({
-      where: { id: teamId },
-      include: {
-        students: true,
-        teamAssignment: true, // => assignmentId
-      },
-    });
+    const team = await progressService.getTeamWithAssignment(teamId);
     if (!team) {
       res.status(404).json({ error: "Team niet gevonden." });
       return;
     }
-    const ta = team.teamAssignment;
-    if (!ta) {
-      res
-        .status(404)
-        .json({ error: "Geen assignment gekoppeld aan dit team." });
+    if (!team.teamAssignment) {
+      res.status(404).json({ error: "Geen assignment gekoppeld aan dit team." });
       return;
     }
 
-    // Haal assignment
-    const assignment = await prisma.assignment.findUnique({
-      where: { id: ta.assignmentId },
-    });
+    const assignment = await progressService.getAssignment(team.teamAssignment.assignmentId);
     if (!assignment) {
       res.status(404).json({ error: "Opdracht niet gevonden." });
       return;
     }
 
-    // Bepaal of assignment isExternal of niet
+    // Bepaal of assignment isExternal
     if (assignment.isExternal) {
-      // -> geen local path, geen nodes => 0% of skip
       res.json({ teamProgress: 0 });
       return;
     }
-    // Als 'isExternal = false', dan is assignment.pathRef de local learningPath ID
-    const localPathId = assignment.pathRef;
 
-    // Tel nodes in dat local learning path
-    const totalNodes: number = await prisma.learningPathNode.count({
-      where: { learningPathId: localPathId },
-    });
+    // tel alle nodes in local learning path
+    const totalNodes = await progressService.countNodesInPath(assignment.pathRef);
     if (totalNodes === 0) {
       res.status(404).json({ error: "Geen leerpadnodes gevonden." });
       return;
     }
 
-    // Haal alle *lokaal* object-IDs uit de nodes
-    // (we gaan ervan uit dat isExternal = false => localLearningObjectId != null)
-    const nodes = await prisma.learningPathNode.findMany({
-      where: { learningPathId: localPathId, isExternal: false },
-      select: { localLearningObjectId: true },
-    });
-    const objectIds = nodes
-      .filter((n) => n.localLearningObjectId !== null)
-      .map((n) => n.localLearningObjectId!);
+    // haal local object ids
+    const objectIds = await progressService.getLocalObjectIdsInPath(assignment.pathRef);
 
     let maxPercentage = 0;
-
-    // Voor elke student
     for (const s of team.students) {
-      const doneCount = await prisma.studentProgress.count({
-        where: {
-          studentId: s.userId,
-          progress: {
-            done: true,
-            learningObjectId: { in: objectIds },
-          },
-        },
-      });
+      const doneCount = await progressService.countDoneProgressForStudent(s.userId, objectIds);
       const percentage = (doneCount / totalNodes) * 100;
-      if (percentage > maxPercentage) maxPercentage = percentage;
+      if (percentage > maxPercentage) {
+        maxPercentage = percentage;
+      }
     }
 
     res.status(200).json({ teamProgress: maxPercentage });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ error: "Fout bij ophalen van team progressie (studentversie)." });
+    res.status(500).json({
+      error: "Fout bij ophalen van team progressie (studentversie).",
+    });
   }
 };
 
@@ -239,54 +179,31 @@ export const getStudentAssignmentProgress = async (
       return;
     }
 
-    const assignment = await prisma.assignment.findUnique({
-      where: { id: assignmentId },
-    });
+    const assignment = await progressService.getAssignment(assignmentId);
     if (!assignment) {
       res.status(404).json({ error: "Opdracht niet gevonden." });
       return;
     }
 
-    // Als isExternal -> Dwengo => 0%
     if (assignment.isExternal) {
       res.json({ assignmentProgress: 0 });
       return;
     }
-    const localPathId = assignment.pathRef;
 
-    // Tel nodes
-    const totalNodes = await prisma.learningPathNode.count({
-      where: { learningPathId: localPathId },
-    });
+    const totalNodes = await progressService.countNodesInPath(assignment.pathRef);
     if (totalNodes === 0) {
       res.status(404).json({ error: "Geen leerpad nodes gevonden." });
       return;
     }
 
-    // Haal local objects
-    const nodes = await prisma.learningPathNode.findMany({
-      where: { learningPathId: localPathId, isExternal: false },
-      select: { localLearningObjectId: true },
-    });
-    const objectIds = nodes
-      .filter((n) => n.localLearningObjectId)
-      .map((n) => n.localLearningObjectId!);
-
-    // Hoeveel done?
-    const doneCount = await prisma.studentProgress.count({
-      where: {
-        studentId,
-        progress: { done: true, learningObjectId: { in: objectIds } },
-      },
-    });
+    const objectIds = await progressService.getLocalObjectIdsInPath(assignment.pathRef);
+    const doneCount = await progressService.countDoneProgressForStudent(studentId, objectIds);
 
     const percentage = (doneCount / totalNodes) * 100;
     res.status(200).json({ assignmentProgress: percentage });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ error: "Fout bij ophalen van opdracht-voortgang (student)." });
+    res.status(500).json({ error: "Fout bij ophalen van opdracht-voortgang (student)." });
   }
 };
 
@@ -306,44 +223,21 @@ export const getStudentLearningPathProgress = async (
       return;
     }
 
-    // Tel local nodes
-    const totalNodes: number = await prisma.learningPathNode.count({
-      where: { learningPathId, isExternal: false },
-    });
+    // tel local nodes
+    const totalNodes = await progressService.countNodesInPath(learningPathId);
     if (totalNodes === 0) {
-      res
-        .status(404)
-        .json({ error: "Geen (lokale) nodes gevonden voor dit leerpad." });
+      res.status(404).json({ error: "Geen (lokale) nodes gevonden voor dit leerpad." });
       return;
     }
 
-    // local object IDs
-    const nodes = await prisma.learningPathNode.findMany({
-      where: { learningPathId, isExternal: false },
-      select: { localLearningObjectId: true },
-    });
-    const objectIds = nodes
-      .filter((n) => n.localLearningObjectId)
-      .map((n) => n.localLearningObjectId!);
-
-    // Hoeveel done?
-    const doneCount = await prisma.studentProgress.count({
-      where: {
-        studentId,
-        progress: {
-          done: true,
-          learningObjectId: { in: objectIds },
-        },
-      },
-    });
+    const objectIds = await progressService.getLocalObjectIdsInPath(learningPathId);
+    const doneCount = await progressService.countDoneProgressForStudent(studentId, objectIds);
 
     const percentage = (doneCount / totalNodes) * 100;
     res.status(200).json({ learningPathProgress: percentage });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ error: "Fout bij ophalen van leerpadvoortgang (student)." });
+    res.status(500).json({ error: "Fout bij ophalen van leerpadvoortgang (student)." });
   }
 };
 
@@ -365,82 +259,55 @@ export const getTeamProgressTeacher = async (
       return;
     }
 
-    const team = await prisma.team.findUnique({
-      where: { id: teamId },
-      include: {
-        students: true,
-        teamAssignment: true,
-      },
-    });
+    const team = await progressService.getTeamWithAssignment(teamId);
     if (!team) {
       res.status(404).json({ error: "Team niet gevonden." });
       return;
     }
     if (!team.teamAssignment) {
-      res
-        .status(404)
-        .json({ error: "Geen assignment gekoppeld aan dit team." });
+      res.status(404).json({ error: "Geen assignment gekoppeld aan dit team." });
       return;
     }
 
-    const assignment = await prisma.assignment.findUnique({
-      where: { id: team.teamAssignment.assignmentId },
-    });
+    const assignment = await progressService.getAssignment(team.teamAssignment.assignmentId);
     if (!assignment) {
       res.status(404).json({ error: "Opdracht niet gevonden." });
       return;
     }
-    // als extern => 0
+
     if (assignment.isExternal) {
       res.json({ teamProgress: 0 });
       return;
     }
-    const localPathId = assignment.pathRef;
 
-    // tel nodes
-    const totalNodes = await prisma.learningPathNode.count({
-      where: { learningPathId: localPathId, isExternal: false },
-    });
+    const totalNodes = await progressService.countNodesInPath(assignment.pathRef);
     if (totalNodes === 0) {
-      res
-        .status(404)
-        .json({ error: "Geen (lokale) nodes gevonden in dit leerpad." });
+      res.status(404).json({ error: "Geen (lokale) nodes gevonden in dit leerpad." });
       return;
     }
 
-    // local objects
-    const nodes = await prisma.learningPathNode.findMany({
-      where: { learningPathId: localPathId, isExternal: false },
-      select: { localLearningObjectId: true },
-    });
-    const objectIds = nodes
-      .filter((n) => n.localLearningObjectId)
-      .map((n) => n.localLearningObjectId!);
+    const objectIds = await progressService.getLocalObjectIdsInPath(assignment.pathRef);
 
     let maxPercentage = 0;
     for (const student of team.students) {
-      const doneCount = await prisma.studentProgress.count({
-        where: {
-          studentId: student.userId,
-          progress: { done: true, learningObjectId: { in: objectIds } },
-        },
-      });
+      const doneCount = await progressService.countDoneProgressForStudent(student.userId, objectIds);
       const perc = (doneCount / totalNodes) * 100;
       if (perc > maxPercentage) {
         maxPercentage = perc;
       }
     }
+
     res.status(200).json({ teamProgress: maxPercentage });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ error: "Fout bij ophalen van teamprogressie (teacherversie)." });
+    res.status(500).json({
+      error: "Fout bij ophalen van teamprogressie (teacherversie).",
+    });
   }
 };
 
 /**
- * (Voor TEACHER) Gemiddelde voortgang van een klas.
+ * (Voor TEACHER) Gemiddelde voortgang van een klas (alle teams).
  */
 export const getAssignmentAverageProgress = async (
   req: AuthenticatedRequest,
@@ -457,9 +324,7 @@ export const getAssignmentAverageProgress = async (
       return;
     }
 
-    const assignment = await prisma.assignment.findUnique({
-      where: { id: assignmentId },
-    });
+    const assignment = await progressService.getAssignment(assignmentId);
     if (!assignment) {
       res.status(404).json({ error: "Opdracht niet gevonden." });
       return;
@@ -468,37 +333,18 @@ export const getAssignmentAverageProgress = async (
       res.json({ averageProgress: 0 });
       return;
     }
-    const localPathId = assignment.pathRef;
 
-    // tel local nodes
-    const totalNodes = await prisma.learningPathNode.count({
-      where: { learningPathId: localPathId, isExternal: false },
-    });
+    const totalNodes = await progressService.countNodesInPath(assignment.pathRef);
     if (totalNodes === 0) {
-      res
-        .status(404)
-        .json({ error: "Geen lokale nodes gevonden voor dit leerpad." });
+      res.status(404).json({ error: "Geen lokale nodes gevonden voor dit leerpad." });
       return;
     }
 
-    // local objects
-    const nodes = await prisma.learningPathNode.findMany({
-      where: { learningPathId: localPathId, isExternal: false },
-      select: { localLearningObjectId: true },
-    });
-    const objectIds = nodes
-      .filter((n) => n.localLearningObjectId)
-      .map((n) => n.localLearningObjectId!);
+    const objectIds = await progressService.getLocalObjectIdsInPath(assignment.pathRef);
+    const teamAssignments = await progressService.getTeamsForAssignment(assignmentId);
 
-    // alle teams
-    const teamAssignments = await prisma.teamAssignment.findMany({
-      where: { assignmentId },
-      include: { team: { include: { students: true } } },
-    });
     if (teamAssignments.length === 0) {
-      res
-        .status(404)
-        .json({ error: "Geen teams gevonden voor deze opdracht." });
+      res.status(404).json({ error: "Geen teams gevonden voor deze opdracht." });
       return;
     }
 
@@ -509,12 +355,7 @@ export const getAssignmentAverageProgress = async (
       const team = ta.team;
       let teamMax = 0;
       for (const student of team.students) {
-        const doneCount = await prisma.studentProgress.count({
-          where: {
-            studentId: student.userId,
-            progress: { done: true, learningObjectId: { in: objectIds } },
-          },
-        });
+        const doneCount = await progressService.countDoneProgressForStudent(student.userId, objectIds);
         const percentage = (doneCount / totalNodes) * 100;
         if (percentage > teamMax) {
           teamMax = percentage;
@@ -528,8 +369,8 @@ export const getAssignmentAverageProgress = async (
     res.status(200).json({ averageProgress });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ error: "Fout bij berekenen van gemiddelde voortgang." });
+    res.status(500).json({
+      error: "Fout bij berekenen van gemiddelde voortgang.",
+    });
   }
 };
