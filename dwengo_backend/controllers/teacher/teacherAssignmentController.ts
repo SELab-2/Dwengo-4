@@ -40,17 +40,17 @@ export class AssignmentTeacherController {
           parsedDeadline,
           title,
           description,
-          teamSize
+          teamSize,
         );
       res
         .status(201)
         .json({ message: "Assignment successfully created.", assignment });
-    }
+    },
   );
 
   createAssignmentWithTeams = async (
     req: AuthenticatedRequest,
-    res: Response
+    res: Response,
   ): Promise<void> => {
     try {
       const teacherId: number = getUserFromAuthRequest(req).id;
@@ -77,7 +77,7 @@ export class AssignmentTeacherController {
           title,
           description,
           classTeams,
-          teamSize
+          teamSize,
         );
       res.status(201).json(assignment);
     } catch {
@@ -94,11 +94,11 @@ export class AssignmentTeacherController {
 
       const assignments = await teacherAssignmentService.getAllAssignments(
         teacherId,
-        limit
+        limit,
       );
 
       res.status(200).json(assignments);
-    }
+    },
   );
 
   getAssignmentsByClass = asyncHandler(
@@ -107,14 +107,21 @@ export class AssignmentTeacherController {
       const teacherId: number = getUserFromAuthRequest(req).id;
       const assignments = await teacherAssignmentService.getAssignmentsByClass(
         classId,
-        teacherId
+        teacherId,
       );
       res.status(200).json(assignments);
-    }
+    },
   );
 
   updateAssignment = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+      // classId: class3.id,
+      // pathRef: lp1.id,
+      // deadline: "2026-10-23",
+      // pathLanguage: "nl",
+      // title: "Learning Path 1",
+      // description: "description1",
+      // teamSize: 2,
       const assignmentId: number = parseInt(req.params.assignmentId);
       const { pathRef, isExternal, title, description, teamSize } = req.body;
       const teacherId: number = getUserFromAuthRequest(req).id;
@@ -126,13 +133,13 @@ export class AssignmentTeacherController {
         teacherId,
         title,
         description,
-        teamSize
+        teamSize,
       );
       res.json({
         message: "Assignment successfully updated.",
         updatedAssignment,
       });
-    }
+    },
   );
 
   deleteAssignment = asyncHandler(
@@ -143,12 +150,12 @@ export class AssignmentTeacherController {
       res.status(204).json({
         message: "Assignment successfully deleted.",
       });
-    }
+    },
   );
 
   updateAssignmentWithTeams = async (
     req: AuthenticatedRequest,
-    res: Response
+    res: Response,
   ): Promise<void> => {
     try {
       const assignmentId: number = parseInt(req.params.assignmentId);
@@ -176,7 +183,7 @@ export class AssignmentTeacherController {
           title,
           description,
           classTeams,
-          teamSize
+          teamSize,
         );
       res.json(updatedAssignment);
     } catch {
