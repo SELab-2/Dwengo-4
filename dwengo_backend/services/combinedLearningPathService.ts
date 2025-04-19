@@ -43,8 +43,6 @@ export async function getCombinedLearningPathByIdOrHruid(
         idOrHruid,
       );
     }
+    throw error;
   }
-  // Dit zal nooit gebeuren
-  // Dit dient enkel om de types te laten kloppen
-  return {} as LearningPathDto;
 }
