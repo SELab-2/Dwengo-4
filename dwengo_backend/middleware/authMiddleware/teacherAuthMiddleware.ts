@@ -3,7 +3,7 @@ import asyncHandler from "express-async-handler";
 import { PrismaClient } from "@prisma/client";
 import { Response, NextFunction } from "express";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
-import { UnauthorizedError } from "../../errors/errors";
+import { AppError, UnauthorizedError } from "../../errors/errors";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 import {
   invalidTokenMessage,
@@ -67,8 +67,11 @@ export const protectTeacher = asyncHandler(
           role: "TEACHER",
         };
         next();
-      } catch {
-        throw new UnauthorizedError(invalidTokenMessage);
+      } catch (error) {
+        if (!(error instanceof AppError)) {
+          throw new UnauthorizedError(invalidTokenMessage);
+        }
+        throw error; // Re-throw the error if it's an AppError
       }
     } else {
       throw new UnauthorizedError(noTokenProvidedMessage);

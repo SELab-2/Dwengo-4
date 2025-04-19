@@ -19,7 +19,7 @@ const AuthenticatedUserSchema = z.object({
 
 // since the user property in AuthenticatedRequest could be undefined, use this function to extract it safely
 export function getUserFromAuthRequest(
-  req: AuthenticatedRequest
+  req: AuthenticatedRequest,
 ): AuthenticatedUser {
   // check that user is set
   if (!req.user) {

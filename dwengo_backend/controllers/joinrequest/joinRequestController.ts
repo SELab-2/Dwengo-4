@@ -1,37 +1,25 @@
-import { Request, Response } from "express";
+import asyncHandler from "express-async-handler";
+import { Response } from "express";
 import joinRequestService from "../../services/joinRequestService";
 import { JoinRequest } from "@prisma/client";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
-import { AppError } from "../../errors/errors";
+import { BadRequestError } from "../../errors/errors";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
-
-// Higher-order function to handle errors and reduce duplication
-const handleRequest =
-  (handler: (_req: Request, _res: Response) => Promise<void>) =>
-  async (req: Request, res: Response): Promise<void> => {
-    try {
-      await handler(req, res);
-    } catch (error) {
-      const message: string =
-        error instanceof Error ? error.message : "An unknown error occurred";
-      res
-        .status(error instanceof AppError ? error.statusCode : 400)
-        .json({ error: message });
-    }
-  };
 
 /**
  * Creates a join request for a student to join a class (class code in request body)
  * @route POST /student/classes/join
  * returns the created join request in the response body
  */
-export const createJoinRequest = handleRequest(
+export const createJoinRequest = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const joinCode = req.body.joinCode || (req.query.joinCode as string);
     const studentId: number = getUserFromAuthRequest(req).id;
-    const joinRequest: JoinRequest | undefined =
+    const joinRequest: JoinRequest =
       await joinRequestService.createValidJoinRequest(studentId, joinCode);
-    res.status(201).json({ joinRequest });
+    res
+      .status(201)
+      .json({ message: "Join request successfully created.", joinRequest });
   },
 );
 
@@ -42,7 +30,7 @@ export const createJoinRequest = handleRequest(
  * @param requestId - id of the join request to be updated
  * returns the updated join request in the response body
  */
-export const updateJoinRequestStatus = handleRequest(
+export const updateJoinRequestStatus = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const classId: number = parseInt(req.params.classId);
     const requestId: number = parseInt(req.params.requestId);
@@ -50,7 +38,7 @@ export const updateJoinRequestStatus = handleRequest(
     const teacherId: number = getUserFromAuthRequest(req).id;
 
     if (!action || (action !== "approve" && action !== "deny")) {
-      res.status(400).json({ error: "Action must be 'approve' or 'deny'" });
+      throw new BadRequestError("Action must be 'approve' or 'deny'.");
     }
 
     if (action === "approve") {
@@ -77,7 +65,7 @@ export const updateJoinRequestStatus = handleRequest(
  * @param classId - id of the class for which the join requests are fetched
  * returns a list of all join requests for the class in the response body
  */
-export const getJoinRequestsByClass = handleRequest(
+export const getJoinRequestsByClass = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const classId: number = parseInt(req.params.classId);
     const teacherId: number = getUserFromAuthRequest(req).id;
