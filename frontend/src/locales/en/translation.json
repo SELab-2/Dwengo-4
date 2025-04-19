@@ -1,7 +1,9 @@
 {
-  "Kies een rol": "Choose a role",
-  "student": "Student",
-  "teacher": "Teacher",
+  "role": {
+    "choose": "Choose a role",
+    "student": "Student",
+    "teacher": "Teacher"
+  },
   "login": {
     "teacher": "Log in as a teacher",
     "email": {
