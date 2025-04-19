@@ -28,7 +28,7 @@ export default class ClassService {
           name: name, // name field matches the Class schema
           code: joinCode, // code field matches the Class schema
         },
-      })
+      }),
     );
 
     // Now that you have the class id, create the ClassTeacher record
@@ -38,7 +38,7 @@ export default class ClassService {
           teacherId: teacherId, // teacherId links to the teacher record
           classId: classroom.id, // Use the id of the newly created class
         },
-      })
+      }),
     );
 
     return classroom;
@@ -48,13 +48,13 @@ export default class ClassService {
   // if either of these conditions are not met, an error is thrown
   private static async verifyClassAndTeacher(
     classId: number,
-    teacherId: number
+    teacherId: number,
   ): Promise<void> {
     // Check if the class exists
     const classroom = await handlePrismaQuery(() =>
       prisma.class.findUnique({
         where: { id: classId },
-      })
+      }),
     );
     if (!classroom) {
       throw new NotFoundError(`Class not found.`);
@@ -68,14 +68,14 @@ export default class ClassService {
   static async deleteClass(classId: number, teacherId: number): Promise<Class> {
     await this.verifyClassAndTeacher(classId, teacherId);
     return await handlePrismaQuery(() =>
-      prisma.class.delete({ where: { id: classId } })
+      prisma.class.delete({ where: { id: classId } }),
     ); // onDelete: Cascade in the prisma schema makes sure that all related records are also deleted
   }
 
   // Get all classes taught by a given teacher
   static async getClassesByTeacher(teacherId: number): Promise<Class[]> {
     // Fetch all classes where the teacher is assigned
-    return handlePrismaQuery(() =>
+    return await handlePrismaQuery(() =>
       prisma.class.findMany({
         where: {
           ClassTeacher: {
@@ -84,7 +84,7 @@ export default class ClassService {
             },
           },
         },
-      })
+      }),
     );
   }
 
@@ -100,13 +100,13 @@ export default class ClassService {
             },
           },
         },
-      })
+      }),
     );
   }
 
   static async getStudentClassByClassId(
     studentId: number,
-    classId: number
+    classId: number,
   ): Promise<Class> {
     // Fetch all classes where the student is enrolled
     const c: Class | null = await prisma.class.findUnique({
@@ -127,7 +127,7 @@ export default class ClassService {
 
   static async leaveClassAsStudent(
     studentId: number,
-    classId: number
+    classId: number,
   ): Promise<ClassStudent> {
     const inClass = await prisma.classStudent.findUnique({
       where: {
@@ -139,7 +139,7 @@ export default class ClassService {
     });
     if (!inClass) {
       throw new BadRequestError(
-        "Student is not a part of this class and is therefore not able to leave it."
+        "Student is not a part of this class and is therefore not able to leave it.",
       );
     }
 
@@ -157,7 +157,7 @@ export default class ClassService {
   static async updateClass(
     classId: number,
     teacherId: number,
-    name: string
+    name: string,
   ): Promise<Class> {
     await this.verifyClassAndTeacher(classId, teacherId);
 
@@ -170,7 +170,7 @@ export default class ClassService {
   // Function to check if the requester is the teacher of the class
   static async isTeacherOfClass(
     classId: number,
-    teacherId: number
+    teacherId: number,
   ): Promise<void> {
     const classTeacher: ClassTeacher | null = await handlePrismaQuery(() =>
       prisma.classTeacher.findUnique({
@@ -180,7 +180,7 @@ export default class ClassService {
             classId: classId,
           },
         },
-      })
+      }),
     );
     if (!classTeacher) {
       throw new AccesDeniedError("Teacher is not part of this class.");
@@ -190,7 +190,7 @@ export default class ClassService {
   // Get all students from a given class
   static async getStudentsByClass(
     classId: number,
-    teacherId: number
+    teacherId: number,
   ): Promise<(Student & { user: User })[]> {
     await this.verifyClassAndTeacher(classId, teacherId);
 
@@ -202,32 +202,32 @@ export default class ClassService {
             include: { user: true }, // include user details
           },
         },
-      })
+      }),
     );
     return classStudents.map((cs) => cs.student);
   }
 
   static async addStudentToClass(
     studentId: number,
-    classId: number
+    classId: number,
   ): Promise<ClassStudent> {
-    return handlePrismaQuery(() =>
+    return await handlePrismaQuery(() =>
       prisma.classStudent.create({
         data: {
           studentId,
           classId,
         },
-      })
+      }),
     );
   }
 
   // Check if student is already in the class
   static isStudentInClass(
     classroom: ClassWithLinks,
-    studentId: number
+    studentId: number,
   ): boolean {
     const inClass: boolean = classroom.classLinks.some(
-      (link: ClassStudent) => link.studentId === studentId
+      (link: ClassStudent) => link.studentId === studentId,
     );
     if (!inClass) {
       throw new AccesDeniedError(`Student is not a part of this class.`);
@@ -237,9 +237,9 @@ export default class ClassService {
 
   static async removeStudentFromClass(
     studentId: number,
-    classId: number
+    classId: number,
   ): Promise<ClassStudent> {
-    return handlePrismaQuery(() =>
+    return await handlePrismaQuery(() =>
       prisma.classStudent.delete({
         where: {
           studentId_classId: {
@@ -247,7 +247,7 @@ export default class ClassService {
             classId,
           },
         },
-      })
+      }),
     );
   }
 
@@ -262,7 +262,7 @@ export default class ClassService {
     const classroom: Class | null = await handlePrismaQuery(() =>
       prisma.class.findUnique({
         where: { id: id },
-      })
+      }),
     );
     if (!classroom) {
       throw new NotFoundError(`Class not found.`);
@@ -273,7 +273,7 @@ export default class ClassService {
   // Read a class by ID and teacher ID
   static async getClassByIdAndTeacherId(
     classId: number,
-    teacherId: number
+    teacherId: number,
   ): Promise<Class> {
     // Verify if the teacher is associated with the class
     await this.isTeacherOfClass(classId, teacherId);
@@ -282,7 +282,7 @@ export default class ClassService {
     const classroom: Class | null = await handlePrismaQuery(() =>
       prisma.class.findUnique({
         where: { id: classId },
-      })
+      }),
     );
     if (!classroom) {
       throw new NotFoundError(`Class not found.`);
@@ -293,13 +293,13 @@ export default class ClassService {
   // Give the class a new name
   static async updateClassName(
     classId: number,
-    newName: string
+    newName: string,
   ): Promise<Class> {
     return await handlePrismaQuery(() =>
       prisma.class.update({
         where: { id: classId },
         data: { name: newName },
-      })
+      }),
     );
   }
 
@@ -314,11 +314,11 @@ export default class ClassService {
         include: {
           classLinks: true,
         },
-      })
+      }),
     );
     if (!classroom) {
       throw new NotFoundError(
-        `Class corresponding to join code ${joinCode} not found.`
+        `Class corresponding to join code ${joinCode} not found.`,
       );
     }
     return classroom;
@@ -326,13 +326,13 @@ export default class ClassService {
 
   static async getJoinCode(
     classId: number,
-    teacherId: number
+    teacherId: number,
   ): Promise<string> {
     const classroom = await handlePrismaQuery(() =>
       prisma.class.findUnique({
         where: { id: classId },
         select: { code: true }, // Only fetch the join code
-      })
+      }),
     );
     if (!classroom) {
       throw new NotFoundError(`Class not found.`);
@@ -357,7 +357,7 @@ export default class ClassService {
       const existingClass = await handlePrismaQuery(() =>
         prisma.class.findUnique({
           where: { code: newJoinCode },
-        })
+        }),
       );
 
       if (!existingClass) {
@@ -371,7 +371,7 @@ export default class ClassService {
   // Function to regenerate the join code for a class
   static async regenerateJoinCode(
     classId: number,
-    teacherId: number
+    teacherId: number,
   ): Promise<string> {
     await this.verifyClassAndTeacher(classId, teacherId);
 
@@ -383,7 +383,7 @@ export default class ClassService {
       prisma.class.update({
         where: { id: classId },
         data: { code: newJoinCode },
-      })
+      }),
     );
 
     return updatedClass.code;
@@ -392,10 +392,10 @@ export default class ClassService {
   // Get all classes from the same teacher
   static async getAllClassesByTeacher(
     teacherId: number,
-    includeStudents: boolean = false
+    includeStudents: boolean = false,
   ): Promise<Class[]> {
     // Fetch all classes taught by the same teacher
-    return handlePrismaQuery(() =>
+    return await handlePrismaQuery(() =>
       prisma.class.findMany({
         where: {
           ClassTeacher: {
@@ -417,7 +417,7 @@ export default class ClassService {
               },
             }
           : undefined,
-      })
+      }),
     );
   }
 }
