@@ -2,17 +2,16 @@ import { Role, Student, Teacher, User } from "@prisma/client";
 
 import prisma from "../config/prisma";
 import { handlePrismaQuery } from "../errors/errorFunctions";
-import { NotFoundError } from "../errors/errors";
+import { BadRequestError, NotFoundError } from "../errors/errors";
 
 export default class UserService {
-  static async findUser(email: string): Promise<User> {
+  static async emailInUse(email: string): Promise<void> {
     const user: User | null = await prisma.user.findUnique({
       where: { email },
     });
-    if (!user) {
-      throw new NotFoundError("User not found.");
+    if (user) {
+      throw new BadRequestError("Email already in use.");
     }
-    return user;
   }
 
   static async createUser(

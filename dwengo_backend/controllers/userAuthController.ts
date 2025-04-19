@@ -33,7 +33,7 @@ const registerUser = async (
 ): Promise<void> => {
   const { firstName, lastName, email, password } = req.body;
   // Controleer of er al een gebruiker bestaat met dit e-mailadres
-  await UserService.findUser(email);
+  await UserService.emailInUse(email);
 
   // Hash het wachtwoord
   const hashedPassword: string = await bcrypt.hash(password, 10);
@@ -62,7 +62,7 @@ const loginUser = async (
   email = email.toLowerCase();
 
   // Zoek eerst de gebruiker
-  const user = await UserService.findUser(email);
+  const user = await UserService.findUserByEmail(email);
   if (user.role === Role.STUDENT && role === Role.TEACHER) {
     throw new BadRequestError("Student cannot login as teacher.");
   }
