@@ -11,6 +11,7 @@ const LanguageChooser: React.FC = () => {
   return (
     <div className="flex">
       <select
+        aria-label="Language selector"
         className="text-sm lg:text-lg hover:cursor-pointer"
         value={i18n.language}
         onChange={(e) => changeLanguage(e.target.value)}
