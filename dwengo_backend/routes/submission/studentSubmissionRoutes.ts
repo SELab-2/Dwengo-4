@@ -1,8 +1,9 @@
 import express, { Router } from "express";
-import controller from "../../controllers/student/studentSubmissionController";
 import { protectStudent } from "../../middleware/authMiddleware/studentAuthMiddleware";
+import StudentSubmissionController from "../../controllers/student/studentSubmissionController";
 
 const router: Router = express.Router();
+const controller = new StudentSubmissionController();
 
 router.use(protectStudent);
 
@@ -15,6 +16,7 @@ router.use(protectStudent);
 router.get(
   "/assignment/:assignmentId/",
   controller.getSubmissionsForAssignment,
+  // controller.getSubmissionsForAssignment,
 );
 
 /**

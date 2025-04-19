@@ -1,8 +1,9 @@
 import express from "express";
-import controller from "../../controllers/teacher/feedbackController";
+import FeedbackController from "../../controllers/teacher/feedbackController";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router = express.Router();
+const controller = new FeedbackController();
 
 router.use(protectTeacher);
 
@@ -49,7 +50,7 @@ router.delete(
 );
 
 /**
- * @route POST /feedback
+ * @route POST /feedback/submission/:submissionId
  * @desc Create feedback for a submission
  * @body submissionId: number
  * @body description: string
