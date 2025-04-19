@@ -36,7 +36,7 @@ export const isAuthorized = async (
   if (classId) await classCheck(userId, classId, requiredRole);
 };
 
-const classCheck = async (
+export const classCheck = async (
   userId: number,
   classId: number,
   requiredRole: Role,

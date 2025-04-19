@@ -1,5 +1,9 @@
 import { Assignment, Role } from "@prisma/client";
-import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
+import {
+  canUpdateOrDelete,
+  classCheck,
+  isAuthorized,
+} from "../authorizationService";
 import ReferenceValidationService from "../../services/referenceValidationService";
 // ^ let op: named import, géén "default" meer.
 import { TeamDivision } from "../../interfaces/extendedTypeInterfaces";
@@ -240,7 +244,7 @@ export default class TeacherAssignmentService {
     // 1) Check authorization for all classes and assignment
     await canUpdateOrDelete(teacherId, assignmentId);
     for (const classId of Object.keys(classTeams)) {
-      await isAuthorized(teacherId, Role.TEACHER, parseInt(classId));
+      await classCheck(teacherId, parseInt(classId), Role.TEACHER);
     }
 
     // 2) Validate pathRef
