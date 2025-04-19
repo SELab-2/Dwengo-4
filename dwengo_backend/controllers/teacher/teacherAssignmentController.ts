@@ -125,7 +125,6 @@ export class AssignmentTeacherController {
       const assignmentId: number = parseInt(req.params.assignmentId);
       const { pathRef, isExternal, title, description, teamSize } = req.body;
       const teacherId: number = getUserFromAuthRequest(req).id;
-
       const updatedAssignment = await teacherAssignmentService.updateAssignment(
         assignmentId,
         pathRef,

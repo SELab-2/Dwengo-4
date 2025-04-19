@@ -67,9 +67,7 @@ export const canUpdateOrDelete = async (
   assignmentId: number,
 ): Promise<void> => {
   // Check if the user is authorized as a teacher
-  console.log(1.1);
   await isAuthorized(userId, Role.TEACHER);
-  console.log(1.2);
 
   // The teacher is authorized
   // Now there needs to be checked if the teacher has classes that have this assignment
@@ -79,8 +77,6 @@ export const canUpdateOrDelete = async (
       select: { classId: true },
     }),
   );
-  console.log(1.3);
-  console.log(allClassesTeacher);
 
   if (allClassesTeacher.length === 0)
     throw new AccessDeniedError("This teacher teaches no classes.");
@@ -94,8 +90,6 @@ export const canUpdateOrDelete = async (
       },
     }),
   );
-  console.log(1.4);
-  console.log(hasAssignment);
 
   if (!hasAssignment)
     throw new NotFoundError("No classes of this teacher have this assignment.");

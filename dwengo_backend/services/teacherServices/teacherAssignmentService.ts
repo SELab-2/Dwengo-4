@@ -139,11 +139,11 @@ export default class TeacherAssignmentService {
       prisma.assignment.update({
         where: { id: assignmentId },
         data: {
-          pathRef,
-          isExternal,
-          title,
-          description,
-          teamSize,
+          pathRef: pathRef,
+          isExternal: isExternal,
+          title: title,
+          description: description,
+          teamSize: teamSize,
         },
       }),
     );
