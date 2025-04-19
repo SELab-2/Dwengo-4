@@ -2,7 +2,7 @@ import { Assignment } from "@prisma/client";
 
 import prisma from "../config/prisma";
 import { handlePrismaQuery } from "../errors/errorFunctions";
-import { AccesDeniedError } from "../errors/errors";
+import { AccessDeniedError } from "../errors/errors";
 
 /**
  * Haalt alle assignments op die een student (studentId) kan zien,
@@ -15,7 +15,7 @@ export const getAssignmentsForStudent = async (
   studentId: number,
   sortFields: string[],
   order: "asc" | "desc",
-  limit: number
+  limit: number,
 ): Promise<Assignment[]> => {
   return await handlePrismaQuery(() =>
     prisma.assignment.findMany({
@@ -34,7 +34,7 @@ export const getAssignmentsForStudent = async (
       },
       orderBy: sortFields.map((field: string) => ({ [field]: order })),
       take: limit,
-    })
+    }),
   );
 };
 
@@ -43,7 +43,7 @@ export const getAssignmentsForStudentInClass = async (
   classId: number,
   sortFields: string[],
   order: "asc" | "desc",
-  limit: number
+  limit: number,
 ): Promise<Assignment[]> => {
   return await handlePrismaQuery(() =>
     prisma.assignment.findMany({
@@ -63,13 +63,13 @@ export const getAssignmentsForStudentInClass = async (
       },
       orderBy: sortFields.map((field: string) => ({ [field]: order })),
       take: limit,
-    })
+    }),
   );
 };
 
 export const isStudentInClass = async (
   studentId: number,
-  classId: number
+  classId: number,
 ): Promise<void> => {
   const studentInClass = await handlePrismaQuery(() =>
     prisma.classStudent.findFirst({
@@ -77,10 +77,10 @@ export const isStudentInClass = async (
         studentId: studentId,
         classId: classId,
       },
-    })
+    }),
   );
 
   if (!studentInClass) {
-    throw new AccesDeniedError("Student is not a part of this class.");
+    throw new AccessDeniedError("Student is not a part of this class.");
   }
 };

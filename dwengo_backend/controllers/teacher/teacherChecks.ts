@@ -1,4 +1,4 @@
-import { AccesDeniedError } from "../../errors/errors";
+import { AccessDeniedError } from "../../errors/errors";
 
 // I have to disable the linter for this enum because it doesn't recognize that
 // these enums are used in other files. It only checks if it is used in the same file.
@@ -18,7 +18,7 @@ export const checkIfTeacherIsCreator = function (
   property: Property,
 ) {
   if (teacherId !== loCreatorId) {
-    throw new AccesDeniedError(
+    throw new AccessDeniedError(
       `Teacher is not the creator of this ${property}.`,
     );
   }

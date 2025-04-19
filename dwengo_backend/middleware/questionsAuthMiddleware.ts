@@ -2,7 +2,7 @@ import { NextFunction, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { PrismaClient } from "@prisma/client";
 import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
-import { NotFoundError, AccesDeniedError } from "../errors/errors";
+import { NotFoundError, AccessDeniedError } from "../errors/errors";
 
 const prisma = new PrismaClient();
 const accessDeniedErrorMessage = "Not logged in.";
@@ -19,7 +19,7 @@ export const authorizeQuestion = asyncHandler(
     const { questionId } = req.params;
     const user = req.user;
     if (!user) {
-      throw new AccesDeniedError(accessDeniedErrorMessage);
+      throw new AccessDeniedError(accessDeniedErrorMessage);
     }
 
     const question = await prisma.question.findUnique({
@@ -57,12 +57,12 @@ export const authorizeQuestion = asyncHandler(
       // private => alleen question.createdBy of teacher/admin
       const isCreator = question.createdBy === user.id;
       if (!isCreator && !isTeacherInClass && !isAdmin) {
-        throw new AccesDeniedError("Question is private: no access.");
+        throw new AccessDeniedError("Question is private: no access.");
       }
     } else {
       // not private => teamleden of teacher/admin
       if (!isStudentInTeam && !isTeacherInClass && !isAdmin) {
-        throw new AccesDeniedError("No access to question.");
+        throw new AccessDeniedError("No access to question.");
       }
     }
 
@@ -80,7 +80,7 @@ export const authorizeQuestionUpdate = asyncHandler(
     const { questionId } = req.params;
     const user = req.user;
     if (!user) {
-      throw new AccesDeniedError(accessDeniedErrorMessage);
+      throw new AccessDeniedError(accessDeniedErrorMessage);
     }
 
     const question = await prisma.question.findUnique({
@@ -108,7 +108,7 @@ export const authorizeQuestionUpdate = asyncHandler(
     const isAdmin = user.role === "ADMIN";
 
     if (!isOwner && !isAdmin) {
-      throw new AccesDeniedError(
+      throw new AccessDeniedError(
         "Only the owner of this question or an admin can update this question.",
       );
     }
@@ -126,7 +126,7 @@ export const authorizeMessageUpdate = asyncHandler(
     const { questionMessageId } = req.params;
     const user = req.user;
     if (!user) {
-      throw new AccesDeniedError(accessDeniedErrorMessage);
+      throw new AccessDeniedError(accessDeniedErrorMessage);
     }
 
     const message = await prisma.questionMessage.findUnique({
@@ -140,7 +140,7 @@ export const authorizeMessageUpdate = asyncHandler(
     const isAdmin = user.role === "ADMIN";
 
     if (!isOwner && !isAdmin) {
-      throw new AccesDeniedError(
+      throw new AccessDeniedError(
         "Only the owner of the message or an admin can update this message",
       );
     }
@@ -159,7 +159,7 @@ export const authorizeMessageDelete = asyncHandler(
     const { questionId, questionMessageId } = req.params;
     const user = req.user;
     if (!user) {
-      throw new AccesDeniedError(accessDeniedErrorMessage);
+      throw new AccessDeniedError(accessDeniedErrorMessage);
     }
 
     // 1) Vind de message
@@ -200,7 +200,7 @@ export const authorizeMessageDelete = asyncHandler(
     const isAdmin = user.role === "ADMIN";
 
     if (!isTeacherInClass && !isAdmin) {
-      throw new AccesDeniedError(
+      throw new AccessDeniedError(
         "Only the owner, the teacher of this class, or an admin can delete this message",
       );
     }

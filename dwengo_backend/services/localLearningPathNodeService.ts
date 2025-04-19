@@ -8,7 +8,7 @@ import {
   throwCorrectNetworkError,
 } from "../errors/errorFunctions";
 import {
-  AccesDeniedError,
+  AccessDeniedError,
   BadRequestError,
   NotFoundError,
 } from "../errors/errors";
@@ -38,13 +38,13 @@ class LocalLearningPathNodeService {
     const path = await handlePrismaQuery(() =>
       prisma.learningPath.findUnique({
         where: { id: pathId },
-      })
+      }),
     );
     if (!path) {
       throw new NotFoundError("Learning path not found.");
     }
     if (path.creatorId !== teacherId) {
-      throw new AccesDeniedError("Teacher is not the creator of this path.");
+      throw new AccessDeniedError("Teacher is not the creator of this path.");
     }
   }
 
@@ -53,14 +53,14 @@ class LocalLearningPathNodeService {
    */
   async getAllNodesForPath(
     teacherId: number,
-    pathId: string
+    pathId: string,
   ): Promise<LearningPathNode[]> {
     await this.checkTeacherOwnsPath(teacherId, pathId);
     return await handlePrismaQuery(() =>
       prisma.learningPathNode.findMany({
         where: { learningPathId: pathId },
         orderBy: { createdAt: "asc" },
-      })
+      }),
     );
   }
 
@@ -72,7 +72,7 @@ class LocalLearningPathNodeService {
   async createNodeForPath(
     teacherId: number,
     pathId: string,
-    data: NodeData
+    data: NodeData,
   ): Promise<LearningPathNode> {
     await this.checkTeacherOwnsPath(teacherId, pathId);
 
@@ -82,12 +82,12 @@ class LocalLearningPathNodeService {
       await this.validateDwengoObject(
         data.dwengoHruid!,
         data.dwengoLanguage!,
-        data.dwengoVersion!
+        data.dwengoVersion!,
       );
     } else {
       if (!data.localLearningObjectId) {
         throw new BadRequestError(
-          "Missing localLearningObjectId for local node."
+          "Missing localLearningObjectId for local node.",
         );
       }
       await this.validateLocalObject(data.localLearningObjectId);
@@ -134,14 +134,14 @@ class LocalLearningPathNodeService {
     teacherId: number,
     pathId: string,
     nodeId: string,
-    data: NodeData
+    data: NodeData,
   ): Promise<LearningPathNode> {
     await this.checkTeacherOwnsPath(teacherId, pathId);
 
     const node = await handlePrismaQuery(() =>
       prisma.learningPathNode.findUnique({
         where: { nodeId },
-      })
+      }),
     );
     if (!node) {
       throw new NotFoundError("Node not found.");
@@ -167,7 +167,7 @@ class LocalLearningPathNodeService {
         await this.validateDwengoObject(
           data.dwengoHruid!,
           data.dwengoLanguage!,
-          data.dwengoVersion!
+          data.dwengoVersion!,
         );
 
         // overschrijf
@@ -181,7 +181,7 @@ class LocalLearningPathNodeService {
         // van true => false
         if (!data.localLearningObjectId) {
           throw new BadRequestError(
-            "Missing localLearningObjectId for local node."
+            "Missing localLearningObjectId for local node.",
           );
         }
         await this.validateLocalObject(data.localLearningObjectId);
@@ -250,7 +250,7 @@ class LocalLearningPathNodeService {
           dwengoVersion: newIsExternal ? newDwengoVersion : null,
           start_node: data.start_node ?? node.start_node,
         },
-      })
+      }),
     );
   }
 
@@ -263,14 +263,14 @@ class LocalLearningPathNodeService {
   async deleteNodeFromPath(
     teacherId: number,
     pathId: string,
-    nodeId: string
+    nodeId: string,
   ): Promise<void> {
     await this.checkTeacherOwnsPath(teacherId, pathId);
 
     const node = await handlePrismaQuery(() =>
       prisma.learningPathNode.findUnique({
         where: { nodeId },
-      })
+      }),
     );
     if (!node) {
       throw new NotFoundError("Node not found.");
@@ -305,7 +305,7 @@ class LocalLearningPathNodeService {
     const exists = await handlePrismaQuery(() =>
       prisma.learningObject.findUnique({
         where: { id: loId },
-      })
+      }),
     );
     if (!exists) {
       throw new NotFoundError(`Local learning object not found.`);
@@ -320,21 +320,21 @@ class LocalLearningPathNodeService {
   private async validateDwengoObject(
     hruid: string,
     language: string,
-    version: number
+    version: number,
   ): Promise<void> {
     try {
       const resp = await dwengoAPI.get(
-        `/api/learningObject/getMetadata?hruid=${hruid}&language=${language}&version=${version}`
+        `/api/learningObject/getMetadata?hruid=${hruid}&language=${language}&version=${version}`,
       );
       if (!resp.data) {
         throw new NotFoundError(
-          `Dwengo-object (hruid=${hruid}, lang=${language}, ver=${version}) not found.`
+          `Dwengo-object (hruid=${hruid}, lang=${language}, ver=${version}) not found.`,
         );
       }
     } catch (err: any) {
       throwCorrectNetworkError(
         err as Error,
-        "Could not fetch the requested learning object from the Dwengo API."
+        "Could not fetch the requested learning object from the Dwengo API.",
       );
     }
   }

@@ -1,5 +1,5 @@
 import { Submission } from "@prisma/client";
-import { AccesDeniedError } from "../errors/errors";
+import { AccessDeniedError } from "../errors/errors";
 
 import prisma from "../config/prisma";
 import { handlePrismaQuery } from "../errors/errorFunctions";
@@ -33,7 +33,7 @@ export default class submissionService {
     );
 
     if (!team) {
-      throw new AccesDeniedError(
+      throw new AccessDeniedError(
         "Student is not part of a team for this assignment.",
       );
     }

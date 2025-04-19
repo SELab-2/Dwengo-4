@@ -7,7 +7,7 @@ import {
 } from "@prisma/client";
 import crypto from "crypto";
 import {
-  AccesDeniedError,
+  AccessDeniedError,
   BadRequestError,
   NotFoundError,
 } from "../errors/errors";
@@ -120,7 +120,7 @@ export default class ClassService {
       },
     });
     if (!c) {
-      throw new AccesDeniedError(`Student is not a part of the given class.`);
+      throw new AccessDeniedError(`Student is not a part of the given class.`);
     }
     return c;
   }
@@ -183,7 +183,7 @@ export default class ClassService {
       }),
     );
     if (!classTeacher) {
-      throw new AccesDeniedError("Teacher is not part of this class.");
+      throw new AccessDeniedError("Teacher is not part of this class.");
     }
   }
 
@@ -230,7 +230,7 @@ export default class ClassService {
       (link: ClassStudent) => link.studentId === studentId,
     );
     if (!inClass) {
-      throw new AccesDeniedError(`Student is not a part of this class.`);
+      throw new AccessDeniedError(`Student is not a part of this class.`);
     }
     return inClass;
   }

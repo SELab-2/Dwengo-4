@@ -2,7 +2,7 @@ import { LearningObject } from "@prisma/client";
 import { LearningObjectDto } from "./dwengoLearningObjectService";
 import { handlePrismaQuery } from "../errors/errorFunctions";
 import {
-  AccesDeniedError,
+  AccessDeniedError,
   NotFoundError,
   UnavailableError,
 } from "../errors/errors";
@@ -76,7 +76,7 @@ export async function getLocalLearningObjectById(
   }
 
   if (!isTeacher && localObj.teacherExclusive) {
-    throw new AccesDeniedError(
+    throw new AccessDeniedError(
       `Local learning object with hruid=${localObj.hruid}, language=${localObj.language}, version=${localObj.version} is teacher exclusive.`,
     );
   }
@@ -143,7 +143,7 @@ export async function getLocalLearningObjectByHruidLangVersion(
   }
 
   if (!isTeacher && localObj.teacherExclusive) {
-    throw new AccesDeniedError(
+    throw new AccessDeniedError(
       `Local learning object with hruid=${hruid}, language=${language}, version=${version} is teacher exclusive.`,
     );
   }

@@ -13,7 +13,7 @@ export class NotFoundError extends AppError {
   }
 }
 
-export class AccesDeniedError extends AppError {
+export class AccessDeniedError extends AppError {
   constructor(message: string) {
     super(message, 403);
   }
@@ -62,7 +62,7 @@ export class NetworkError extends AppError {
 }
 
 export class InternalServerError extends AppError {
-    constructor(message: string) {
-        super(message, 500);
-    }
+  constructor(message: string) {
+    super(message, 500);
+  }
 }

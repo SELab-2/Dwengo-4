@@ -2,7 +2,7 @@ import { handlePrismaQuery } from "../errors/errorFunctions";
 import { Role } from "@prisma/client";
 import prisma from "../config/prisma";
 import {
-  AccesDeniedError,
+  AccessDeniedError,
   NotFoundError,
   UnauthorizedError,
 } from "../errors/errors";
@@ -47,7 +47,7 @@ export const classCheck = async (
       where: { teacherId: userId, classId },
     });
     if (!teachesClass) {
-      throw new AccesDeniedError("Teacher does not teach this class.");
+      throw new AccessDeniedError("Teacher does not teach this class.");
     }
   }
 
@@ -57,7 +57,7 @@ export const classCheck = async (
       where: { studentId: userId, classId },
     });
     if (!enrolled) {
-      throw new AccesDeniedError("Student is not enrolled in this class.");
+      throw new AccessDeniedError("Student is not enrolled in this class.");
     }
   }
 };
@@ -79,7 +79,7 @@ export const canUpdateOrDelete = async (
   );
 
   if (allClassesTeacher.length === 0)
-    throw new AccesDeniedError("This teacher teaches no classes.");
+    throw new AccessDeniedError("This teacher teaches no classes.");
 
   // Check if at least one of the classes of the teacher has the assignment
   const hasAssignment = await handlePrismaQuery(() =>

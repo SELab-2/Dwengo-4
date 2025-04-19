@@ -1,6 +1,6 @@
 import { handlePrismaQuery } from "../errors/errorFunctions";
 import {
-  AccesDeniedError,
+  AccessDeniedError,
   ForbiddenActionError,
   NotFoundError,
 } from "../errors/errors";
@@ -154,7 +154,7 @@ export default class FeedbackService {
 
     if (teacherWithRights === null) {
       // The teacher has no rights
-      throw new AccesDeniedError(teacherAccessDeniedMessage);
+      throw new AccessDeniedError(teacherAccessDeniedMessage);
     }
 
     return true;
@@ -192,7 +192,7 @@ export default class FeedbackService {
 
     if (teacherWithRights === null) {
       // The teacher has no rights
-      throw new AccesDeniedError(teacherAccessDeniedMessage);
+      throw new AccessDeniedError(teacherAccessDeniedMessage);
     }
 
     return true;
