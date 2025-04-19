@@ -1,5 +1,4 @@
 import { Response } from "express";
-import asyncHandler from "express-async-handler";
 import {
   getAssignmentsForStudent,
   getAssignmentsForStudentInClass,
@@ -17,7 +16,7 @@ function extractSortableFields(input: string): string[] {
     input
       ?.split(",")
       .filter((field: string): boolean =>
-        allowedSortFields.includes(field)
+        allowedSortFields.includes(field),
       ) || ["deadline"]
   );
 }
@@ -30,7 +29,7 @@ export const getStudentAssignments = asyncHandler(
 
     // Sorteer standaard de deadline, extra velden kunnen meegegeven worden
     const sortFields: string[] = extractSortableFields(
-      req.query.sort as string
+      req.query.sort as string,
     );
     const order: "desc" | "asc" = req.query.order === "desc" ? "desc" : "asc";
     // Sorteer standaard ascending, descending kan ook
@@ -45,10 +44,10 @@ export const getStudentAssignments = asyncHandler(
       studentId,
       sortFields,
       order,
-      limit
+      limit,
     );
     res.status(200).json(assignments);
-  }
+  },
 );
 
 export const getStudentAssignmentsInClass = asyncHandler(
@@ -61,7 +60,7 @@ export const getStudentAssignmentsInClass = asyncHandler(
 
     // Sorteer standaard de deadline, extra velden kunnen meegegeven worden
     const sortFields: string[] = extractSortableFields(
-      req.query.sort as string
+      req.query.sort as string,
     );
     const order: "desc" | "asc" = req.query.order === "desc" ? "desc" : "asc";
     // Sorteer standaard ascending, descending kan ook
@@ -77,8 +76,8 @@ export const getStudentAssignmentsInClass = asyncHandler(
       classId,
       sortFields,
       order,
-      limit
+      limit,
     );
     res.status(200).json(assignments);
-  }
+  },
 );
