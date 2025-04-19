@@ -29,9 +29,12 @@ export const getAllLearningObjectsController = asyncHandler(
 // Haal één leerobject op (via :id)
 export const getLearningObjectController = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { id } = req.params;
+    const { learningObjectId } = req.params;
     const isTeacher: boolean = userIsTeacherOrAdmin(req);
-    const lo: LearningObjectDto = await getLearningObjectById(id, isTeacher);
+    const lo: LearningObjectDto = await getLearningObjectById(
+      learningObjectId,
+      isTeacher,
+    );
     res.json(lo);
   },
 );
@@ -52,10 +55,10 @@ export const searchLearningObjectsController = asyncHandler(
 // Haal alle leerobjecten op die horen bij een specifiek leerpad (op basis van pathId)
 export const getLearningObjectsForPathController = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { pathId } = req.params;
+    const { learningPathId } = req.params;
     const isTeacher: boolean = userIsTeacherOrAdmin(req);
     const objects: LearningObjectDto[] = await getLearningObjectsForPath(
-      pathId,
+      learningPathId,
       isTeacher,
     );
     res.json(objects);
