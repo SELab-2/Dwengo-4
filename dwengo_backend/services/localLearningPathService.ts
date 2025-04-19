@@ -168,23 +168,26 @@ export class LocalLearningPathService {
    */
   async getLearningPathAsDtoByIdOrHruid(
     idOrHruid: string,
-  ): Promise<LearningPathDto | null> {
+  ): Promise<LearningPathDto> {
     // 1) Probeer op id
-    const byId = await prisma.learningPath.findUnique({
-      where: { id: idOrHruid },
-    });
+    const byId = await handlePrismaQuery(() =>
+      prisma.learningPath.findUnique({
+        where: { id: idOrHruid },
+      }),
+    );
     if (byId) {
       return mapLocalPathToDto(byId);
     }
     // 2) Probeer op hruid
-    const byHruid = await prisma.learningPath.findUnique({
-      where: { hruid: idOrHruid },
-    });
+    const byHruid = await handlePrismaQuery(() =>
+      prisma.learningPath.findUnique({
+        where: { hruid: idOrHruid },
+      }),
+    );
     if (byHruid) {
       return mapLocalPathToDto(byHruid);
     }
-
-    return null;
+    throw new NotFoundError("Learning path not found.");
   }
 }
 

@@ -6,6 +6,14 @@ import {
 import { LearningPathDto } from "../../services/learningPathService";
 import asyncHandler from "express-async-handler";
 
+interface LearningPathFilters {
+  language?: string;
+  hruid?: string;
+  title?: string;
+  description?: string;
+  all?: string;
+}
+
 /**
  * GET /learningPath?language=...&hruid=...&title=...&description=...&all=
  * Zoekt in Dwengo + lokale leerpaden
@@ -22,7 +30,7 @@ export const searchLearningPathsController = asyncHandler(
 
     const results: LearningPathDto[] = await searchAllLearningPaths(filters);
     res.json(results);
-  }
+  },
 );
 
 /**
@@ -36,5 +44,5 @@ export const getLearningPathByIdController = asyncHandler(
       await getCombinedLearningPathByIdOrHruid(pathId);
 
     res.json(path);
-  }
+  },
 );
