@@ -70,10 +70,6 @@ app.use("/join-request", joinRequestRoutes);
 // Routes voor authentificatie
 app.use("/auth", authRoutes);
 app.use("/pathByTeacher", teacherLocalLearningPathRoutes);
-app.use(
-  "/learningPath/:learningPathId/node",
-  teacherLocalLearningPathNodesRoutes,
-);
 app.use("/learningObjectByTeacher", teacherLocalLearningObjectRoutes);
 
 // Routes voor teams
@@ -91,6 +87,11 @@ app.use("/learningObject", learningObjectRoutes);
 app.use("/question", QuestionRoutes);
 
 app.use("/learningPath", learningPathRoutes);
+
+app.use(
+  "/learningPath/:learningPathId/node",
+  teacherLocalLearningPathNodesRoutes,
+);
 
 app.use("/progress", progressRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
