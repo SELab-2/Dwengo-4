@@ -15,6 +15,8 @@ import SignupTeacher from '../pages/teacher/SignupTeacher';
 import { action as teacherLogoutAction } from '../pages/teacher/LogoutTeacher';
 import EditClassTeacher from '../pages/teacher/EditClassTeacher';
 import TeacherIndex from '../pages/teacher/TeacherIndex';
+import CreateLearningPath from '../pages/teacher/learningPath/CreateLearningPath';
+import EditLearningPath from '../pages/teacher/learningPath/EditLearningPath';
 
 // ==== STUDENT ROUTES ==== //
 import RootLayoutStudent from '../components/student/RootLayoutStudent';
@@ -116,6 +118,14 @@ export const router = createBrowserRouter([
       {
         path: 'assignments/:assignmentId/edit',
         element: <AssignmentEdit></AssignmentEdit>,
+      },
+      {
+        path: 'learning-paths/create',
+        element: <CreateLearningPath></CreateLearningPath>,
+      },
+      {
+        path: 'learning-paths/:learningPathId/edit',
+        element: <EditLearningPath></EditLearningPath>,
       },
     ],
   },
