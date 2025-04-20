@@ -192,7 +192,7 @@ describe("classroom tests", (): void => {
   });
 
   describe("[DELETE] /class/teacher/:classId", (): void => {
-    it("should respond with a `200` status code and a message when the class is deleted", async (): Promise<void> => {
+    it("should respond with a `204` status code", async (): Promise<void> => {
       // add teacherUser1 to class, so we can test deleting it
       await addTeacherToClass(teacherUser1.id, classroom.id);
 
@@ -238,12 +238,11 @@ describe("classroom tests", (): void => {
         });
 
       // now test deleting the class
-      const { status, body } = await request(app)
+      const { status } = await request(app)
         .delete(`/class/teacher/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
-      expect(status).toBe(200);
-      expect(body.message).toBe("Class successfully deleted.");
+      expect(status).toBe(204);
       // verify that class was deleted
       const deletedClass: Class | null = await prisma.class.findFirst({
         where: { id: classroom.id },

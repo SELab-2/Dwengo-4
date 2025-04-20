@@ -462,17 +462,14 @@ describe("invite tests", async (): Promise<void> => {
       );
     });
 
-    it("should respond with a `200` status code and the deleted invite", async (): Promise<void> => {
+    it("should respond with a `204` status code", async (): Promise<void> => {
       // test deleting the invite
-      const { status, body } = await request(app)
+      const { status } = await request(app)
         .delete(`/invite/${invite.inviteId}/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
-      expect(status).toBe(200);
-      await expectBodyToContainDeletedInviteAndVerifyInviteDeleted(
-        body,
-        invite,
-      );
+      expect(status).toBe(204);
+      await expectBodyToContainDeletedInviteAndVerifyInviteDeleted(invite);
     });
 
     it("should respond with a `403` status code when the teacher trying to delete the invite is not part of the class", async (): Promise<void> => {
@@ -498,15 +495,12 @@ describe("invite tests", async (): Promise<void> => {
       const teacherUser3: User & { teacher: Teacher; token: string } =
         await createTeacher("Jane", "Doe", "jane.doe@gmail.com");
       await addTeacherToClass(teacherUser3.id, classroom.id);
-      const { status, body } = await request(app)
+      const { status } = await request(app)
         .delete(`/invite/${invite.inviteId}/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser3.token}`); // teacher3 didn't create the invite, but is part of the class
 
-      expect(status).toBe(200);
-      await expectBodyToContainDeletedInviteAndVerifyInviteDeleted(
-        body,
-        invite,
-      );
+      expect(status).toBe(204);
+      await expectBodyToContainDeletedInviteAndVerifyInviteDeleted(invite);
     });
 
     it("should respond with a `404` status code when the invite does not exist", async (): Promise<void> => {
@@ -617,11 +611,8 @@ describe("invite tests", async (): Promise<void> => {
 });
 
 async function expectBodyToContainDeletedInviteAndVerifyInviteDeleted(
-  body: any,
   invite: Invite,
 ) {
-  expect(body.invite).toStrictEqual(invite);
-  expect(body.message).toBe("Invite successfully deleted.");
   // verify that the invite was deleted
   const deletedInvite: Invite | null = await prisma.invite.findUnique({
     where: {

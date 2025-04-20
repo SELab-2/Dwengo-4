@@ -108,13 +108,7 @@ export const deleteInvite = asyncHandler(
     const classId: number = parseInt(req.params.classId);
     const classTeacherId: number = getUserFromAuthRequest(req).id;
 
-    const invite: Invite = await inviteService.deleteInvite(
-      classTeacherId,
-      inviteId,
-      classId,
-    );
-    res
-      .status(200)
-      .json({ invite: invite, message: "Invite successfully deleted." });
+    await inviteService.deleteInvite(classTeacherId, inviteId, classId);
+    res.status(204).end();
   },
 );

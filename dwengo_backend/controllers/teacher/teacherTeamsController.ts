@@ -58,6 +58,6 @@ export const deleteTeamInAssignment = asyncHandler(
     const teamId: number = parseInt(req.params.teamId);
 
     await deleteTeam(teamId);
-    res.status(200).json({ message: "Team successfully deleted." });
+    res.status(204).end();
   },
 );

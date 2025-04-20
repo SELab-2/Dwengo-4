@@ -24,10 +24,10 @@ export const getNodesForPath = asyncHandler(
 
     const nodes = await localLearningPathNodeService.getAllNodesForPath(
       teacherId,
-      pathId
+      pathId,
     );
     res.json(nodes);
-  }
+  },
 );
 
 /**
@@ -50,14 +50,14 @@ export const createNodeForPath = asyncHandler(
         dwengoLanguage: body.dwengoLanguage,
         dwengoVersion: body.dwengoVersion,
         start_node: !!body.start_node,
-      }
+      },
     );
 
     res.status(201).json({
       message: "Node successfully created.",
       node: newNode,
     });
-  }
+  },
 );
 
 /**
@@ -81,14 +81,14 @@ export const updateNodeForPath = asyncHandler(
         dwengoLanguage: body.dwengoLanguage,
         dwengoVersion: body.dwengoVersion,
         start_node: body.start_node,
-      }
+      },
     );
 
     res.json({
       message: "Node successfully updated.",
       node: updatedNode,
     });
-  }
+  },
 );
 
 /**
@@ -102,8 +102,8 @@ export const deleteNodeFromPath = asyncHandler(
     await localLearningPathNodeService.deleteNodeFromPath(
       teacherId,
       pathId,
-      nodeId
+      nodeId,
     );
-    res.json({ message: "Node successfully deleted." });
-  }
+    res.status(204).end();
+  },
 );

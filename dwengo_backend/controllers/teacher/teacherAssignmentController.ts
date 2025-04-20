@@ -146,9 +146,7 @@ export class AssignmentTeacherController {
       const assignmentId: number = parseInt(req.params.assignmentId);
       const teacherId: number = getUserFromAuthRequest(req).id;
       await teacherAssignmentService.deleteAssignment(assignmentId, teacherId);
-      res.status(204).json({
-        message: "Assignment successfully deleted.",
-      });
+      res.status(204).end();
     },
   );
 

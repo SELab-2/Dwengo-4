@@ -110,6 +110,6 @@ export const deleteLocalLearningObject = asyncHandler(
       Property.LearningObject,
     );
     await LocalLearningObjectService.deleteLearningObject(id);
-    res.json({ message: "Learning object successfully deleted." });
+    res.status(204).end();
   },
 );

@@ -83,7 +83,7 @@ export default class FeedbackController {
 
       await service.deleteFeedbackForSubmission(submissionId, teacherId);
       // Status 204: successful deletion but no json body returned (no content).
-      res.status(204).json({ message: "Feedback successfully deleted." }).end();
+      res.status(204).end();
     },
   );
 }

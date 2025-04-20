@@ -25,7 +25,7 @@ export const getTeacherClasses = asyncHandler(
     const teacherId: number = getUserFromAuthRequest(req).id;
     const classrooms = await classService.getClassesByTeacher(teacherId);
     res.status(200).json({ classrooms });
-  }
+  },
 );
 
 /**
@@ -42,7 +42,7 @@ export const createClassroom = asyncHandler(
 
     const classroom = await classService.createClass(name, teacherId);
     res.status(201).json({ message: "Class successfully created.", classroom });
-  }
+  },
 );
 
 /**
@@ -56,8 +56,8 @@ export const deleteClassroom = asyncHandler(
     const teacherId = getUserFromAuthRequest(req).id;
 
     await classService.deleteClass(Number(classId), Number(teacherId));
-    res.json({ message: "Class successfully deleted." });
-  }
+    res.status(204).end();
+  },
 );
 
 /**
@@ -74,7 +74,7 @@ export const updateClassroom = asyncHandler(
 
     const classroom = await classService.updateClass(classId, teacherId, name);
     res.status(200).json({ message: "Class successfully updated.", classroom });
-  }
+  },
 );
 
 /**
@@ -90,7 +90,7 @@ export const getJoinLink = asyncHandler(
 
     const joinLink = `${APP_URL}/join-request/student/join?joinCode=${joinCode}`;
     res.status(200).json({ joinLink });
-  }
+  },
 );
 
 /**
@@ -103,11 +103,11 @@ export const regenerateJoinLink = asyncHandler(
     const teacherId = getUserFromAuthRequest(req).id;
     const newJoinCode = await classService.regenerateJoinCode(
       Number(classId),
-      teacherId
+      teacherId,
     );
     const joinLink = `${APP_URL}/join-request/student/join?joinCode=${newJoinCode}`;
     res.json({ message: "Join link successfully recreated.", joinLink });
-  }
+  },
 );
 
 /**
@@ -118,10 +118,10 @@ export const getClassroomsStudents = asyncHandler(
     const teacherId: number = getUserFromAuthRequest(req).id;
     const classrooms = await classService.getAllClassesByTeacher(
       teacherId,
-      true
+      true,
     );
     res.status(200).json({ classrooms });
-  }
+  },
 );
 
 /**
@@ -136,11 +136,11 @@ export const getStudentsByClassId = asyncHandler(
 
     const students: Student[] = await classService.getStudentsByClass(
       Number(classId),
-      teacherId
+      teacherId,
     );
 
     res.json({ students });
-  }
+  },
 );
 
 /**
@@ -154,10 +154,10 @@ export const getAllClassrooms = asyncHandler(
     const includeStudents = req.query.includeStudents === "true";
     const classrooms = await classService.getAllClassesByTeacher(
       teacherId,
-      includeStudents
+      includeStudents,
     );
     res.status(200).json({ classrooms });
-  }
+  },
 );
 
 /**
@@ -173,9 +173,9 @@ export const getClassByIdAndTeacherId = asyncHandler(
 
     const classroom = await classService.getClassByIdAndTeacherId(
       classId,
-      teacherId
+      teacherId,
     );
 
     res.status(200).json({ classroom });
-  }
+  },
 );

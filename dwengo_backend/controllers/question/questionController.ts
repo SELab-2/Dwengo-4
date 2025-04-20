@@ -219,7 +219,7 @@ export const deleteQuestion = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { questionId } = req.params;
     await QuestionService.deleteQuestion(Number(questionId));
-    res.status(204).json({ message: "Question successfully deleted." });
+    res.status(204).end();
   },
 );
 
@@ -228,6 +228,6 @@ export const deleteQuestionMessage = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { questionMessageId } = req.params;
     await QuestionService.deleteQuestionMessage(Number(questionMessageId));
-    res.status(204).json({ message: "Message successfully deleted." });
+    res.status(204).end();
   },
 );

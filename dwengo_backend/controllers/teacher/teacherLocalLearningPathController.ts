@@ -135,6 +135,6 @@ export const deleteLocalLearningPath = asyncHandler(
     );
 
     await LocalLearningPathService.deleteLearningPath(pathId);
-    res.json({ message: "Learning path successfully deleted." });
+    res.status(204).end();
   },
 );
