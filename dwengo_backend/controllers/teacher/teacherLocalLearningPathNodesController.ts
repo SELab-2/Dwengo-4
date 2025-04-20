@@ -20,11 +20,11 @@ export interface NodeMetadata {
 export const getNodesForPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = getUserFromAuthRequest(req).id; // we weten: TEACHER
-    const { pathId } = req.params;
+    const { learningPathId } = req.params;
 
     const nodes = await localLearningPathNodeService.getAllNodesForPath(
       teacherId,
-      pathId,
+      learningPathId,
     );
     res.json(nodes);
   },
@@ -67,12 +67,12 @@ export const createNodeForPath = asyncHandler(
 export const updateNodeForPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = getUserFromAuthRequest(req).id;
-    const { pathId, nodeId } = req.params;
+    const { learningPathId, nodeId } = req.params;
     const body: NodeMetadata = req.body;
 
     const updatedNode = await localLearningPathNodeService.updateNodeForPath(
       teacherId,
-      pathId,
+      learningPathId,
       nodeId,
       {
         isExternal: body.isExternal,
@@ -97,11 +97,11 @@ export const updateNodeForPath = asyncHandler(
 export const deleteNodeFromPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = getUserFromAuthRequest(req).id;
-    const { pathId, nodeId } = req.params;
+    const { learningPathId, nodeId } = req.params;
 
     await localLearningPathNodeService.deleteNodeFromPath(
       teacherId,
-      pathId,
+      learningPathId,
       nodeId,
     );
     res.status(204).end();

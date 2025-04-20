@@ -49,9 +49,11 @@ export const getLocalLearningObjects = asyncHandler(
 export const getLocalLearningObjectById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = getUserFromAuthRequest(req).id;
-    const { id } = req.params;
+    const { createdLearningObjectId } = req.params;
     const found: LearningObject =
-      await LocalLearningObjectService.getLearningObjectById(id);
+      await LocalLearningObjectService.getLearningObjectById(
+        createdLearningObjectId,
+      );
 
     // Check of deze teacher de eigenaar is
     checkIfTeacherIsCreator(
@@ -71,11 +73,13 @@ export const updateLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = getUserFromAuthRequest(req).id;
 
-    const { id } = req.params;
+    const { createdLearningObjectId } = req.params;
     const data: Partial<LocalLearningObjectData> = req.body;
 
     // Check of leerobject bestaat en van deze teacher is
-    const existing = await LocalLearningObjectService.getLearningObjectById(id);
+    const existing = await LocalLearningObjectService.getLearningObjectById(
+      createdLearningObjectId,
+    );
 
     checkIfTeacherIsCreator(
       teacherId,
@@ -84,7 +88,7 @@ export const updateLocalLearningObject = asyncHandler(
     );
 
     const updated = await LocalLearningObjectService.updateLearningObject(
-      id,
+      createdLearningObjectId,
       data,
     );
     res.json({
@@ -101,15 +105,19 @@ export const deleteLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = getUserFromAuthRequest(req).id;
 
-    const { id } = req.params;
-    const existing = await LocalLearningObjectService.getLearningObjectById(id);
+    const { createdLearningObjectId } = req.params;
+    const existing = await LocalLearningObjectService.getLearningObjectById(
+      createdLearningObjectId,
+    );
 
     checkIfTeacherIsCreator(
       teacherId,
       existing.creatorId,
       Property.LearningObject,
     );
-    await LocalLearningObjectService.deleteLearningObject(id);
+    await LocalLearningObjectService.deleteLearningObject(
+      createdLearningObjectId,
+    );
     res.status(204).end();
   },
 );
