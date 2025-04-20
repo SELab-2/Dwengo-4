@@ -20,10 +20,10 @@ export const createInvite = asyncHandler(
     const invite: Invite = await inviteService.createInvite(
       classTeacherId,
       otherTeacherEmail,
-      classId
+      classId,
     );
     res.status(201).json({ message: "Invite successfully created.", invite });
-  }
+  },
 );
 
 /**
@@ -39,10 +39,10 @@ export const getPendingInvitesForClass = asyncHandler(
 
     const invites: Invite[] = await inviteService.getPendingInvitesForClass(
       classTeacherId,
-      classId
+      classId,
     );
     res.status(200).json({ invites });
-  }
+  },
 );
 
 /**
@@ -57,7 +57,7 @@ export const getPendingInvitesForTeacher = asyncHandler(
     const invites: Invite[] =
       await inviteService.getPendingInvitesForTeacher(teacherId);
     res.status(200).json({ invites });
-  }
+  },
 );
 
 /**
@@ -75,7 +75,7 @@ export const updateInviteStatus = asyncHandler(
     if (action == "accept") {
       const invite: Invite = await inviteService.acceptInviteAndJoinClass(
         teacherId,
-        inviteId
+        inviteId,
       );
       res
         .status(200)
@@ -84,13 +84,13 @@ export const updateInviteStatus = asyncHandler(
       // action == "decline" (ensured by validation middleware)
       const invite: Invite = await inviteService.declineInvite(
         teacherId,
-        inviteId
+        inviteId,
       );
       res
         .status(200)
         .json({ message: "Invite successfully declined.", invite });
     }
-  }
+  },
 );
 
 /**
@@ -111,10 +111,10 @@ export const deleteInvite = asyncHandler(
     const invite: Invite = await inviteService.deleteInvite(
       classTeacherId,
       inviteId,
-      classId
+      classId,
     );
     res
       .status(200)
-      .json({ invite: invite, message: "Invite succesfully deleted." });
-  }
+      .json({ invite: invite, message: "Invite successfully deleted." });
+  },
 );

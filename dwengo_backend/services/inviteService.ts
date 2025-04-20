@@ -146,7 +146,7 @@ export default class inviteService {
 
     return await handlePrismaTransaction(prisma, async (tx) => {
       // Accept de invite
-      await tx.invite.update({
+      const approved: Invite = await tx.invite.update({
         where: {
           inviteId: invite.inviteId,
         },
@@ -161,7 +161,7 @@ export default class inviteService {
           classId: invite.classId,
         },
       });
-      return invite;
+      return approved;
     });
   }
 
@@ -195,6 +195,20 @@ export default class inviteService {
   ): Promise<Invite> {
     // Check of de teacher een teacher van de klas is
     await classService.isTeacherOfClass(classId, classTeacherId);
+
+    // Check of de invite bestaat
+    const invite: Invite | null = await handlePrismaQuery(() =>
+      prisma.invite.findFirst({
+        where: {
+          inviteId,
+          classId,
+          status: JoinRequestStatus.PENDING,
+        },
+      }),
+    );
+    if (!invite) {
+      throw new NotFoundError("Invite does not exist or is not pending.");
+    }
 
     // Verwijder de invite
     return await handlePrismaQuery(() =>

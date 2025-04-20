@@ -64,8 +64,6 @@ export default class FeedbackController {
       const submissionId: number = Number(req.params.submissionId);
       const teacherId: number = getUserFromAuthRequest(req).id;
 
-      console.log(submissionId);
-
       const { description }: { description: string } = req.body;
       const feedback: Feedback = await service.updateFeedbackForSubmission(
         submissionId,
