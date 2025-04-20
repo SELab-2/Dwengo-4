@@ -9,6 +9,7 @@ import crypto from "crypto";
 import {
   AccessDeniedError,
   BadRequestError,
+  ConflictError,
   NotFoundError,
 } from "../errors/errors";
 import { handlePrismaQuery } from "../errors/errorFunctions";
@@ -244,7 +245,7 @@ export default class ClassService {
       }
     }
     // The student is already in the class
-    throw new BadRequestError(`Student is already a member of this class.`);
+    throw new ConflictError(`Student is already a member of this class.`);
   }
 
   static async removeStudentFromClass(
