@@ -55,7 +55,7 @@ export const deleteClassroom = asyncHandler(
     const { classId } = req.params;
     const teacherId = getUserFromAuthRequest(req).id;
 
-    await classService.deleteClass(Number(classId), Number(teacherId));
+    await classService.deleteClass(Number(classId), teacherId);
     res.status(204).end();
   },
 );
