@@ -115,13 +115,6 @@ export class AssignmentTeacherController {
 
   updateAssignment = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-      // classId: class3.id,
-      // pathRef: lp1.id,
-      // deadline: "2026-10-23",
-      // pathLanguage: "nl",
-      // title: "Learning Path 1",
-      // description: "description1",
-      // teamSize: 2,
       const assignmentId: number = parseInt(req.params.assignmentId);
       const { pathRef, isExternal, title, description, teamSize } = req.body;
       const teacherId: number = getUserFromAuthRequest(req).id;
