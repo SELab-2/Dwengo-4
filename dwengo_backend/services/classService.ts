@@ -183,7 +183,7 @@ export default class ClassService {
       }),
     );
     if (!classTeacher) {
-      throw new AccessDeniedError("Teacher is not part of this class.");
+      throw new AccessDeniedError("Teacher is not a part of this class.");
     }
   }
 
