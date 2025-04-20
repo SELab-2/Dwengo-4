@@ -1,7 +1,11 @@
-import { LearningPathNode } from "@prisma/client";
+import { LearningObject, LearningPathNode } from "@prisma/client";
 import { dwengoAPI } from "../config/dwengoAPI";
-
 import prisma from "../config/prisma";
+import {
+  fetchDwengoObjectByHruidLangVersion,
+  LearningObjectDto,
+} from "./dwengoLearningObjectService";
+import LocalLearningObjectService from "./localLearningObjectService";
 
 /**
  * Data object om een node te maken/updaten.
@@ -38,16 +42,47 @@ class LocalLearningPathNodeService {
 
   /**
    * Haal alle nodes van dit leerpad op.
+   * @param includeLearningObjects: gives the option to include the learning objects metadata
    */
   async getAllNodesForPath(
     teacherId: number,
     pathId: string,
-  ): Promise<LearningPathNode[]> {
+    includeLearningObjects: boolean,
+  ): Promise<
+    (LearningPathNode & { learningObject: LearningObject | LearningObjectDto | null })[]
+  > {
     await this.checkTeacherOwnsPath(teacherId, pathId);
-    return prisma.learningPathNode.findMany({
+    const nodes: LearningPathNode[] = await prisma.learningPathNode.findMany({
       where: { learningPathId: pathId },
+      include: {
+        transitions: true,
+      },
       orderBy: { createdAt: "asc" },
     });
+
+    if (includeLearningObjects) {
+      const nodesWithObjects = await Promise.all(
+        nodes.map(async (node) => {
+          let learningObject: LearningObject | LearningObjectDto | null = null;
+          // dwengo learning object
+          if (node.isExternal) {
+            learningObject = await fetchDwengoObjectByHruidLangVersion(
+              node.dwengoHruid!, // todo: prettier way of making sure these fields are not null
+              node.dwengoLanguage!,
+              node.dwengoVersion!,
+              true,
+            );
+          } else {
+            learningObject = await LocalLearningObjectService.getLearningObjectById(
+              node.localLearningObjectId!,
+            );
+          }
+          return { ...node, learningObject };
+        }),
+      );
+      return nodesWithObjects;
+    }
+    return nodes.map((node) => ({ ...node, learningObject: null }));
   }
 
   /**
@@ -92,14 +127,10 @@ class LocalLearningPathNodeService {
         data: {
           learningPathId: pathId,
           isExternal: data.isExternal,
-
-          localLearningObjectId: data.isExternal
-            ? undefined
-            : data.localLearningObjectId,
+          localLearningObjectId: data.isExternal ? undefined : data.localLearningObjectId,
           dwengoHruid: data.isExternal ? data.dwengoHruid : undefined,
           dwengoLanguage: data.isExternal ? data.dwengoLanguage : undefined,
           dwengoVersion: data.isExternal ? data.dwengoVersion : undefined,
-
           start_node: data.start_node ?? false,
         },
       });
@@ -195,13 +226,9 @@ class LocalLearningPathNodeService {
         const newHruid =
           data.dwengoHruid !== undefined ? data.dwengoHruid : newDwengoHruid;
         const newLang =
-          data.dwengoLanguage !== undefined
-            ? data.dwengoLanguage
-            : newDwengoLanguage;
+          data.dwengoLanguage !== undefined ? data.dwengoLanguage : newDwengoLanguage;
         const newVer =
-          data.dwengoVersion !== undefined
-            ? data.dwengoVersion
-            : newDwengoVersion;
+          data.dwengoVersion !== undefined ? data.dwengoVersion : newDwengoVersion;
 
         if (
           data.dwengoHruid !== undefined ||
@@ -233,9 +260,7 @@ class LocalLearningPathNodeService {
       where: { nodeId },
       data: {
         isExternal: newIsExternal,
-        localLearningObjectId: newIsExternal
-          ? null
-          : (newLocalLearningObjectId ?? null),
+        localLearningObjectId: newIsExternal ? null : (newLocalLearningObjectId ?? null),
         dwengoHruid: newIsExternal ? newDwengoHruid : null,
         dwengoLanguage: newIsExternal ? newDwengoLanguage : null,
         dwengoVersion: newIsExternal ? newDwengoVersion : null,
@@ -325,9 +350,7 @@ class LocalLearningPathNodeService {
       } else {
         console.error(err);
         throw new Error(
-          `Fout bij Dwengo-check: ${
-            (err.response && err.response.data) || err.message
-          }`,
+          `Fout bij Dwengo-check: ${(err.response && err.response.data) || err.message}`,
         );
       }
     }

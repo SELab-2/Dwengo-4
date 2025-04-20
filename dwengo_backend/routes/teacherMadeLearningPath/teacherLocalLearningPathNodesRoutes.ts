@@ -14,7 +14,7 @@ const router = Router({ mergeParams: true });
 /**
  * @route GET /learningPath/:learningPathId/node
  * @description Haal alle nodes op voor dat leerpad
- * @param pathId: string
+ * @param learningPathId: string
  * @access User
  */
 router.get("/", protectAnyUser, getNodesForPath);

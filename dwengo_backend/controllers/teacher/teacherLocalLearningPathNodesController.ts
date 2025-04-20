@@ -19,11 +19,12 @@ export interface NodeMetadata {
 export const getNodesForPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = req.user!.id; // we weten: TEACHER
-    const { pathId } = req.params;
+    const { learningPathId } = req.params;
 
     const nodes = await localLearningPathNodeService.getAllNodesForPath(
       teacherId,
-      pathId,
+      learningPathId,
+      true, // include learning object info
     );
     res.json(nodes);
   },
@@ -98,11 +99,7 @@ export const deleteNodeFromPath = asyncHandler(
     const teacherId = req.user!.id;
     const { pathId, nodeId } = req.params;
 
-    await localLearningPathNodeService.deleteNodeFromPath(
-      teacherId,
-      pathId,
-      nodeId,
-    );
+    await localLearningPathNodeService.deleteNodeFromPath(teacherId, pathId, nodeId);
     res.json({ message: "Node verwijderd uit leerpad" });
   },
 );

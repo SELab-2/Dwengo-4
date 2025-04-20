@@ -31,6 +31,7 @@ import { action as studentLogoutAction } from '../pages/student/LogoutStudent';
 import StudentIndex from '../pages/student';
 import JoinClass from '../components/student/classes/JoinRequestForm';
 import StudentClassIndex from '../pages/student/StudentClassIndex';
+import { NodeCreationProvider } from '../context/NodeCreationContext';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
@@ -125,7 +126,11 @@ export const router = createBrowserRouter([
       },
       {
         path: 'learning-paths/:learningPathId/edit',
-        element: <EditLearningPath></EditLearningPath>,
+        element: (
+          <NodeCreationProvider>
+            <EditLearningPath />
+          </NodeCreationProvider>
+        ),
       },
     ],
   },
