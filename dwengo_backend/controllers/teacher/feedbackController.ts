@@ -16,10 +16,10 @@ export default class FeedbackController {
       const feedback: Feedback[] = await service.getAllFeedbackForEvaluation(
         Number(assignmentId),
         evaluationId,
-        teacherId
+        teacherId,
       );
       res.status(200).json(feedback);
-    }
+    },
   );
 
   // route: /feedback/submission/:submissionId
@@ -34,12 +34,12 @@ export default class FeedbackController {
       const feedback: Feedback = await service.createFeedback(
         submissionId,
         teacherId,
-        description
+        description,
       );
       res
         .status(201)
         .json({ message: "Feedback successfully created.", feedback });
-    }
+    },
   );
 
   // route: /feedback/submission/:submissionId
@@ -51,10 +51,10 @@ export default class FeedbackController {
 
       const feedback: Feedback = await service.getFeedbackForSubmission(
         submissionId,
-        teacherId
+        teacherId,
       );
       res.status(200).json(feedback);
-    }
+    },
   );
 
   // route: /feedback/submission/:submissionId
@@ -64,14 +64,16 @@ export default class FeedbackController {
       const submissionId: number = Number(req.params.submissionId);
       const teacherId: number = getUserFromAuthRequest(req).id;
 
+      console.log(submissionId);
+
       const { description }: { description: string } = req.body;
       const feedback: Feedback = await service.updateFeedbackForSubmission(
         submissionId,
         description,
-        teacherId
+        teacherId,
       );
       res.json({ message: "Feedback successfully updated.", feedback });
-    }
+    },
   );
 
   // route: /feedback/submission/:submissionId
@@ -84,6 +86,6 @@ export default class FeedbackController {
       await service.deleteFeedbackForSubmission(submissionId, teacherId);
       // Status 204: successful deletion but no json body returned (no content).
       res.status(204).json({ message: "Feedback successfully deleted." }).end();
-    }
+    },
   );
 }

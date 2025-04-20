@@ -1,6 +1,7 @@
 import { handlePrismaQuery } from "../errors/errorFunctions";
 import {
   AccessDeniedError,
+  BadRequestError,
   ForbiddenActionError,
   NotFoundError,
 } from "../errors/errors";
@@ -9,7 +10,7 @@ import { Assignment, Feedback, Teacher } from "@prisma/client";
 import prisma from "../config/prisma";
 
 const teacherAccessDeniedMessage =
-  "The teacher is unauthorized to do this action.";
+  "Teacher should teach this class to perform this action.";
 export default class FeedbackService {
   static async getAllFeedbackForEvaluation(
     assignmentId: number,
@@ -38,6 +39,8 @@ export default class FeedbackService {
     teacherId: number,
     description: string,
   ): Promise<Feedback> {
+    this.validateSubmissionId(submissionId);
+
     await this.hasSubmissionRights(teacherId, submissionId);
 
     // aantal evaluaties met deadline in de toekomst
@@ -59,7 +62,9 @@ export default class FeedbackService {
 
     // Als deadline in de toekomst ligt: error
     if (deadline !== null) {
-      throw new ForbiddenActionError("Deadline in toekomst");
+      throw new ForbiddenActionError(
+        "Deadline not over yet. Feedback can only be given after the deadline.",
+      );
     }
 
     return await handlePrismaQuery(() =>
@@ -77,19 +82,11 @@ export default class FeedbackService {
     submissionId: number,
     teacherId: number,
   ): Promise<Feedback> {
+    this.validateSubmissionId(submissionId);
+
     await this.hasSubmissionRights(teacherId, submissionId);
 
-    const feedback: Feedback | null = await handlePrismaQuery(() =>
-      prisma.feedback.findUnique({
-        where: {
-          submissionId: submissionId,
-        },
-      }),
-    );
-    if (feedback === null) {
-      throw new NotFoundError("Feedback not found for this submission.");
-    }
-    return feedback;
+    return this.checkExistenceFeedback(submissionId);
   }
 
   static async updateFeedbackForSubmission(
@@ -97,7 +94,12 @@ export default class FeedbackService {
     description: string,
     teacherId: number,
   ): Promise<Feedback> {
+    this.validateSubmissionId(submissionId);
+
     await this.hasSubmissionRights(teacherId, submissionId);
+
+    // Check if feedback exists
+    await this.checkExistenceFeedback(submissionId);
 
     return await handlePrismaQuery(() =>
       prisma.feedback.update({
@@ -115,7 +117,11 @@ export default class FeedbackService {
     submissionId: number,
     teacherId: number,
   ): Promise<Feedback> {
+    this.validateSubmissionId(submissionId);
+
     await this.hasSubmissionRights(teacherId, submissionId);
+
+    await this.checkExistenceFeedback(submissionId);
 
     return await handlePrismaQuery(() =>
       prisma.feedback.delete({
@@ -196,5 +202,26 @@ export default class FeedbackService {
     }
 
     return true;
+  }
+
+  static validateSubmissionId(submissionId: number): void {
+    if (isNaN(submissionId)) {
+      throw new BadRequestError("Submission ID is not a valid number.");
+    }
+  }
+
+  static async checkExistenceFeedback(submissionId: number): Promise<Feedback> {
+    // Check if feedback exists
+    const feedback: Feedback | null = await handlePrismaQuery(() =>
+      prisma.feedback.findUnique({
+        where: {
+          submissionId: submissionId,
+        },
+      }),
+    );
+    if (feedback === null) {
+      throw new NotFoundError("Feedback not found for this submission.");
+    }
+    return feedback;
   }
 }
