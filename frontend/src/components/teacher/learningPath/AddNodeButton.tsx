@@ -3,9 +3,10 @@ import { useNodeCreationContext } from '../../../context/NodeCreationContext';
 
 interface AddNodeButtonProps {
   label: string;
+  nodeId?: string; // null if there's no other add node buttons
 }
 
-const AddNodeButton: React.FC<AddNodeButtonProps> = ({ label }) => {
+const AddNodeButton: React.FC<AddNodeButtonProps> = ({ label, nodeId }) => {
   const { isCreatingNode, startCreatingNode } = useNodeCreationContext();
 
   return isCreatingNode ? (
@@ -20,7 +21,7 @@ const AddNodeButton: React.FC<AddNodeButtonProps> = ({ label }) => {
         border border-gray-300 cursor-pointer transition-colors 
         duration-200 hover:bg-gray-200 flex items-center gap-2
       `}
-      onClick={startCreatingNode}
+      onClick={() => startCreatingNode(nodeId)}
     >
       {/* Plus Icon */}
       <svg

@@ -1,17 +1,21 @@
 import React from 'react';
 import AddNodeButton from './AddNodeButton';
 import { useNodeCreationContext } from '../../../context/NodeCreationContext';
+import { LearningPathNodeWithObject } from '../../../types/type';
 
 interface NodeComponentProps {
-  title: string;
+  node: LearningPathNodeWithObject;
   onOpenLearningObject: () => void;
 }
 
 const NodeComponent: React.FC<NodeComponentProps> = ({
-  title,
+  node,
   onOpenLearningObject,
 }) => {
-  const { isCreatingNode } = useNodeCreationContext();
+  const { isCreatingNode, currentNodeId } = useNodeCreationContext();
+
+  const isCurrentNode = isCreatingNode && currentNodeId === node.nodeId;
+
   return (
     <div className="relative group">
       {/* Button to open the learning object */}
@@ -19,11 +23,13 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
         className="w-full text-left p-4 border-b border-gray-200 bg-white hover:bg-gray-100 transition-colors duration-200"
         onClick={() => onOpenLearningObject()}
       >
-        {title || 'Untitled Node'}
+        {node.learningObject?.title || 'Untitled Node'}
       </button>
 
       {/* Plus icon for creating a new node */}
-      <AddNodeButton label="Add node here" />
+      {(!isCreatingNode || isCurrentNode) && (
+        <AddNodeButton nodeId={node.nodeId} label="Add node here" />
+      )}
     </div>
   );
 };

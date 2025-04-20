@@ -89,7 +89,7 @@ const EditLearningPath: React.FC = () => {
               {orderedNodes.map((node) => (
                 <NodeComponent
                   key={node.nodeId}
-                  title={node.learningObject?.title}
+                  node={node}
                   onOpenLearningObject={() =>
                     console.log('Open learning object')
                   }
