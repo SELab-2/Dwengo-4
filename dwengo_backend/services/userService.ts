@@ -2,7 +2,7 @@ import { Role, Student, Teacher, User } from "@prisma/client";
 
 import prisma from "../config/prisma";
 import { handlePrismaQuery } from "../errors/errorFunctions";
-import { BadRequestError, NotFoundError } from "../errors/errors";
+import { ConflictError, NotFoundError } from "../errors/errors";
 
 export default class UserService {
   static async emailInUse(email: string): Promise<void> {
@@ -10,7 +10,7 @@ export default class UserService {
       where: { email },
     });
     if (user) {
-      throw new BadRequestError("Email already in use.");
+      throw new ConflictError("Email already in use.");
     }
   }
 
@@ -48,7 +48,7 @@ export default class UserService {
       prisma.user.findFirst({ where: { email } }),
     );
     if (!user) {
-      throw new NotFoundError("User not found.");
+      throw new NotFoundError("Existing user not found.");
     }
     return user;
   }
