@@ -9,6 +9,7 @@ import {
 import NodeComponent from '../../../components/teacher/learningPath/NodeComponent';
 import AddNodeButton from '../../../components/teacher/learningPath/AddNodeButton';
 import SelectLearningObject from './SelectLearningObject';
+import { useNodeCreationContext } from '../../../context/NodeCreationContext';
 
 const getOrderedNodes = (nodes: LearningPathNodeWithObject[]) => {
   const nodeMap = new Map(nodes.map((node) => [node.nodeId, node]));
@@ -34,6 +35,7 @@ const getOrderedNodes = (nodes: LearningPathNodeWithObject[]) => {
 
 const EditLearningPath: React.FC = () => {
   const [learningPath, setLearningPath] = useState<LearningPath | null>(null);
+  const { isAddingNode } = useNodeCreationContext();
 
   const { learningPathId } = useParams<{ learningPathId: string }>();
   // handle undefined learningPathId
@@ -102,7 +104,9 @@ const EditLearningPath: React.FC = () => {
       </div>
 
       {/* Main content */}
-      <SelectLearningObject onSelect={() => console.log('lo selected')} />
+      {isAddingNode && (
+        <SelectLearningObject onSelect={() => console.log('lo selected')} />
+      )}
       {/* <div className="border-l border-gray-200 w-full p-6 pb-[74px] max-h-[calc(100vh-80px)] overflow-y-scroll">
         <div className="header">
           {!selectedLearningObject ? (
