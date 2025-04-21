@@ -4,15 +4,16 @@ import { useNavigate } from 'react-router-dom';
 import InputWithChecks from '../../components/shared/InputWithChecks';
 import {
   validateEmail,
-  validateRequired,
   validateForm,
   validateMinLength,
+  validateRequired,
 } from '../../util/shared/validation';
 import Container from '../../components/shared/Container';
 import BoxBorder from '../../components/shared/BoxBorder';
 import { loginTeacher } from '../../util/teacher/httpTeacher';
 import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButton';
 import PrimaryButton from '../../components/shared/PrimaryButton';
+import { useTranslation } from 'react-i18next';
 
 interface LoginFormData {
   email: string;
@@ -34,6 +35,7 @@ const LoginTeacher: React.FC = () => {
   const emailRef = useRef<InputWithChecksHandle | null>(null);
   const passwordRef = useRef<InputWithChecksHandle | null>(null);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const { mutate, isPending, isError, error } = useMutation<
     LoginResponse,
@@ -79,20 +81,20 @@ const LoginTeacher: React.FC = () => {
     <section>
       <Container>
         <BoxBorder extraClasses="mxw-700 m-a g-20">
-          <h2>Leerkracht Inloggen</h2>
+          <h2>{t('login.teacher')}</h2>
           <form className="g-20" onSubmit={handleFormSubmit}>
             <InputWithChecks
               ref={emailRef}
-              label="E-mailadres"
+              label={t('login.email.label')}
               inputType="email"
               validate={(value: string) =>
                 validateForm(value, [validateRequired, validateEmail])
               }
-              placeholder="Voer je e-mailadres in"
+              placeholder={t('login.email.placeholder')}
             />
             <InputWithChecks
               ref={passwordRef}
-              label="Wachtwoord"
+              label={t('login.password.label')}
               inputType="password"
               validate={(value: string) =>
                 validateForm(value, [
@@ -100,17 +102,16 @@ const LoginTeacher: React.FC = () => {
                   (v: string) => validateMinLength(v, 6),
                 ])
               }
-              placeholder="Voer je wachtwoord in"
+              placeholder={t('login.password.placeholder')}
             />
             {isError && (
               <div className="c-r">
-                {(error as any)?.info?.message ||
-                  'Er is iets fout gelopen tijdens het inloggen'}
+                {(error as any)?.info?.message || t('login.error')}
               </div>
             )}
             <div>
               <PrimaryButton type="submit" disabled={isPending}>
-                Inloggen
+                {t('login.submit')}
                 {isPending && <LoadingIndicatorButton />}
               </PrimaryButton>
             </div>
