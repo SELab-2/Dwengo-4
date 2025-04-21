@@ -7,9 +7,9 @@ interface AddNodeButtonProps {
 }
 
 const AddNodeButton: React.FC<AddNodeButtonProps> = ({ label, nodeId }) => {
-  const { isCreatingNode, startCreatingNode } = useNodeCreationContext();
+  const { isAddingNode, startCreatingNode } = useNodeCreationContext();
 
-  return isCreatingNode ? (
+  return isAddingNode ? (
     <div className="w-full text-left p-4 border-b border-gray-200 bg-gray-100">
       <span className="text-gray-500 italic">Creating new node...</span>
     </div>

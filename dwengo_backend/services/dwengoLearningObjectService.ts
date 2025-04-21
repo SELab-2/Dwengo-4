@@ -73,6 +73,7 @@ export interface LearningObjectDto {
   contentLocation?: string;
   createdAt: string;
   updatedAt: string;
+  creatorId?: number; // only for local learning objects
   origin: "dwengo" | "local";
 }
 
@@ -236,10 +237,9 @@ export async function getDwengoObjectsForPath(
           version: node.version,
           language: node.language,
         };
-        const response = await dwengoAPI.get(
-          "/api/learningObject/getMetadata",
-          { params },
-        );
+        const response = await dwengoAPI.get("/api/learningObject/getMetadata", {
+          params,
+        });
         const dwengoObj: DwengoLearningObject = response.data;
         const mapped = mapDwengoToLocal(dwengoObj);
 

@@ -49,7 +49,8 @@ interface LearningObject {
   available: boolean;
   contentLocation?: string;
   creatorId?: number; // for local objects
-  content?: string; // for local objects
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 type LearningPathNodeWithObject = LearningPathNode & {

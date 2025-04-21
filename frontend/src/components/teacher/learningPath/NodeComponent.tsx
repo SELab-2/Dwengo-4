@@ -12,9 +12,9 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
   node,
   onOpenLearningObject,
 }) => {
-  const { isCreatingNode, currentNodeId } = useNodeCreationContext();
+  const { isAddingNode, currentNodeId } = useNodeCreationContext();
 
-  const isCurrentNode = isCreatingNode && currentNodeId === node.nodeId;
+  const isCurrentNode = isAddingNode && currentNodeId === node.nodeId;
 
   return (
     <div className="relative group">
@@ -27,7 +27,7 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
       </button>
 
       {/* Plus icon for creating a new node */}
-      {(!isCreatingNode || isCurrentNode) && (
+      {(!isAddingNode || isCurrentNode) && (
         <AddNodeButton nodeId={node.nodeId} label="Add node here" />
       )}
     </div>

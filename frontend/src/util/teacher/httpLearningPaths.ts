@@ -1,4 +1,8 @@
-import { LearningPath, LearningPathNodeWithObject } from '../../types/type';
+import {
+  LearningObject,
+  LearningPath,
+  LearningPathNodeWithObject,
+} from '../../types/type';
 import { getAuthToken } from './authTeacher';
 
 const BACKEND = 'http://localhost:5000'; // shouldn't we be getting this from env instead?
@@ -104,6 +108,32 @@ export async function fetchLocalLearningPathNodes(
   if (!response.ok) {
     const error: APIError = new Error(
       'Er is iets misgegaan bij het ophalen van de nodes van het leerpad.',
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  return response.json();
+}
+
+/**
+ * Fetches all learning objects that the current teacher has created.
+ * @returns {Promise<LearningObject[]>} The learning objects
+ * @throws {APIError} When fetching fails
+ */
+export async function fetchLocalLearningObjects(): Promise<LearningObject[]> {
+  const response = await fetch(`${BACKEND}/learningObjectByTeacher`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het ophalen van de leerobjecten.',
     );
     error.code = response.status;
     error.info = await response.json();

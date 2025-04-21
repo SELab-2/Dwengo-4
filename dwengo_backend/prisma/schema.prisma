@@ -276,19 +276,6 @@ model LearningObject {
   returnValue      ReturnValue?
   progress         LearningObjectProgress[]
   // QuestionSpecifics QuestionSpecific[]
-
-  /**
-   * we should still figure out how to handle learning object content
-   * for now, we can just use a string to store the content of the learning object if contentType == TEXT_PLAIN
-   * in the dwengo API, they save the content as a file; so it would make sense to do the same here
-   * and let the teacher upload a file that we then save to our server and display in the frontend
-   * we could also try to support markdown editing in the frontend, but i think that might be too much work
-   * (i mean, i don't know how much work it is to create a preview of a markdown file in the frontend)
-   * and it would also be nice to allow the user to upload images within a markdown file
-   * or contain other learning objects within the markdown learning object
-   * like what https://github.com/dwengovzw/Learning-Object-Repository/blob/main/Creating%20learning%20objects.pdf describes
-   */
-  content String?
 }
 
 model EducationalGoal {

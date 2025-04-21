@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 
 interface NodeCreationContextProps {
-  isCreatingNode: boolean;
+  isAddingNode: boolean;
   currentNodeId?: string;
   startCreatingNode: (nodeId: string | undefined) => void;
   stopCreatingNode: () => void;
@@ -17,7 +17,7 @@ const NodeCreationContext = createContext<NodeCreationContextProps | undefined>(
 export const NodeCreationProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [isCreatingNode, setIsCreatingNode] = useState(false);
+  const [isAddingNode, setIsCreatingNode] = useState(false);
   const [currentNodeId, setCurrentNodeId] = useState<string | undefined>(
     undefined,
   );
@@ -35,7 +35,7 @@ export const NodeCreationProvider: React.FC<{ children: React.ReactNode }> = ({
   return (
     <NodeCreationContext.Provider
       value={{
-        isCreatingNode,
+        isAddingNode,
         currentNodeId,
         startCreatingNode,
         stopCreatingNode,

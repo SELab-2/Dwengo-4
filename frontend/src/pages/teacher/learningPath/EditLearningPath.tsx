@@ -8,6 +8,7 @@ import {
 } from '../../../util/teacher/httpLearningPaths';
 import NodeComponent from '../../../components/teacher/learningPath/NodeComponent';
 import AddNodeButton from '../../../components/teacher/learningPath/AddNodeButton';
+import SelectLearningObject from './SelectLearningObject';
 
 const getOrderedNodes = (nodes: LearningPathNodeWithObject[]) => {
   const nodeMap = new Map(nodes.map((node) => [node.nodeId, node]));
@@ -101,6 +102,7 @@ const EditLearningPath: React.FC = () => {
       </div>
 
       {/* Main content */}
+      <SelectLearningObject onSelect={() => console.log('lo selected')} />
       {/* <div className="border-l border-gray-200 w-full p-6 pb-[74px] max-h-[calc(100vh-80px)] overflow-y-scroll">
         <div className="header">
           {!selectedLearningObject ? (
