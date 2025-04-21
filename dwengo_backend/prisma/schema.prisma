@@ -234,6 +234,9 @@ enum ContentType {
   IMAGE_IMAGE_BLOCK
   IMAGE_IMAGE
   AUDIO_MPEG
+  APPLICATION_PDF
+  EXTERN
+  BLOCKLY
   // Eigen toevoegingen
   VIDEO
   EVAL_MULTIPLE_CHOICE
@@ -271,11 +274,22 @@ model LearningObject {
   creator   Teacher @relation(fields: [creatorId], references: [userId], name: "LearningObjectCreator")
 
   // Binnen een leerobject kunnen er meerdere evaluaties zitten
-  evaluations      Evaluation[]
-  educationalGoals EducationalGoal[]
-  returnValue      ReturnValue?
-  progress         LearningObjectProgress[]
+  evaluations           Evaluation[]
+  educationalGoals      EducationalGoal[]
+  returnValue           ReturnValue?
+  progress              LearningObjectProgress[]
   // QuestionSpecifics QuestionSpecific[]
+  LearningObjectRawHtml LearningObjectRawHtml?
+}
+
+model LearningObjectRawHtml {
+  id               Int      @id @default(autoincrement())
+  learningObjectId String   @unique
+  rawHtml          String // hier komt de HTML-inhoud
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  learningObject LearningObject @relation(fields: [learningObjectId], references: [id], onDelete: Cascade)
 }
 
 model EducationalGoal {
@@ -402,7 +416,7 @@ model QuestionMessage {
   text       String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  Questions  Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   user       User     @relation(fields: [userId], references: [id])
 }
 

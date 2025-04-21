@@ -29,6 +29,7 @@ import { action as studentLogoutAction } from '../pages/student/LogoutStudent';
 import StudentIndex from '../pages/student';
 import JoinClass from '../components/student/classes/JoinRequestForm';
 import StudentClassIndex from '../pages/student/StudentClassIndex';
+import LocalLearningObjectsPage from '../pages/teacher/LocalLearningObject';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
@@ -96,6 +97,10 @@ export const router = createBrowserRouter([
       {
         path: 'classes',
         element: <ClassesPage></ClassesPage>,
+      },
+      {
+        path: 'local-learning-objects',
+        element: <LocalLearningObjectsPage></LocalLearningObjectsPage>,
       },
       {
         path: 'classes/:classId',

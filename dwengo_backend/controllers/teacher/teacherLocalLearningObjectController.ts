@@ -17,8 +17,12 @@ export const createLocalLearningObject = asyncHandler(
       throw new Error("Geen geldige teacher-gebruiker.");
     }
 
+    // Pak rawHtml uit de body
     const data: LocalLearningObjectData = req.body;
-    // Eventuele extra validatie (bv. velden checken) kan hier
+    if (!data.rawHtml) {
+      res.status(400);
+      throw new Error("Veld 'rawHtml' is vereist.");
+    }
 
     const createdLO = await LocalLearningObjectService.createLearningObject(
       teacherId,
@@ -83,7 +87,7 @@ export const getLocalLearningObjectById = asyncHandler(
 
 /**
  * Update een leerobject.
- * PUT /teacher/learningObjects/:id
+ * PATCH /teacher/learningObjects/:id
  */
 export const updateLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -144,4 +148,26 @@ export const deleteLocalLearningObject = asyncHandler(
     await LocalLearningObjectService.deleteLearningObject(id);
     res.json({ message: "Leerobject verwijderd" });
   },
+);
+
+/**
+ * Haal alleen de rawHtml op.
+ * GET /teacher/learningObjects/:id/html
+ */
+export const getLocalLearningObjectHtml = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const teacherId = req.user?.id;
+    if (!teacherId) {
+      res.status(401);
+      throw new Error("Geen geldige teacher-gebruiker.");
+    }
+
+    const { id } = req.params;
+    const rawHtml = await LocalLearningObjectService.getRawHtmlById(id);
+    if (rawHtml === null) {
+      res.status(404);
+      throw new Error("HTML-content niet gevonden");
+    }
+    res.type('text/html').send(rawHtml);
+  }
 );
