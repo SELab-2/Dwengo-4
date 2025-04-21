@@ -5,9 +5,13 @@
   "scripts": {
     "dev": "nodemon --watch '**/*.ts' --exec ts-node index.ts",
     "start": "cross-env NODE_ENV=production ts-node index.ts",
-    "test:int": "vitest -c ./vitest.config.integration.ts",
+    "test": "vitest -c ./vitest.config.unit.ts",
+    "test:unit": "vitest run -c ./vitest.config.unit.ts",
+    "test:ui": "vitest -c ./vitest.config.unit.ts --ui",
+
+    "test:int": "vitest run -c ./vitest.config.integration.ts",
     "test:int:ui": "vitest -c ./vitest.config.integration.ts --ui",
-    "coverage": "vitest -c ./vitest.config.integration.ts --coverage"
+    "coverage": "vitest run -c ./vitest.config.integration.ts --coverage"
   },
   "author": "",
   "license": "ISC",

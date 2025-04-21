@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
-import prisma from "./helpers/prisma";
-import app from "../index";
+import prisma from "../helpers/prisma";
+import app from "../../index";
 import {
   Class,
   ClassAssignment,
@@ -22,7 +22,7 @@ import {
   createJoinRequest,
   createStudent,
   createTeacher,
-} from "./helpers/testDataCreation";
+} from "../helpers/testDataCreation";
 
 const APP_URL: string = process.env.APP_URL || "http://localhost:5000";
 

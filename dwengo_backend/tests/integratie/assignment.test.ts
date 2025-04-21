@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Assignment, Teacher, User } from "@prisma/client";
-import app from "../index";
-import { createTeacher } from "./helpers/testDataCreation";
+import app from "../../index";
+import { createTeacher } from "../helpers/testDataCreation";
 import request from "supertest";
-import prisma from "./helpers/prisma";
+import prisma from "../helpers/prisma";
 
 const getAuthHeaders = (
   user: User & { token: string },

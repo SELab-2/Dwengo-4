@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
-import prisma from "./helpers/prisma";
-import app from "../index";
+import prisma from "../helpers/prisma";
+import app from "../../index";
 import { Assignment, Class, LearningPath, Teacher, User } from "@prisma/client";
 import {
   addTeacherToClass,
@@ -10,8 +10,8 @@ import {
   createLearningPath,
   createTeacher,
   stringToDate,
-} from "./helpers/testDataCreation";
-import TeacherSubmissionController from "../controllers/teacher/teacherSubmissionController";
+} from "../helpers/testDataCreation";
+import TeacherSubmissionController from "../../controllers/teacher/teacherSubmissionController";
 
 describe("Tests for teacherAssignment", async (): Promise<void> => {
   let teacher1: User & { teacher: Teacher; token: string };

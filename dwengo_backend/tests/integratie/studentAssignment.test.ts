@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
-import app from "../index";
+import app from "../../index";
 import {
   Assignment,
   Class,
@@ -17,7 +17,7 @@ import {
   createStudent,
   createTeacher,
   stringToDate,
-} from "./helpers/testDataCreation";
+} from "../helpers/testDataCreation";
 
 describe("[GET] /assignment/student", async (): Promise<void> => {
   let student1: User & { student: Student; token: string };

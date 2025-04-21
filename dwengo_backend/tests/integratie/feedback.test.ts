@@ -14,11 +14,11 @@ import {
   giveAssignmentToTeam,
   giveFeedbackToSubmission,
   updateAssignmentForTeam,
-} from "./helpers/testDataCreation";
-import app from "../index";
+} from "../helpers/testDataCreation";
+import app from "../../index";
 import request from "supertest";
-import prisma from "./helpers/prisma";
-import { setupTestData } from "./helpers/setupTestDataSubmissionsAndFeedback";
+import prisma from "../helpers/prisma";
+import { setupTestData } from "../helpers/setupTestDataSubmissionsAndFeedback";
 
 describe("Feedback tests", (): void => {
   const dayInMilliseconds: number = 1000 * 60 * 60 * 24;

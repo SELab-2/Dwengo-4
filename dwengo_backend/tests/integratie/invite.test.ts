@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
-import prisma from "./helpers/prisma";
-import app from "../index";
+import prisma from "../helpers/prisma";
+import app from "../../index";
 import {
   Class,
   ClassTeacher,
@@ -15,7 +15,7 @@ import {
   createClass,
   createInvite,
   createTeacher,
-} from "./helpers/testDataCreation";
+} from "../helpers/testDataCreation";
 
 describe("invite tests", async (): Promise<void> => {
   let teacherUser1: User & { teacher: Teacher; token: string };

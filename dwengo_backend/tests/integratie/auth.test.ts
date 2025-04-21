@@ -1,8 +1,8 @@
 import { it, describe, expect, beforeEach } from "vitest";
 import request from "supertest";
-import app from "../index";
-import prisma from "./helpers/prisma";
-import { createStudent, createTeacher } from "./helpers/testDataCreation";
+import app from "../../index";
+import prisma from "../helpers/prisma";
+import { createStudent, createTeacher } from "../helpers/testDataCreation";
 
 describe("Authentication API Tests", () => {
   describe("[POST] /auth/student/register", () => {
