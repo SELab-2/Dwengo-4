@@ -107,7 +107,7 @@ export const getLearningObjectByHruidLangVersionController = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const { hruid, language, version } = req.query;
+    const { hruid, language, version } = req.params;
     if (!hruid || !language || !version) {
       res.status(400).json({
         error:

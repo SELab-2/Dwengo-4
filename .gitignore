@@ -32,6 +32,3 @@ build/
 
 # migrations
 dwengo_backend/prisma/migrations/
-dwengo_backend/dwengo_backend
-prisma/migrations/migration_lock.toml
-prisma/migrations/20250415141642_/migration.sql

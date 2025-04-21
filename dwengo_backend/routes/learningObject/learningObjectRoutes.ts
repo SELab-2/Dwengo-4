@@ -36,7 +36,7 @@ router.get("/teacher/search", protectTeacher, searchLearningObjectsController);
  * @access Teacher
  */
 router.get(
-  "/teacher/lookup",
+  "/teacher/lookup/:hruid/:language/:version",
   protectTeacher,
   getLearningObjectByHruidLangVersionController,
 );

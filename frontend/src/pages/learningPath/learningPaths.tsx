@@ -4,6 +4,8 @@ import { fetchLearningPaths } from '../../util/teacher/httpTeacher';
 import { LearningPath } from '../../types/type';
 import { LearningPathFilter } from '../../components/learningPath/learningPathFilter';
 import { Filter, FilterType } from '../../components/ui/filters';
+import { Link } from 'react-router-dom';
+import { filterLearningPaths } from '@/util/filter';
 
 /**
  * LearningPaths component displays all available learning paths.
@@ -56,53 +58,10 @@ const LearningPaths: React.FC = () => {
             .sort((a, b) => a.name.localeCompare(b.name));
     }, [learningPaths]);
 
-    const filteredResults = useMemo(() => {
-        if (!learningPaths) return [];
-        return learningPaths.filter(path => {
-            // First check the search query
-            if (searchQuery && !path.title.toLowerCase().includes(searchQuery.toLowerCase())) {
-                return false;
-            }
-
-            // If no filters are applied, show all paths that match the search
-            if (filters.length === 0) return true;
-            // Check if path matches all active filters
-            return filters.every(filter => {
-                switch (filter.type) {
-                    case FilterType.LANGUAGE:
-                        if (filter.value.length === 0) return true;
-                        // Check if the path's language matches the selected languages
-                        if (path.language === null) return false; // Handle null language
-                        // Check if any of the selected languages match the path's language
-                        return filter.value.length === 0 || filter.value.includes(path.language);
-                    case FilterType.CREATED_DATE:
-                        if (filter.value.length === 0) return true;
-                        const pathDate = new Date(path.createdAt);
-                        if (isNaN(pathDate.getTime())) return false; // Invalid date
-                        const now = new Date();
-                        const diffDays = Math.floor((now.getTime() - pathDate.getTime()) / (1000 * 60 * 60 * 24));
-
-                        return filter.value.some(value => {
-                            switch (value) {
-                                case 'week': return diffDays <= 7;
-                                case 'month': return diffDays <= 30;
-                                case 'year': return diffDays <= 365;
-                                default: return true;
-                            }
-                        });
-                    case FilterType.CREATOR:
-                        if (filter.value.length === 0) return true;
-                        if (!path.creator?.user?.firstName || !path.creator?.user?.lastName) return false;
-                        const creatorFullName = `${path.creator.user.firstName} ${path.creator.user.lastName}`;
-                        // Check if any of the selected creators match the path's creator full name
-                        return filter.value.some(v => creatorFullName === v);
-
-                    default:
-                        return true;
-                }
-            });
-        });
-    }, [learningPaths, filters, searchQuery]);
+    const filteredResults = useMemo(
+        () => filterLearningPaths(learningPaths || [], filters, searchQuery),
+        [learningPaths, filters, searchQuery]
+    );
 
     useEffect(() => {
         setFilteredPaths(filteredResults);
@@ -149,7 +108,11 @@ const LearningPaths: React.FC = () => {
                                         <div
                                             className="w-full h-full flex items-center justify-center object-fit-cover"
                                             style={{
-                                                backgroundColor: `hsl(${Math.random() * 360}, 70%, 80%)`
+                                                backgroundColor: useMemo(() => {
+                                                    const hash = [...path.id].reduce((acc, c) => acc + c.charCodeAt(0), 0);
+                                                    const hue = hash % 360;
+                                                    return `hsl(${hue}, 70%, 80%)`;
+                                                }, [path.id])
                                             }}
                                         >
                                             <span className="text-gray-700 text-xl font-semibold">
@@ -159,12 +122,12 @@ const LearningPaths: React.FC = () => {
                                     )}
                                 </div>
                                 <div className="p-6 flex-grow h-40 border-t-2 border-gray-200">
-                                    <a
-                                        href={`/learning-path/${path.id}`}
+                                    <Link
+                                        to={`/learning-path/${path.id}`}
                                         className="text-blue-600 hover:text-blue-800"
                                     >
                                         <h2 className="text-xl font-semibold mb-2">{path.title}</h2>
-                                    </a>
+                                    </Link>
                                     <p className="text-gray-700 h-[77px] overflow-hidden line-clamp-3">{path.description}</p>
                                 </div>
                             </div>

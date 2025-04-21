@@ -148,6 +148,10 @@ export const router = createBrowserRouter([
         action: studentLogoutAction,
       },
       {
+        path: 'learning-path/:pathId',
+        element: <LearningPath />,
+      },
+      {
         path: 'dashboard',
         element: <RootLayoutDashboardStudent />,
         loader: studentTokenLoader,

@@ -40,28 +40,19 @@ const LearningPath: React.FC = () => {
         isLoading: isLoadingLearningObjects,
         isError: isErrorLearningObjects,
         error: errorLearningObjects,
-    } = useQuery({
+    } = useQuery<LearningObject[]>({
         queryKey: ['learningObjects', pathId],
         queryFn: () => fetchLearningObjectsByLearningPath(pathId!),
         staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
         gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
     });
 
-    console.log('learningObjectsData', learningObjectsData);
-    console.log('learningPathData', learningPathData);
-
-    const getNextLearningObject = () => {
+    const nextObject = useMemo(() => {
         if (!selectedLearningObject || !learningObjectsData) return null;
-        const currentIndex = learningObjectsData.findIndex(obj => obj.id === selectedLearningObject.id);
-        return learningObjectsData[currentIndex + 1] || null;
-    };
+        const idx = learningObjectsData.findIndex(o => o.id === selectedLearningObject.id);
+        return learningObjectsData[idx + 1] || null;
+    }, [selectedLearningObject, learningObjectsData]);
 
-    const handleNextClick = () => {
-        const nextObject = getNextLearningObject();
-        if (nextObject) {
-            setSelectedLearningObject(nextObject);
-        }
-    };
 
     useEffect(() => {
         if (learningPathData) {
@@ -123,11 +114,11 @@ const LearningPath: React.FC = () => {
                 <div className="fixed bottom-0 right-0 flex p-4 justify-end border-t border-l border-gray-200 bg-white w-[calc(100%-416px)] z-10">
                     <button
                         className="px-4 py-2 text-base font-normal rounded bg-blue-600 text-white border-none cursor-pointer transition-opacity duration-200 disabled:opacity-50"
-                        onClick={handleNextClick}
-                        disabled={!getNextLearningObject()}
+                        onClick={() => nextObject && setSelectedLearningObject(nextObject)}
+                        disabled={!nextObject}
                     >
-                        {getNextLearningObject()
-                            ? `Up Next: ${getNextLearningObject()?.title}`
+                        {nextObject
+                            ? `Up Next: ${nextObject.title}`
                             : 'End of Path'}
                     </button>
                 </div>
