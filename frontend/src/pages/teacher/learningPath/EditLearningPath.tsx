@@ -6,10 +6,10 @@ import {
   fetchLocalLearningPath,
   fetchLocalLearningPathNodes,
 } from '../../../util/teacher/httpLearningPaths';
-import NodeComponent from '../../../components/teacher/learningPath/NodeComponent';
 import AddNodeButton from '../../../components/teacher/learningPath/AddNodeButton';
 import SelectLearningObject from './SelectLearningObject';
 import { useNodeCreationContext } from '../../../context/NodeCreationContext';
+import NodeList from '../../../components/teacher/learningPath/NodeList';
 
 const getOrderedNodes = (nodes: LearningPathNodeWithObject[]) => {
   const nodeMap = new Map(nodes.map((node) => [node.nodeId, node]));
@@ -70,6 +70,12 @@ const EditLearningPath: React.FC = () => {
 
   const orderedNodes = nodesData ? getOrderedNodes(nodesData) : [];
 
+  // const addNodeAtPosition = (position: number) => {
+  //   const updatedNodes = [...nodes];
+  //   updatedNodes.splice(position, 0, newNode);
+  //   setNodes(updatedNodes);
+  // };
+
   console.log('nodesData', orderedNodes);
   console.log('learningPathData', learningPathData);
 
@@ -85,20 +91,7 @@ const EditLearningPath: React.FC = () => {
           ) : orderedNodes.length == 0 ? (
             <AddNodeButton label="Add Node" />
           ) : (
-            <>
-              <p className="text-gray-500">
-                hover over a node to add a new node below it
-              </p>
-              {orderedNodes.map((node) => (
-                <NodeComponent
-                  key={node.nodeId}
-                  node={node}
-                  onOpenLearningObject={() =>
-                    console.log('Open learning object')
-                  }
-                />
-              ))}
-            </>
+            <NodeList nodes={orderedNodes} />
           )}
         </div>
       </div>
