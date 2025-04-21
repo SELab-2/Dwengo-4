@@ -22,6 +22,8 @@ const NodeComponent: React.FC<NodeComponentProps> = memo(
     const [isHovered, setIsHovered] = useState(false); // use to conditionally render the button to add new node underneath current node
 
     const nodeRef = useRef<HTMLDivElement | null>(null);
+    const dragHandleRef = useRef<HTMLDivElement | null>(null);
+
     const [{ isDragging }, drop] = useDrop<
       DragItem,
       unknown,
@@ -58,36 +60,63 @@ const NodeComponent: React.FC<NodeComponentProps> = memo(
       },
     });
 
-    const [, drag] = useDrag({
+    const [, drag, preview] = useDrag({
       type: DRAG_N_DROP_TYPE,
       item: { index },
       canDrag: () => !isAddingNode, // disable dragging when isAddingNode is true
     });
 
-    drag(drop(nodeRef));
+    drop(nodeRef);
+    drag(dragHandleRef); // attach drag to the dragHandleRef (so you can only drag the node by the drag handle)
+    preview(nodeRef); // attach preview to entire node, so you don't only see the drag handle icon when dragging
 
     const isCurrentNode = isAddingNode && currentNodeId === node.nodeId;
 
     return (
       <div
         ref={nodeRef}
-        className="relative"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        className="relative flex items-center p-2 border-b border-gray-200 bg-white hover:bg-gray-100 transition-colors duration-200"
       >
-        {/* Button to open the learning object */}
-        <button
-          className="w-full text-left p-4 border-b border-gray-200 bg-white hover:bg-gray-100 transition-colors duration-200"
-          onClick={() => onOpenLearningObject()}
+        {/* Drag Handle */}
+        <div
+          ref={dragHandleRef}
+          className="cursor-grab p-2 mr-4 bg-gray-200 rounded"
         >
-          {node.learningObject?.title || 'Untitled Node'}
-        </button>
+          {/* Drag handle icon */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="size-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+            />
+          </svg>
+        </div>
+        <div
+          className="relative"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {/* Button to open the learning object */}
+          <button
+            className="w-full text-left p-4 border-b border-gray-200 bg-white hover:bg-gray-100 transition-colors duration-200"
+            onClick={() => onOpenLearningObject()}
+          >
+            {node.learningObject?.title || 'Untitled Node'}
+          </button>
 
-        {/* Plus icon for creating a new node */}
-        {((isHovered && !isAddingNode) || (isAddingNode && isCurrentNode)) &&
-          !isDragging && (
-            <AddNodeButton nodeId={node.nodeId} label="Add node here" />
-          )}
+          {/* Plus icon for creating a new node */}
+          {((isHovered && !isAddingNode) || (isAddingNode && isCurrentNode)) &&
+            !isDragging && (
+              <AddNodeButton nodeId={node.nodeId} label="Add node here" />
+            )}
+        </div>
       </div>
     );
   },
