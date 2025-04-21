@@ -30,20 +30,23 @@ export const protectTeacher = asyncHandler(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     let token: string | undefined;
 
+    
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
     ) {
       try {
+     
         token = req.headers.authorization.split(" ")[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
-
+   
+        
         // Zoek de gebruiker (Teacher) en stel deze in op req.user
         const teacher = await prisma.teacher.findUnique({
           where: { userId: decoded.id },
           include: { user: { select: { id: true, email: true } } } // Exclude password
         });
-
+        
         if (!teacher) {
           // Directly return the error response instead of throwingcd
           res.status(401).json({ error: "Leerkracht niet gevonden." });
