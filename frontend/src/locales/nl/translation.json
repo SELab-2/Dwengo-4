@@ -67,7 +67,12 @@
     "label": "Klasgroepen",
     "error": "Er is iets fout gelopen tijdens het ophalen van de klasgroepen",
     "not_found": "Geen klasgroepen gevonden",
-    "view": "Bekijk klas"
+    "view": "Bekijk klas",
+    "leave_class": {
+      "label": "Klas verlaten",
+      "confirmation": "Weet je zeker dat je deze klas wilt verlaten? Om opnieuw lid te worden heb je een uitnodigingscode nodig.",
+      "error": "Er is iets misgegaan bij het verlaten van de klas."
+    }
   },
   "deadline": "Deadline: {{date}}"
 }

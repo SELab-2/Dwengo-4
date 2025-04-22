@@ -67,7 +67,12 @@
     "label": "Classes",
     "error": "Something went wrong while loading the classes",
     "not_found": "No classes found",
-    "view": "View class"
+    "view": "View class",
+    "leave_class": {
+      "label": "Leave class",
+      "confirmation": "Are you sure you want to leave this class? To rejoin, you will need an invitation code.",
+      "error": "Something went wrong while leaving the class"
+    }
   },
   "deadline": "Deadline: {{date}}"
 }
