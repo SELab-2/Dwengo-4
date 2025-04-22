@@ -58,9 +58,13 @@
   "home": "Home",
   "assignments": {
     "label": "Opdrachten",
-    "view_all": "Bekijk alle opdrachten"
+    "view_all": "Bekijk alle opdrachten",
+    "error": "Er is iets fout gelopen tijdens het ophalen van de opdrachten",
+    "view": "Opdracht bekijken",
+    "not_found": "Geen opdrachten gevonden"
   },
   "classes": {
     "label": "Klasgroepen"
-  }
+  },
+  "deadline": "Deadline: {{date}}"
 }

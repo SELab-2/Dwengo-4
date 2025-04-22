@@ -58,9 +58,13 @@
   "home": "Home",
   "assignments": {
     "label": "Assignments",
-    "view_all": "View all assignments"
+    "view_all": "View all assignments",
+    "error": "Something went wrong while loading the assignments",
+    "view": "View assignment",
+    "not_found": "No assignments found"
   },
   "classes": {
     "label": "Classes"
-  }
+  },
+  "deadline": "Deadline: {{date}}"
 }
