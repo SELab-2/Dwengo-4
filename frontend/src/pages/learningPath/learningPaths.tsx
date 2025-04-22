@@ -31,6 +31,10 @@ interface LearningPathCardProps {
  */
 const LearningPathCard: React.FC<LearningPathCardProps> = ({ path }) => {
     const backgroundColor = useMemo(() => generateBackgroundColor(path.id), [path.id]);
+    const isTeacherView = window.location.pathname.includes('/teacher');
+    const linkPath = isTeacherView
+        ? `/teacher/learning-path/${path.id}`
+        : `/student/learning-path/${path.id}`;
 
     return (
         <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-128">
@@ -54,7 +58,7 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ path }) => {
             </div>
             <div className="p-6 flex-grow h-40 border-t-2 border-gray-200">
                 <Link
-                    to={`/learning-path/${path.id}`}
+                    to={linkPath}
                     className="text-blue-600 hover:text-blue-800"
                 >
                     <h2 className="text-xl font-semibold mb-2">{path.title}</h2>
