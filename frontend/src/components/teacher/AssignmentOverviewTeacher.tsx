@@ -1,13 +1,11 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  AssignmentItem,
-  fetchAssignments,
-} from '../../util/student/httpStudent';
+import { fetchAllAssignments } from '../../util/teacher/httpTeacher';
 import { Link } from 'react-router-dom';
 import PrimaryButton from '../shared/PrimaryButton';
+import { AssignmentItem } from '../../util/student/httpStudent';
 
-export default function AssignmentOverview() {
+export default function AssignmentOverviewTeacher() {
   // Query: Haal alle klassen op
   const {
     data: assignments,
@@ -16,7 +14,7 @@ export default function AssignmentOverview() {
     error,
   } = useQuery<AssignmentItem[]>({
     queryKey: ['assignments'],
-    queryFn: fetchAssignments,
+    queryFn: fetchAllAssignments,
   });
 
   return (
@@ -54,7 +52,7 @@ export default function AssignmentOverview() {
                       {assignmentItem.description}
                     </div>
                     <div className="flex mt-1 flex-row justify-between items-center text-sm">
-                      <Link to={`/student/assignment/${assignmentItem.id}`}>
+                      <Link to={`/teacher/assignment/${assignmentItem.id}`}>
                         <PrimaryButton>Leerpad bekijken</PrimaryButton>
                       </Link>
                       {/*<p>12/50 completed</p> Replace with actual progress*/}

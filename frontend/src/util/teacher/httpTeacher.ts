@@ -354,8 +354,7 @@ export async function fetchLearningPath(
     throw error;
   }
 
-  let learningPath = await response.json();
-  learningPath = learningPath;
+  const learningPath = await response.json();
   return learningPath;
 }
 
@@ -394,14 +393,12 @@ export async function fetchLearningObjectsByLearningPath(pathId: string): Promis
  * @throws {APIError} When creation fails
  */
 export async function createAssignment({
-  classes,
   name,
   learningPathId,
   students,
   dueDate,
   description,
 }: {
-  classes: ClassItem[];
   name: string;
   learningPathId: string;
   students: StudentItem[];
@@ -460,8 +457,35 @@ export async function fetchAssignments(classId: string): Promise<any> {
     throw error;
   }
 
-  let assignments = await response.json();
-  assignments = assignments;
+  const assignments = await response.json();
+  return assignments;
+}
+
+/**
+ * Fetches all assignments for a class
+ * @param {string} classId - The ID of the class
+ * @returns {Promise<any>} List of assignments
+ * @throws {APIError} When fetching fails
+ */
+export async function fetchAllAssignments(): Promise<any> {
+  const response = await fetch(`${BACKEND}/assignment/teacher?limit=5`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het ophalen van de opdrachten.',
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  const assignments = await response.json();
   return assignments;
 }
 
@@ -498,7 +522,7 @@ export async function fetchAssignment(
     throw error;
   }
 
-  let assignment = await response.json();
+  const assignment = await response.json();
 
   if (includeTeams && assignment.teamAssignments) {
     // Group teams by classId
