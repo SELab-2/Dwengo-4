@@ -1,6 +1,9 @@
 import React, { memo, useRef, useState } from 'react';
 import AddNodeButton from './AddNodeButton';
-import { useNodeCreationContext } from '../../../context/NodeCreationContext';
+import {
+  DraftNode,
+  useLPEditContext,
+} from '../../../context/LearningPathEditContext';
 import { LearningPathNodeWithObject } from '../../../types/type';
 import { useDrag, useDrop } from 'react-dnd';
 
@@ -10,7 +13,7 @@ interface DragItem {
 }
 
 interface NodeComponentProps {
-  node: LearningPathNodeWithObject;
+  node: LearningPathNodeWithObject | DraftNode;
   index: number; // index of the node in the list (needed to keep track of node order while dragging)
   moveNode: (dragIndex: number, hoverIndex: number) => void; // for dragging and dropping nodes
   onOpenLearningObject: () => void;
@@ -18,7 +21,7 @@ interface NodeComponentProps {
 
 const NodeComponent: React.FC<NodeComponentProps> = memo(
   function NodeComponent({ node, index, moveNode, onOpenLearningObject }) {
-    const { isAddingNode, currentNodeId } = useNodeCreationContext();
+    const { isAddingNode, currentNodeIndex } = useLPEditContext();
     const [isHovered, setIsHovered] = useState(false); // use to conditionally render the button to add new node underneath current node
 
     const nodeRef = useRef<HTMLDivElement | null>(null);
@@ -70,12 +73,12 @@ const NodeComponent: React.FC<NodeComponentProps> = memo(
     drag(dragHandleRef); // attach drag to the dragHandleRef (so you can only drag the node by the drag handle)
     preview(nodeRef); // attach preview to entire node, so you don't only see the drag handle icon when dragging
 
-    const isCurrentNode = isAddingNode && currentNodeId === node.nodeId;
+    const isCurrentNode = isAddingNode && currentNodeIndex === index;
 
     return (
       <div
         ref={nodeRef}
-        className="relative flex items-center p-2 border-b border-gray-200 bg-white hover:bg-gray-100 transition-colors duration-200"
+        className="relative flex items-center p-2 border border-gray-200 bg-white hover:bg-gray-100 transition-colors duration-200"
       >
         {/* Drag Handle */}
         <div
@@ -99,22 +102,19 @@ const NodeComponent: React.FC<NodeComponentProps> = memo(
           </svg>
         </div>
         <div
-          className="relative"
+          className="relative flex-col flex-1 items-start"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
           {/* Button to open the learning object */}
-          <button
-            className="w-full text-left p-4 border-b border-gray-200 bg-white hover:bg-gray-100 transition-colors duration-200"
-            onClick={() => onOpenLearningObject()}
-          >
+          <button onClick={() => onOpenLearningObject()}>
             {node.learningObject?.title || 'Untitled Node'}
           </button>
 
           {/* Plus icon for creating a new node */}
           {((isHovered && !isAddingNode) || (isAddingNode && isCurrentNode)) &&
             !isDragging && (
-              <AddNodeButton nodeId={node.nodeId} label="Add node here" />
+              <AddNodeButton nodeIndex={index} label="Add node here" />
             )}
         </div>
       </div>

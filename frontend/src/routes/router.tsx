@@ -2,6 +2,7 @@ import React from 'react';
 import { createBrowserRouter, Link, RouteObject } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageChooser from '../components/shared/LanguageChooser';
+import { LPEditProvider } from '../context/LearningPathEditContext';
 
 // ==== TEACHER ROUTES ==== //
 import Assignment from '../pages/teacher/Assignment';
@@ -31,7 +32,6 @@ import { action as studentLogoutAction } from '../pages/student/LogoutStudent';
 import StudentIndex from '../pages/student';
 import JoinClass from '../components/student/classes/JoinRequestForm';
 import StudentClassIndex from '../pages/student/StudentClassIndex';
-import { NodeCreationProvider } from '../context/NodeCreationContext';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
@@ -127,9 +127,9 @@ export const router = createBrowserRouter([
       {
         path: 'learning-paths/:learningPathId/edit',
         element: (
-          <NodeCreationProvider>
+          <LPEditProvider>
             <EditLearningPath />
-          </NodeCreationProvider>
+          </LPEditProvider>
         ),
       },
     ],

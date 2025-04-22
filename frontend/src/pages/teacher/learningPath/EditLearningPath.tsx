@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LearningPath, LearningPathNodeWithObject } from '../../../types/type';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -8,7 +8,7 @@ import {
 } from '../../../util/teacher/httpLearningPaths';
 import AddNodeButton from '../../../components/teacher/learningPath/AddNodeButton';
 import SelectLearningObject from './SelectLearningObject';
-import { useNodeCreationContext } from '../../../context/NodeCreationContext';
+import { useLPEditContext } from '../../../context/LearningPathEditContext';
 import NodeList from '../../../components/teacher/learningPath/NodeList';
 
 const getOrderedNodes = (nodes: LearningPathNodeWithObject[]) => {
@@ -35,7 +35,7 @@ const getOrderedNodes = (nodes: LearningPathNodeWithObject[]) => {
 
 const EditLearningPath: React.FC = () => {
   const [learningPath, setLearningPath] = useState<LearningPath | null>(null);
-  const { isAddingNode } = useNodeCreationContext();
+  const { isAddingNode, setOrderedNodes, orderedNodes } = useLPEditContext();
 
   const { learningPathId } = useParams<{ learningPathId: string }>();
   // handle undefined learningPathId
@@ -68,13 +68,13 @@ const EditLearningPath: React.FC = () => {
     queryFn: () => fetchLocalLearningPathNodes(learningPathId!),
   });
 
-  const orderedNodes = nodesData ? getOrderedNodes(nodesData) : [];
-
-  // const addNodeAtPosition = (position: number) => {
-  //   const updatedNodes = [...nodes];
-  //   updatedNodes.splice(position, 0, newNode);
-  //   setNodes(updatedNodes);
-  // };
+  // initialize orderedNodes when nodesData is fetched
+  useEffect(() => {
+    if (nodesData) {
+      const ordered = getOrderedNodes(nodesData);
+      setOrderedNodes(ordered);
+    }
+  }, [nodesData]);
 
   console.log('nodesData', orderedNodes);
   console.log('learningPathData', learningPathData);
@@ -89,17 +89,15 @@ const EditLearningPath: React.FC = () => {
           ) : isErrorNodes ? (
             <p>Error: {errorNodes?.message}</p>
           ) : orderedNodes.length == 0 ? (
-            <AddNodeButton label="Add Node" />
+            <AddNodeButton nodeIndex={0} label="Add Node" />
           ) : (
-            <NodeList nodes={orderedNodes} />
+            <NodeList />
           )}
         </div>
       </div>
 
       {/* Main content */}
-      {isAddingNode && (
-        <SelectLearningObject onSelect={() => console.log('lo selected')} />
-      )}
+      {isAddingNode && <SelectLearningObject />}
       {/* <div className="border-l border-gray-200 w-full p-6 pb-[74px] max-h-[calc(100vh-80px)] overflow-y-scroll">
         <div className="header">
           {!selectedLearningObject ? (

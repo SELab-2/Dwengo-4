@@ -1,13 +1,14 @@
 import React from 'react';
-import { useNodeCreationContext } from '../../../context/NodeCreationContext';
+import { useLPEditContext } from '../../../context/LearningPathEditContext';
 
 interface AddNodeButtonProps {
   label: string;
-  nodeId?: string; // null if there's no other add node buttons
+  nodeIndex: number;
 }
 
-const AddNodeButton: React.FC<AddNodeButtonProps> = ({ label, nodeId }) => {
-  const { isAddingNode, startCreatingNode } = useNodeCreationContext();
+const AddNodeButton: React.FC<AddNodeButtonProps> = ({ label, nodeIndex }) => {
+  const { isAddingNode, startAddingNode: startCreatingNode } =
+    useLPEditContext();
 
   return isAddingNode ? (
     <div className="w-full text-left p-4 border-b border-gray-200 bg-gray-100">
@@ -21,7 +22,7 @@ const AddNodeButton: React.FC<AddNodeButtonProps> = ({ label, nodeId }) => {
         border border-gray-300 cursor-pointer transition-colors 
         duration-200 hover:bg-gray-200 flex items-center gap-2
       `}
-      onClick={() => startCreatingNode(nodeId)}
+      onClick={() => startCreatingNode(nodeIndex)}
     >
       {/* Plus Icon */}
       <svg

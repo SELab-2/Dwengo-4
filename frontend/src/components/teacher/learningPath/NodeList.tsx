@@ -2,15 +2,10 @@ import { DndProvider } from 'react-dnd';
 import NodeComponent from './NodeComponent';
 import React from 'react';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { LearningPathNodeWithObject } from '../../../types/type';
+import { useLPEditContext } from '../../../context/LearningPathEditContext';
 
-interface NodeListProps {
-  nodes: LearningPathNodeWithObject[];
-}
-
-const NodeList: React.FC<NodeListProps> = ({ nodes }) => {
-  const [orderedNodes, setOrderedNodes] =
-    React.useState<LearningPathNodeWithObject[]>(nodes);
+const NodeList: React.FC = () => {
+  const { orderedNodes, setOrderedNodes } = useLPEditContext();
 
   const moveNode = (dragIndex: number, hoverIndex: number) => {
     const updatedNodes = Array.from(orderedNodes);
@@ -27,7 +22,7 @@ const NodeList: React.FC<NodeListProps> = ({ nodes }) => {
       <DndProvider backend={HTML5Backend}>
         {orderedNodes.map((node, index) => (
           <NodeComponent
-            key={node.nodeId}
+            key={'nodeId' in node ? node.nodeId : node.draftId} // use draftId for draft nodes
             node={node}
             index={index}
             moveNode={moveNode}
