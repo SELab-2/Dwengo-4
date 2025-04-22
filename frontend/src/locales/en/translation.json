@@ -54,5 +54,13 @@
   "loading": {
     "loading": "Loading ...",
     "error": "Something went wrong while loading the data"
+  },
+  "home": "Home",
+  "assignments": {
+    "label": "Assignments",
+    "view_all": "View all assignments"
+  },
+  "classes": {
+    "label": "Classes"
   }
 }

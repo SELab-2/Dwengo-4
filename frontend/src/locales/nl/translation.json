@@ -54,5 +54,13 @@
   "loading": {
     "loading": "Laden...",
     "error": "Er is iets fout gelopen tijdens het laden van de gegevens"
+  },
+  "home": "Home",
+  "assignments": {
+    "label": "Opdrachten",
+    "view_all": "Bekijk alle opdrachten"
+  },
+  "classes": {
+    "label": "Klasgroepen"
   }
 }
