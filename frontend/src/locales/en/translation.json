@@ -6,6 +6,7 @@
   },
   "login": {
     "teacher": "Log in as a teacher",
+    "student": "Log in as a student",
     "email": {
       "label": "E-mail address",
       "placeholder": "Enter your e-mail address"

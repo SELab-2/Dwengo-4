@@ -6,6 +6,7 @@
   },
   "login": {
     "teacher": "Inloggen als lesgever",
+    "student": "Inloggen als leerling",
     "email": {
       "label": "E-mailadres",
       "placeholder": "Voer je e-mailadres in"
