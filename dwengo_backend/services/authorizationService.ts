@@ -1,10 +1,10 @@
-import {  Role } from "@prisma/client";
+import { Role } from "@prisma/client";
 import prisma from "../config/prisma";
 
 export const isAuthorized = async (
   userId: number,
   requiredRole: Role,
-  classId?: number
+  classId?: number,
 ): Promise<boolean> => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -40,7 +40,7 @@ export const isAuthorized = async (
 
 export const canUpdateOrDelete = async (
   userId: number,
-  assignmentId: number
+  assignmentId: number,
 ): Promise<boolean> => {
   if (!(await isAuthorized(userId, Role.TEACHER))) return false;
 
