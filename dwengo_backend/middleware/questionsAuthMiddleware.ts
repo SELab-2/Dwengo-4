@@ -199,3 +199,4 @@ export const authorizeMessageDelete = asyncHandler(
     next();
   }
 );
+export { prisma };
