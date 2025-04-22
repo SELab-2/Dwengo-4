@@ -40,7 +40,7 @@ export default class TeacherAssignmentService {
     );
 
     // 3) Maak assignment
-    return await prisma.assignment.create({
+    return prisma.assignment.create({
       data: {
         title: title,
         description: description,
@@ -187,7 +187,7 @@ export default class TeacherAssignmentService {
     );
 
     // 3) Create assignment and teams in transaction
-    return await prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx) => {
       // Create the assignment
       const assignment = await tx.assignment.create({
         data: {
@@ -254,7 +254,7 @@ export default class TeacherAssignmentService {
     );
 
     // 3) Update assignment and teams in transaction
-    return await prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx) => {
       // Update the assignment
       const assignment = await tx.assignment.update({
         where: { id: assignmentId },
