@@ -86,5 +86,6 @@
     "error": "Er is iets fout gelopen tijdens het lid worden van de klas",
     "submit": "Toegang aanvragen",
     "success": "Je hebt een aanvraag verzonden om lid te worden van deze klas. Wacht op goedkeuring van de lesgever."
-  }
+  },
+  "code": "Klascode"
 }

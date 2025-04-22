@@ -86,5 +86,6 @@
     "error": "Something went wrong while joining the class",
     "submit": "Request access",
     "success": "You have successfully requested access to the class. The teacher will approve your request soon."
-  }
+  },
+  "code": "Class code"
 }
