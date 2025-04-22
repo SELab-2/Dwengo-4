@@ -28,6 +28,7 @@
   },
   "register": {
     "teacher": "Register as a teacher",
+    "student": "Register as a student",
     "submit": "Register",
     "error": "Something went wrong while registering"
   },

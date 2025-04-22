@@ -28,6 +28,7 @@
   },
   "register": {
     "teacher": "Registreren als lesgever",
+    "student": "Registreren als leerling",
     "submit": "Registreren",
     "error": "Er is iets fout gelopen tijdens het registreren"
   },
