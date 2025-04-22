@@ -64,7 +64,10 @@
     "not_found": "Geen opdrachten gevonden"
   },
   "classes": {
-    "label": "Klasgroepen"
+    "label": "Klasgroepen",
+    "error": "Er is iets fout gelopen tijdens het ophalen van de klasgroepen",
+    "not_found": "Geen klasgroepen gevonden",
+    "view": "Bekijk klas"
   },
   "deadline": "Deadline: {{date}}"
 }

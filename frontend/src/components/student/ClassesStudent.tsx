@@ -3,6 +3,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ClassItem, fetchClasses } from '../../util/student/httpStudent';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function ClassesStudent() {
   // Query: Haal alle klassen op
@@ -17,16 +18,13 @@ export default function ClassesStudent() {
   });
 
   const navigate = useNavigate();
-
+  const { t } = useTranslation();
   return (
     <>
       <div className="w-full flex flex-row gap-5 flex-wrap">
-        {isLoading && <p>Laden ...</p>}
+        {isLoading && <p>{t('loading.loading')}</p>}
         {isError && (
-          <p className="c-r">
-            {error?.info?.message ||
-              'Er is iets fout gegaan bij het ophalen van de klassen.'}
-          </p>
+          <p className="c-r">{error?.info?.message || t('classes.error')}</p>
         )}
 
         {!isLoading && !isError && classes && classes.length > 0 ? (
@@ -45,7 +43,7 @@ export default function ClassesStudent() {
                     <PrimaryButton
                       onClick={() => navigate(`/student/class/${classItem.id}`)}
                     >
-                      <span className="">Klas bekijken</span>
+                      <span className="">{t('classes.view')}</span>
                     </PrimaryButton>
                   </div>
                 </div>
@@ -53,7 +51,7 @@ export default function ClassesStudent() {
             ))}
           </>
         ) : (
-          !isLoading && <p>Geen klassen gevonden.</p>
+          !isLoading && <p>{t('classes.not_found')}</p>
         )}
       </div>
     </>

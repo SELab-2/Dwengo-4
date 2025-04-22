@@ -64,7 +64,10 @@
     "not_found": "No assignments found"
   },
   "classes": {
-    "label": "Classes"
+    "label": "Classes",
+    "error": "Something went wrong while loading the classes",
+    "not_found": "No classes found",
+    "view": "View class"
   },
   "deadline": "Deadline: {{date}}"
 }
