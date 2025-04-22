@@ -74,5 +74,15 @@
       "error": "Er is iets misgegaan bij het verlaten van de klas."
     }
   },
-  "deadline": "Deadline: {{date}}"
+  "deadline": "Deadline: {{date}}",
+  "join_class": {
+    "title": "Lid worden van klas",
+    "code": {
+      "label": "Klascode",
+      "placeholder": "Voer de klascode in"
+    },
+    "error": "Er is iets fout gelopen tijdens het lid worden van de klas",
+    "submit": "Toegang aanvragen",
+    "success": "Je hebt een aanvraag verzonden om lid te worden van deze klas. Wacht op goedkeuring van de lesgever."
+  }
 }

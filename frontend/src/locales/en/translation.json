@@ -74,5 +74,15 @@
       "error": "Something went wrong while leaving the class"
     }
   },
-  "deadline": "Deadline: {{date}}"
+  "deadline": "Deadline: {{date}}",
+  "join_class": {
+    "title": "Join class",
+    "code": {
+      "label": "Class code",
+      "placeholder": "Enter the class code"
+    },
+    "error": "Something went wrong while joining the class",
+    "submit": "Request access",
+    "success": "You have successfully requested access to the class. The teacher will approve your request soon."
+  }
 }
