@@ -1,18 +1,17 @@
-import {  Submission } from "@prisma/client";
+import { Submission } from "@prisma/client";
 import { AccesDeniedError } from "../errors/errors";
 
 import prisma from "../config/prisma";
-
 
 export default class submissionService {
   static async createSubmission(
     studentId: number,
     evaluationId: string,
-    assignmentId: number
+    assignmentId: number,
   ): Promise<Submission> {
     // Controleren of de student in een team zit dat gekoppeld is aan de opdracht.
     // De originele filter probeerde ook te filteren op assignment.learningPath, maar dat veld bestaat niet.
-    const team: {id: number} | null = await prisma.team.findFirst({
+    const team: { id: number } | null = await prisma.team.findFirst({
       where: {
         students: {
           some: {
@@ -31,7 +30,9 @@ export default class submissionService {
     });
 
     if (!team) {
-      throw new AccesDeniedError("Student is not in a team for this assignment");
+      throw new AccesDeniedError(
+        "Student is not in a team for this assignment",
+      );
     }
 
     return prisma.submission.create({
@@ -45,7 +46,7 @@ export default class submissionService {
 
   static async getSubmissionsForAssignment(
     assignmentId: number,
-    studentId: number
+    studentId: number,
   ): Promise<Submission[]> {
     return prisma.submission.findMany({
       where: {
@@ -67,7 +68,7 @@ export default class submissionService {
   static getSubmissionsForEvaluation(
     assignmentId: number,
     evaluationId: string,
-    studentId: number
+    studentId: number,
   ): Promise<Submission[]> {
     return prisma.submission.findMany({
       where: {
@@ -90,7 +91,7 @@ export default class submissionService {
   static teacherGetSubmissionsForStudent(
     studentId: number,
     teacherId: number,
-    assignmentId?: number
+    assignmentId?: number,
   ): Promise<Submission[]> {
     return prisma.submission.findMany({
       where: {
@@ -122,7 +123,7 @@ export default class submissionService {
   static async teacherGetSubmissionsForTeam(
     teamId: number,
     teacherId: number,
-    assignmentId?: number
+    assignmentId?: number,
   ) {
     return prisma.submission.findMany({
       where: {
