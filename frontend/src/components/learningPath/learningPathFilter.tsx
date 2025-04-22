@@ -2,34 +2,19 @@
 
 import { Button } from "../ui/button";
 import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-    CommandSeparator,
-} from "../ui/command";
-import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "../ui/popover";
 import { cn } from "../../lib/utils";
-import { ListFilter, User } from "lucide-react";
-import { nanoid } from "nanoid";
+import { ListFilter } from "lucide-react";
 import * as React from "react";
-import { AnimateChangeInHeight } from "../ui/filters";
-import Filters from "../ui/filters";
+import Filters, { Filter } from "../ui/filters";
 import {
-    DueDate,
-    Filter,
-    FilterOperator,
-    FilterOption,
     FilterType,
-    filterViewOptions,
-    filterViewToFilterOptions,
 } from "../ui/filters";
+import { FilterOptionsManager } from "./FilterOptionsManager";
+import { FilterCommandMenu } from "./FilterCommandMenu";
 
 interface LearningPathFilterProps {
     filters: Filter[];
@@ -46,39 +31,11 @@ export function LearningPathFilter({ filters, setFilters, creators, languages }:
     const [open, setOpen] = React.useState(false);
     const [selectedView, setSelectedView] = React.useState<FilterType | null>(null);
     const [commandInput, setCommandInput] = React.useState("");
-    const commandInputRef = React.useRef<HTMLInputElement>(null);
-
-    // Update filterViewToFilterOptions when creators or languages change
-    React.useEffect(() => {
-        if (creators?.length) {
-            const selectedCreators = filters
-                .filter(f => f.type === FilterType.CREATOR)
-                .flatMap(f => f.value);
-
-            filterViewToFilterOptions[FilterType.CREATOR] = creators
-                .filter(creator => !selectedCreators.includes(creator.name))
-                .map(creator => ({
-                    name: creator.name,
-                    icon: <User className="size-3" />,
-                }));
-        }
-
-        if (languages?.length) {
-            const selectedLanguages = filters
-                .filter(f => f.type === FilterType.LANGUAGE)
-                .flatMap(f => f.value);
-
-            filterViewToFilterOptions[FilterType.LANGUAGE] = languages
-                .filter(language => !selectedLanguages.includes(language.name))
-                .map(language => ({
-                    name: language.name,
-                    icon: undefined,
-                }));
-        }
-    }, [creators, languages, filters]);
+    const commandInputRef = React.useRef<HTMLInputElement>(null!);
 
     return (
         <div className="flex gap-2 flex-wrap">
+            <FilterOptionsManager creators={creators} languages={languages} filters={filters} />
             <Filters filters={filters} setFilters={setFilters} />
             {filters.filter((filter) => filter.value?.length > 0).length > 0 && (
                 <Button
@@ -118,98 +75,17 @@ export function LearningPathFilter({ filters, setFilters, creators, languages }:
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0">
-                    <AnimateChangeInHeight>
-                        <Command>
-                            <CommandInput
-                                placeholder={selectedView ? selectedView : "Filter..."}
-                                className="h-9"
-                                value={commandInput}
-                                onInputCapture={(e) => {
-                                    setCommandInput(e.currentTarget.value);
-                                }}
-                                ref={commandInputRef}
-                            />
-                            <CommandList>
-                                <CommandEmpty>No results found.</CommandEmpty>
-                                {selectedView ? (
-                                    <CommandGroup>
-                                        {filterViewToFilterOptions[selectedView].map(
-                                            (filter: FilterOption) => (
-                                                <CommandItem
-                                                    className="group text-muted-foreground flex gap-2 items-center"
-                                                    key={filter.name}
-                                                    value={filter.name}
-                                                    onSelect={(currentValue) => {
-                                                        setFilters((prev) => [
-                                                            ...prev,
-                                                            {
-                                                                id: nanoid(),
-                                                                type: selectedView,
-                                                                operator:
-                                                                    selectedView === FilterType.DUE_DATE &&
-                                                                        currentValue !== DueDate.IN_THE_PAST
-                                                                        ? FilterOperator.BEFORE
-                                                                        : FilterOperator.IS,
-                                                                value: selectedView === FilterType.CREATOR
-                                                                    ? [currentValue]
-                                                                    : [currentValue],
-                                                            },
-                                                        ]);
-                                                        setTimeout(() => {
-                                                            setSelectedView(null);
-                                                            setCommandInput("");
-                                                        }, 200);
-                                                        setOpen(false);
-                                                    }}
-                                                >
-                                                    {filter.icon}
-                                                    <span className="text-accent-foreground">
-                                                        {filter.name}
-                                                    </span>
-                                                    {filter.label && (
-                                                        <span className="text-muted-foreground text-xs ml-auto">
-                                                            {filter.label}
-                                                        </span>
-                                                    )}
-                                                </CommandItem>
-                                            )
-                                        )}
-                                    </CommandGroup>
-                                ) : (
-                                    filterViewOptions.map(
-                                        (group: FilterOption[], index: number) => (
-                                            <React.Fragment key={index}>
-                                                <CommandGroup>
-                                                    {group.map((filter: FilterOption) => (
-                                                        <CommandItem
-                                                            className="group text-muted-foreground flex gap-2 items-center"
-                                                            key={filter.name}
-                                                            value={filter.name}
-                                                            onSelect={(currentValue) => {
-                                                                setSelectedView(currentValue as FilterType);
-                                                                setCommandInput("");
-                                                                commandInputRef.current?.focus();
-                                                            }}
-                                                        >
-                                                            {filter.icon}
-                                                            <span className="text-accent-foreground">
-                                                                {filter.name}
-                                                            </span>
-                                                        </CommandItem>
-                                                    ))}
-                                                </CommandGroup>
-                                                {index < filterViewOptions.length - 1 && (
-                                                    <CommandSeparator />
-                                                )}
-                                            </React.Fragment>
-                                        )
-                                    )
-                                )}
-                            </CommandList>
-                        </Command>
-                    </AnimateChangeInHeight>
+                    <FilterCommandMenu
+                        selectedView={selectedView}
+                        setSelectedView={setSelectedView}
+                        commandInput={commandInput}
+                        setCommandInput={setCommandInput}
+                        setFilters={setFilters}
+                        setOpen={setOpen}
+                        commandInputRef={commandInputRef}
+                    />
                 </PopoverContent>
             </Popover>
         </div>
     );
-}
+}   

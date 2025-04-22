@@ -1,11 +1,8 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import asyncHandler from "express-async-handler";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import LocalLearningPathService from "../../services/localLearningPathService";
-import { getLocalLearningPaths } from "./teacherLocalLearningPathController";
-import { searchLearningPathsController } from "../learningPath/learningPathController";
 import { searchLearningPaths, getLearningPathByIdOrHruid } from "../../services/learningPathService";
-import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 // Een interface om je body te structureren.
 // Je kunt er bijvoorbeeld nog meer velden in opnemen, afhankelijk van je noden.
@@ -56,7 +53,7 @@ export const getLearningPathById = asyncHandler(
             let learningPath;
 
             // Check if it's a local path (UUID format)
-            if (isExternalBool) {
+            if (!isExternalBool) {
                 learningPath = await LocalLearningPathService.getLearningPathById(pathId);
             } else {
                 // If not local, fetch from API

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchLearningPaths } from '../../util/teacher/httpTeacher';
 import { LearningPath } from '../../types/type';
@@ -6,6 +6,64 @@ import { LearningPathFilter } from '../../components/learningPath/learningPathFi
 import { Filter, FilterType } from '../../components/ui/filters';
 import { Link } from 'react-router-dom';
 import { filterLearningPaths } from '@/util/filter';
+
+/**
+ * Generates a background color based on the given ID.
+ * 
+ * @param {string} id - The ID to generate the background color for.
+ * @returns {string} The generated background color in HSL format.
+ */
+const generateBackgroundColor = (id: string) => {
+    const hash = [...id].reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    const hue = hash % 360;
+    return `hsl(${hue}, 70%, 80%)`;
+};
+
+interface LearningPathCardProps {
+    path: LearningPath;
+}
+
+/**
+ * LearningPathCard component displays a single learning path card.
+ * 
+ * @param {LearningPathCardProps} props - The props for the component.
+ * @returns {JSX.Element} The rendered LearningPathCard component.
+ */
+const LearningPathCard: React.FC<LearningPathCardProps> = ({ path }) => {
+    const backgroundColor = useMemo(() => generateBackgroundColor(path.id), [path.id]);
+
+    return (
+        <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-128">
+            <div className="w-full h-80 flex items-center justify-center">
+                {path.image ? (
+                    <img
+                        src={`data:image/png;base64,${path.image}`}
+                        alt={`${path.title} thumbnail`}
+                        className="w-full h-full object-cover"
+                    />
+                ) : (
+                    <div
+                        className="w-full h-full flex items-center justify-center object-fit-cover"
+                        style={{ backgroundColor }}
+                    >
+                        <span className="text-gray-700 text-xl font-semibold">
+                            {path.title}
+                        </span>
+                    </div>
+                )}
+            </div>
+            <div className="p-6 flex-grow h-40 border-t-2 border-gray-200">
+                <Link
+                    to={`/learning-path/${path.id}`}
+                    className="text-blue-600 hover:text-blue-800"
+                >
+                    <h2 className="text-xl font-semibold mb-2">{path.title}</h2>
+                </Link>
+                <p className="text-gray-700 h-[77px] overflow-hidden line-clamp-3">{path.description}</p>
+            </div>
+        </div>
+    );
+};
 
 /**
  * LearningPaths component displays all available learning paths.
@@ -21,7 +79,6 @@ import { filterLearningPaths } from '@/util/filter';
  */
 const LearningPaths: React.FC = () => {
     const [filters, setFilters] = useState<Filter[]>([]);
-    const [filteredPaths, setFilteredPaths] = useState<LearningPath[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
 
     const {
@@ -63,10 +120,6 @@ const LearningPaths: React.FC = () => {
         [learningPaths, filters, searchQuery]
     );
 
-    useEffect(() => {
-        setFilteredPaths(filteredResults);
-    }, [filteredResults]);
-
     return (
         <div className="container mx-auto p-6">
             <h1 className="text-3xl font-bold mb-6">Learning Paths</h1>
@@ -91,46 +144,12 @@ const LearningPaths: React.FC = () => {
             {isError && <p className="text-red-500">Error: {error.message}</p>}
 
             {!isLoading && !isError && (
-                filteredPaths.length === 0 ? (
+                filteredResults.length === 0 ? (
                     <p className="text-gray-600">No learning paths found matching your filters.</p>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-10/12 mx-auto">
-                        {filteredPaths.map((path) => (
-                            <div key={path.id} className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-128">
-                                <div className="w-full h-80 flex items-center justify-center">
-                                    {path.image ? (
-                                        <img
-                                            src={`data:image/png;base64,${path.image}`}
-                                            alt={`${path.title} thumbnail`}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    ) : (
-                                        <div
-                                            className="w-full h-full flex items-center justify-center object-fit-cover"
-                                            style={{
-                                                backgroundColor: useMemo(() => {
-                                                    const hash = [...path.id].reduce((acc, c) => acc + c.charCodeAt(0), 0);
-                                                    const hue = hash % 360;
-                                                    return `hsl(${hue}, 70%, 80%)`;
-                                                }, [path.id])
-                                            }}
-                                        >
-                                            <span className="text-gray-700 text-xl font-semibold">
-                                                {path.title}
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="p-6 flex-grow h-40 border-t-2 border-gray-200">
-                                    <Link
-                                        to={`/learning-path/${path.id}`}
-                                        className="text-blue-600 hover:text-blue-800"
-                                    >
-                                        <h2 className="text-xl font-semibold mb-2">{path.title}</h2>
-                                    </Link>
-                                    <p className="text-gray-700 h-[77px] overflow-hidden line-clamp-3">{path.description}</p>
-                                </div>
-                            </div>
+                        {filteredResults.map((path) => (
+                            <LearningPathCard key={path.id} path={path} />
                         ))}
                     </div>
                 )
