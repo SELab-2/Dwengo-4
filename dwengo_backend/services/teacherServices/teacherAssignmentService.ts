@@ -172,11 +172,18 @@ export default class TeacherAssignmentService {
     teamSize: number,
   ): Promise<Assignment> {
     // 1) Check authorization for all classes
-    for (const classId of Object.keys(classTeams)) {
-      if (!(await isAuthorized(teacherId, Role.TEACHER, parseInt(classId)))) {
-        throw new Error("The teacher is unauthorized to perform this action");
-      }
-    }
+    await Promise.all(
+      Object.keys(classTeams).map(async (classId) => {
+        const authorized = await isAuthorized(
+          teacherId,
+          Role.TEACHER,
+          parseInt(classId),
+        );
+        if (!authorized) {
+          throw new Error("The teacher is unauthorized to perform this action");
+        }
+      }),
+    );
 
     // 2) Validate pathRef
     await ReferenceValidationService.validateLearningPath(
@@ -200,6 +207,10 @@ export default class TeacherAssignmentService {
         },
       });
 
+      //*
+      // Deze for loop moet blijven staan. Je mag geen Promise.all() gebruiken in een transaction.
+      // Error: PrismaClientTransactionInvalidError: Transaction API error: cannot run multiple operations in parallel on the same transaction.
+      // *//
       // Create class assignments and teams
       for (const [classId, teams] of Object.entries(classTeams)) {
         await tx.classAssignment.create({
@@ -239,11 +250,19 @@ export default class TeacherAssignmentService {
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
       throw new Error("The teacher is unauthorized to update the assignment");
     }
-    for (const classId of Object.keys(classTeams)) {
-      if (!(await isAuthorized(teacherId, Role.TEACHER, parseInt(classId)))) {
-        throw new Error("The teacher is unauthorized to perform this action");
-      }
-    }
+
+    await Promise.all(
+      Object.keys(classTeams).map(async (classId) => {
+        const authorized = await isAuthorized(
+          teacherId,
+          Role.TEACHER,
+          parseInt(classId),
+        );
+        if (!authorized) {
+          throw new Error(`Teacher is unauthorized to access class ${classId}`);
+        }
+      }),
+    );
 
     // 2) Validate pathRef
     await ReferenceValidationService.validateLearningPath(
@@ -277,6 +296,10 @@ export default class TeacherAssignmentService {
         },
       });
 
+      //*
+      // Deze for loops moet blijven staan. Je mag geen Promise.all() gebruiken in een transaction.
+      // Error: PrismaClientTransactionInvalidError: Transaction API error: cannot run multiple operations in parallel on the same transaction.
+      // *//
       // Ensure all classAssignments exist for the provided classes
       for (const classId of Object.keys(classTeams)) {
         const existingClassAssignment = await tx.classAssignment.findFirst({
