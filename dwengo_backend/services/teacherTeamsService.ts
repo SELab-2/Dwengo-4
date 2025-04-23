@@ -1,21 +1,15 @@
-import {
-  ClassAssignment,
-  ClassStudent,
-  PrismaClient,
-  Student,
-  Team,
-  User,
-} from "@prisma/client";
+import { PrismaClient, Student, Team } from "@prisma/client";
 import {
   IdentifiableTeamDivision,
   TeamDivision,
 } from "../interfaces/extendedTypeInterfaces";
 
-import _ from "lodash";
-
 import prisma from "../config/prisma";
-import { handlePrismaQuery } from "../errors/errorFunctions";
-import { BadRequestError, NotFoundError } from "../errors/errors";
+import {
+  handlePrismaQuery,
+  handleQueryWithExistenceCheck,
+} from "../errors/errorFunctions";
+import { BadRequestError } from "../errors/errors";
 
 /**
  * This function assumes that the division of a group of people into teams has already been done
@@ -36,7 +30,7 @@ export const createTeamsInAssignment = async (
         | "$transaction"
         | "$use"
         | "$extends"
-      >
+      >,
 ): Promise<Team[]> => {
   const createdTeams: Team[] = [];
 
@@ -47,20 +41,19 @@ export const createTeamsInAssignment = async (
     tx = prisma;
   }
   console.log("AssignmentId: 5 ", classId);
-  const classAssignment: ClassAssignment | null =
-    await tx.classAssignment.findUnique({
-      where: {
-        classId_assignmentId: {
-          classId: classId,
-          assignmentId: assignmentId,
+  // Check if the assignment has been assigned to the class
+  await handleQueryWithExistenceCheck(
+    () =>
+      tx.classAssignment.findUnique({
+        where: {
+          classId_assignmentId: {
+            classId: classId,
+            assignmentId: assignmentId,
+          },
         },
-      },
-    });
-  if (!classAssignment) {
-    throw new NotFoundError(
-      "This assignment has not been assigned to this class yet."
-    );
-  }
+      }),
+    "This assignment has not been assigned to this class yet.",
+  );
 
   // Create teams in the database
   for (const team of teams) {
@@ -89,7 +82,7 @@ async function createTeam(
         | "$transaction"
         | "$use"
         | "$extends"
-      >
+      >,
 ): Promise<Team> {
   //check if a transaction has been started, if not, use the default prisma client
   if (!tx) {
@@ -119,7 +112,7 @@ async function giveAssignmentToTeam(
         | "$transaction"
         | "$use"
         | "$extends"
-      >
+      >,
 ): Promise<Team> {
   //check if a transaction has been started, if not, use the default prisma client
   if (!tx) {
@@ -155,7 +148,7 @@ async function assignStudentsToTeam(
         | "$transaction"
         | "$use"
         | "$extends"
-      >
+      >,
 ): Promise<void> {
   //check if a transaction has been started, if not, use the default prisma client
   if (!tx) {
@@ -193,23 +186,20 @@ async function assignStudentsToTeam(
 // createTeamsInAssignment. Want createTeamsInAssignment verwacht al een geldige indeling, daar wordt ook
 // door middleware op gecontroleerd.
 
-async function randomlyDivideClassIntoTeams(
+/*async function randomlyDivideClassIntoTeams(
   teamSize: number,
-  classId: number
+  classId: number,
 ): Promise<TeamDivision[]> {
-  const students: ClassStudent[] = await handlePrismaQuery(() =>
-    prisma.classStudent.findMany({
-      where: { classId: classId },
-    })
+  const students: ClassStudent[] = await handleQueryWithExistenceCheck(
+    () =>
+      prisma.classStudent.findMany({
+        where: { classId: classId },
+      }),
+    `There are no students in this class.`,
   );
 
-  // Ensure that class is found and classLinks exists
-  if (!students) {
-    throw new NotFoundError(`There are no students in this class.`);
-  }
-
   const studentIds: number[] = students.map(
-    (st: ClassStudent): number => st.studentId
+    (st: ClassStudent): number => st.studentId,
   );
 
   // Shuffle the list of studentIds using Lodash
@@ -226,12 +216,12 @@ async function randomlyDivideClassIntoTeams(
   }
 
   return teams;
-}
+}*/
 
 // Does the same as "randomlyDivideClassIntoTeams" but sorts the students alphabetically
-async function divideClassIntoAlphabeticalTeams(
+/*async function divideClassIntoAlphabeticalTeams(
   teamSize: number,
-  classId: number
+  classId: number,
 ): Promise<TeamDivision[]> {
   // This lets TypeScript know what is happening when assigning types to the variables in the sort function
   interface StudentWithUser extends Student {
@@ -249,11 +239,11 @@ async function divideClassIntoAlphabeticalTeams(
         },
       },
       include: { user: true },
-    })
+    }),
   );
 
   // Check if the class is not empty
-  if (!students || students.length === 0) {
+  if (students.length === 0) {
     throw new NotFoundError(`There are no students in this class.`);
   }
 
@@ -262,19 +252,19 @@ async function divideClassIntoAlphabeticalTeams(
     (a: StudentWithUser, b: StudentWithUser): number => {
       // Sort alphabetically based on the user's last name
       const lastNameComparison: number = a.user.lastName.localeCompare(
-        b.user.lastName
+        b.user.lastName,
       );
 
       // If last names are the same, compare by first name
       return lastNameComparison !== 0
         ? lastNameComparison
         : a.user.firstName.localeCompare(b.user.firstName);
-    }
+    },
   );
 
   // Extract sorted student IDs
   const studentIds: number[] = sortedStudents.map(
-    (st: Student): number => st.userId
+    (st: Student): number => st.userId,
   );
 
   const teams: TeamDivision[] = [];
@@ -288,7 +278,7 @@ async function divideClassIntoAlphabeticalTeams(
   }
 
   return teams;
-}
+}*/
 
 // Check if the students exists or not
 const validateStudentIds = async (studentIds: number[]): Promise<void> => {
@@ -297,17 +287,17 @@ const validateStudentIds = async (studentIds: number[]): Promise<void> => {
     prisma.student.findMany({
       where: { userId: { in: studentIds } },
       select: { userId: true },
-    })
+    }),
   );
 
   // Extract the StudentIds
   const validStudentIds = new Set(
-    validStudents.map((student: Student): number => student.userId)
+    validStudents.map((student: Student): number => student.userId),
   );
 
   // Check if all the given StudentIds where found in the Database
   const invalidStudentIds: number[] = studentIds.filter(
-    (studentId: number): boolean => !validStudentIds.has(studentId)
+    (studentId: number): boolean => !validStudentIds.has(studentId),
   );
 
   // If any ID was not found this means that it isn't part of our Database and is therefore invalid
@@ -319,7 +309,7 @@ const validateStudentIds = async (studentIds: number[]): Promise<void> => {
 // Update the given list of teams that have a given assignment
 export const updateTeamsForAssignment = async (
   assignmentId: number,
-  teams: IdentifiableTeamDivision[]
+  teams: IdentifiableTeamDivision[],
 ): Promise<Team[]> => {
   const updatedTeams: Team[] = [];
 
@@ -328,7 +318,7 @@ export const updateTeamsForAssignment = async (
     const existingTeam: Team | null = await handlePrismaQuery(() =>
       prisma.team.findUnique({
         where: { id: team.teamId },
-      })
+      }),
     );
 
     if (!existingTeam) {
@@ -349,7 +339,7 @@ export const updateTeamsForAssignment = async (
             set: team.studentIds.map(
               (studentId: number): { userId: number } => ({
                 userId: studentId,
-              })
+              }),
             ),
           },
           teamAssignment: {
@@ -361,7 +351,7 @@ export const updateTeamsForAssignment = async (
             },
           },
         },
-      })
+      }),
     );
 
     updatedTeams.push(updatedTeam);
@@ -372,7 +362,7 @@ export const updateTeamsForAssignment = async (
 
 // Get all teams for a given assignment
 export const getTeamsThatHaveAssignment = async (
-  assignmentId: number
+  assignmentId: number,
 ): Promise<Team[]> => {
   return await handlePrismaQuery(() =>
     prisma.team.findMany({
@@ -381,7 +371,7 @@ export const getTeamsThatHaveAssignment = async (
           assignmentId: assignmentId,
         },
       },
-    })
+    }),
   );
 };
 
@@ -393,6 +383,6 @@ export const deleteTeam = async (teamId: number): Promise<void> => {
       where: {
         id: teamId,
       },
-    })
+    }),
   );
 };
