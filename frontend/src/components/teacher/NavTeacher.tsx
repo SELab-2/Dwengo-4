@@ -3,9 +3,12 @@ import { useSubmit } from 'react-router-dom';
 import Container from '../shared/Container';
 import styles from './Nav.module.css';
 import NavButton from '../shared/NavButton';
+import { useTranslation } from 'react-i18next';
+import LanguageChooser from '../shared/LanguageChooser';
 
 const NavTeacher: React.FC = () => {
-  const [menuOpen] = useState<boolean>(false);
+  const { t } = useTranslation();
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [firstName] = useState<string | null>(
     localStorage.getItem('firstName'),
   );
@@ -38,8 +41,11 @@ const NavTeacher: React.FC = () => {
                   styles.navLinks
                 } ${menuOpen ? styles.open : ''}`}
               >
-                <NavButton to="/teacher/inloggen" label="Inloggen" />
-                <NavButton to="/teacher/registreren" label="Registreren" />
+                <NavButton to="/teacher/inloggen" label={t('nav.login')} />
+                <NavButton
+                  to="/teacher/registreren"
+                  label={t('nav.register')}
+                />
               </div>
             )}
           </div>
@@ -47,7 +53,8 @@ const NavTeacher: React.FC = () => {
           {/* Right side icons */}
           {firstName && (
             <div className="flex items-center space-x-4">
-              <span>Logged in as {firstName}</span>
+              <span>{t('nav.logged_in_as', { name: firstName })}</span>
+              <LanguageChooser />
               <button
                 className="text-gray-700 hover:cursor-pointer hover:text-gray-600"
                 aria-label="Notifications"

@@ -132,7 +132,7 @@ export async function fetchClasses(): Promise<ClassItem[]> {
   }
 
   const returner = await response.json();
-  const classrooms = returner['classes'];
+  const classrooms = returner['classrooms'];
   console.log('GETTING CLASSES', classrooms);
 
   return classrooms;
@@ -251,7 +251,7 @@ export async function fetchConversation(assignmentId: string) {
     error.info = await response.json();
     throw error;
   }
-
+  
   const resp = await response.json();
 
   const responseQuestion = await fetch(
