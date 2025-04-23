@@ -268,3 +268,35 @@ export async function fetchConversation(assignmentId: string) {
   if (!response.ok) throw new Error('Failed to fetch questions');
   return responseQuestion.json();
 }
+
+/**
+ * Adds a new message to a question
+ * @param {string} questionId - The ID of the question
+ * @param {string} content - The content of the message
+ * @returns {Promise<any>} The created message
+ * @throws {APIError} When the operation fails
+ */
+export async function addMessageToQuestion(
+  questionId: string,
+  content: string,
+): Promise<any> {
+  const response = await fetch(`${BACKEND}/question/${questionId}/message`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+    body: JSON.stringify({ text: content }),
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het toevoegen van het bericht.',
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  return await response.json();
+}
