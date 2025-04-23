@@ -1,9 +1,11 @@
-import { handlePrismaQuery } from "../errors/errorFunctions";
+import {
+  handlePrismaQuery,
+  handleQueryWithExistenceCheck,
+} from "../errors/errorFunctions";
 import {
   AccessDeniedError,
   BadRequestError,
   ForbiddenActionError,
-  NotFoundError,
 } from "../errors/errors";
 import { Assignment, Feedback, Teacher } from "@prisma/client";
 
@@ -212,16 +214,14 @@ export default class FeedbackService {
 
   static async checkExistenceFeedback(submissionId: number): Promise<Feedback> {
     // Check if feedback exists
-    const feedback: Feedback | null = await handlePrismaQuery(() =>
-      prisma.feedback.findUnique({
-        where: {
-          submissionId: submissionId,
-        },
-      }),
+    return await handleQueryWithExistenceCheck(
+      () =>
+        prisma.feedback.findUnique({
+          where: {
+            submissionId: submissionId,
+          },
+        }),
+      "Feedback not found for this submission.",
     );
-    if (feedback === null) {
-      throw new NotFoundError("Feedback not found for this submission.");
-    }
-    return feedback;
   }
 }

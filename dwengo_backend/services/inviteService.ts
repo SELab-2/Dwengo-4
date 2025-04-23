@@ -3,12 +3,12 @@ import classService from "./classService";
 import {
   BadRequestError,
   ConflictError,
-  NotFoundError,
   UnauthorizedError,
 } from "../errors/errors";
 import {
   handlePrismaQuery,
   handlePrismaTransaction,
+  handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
 
 import prisma from "../config/prisma";
@@ -45,16 +45,14 @@ export default class inviteService {
     await classService.isTeacherOfClass(classId, classTeacherId);
 
     // Zoek de leerkracht op basis van het e-mailadres
-    const teacherUser = await handlePrismaQuery(() =>
-      prisma.user.findUnique({
-        where: { email: otherTeacherEmail },
-      }),
+    const teacherUser = await handleQueryWithExistenceCheck(
+      () =>
+        prisma.user.findUnique({
+          where: { email: otherTeacherEmail },
+        }),
+      "Given email doesn't correspond to any existing teachers.",
     );
-    if (!teacherUser) {
-      throw new NotFoundError(
-        "Given email doesn't correspond to any existing teachers.",
-      );
-    }
+
     if (teacherUser.role !== "TEACHER") {
       throw new UnauthorizedError(
         "User is not a teacher. Only teachers can receive invites.",
@@ -197,18 +195,17 @@ export default class inviteService {
     await classService.isTeacherOfClass(classId, classTeacherId);
 
     // Check of de invite bestaat
-    const invite: Invite | null = await handlePrismaQuery(() =>
-      prisma.invite.findFirst({
-        where: {
-          inviteId,
-          classId,
-          status: JoinRequestStatus.PENDING,
-        },
-      }),
+    await handleQueryWithExistenceCheck(
+      () =>
+        prisma.invite.findFirst({
+          where: {
+            inviteId,
+            classId,
+            status: JoinRequestStatus.PENDING,
+          },
+        }),
+      "Invite does not exist or is not pending.",
     );
-    if (!invite) {
-      throw new NotFoundError("Invite does not exist or is not pending.");
-    }
 
     // Verwijder de invite
     return await handlePrismaQuery(() =>
