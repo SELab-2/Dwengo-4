@@ -5,6 +5,7 @@ import prisma from "../config/prisma";
 import {
   handlePrismaQuery,
   handlePrismaTransaction,
+  handleQueryWithExistenceCheck,
   throwCorrectNetworkError,
 } from "../errors/errorFunctions";
 import {
@@ -35,14 +36,14 @@ class LocalLearningPathNodeService {
    * Helper: check of de teacher de eigenaar is van leerpad 'pathId'
    */
   private async checkTeacherOwnsPath(teacherId: number, pathId: string) {
-    const path = await handlePrismaQuery(() =>
-      prisma.learningPath.findUnique({
-        where: { id: pathId },
-      }),
+    const path = await handleQueryWithExistenceCheck(
+      () =>
+        prisma.learningPath.findUnique({
+          where: { id: pathId },
+        }),
+      "Learning path not found.",
     );
-    if (!path) {
-      throw new NotFoundError("Learning path not found.");
-    }
+
     if (path.creatorId !== teacherId) {
       throw new AccessDeniedError("Teacher is not the creator of this path.");
     }
@@ -138,14 +139,14 @@ class LocalLearningPathNodeService {
   ): Promise<LearningPathNode> {
     await this.checkTeacherOwnsPath(teacherId, pathId);
 
-    const node = await handlePrismaQuery(() =>
-      prisma.learningPathNode.findUnique({
-        where: { nodeId },
-      }),
+    const node = await handleQueryWithExistenceCheck(
+      () =>
+        prisma.learningPathNode.findUnique({
+          where: { nodeId },
+        }),
+      "Node not found.",
     );
-    if (!node) {
-      throw new NotFoundError("Node not found.");
-    }
+
     if (node.learningPathId !== pathId) {
       throw new BadRequestError("Node is not a part of this learning path.");
     }
@@ -267,14 +268,14 @@ class LocalLearningPathNodeService {
   ): Promise<void> {
     await this.checkTeacherOwnsPath(teacherId, pathId);
 
-    const node = await handlePrismaQuery(() =>
-      prisma.learningPathNode.findUnique({
-        where: { nodeId },
-      }),
+    const node = await handleQueryWithExistenceCheck(
+      () =>
+        prisma.learningPathNode.findUnique({
+          where: { nodeId },
+        }),
+      "Node not found.",
     );
-    if (!node) {
-      throw new NotFoundError("Node not found.");
-    }
+
     if (node.learningPathId !== pathId) {
       throw new BadRequestError("Node is not a part of the learning path.");
     }
@@ -302,14 +303,13 @@ class LocalLearningPathNodeService {
    *  ================================
    */
   private async validateLocalObject(loId: string): Promise<void> {
-    const exists = await handlePrismaQuery(() =>
-      prisma.learningObject.findUnique({
-        where: { id: loId },
-      }),
+    await handleQueryWithExistenceCheck(
+      () =>
+        prisma.learningObject.findUnique({
+          where: { id: loId },
+        }),
+      `Local learning object not found.`,
     );
-    if (!exists) {
-      throw new NotFoundError(`Local learning object not found.`);
-    }
   }
 
   /**

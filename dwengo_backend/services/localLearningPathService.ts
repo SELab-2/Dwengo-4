@@ -3,9 +3,11 @@ import {
   LearningPath as PrismaLearningPath,
 } from "@prisma/client";
 import { LearningPathDto } from "./learningPathService"; // <-- We hergebruiken het type
-
 import prisma from "../config/prisma";
-import { handlePrismaQuery } from "../errors/errorFunctions";
+import {
+  handlePrismaQuery,
+  handleQueryWithExistenceCheck,
+} from "../errors/errorFunctions";
 import { NotFoundError } from "../errors/errors";
 
 export interface LocalLearningPathData {
@@ -71,15 +73,13 @@ export class LocalLearningPathService {
   }
 
   async getLearningPathById(pathId: string): Promise<LearningPath> {
-    const path: LearningPath | null = await handlePrismaQuery(() =>
-      prisma.learningPath.findUnique({
-        where: { id: pathId },
-      }),
+    return await handleQueryWithExistenceCheck(
+      () =>
+        prisma.learningPath.findUnique({
+          where: { id: pathId },
+        }),
+      "Learning path not found.",
     );
-    if (!path) {
-      throw new NotFoundError("Learning path not found.");
-    }
-    return path;
   }
 
   async updateLearningPath(
