@@ -1,20 +1,21 @@
 import {
   Question,
-  QuestionType,
-  QuestionSpecific,
   QuestionGeneral,
   QuestionMessage,
+  QuestionSpecific,
+  QuestionType,
   Role,
 } from "@prisma/client";
 
 import referenceValidationService from "./referenceValidationService";
-import { NotFoundError, BadRequestError } from "../errors/errors";
+import { BadRequestError } from "../errors/errors";
 import { AuthenticatedUser } from "../interfaces/extendedTypeInterfaces";
 
 import prisma from "../config/prisma";
 import {
   handlePrismaQuery,
   handlePrismaTransaction,
+  handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
 
 /**
@@ -58,12 +59,10 @@ function canUserSeeQuestionInList(
   if (question.isPrivate) {
     // Private => alleen creator, teacher in class, admin
     const isCreator = question.createdBy === user.id;
-    if (isCreator || isTeacherInClass || isAdmin) return true;
-    return false;
+    return isCreator || isTeacherInClass || isAdmin;
   } else {
     // Niet private => hele team, teacher, admin
-    if (isStudentInTeam || isTeacherInClass || isAdmin) return true;
-    return false;
+    return isStudentInTeam || isTeacherInClass || isAdmin;
   }
 }
 
@@ -84,28 +83,26 @@ export default class QuestionService {
     isPrivate: boolean,
   ): Promise<Question> {
     // 1) Check assignment
-    const assignment = await handlePrismaQuery(() =>
-      prisma.assignment.findUnique({
-        where: { id: assignmentId },
-      }),
+    await handleQueryWithExistenceCheck(
+      () =>
+        prisma.assignment.findUnique({
+          where: { id: assignmentId },
+        }),
+      "Assignment not found.",
     );
-    if (!assignment) {
-      throw new NotFoundError("Assignment not found.");
-    }
 
     // 2) Check team
-    const team = await handlePrismaQuery(() =>
-      prisma.team.findUnique({
-        where: { id: teamId },
-        include: {
-          teamAssignment: true,
-          students: true,
-        },
-      }),
+    const team = await handleQueryWithExistenceCheck(
+      () =>
+        prisma.team.findUnique({
+          where: { id: teamId },
+          include: {
+            teamAssignment: true,
+            students: true,
+          },
+        }),
+      "Team not found.",
     );
-    if (!team) {
-      throw new NotFoundError("Team not found.");
-    }
 
     // Check of team bij deze assignment hoort
     if (
@@ -126,7 +123,7 @@ export default class QuestionService {
     }
 
     // 3) Transactie: Question + eerste message
-    const newQuestion = await handlePrismaTransaction(prisma, async (tx) => {
+    return await handlePrismaTransaction(prisma, async (tx) => {
       const q = await tx.question.create({
         data: {
           title,
@@ -146,8 +143,6 @@ export default class QuestionService {
       });
       return q;
     });
-
-    return newQuestion;
   }
 
   /**
@@ -278,14 +273,14 @@ export default class QuestionService {
     if (!text.trim()) {
       throw new BadRequestError("Message cannot be empty.");
     }
-    const question = await handlePrismaQuery(() =>
-      prisma.question.findUnique({
-        where: { id: questionId },
-      }),
+
+    await handleQueryWithExistenceCheck(
+      () =>
+        prisma.question.findUnique({
+          where: { id: questionId },
+        }),
+      "Question not found.",
     );
-    if (!question) {
-      throw new NotFoundError("Question not found.");
-    }
 
     return await handlePrismaQuery(() =>
       prisma.questionMessage.create({
@@ -308,12 +303,11 @@ export default class QuestionService {
     if (!newTitle.trim()) {
       throw new BadRequestError("Title cannot be empty.");
     }
-    const q = await handlePrismaQuery(() =>
-      prisma.question.findUnique({ where: { id: questionId } }),
+    await handleQueryWithExistenceCheck(
+      () => prisma.question.findUnique({ where: { id: questionId } }),
+      "Question not found.",
     );
-    if (!q) {
-      throw new NotFoundError("Question not found.");
-    }
+
     return await handlePrismaQuery(() =>
       prisma.question.update({
         where: { id: questionId },
@@ -332,14 +326,14 @@ export default class QuestionService {
     if (!newText.trim()) {
       throw new BadRequestError("Message cannot be empty.");
     }
-    const msg = await handlePrismaQuery(() =>
-      prisma.questionMessage.findUnique({
-        where: { id: questionMessageId },
-      }),
+    await handleQueryWithExistenceCheck(
+      () =>
+        prisma.questionMessage.findUnique({
+          where: { id: questionMessageId },
+        }),
+      "QuestionMessage not found.",
     );
-    if (!msg) {
-      throw new NotFoundError("QuestionMessage not found.");
-    }
+
     return await handlePrismaQuery(() =>
       prisma.questionMessage.update({
         where: { id: questionMessageId },
@@ -353,20 +347,18 @@ export default class QuestionService {
    * (De authorizeQuestion middleware checkt of user mag inzien.)
    */
   static async getQuestion(questionId: number): Promise<Question> {
-    const question = await handlePrismaQuery(() =>
-      prisma.question.findUnique({
-        where: { id: questionId },
-        include: {
-          specific: true,
-          general: true,
-          questionConversation: true,
-        },
-      }),
+    return await handleQueryWithExistenceCheck(
+      () =>
+        prisma.question.findUnique({
+          where: { id: questionId },
+          include: {
+            specific: true,
+            general: true,
+            questionConversation: true,
+          },
+        }),
+      "Question not found.",
     );
-    if (!question) {
-      throw new NotFoundError("Question not found.");
-    }
-    return question;
   }
 
   /**
@@ -488,14 +480,14 @@ export default class QuestionService {
    * DELETE vraag (cascade messages)
    */
   static async deleteQuestion(questionId: number): Promise<Question> {
-    const question = await handlePrismaQuery(() =>
-      prisma.question.findUnique({
-        where: { id: questionId },
-      }),
+    await handleQueryWithExistenceCheck(
+      () =>
+        prisma.question.findUnique({
+          where: { id: questionId },
+        }),
+      "Question not found.",
     );
-    if (!question) {
-      throw new NotFoundError("Question not found.");
-    }
+
     return await handlePrismaQuery(() =>
       prisma.question.delete({ where: { id: questionId } }),
     );
@@ -507,14 +499,14 @@ export default class QuestionService {
   static async deleteQuestionMessage(
     questionMessageId: number,
   ): Promise<QuestionMessage> {
-    const msg = await handlePrismaQuery(() =>
-      prisma.questionMessage.findUnique({
-        where: { id: questionMessageId },
-      }),
+    await handleQueryWithExistenceCheck(
+      () =>
+        prisma.questionMessage.findUnique({
+          where: { id: questionMessageId },
+        }),
+      "QuestionMessage not found.",
     );
-    if (!msg) {
-      throw new NotFoundError("QuestionMessage not found.");
-    }
+
     return await handlePrismaQuery(() =>
       prisma.questionMessage.delete({ where: { id: questionMessageId } }),
     );
