@@ -62,7 +62,7 @@ export class LocalLearningPathService {
         creator: {
           include: {
             user: true,
-          }
+          },
         },
       },
     });

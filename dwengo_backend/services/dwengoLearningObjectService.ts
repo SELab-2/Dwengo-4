@@ -3,7 +3,7 @@ import { dwengoAPI } from "../config/dwengoAPI";
 /**
  * De mogelijke content types (zie je enum in de oorspronkelijke code).
  */
-/* eslint-disable no-unused-vars */
+
 enum ContentType {
   // Dit zijn momenteel "unused variables" dus eslint wil dat deze voorafgegaan worden door een "_"
   _TEXT_PLAIN = "text/plain",
@@ -19,7 +19,7 @@ enum ContentType {
 /**
  * Mapping van Dwengo string => onze enum
  */
-/* eslint-disable no-unused-vars */
+
 const permittedContentTypes = {
   "text/plain": ContentType._TEXT_PLAIN,
   "text/markdown": ContentType._TEXT_MARKDOWN,
@@ -85,7 +85,9 @@ export interface LearningObjectDtoWithRaw extends LearningObjectDto {
 /**
  * Converteer Dwengo-object naar onze LearningObjectDto
  */
-function mapDwengoToLocal(dwengoObj: DwengoLearningObject): LearningObjectDtoWithRaw {
+function mapDwengoToLocal(
+  dwengoObj: DwengoLearningObject,
+): LearningObjectDtoWithRaw {
   return {
     id: dwengoObj._id ?? "",
     uuid: dwengoObj.uuid ?? "",
@@ -96,7 +98,7 @@ function mapDwengoToLocal(dwengoObj: DwengoLearningObject): LearningObjectDtoWit
     description: dwengoObj.description ?? "",
     contentType:
       permittedContentTypes[
-      (dwengoObj.content_type as keyof typeof permittedContentTypes) ?? ""
+        (dwengoObj.content_type as keyof typeof permittedContentTypes) ?? ""
       ] ?? ContentType._TEXT_PLAIN,
     keywords: dwengoObj.keywords ?? [],
     targetAges: dwengoObj.target_ages ?? [],
@@ -259,26 +261,35 @@ export async function getDwengoObjectsForPath(
       return [];
     }
     const nodes = learningPath.nodes || [];
-    const results = await Promise.all(nodes.map(async (node: { learningobject_hruid: any; version: any; language: any; }) => {
-      try {
-        const params = {
-          hruid: node.learningobject_hruid,
-          version: node.version,
-          language: node.language,
-        };
-        const [metaRes, rawRes] = await Promise.all([
-          dwengoAPI.get("/api/learningObject/getMetadata", { params }),
-          dwengoAPI.get("/api/learningObject/getRaw", { params }),
-        ]);
-        const dto = mapDwengoToLocal(metaRes.data as DwengoLearningObject);
-        dto.raw = rawRes.data;
-        if (!isTeacher && (dto.teacherExclusive || !dto.available)) return null;
-        return dto;
-      } catch {
-        console.error("Fout bij node:", node);
-        return null;
-      }
-    }));
+    const results = await Promise.all(
+      nodes.map(
+        async (node: {
+          learningobject_hruid: any;
+          version: any;
+          language: any;
+        }) => {
+          try {
+            const params = {
+              hruid: node.learningobject_hruid,
+              version: node.version,
+              language: node.language,
+            };
+            const [metaRes, rawRes] = await Promise.all([
+              dwengoAPI.get("/api/learningObject/getMetadata", { params }),
+              dwengoAPI.get("/api/learningObject/getRaw", { params }),
+            ]);
+            const dto = mapDwengoToLocal(metaRes.data as DwengoLearningObject);
+            dto.raw = rawRes.data;
+            if (!isTeacher && (dto.teacherExclusive || !dto.available))
+              return null;
+            return dto;
+          } catch {
+            console.error("Fout bij node:", node);
+            return null;
+          }
+        },
+      ),
+    );
     return results.filter((x): x is LearningObjectDtoWithRaw => x !== null);
   } catch (error) {
     console.error("Fout bij getDwengoObjectsForPath:", error);
