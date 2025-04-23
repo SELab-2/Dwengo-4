@@ -227,31 +227,45 @@ export async function getDwengoObjectsForPath(
       return [];
     }
     const nodes = learningPath.nodes || [];
-    const results: LearningObjectDto[] = [];
+    const results: LearningObjectDto[] = await Promise.all(
+      nodes.map(
+        async (node: {
+          learningobject_hruid: any;
+          version: any;
+          language: any;
+        }) => {
+          try {
+            const params = {
+              hruid: node.learningobject_hruid,
+              version: node.version,
+              language: node.language,
+            };
 
-    for (const node of nodes) {
-      try {
-        const params = {
-          hruid: node.learningobject_hruid,
-          version: node.version,
-          language: node.language,
-        };
-        const response = await dwengoAPI.get(
-          "/api/learningObject/getMetadata",
-          { params },
-        );
-        const dwengoObj: DwengoLearningObject = response.data;
-        const mapped = mapDwengoToLocal(dwengoObj);
+            const response = await dwengoAPI.get(
+              "/api/learningObject/getMetadata",
+              {
+                params,
+              },
+            );
 
-        if (!isTeacher && (mapped.teacherExclusive || !mapped.available)) {
-          continue;
-        }
-        results.push(mapped);
-      } catch (err) {
-        console.error("Fout bij ophalen node:", err);
-      }
-    }
-    return results;
+            const dwengoObj: DwengoLearningObject = response.data;
+            const mapped = mapDwengoToLocal(dwengoObj);
+
+            if (!isTeacher && (mapped.teacherExclusive || !mapped.available)) {
+              return null;
+            }
+
+            return mapped;
+          } catch (err) {
+            console.error("Fout bij ophalen node:", err);
+            return null;
+          }
+        },
+      ),
+    );
+
+    // Filter out nulls (skipped or failed nodes)
+    return results.filter((r) => r !== null);
   } catch (error) {
     console.error("Fout bij getDwengoObjectsForPath:", error);
     return [];

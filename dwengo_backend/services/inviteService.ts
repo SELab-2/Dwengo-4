@@ -1,4 +1,4 @@
-import { Invite, JoinRequestStatus, Class } from "@prisma/client";
+import { Class, Invite, JoinRequestStatus } from "@prisma/client";
 import classService from "./classService";
 import {
   AccesDeniedError,
@@ -6,9 +6,7 @@ import {
   ConflictError,
   NotFoundError,
 } from "../errors/errors";
-
 import prisma from "../config/prisma";
-
 
 export default class inviteService {
   private static async validateInvitePending(
@@ -103,7 +101,7 @@ export default class inviteService {
     if (!isTeacher) {
       throw new AccesDeniedError("Leerkracht is geen beheerder van de klas");
     }
-    return await prisma.invite.findMany({
+    return prisma.invite.findMany({
       where: {
         classId,
         status: JoinRequestStatus.PENDING,
@@ -186,7 +184,7 @@ export default class inviteService {
     }
 
     // Verwijder de invite
-    return await prisma.invite.delete({
+    return prisma.invite.delete({
       where: {
         inviteId,
         classId,

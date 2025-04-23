@@ -1,17 +1,19 @@
 import { Assignment } from "@prisma/client";
 import prisma from "../config/prisma";
 
-
-
 export default class AssignmentService {
-  static async getAssignmentById(assignmentId: number, includeClass: boolean, includeTeams: boolean): Promise<Assignment | null> {
+  static async getAssignmentById(
+    assignmentId: number,
+    includeClass: boolean,
+    includeTeams: boolean,
+  ): Promise<Assignment | null> {
     return prisma.assignment.findUnique({
       where: { id: assignmentId },
       include: {
         classAssignments: {
           include: {
-            class: includeClass
-          }
+            class: includeClass,
+          },
         },
         teamAssignments: {
           include: {
@@ -19,16 +21,14 @@ export default class AssignmentService {
               include: {
                 students: {
                   include: {
-                    user: includeTeams
-                  }
-                }
-              }
-            }
-          }
-        }
+                    user: includeTeams,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
-
     });
   }
 }
-
