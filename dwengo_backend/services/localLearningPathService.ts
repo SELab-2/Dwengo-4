@@ -1,5 +1,7 @@
-
-import { PrismaClient, LearningPath as PrismaLearningPath } from "@prisma/client";
+import {
+  LearningPath as PrismaLearningPath,
+  PrismaClient,
+} from "@prisma/client";
 import { LearningPathDto } from "./learningPathService"; // <-- We hergebruiken het type
 
 const prisma = new PrismaClient();
@@ -36,7 +38,7 @@ function mapLocalPathToDto(lp: PrismaLearningPath): LearningPathDto {
 export class LocalLearningPathService {
   async createLearningPath(
     teacherId: number,
-    data: Required<LocalLearningPathData>
+    data: Required<LocalLearningPathData>,
   ) {
     return prisma.learningPath.create({
       data: {
@@ -115,7 +117,10 @@ export class LocalLearningPathService {
     // als all is gedefinieerd => geen filtering
     if (filters.all === undefined) {
       if (filters.language) {
-        whereClause.language = { contains: filters.language, mode: "insensitive" };
+        whereClause.language = {
+          contains: filters.language,
+          mode: "insensitive",
+        };
       }
       if (filters.hruid) {
         whereClause.hruid = filters.hruid; // exacte match
@@ -142,7 +147,9 @@ export class LocalLearningPathService {
   /**
    * [NIEUW] Haal 1 leerpad (in Dto) op via id of hruid
    */
-  async getLearningPathAsDtoByIdOrHruid(idOrHruid: string): Promise<LearningPathDto | null> {
+  async getLearningPathAsDtoByIdOrHruid(
+    idOrHruid: string,
+  ): Promise<LearningPathDto | null> {
     // 1) Probeer op id
     const byId = await prisma.learningPath.findUnique({
       where: { id: idOrHruid },

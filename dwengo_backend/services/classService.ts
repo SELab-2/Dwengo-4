@@ -66,7 +66,7 @@ export default class ClassService {
   // Delete a class by ID
   static async deleteClass(classId: number, teacherId: number): Promise<Class> {
     await this.verifyClassAndTeacher(classId, teacherId);
-    return await prisma.class.delete({ where: { id: classId } }); // onDelete: Cascade in the prisma schema makes sure that all related records are also deleted
+    return prisma.class.delete({ where: { id: classId } }); // onDelete: Cascade in the prisma schema makes sure that all related records are also deleted
   }
 
   // Get all classes taught by a given teacher
@@ -136,7 +136,7 @@ export default class ClassService {
       );
     }
 
-    return await prisma.classStudent.delete({
+    return prisma.classStudent.delete({
       where: {
         studentId_classId: {
           studentId: studentId,
@@ -207,7 +207,7 @@ export default class ClassService {
     });
   }
 
-  // Check if student is already in the class
+  // Check if the student is already in the class
   static async isStudentInClass(
     classroom: ClassWithLinks,
     studentId: number,

@@ -259,7 +259,6 @@ export async function getDwengoObjectsForPath(
       return [];
     }
     const nodes = learningPath.nodes || [];
-
     const results = await Promise.all(nodes.map(async (node: { learningobject_hruid: any; version: any; language: any; }) => {
       try {
         const params = {
@@ -281,7 +280,6 @@ export async function getDwengoObjectsForPath(
       }
     }));
     return results.filter((x): x is LearningObjectDtoWithRaw => x !== null);
-
   } catch (error) {
     console.error("Fout bij getDwengoObjectsForPath:", error);
     return [];

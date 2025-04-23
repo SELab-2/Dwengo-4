@@ -1,9 +1,6 @@
+import { JoinRequest, JoinRequestStatus } from "@prisma/client";
 
-import { JoinRequestStatus, JoinRequest} from "@prisma/client";
-
-
-import classService from "./classService";
-import { ClassWithLinks } from "./classService";
+import classService, { ClassWithLinks } from "./classService";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import {
   AccesDeniedError,
@@ -12,7 +9,6 @@ import {
 } from "../errors/errors";
 
 import prisma from "../config/prisma";
-
 
 export default class joinRequestService {
   // Validate whether the class exists before proceeding
@@ -33,7 +29,7 @@ export default class joinRequestService {
     classId: number,
     status: JoinRequestStatus,
   ): Promise<JoinRequest> {
-    // check if teacher is allowed to approve/deny the request
+    // check if the teacher is allowed to approve/deny the request
     const isTeacher: boolean = await classService.isTeacherOfClass(
       classId,
       teacherId,
@@ -54,12 +50,10 @@ export default class joinRequestService {
     }
 
     // Update the join request status
-    const updatedRequest = await prisma.joinRequest.update({
+    return prisma.joinRequest.update({
       where: { requestId },
       data: { status: status },
     });
-
-    return updatedRequest;
   }
 
   static async createJoinRequest(
