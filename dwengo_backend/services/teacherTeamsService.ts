@@ -6,6 +6,26 @@ import {
 
 import prisma from "../config/prisma";
 
+type PrismaTransactionClient = Omit<
+  PrismaClient,
+  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+>;
+
+/**
+ * Resolves the transaction client to be used.
+ *
+ * If a transaction client is provided, it will return the provided client.
+ * Otherwise, it falls back to the default Prisma client.
+ *
+ * @param {PrismaClient | PrismaTransactionClient} [tx] - Optional transaction or Prisma client instance.
+ * @return {PrismaTransactionClient} The resolved Prisma transaction client.
+ */
+function resolveTx(
+  tx?: PrismaClient | PrismaTransactionClient,
+): PrismaTransactionClient {
+  return tx ?? prisma;
+}
+
 /**
  * This function assumes that the division of a group of people into teams has already been done
  * and is specified as a "TeamDivision" interface.
@@ -15,27 +35,14 @@ export const createTeamsInAssignment = async (
   assignmentId: number,
   classId: number,
   teams: TeamDivision[],
-  tx?:
-    | PrismaClient
-    | Omit<
-        PrismaClient,
-        | "$connect"
-        | "$disconnect"
-        | "$on"
-        | "$transaction"
-        | "$use"
-        | "$extends"
-      >,
+  tx?: PrismaTransactionClient,
 ): Promise<Team[]> => {
   const createdTeams: Team[] = [];
 
   // Check if a class has been assigned an Assignment before splitting this class up into
   // Teams to solve this assignment.
-  // Dit is nodig om met dezelfde transactie te werken, als we dat willen.
-  if (!tx) {
-    tx = prisma;
-  }
-  console.log("AssignmentId: 5 ", classId);
+  tx = resolveTx(tx);
+
   const classAssignments: ClassAssignment[] = await tx.classAssignment.findMany(
     {
       where: {
@@ -44,15 +51,12 @@ export const createTeamsInAssignment = async (
       },
     },
   );
-  console.log("AssignmentId: 5.5 ", classAssignments);
+
   if (classAssignments.length === 0) {
     throw new Error("Assignment not found or not linked to any class.");
   }
 
-  console.log("AssignmentId: 6 ");
-
   // Create teams in the database
-  // Geen promise.all() gebruiken hier aangezien tx een prisma.$transaction() kan zijn.
   for (const team of teams) {
     const newTeam: Team = await createTeam(team.teamName, classId, tx);
     await assignStudentsToTeam(newTeam.id, team.studentIds, tx);
@@ -69,24 +73,9 @@ export const createTeamsInAssignment = async (
 async function createTeam(
   teamName: string,
   classId: number,
-  tx?:
-    | PrismaClient
-    | Omit<
-        PrismaClient,
-        | "$connect"
-        | "$disconnect"
-        | "$on"
-        | "$transaction"
-        | "$use"
-        | "$extends"
-      >,
+  tx?: PrismaTransactionClient,
 ): Promise<Team> {
-  //check if a transaction has been started, if not, use the default prisma client
-  if (!tx) {
-    tx = prisma;
-  }
-
-  return tx.team.create({
+  return resolveTx(tx).team.create({
     data: {
       teamname: teamName,
       classId: classId,
@@ -99,24 +88,9 @@ async function createTeam(
 async function giveAssignmentToTeam(
   teamId: number,
   assignmentId: number,
-  tx?:
-    | PrismaClient
-    | Omit<
-        PrismaClient,
-        | "$connect"
-        | "$disconnect"
-        | "$on"
-        | "$transaction"
-        | "$use"
-        | "$extends"
-      >,
+  tx?: PrismaTransactionClient,
 ): Promise<Team> {
-  //check if a transaction has been started, if not, use the default prisma client
-  if (!tx) {
-    tx = prisma;
-  }
-
-  return tx.team.update({
+  return resolveTx(tx).team.update({
     where: { id: teamId },
     data: {
       teamAssignment: {
@@ -135,24 +109,9 @@ async function giveAssignmentToTeam(
 async function assignStudentsToTeam(
   teamId: number,
   studentIds: number[],
-  tx?:
-    | PrismaClient
-    | Omit<
-        PrismaClient,
-        | "$connect"
-        | "$disconnect"
-        | "$on"
-        | "$transaction"
-        | "$use"
-        | "$extends"
-      >,
+  tx?: PrismaTransactionClient,
 ): Promise<void> {
-  //check if a transaction has been started, if not, use the default prisma client
-  if (!tx) {
-    tx = prisma;
-  }
-
-  // Geen promise.all() gebruiken hier aangezien tx een prisma.$transaction() kan zijn.
+  tx = resolveTx(tx);
   for (const studentId of studentIds) {
     // Ga eerst na of deze student en dit team zelfs bestaan
     const student: Student | null = await tx.student.findUnique({
@@ -180,7 +139,8 @@ async function assignStudentsToTeam(
 // createTeamsInAssignment. Want createTeamsInAssignment verwacht al een geldige indeling, daar wordt ook
 // door middleware op gecontroleerd.
 // *//
-/*async function randomlyDivideClassIntoTeams(
+/*
+async function randomlyDivideClassIntoTeams(
   teamSize: number,
   classId: number,
 ): Promise<TeamDivision[]> {
@@ -211,10 +171,12 @@ async function assignStudentsToTeam(
   }
 
   return teams;
-}*/
+}
+*/
 
 // Does the same as "randomlyDivideClassIntoTeams" but sorts the students alphabetically
-/*async function divideClassIntoAlphabeticalTeams(
+/*
+async function divideClassIntoAlphabeticalTeams(
   teamSize: number,
   classId: number,
 ): Promise<TeamDivision[]> {
@@ -223,7 +185,7 @@ async function assignStudentsToTeam(
     user: User;
   }
 
-  // First, fetch all the students in the given class
+  // First fetch all the students in the given class
   const students: (Student & { user: User })[] = await prisma.student.findMany({
     where: {
       classes: {
@@ -271,7 +233,8 @@ async function assignStudentsToTeam(
   }
 
   return teams;
-}*/
+}
+*/
 
 // Check if the students exists or not
 const validateStudentIds = async (studentIds: number[]): Promise<void> => {
@@ -302,43 +265,47 @@ export const updateTeamsForAssignment = async (
   assignmentId: number,
   teams: IdentifiableTeamDivision[],
 ): Promise<Team[]> => {
-  return await Promise.all(
-    teams.map(async (team) => {
-      // Check if the team exists
-      const existingTeam = await prisma.team.findUnique({
-        where: { id: team.teamId },
-      });
+  const updatedTeams: Team[] = [];
 
-      if (!existingTeam) {
-        throw new Error(`Team with ID ${team.teamId} not found.`);
-      }
+  for (const team of teams) {
+    // Check if the team exists
+    const existingTeam: Team | null = await prisma.team.findUnique({
+      where: { id: team.teamId },
+    });
 
-      // Validate students before updating
-      await validateStudentIds(team.studentIds);
+    if (!existingTeam) {
+      throw new Error(`Team with ID ${team.teamId} not found.`);
+    }
 
-      // Update team name and students
-      return prisma.team.update({
-        where: { id: team.teamId },
-        data: {
-          teamname: team.teamName,
-          students: {
-            set: team.studentIds.map((studentId) => ({ userId: studentId })),
-          },
-          teamAssignment: {
-            connectOrCreate: {
-              where: {
-                teamId_assignmentId: {
-                  teamId: team.teamId,
-                  assignmentId,
-                },
-              },
-              create: { assignmentId },
+    // Validate students before updating
+    await validateStudentIds(team.studentIds);
+
+    // Update team name and students
+    const updatedTeam: Team = await prisma.team.update({
+      where: { id: team.teamId },
+      data: {
+        teamname: team.teamName,
+        students: {
+          // The set operation removes all existing students from the team and replaces them with the new list of students (team.studentIds).
+          set: team.studentIds.map((studentId: number): { userId: number } => ({
+            userId: studentId,
+          })),
+        },
+        teamAssignment: {
+          connectOrCreate: {
+            where: {
+              teamId_assignmentId: { teamId: team.teamId, assignmentId },
             },
+            create: { assignmentId: assignmentId },
           },
         },
-      });
-    }),
-  );
+      },
+    });
+
+    updatedTeams.push(updatedTeam);
+  }
+
+  return updatedTeams;
 };
 
 // Get all teams for a given assignment
