@@ -1,8 +1,7 @@
-
 import { dwengoAPI } from "../config/dwengoAPI";
 
 export interface LearningPathDto {
-  _id: string;      // Dwengo gebruikt _id of in onze DB is het id
+  _id: string; // Dwengo gebruikt _id of in onze DB is het id
   hruid: string;
   language: string;
   title: string;
@@ -16,7 +15,7 @@ export interface LearningPathDto {
 
   // ===== BELANGRIJK =====
   // Zodat we Dwengo vs. lokaal kunnen onderscheiden in 1 type:
-  isExternal: boolean; 
+  isExternal: boolean;
 }
 
 // Dwengo -> Local mapping
@@ -43,7 +42,13 @@ function mapDwengoPathToLocal(dwengoPath: any): LearningPathDto {
  * (ongewijzigd, behalve dat mapDwengoPathToLocal nu isExternal=true zet)
  */
 export async function searchLearningPaths(
-  filters: { language?: string; hruid?: string; title?: string; description?: string; all?: string } = {}
+  filters: {
+    language?: string;
+    hruid?: string;
+    title?: string;
+    description?: string;
+    all?: string;
+  } = {},
 ): Promise<LearningPathDto[]> {
   try {
     const params: Record<string, any> = {};
@@ -55,11 +60,12 @@ export async function searchLearningPaths(
       params.all = filters.all;
     }
 
-    const response = await dwengoAPI.get("/api/learningPath/search", { params });
+    const response = await dwengoAPI.get("/api/learningPath/search", {
+      params,
+    });
     const dwengoData = response.data; // array van leerpaden
 
-    const results = dwengoData.map(mapDwengoPathToLocal);
-    return results;
+    return dwengoData.map(mapDwengoPathToLocal);
   } catch (error) {
     console.error("Fout bij searchLearningPaths:", error);
     throw new Error("Dwengo API call voor leerpaden mislukt.");
@@ -67,7 +73,7 @@ export async function searchLearningPaths(
 }
 
 export async function getLearningPathByIdOrHruid(
-  idOrHruid: string
+  idOrHruid: string,
 ): Promise<LearningPathDto | null> {
   try {
     // Dwengo heeft geen echte "getById", we doen search + filteren
@@ -78,7 +84,9 @@ export async function getLearningPathByIdOrHruid(
     const allPaths = response.data; // array
 
     // Zoeken in array op basis van _id of hruid
-    const found = allPaths.find((lp: any) => lp._id === idOrHruid || lp.hruid === idOrHruid);
+    const found = allPaths.find(
+      (lp: any) => lp._id === idOrHruid || lp.hruid === idOrHruid,
+    );
     if (!found) return null;
 
     // map + isExternal = true
