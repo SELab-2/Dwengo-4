@@ -1,4 +1,7 @@
-import { handlePrismaQuery } from "../errors/errorFunctions";
+import {
+  handlePrismaQuery,
+  handleQueryWithExistenceCheck,
+} from "../errors/errorFunctions";
 import { Role } from "@prisma/client";
 import prisma from "../config/prisma";
 import {
@@ -12,14 +15,14 @@ export const isAuthorized = async (
   requiredRole: Role,
   classId?: number,
 ): Promise<void> => {
-  const user = await handlePrismaQuery(() =>
-    prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true, teacher: true, student: true },
-    }),
+  const user = await handleQueryWithExistenceCheck(
+    () =>
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true, teacher: true, student: true },
+      }),
+    `User with id: ${userId} not found.`,
   );
-
-  if (!user) throw new NotFoundError("User not found.");
 
   // Admins are authorized for everything
   if (user.role === Role.ADMIN) return;
