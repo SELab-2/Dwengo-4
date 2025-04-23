@@ -1,6 +1,5 @@
-import { PrismaClient, LearningObjectProgress } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { LearningObjectProgress } from "@prisma/client";
+import prisma from "../config/prisma";
 
 class ProgressService {
   /**

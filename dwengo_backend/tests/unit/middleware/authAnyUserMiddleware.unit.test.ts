@@ -1,62 +1,34 @@
-import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { verify } from "jsonwebtoken";
 import type { AuthenticatedRequest } from "../../../interfaces/extendedTypeInterfaces";
+import prisma from "../../../config/__mocks__/prisma";
 
-//! zeer moeilijk te testen deze middleware, is ook slechts deels getest
 
-// Mock functies
-const mockUserFindUnique = vi.fn();
-const mockTeacherFindUnique = vi.fn();
-const mockStudentFindUnique = vi.fn();
-
-// Mock Prisma
-vi.mock("@prisma/client", async () => {
-  return {
-    PrismaClient: vi.fn().mockImplementation(() => ({
-      user: { findUnique: mockUserFindUnique },
-      teacher: { findUnique: mockTeacherFindUnique },
-      student: { findUnique: mockStudentFindUnique },
-    })),
-    Role: {
-      ADMIN: "ADMIN",
-      TEACHER: "TEACHER",
-      STUDENT: "STUDENT",
-    },
-  };
-});
-
-// Mock JWT
+vi.mock("../../../config/prisma");
 vi.mock("jsonwebtoken", async (importOriginal) => {
   const actual = await importOriginal();
   return {
-    ...actual as any,
+    ...actual,
     verify: vi.fn(),
   };
 });
 
-import { verify } from "jsonwebtoken";
-
-let protectAnyUser: any;
-
-beforeAll(async () => {
-  const imported = await import("../../../middleware/authAnyUserMiddleware");
-  protectAnyUser = imported.protectAnyUser;
-});
-
-describe("🔐 protectAnyUser Middleware (zonder code-aanpassing)", () => {
+describe(" protectAnyUser Middleware (met prisma mock)", () => {
+  let protectAnyUser: any;
   let req: AuthenticatedRequest;
   let res: any;
   let next: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    // Laad de middleware LAAT (pas NA mocks)
+    protectAnyUser = (await import("../../../middleware/authAnyUserMiddleware")).protectAnyUser;
+
     req = { headers: {}, user: undefined } as AuthenticatedRequest;
     res = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn(),
     };
     next = vi.fn();
-  });
-
-  afterEach(() => {
     vi.clearAllMocks();
   });
 
@@ -69,9 +41,9 @@ describe("🔐 protectAnyUser Middleware (zonder code-aanpassing)", () => {
   });
 
   it("⚠️ Ongeldige token", async () => {
-    req.headers.authorization = "Bearer invalid.token";
+    req.headers.authorization = "Bearer fake.token";
     (verify as any).mockImplementation(() => {
-      throw new Error("invalid token");
+      throw new Error("invalid");
     });
 
     await protectAnyUser(req, res, next);
@@ -80,4 +52,8 @@ describe("🔐 protectAnyUser Middleware (zonder code-aanpassing)", () => {
       error: "Niet geautoriseerd, token mislukt.",
     });
   });
+
+  
+
+  
 });

@@ -5,17 +5,7 @@ import LocalLearningObjectService, {
 import prisma from "../../../config/prisma";
 import { ContentType, LearningObject } from "@prisma/client";
 
-vi.mock("../../../config/prisma", () => ({
-  default: {
-    learningObject: {
-      create: vi.fn(),
-      findMany: vi.fn(),
-      findUnique: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-    },
-  },
-}));
+vi.mock("../../../config/prisma");
 
 const baseData: LocalLearningObjectData = {
   title: "Intro tot AI",
@@ -33,7 +23,7 @@ const mockLearningObject: LearningObject = {
   language: "nl",
   title: "Intro tot AI",
   description: "Leer wat AI is",
-  contentType: "text/markdown",
+  contentType: "text/markdown" as ContentType,
   keywords: ["AI"],
   targetAges: [14],
   teacherExclusive: false,
@@ -56,7 +46,7 @@ describe("LocalLearningObjectService", () => {
 
   describe("createLearningObject", () => {
     it("maakt een leerobject aan met standaardwaarden", async () => {
-      vi.mocked(prisma.learningObject.create).mockResolvedValue(mockLearningObject);
+      (prisma.learningObject.create as ReturnType<typeof vi.fn>).mockResolvedValue(mockLearningObject);
 
       const result = await LocalLearningObjectService.createLearningObject(42, baseData);
 
@@ -68,7 +58,7 @@ describe("LocalLearningObjectService", () => {
 
   describe("getAllLearningObjectsByTeacher", () => {
     it("haalt alle leerobjecten van een teacher op", async () => {
-      vi.mocked(prisma.learningObject.findMany).mockResolvedValue([mockLearningObject]);
+      (prisma.learningObject.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([mockLearningObject]);
 
       const result = await LocalLearningObjectService.getAllLearningObjectsByTeacher(42);
 
@@ -82,7 +72,7 @@ describe("LocalLearningObjectService", () => {
 
   describe("getLearningObjectById", () => {
     it("haalt een leerobject op via id", async () => {
-      vi.mocked(prisma.learningObject.findUnique).mockResolvedValue(mockLearningObject);
+      (prisma.learningObject.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockLearningObject);
 
       const result = await LocalLearningObjectService.getLearningObjectById("lo123");
 
@@ -95,7 +85,7 @@ describe("LocalLearningObjectService", () => {
 
   describe("updateLearningObject", () => {
     it("update een leerobject", async () => {
-      vi.mocked(prisma.learningObject.update).mockResolvedValue({
+      (prisma.learningObject.update as ReturnType<typeof vi.fn>).mockResolvedValue({
         ...mockLearningObject,
         title: "Nieuwe Titel",
       });
@@ -129,7 +119,7 @@ describe("LocalLearningObjectService", () => {
 
   describe("deleteLearningObject", () => {
     it("verwijdert een leerobject", async () => {
-      vi.mocked(prisma.learningObject.delete).mockResolvedValue(mockLearningObject);
+      (prisma.learningObject.delete as ReturnType<typeof vi.fn>).mockResolvedValue(mockLearningObject);
 
       const result = await LocalLearningObjectService.deleteLearningObject("lo123");
 

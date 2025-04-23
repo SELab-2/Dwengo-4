@@ -1,33 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import prisma from "../../../config/prisma";
+import { authorizeQuestion } from "../../../middleware/questionsAuthMiddleware";
 
-//! om meer testen te schrijven zou ik middleware moeten aanpassen, maar dat is mometeel met de naderende deadline gevaarlijk
-
-
-vi.mock("../../../middleware/questionsAuthMiddleware", async (importOriginal) => {
-  const actual = await importOriginal();
-
-  const mockFindQuestion = vi.fn();
-
-  return {
-    ...actual as any,
-    __esModule: true,
-    prisma: {
-      question: {
-        findUnique: mockFindQuestion,
-      },
-      __mockFns: {
-        mockFindQuestion,
-      },
-    },
-  };
-});
-
-import {
-  authorizeQuestion,
-} from "../../../middleware/questionsAuthMiddleware";
-
-import { prisma } from "../../../middleware/questionsAuthMiddleware";
-
+vi.mock("../../../config/prisma");
 
 const buildReq = (params = {}, user = null) =>
   ({ params, user } as any);
@@ -44,7 +19,7 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-describe("🔐 authorizeQuestion", () => {
+describe(" authorizeQuestion", () => {
   const baseQuestion = {
     id: 1,
     isPrivate: true,
@@ -57,9 +32,9 @@ describe("🔐 authorizeQuestion", () => {
     },
   };
 
-  it("✅ should allow access to creator", async () => {
-    prisma.__mockFns.mockFindQuestion.mockResolvedValue(baseQuestion);
-    const req = buildReq({ questionId: "1" }, { id: 99, role: "STUDENT" } as any);
+  it(" should allow access to creator", async () => {
+    (prisma.question.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(baseQuestion);
+    const req = buildReq({ questionId: "1" }, { id: 99, role: "STUDENT" });
     const res = buildRes();
     const next = vi.fn();
 
@@ -67,9 +42,9 @@ describe("🔐 authorizeQuestion", () => {
     expect(next).toHaveBeenCalled();
   });
 
-  it("✅ should allow teacher in class", async () => {
-    prisma.__mockFns.mockFindQuestion.mockResolvedValue(baseQuestion);
-    const req = buildReq({ questionId: "1" }, { id: 3, role: "TEACHER" } as any);
+  it(" should allow teacher in class", async () => {
+    (prisma.question.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(baseQuestion);
+    const req = buildReq({ questionId: "1" }, { id: 3, role: "TEACHER" });
     const res = buildRes();
     const next = vi.fn();
 
@@ -77,17 +52,21 @@ describe("🔐 authorizeQuestion", () => {
     expect(next).toHaveBeenCalled();
   });
 
-  it("✅ should allow team member to public question", async () => {
-    prisma.__mockFns.mockFindQuestion.mockResolvedValue({
+  it(" should allow team member to public question", async () => {
+    (prisma.question.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
       ...baseQuestion,
       isPrivate: false,
     });
 
-    const req = buildReq({ questionId: "1" }, { id: 2, role: "STUDENT" } as any);
+    const req = buildReq({ questionId: "1" }, { id: 2, role: "STUDENT" });
     const res = buildRes();
     const next = vi.fn();
 
     await authorizeQuestion(req, res as any, next);
     expect(next).toHaveBeenCalled();
   });
+
+  
+
+  
 });

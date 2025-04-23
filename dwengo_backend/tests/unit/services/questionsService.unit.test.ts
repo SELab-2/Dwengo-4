@@ -1,42 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import QuestionService from "../../../services/questionsService";
 import prisma from "../../../config/prisma";
-import { Role } from "@prisma/client";
 import { NotFoundError, BadRequestError } from "../../../errors/errors";
 
-
-
-vi.mock("../../../config/prisma", () => ({
-  default: {
-    question: {
-      findUnique: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      create: vi.fn(),
-      findMany: vi.fn()
-    },
-    questionMessage: {
-      create: vi.fn(),
-      findUnique: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      findMany: vi.fn()
-    },
-    questionSpecific: {
-      create: vi.fn()
-    },
-    questionGeneral: {
-      create: vi.fn()
-    },
-    assignment: {
-      findUnique: vi.fn()
-    },
-    team: {
-      findUnique: vi.fn()
-    },
-    $transaction: vi.fn()
-  }
-}));
+vi.mock("../../../config/prisma");
 
 const mockQuestion = { id: 1, title: "Test", createdBy: 1, isPrivate: false };
 const mockMessage = { id: 99, text: "Initial", userId: 1, questionId: 1 };
@@ -45,11 +12,11 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe("QuestionService 🧪", () => {
+describe("QuestionService", () => {
   describe("createQuestionMessage()", () => {
     it("creates a message if input is valid", async () => {
-      (prisma.question.findUnique as any).mockResolvedValue(mockQuestion);
-      (prisma.questionMessage.create as any).mockResolvedValue(mockMessage);
+      (prisma.question.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockQuestion);
+      (prisma.questionMessage.create as ReturnType<typeof vi.fn>).mockResolvedValue(mockMessage);
 
       const result = await QuestionService.createQuestionMessage(1, 1, "Hello");
       expect(result.text).toBe("Initial");
@@ -62,7 +29,7 @@ describe("QuestionService 🧪", () => {
     });
 
     it("throws if question doesn't exist", async () => {
-      (prisma.question.findUnique as any).mockResolvedValue(null);
+      (prisma.question.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
       await expect(
         QuestionService.createQuestionMessage(1, 1, "Text")
@@ -72,8 +39,8 @@ describe("QuestionService 🧪", () => {
 
   describe("updateQuestion()", () => {
     it("updates question title", async () => {
-      (prisma.question.findUnique as any).mockResolvedValue(mockQuestion);
-      (prisma.question.update as any).mockResolvedValue({ title: "New Title" });
+      (prisma.question.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockQuestion);
+      (prisma.question.update as ReturnType<typeof vi.fn>).mockResolvedValue({ title: "New Title" });
 
       const result = await QuestionService.updateQuestion(1, "New Title");
       expect(result.title).toBe("New Title");
@@ -86,7 +53,7 @@ describe("QuestionService 🧪", () => {
     });
 
     it("throws if question not found", async () => {
-      (prisma.question.findUnique as any).mockResolvedValue(null);
+      (prisma.question.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
       await expect(
         QuestionService.updateQuestion(1, "New Title")
       ).rejects.toThrow(NotFoundError);
@@ -95,13 +62,14 @@ describe("QuestionService 🧪", () => {
 
   describe("getQuestion()", () => {
     it("returns question with relations", async () => {
-      (prisma.question.findUnique as any).mockResolvedValue({ id: 5 });
+      (prisma.question.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 5 });
+
       const result = await QuestionService.getQuestion(5);
       expect(result.id).toBe(5);
     });
 
     it("throws if not found", async () => {
-      (prisma.question.findUnique as any).mockResolvedValue(null);
+      (prisma.question.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
       await expect(
         QuestionService.getQuestion(999)
       ).rejects.toThrow(NotFoundError);
@@ -110,14 +78,15 @@ describe("QuestionService 🧪", () => {
 
   describe("deleteQuestion()", () => {
     it("deletes question by ID", async () => {
-      (prisma.question.findUnique as any).mockResolvedValue(mockQuestion);
-      (prisma.question.delete as any).mockResolvedValue(mockQuestion);
+      (prisma.question.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockQuestion);
+      (prisma.question.delete as ReturnType<typeof vi.fn>).mockResolvedValue(mockQuestion);
+
       const result = await QuestionService.deleteQuestion(1);
       expect(result.id).toBe(1);
     });
 
     it("throws if not found", async () => {
-      (prisma.question.findUnique as any).mockResolvedValue(null);
+      (prisma.question.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
       await expect(
         QuestionService.deleteQuestion(404)
       ).rejects.toThrow(NotFoundError);
@@ -126,14 +95,15 @@ describe("QuestionService 🧪", () => {
 
   describe("deleteQuestionMessage()", () => {
     it("deletes a message", async () => {
-      (prisma.questionMessage.findUnique as any).mockResolvedValue(mockMessage);
-      (prisma.questionMessage.delete as any).mockResolvedValue(mockMessage);
+      (prisma.questionMessage.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockMessage);
+      (prisma.questionMessage.delete as ReturnType<typeof vi.fn>).mockResolvedValue(mockMessage);
+
       const result = await QuestionService.deleteQuestionMessage(99);
       expect(result.id).toBe(99);
     });
 
     it("throws if message not found", async () => {
-      (prisma.questionMessage.findUnique as any).mockResolvedValue(null);
+      (prisma.questionMessage.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
       await expect(
         QuestionService.deleteQuestionMessage(123)
       ).rejects.toThrow(NotFoundError);

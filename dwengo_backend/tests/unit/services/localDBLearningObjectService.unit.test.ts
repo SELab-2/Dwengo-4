@@ -3,15 +3,7 @@ import * as service from "../../../services/localDBLearningObjectService";
 import prisma from "../../../config/prisma";
 import { LearningObject } from "@prisma/client";
 
-// Mocks
-vi.mock("../../../config/prisma", () => ({
-  default: {
-    learningObject: {
-      findMany: vi.fn(),
-      findUnique: vi.fn(),
-    },
-  },
-}));
+vi.mock("../../../config/prisma");
 
 const mockObject: LearningObject = {
   id: "abc123",
@@ -21,7 +13,7 @@ const mockObject: LearningObject = {
   language: "nl",
   title: "Titel",
   description: "Beschrijving",
-  contentType: "video",
+  contentType: "video" as any,
   keywords: ["coding"],
   targetAges: [12, 14],
   teacherExclusive: false,
@@ -41,11 +33,12 @@ describe("localDBLearningObjectService", () => {
     vi.clearAllMocks();
   });
 
-  // === getLocalLearningObjects ===
   describe("getLocalLearningObjects", () => {
     it("geeft alle objecten voor teacher", async () => {
-      vi.mocked(prisma.learningObject.findMany).mockResolvedValue([mockObject]);
+      (prisma.learningObject.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([mockObject]);
+
       const result = await service.getLocalLearningObjects(true);
+
       expect(result[0].origin).toBe("local");
       expect(prisma.learningObject.findMany).toHaveBeenCalledWith({
         where: {},
@@ -54,8 +47,10 @@ describe("localDBLearningObjectService", () => {
     });
 
     it("filtert op exclusiviteit voor niet-teachers", async () => {
-      vi.mocked(prisma.learningObject.findMany).mockResolvedValue([mockObject]);
+      (prisma.learningObject.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([mockObject]);
+
       const result = await service.getLocalLearningObjects(false);
+
       expect(result).toHaveLength(1);
       expect(prisma.learningObject.findMany).toHaveBeenCalledWith({
         where: { teacherExclusive: false, available: true },
@@ -64,36 +59,39 @@ describe("localDBLearningObjectService", () => {
     });
   });
 
-  // === getLocalLearningObjectById ===
   describe("getLocalLearningObjectById", () => {
     it("retourneert object als teacher", async () => {
-      vi.mocked(prisma.learningObject.findUnique).mockResolvedValue(mockObject);
+      (prisma.learningObject.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockObject);
+
       const result = await service.getLocalLearningObjectById("abc123", true);
       expect(result?.id).toBe("abc123");
     });
 
     it("retourneert null als object niet bestaat", async () => {
-      vi.mocked(prisma.learningObject.findUnique).mockResolvedValue(null);
+      (prisma.learningObject.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+
       const result = await service.getLocalLearningObjectById("niet-bestaat", false);
       expect(result).toBeNull();
     });
 
     it("weigert toegang voor student als object niet beschikbaar is", async () => {
-      vi.mocked(prisma.learningObject.findUnique).mockResolvedValue({
+      (prisma.learningObject.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
         ...mockObject,
         teacherExclusive: true,
         available: false,
       });
+
       const result = await service.getLocalLearningObjectById("abc123", false);
       expect(result).toBeNull();
     });
   });
 
-  // === searchLocalLearningObjects ===
   describe("searchLocalLearningObjects", () => {
     it("zoekt zonder restrictie als teacher", async () => {
-      vi.mocked(prisma.learningObject.findMany).mockResolvedValue([mockObject]);
+      (prisma.learningObject.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([mockObject]);
+
       const result = await service.searchLocalLearningObjects(true, "Titel");
+
       expect(result[0].title).toBe("Titel");
       expect(prisma.learningObject.findMany).toHaveBeenCalledWith({
         where: {
@@ -108,8 +106,10 @@ describe("localDBLearningObjectService", () => {
     });
 
     it("voegt AND toe bij student", async () => {
-      vi.mocked(prisma.learningObject.findMany).mockResolvedValue([mockObject]);
+      (prisma.learningObject.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([mockObject]);
+
       const result = await service.searchLocalLearningObjects(false, "code");
+
       expect(result.length).toBe(1);
       expect(prisma.learningObject.findMany).toHaveBeenCalledWith({
         where: {
@@ -125,10 +125,10 @@ describe("localDBLearningObjectService", () => {
     });
   });
 
-  // === getLocalLearningObjectByHruidLangVersion ===
   describe("getLocalLearningObjectByHruidLangVersion", () => {
     it("haalt object op met combinatie hruid/language/version", async () => {
-      vi.mocked(prisma.learningObject.findUnique).mockResolvedValue(mockObject);
+      (prisma.learningObject.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockObject);
+
       const result = await service.getLocalLearningObjectByHruidLangVersion(
         "obj-hruid",
         "nl",
@@ -139,17 +139,19 @@ describe("localDBLearningObjectService", () => {
     });
 
     it("retourneert null als object niet bestaat", async () => {
-      vi.mocked(prisma.learningObject.findUnique).mockResolvedValue(null);
+      (prisma.learningObject.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+
       const result = await service.getLocalLearningObjectByHruidLangVersion("missing", "en", 99, false);
       expect(result).toBeNull();
     });
 
     it("filtert niet-toegankelijke objecten weg voor niet-teachers", async () => {
-      vi.mocked(prisma.learningObject.findUnique).mockResolvedValue({
+      (prisma.learningObject.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
         ...mockObject,
         teacherExclusive: true,
         available: false,
       });
+
       const result = await service.getLocalLearningObjectByHruidLangVersion(
         "secret",
         "nl",

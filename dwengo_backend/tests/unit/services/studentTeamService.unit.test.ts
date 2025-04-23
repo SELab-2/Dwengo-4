@@ -2,15 +2,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import StudentTeamService from '../../../services/studentTeamService';
 import prisma from '../../../config/prisma';
 
-vi.mock('../../../config/prisma', () => ({
-  default: {
-    team: {
-      findMany: vi.fn(),
-      findFirst: vi.fn(),
-      findUnique: vi.fn(),
-    },
-  },
-}));
+vi.mock('../../../config/prisma');
 
 describe('StudentTeamService', () => {
   const mockStudentId = 1;
@@ -29,12 +21,12 @@ describe('StudentTeamService', () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    // wordt automatisch gereset door __mocks__/prisma.ts
   });
 
   describe('getStudentTeams', () => {
     test('returns teams student is part of', async () => {
-      (prisma.team.findMany as any).mockResolvedValue([mockTeam]);
+      (prisma.team.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([mockTeam]);
 
       const result = await StudentTeamService.getStudentTeams(mockStudentId);
 
@@ -57,7 +49,7 @@ describe('StudentTeamService', () => {
     });
 
     test('returns empty array when student is not in any team', async () => {
-      (prisma.team.findMany as any).mockResolvedValue([]);
+      (prisma.team.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
 
       const result = await StudentTeamService.getStudentTeams(mockStudentId);
 
@@ -82,7 +74,7 @@ describe('StudentTeamService', () => {
         ],
       };
 
-      (prisma.team.findFirst as any).mockResolvedValue(mockResponse);
+      (prisma.team.findFirst as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponse);
 
       const result = await StudentTeamService.getTeam(mockStudentId, mockAssignmentId);
 
@@ -121,7 +113,7 @@ describe('StudentTeamService', () => {
     });
 
     test('returns null if no team found', async () => {
-      (prisma.team.findFirst as any).mockResolvedValue(null);
+      (prisma.team.findFirst as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
       const result = await StudentTeamService.getTeam(mockStudentId, mockAssignmentId);
 
@@ -146,7 +138,7 @@ describe('StudentTeamService', () => {
         ],
       };
 
-      (prisma.team.findUnique as any).mockResolvedValue(mockResponse);
+      (prisma.team.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponse);
 
       const result = await StudentTeamService.getTeamById(mockTeamId);
 
@@ -173,7 +165,7 @@ describe('StudentTeamService', () => {
     });
 
     test('returns null if no team found', async () => {
-      (prisma.team.findUnique as any).mockResolvedValue(null);
+      (prisma.team.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
       const result = await StudentTeamService.getTeamById(mockTeamId);
 

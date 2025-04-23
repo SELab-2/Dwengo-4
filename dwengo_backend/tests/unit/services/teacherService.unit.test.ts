@@ -3,14 +3,7 @@ import TeacherService from '../../../services/teacherService';
 import prisma from '../../../config/prisma';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
-vi.mock('../../../config/prisma', () => ({
-  default: {
-    teacher: {
-      findUniqueOrThrow: vi.fn(),
-      findMany: vi.fn(),
-    },
-  },
-}));
+vi.mock('../../../config/prisma');
 
 describe('TeacherService', () => {
   const mockUser = { id: 1, email: 'teacher@test.com', firstName: 'Jan', lastName: 'Tester' };
@@ -22,7 +15,7 @@ describe('TeacherService', () => {
 
   describe('findTeacherById', () => {
     it('should return a teacher with user info when found', async () => {
-      (prisma.teacher.findUniqueOrThrow as any).mockResolvedValue(mockTeacher);
+      (prisma.teacher.findUniqueOrThrow as ReturnType<typeof vi.fn>).mockResolvedValue(mockTeacher);
 
       const result = await TeacherService.findTeacherById(1);
 
@@ -41,7 +34,8 @@ describe('TeacherService', () => {
           target: 'userId',
         },
       });
-      (prisma.teacher.findUniqueOrThrow as any).mockRejectedValue(error);
+
+      (prisma.teacher.findUniqueOrThrow as ReturnType<typeof vi.fn>).mockRejectedValue(error);
 
       await expect(TeacherService.findTeacherById(999)).rejects.toThrow('Not found');
     });
@@ -53,7 +47,8 @@ describe('TeacherService', () => {
         { userId: 1, user: mockUser },
         { userId: 2, user: { ...mockUser, id: 2, email: 'another@test.com' } },
       ];
-      (prisma.teacher.findMany as any).mockResolvedValue(teachers);
+
+      (prisma.teacher.findMany as ReturnType<typeof vi.fn>).mockResolvedValue(teachers);
 
       const result = await TeacherService.getAllTeachers();
 
@@ -64,7 +59,7 @@ describe('TeacherService', () => {
     });
 
     it('should return an empty array if no teachers exist', async () => {
-      (prisma.teacher.findMany as any).mockResolvedValue([]);
+      (prisma.teacher.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
 
       const result = await TeacherService.getAllTeachers();
 
@@ -79,7 +74,8 @@ describe('TeacherService', () => {
         { userId: 1, user: mockUser },
         { userId: 2, user: { ...mockUser, id: 2, email: 'linked@test.com' } },
       ];
-      (prisma.teacher.findMany as any).mockResolvedValue(teachers);
+
+      (prisma.teacher.findMany as ReturnType<typeof vi.fn>).mockResolvedValue(teachers);
 
       const result = await TeacherService.getTeachersByClass(classId);
 
@@ -97,7 +93,7 @@ describe('TeacherService', () => {
     });
 
     it('should return empty array if no teachers are linked to the class', async () => {
-      (prisma.teacher.findMany as any).mockResolvedValue([]);
+      (prisma.teacher.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
 
       const result = await TeacherService.getTeachersByClass(999);
 

@@ -3,6 +3,8 @@ import errorHandler from "../../../middleware/errorMiddleware";
 import { AppError } from "../../../errors/errors";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
+vi.mock("../../../config/prisma");
+
 const mockReq = {} as any;
 
 let mockStatusCode = 200;

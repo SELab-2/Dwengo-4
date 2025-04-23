@@ -1,33 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import ClassService, { ClassWithLinks } from "../../../services/classService";
-import prisma from "../../../config/prisma";
+import prisma from "../../../config/prisma"; // Wordt automatisch gemockt via __mocks__
 import { AccesDeniedError, BadRequestError, NotFoundError } from "../../../errors/errors";
-import { Class, ClassStudent, User, Student } from "@prisma/client";
+import { Class, ClassStudent } from "@prisma/client";
 
-// 🔒 Mock prisma
-vi.mock("../../../config/prisma", () => ({
-  default: {
-    class: {
-      create: vi.fn(),
-      delete: vi.fn(),
-      findUnique: vi.fn(),
-      findMany: vi.fn(),
-      update: vi.fn(),
-    },
-    classTeacher: {
-      create: vi.fn(),
-      findUnique: vi.fn(),
-    },
-    classStudent: {
-      create: vi.fn(),
-      delete: vi.fn(),
-      findMany: vi.fn(),
-      findUnique: vi.fn(),
-    },
-  },
-}));
+vi.mock("../../../config/prisma");
 
-describe("ClassService 🧪", () => {
+describe("ClassService", () => {
   const now = new Date();
   const mockClass: Class = {
     id: 1,
@@ -43,8 +22,8 @@ describe("ClassService 🧪", () => {
 
   describe("createClass", () => {
     it("maakt een klas aan en koppelt een leerkracht", async () => {
-      (prisma.class.create as any).mockResolvedValue(mockClass);
-      (prisma.classTeacher.create as any).mockResolvedValue({});
+      (prisma.class.create as ReturnType<typeof vi.fn>).mockResolvedValue(mockClass);
+      (prisma.classTeacher.create as ReturnType<typeof vi.fn>).mockResolvedValue({});
 
       const result = await ClassService.createClass("Science", 1);
       expect(result).toEqual(mockClass);
@@ -54,20 +33,20 @@ describe("ClassService 🧪", () => {
   describe("deleteClass", () => {
     it("verwijdert klas als teacher rechten heeft", async () => {
       vi.spyOn(ClassService, "isTeacherOfClass").mockResolvedValue(true);
-      (prisma.class.findUnique as any).mockResolvedValue(mockClass);
-      (prisma.class.delete as any).mockResolvedValue(mockClass);
+      (prisma.class.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockClass);
+      (prisma.class.delete as ReturnType<typeof vi.fn>).mockResolvedValue(mockClass);
 
       const res = await ClassService.deleteClass(1, 1);
       expect(res).toEqual(mockClass);
     });
 
     it("gooit NotFoundError bij onbekende klas", async () => {
-      (prisma.class.findUnique as any).mockResolvedValue(null);
+      (prisma.class.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
       await expect(ClassService.deleteClass(1, 1)).rejects.toThrow(NotFoundError);
     });
 
     it("gooit AccesDeniedError bij geen rechten", async () => {
-      (prisma.class.findUnique as any).mockResolvedValue(mockClass);
+      (prisma.class.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockClass);
       vi.spyOn(ClassService, "isTeacherOfClass").mockResolvedValue(false);
       await expect(ClassService.deleteClass(1, 2)).rejects.toThrow(AccesDeniedError);
     });
@@ -75,7 +54,7 @@ describe("ClassService 🧪", () => {
 
   describe("getClassesByTeacher", () => {
     it("geeft alle klassen van een teacher terug", async () => {
-      (prisma.class.findMany as any).mockResolvedValue([mockClass]);
+      (prisma.class.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([mockClass]);
       const res = await ClassService.getClassesByTeacher(1);
       expect(res).toEqual([mockClass]);
     });
@@ -83,7 +62,7 @@ describe("ClassService 🧪", () => {
 
   describe("getClassesByStudent", () => {
     it("geeft alle klassen van student", async () => {
-      (prisma.class.findMany as any).mockResolvedValue([mockClass]);
+      (prisma.class.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([mockClass]);
       const res = await ClassService.getClassesByStudent(1);
       expect(res).toEqual([mockClass]);
     });
@@ -92,24 +71,24 @@ describe("ClassService 🧪", () => {
   describe("leaveClassAsStudent", () => {
     it("verwijdert student uit klas", async () => {
       const rel = { studentId: 1, classId: 1 };
-      (prisma.classStudent.findUnique as any).mockResolvedValue(rel);
-      (prisma.classStudent.delete as any).mockResolvedValue(rel);
+      (prisma.classStudent.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(rel);
+      (prisma.classStudent.delete as ReturnType<typeof vi.fn>).mockResolvedValue(rel);
 
       const result = await ClassService.leaveClassAsStudent(1, 1);
       expect(result).toEqual(rel);
     });
 
     it("gooit error als student niet in klas zit", async () => {
-      (prisma.classStudent.findUnique as any).mockResolvedValue(null);
+      (prisma.classStudent.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
       await expect(ClassService.leaveClassAsStudent(1, 1)).rejects.toThrow(BadRequestError);
     });
   });
 
   describe("updateClass", () => {
     it("update klas naam na controle teacher", async () => {
-      (prisma.class.findUnique as any).mockResolvedValue(mockClass);
+      (prisma.class.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockClass);
       vi.spyOn(ClassService, "isTeacherOfClass").mockResolvedValue(true);
-      (prisma.class.update as any).mockResolvedValue({ ...mockClass, name: "Wiskunde" });
+      (prisma.class.update as ReturnType<typeof vi.fn>).mockResolvedValue({ ...mockClass, name: "Wiskunde" });
 
       const res = await ClassService.updateClass(1, 1, "Wiskunde");
       expect(res.name).toBe("Wiskunde");
@@ -118,19 +97,19 @@ describe("ClassService 🧪", () => {
 
   describe("getJoinCode", () => {
     it("geeft joincode als teacher rechten heeft", async () => {
-      (prisma.class.findUnique as any).mockResolvedValue({ code: "abcdef" });
+      (prisma.class.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({ code: "abcdef" });
       vi.spyOn(ClassService, "isTeacherOfClass").mockResolvedValue(true);
       const res = await ClassService.getJoinCode(1, 1);
       expect(res).toBe("abcdef");
     });
 
     it("gooit NotFoundError bij onbekende klas", async () => {
-      (prisma.class.findUnique as any).mockResolvedValue(null);
+      (prisma.class.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
       await expect(ClassService.getJoinCode(99, 1)).rejects.toThrow(NotFoundError);
     });
 
     it("gooit AccesDeniedError bij geen rechten", async () => {
-      (prisma.class.findUnique as any).mockResolvedValue({ code: "abcdef" });
+      (prisma.class.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({ code: "abcdef" });
       vi.spyOn(ClassService, "isTeacherOfClass").mockResolvedValue(false);
       await expect(ClassService.getJoinCode(1, 2)).rejects.toThrow(AccesDeniedError);
     });
@@ -138,7 +117,7 @@ describe("ClassService 🧪", () => {
 
   describe("generateUniqueCode", () => {
     it("genereert unieke code", async () => {
-      (prisma.class.findUnique as any).mockResolvedValue(null);
+      (prisma.class.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
       const code = await ClassService.generateUniqueCode();
       expect(code).toHaveLength(8);
     });
@@ -150,7 +129,7 @@ describe("ClassService 🧪", () => {
     });
 
     it("geeft klas terug als join code geldig is", async () => {
-      (prisma.class.findUnique as any).mockResolvedValue({
+      (prisma.class.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
         ...mockClass,
         classLinks: [],
       });
@@ -185,7 +164,7 @@ describe("ClassService 🧪", () => {
         studentId: 1,
         classId: 1,
       };
-      (prisma.classStudent.delete as any).mockResolvedValue(deletionResult);
+      (prisma.classStudent.delete as ReturnType<typeof vi.fn>).mockResolvedValue(deletionResult);
       const res = await ClassService.removeStudentFromClass(1, 1);
       expect(res.studentId).toBe(1);
     });

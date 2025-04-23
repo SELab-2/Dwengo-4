@@ -1,28 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import StudentService from '../../../services/studentService'
-import prisma from '../../../config/prisma'
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import StudentService from '../../../services/studentService';
+import prisma from '../../../config/prisma';
 
-// Prisma mocking setup
-vi.mock('../../../config/prisma', () => ({
-  default: {
-    student: {
-      findUniqueOrThrow: vi.fn(),
-      findMany: vi.fn(),
-    },
-    class: {
-      findUnique: vi.fn(),
-    },
-  },
-}))
+vi.mock('../../../config/prisma');
 
 describe('StudentService', () => {
-  const mockFindUniqueOrThrow = prisma.student.findUniqueOrThrow as unknown as ReturnType<typeof vi.fn>
-  const mockFindMany = prisma.student.findMany as unknown as ReturnType<typeof vi.fn>
-  const mockClassFindUnique = prisma.class.findUnique as unknown as ReturnType<typeof vi.fn>
-
   beforeEach(() => {
-    vi.clearAllMocks()
-  })
+    vi.clearAllMocks();
+  });
 
   // === findStudentById ===
   describe('findStudentById', () => {
@@ -32,23 +17,23 @@ describe('StudentService', () => {
         user: {
           email: 'student@example.com',
         },
-      }
-      mockFindUniqueOrThrow.mockResolvedValue(mockStudent)
+      };
+      (prisma.student.findUniqueOrThrow as ReturnType<typeof vi.fn>).mockResolvedValue(mockStudent);
 
-      const result = await StudentService.findStudentById(1)
-      expect(result).toEqual(mockStudent)
-      expect(mockFindUniqueOrThrow).toHaveBeenCalledWith({
+      const result = await StudentService.findStudentById(1);
+      expect(result).toEqual(mockStudent);
+      expect(prisma.student.findUniqueOrThrow).toHaveBeenCalledWith({
         where: { userId: 1 },
         include: { user: true },
-      })
-    })
+      });
+    });
 
     it('gooit error door als student niet gevonden wordt', async () => {
-      mockFindUniqueOrThrow.mockRejectedValue(new Error('Not found'))
+      (prisma.student.findUniqueOrThrow as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Not found'));
 
-      await expect(StudentService.findStudentById(999)).rejects.toThrow('Not found')
-    })
-  })
+      await expect(StudentService.findStudentById(999)).rejects.toThrow('Not found');
+    });
+  });
 
   // === getStudentsByClass ===
   describe('getStudentsByClass', () => {
@@ -58,18 +43,18 @@ describe('StudentService', () => {
           { student: { userId: 1, user: { email: 's1@test.com' } } },
           { student: { userId: 2, user: { email: 's2@test.com' } } },
         ],
-      }
+      };
 
-      mockClassFindUnique.mockResolvedValue(classData)
+      (prisma.class.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(classData);
 
-      const result = await StudentService.getStudentsByClass(100)
+      const result = await StudentService.getStudentsByClass(100);
 
       expect(result).toEqual([
         { userId: 1, user: { email: 's1@test.com' } },
         { userId: 2, user: { email: 's2@test.com' } },
-      ])
+      ]);
 
-      expect(mockClassFindUnique).toHaveBeenCalledWith({
+      expect(prisma.class.findUnique).toHaveBeenCalledWith({
         where: { id: 100 },
         include: {
           classLinks: {
@@ -82,17 +67,17 @@ describe('StudentService', () => {
             },
           },
         },
-      })
-    })
+      });
+    });
 
     it('gooit error als klas niet bestaat', async () => {
-      mockClassFindUnique.mockResolvedValue(null)
+      (prisma.class.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
       await expect(StudentService.getStudentsByClass(999)).rejects.toThrow(
         'Class with ID: 999 not found'
-      )
-    })
-  })
+      );
+    });
+  });
 
   // === getStudentsByTeamAssignment ===
   describe('getStudentsByTeamAssignment', () => {
@@ -100,15 +85,15 @@ describe('StudentService', () => {
       const mockStudents = [
         { userId: 1, user: { email: 's1@test.com' } },
         { userId: 2, user: { email: 's2@test.com' } },
-      ]
+      ];
 
-      mockFindMany.mockResolvedValue(mockStudents)
+      (prisma.student.findMany as ReturnType<typeof vi.fn>).mockResolvedValue(mockStudents);
 
-      const result = await StudentService.getStudentsByTeamAssignment(10, 20)
+      const result = await StudentService.getStudentsByTeamAssignment(10, 20);
 
-      expect(result).toEqual(mockStudents)
+      expect(result).toEqual(mockStudents);
 
-      expect(mockFindMany).toHaveBeenCalledWith({
+      expect(prisma.student.findMany).toHaveBeenCalledWith({
         where: {
           Team: {
             some: {
@@ -122,20 +107,20 @@ describe('StudentService', () => {
         include: {
           user: true,
         },
-      })
-    })
+      });
+    });
 
     it('retourneert lege array als geen matches zijn', async () => {
-      mockFindMany.mockResolvedValue([])
+      (prisma.student.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
 
-      const result = await StudentService.getStudentsByTeamAssignment(999, 888)
-      expect(result).toEqual([])
-    })
+      const result = await StudentService.getStudentsByTeamAssignment(999, 888);
+      expect(result).toEqual([]);
+    });
 
     it('gooit error als prisma faalt', async () => {
-      mockFindMany.mockRejectedValue(new Error('Query failed'))
+      (prisma.student.findMany as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Query failed'));
 
-      await expect(StudentService.getStudentsByTeamAssignment(1, 2)).rejects.toThrow('Query failed')
-    })
-  })
-})
+      await expect(StudentService.getStudentsByTeamAssignment(1, 2)).rejects.toThrow('Query failed');
+    });
+  });
+});

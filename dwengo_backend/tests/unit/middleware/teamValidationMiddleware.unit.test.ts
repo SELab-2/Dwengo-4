@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
+
 import {
   makeAssignmentIdParamValid,
   makeTeamIdParamValid,
@@ -7,7 +8,11 @@ import {
   ensureTeamParamValidIdentifiableTeamDivision,
 } from '../../../middleware/teamValidationMiddleware';
 
-const mockRes = () => {
+import prisma from '../../../config/prisma';
+vi.mock('../../../config/prisma');
+
+//  Response & Next mocks
+const mockRes = (): Response => {
   const json = vi.fn();
   const status = vi.fn(() => ({ json }));
   return { status, json } as unknown as Response;
@@ -15,7 +20,7 @@ const mockRes = () => {
 
 const mockNext = () => vi.fn() as NextFunction;
 
-describe('teamValidationMiddleware 🧠🔒', () => {
+describe('teamValidationMiddleware', () => {
   let res: Response;
   let next: NextFunction;
 
@@ -28,14 +33,12 @@ describe('teamValidationMiddleware 🧠🔒', () => {
   describe('makeAssignmentIdParamValid', () => {
     it('calls next if assignmentId is a valid number', async () => {
       const req = { params: { assignmentId: '42' } } as any;
-
       await makeAssignmentIdParamValid(req, res, next);
       expect(next).toHaveBeenCalled();
     });
 
     it('responds 400 if assignmentId is not a number', async () => {
       const req = { params: { assignmentId: 'abc' } } as any;
-
       await makeAssignmentIdParamValid(req, res, next);
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.status(400).json).toHaveBeenCalledWith({
@@ -48,14 +51,12 @@ describe('teamValidationMiddleware 🧠🔒', () => {
   describe('makeTeamIdParamValid', () => {
     it('calls next if teamId is a valid number', async () => {
       const req = { params: { teamId: '123' } } as any;
-
       await makeTeamIdParamValid(req, res, next);
       expect(next).toHaveBeenCalled();
     });
 
     it('responds 400 if teamId is not a number', async () => {
       const req = { params: { teamId: 'xyz' } } as any;
-
       await makeTeamIdParamValid(req, res, next);
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.status(400).json).toHaveBeenCalledWith({
@@ -83,9 +84,7 @@ describe('teamValidationMiddleware 🧠🔒', () => {
     it('rejects if teamName is empty', async () => {
       const req = {
         body: {
-          teams: [
-            { teamName: '', studentIds: [1, 2] },
-          ],
+          teams: [{ teamName: '', studentIds: [1, 2] }],
         },
       } as Request;
 
@@ -101,9 +100,7 @@ describe('teamValidationMiddleware 🧠🔒', () => {
     it('rejects if studentIds is empty', async () => {
       const req = {
         body: {
-          teams: [
-            { teamName: 'Solo', studentIds: [] },
-          ],
+          teams: [{ teamName: 'Solo', studentIds: [] }],
         },
       } as Request;
 
@@ -119,9 +116,7 @@ describe('teamValidationMiddleware 🧠🔒', () => {
     it('rejects if studentIds contains a non-number', async () => {
       const req = {
         body: {
-          teams: [
-            { teamName: 'Broken', studentIds: ['x'] },
-          ],
+          teams: [{ teamName: 'Broken', studentIds: ['x'] }],
         },
       } as Request;
 
@@ -149,9 +144,7 @@ describe('teamValidationMiddleware 🧠🔒', () => {
     it('rejects if teamId is missing', async () => {
       const req = {
         body: {
-          teams: [
-            { teamName: 'No ID', studentIds: [1] }, // teamId ontbreekt
-          ],
+          teams: [{ teamName: 'No ID', studentIds: [1] }],
         },
       } as Request;
 
@@ -162,9 +155,7 @@ describe('teamValidationMiddleware 🧠🔒', () => {
     it('rejects if teamId is negative', async () => {
       const req = {
         body: {
-          teams: [
-            { teamId: -1, teamName: 'Oops', studentIds: [1] },
-          ],
+          teams: [{ teamId: -1, teamName: 'Oops', studentIds: [1] }],
         },
       } as Request;
 
@@ -175,9 +166,7 @@ describe('teamValidationMiddleware 🧠🔒', () => {
     it('rejects if studentIds is malformed', async () => {
       const req = {
         body: {
-          teams: [
-            { teamId: 5, teamName: 'Oops', studentIds: ['NaN'] },
-          ],
+          teams: [{ teamId: 5, teamName: 'Oops', studentIds: ['NaN'] }],
         },
       } as Request;
 
