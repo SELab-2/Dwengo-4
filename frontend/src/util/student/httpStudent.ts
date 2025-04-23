@@ -231,16 +231,40 @@ export async function fetchLearningPath(
   return await response.json();
 }
 
-export async function fetchQuestion(questionId: string) {
-  const response = await fetch(`${BACKEND}/question/${questionId}/messages`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthToken()}`,
+export async function fetchConversation(assignmentId: string) {
+  const response = await fetch(
+    `${BACKEND}/team/student/assignment/${assignmentId}/studentTeam`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
     },
-  });
+  );
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het ophalen van het team.',
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  const resp = await response.json();
+
+  const responseQuestion = await fetch(
+    `${BACKEND}/question/team/${resp.teamAssignment.teamId}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+    },
+  );
 
   if (!response.ok) throw new Error('Failed to fetch questions');
-  //console.log(await response.json());
-  return response.json();
+  return responseQuestion.json();
 }

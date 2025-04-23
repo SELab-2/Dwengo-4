@@ -28,7 +28,7 @@ import StudentIndex from '../pages/student';
 import JoinClass from '../components/student/classes/JoinRequestForm';
 import AssignmentStudent from '../pages/student/AssignmentStudent';
 import AssignmentsStudent from '../pages/student/AssignmentsStudent';
-import NewQuestionStudent from '../pages/student/NewQuestionStudent';
+import QuestionOverview from '../pages/student/QuestionOverview';
 
 const HomePage: React.FC = () => {
   return (
@@ -147,8 +147,8 @@ export const router = createBrowserRouter([
         element: <AssignmentsStudent></AssignmentsStudent>,
       },
       {
-        path: 'question/:questionId',
-        element: <NewQuestionStudent></NewQuestionStudent>,
+        path: 'question/:assignmentId',
+        element: <QuestionOverview></QuestionOverview>,
       },
       {
         path: 'dashboard',
