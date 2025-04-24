@@ -3,6 +3,7 @@ import { dwengoAPI } from "../config/dwengoAPI";
 /**
  * De mogelijke content types (zie je enum in de oorspronkelijke code).
  */
+
 enum ContentType {
   // Dit zijn momenteel "unused variables" dus eslint wil dat deze voorafgegaan worden door een "_"
   _TEXT_PLAIN = "text/plain",
@@ -18,6 +19,7 @@ enum ContentType {
 /**
  * Mapping van Dwengo string => onze enum
  */
+
 const permittedContentTypes = {
   "text/plain": ContentType._TEXT_PLAIN,
   "text/markdown": ContentType._TEXT_MARKDOWN,
@@ -76,10 +78,16 @@ export interface LearningObjectDto {
   origin: "dwengo" | "local";
 }
 
+export interface LearningObjectDtoWithRaw extends LearningObjectDto {
+  raw?: string;
+}
+
 /**
  * Converteer Dwengo-object naar onze LearningObjectDto
  */
-function mapDwengoToLocal(dwengoObj: DwengoLearningObject): LearningObjectDto {
+function mapDwengoToLocal(
+  dwengoObj: DwengoLearningObject,
+): LearningObjectDtoWithRaw {
   return {
     id: dwengoObj._id ?? "",
     uuid: dwengoObj.uuid ?? "",
@@ -137,6 +145,32 @@ export async function fetchDwengoObjectById(
   try {
     const params = { _id: id };
     const response = await dwengoAPI.get("/api/learningObject/getMetadata", {
+      params,
+    });
+    const dwengoObj: DwengoLearningObject = response.data;
+    const mapped = mapDwengoToLocal(dwengoObj);
+
+    if (!isTeacher && (mapped.teacherExclusive || !mapped.available)) {
+      return null;
+    }
+    return mapped;
+  } catch (error: any) {
+    if (error.response && error.response.status === 404) {
+      return null;
+    }
+    console.error("Fout bij fetchDwengoObjectById:", error);
+    return null;
+  }
+}
+
+// Eén Dwengo-object op basis van _id
+export async function fetchDwengoObjectByIdRaw(
+  id: string,
+  isTeacher: boolean,
+): Promise<LearningObjectDto | null> {
+  try {
+    const params = { _id: id };
+    const response = await dwengoAPI.get("/api/learningObject/getRaw", {
       params,
     });
     const dwengoObj: DwengoLearningObject = response.data;
@@ -215,7 +249,7 @@ export async function searchDwengoObjects(
 export async function getDwengoObjectsForPath(
   pathId: string,
   isTeacher: boolean,
-): Promise<LearningObjectDto[]> {
+): Promise<LearningObjectDtoWithRaw[]> {
   try {
     const pathResp = await dwengoAPI.get("/api/learningPath/search", {
       params: { all: "" },
@@ -227,7 +261,7 @@ export async function getDwengoObjectsForPath(
       return [];
     }
     const nodes = learningPath.nodes || [];
-    const results: LearningObjectDto[] = await Promise.all(
+    const results = await Promise.all(
       nodes.map(
         async (node: {
           learningobject_hruid: any;
@@ -240,34 +274,44 @@ export async function getDwengoObjectsForPath(
               version: node.version,
               language: node.language,
             };
-
-            const response = await dwengoAPI.get(
-              "/api/learningObject/getMetadata",
-              {
-                params,
-              },
-            );
-
-            const dwengoObj: DwengoLearningObject = response.data;
-            const mapped = mapDwengoToLocal(dwengoObj);
-
-            if (!isTeacher && (mapped.teacherExclusive || !mapped.available)) {
+            const [metaRes, rawRes] = await Promise.all([
+              dwengoAPI.get("/api/learningObject/getMetadata", { params }),
+              dwengoAPI.get("/api/learningObject/getRaw", { params }),
+            ]);
+            const dto = mapDwengoToLocal(metaRes.data as DwengoLearningObject);
+            dto.raw = rawRes.data;
+            if (!isTeacher && (dto.teacherExclusive || !dto.available))
               return null;
-            }
-
-            return mapped;
-          } catch (err) {
-            console.error("Fout bij ophalen node:", err);
+            return dto;
+          } catch {
+            console.error("Fout bij node:", node);
             return null;
           }
         },
       ),
     );
-
-    // Filter out nulls (skipped or failed nodes)
-    return results.filter((r) => r !== null);
+    return results.filter((x): x is LearningObjectDtoWithRaw => x !== null);
   } catch (error) {
     console.error("Fout bij getDwengoObjectsForPath:", error);
     return [];
+  }
+}
+
+// Dwengo-object op basis van hruid (raw)
+export async function fetchDwengoObjectRawByHruid(
+  hruid: string,
+): Promise<DwengoLearningObject | null> {
+  try {
+    const params = { hruid };
+    const response = await dwengoAPI.get("/api/learningObject/getRaw", {
+      params,
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.status === 404) {
+      return null;
+    }
+    console.error("Fout bij fetchDwengoObjectRawByHruid:", error);
+    return null;
   }
 }

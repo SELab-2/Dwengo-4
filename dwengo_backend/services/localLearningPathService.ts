@@ -1,10 +1,6 @@
-import {
-  LearningPath as PrismaLearningPath,
-  PrismaClient,
-} from "@prisma/client";
+import { LearningPath as PrismaLearningPath } from "@prisma/client";
 import { LearningPathDto } from "./learningPathService"; // <-- We hergebruiken het type
-
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
 
 export interface LocalLearningPathData {
   title?: string;
@@ -58,6 +54,13 @@ export class LocalLearningPathService {
     return prisma.learningPath.findMany({
       where: { creatorId: teacherId },
       orderBy: { createdAt: "desc" },
+      include: {
+        creator: {
+          include: {
+            user: true,
+          },
+        },
+      },
     });
   }
 

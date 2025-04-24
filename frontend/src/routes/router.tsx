@@ -30,6 +30,10 @@ import StudentIndex from '../pages/student';
 import JoinClass from '../components/student/classes/JoinRequestForm';
 import StudentClassIndex from '../pages/student/StudentClassIndex';
 
+// ==== LEARNING PATHS ==== //
+import LearningPaths from '../pages/learningPath/learningPaths';
+import LearningPath from '../pages/learningPath/learningPath';
+
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
   return (
@@ -70,8 +74,8 @@ export const router = createBrowserRouter([
     element: <HomePage />,
   },
   {
-    path: '/learning-paths',
-    element: <div>Learning Path</div>,
+    path: '/learning-path/:pathId',
+    element: <LearningPath />,
   },
   {
     path: 'teacher',
@@ -117,6 +121,14 @@ export const router = createBrowserRouter([
         path: 'assignments/:assignmentId/edit',
         element: <AssignmentEdit></AssignmentEdit>,
       },
+      {
+        path: 'learning-paths',
+        element: <LearningPaths />,
+      },
+      {
+        path: 'learning-path/:pathId',
+        element: <LearningPath />,
+      },
     ],
   },
   {
@@ -147,6 +159,10 @@ export const router = createBrowserRouter([
       {
         path: 'logout',
         action: studentLogoutAction,
+      },
+      {
+        path: 'learning-path/:pathId',
+        element: <LearningPath />,
       },
       {
         path: 'dashboard',
