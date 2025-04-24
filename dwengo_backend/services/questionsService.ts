@@ -1,14 +1,14 @@
 import {
   Question,
-  QuestionType,
-  QuestionSpecific,
   QuestionGeneral,
   QuestionMessage,
+  QuestionSpecific,
+  QuestionType,
   Role,
 } from "@prisma/client";
 
 import referenceValidationService from "./referenceValidationService";
-import { NotFoundError, BadRequestError } from "../errors/errors";
+import { BadRequestError, NotFoundError } from "../errors/errors";
 import { AuthenticatedUser } from "../interfaces/extendedTypeInterfaces";
 
 import prisma from "../config/prisma";
@@ -54,12 +54,10 @@ function canUserSeeQuestionInList(
   if (question.isPrivate) {
     // Private => alleen creator, teacher in class, admin
     const isCreator = question.createdBy === user.id;
-    if (isCreator || isTeacherInClass || isAdmin) return true;
-    return false;
+    return isCreator || isTeacherInClass || isAdmin;
   } else {
     // Niet private => hele team, teacher, admin
-    if (isStudentInTeam || isTeacherInClass || isAdmin) return true;
-    return false;
+    return isStudentInTeam || isTeacherInClass || isAdmin;
   }
 }
 
@@ -116,7 +114,7 @@ export default class QuestionService {
     }
 
     // 3) Transactie: Question + eerste message
-    const newQuestion = await prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx) => {
       const q = await tx.question.create({
         data: {
           title,
@@ -136,8 +134,6 @@ export default class QuestionService {
       });
       return q;
     });
-
-    return newQuestion;
   }
 
   /**

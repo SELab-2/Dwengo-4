@@ -1,4 +1,4 @@
-import { PrismaClient, Role, Student, Teacher, User } from "@prisma/client";
+import { Role, Student, Teacher, User } from "@prisma/client";
 
 import prisma from "../config/prisma";
 
@@ -12,7 +12,7 @@ export default class UserService {
     lastName: string,
     email: string,
     hashedPassword: string,
-    role: Role
+    role: Role,
   ): Promise<User> {
     return prisma.user.create({
       data: {
@@ -38,14 +38,18 @@ export default class UserService {
     return prisma.user.findUniqueOrThrow({ where: { email } });
   }
 
-  static async findTeacherUserById(userId: number): Promise<(Teacher & { user: User }) | null> {
+  static async findTeacherUserById(
+    userId: number,
+  ): Promise<(Teacher & { user: User }) | null> {
     return prisma.teacher.findUnique({
       where: { userId },
       include: { user: true },
     });
   }
 
-  static async findStudentUserById(userId: number): Promise<(Student & { user: User }) | null> {
+  static async findStudentUserById(
+    userId: number,
+  ): Promise<(Student & { user: User }) | null> {
     return prisma.student.findUnique({
       where: { userId },
       include: { user: true },

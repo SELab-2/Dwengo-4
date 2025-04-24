@@ -57,8 +57,9 @@ const loginUser = async (
   res: Response,
   role: Role,
 ): Promise<void> => {
-  const email = req.body.email.toLowerCase();
-  const password = req.body.password;
+  let { email } = req.body;
+  const { password } = req.body;
+  email = email.toLowerCase();
 
   // Zoek eerst de gebruiker
   const user = await UserService.findUser(email);
@@ -89,8 +90,6 @@ const loginUser = async (
 
   res.json({
     message: "Succesvol ingelogd",
-    firstName: studentOrTeacherRecord.user.firstName,
-    lastName: studentOrTeacherRecord.user.lastName,
     token: generateToken(studentOrTeacherRecord.userId),
   });
 };

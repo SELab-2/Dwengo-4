@@ -43,7 +43,7 @@ export const getAssignmentsForStudentInClass = async (
   order: "asc" | "desc",
   limit: number,
 ): Promise<Assignment[]> => {
-  return await prisma.assignment.findMany({
+  return prisma.assignment.findMany({
     where: {
       classAssignments: {
         some: {

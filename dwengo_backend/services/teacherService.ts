@@ -1,11 +1,10 @@
-import {  Teacher, User } from "@prisma/client";
+import { Teacher, User } from "@prisma/client";
 
 import prisma from "../config/prisma";
 
-
 export default class TeacherService {
   static async findTeacherById(
-    userId: number
+    userId: number,
   ): Promise<Teacher & { user: User }> {
     return prisma.teacher.findUniqueOrThrow({
       where: { userId: userId },

@@ -1,4 +1,4 @@
-import { PrismaClient, LearningObjectProgress } from "@prisma/client";
+import { LearningObjectProgress, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -8,8 +8,11 @@ class ProgressService {
    * @param studentId id van de student
    * @param learningObjectId id van het lokale leerobject
    */
-  async createProgress(studentId: number, learningObjectId: string): Promise<LearningObjectProgress> {
-    const result = await prisma.$transaction(async (transactionPrisma) => {
+  async createProgress(
+    studentId: number,
+    learningObjectId: string,
+  ): Promise<LearningObjectProgress> {
+    return prisma.$transaction(async (transactionPrisma) => {
       const progress = await transactionPrisma.learningObjectProgress.create({
         data: {
           learningObjectId,
@@ -26,8 +29,6 @@ class ProgressService {
 
       return progress;
     });
-
-    return result;
   }
 
   /**
@@ -96,14 +97,17 @@ class ProgressService {
       select: { localLearningObjectId: true },
     });
     return nodes
-      .filter(n => n.localLearningObjectId !== null)
-      .map(n => n.localLearningObjectId!);
+      .filter((n) => n.localLearningObjectId !== null)
+      .map((n) => n.localLearningObjectId!);
   }
 
   /**
    * Telt het aantal studentProgress-records waarin 'done=true' en learningObjectId in de lijst zit.
    */
-  async countDoneProgressForStudent(studentId: number, objectIds: string[]): Promise<number> {
+  async countDoneProgressForStudent(
+    studentId: number,
+    objectIds: string[],
+  ): Promise<number> {
     return prisma.studentProgress.count({
       where: {
         studentId,
