@@ -11,7 +11,6 @@ import {
   createTeacher,
   stringToDate,
 } from "./helpers/testDataCreation";
-import TeacherSubmissionController from "../controllers/teacher/teacherSubmissionController";
 
 describe("Tests for teacherAssignment", async (): Promise<void> => {
   let teacher1: User & { teacher: Teacher; token: string };
@@ -109,11 +108,13 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
           teamSize: 2,
         });
       expect(status).toBe(201);
-      expect(body.deadline).toStrictEqual(new Date("2026-10-23").toISOString());
-      expect(body.pathRef).toBe(lp1.id);
+      expect(body.assignment.deadline).toStrictEqual(
+        new Date("2026-10-23").toISOString(),
+      );
+      expect(body.assignment.pathRef).toBe(lp1.id);
     });
 
-    it("should respond with a `500` status code because the teacher is not a member of the class", async (): Promise<void> => {
+    it("should respond with a `403` status code because the teacher is not a member of the class", async (): Promise<void> => {
       // class3 has no assignments
       const { status, body } = await request(app)
         .post("/assignment/teacher")
@@ -126,8 +127,9 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
           title: "Learning Path 1",
           description: "description1",
         });
-      expect(status).toBe(500);
-      expect(body.error).toBe("Failed to create assignment");
+      expect(status).toBe(403);
+      expect(body.error).toBe("AccessDeniedError");
+      expect(body.message).toBe("Teacher does not teach this class.");
     });
   });
 
@@ -169,16 +171,17 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get(`/assignment/teacher/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher3.token}`);
-      expect(status).toBe(500);
-      expect(body.error).toBe("Failed to retrieve assignments");
+      expect(status).toBe(403);
+      expect(body.error).toBe("AccessDeniedError");
+      expect(body.message).toBe("Teacher does not teach this class.");
     });
   });
 
   describe("[PATCH] /assignment/teacher/:assignmentId", async (): Promise<void> => {
-    it("should respond with a `200` status code and the updated assignment", async (): Promise<void> => {
+    it("should respond with a `201` status code and the updated assignment", async (): Promise<void> => {
       // First create assignment for class3
       const { status, body } = await request(app)
-        .post("/assignment/teacher")
+        .post(`/assignment/teacher`)
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
@@ -191,7 +194,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
         });
 
       expect(status).toBe(201);
-      const assignmentId: number = body.id;
+      const assignmentId: number = body.assignment.id;
 
       const req = await request(app)
         .patch(`/assignment/teacher/${assignmentId}`)
@@ -201,14 +204,16 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
         });
 
       expect(req.status).toBe(200);
-      expect(req.body.pathRef).toBe(lp2.id);
-      expect(req.body.deadline).toStrictEqual(
+      expect(req.body.updatedAssignment.pathRef).toBe(lp2.id);
+      expect(req.body.updatedAssignment.deadline).toStrictEqual(
         new Date("2026-10-23").toISOString(),
       );
-      expect(req.body.updatedAt).not.toStrictEqual(body.updatedAt);
+      expect(req.body.updatedAssignment.updatedAt).not.toStrictEqual(
+        body.updatedAt,
+      );
     });
 
-    it("should respond with a `500` status code because the teacher is not a member of the class", async (): Promise<void> => {
+    it("should respond with a `404` status code because the teacher is not a member of the class", async (): Promise<void> => {
       // First create assignment for class3
       await request(app)
         .post("/assignment/teacher")
@@ -226,8 +231,11 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
           learningPathId: lp2.id,
         });
 
-      expect(status).toBe(500);
-      expect(body.error).toBe("Failed to update assignment");
+      expect(status).toBe(404);
+      expect(body.error).toBe("NotFoundError");
+      expect(body.message).toBe(
+        "No classes of this teacher have this assignment.",
+      );
     });
   });
 
@@ -245,13 +253,16 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
       expect(assignment).toBeNull();
     });
 
-    it("should respond with a `500` status code because the teacher is not a member of the class", async (): Promise<void> => {
+    it("should respond with a `404` status code because the teacher is not a member of the class", async (): Promise<void> => {
       const { status, body } = await request(app)
         .delete(`/assignment/teacher/${assignment1.id}`)
         .set("Authorization", `Bearer ${teacher3.token}`);
 
-      expect(status).toBe(500);
-      expect(body.error).toBe("Failed to delete assignment");
+      expect(status).toBe(404);
+      expect(body.error).toBe("NotFoundError");
+      expect(body.message).toBe(
+        "No classes of this teacher have this assignment.",
+      );
     });
   });
 
