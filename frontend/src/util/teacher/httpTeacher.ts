@@ -312,10 +312,13 @@ export async function fetchLearningPaths(): Promise<LearningPath[]> {
   }
 
   let learningPaths = await response.json();
-  learningPaths = learningPaths.map((path: any) => ({
-    ...path,
-    id: path._id || path.id,
-  })) as LearningPath[];
+  learningPaths = learningPaths
+    .map((path: any) => ({
+      ...path,
+      id: path._id || path.id,
+    }))
+    .sort((a: LearningPath, b: LearningPath) => a.title.localeCompare(b.title)) as LearningPath[];
+
 
   return learningPaths;
 }
@@ -353,6 +356,35 @@ export async function fetchLearningPath(
 
   const learningPath = await response.json();
   return learningPath;
+}
+
+/**
+ * Fetches all learning objects for a specific learning path
+ * @param {string} pathId - The ID of the learning path
+ * @returns {Promise<any>} List of learning objects
+ * @throws {APIError} When fetching fails
+ */
+export async function fetchLearningObjectsByLearningPath(pathId: string): Promise<any> {
+
+  const response = await fetch(`${BACKEND}/learningObject/learningPath/${pathId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+  console.log("fet  ")
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het ophalen van de leerobjecten.',
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  return await response.json();
 }
 
 /**

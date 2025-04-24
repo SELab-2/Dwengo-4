@@ -22,7 +22,7 @@ export default class StudentTeamService {
             },
           },
         },
-      }),
+      })
     );
   }
 
@@ -59,7 +59,7 @@ export default class StudentTeamService {
             },
           },
         }),
-      "Student is not part of a team for this assignment.",
+      "Student is not part of a team for this assignment."
     );
   }
 
@@ -84,7 +84,7 @@ export default class StudentTeamService {
             },
           },
         }),
-      "Team not found.",
+      "Team not found."
     );
   }
 }

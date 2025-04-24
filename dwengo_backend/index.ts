@@ -20,6 +20,9 @@ import teacherInviteRoutes from "./routes/invite/teacherInviteRoutes";
 import joinRequestRoutes from "./routes/joinRequest/joinRequestRoutes";
 import teamRoutes from "./routes/team/teamRoutes";
 import authRoutes from "./routes/authentication/authRoutes";
+import { httpLogger, logger } from "./utils/logger";
+import { Logger } from "winston";
+import { logResponseBody } from "./middleware/logResponse";
 
 dotenv.config();
 
@@ -39,11 +42,11 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
   }
   res.setHeader(
     "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS, PATCH",
+    "GET, POST, PUT, DELETE, OPTIONS, PATCH"
   );
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "X-Requested-With, Content-Type, Authorization",
+    "X-Requested-With, Content-Type, Authorization"
   );
   next();
 });
@@ -54,6 +57,12 @@ app.options("*", (req, res) => {
 app.options("*", (req, res) => {
   res.sendStatus(200);
 });
+
+app.use(httpLogger);
+
+if (process.env.NODE_ENV !== "production") {
+  app.use(logResponseBody());
+}
 
 // JSON-parser middleware
 app.use(express.json());
@@ -70,6 +79,7 @@ app.use("/join-request", joinRequestRoutes);
 // Routes voor authentificatie
 app.use("/auth", authRoutes);
 app.use("/pathByTeacher", teacherLocalLearningPathRoutes);
+
 app.use("/learningObjectByTeacher", teacherLocalLearningObjectRoutes);
 
 // Routes voor teams
@@ -90,7 +100,7 @@ app.use("/learningPath", learningPathRoutes);
 
 app.use(
   "/learningPath/:learningPathId/node",
-  teacherLocalLearningPathNodesRoutes,
+  teacherLocalLearningPathNodesRoutes
 );
 
 app.use("/progress", progressRoutes);
@@ -103,9 +113,12 @@ app.use("/submission", submissionRoutes);
 app.use(errorHandler);
 
 if (process.env.NODE_ENV !== "test") {
-  console.log(process.env.NODE_ENV);
+  logger.info(`NODE_ENV: ${process.env.NODE_ENV}`);
   const PORT: string | number = process.env.PORT || 5000;
-  app.listen(PORT, (): void => console.log(`Server draait op poort ${PORT}`));
+  app.listen(
+    PORT,
+    (): Logger => logger.info(`Server is running on port ${PORT}`),
+  );
 }
 
 export default app;

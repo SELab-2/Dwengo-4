@@ -1,5 +1,7 @@
 import React from 'react';
 import { createBrowserRouter, Link, RouteObject } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import LanguageChooser from '../components/shared/LanguageChooser';
 
 // ==== TEACHER ROUTES ==== //
 import Assignment from '../pages/teacher/Assignment';
@@ -28,31 +30,41 @@ import StudentIndex from '../pages/student';
 import JoinClass from '../components/student/classes/JoinRequestForm';
 import StudentClassIndex from '../pages/student/StudentClassIndex';
 
+// ==== LEARNING PATHS ==== //
+import LearningPaths from '../pages/learningPath/learningPaths';
+import LearningPath from '../pages/learningPath/learningPath';
+
 const HomePage: React.FC = () => {
+  const { t } = useTranslation();
   return (
-    <div className="flex flex-col justify-center items-center h-screen">
-      <div className="-translate-y-20">
-        <h2 className="justify-center flex flex-row font-bold text-5xl mb-8">
-          Kies een rol
-        </h2>
-        <div className="flex flex-row justify-center gap-x-10">
-          <Link to="/student">
-            <button
-              className={`px-7 text-4xl py-1.5 font-bold rounded-md  bg-dwengo-green hover:bg-dwengo-green-dark text-white  hover:cursor-pointer`}
-            >
-              Student
-            </button>
-          </Link>
-          <Link to="/teacher">
-            <button
-              className={`px-7 text-4xl py-1.5 font-bold rounded-md   text-white bg-dwengo-green hover:bg-dwengo-green-dark hover:cursor-pointer`}
-            >
-              Teacher
-            </button>
-          </Link>
+    <>
+      <div className="absolute top-4 right-4">
+        <LanguageChooser />
+      </div>
+      <div className="flex flex-col justify-center items-center h-screen">
+        <div className="-translate-y-20">
+          <h2 className="justify-center flex flex-row font-bold text-5xl mb-8">
+            {t('role.choose')}
+          </h2>
+          <div className="flex flex-row justify-center gap-x-10">
+            <Link to="/student">
+              <button
+                className={`px-7 text-4xl py-1.5 font-bold rounded-md  bg-dwengo-green hover:bg-dwengo-green-dark text-white  hover:cursor-pointer`}
+              >
+                {t('role.student')}
+              </button>
+            </Link>
+            <Link to="/teacher">
+              <button
+                className={`px-7 text-4xl py-1.5 font-bold rounded-md   text-white bg-dwengo-green hover:bg-dwengo-green-dark hover:cursor-pointer`}
+              >
+                {t('role.teacher')}
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
@@ -62,8 +74,8 @@ export const router = createBrowserRouter([
     element: <HomePage />,
   },
   {
-    path: '/learning-paths',
-    element: <div>Learning Path</div>,
+    path: '/learning-path/:pathId',
+    element: <LearningPath />,
   },
   {
     path: 'teacher',
@@ -109,6 +121,14 @@ export const router = createBrowserRouter([
         path: 'assignments/:assignmentId/edit',
         element: <AssignmentEdit></AssignmentEdit>,
       },
+      {
+        path: 'learning-paths',
+        element: <LearningPaths />,
+      },
+      {
+        path: 'learning-path/:pathId',
+        element: <LearningPath />,
+      },
     ],
   },
   {
@@ -139,6 +159,10 @@ export const router = createBrowserRouter([
       {
         path: 'logout',
         action: studentLogoutAction,
+      },
+      {
+        path: 'learning-path/:pathId',
+        element: <LearningPath />,
       },
       {
         path: 'dashboard',

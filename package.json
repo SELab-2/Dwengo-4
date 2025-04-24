@@ -13,7 +13,10 @@
   "dependencies": {
     "@prisma/client": "^6.6.0",
     "eslint": "^9.24.0",
-    "typescript-eslint": "^8.29.1"
+    "express-winston": "^4.2.0",
+    "i18next-browser-languagedetector": "^8.0.4",
+    "typescript-eslint": "^8.29.1",
+    "winston": "^3.17.0"
   },
   "scripts": {
     "prepare": "husky install"

@@ -44,7 +44,7 @@ export const createNodeForPath = asyncHandler(
       teacherId,
       learningPathId,
       {
-        isExternal: !!body.isExternal,
+        isExternal: body.isExternal,
         localLearningObjectId: body.localLearningObjectId,
         dwengoHruid: body.dwengoHruid,
         dwengoLanguage: body.dwengoLanguage,

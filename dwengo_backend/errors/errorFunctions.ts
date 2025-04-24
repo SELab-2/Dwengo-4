@@ -9,8 +9,7 @@ import {
 
 /**
  * Every prisma query should be wrapped in this function to handle prisma errors correctly.
- * If the prisma error has a clear error message, it will be thrown as a DatabaseError with the same message.
- * If the prisma error does not have a clear error message, a generic DatabaseError will be thrown.
+ * If there is some sort of prisma error, this will be caught and a DatabaseError will be thrown.
  */
 
 export async function handlePrismaQuery<T>(

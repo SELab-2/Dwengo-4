@@ -8,7 +8,7 @@ import {
 
 export default class TeacherService {
   static async findTeacherById(
-    userId: number,
+    userId: number
   ): Promise<Teacher & { user: User }> {
     return await handleQueryWithExistenceCheck(
       () =>
@@ -18,7 +18,7 @@ export default class TeacherService {
             user: true,
           },
         }),
-      "Teacher not found",
+      "Teacher not found"
     );
   }
 
@@ -28,7 +28,7 @@ export default class TeacherService {
         include: {
           user: true, // Inclusief gebruikersinformatie
         },
-      }),
+      })
     );
   }
 
@@ -43,7 +43,7 @@ export default class TeacherService {
         include: {
           user: true, // Includes full user data in each teacher object
         },
-      }),
+      })
     );
   }
 }

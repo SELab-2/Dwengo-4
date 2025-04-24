@@ -22,7 +22,7 @@ export default class UserService {
     lastName: string,
     email: string,
     hashedPassword: string,
-    role: Role,
+    role: Role
   ): Promise<User> {
     return await handlePrismaQuery(() =>
       prisma.user.create({
@@ -42,19 +42,19 @@ export default class UserService {
           student: true,
           admin: true,
         },
-      }),
+      })
     );
   }
 
   static async findUserByEmail(email: string): Promise<User> {
     return await handleQueryWithExistenceCheck(
       () => prisma.user.findFirst({ where: { email } }),
-      "Existing user not found.",
+      "Existing user not found."
     );
   }
 
   static async findTeacherUserById(
-    userId: number,
+    userId: number
   ): Promise<Teacher & { user: User }> {
     return await handleQueryWithExistenceCheck(
       () =>
@@ -62,12 +62,12 @@ export default class UserService {
           where: { userId },
           include: { user: true },
         }),
-      "Teacher not found.",
+      "Teacher not found."
     );
   }
 
   static async findStudentUserById(
-    userId: number,
+    userId: number
   ): Promise<Student & { user: User }> {
     return await handleQueryWithExistenceCheck(
       () =>
@@ -75,7 +75,7 @@ export default class UserService {
           where: { userId },
           include: { user: true },
         }),
-      "Student not found.",
+      "Student not found."
     );
   }
 }

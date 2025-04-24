@@ -1,22 +1,22 @@
-import React, { useRef } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import InputWithChecks from "../../shared/InputWithChecks";
+import React, { useRef } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import InputWithChecks from '../../shared/InputWithChecks';
 import {
-  validateRequired,
   validateForm,
-} from "../../../util/shared/validation";
-import Container from "../../shared/Container";
-import BoxBorder from "../../shared/BoxBorder";
-import { createClass } from "../../../util/teacher/httpTeacher";
-import LoadingIndicatorButton from "../../shared/LoadingIndicatorButton";
-import PrimaryButton from "../../shared/PrimaryButton";
-import { ClassItem } from "../../../types/type";
+  validateRequired,
+} from '../../../util/shared/validation';
+import Container from '../../shared/Container';
+import BoxBorder from '../../shared/BoxBorder';
+import { createClass } from '../../../util/teacher/httpTeacher';
+import LoadingIndicatorButton from '../../shared/LoadingIndicatorButton';
+import PrimaryButton from '../../shared/PrimaryButton';
+import { ClassItem } from '../../../types/type';
+import { useTranslation } from 'react-i18next';
 
 interface InputWithChecksRef {
   validateInput: () => boolean;
   getValue: () => string;
 }
-
 
 interface CreateClassPayload {
   name: string;
@@ -25,6 +25,7 @@ interface CreateClassPayload {
 const CreateClass: React.FC = () => {
   const classNameRef = useRef<InputWithChecksRef | null>(null);
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const { mutate, isPending, isError, error } = useMutation<
     ClassItem,
@@ -33,7 +34,7 @@ const CreateClass: React.FC = () => {
   >({
     mutationFn: createClass,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["classes"] });
+      queryClient.invalidateQueries({ queryKey: ['classes'] });
     },
   });
 
@@ -53,26 +54,25 @@ const CreateClass: React.FC = () => {
     <section>
       <Container>
         <BoxBorder extraClasses="mxw-700 m-a g-20">
-          <h2>Nieuwe Klas Aanmaken</h2>
+          <h2>{t('class.create')}</h2>
           <form className="g-20" onSubmit={handleFormSubmit}>
             <InputWithChecks
               ref={classNameRef}
-              label="Klasnaam"
+              label={t('class.name.label')}
               inputType="text"
               validate={(value: string) =>
                 validateForm(value, [validateRequired])
               }
-              placeholder="Voer de naam van de klas in"
+              placeholder={t('class.name.placeholder')}
             />
             {isError && (
               <div className="c-r">
-                {(error as any)?.info?.message ||
-                  "Er is iets fout gelopen tijdens het aanmaken van de klas"}
+                {(error as any)?.info?.message || t('class.error')}
               </div>
             )}
             <div>
               <PrimaryButton type="submit" disabled={isPending}>
-                Klas Aanmaken
+                {t('class.submit')}
                 {isPending && <LoadingIndicatorButton />}
               </PrimaryButton>
             </div>

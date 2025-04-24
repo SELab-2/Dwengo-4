@@ -79,7 +79,7 @@ const TeamCreationModal = ({
     const classId = selectedClass.id;
     setIndividualStudents({
       ...individualStudents,
-      [classId]: individualStudents[classId]?.includes(student)
+      [classId]: individualStudents[classId]?.some(s => s.id === student.id)
         ? individualStudents[classId].filter(s => s.id !== student.id)
         : [...(individualStudents[classId] || []), student]
     });

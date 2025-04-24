@@ -9,7 +9,7 @@ import { AccessDeniedError, UnauthorizedError } from "../errors/errors";
 export const isAuthorized = async (
   userId: number,
   requiredRole: Role,
-  classId?: number,
+  classId?: number
 ): Promise<void> => {
   const user = await handleQueryWithExistenceCheck(
     () =>
@@ -17,7 +17,7 @@ export const isAuthorized = async (
         where: { id: userId },
         select: { role: true, teacher: true, student: true },
       }),
-    `User with id: ${userId} not found.`,
+    `User with id: ${userId} not found.`
   );
 
   // Admins are authorized for everything
@@ -28,7 +28,7 @@ export const isAuthorized = async (
     (requiredRole === Role.STUDENT && user.role !== Role.STUDENT)
   ) {
     throw new UnauthorizedError(
-      "User is not authorized to perform this action.",
+      "User is not authorized to perform this action."
     );
   }
 
@@ -38,7 +38,7 @@ export const isAuthorized = async (
 export const classCheck = async (
   userId: number,
   classId: number,
-  requiredRole: Role,
+  requiredRole: Role
 ): Promise<void> => {
   // Extra check for teachers: ensure they teach this class
   if (requiredRole === Role.TEACHER && classId) {
@@ -63,7 +63,7 @@ export const classCheck = async (
 
 export const canUpdateOrDelete = async (
   userId: number,
-  assignmentId: number,
+  assignmentId: number
 ): Promise<void> => {
   // Check if the user is authorized as a teacher
   await isAuthorized(userId, Role.TEACHER);
@@ -74,7 +74,7 @@ export const canUpdateOrDelete = async (
     prisma.classTeacher.findMany({
       where: { teacherId: userId },
       select: { classId: true },
-    }),
+    })
   );
 
   if (allClassesTeacher.length === 0)
@@ -89,6 +89,6 @@ export const canUpdateOrDelete = async (
           classId: { in: allClassesTeacher.map((c) => c.classId) },
         },
       }),
-    "No classes of this teacher have this assignment.",
+    "No classes of this teacher have this assignment."
   );
 };
