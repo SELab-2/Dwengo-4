@@ -51,7 +51,7 @@ const LoginStudent: React.FC = () => {
       localStorage.setItem('lastName', data.lastName);
       localStorage.setItem('expiration', expires.toISOString());
 
-      navigate('/student/dashboard');
+      navigate('/student');
     },
   });
 
@@ -104,10 +104,7 @@ const LoginStudent: React.FC = () => {
               placeholder={t('login.password.placeholder')}
             />
             {isError && (
-              <div className="c-r">
-                {error.message ||
-                  'Er is iets fout gelopen tijdens het inloggen'}
-              </div>
+              <div className="c-r">{error.message || t('login.error')}</div>
             )}
             <div>
               <PrimaryButton type="submit" disabled={isPending}>

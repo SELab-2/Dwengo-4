@@ -24,7 +24,7 @@ export default function ClassesStudent() {
       <div className="w-full flex flex-row gap-5 flex-wrap">
         {isLoading && <p>{t('loading.loading')}</p>}
         {isError && (
-          <p className="c-r">{error?.info?.message || t('classes.error')}</p>
+          <p className="c-r">{error.message || t('classes.error')}</p>
         )}
 
         {!isLoading && !isError && classes && classes.length > 0 ? (
@@ -32,7 +32,7 @@ export default function ClassesStudent() {
             {classes.map((classItem) => (
               <div
                 key={classItem.id}
-                className="flex items-center flex-row w-[20rem] p-4 justify-between bg-gray-100 rounded-lg shrink-0"
+                className="flex items-center flex-row w-[20rem] p-4 justify-between rounded-lg shrink-0"
               >
                 <div className="flex flex-col">
                   <div className="flex flex-row w-full justify-between">

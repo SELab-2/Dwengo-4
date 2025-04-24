@@ -264,6 +264,7 @@ export async function fetchLearningPath(
 }
 
 export async function fetchConversation(assignmentId: string) {
+  // First fetch: Get the student's team for this assignment
   const response = await fetch(
     `${BACKEND}/team/student/assignment/${assignmentId}/studentTeam`,
     {
@@ -285,20 +286,54 @@ export async function fetchConversation(assignmentId: string) {
   }
 
   const resp = await response.json();
+  console.log(resp);
+  const teamId = resp.teamAssignment.teamId;
 
-  const responseQuestion = await fetch(
-    `${BACKEND}/question/team/${resp.teamAssignment.teamId}`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
+  // Second fetch: Get questions for this team
+  const responseQuestion = await fetch(`${BACKEND}/question/team/${teamId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getAuthToken()}`,
     },
-  );
+  });
 
-  if (!response.ok) throw new Error('Failed to fetch questions');
-  return responseQuestion.json();
+  if (!responseQuestion.ok) {
+    throw new Error('Failed to fetch questions');
+  }
+
+  const questions = await responseQuestion.json();
+
+  // If no questions exist, create one
+  if (Array.isArray(questions) && questions.length === 0) {
+    const createQuestionResponse = await fetch(
+      `${BACKEND}/question/general/assignment/${assignmentId}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        body: JSON.stringify({
+          teamId: teamId,
+          assignmentId: assignmentId,
+          title: 'Team Discussion',
+          type: 'GENERAL',
+          text: 'text',
+          pathRef: 'todo',
+          isPrivate: false,
+        }),
+      },
+    );
+
+    if (!createQuestionResponse.ok) {
+      throw new Error('Failed to create a new question for the team');
+    }
+
+    return [await createQuestionResponse.json()];
+  }
+
+  return questions;
 }
 
 /**

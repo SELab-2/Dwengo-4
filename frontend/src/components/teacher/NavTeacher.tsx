@@ -8,7 +8,7 @@ import LanguageChooser from '../shared/LanguageChooser';
 
 const NavTeacher: React.FC = () => {
   const { t } = useTranslation();
-  const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const [menuOpen] = useState<boolean>(false);
   const [firstName] = useState<string | null>(
     localStorage.getItem('firstName'),
   );
@@ -31,9 +31,12 @@ const NavTeacher: React.FC = () => {
             />
             {firstName ? (
               <div className="flex space-x-4">
-                <NavButton to="/teacher" label="Home" />
-                <NavButton to="/teacher/classes" label="Klassen" />
-                <NavButton to="/learning-paths" label="Leerpaden" />
+                <NavButton to="/teacher" label={t('nav.home')} />
+                <NavButton to="/teacher/classes" label={t('nav.classes')} />
+                <NavButton
+                  to="/learning-paths"
+                  label={t('nav.learning_paths')}
+                />
               </div>
             ) : (
               <div
