@@ -20,6 +20,9 @@ import teacherInviteRoutes from "./routes/invite/teacherInviteRoutes";
 import joinRequestRoutes from "./routes/joinRequest/joinRequestRoutes";
 import teamRoutes from "./routes/team/teamRoutes";
 import authRoutes from "./routes/authentication/authRoutes";
+import { httpLogger, logger } from "./utils/logger";
+import { Logger } from "winston";
+import { logResponseBody } from "./middleware/logResponse";
 
 dotenv.config();
 
@@ -55,6 +58,12 @@ app.options("*", (req, res) => {
   res.sendStatus(200);
 });
 
+app.use(httpLogger);
+
+if (process.env.NODE_ENV !== "production") {
+  app.use(logResponseBody());
+}
+
 // JSON-parser middleware
 app.use(express.json());
 
@@ -70,10 +79,7 @@ app.use("/join-request", joinRequestRoutes);
 // Routes voor authentificatie
 app.use("/auth", authRoutes);
 app.use("/pathByTeacher", teacherLocalLearningPathRoutes);
-app.use(
-  "/learningPath/:learningPathId/node",
-  teacherLocalLearningPathNodesRoutes,
-);
+
 app.use("/learningObjectByTeacher", teacherLocalLearningObjectRoutes);
 
 // Routes voor teams
@@ -92,6 +98,11 @@ app.use("/question", QuestionRoutes);
 
 app.use("/learningPath", learningPathRoutes);
 
+app.use(
+  "/learningPath/:learningPathId/node",
+  teacherLocalLearningPathNodesRoutes,
+);
+
 app.use("/progress", progressRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
@@ -102,9 +113,12 @@ app.use("/submission", submissionRoutes);
 app.use(errorHandler);
 
 if (process.env.NODE_ENV !== "test") {
-  console.log(process.env.NODE_ENV);
+  logger.info(`NODE_ENV: ${process.env.NODE_ENV}`);
   const PORT: string | number = process.env.PORT || 5000;
-  app.listen(PORT, (): void => console.log(`Server draait op poort ${PORT}`));
+  app.listen(
+    PORT,
+    (): Logger => logger.info(`Server is running on port ${PORT}`),
+  );
 }
 
 export default app;
