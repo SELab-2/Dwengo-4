@@ -1,6 +1,12 @@
 import { dwengoAPI } from "../config/dwengoAPI";
+import { BadRequestError, NotFoundError } from "../errors/errors";
+import {
+  handlePrismaQuery,
+  throwCorrectNetworkError,
+} from "../errors/errorFunctions";
 
 import prisma from "../config/prisma";
+import { LearningObject } from "@prisma/client";
 
 /**
  * ReferenceValidationService:
@@ -14,36 +20,36 @@ export default class ReferenceValidationService {
    *  ===========================
    */
   static async validateLocalLearningObject(localId: string): Promise<void> {
-    const lo = await prisma.learningObject.findUnique({
-      where: { id: localId },
-    });
+    const lo: LearningObject | null = await handlePrismaQuery(() =>
+      prisma.learningObject.findUnique({
+        where: { id: localId },
+      })
+    );
     if (!lo) {
-      throw new Error(`Lokaal leerobject '${localId}' niet gevonden.`);
+      throw new NotFoundError(`Local learning object not found.`);
     }
   }
 
   static async validateDwengoLearningObject(
     hruid: string,
     language: string,
-    version: number,
+    version: number
   ): Promise<void> {
     // Dwengo: GET /api/learningObject/getMetadata?hruid=xxx&language=xxx&version=xxx
     try {
       const resp = await dwengoAPI.get(
-        `/api/learningObject/getMetadata?hruid=${hruid}&language=${language}&version=${version}`,
+        `/api/learningObject/getMetadata?hruid=${hruid}&language=${language}&version=${version}`
       );
       if (!resp.data) {
-        throw new Error(
-          `Dwengo leerobject hruid=${hruid},language=${language},version=${version} => geen data ontvangen.`,
+        throw new NotFoundError(
+          `Dwengo learning object hruid=${hruid},language=${language},version=${version} not found.`
         );
       }
-    } catch (err: any) {
-      if (err.response?.status === 404) {
-        throw new Error(
-          `Dwengo leerobject hruid=${hruid},language=${language},version=${version} niet gevonden (404).`,
-        );
-      }
-      throw new Error(`Fout bij Dwengo-check: ${err.message}`);
+    } catch (error) {
+      throwCorrectNetworkError(
+        error as Error,
+        "Could not fetch the requested learning object from the Dwengo API."
+      );
     }
   }
 
@@ -56,19 +62,19 @@ export default class ReferenceValidationService {
     localId?: string,
     hruid?: string,
     language?: string,
-    version?: number,
+    version?: number
   ): Promise<void> {
     if (isExternal) {
       if (!hruid || !language || version == null) {
-        throw new Error(
-          "Missing Dwengo leerobject referenties (hruid/language/version)",
+        throw new BadRequestError(
+          "Missing Dwengo learning object references (hruid/language/version)."
         );
       }
       await this.validateDwengoLearningObject(hruid, language, version);
     } else {
       if (!localId) {
-        throw new Error(
-          "Missing localId voor niet-externe leerobjectvalidatie",
+        throw new BadRequestError(
+          "Missing localId for non-external learning object validation."
         );
       }
       await this.validateLocalLearningObject(localId);
@@ -81,32 +87,39 @@ export default class ReferenceValidationService {
    *  ===========================
    */
   static async validateLocalLearningPath(localId: string): Promise<void> {
-    const lp = await prisma.learningPath.findUnique({
-      where: { id: localId },
-    });
+    const lp = await handlePrismaQuery(() =>
+      prisma.learningPath.findUnique({
+        where: { id: localId },
+      })
+    );
     if (!lp) {
-      throw new Error(`Lokaal leerpad '${localId}' niet gevonden.`);
+      throw new NotFoundError(`Learning path not found.`);
     }
   }
 
   static async validateDwengoLearningPath(
     hruid: string,
-    language: string,
+    language: string
   ): Promise<void> {
     // Dwengo: /api/learningPath/search?hruid=...&language=...
     // (versie voor paden is meestal niet gedefinieerd in Dwengo)
     try {
       const resp = await dwengoAPI.get(
-        `/api/learningPath/search?hruid=${hruid}&language=${language}`,
+        `/api/learningPath/search?hruid=${hruid}&language=${language}`
       );
-      if (!resp.data || !Array.isArray(resp.data) || resp.data.length === 0) {
-        throw new Error(
-          `Dwengo leerpad (hruid=${hruid}, language=${language}) niet gevonden (lege array).`,
+      // Dwengo API geeft een array terug, met 0 of meer items
+      // Lege lijsten worden teruggegeven, zoals afgesproken in de Discord
+      if (!Array.isArray(resp.data)) {
+        throw new NotFoundError(
+          `Dwengo learning path (hruid=${hruid}, language=${language}) not found.`
         );
       }
       // Eventueel checken of we exact 1 match hebben
-    } catch (err: any) {
-      throw new Error(`Fout bij Dwengo-check leerpad: ${err.message}`);
+    } catch (error) {
+      throwCorrectNetworkError(
+        error as Error,
+        "Could not fetch the requested learning path from the Dwengo API."
+      );
     }
   }
 
@@ -117,16 +130,20 @@ export default class ReferenceValidationService {
     isExternal: boolean,
     localId?: string,
     hruid?: string,
-    language?: string,
+    language?: string
   ): Promise<void> {
     if (isExternal) {
       if (!hruid || !language) {
-        throw new Error("Missing Dwengo leerpad referenties (hruid/language)");
+        throw new BadRequestError(
+          "Missing Dwengo leerpad references (hruid/language)."
+        );
       }
       await this.validateDwengoLearningPath(hruid, language);
     } else {
       if (!localId) {
-        throw new Error("Missing localId voor niet-externe leerpadvalidatie");
+        throw new BadRequestError(
+          "Missing localId voor niet-externe leerpadvalidatie"
+        );
       }
       await this.validateLocalLearningPath(localId);
     }

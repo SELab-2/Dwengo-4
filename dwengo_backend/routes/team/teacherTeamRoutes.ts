@@ -12,7 +12,7 @@ import {
   ensureTeamsParamValidTeamDivision,
   ensureTeamParamValidIdentifiableTeamDivision,
 } from "../../middleware/teamValidationMiddleware";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router = Router();
 router.use(protectTeacher);
