@@ -90,6 +90,8 @@ const loginUser = async (
 
   res.json({
     message: "Succesvol ingelogd",
+    firstName: user.firstName,
+    lastName: user.lastName,
     token: generateToken(studentOrTeacherRecord.userId),
   });
 };
