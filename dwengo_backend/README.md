@@ -13,7 +13,7 @@ Om de app te starten, voer de volgende stappen uit:
    npx prisma migrate dev
    ```
 
-3**Start de ontwikkelserver:**
+3. **Start de ontwikkelserver:**
    ```bash
    npm run dev
    ```
