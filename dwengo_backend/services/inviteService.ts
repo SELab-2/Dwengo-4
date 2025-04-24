@@ -2,7 +2,7 @@ import { Invite, JoinRequestStatus, Class, PrismaClient } from "@prisma/client";
 import classService from "./classService";
 import { AccesDeniedError, BadRequestError, ConflictError, NotFoundError } from "../errors/errors";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
 
 export default class inviteService {
 
