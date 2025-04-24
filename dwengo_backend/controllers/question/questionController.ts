@@ -49,11 +49,11 @@ export const createQuestionSpecific = asyncHandler(
       localLearningObjectId,
       dwengoHruid,
       dwengoLanguage,
-      dwengoVersion ? Number(dwengoVersion) : undefined,
+      dwengoVersion ? Number(dwengoVersion) : undefined
     );
 
     res.status(201).json({ message: createdQuestionMessage, questionSpec });
-  },
+  }
 );
 
 // CREATE GENERAL
@@ -88,11 +88,11 @@ export const createQuestionGeneral = asyncHandler(
       !!isExternal,
       !!isPrivate,
       pathRef,
-      dwengoLanguage,
+      dwengoLanguage
     );
 
     res.status(201).json({ message: createdQuestionMessage, questionGen });
-  },
+  }
 );
 
 // CREATE message
@@ -113,10 +113,10 @@ export const createQuestionMessage = asyncHandler(
     const msg = await QuestionService.createQuestionMessage(
       Number(questionId),
       userId,
-      text,
+      text
     );
     res.status(201).json({ message: "Message successfully created.", msg });
-  },
+  }
 );
 
 // UPDATE question
@@ -129,12 +129,12 @@ export const updateQuestion = asyncHandler(
     }
     const updated = await QuestionService.updateQuestion(
       Number(questionId),
-      title,
+      title
     );
     res
       .status(200)
       .json({ message: "Question successfully updated.", updated });
-  },
+  }
 );
 
 // UPDATE message
@@ -148,12 +148,12 @@ export const updateQuestionMessage = asyncHandler(
     }
     const updatedMsg = await QuestionService.updateQuestionMessage(
       Number(questionMessageId),
-      text,
+      text
     );
     res
       .status(200)
       .json({ message: "Message successfully updated.", updatedMsg });
-  },
+  }
 );
 
 // GET question
@@ -162,7 +162,7 @@ export const getQuestion = asyncHandler(
     const { questionId } = req.params;
     const q = await QuestionService.getQuestion(Number(questionId));
     res.json(q);
-  },
+  }
 );
 
 // GET questions by team
@@ -172,10 +172,10 @@ export const getQuestionsTeam = asyncHandler(
     const user = getUserFromAuthRequest(req);
     const questions = await QuestionService.getQuestionsForTeam(
       Number(teamId),
-      user, // pass user => filtering
+      user // pass user => filtering
     );
     res.json(questions);
-  },
+  }
 );
 
 // GET questions by class
@@ -185,10 +185,10 @@ export const getQuestionsClass = asyncHandler(
     const user = getUserFromAuthRequest(req);
     const questions = await QuestionService.getQuestionsForClass(
       Number(classId),
-      user,
+      user
     );
     res.json(questions);
-  },
+  }
 );
 
 // GET questions for assignment + class
@@ -199,10 +199,10 @@ export const getQuestionsAssignment = asyncHandler(
     const questions = await QuestionService.getQuestionsForAssignment(
       Number(assignmentId),
       Number(classId),
-      user,
+      user
     );
     res.json(questions);
-  },
+  }
 );
 
 // GET question messages
@@ -211,7 +211,7 @@ export const getQuestionMessages = asyncHandler(
     const { questionId } = req.params;
     const msgs = await QuestionService.getQuestionMessages(Number(questionId));
     res.json(msgs);
-  },
+  }
 );
 
 // DELETE question
@@ -220,7 +220,7 @@ export const deleteQuestion = asyncHandler(
     const { questionId } = req.params;
     await QuestionService.deleteQuestion(Number(questionId));
     res.status(204).end();
-  },
+  }
 );
 
 // DELETE message
@@ -229,5 +229,5 @@ export const deleteQuestionMessage = asyncHandler(
     const { questionMessageId } = req.params;
     await QuestionService.deleteQuestionMessage(Number(questionMessageId));
     res.status(204).end();
-  },
+  }
 );

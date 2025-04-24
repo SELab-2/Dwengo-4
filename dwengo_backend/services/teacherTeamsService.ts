@@ -16,6 +16,25 @@ import _ from "lodash";
 import prisma from "../config/prisma";
 import { handlePrismaQuery } from "../errors/errorFunctions";
 import { BadRequestError, NotFoundError } from "../errors/errors";
+type PrismaTransactionClient = Omit<
+  PrismaClient,
+  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+>;
+
+/**
+ * Resolves the transaction client to be used.
+ *
+ * If a transaction client is provided, it will return the provided client.
+ * Otherwise, it falls back to the default Prisma client.
+ *
+ * @param {PrismaClient | PrismaTransactionClient} [tx] - Optional transaction or Prisma client instance.
+ * @return {PrismaTransactionClient} The resolved Prisma transaction client.
+ */
+function resolveTx(
+  tx?: PrismaClient | PrismaTransactionClient
+): PrismaTransactionClient {
+  return tx ?? prisma;
+}
 
 /**
  * This function assumes that the division of a group of people into teams has already been done
@@ -26,27 +45,14 @@ export const createTeamsInAssignment = async (
   assignmentId: number,
   classId: number,
   teams: TeamDivision[],
-  tx?:
-    | PrismaClient
-    | Omit<
-        PrismaClient,
-        | "$connect"
-        | "$disconnect"
-        | "$on"
-        | "$transaction"
-        | "$use"
-        | "$extends"
-      >
+  tx?: PrismaTransactionClient
 ): Promise<Team[]> => {
   const createdTeams: Team[] = [];
 
   // Check if a class has been assigned an Assignment before splitting this class up into
   // Teams to solve this assignment.
-  // Dit is nodig om met dezelfde transactie te werken, als we dat willen.
-  if (!tx) {
-    tx = prisma;
-  }
-  console.log("AssignmentId: 5 ", classId);
+  tx = resolveTx(tx);
+
   const classAssignment: ClassAssignment | null =
     await tx.classAssignment.findUnique({
       where: {
@@ -56,6 +62,7 @@ export const createTeamsInAssignment = async (
         },
       },
     });
+
   if (!classAssignment) {
     throw new NotFoundError(
       "This assignment has not been assigned to this class yet."
@@ -79,24 +86,9 @@ export const createTeamsInAssignment = async (
 async function createTeam(
   teamName: string,
   classId: number,
-  tx?:
-    | PrismaClient
-    | Omit<
-        PrismaClient,
-        | "$connect"
-        | "$disconnect"
-        | "$on"
-        | "$transaction"
-        | "$use"
-        | "$extends"
-      >
+  tx?: PrismaTransactionClient
 ): Promise<Team> {
-  //check if a transaction has been started, if not, use the default prisma client
-  if (!tx) {
-    tx = prisma;
-  }
-
-  return tx.team.create({
+  return resolveTx(tx).team.create({
     data: {
       teamname: teamName,
       classId: classId,
@@ -109,24 +101,9 @@ async function createTeam(
 async function giveAssignmentToTeam(
   teamId: number,
   assignmentId: number,
-  tx?:
-    | PrismaClient
-    | Omit<
-        PrismaClient,
-        | "$connect"
-        | "$disconnect"
-        | "$on"
-        | "$transaction"
-        | "$use"
-        | "$extends"
-      >
+  tx?: PrismaTransactionClient
 ): Promise<Team> {
-  //check if a transaction has been started, if not, use the default prisma client
-  if (!tx) {
-    tx = prisma;
-  }
-
-  return tx.team.update({
+  return resolveTx(tx).team.update({
     where: { id: teamId },
     data: {
       teamAssignment: {
@@ -145,23 +122,9 @@ async function giveAssignmentToTeam(
 async function assignStudentsToTeam(
   teamId: number,
   studentIds: number[],
-  tx?:
-    | PrismaClient
-    | Omit<
-        PrismaClient,
-        | "$connect"
-        | "$disconnect"
-        | "$on"
-        | "$transaction"
-        | "$use"
-        | "$extends"
-      >
+  tx?: PrismaTransactionClient
 ): Promise<void> {
-  //check if a transaction has been started, if not, use the default prisma client
-  if (!tx) {
-    tx = prisma;
-  }
-
+  tx = resolveTx(tx);
   for (const studentId of studentIds) {
     // Ga eerst na of deze student en dit team zelfs bestaan
     const student: Student | null = await tx.student.findUnique({
@@ -176,7 +139,7 @@ async function assignStudentsToTeam(
     }
 
     if (student && team) {
-      await prisma.team.update({
+      await tx.team.update({
         where: { id: teamId },
         data: {
           students: {
@@ -193,102 +156,102 @@ async function assignStudentsToTeam(
 // createTeamsInAssignment. Want createTeamsInAssignment verwacht al een geldige indeling, daar wordt ook
 // door middleware op gecontroleerd.
 
-async function randomlyDivideClassIntoTeams(
-  teamSize: number,
-  classId: number
-): Promise<TeamDivision[]> {
-  const students: ClassStudent[] = await handlePrismaQuery(() =>
-    prisma.classStudent.findMany({
-      where: { classId: classId },
-    })
-  );
+// async function randomlyDivideClassIntoTeams(
+//   teamSize: number,
+//   classId: number
+// ): Promise<TeamDivision[]> {
+//   const students: ClassStudent[] = await handlePrismaQuery(() =>
+//     prisma.classStudent.findMany({
+//       where: { classId: classId },
+//     })
+//   );
 
-  // Ensure that class is found and classLinks exists
-  if (!students) {
-    throw new NotFoundError(`There are no students in this class.`);
-  }
+//   // Ensure that class is found and classLinks exists
+//   if (!students) {
+//     throw new NotFoundError(`There are no students in this class.`);
+//   }
 
-  const studentIds: number[] = students.map(
-    (st: ClassStudent): number => st.studentId
-  );
+//   const studentIds: number[] = students.map(
+//     (st: ClassStudent): number => st.studentId
+//   );
 
-  // Shuffle the list of studentIds using Lodash
-  const shuffledStudents: number[] = _.shuffle(studentIds);
+//   // Shuffle the list of studentIds using Lodash
+//   const shuffledStudents: number[] = _.shuffle(studentIds);
 
-  const teams: TeamDivision[] = [];
+//   const teams: TeamDivision[] = [];
 
-  for (let i: number = 0; i < shuffledStudents.length; i += teamSize) {
-    teams.push({
-      teamName: `Team ${i + 1}`,
-      // Select "teamSize" amount of students via slicing
-      studentIds: shuffledStudents.slice(i, i + teamSize),
-    });
-  }
+//   for (let i: number = 0; i < shuffledStudents.length; i += teamSize) {
+//     teams.push({
+//       teamName: `Team ${i + 1}`,
+//       // Select "teamSize" amount of students via slicing
+//       studentIds: shuffledStudents.slice(i, i + teamSize),
+//     });
+//   }
 
-  return teams;
-}
+//   return teams;
+// }
 
-// Does the same as "randomlyDivideClassIntoTeams" but sorts the students alphabetically
-async function divideClassIntoAlphabeticalTeams(
-  teamSize: number,
-  classId: number
-): Promise<TeamDivision[]> {
-  // This lets TypeScript know what is happening when assigning types to the variables in the sort function
-  interface StudentWithUser extends Student {
-    user: User;
-  }
+// // Does the same as "randomlyDivideClassIntoTeams" but sorts the students alphabetically
+// async function divideClassIntoAlphabeticalTeams(
+//   teamSize: number,
+//   classId: number
+// ): Promise<TeamDivision[]> {
+//   // This lets TypeScript know what is happening when assigning types to the variables in the sort function
+//   interface StudentWithUser extends Student {
+//     user: User;
+//   }
 
-  // First fetch all the students in the given class
-  const students: (Student & { user: User })[] = await handlePrismaQuery(() =>
-    prisma.student.findMany({
-      where: {
-        classes: {
-          some: {
-            classId: classId,
-          },
-        },
-      },
-      include: { user: true },
-    })
-  );
+//   // First fetch all the students in the given class
+//   const students: (Student & { user: User })[] = await handlePrismaQuery(() =>
+//     prisma.student.findMany({
+//       where: {
+//         classes: {
+//           some: {
+//             classId: classId,
+//           },
+//         },
+//       },
+//       include: { user: true },
+//     })
+//   );
 
-  // Check if the class is not empty
-  if (!students || students.length === 0) {
-    throw new NotFoundError(`There are no students in this class.`);
-  }
+//   // Check if the class is not empty
+//   if (!students || students.length === 0) {
+//     throw new NotFoundError(`There are no students in this class.`);
+//   }
 
-  // Sort students alphabetically by name
-  const sortedStudents: StudentWithUser[] = students.sort(
-    (a: StudentWithUser, b: StudentWithUser): number => {
-      // Sort alphabetically based on the user's last name
-      const lastNameComparison: number = a.user.lastName.localeCompare(
-        b.user.lastName
-      );
+//   // Sort students alphabetically by name
+//   const sortedStudents: StudentWithUser[] = students.sort(
+//     (a: StudentWithUser, b: StudentWithUser): number => {
+//       // Sort alphabetically based on the user's last name
+//       const lastNameComparison: number = a.user.lastName.localeCompare(
+//         b.user.lastName
+//       );
 
-      // If last names are the same, compare by first name
-      return lastNameComparison !== 0
-        ? lastNameComparison
-        : a.user.firstName.localeCompare(b.user.firstName);
-    }
-  );
+//       // If last names are the same, compare by first name
+//       return lastNameComparison !== 0
+//         ? lastNameComparison
+//         : a.user.firstName.localeCompare(b.user.firstName);
+//     }
+//   );
 
-  // Extract sorted student IDs
-  const studentIds: number[] = sortedStudents.map(
-    (st: Student): number => st.userId
-  );
+//   // Extract sorted student IDs
+//   const studentIds: number[] = sortedStudents.map(
+//     (st: Student): number => st.userId
+//   );
 
-  const teams: TeamDivision[] = [];
+//   const teams: TeamDivision[] = [];
 
-  for (let i: number = 0; i < studentIds.length; i += teamSize) {
-    teams.push({
-      teamName: `Team ${Math.floor(i / teamSize) + 1}`,
-      // Select "teamSize" amount of students via slicing
-      studentIds: studentIds.slice(i, i + teamSize),
-    });
-  }
+//   for (let i: number = 0; i < studentIds.length; i += teamSize) {
+//     teams.push({
+//       teamName: `Team ${Math.floor(i / teamSize) + 1}`,
+//       // Select "teamSize" amount of students via slicing
+//       studentIds: studentIds.slice(i, i + teamSize),
+//     });
+//   }
 
-  return teams;
-}
+//   return teams;
+// }
 
 // Check if the students exists or not
 const validateStudentIds = async (studentIds: number[]): Promise<void> => {

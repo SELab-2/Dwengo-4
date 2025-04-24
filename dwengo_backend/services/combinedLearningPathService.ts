@@ -14,7 +14,7 @@ export async function searchAllLearningPaths(
     title?: string;
     description?: string;
     all?: string;
-  } = {},
+  } = {}
 ): Promise<LearningPathDto[]> {
   // A) Dwengo
   const dwengoResults = await dwengoSearchPaths(filters); // => isExternal=true
@@ -30,7 +30,7 @@ export async function searchAllLearningPaths(
  * Haal 1 leerpad op (via ID/hruid) => Dwengo => zoniet => Lokaal
  */
 export async function getCombinedLearningPathByIdOrHruid(
-  idOrHruid: string,
+  idOrHruid: string
 ): Promise<LearningPathDto> {
   try {
     // 1) Dwengo
@@ -40,7 +40,7 @@ export async function getCombinedLearningPathByIdOrHruid(
       // Dwengo leerpad niet gevonden in de Dwengo API
       // Ga verder met lokaal
       return await localLearningPathService.getLearningPathAsDtoByIdOrHruid(
-        idOrHruid,
+        idOrHruid
       );
     }
     throw error;

@@ -30,7 +30,7 @@ export default class TeacherAssignmentService {
     deadline: Date,
     title: string,
     description: string,
-    teamSize: number,
+    teamSize: number
   ): Promise<Assignment> {
     // 1) check authorization
     await isAuthorized(teacherId, Role.TEACHER, classId);
@@ -42,7 +42,7 @@ export default class TeacherAssignmentService {
       isExternal,
       isExternal ? undefined : pathRef, // localId
       isExternal ? pathRef : undefined, // hruid
-      isExternal ? pathLanguage : undefined, // language
+      isExternal ? pathLanguage : undefined // language
     );
 
     // 3) Maak assignment
@@ -61,7 +61,7 @@ export default class TeacherAssignmentService {
           description,
           teamSize,
         },
-      }),
+      })
     );
   }
 
@@ -70,7 +70,7 @@ export default class TeacherAssignmentService {
    */
   static async getAllAssignments(
     teacherId: number,
-    limit: number | undefined,
+    limit: number | undefined
   ): Promise<Assignment[]> {
     return await handlePrismaQuery(() =>
       prisma.assignment.findMany({
@@ -91,7 +91,7 @@ export default class TeacherAssignmentService {
           deadline: "desc",
         },
         take: limit,
-      }),
+      })
     );
   }
 
@@ -100,7 +100,7 @@ export default class TeacherAssignmentService {
    */
   static async getAssignmentsByClass(
     classId: number,
-    teacherId: number,
+    teacherId: number
   ): Promise<Assignment[]> {
     await isAuthorized(teacherId, Role.TEACHER, classId);
     return await handlePrismaQuery(() =>
@@ -112,7 +112,7 @@ export default class TeacherAssignmentService {
             },
           },
         },
-      }),
+      })
     );
   }
 
@@ -126,7 +126,7 @@ export default class TeacherAssignmentService {
     teacherId: number,
     title: string,
     description: string,
-    teamSize: number,
+    teamSize: number
   ): Promise<Assignment> {
     // 1) autorisatie
     await canUpdateOrDelete(teacherId, assignmentId);
@@ -145,7 +145,7 @@ export default class TeacherAssignmentService {
           description: description,
           teamSize: teamSize,
         },
-      }),
+      })
     );
   }
 
@@ -154,14 +154,14 @@ export default class TeacherAssignmentService {
    */
   static async deleteAssignment(
     assignmentId: number,
-    teacherId: number,
+    teacherId: number
   ): Promise<Assignment> {
     await canUpdateOrDelete(teacherId, assignmentId);
 
     return await handlePrismaQuery(() =>
       prisma.assignment.delete({
         where: { id: assignmentId },
-      }),
+      })
     );
   }
 
@@ -177,19 +177,21 @@ export default class TeacherAssignmentService {
     title: string,
     description: string,
     classTeams: ClassTeams,
-    teamSize: number,
+    teamSize: number
   ): Promise<Assignment> {
     // 1) Check authorization for all classes
-    for (const classId of Object.keys(classTeams)) {
-      await isAuthorized(teacherId, Role.TEACHER, parseInt(classId));
-    }
+    await Promise.all(
+      Object.keys(classTeams).map(async (classId) => {
+        await isAuthorized(teacherId, Role.TEACHER, parseInt(classId));
+      })
+    );
 
     // 2) Validate pathRef
     await ReferenceValidationService.validateLearningPath(
       isExternal,
       isExternal ? undefined : pathRef, // localId
       isExternal ? pathRef : undefined, // hruid
-      isExternal ? pathLanguage : undefined, // language
+      isExternal ? pathLanguage : undefined // language
     );
 
     // 3) Create assignment and teams in transaction
@@ -206,6 +208,10 @@ export default class TeacherAssignmentService {
         },
       });
 
+      //*
+      // Deze for loop moet blijven staan. Je mag geen Promise.all() gebruiken in een transaction.
+      // Error: PrismaClientTransactionInvalidError: Transaction API error: cannot run multiple operations in parallel on the same transaction.
+      // *//
       // Create class assignments and teams
       for (const [classId, teams] of Object.entries(classTeams)) {
         await tx.classAssignment.create({
@@ -218,7 +224,7 @@ export default class TeacherAssignmentService {
           assignment.id,
           parseInt(classId),
           teams,
-          tx,
+          tx
         );
       }
 
@@ -239,20 +245,23 @@ export default class TeacherAssignmentService {
     title: string,
     description: string,
     classTeams: ClassTeams,
-    teamSize: number,
+    teamSize: number
   ): Promise<Assignment> {
     // 1) Check authorization for all classes and assignment
     await canUpdateOrDelete(teacherId, assignmentId);
-    for (const classId of Object.keys(classTeams)) {
-      await classCheck(teacherId, parseInt(classId), Role.TEACHER);
-    }
+
+    await Promise.all(
+      Object.keys(classTeams).map(async (classId) => {
+        await isAuthorized(teacherId, Role.TEACHER, parseInt(classId));
+      })
+    );
 
     // 2) Validate pathRef
     await ReferenceValidationService.validateLearningPath(
       isExternal,
       isExternal ? undefined : pathRef, // localId
       isExternal ? pathRef : undefined, // hruid
-      isExternal ? pathLanguage : undefined, // language
+      isExternal ? pathLanguage : undefined // language
     );
 
     // 3) Update assignment and teams in transaction
@@ -279,6 +288,10 @@ export default class TeacherAssignmentService {
         },
       });
 
+      //*
+      // Deze for loops moet blijven staan. Je mag geen Promise.all() gebruiken in een transaction.
+      // Error: PrismaClientTransactionInvalidError: Transaction API error: cannot run multiple operations in parallel on the same transaction.
+      // *//
       // Ensure all classAssignments exist for the provided classes
       for (const classId of Object.keys(classTeams)) {
         const existingClassAssignment = await tx.classAssignment.findFirst({
@@ -304,7 +317,7 @@ export default class TeacherAssignmentService {
           assignment.id,
           parseInt(classId),
           teams,
-          tx,
+          tx
         );
       }
 

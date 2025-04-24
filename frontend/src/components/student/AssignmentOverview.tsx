@@ -6,8 +6,10 @@ import {
 } from '../../util/student/httpStudent';
 import { Link } from 'react-router-dom';
 import PrimaryButton from '../shared/PrimaryButton';
+import { useTranslation } from 'react-i18next';
 
 export default function AssignmentOverview() {
+  const { t } = useTranslation();
   // Query: Haal alle klassen op
   const {
     data: assignments,
@@ -22,11 +24,10 @@ export default function AssignmentOverview() {
   return (
     <>
       <div className="flex flex-row gap-x-5 h-[12.5rem]  ">
-        {isLoading && <p>Laden ...</p>}
+        {isLoading && <p>{t('loading.loading')}</p>}
         {isError && (
           <p className="c-r">
-            {error?.info?.message ||
-              'Er is iets fout gegaan bij het ophalen van de taken.'}
+            {error?.info?.message || t('assignments.error')}
           </p>
         )}
 
@@ -47,7 +48,7 @@ export default function AssignmentOverview() {
                         {assignmentItem.title}
                       </h3>
                       <p className="text-sm text-gray-700 translate-y-1.5">
-                        Deadline: {formattedDate}
+                        {t('deadline', { date: formattedDate })}
                       </p>
                     </div>
                     <div className="h-20 mt-1 text-gray-500 line-clamp-3">
@@ -55,7 +56,7 @@ export default function AssignmentOverview() {
                     </div>
                     <div className="flex mt-1 flex-row justify-between items-center text-sm">
                       <Link to={`/student/assignment/${assignmentItem.id}`}>
-                        <PrimaryButton>Leerpad bekijken</PrimaryButton>
+                        <PrimaryButton>{t('assignments.view')}</PrimaryButton>
                       </Link>
                       {/*<p>12/50 completed</p> Replace with actual progress*/}
                     </div>
@@ -65,7 +66,7 @@ export default function AssignmentOverview() {
             })}
           </>
         ) : (
-          !isLoading && <p>Geen opdrachten gevonden.</p>
+          !isLoading && <p>{t('assignments.not_found')}</p>
         )}
       </div>
     </>

@@ -8,7 +8,7 @@ export default class submissionService {
   static async createSubmission(
     studentId: number,
     evaluationId: string,
-    assignmentId: number,
+    assignmentId: number
   ): Promise<Submission> {
     // Controleren of de student in een team zit dat gekoppeld is aan de opdracht.
     // De originele filter probeerde ook te filteren op assignment.learningPath, maar dat veld bestaat niet.
@@ -29,12 +29,12 @@ export default class submissionService {
         select: {
           id: true,
         },
-      }),
+      })
     );
 
     if (!team) {
       throw new AccessDeniedError(
-        "Student is not part of a team for this assignment.",
+        "Student is not part of a team for this assignment."
       );
     }
 
@@ -45,13 +45,13 @@ export default class submissionService {
           teamId: team.id,
           assignmentId: assignmentId,
         },
-      }),
+      })
     );
   }
 
   static async getSubmissionsForAssignment(
     assignmentId: number,
-    studentId: number,
+    studentId: number
   ): Promise<Submission[]> {
     return await handlePrismaQuery(() =>
       prisma.submission.findMany({
@@ -68,14 +68,14 @@ export default class submissionService {
             },
           },
         },
-      }),
+      })
     );
   }
 
   static async getSubmissionsForEvaluation(
     assignmentId: number,
     evaluationId: string,
-    studentId: number,
+    studentId: number
   ): Promise<Submission[]> {
     return await handlePrismaQuery(() =>
       prisma.submission.findMany({
@@ -93,14 +93,14 @@ export default class submissionService {
             },
           },
         },
-      }),
+      })
     );
   }
 
   static async teacherGetSubmissionsForStudent(
     studentId: number,
     teacherId: number,
-    assignmentId?: number,
+    assignmentId?: number
   ): Promise<Submission[]> {
     return await handlePrismaQuery(() =>
       prisma.submission.findMany({
@@ -127,14 +127,14 @@ export default class submissionService {
             },
           },
         },
-      }),
+      })
     );
   }
 
   static async teacherGetSubmissionsForTeam(
     teamId: number,
     teacherId: number,
-    assignmentId?: number,
+    assignmentId?: number
   ) {
     return await handlePrismaQuery(() =>
       prisma.submission.findMany({
@@ -157,7 +157,7 @@ export default class submissionService {
             },
           },
         },
-      }),
+      })
     );
   }
 }

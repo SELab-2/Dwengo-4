@@ -20,7 +20,7 @@ export default class StudentTeamService {
             },
           },
         },
-      }),
+      })
     );
   }
 
@@ -55,11 +55,11 @@ export default class StudentTeamService {
             },
           },
         },
-      }),
+      })
     );
     if (!team) {
       throw new NotFoundError(
-        "Student is not part of a team for this assignment.",
+        "Student is not part of a team for this assignment."
       );
     }
     return team;
@@ -84,7 +84,7 @@ export default class StudentTeamService {
             },
           },
         },
-      }),
+      })
     );
     if (!team) {
       throw new NotFoundError("Team not found.");

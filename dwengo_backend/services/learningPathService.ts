@@ -49,7 +49,7 @@ export async function searchLearningPaths(
     hruid?: string;
     title?: string;
     description?: string;
-    all?: string; // leeg string => alles
+    all?: string;
   } = {}
 ): Promise<LearningPathDto[]> {
   try {

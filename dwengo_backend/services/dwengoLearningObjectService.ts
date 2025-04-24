@@ -117,7 +117,7 @@ function mapDwengoToLocal(dwengoObj: DwengoLearningObject): LearningObjectDto {
 
 // Alle Dwengo-objects
 export async function fetchAllDwengoObjects(
-  isTeacher: boolean,
+  isTeacher: boolean
 ): Promise<LearningObjectDto[]> {
   try {
     const params: Record<string, any> = {};
@@ -131,14 +131,14 @@ export async function fetchAllDwengoObjects(
     checkAll(
       response.data,
       "Something went wrong while searching for learning objects.",
-      isTeacher,
+      isTeacher
     );
     const dwengoData: DwengoLearningObject[] = response.data;
     return dwengoData.map(mapDwengoToLocal);
   } catch (error) {
     throwCorrectNetworkError(
       error as Error,
-      "Unable to fetch learning objects from the Dwengo API.",
+      "Unable to fetch learning objects from the Dwengo API."
     );
   }
   // Dit zou nooit mogen gebeuren
@@ -148,7 +148,7 @@ export async function fetchAllDwengoObjects(
 // Eén Dwengo-object op basis van _id
 export async function fetchDwengoObjectById(
   id: string,
-  isTeacher: boolean,
+  isTeacher: boolean
 ): Promise<LearningObjectDto> {
   try {
     const params = { _id: id };
@@ -159,7 +159,7 @@ export async function fetchDwengoObjectById(
     checkAll(
       response.data,
       `Dwengo learning object with id ${id} not found.`,
-      isTeacher,
+      isTeacher
     );
 
     const dwengoObj: DwengoLearningObject = response.data;
@@ -169,7 +169,7 @@ export async function fetchDwengoObjectById(
   } catch (error) {
     throwCorrectNetworkError(
       error as Error,
-      "Unable to fetch the learning object from the Dwengo API.",
+      "Unable to fetch the learning object from the Dwengo API."
     );
   }
   throw new Error("Unexpected state reached in fetchDwengoObjectById."); // Dit zou nooit mogen gebeuren
@@ -180,7 +180,7 @@ export async function fetchDwengoObjectByHruidLangVersion(
   hruid: string,
   language: string,
   version: number,
-  isTeacher: boolean,
+  isTeacher: boolean
 ): Promise<LearningObjectDto> {
   try {
     // Dwengo-API: /api/learningObject/getMetadata?hruid=...&language=...&version=...
@@ -188,7 +188,7 @@ export async function fetchDwengoObjectByHruidLangVersion(
 
     if (!hruid || !language || !version) {
       throw new BadRequestError(
-        "Missing required parameters: hruid, language, and version.",
+        "Missing required parameters: hruid, language, and version."
       );
     }
 
@@ -199,7 +199,7 @@ export async function fetchDwengoObjectByHruidLangVersion(
     checkAll(
       response.data,
       `Dwengo learning object with hruid=${hruid}, language=${language}, version=${version} not found.`,
-      isTeacher,
+      isTeacher
     );
 
     const dwengoObj: DwengoLearningObject = response.data;
@@ -207,7 +207,7 @@ export async function fetchDwengoObjectByHruidLangVersion(
   } catch (error) {
     throwCorrectNetworkError(
       error as Error,
-      "Unable to fetch the learning object from the Dwengo API.",
+      "Unable to fetch the learning object from the Dwengo API."
     );
   }
   // Dit mag nooit gebeuren
@@ -217,7 +217,7 @@ export async function fetchDwengoObjectByHruidLangVersion(
 // Zoeken Dwengo-objects
 export async function searchDwengoObjects(
   isTeacher: boolean,
-  searchTerm: string,
+  searchTerm: string
 ): Promise<LearningObjectDto[]> {
   try {
     const params: Record<string, any> = {};
@@ -234,7 +234,7 @@ export async function searchDwengoObjects(
     checkAll(
       response.data,
       `The search term: ${searchTerm} didn't correspond with any learning object.`,
-      isTeacher,
+      isTeacher
     );
 
     const dwengoData: DwengoLearningObject[] = response.data;
@@ -242,7 +242,7 @@ export async function searchDwengoObjects(
   } catch (error) {
     throwCorrectNetworkError(
       error as Error,
-      "Unable to fetch learning objects from the Dwengo API.",
+      "Unable to fetch learning objects from the Dwengo API."
     );
   }
   // Zou niet mogen gebeuren
@@ -252,7 +252,7 @@ export async function searchDwengoObjects(
 // Haal leerobjecten op voor een leerpad (Dwengo)
 export async function getDwengoObjectsForPath(
   pathId: string,
-  isTeacher: boolean,
+  isTeacher: boolean
 ): Promise<LearningObjectDto[]> {
   try {
     const pathResp = await dwengoAPI.get("/api/learningPath/search", {
@@ -263,45 +263,59 @@ export async function getDwengoObjectsForPath(
 
     checkFetchedObject(
       learningPath,
-      `Learning path with id=${pathId} not found.`,
+      `Learning path with id=${pathId} not found.`
     );
 
     const nodes = learningPath.nodes || [];
-    const results: LearningObjectDto[] = [];
+    const results: LearningObjectDto[] = await Promise.all(
+      nodes.map(
+        async (node: {
+          learningobject_hruid: any;
+          version: any;
+          language: any;
+        }) => {
+          try {
+            const params = {
+              hruid: node.learningobject_hruid,
+              version: node.version,
+              language: node.language,
+            };
 
-    for (const node of nodes) {
-      try {
-        const params = {
-          hruid: node.learningobject_hruid,
-          version: node.version,
-          language: node.language,
-        };
-        const response = await dwengoAPI.get(
-          "/api/learningObject/getMetadata",
-          { params },
-        );
+            const response = await dwengoAPI.get(
+              "/api/learningObject/getMetadata",
+              {
+                params,
+              }
+            );
 
-        checkAll(
-          response.data,
-          `Dwengo learning object (hruid: ${params.hruid}) corresponding with node id=${node._id} not found.`,
-          isTeacher,
-        );
+            checkAll(
+              response.data,
+              `Dwengo learning object (hruid: ${params.hruid}) not found.`,
+              isTeacher
+            );
 
-        const dwengoObj: DwengoLearningObject = response.data;
-        const mapped = mapDwengoToLocal(dwengoObj);
-        results.push(mapped);
-      } catch (err) {
-        throwCorrectNetworkError(
-          err as Error,
-          "Could not fetch learning object related to node.",
-        );
-      }
-    }
+            const dwengoObj: DwengoLearningObject = response.data;
+            const mapped = mapDwengoToLocal(dwengoObj);
+
+            if (!isTeacher && (mapped.teacherExclusive || !mapped.available)) {
+              return null;
+            }
+
+            return mapped;
+          } catch (err) {
+            throwCorrectNetworkError(
+              err as Error,
+              "Could not fetch learning object related to node."
+            );
+          }
+        }
+      )
+    );
     return results;
   } catch (error) {
     throwCorrectNetworkError(
       error as Error,
-      "Could not fetch the desired learning path.",
+      "Could not fetch the desired learning path."
     );
   }
   // Dit is een fallback, maar zou nooit moeten gebeuren
@@ -315,7 +329,7 @@ export async function getDwengoObjectsForPath(
 
 function checkFetchedObject<T>(
   fetchedObject: T | null,
-  notFoundMessage: string,
+  notFoundMessage: string
 ) {
   if (!fetchedObject) {
     throw new NotFoundError(notFoundMessage);
@@ -324,7 +338,7 @@ function checkFetchedObject<T>(
 
 function checkAvailabilityAndTeacherExclusive(
   dwengoObj: DwengoLearningObject,
-  isTeacher: boolean,
+  isTeacher: boolean
 ) {
   if (!isTeacher && dwengoObj.teacher_exclusive) {
     throw new UnauthorizedError("This learning object is only for teachers.");
@@ -332,7 +346,7 @@ function checkAvailabilityAndTeacherExclusive(
 
   if (!dwengoObj.available) {
     throw new UnavailableError(
-      "This learning object is temporarily not available.",
+      "This learning object is temporarily not available."
     );
   }
 }
@@ -340,7 +354,7 @@ function checkAvailabilityAndTeacherExclusive(
 function checkAll(
   dwengoObj: DwengoLearningObject | null,
   notFoundMessage: string,
-  isTeacher: boolean,
+  isTeacher: boolean
 ) {
   checkFetchedObject(dwengoObj, notFoundMessage);
   checkAvailabilityAndTeacherExclusive(dwengoObj!, isTeacher);

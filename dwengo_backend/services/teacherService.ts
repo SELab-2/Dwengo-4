@@ -6,7 +6,7 @@ import { handlePrismaQuery } from "../errors/errorFunctions";
 
 export default class TeacherService {
   static async findTeacherById(
-    userId: number,
+    userId: number
   ): Promise<Teacher & { user: User }> {
     const teacher: (Teacher & { user: User }) | null = await handlePrismaQuery(
       () =>
@@ -15,7 +15,7 @@ export default class TeacherService {
           include: {
             user: true,
           },
-        }),
+        })
     );
     if (!teacher) {
       throw new NotFoundError("Teacher not found");
@@ -29,7 +29,7 @@ export default class TeacherService {
         include: {
           user: true, // Inclusief gebruikersinformatie
         },
-      }),
+      })
     );
   }
 
@@ -44,7 +44,7 @@ export default class TeacherService {
         include: {
           user: true, // Includes full user data in each teacher object
         },
-      }),
+      })
     );
   }
 }

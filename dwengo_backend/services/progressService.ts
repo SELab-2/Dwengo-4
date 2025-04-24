@@ -25,7 +25,7 @@ class ProgressService {
    */
   async createProgress(
     studentId: number,
-    learningObjectId: string,
+    learningObjectId: string
   ): Promise<LearningObjectProgress> {
     const result = await handlePrismaTransaction(
       prisma,
@@ -45,7 +45,7 @@ class ProgressService {
         });
 
         return progress;
-      },
+      }
     );
 
     return result;
@@ -57,7 +57,7 @@ class ProgressService {
    */
   async getStudentProgress(
     studentId: number,
-    learningObjectId: string,
+    learningObjectId: string
   ): Promise<LearningObjectProgress> {
     const progress = await handlePrismaQuery(() =>
       prisma.studentProgress.findFirst({
@@ -66,7 +66,7 @@ class ProgressService {
           progress: { learningObjectId },
         },
         include: { progress: true },
-      }),
+      })
     );
     if (!progress) {
       throw new NotFoundError("Progress not found.");
@@ -83,7 +83,7 @@ class ProgressService {
       prisma.learningObjectProgress.update({
         where: { id: progressId },
         data: { done: true },
-      }),
+      })
     );
   }
 
@@ -91,7 +91,7 @@ class ProgressService {
    * Haal (team + assignment + students) op, op basis van teamId.
    */
   async getTeamWithAssignment(
-    teamId: number,
+    teamId: number
   ): Promise<TeamWithStudentAndAssignment> {
     const team: TeamWithStudentAndAssignment | null = await handlePrismaQuery(
       () =>
@@ -101,7 +101,7 @@ class ProgressService {
             students: true,
             teamAssignment: true,
           },
-        }),
+        })
     );
     if (!team) {
       throw new NotFoundError("Team not found.");
@@ -119,7 +119,7 @@ class ProgressService {
     const assignment: Assignment | null = await handlePrismaQuery(() =>
       prisma.assignment.findUnique({
         where: { id: assignmentId },
-      }),
+      })
     );
     if (!assignment) {
       throw new NotFoundError("Assignment not found.");
@@ -134,7 +134,7 @@ class ProgressService {
     const count: number = await handlePrismaQuery(() =>
       prisma.learningPathNode.count({
         where: { learningPathId },
-      }),
+      })
     );
     // Als count 0 is, dan bestaat het leerpad niet.
     // Een leerpad moet altijd meer dan 0 nodes hebben.
@@ -152,7 +152,7 @@ class ProgressService {
       prisma.learningPathNode.findMany({
         where: { learningPathId, isExternal: false },
         select: { localLearningObjectId: true },
-      }),
+      })
     );
     return nodes
       .filter((n) => n.localLearningObjectId !== null)
@@ -164,7 +164,7 @@ class ProgressService {
    */
   async countDoneProgressForStudent(
     studentId: number,
-    objectIds: string[],
+    objectIds: string[]
   ): Promise<number> {
     return await handlePrismaQuery(() =>
       prisma.studentProgress.count({
@@ -172,7 +172,7 @@ class ProgressService {
           studentId,
           progress: { done: true, learningObjectId: { in: objectIds } },
         },
-      }),
+      })
     );
   }
 
@@ -185,7 +185,7 @@ class ProgressService {
       prisma.teamAssignment.findMany({
         where: { assignmentId },
         include: { team: { include: { students: true } } },
-      }),
+      })
     );
   }
 }
