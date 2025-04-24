@@ -1,0 +1,91 @@
+{
+  "role": {
+    "choose": "Kies een rol",
+    "student": "Leerling",
+    "teacher": "Lesgever"
+  },
+  "login": {
+    "teacher": "Inloggen als lesgever",
+    "student": "Inloggen als leerling",
+    "email": {
+      "label": "E-mailadres",
+      "placeholder": "Voer je e-mailadres in"
+    },
+    "password": {
+      "label": "Wachtwoord",
+      "placeholder": "Voer je wachtwoord in"
+    },
+    "firstName": {
+      "label": "Voornaam",
+      "placeholder": "Voer je voornaam in"
+    },
+    "lastName": {
+      "label": "Achternaam",
+      "placeholder": "Voer je achternaam in"
+    },
+    "error": "Er is iets fout gelopen tijdens het inloggen",
+    "submit": "Inloggen"
+  },
+  "register": {
+    "teacher": "Registreren als lesgever",
+    "student": "Registreren als leerling",
+    "submit": "Registreren",
+    "error": "Er is iets fout gelopen tijdens het registreren"
+  },
+  "nav": {
+    "home": "Home",
+    "login": "Inloggen",
+    "register": "Registreren",
+    "logout": "Uitloggen",
+    "profile": "Profiel",
+    "settings": "Instellingen",
+    "classes": "Klassen",
+    "learning_paths": "Leerpaden",
+    "logged_in_as": "Ingelogd als {{name}}"
+  },
+  "class": {
+    "create": "Nieuwe klas aanmaken",
+    "name": {
+      "label": "Klasnaam",
+      "placeholder": "Voer de klasnaam in"
+    },
+    "error": "Er is iets fout gelopen tijdens het aanmaken van de klas",
+    "submit": "Aanmaken",
+    "my_classes": "Mijn klassen"
+  },
+  "loading": {
+    "loading": "Laden...",
+    "error": "Er is iets fout gelopen tijdens het laden van de gegevens"
+  },
+  "home": "Home",
+  "assignments": {
+    "label": "Opdrachten",
+    "view_all": "Bekijk alle opdrachten",
+    "error": "Er is iets fout gelopen tijdens het ophalen van de opdrachten",
+    "view": "Opdracht bekijken",
+    "not_found": "Geen opdrachten gevonden"
+  },
+  "classes": {
+    "label": "Klasgroepen",
+    "error": "Er is iets fout gelopen tijdens het ophalen van de klasgroepen",
+    "not_found": "Geen klasgroepen gevonden",
+    "view": "Bekijk klas",
+    "leave_class": {
+      "label": "Klas verlaten",
+      "confirmation": "Weet je zeker dat je deze klas wilt verlaten? Om opnieuw lid te worden heb je een uitnodigingscode nodig.",
+      "error": "Er is iets misgegaan bij het verlaten van de klas."
+    }
+  },
+  "deadline": "Deadline: {{date}}",
+  "join_class": {
+    "title": "Lid worden van klas",
+    "code": {
+      "label": "Klascode",
+      "placeholder": "Voer de klascode in"
+    },
+    "error": "Er is iets fout gelopen tijdens het lid worden van de klas",
+    "submit": "Toegang aanvragen",
+    "success": "Je hebt een aanvraag verzonden om lid te worden van deze klas. Wacht op goedkeuring van de lesgever."
+  },
+  "code": "Klascode"
+}

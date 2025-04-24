@@ -1,37 +1,98 @@
-import { Assignment, PrismaClient, Role } from "@prisma/client";
+import { Assignment, Role } from "@prisma/client";
 import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
+import ReferenceValidationService from "../../services/referenceValidationService";
+import { TeamDivision } from "../../interfaces/extendedTypeInterfaces";
+import { createTeamsInAssignment } from "../teacherTeamsService";
+import prisma from "../../config/prisma";
 
-const prisma = new PrismaClient();
+interface ClassTeams {
+  [classId: number]: TeamDivision[];
+}
 
 export default class TeacherAssignmentService {
-  // Static method to create an assignment for a class
+  /**
+   * Creëer een assignment voor een class, met pathRef/isExternal.
+   */
   static async createAssignmentForClass(
     teacherId: number,
     classId: number,
-    learningPathId: string,
-    deadline: Date
+    pathRef: string,
+    pathLanguage: string,
+    isExternal: boolean,
+    deadline: Date,
+    title: string,
+    description: string,
+    teamSize: number,
   ): Promise<Assignment> {
+    // 1) check authorization
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
       throw new Error("The teacher is unauthorized to perform this action");
     }
 
+    // 2) Valideer pathRef
+    // => isExternal=true => Dwengo (hruid + language)
+    // => isExternal=false => lokaal (localId=pathRef)
+    await ReferenceValidationService.validateLearningPath(
+      isExternal,
+      isExternal ? undefined : pathRef, // localId
+      isExternal ? pathRef : undefined, // hruid
+      isExternal ? pathLanguage : undefined, // language
+    );
+
+    // 3) Maak assignment
     return prisma.assignment.create({
       data: {
-        learningPathId,
-        deadline,
+        title: title,
+        description: description,
+        pathRef: pathRef,
+        isExternal: isExternal,
+        deadline: deadline,
+        teamSize: teamSize,
         classAssignments: {
-          create: {
-            classId, // This will automatically link to the created Assignment
-          },
+          create: [
+            {
+              classId,
+            },
+          ],
         },
       },
     });
   }
 
-  // Static method to get assignments by class
+  /**
+   * Haal alle assignments op voor 1 teacher
+   */
+  static async getAllAssignments(
+    teacherId: number,
+    limit: number | undefined,
+  ): Promise<Assignment[]> {
+    return prisma.assignment.findMany({
+      where: {
+        classAssignments: {
+          some: {
+            class: {
+              ClassTeacher: {
+                some: {
+                  teacherId,
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        deadline: "desc",
+      },
+      take: limit,
+    });
+  }
+
+  /**
+   * Haal alle assignments op voor 1 klas
+   */
   static async getAssignmentsByClass(
     classId: number,
-    teacherId: number
+    teacherId: number,
   ): Promise<Assignment[]> {
     if (!(await isAuthorized(teacherId, Role.TEACHER, classId))) {
       throw new Error("The teacher is unauthorized to request the assignments");
@@ -40,33 +101,52 @@ export default class TeacherAssignmentService {
       where: {
         classAssignments: {
           some: {
-            classId: classId, // This ensures we are looking for assignments related to this class
+            classId,
           },
         },
       },
     });
   }
 
-  // Static method to update an assignment
+  /**
+   * Update assignment => pathRef/isExternal
+   */
   static async updateAssignment(
     assignmentId: number,
-    learningPathId: string,
-    teacherId: number
+    pathRef: string,
+    isExternal: boolean,
+    teacherId: number,
+    title: string,
+    description: string,
+    teamSize: number,
   ): Promise<Assignment> {
+    // 1) autorisatie
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
       throw new Error("The teacher is unauthorized to update the assignment");
     }
 
+    // 2) validate new pathRef
+    await ReferenceValidationService.validateLearningPath(isExternal, pathRef);
+
+    // 3) update
     return prisma.assignment.update({
       where: { id: assignmentId },
-      data: { learningPathId },
+      data: {
+        pathRef,
+        isExternal,
+        title,
+        description,
+        teamSize,
+      },
     });
   }
 
-  // Static method to delete an assignment
+  /**
+   * Delete assignment
+   */
   static async deleteAssignment(
     assignmentId: number,
-    teacherId: number
+    teacherId: number,
   ): Promise<Assignment> {
     if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
       throw new Error("The teacher is unauthorized to delete the assignment");
@@ -74,6 +154,182 @@ export default class TeacherAssignmentService {
 
     return prisma.assignment.delete({
       where: { id: assignmentId },
+    });
+  }
+
+  /**
+   * Create an assignment with class teams structure
+   */
+  static async createAssignmentWithTeams(
+    teacherId: number,
+    pathRef: string,
+    pathLanguage: string,
+    isExternal: boolean,
+    deadline: Date,
+    title: string,
+    description: string,
+    classTeams: ClassTeams,
+    teamSize: number,
+  ): Promise<Assignment> {
+    // 1) Check authorization for all classes
+    await Promise.all(
+      Object.keys(classTeams).map(async (classId) => {
+        const authorized = await isAuthorized(
+          teacherId,
+          Role.TEACHER,
+          parseInt(classId),
+        );
+        if (!authorized) {
+          throw new Error("The teacher is unauthorized to perform this action");
+        }
+      }),
+    );
+
+    // 2) Validate pathRef
+    await ReferenceValidationService.validateLearningPath(
+      isExternal,
+      isExternal ? undefined : pathRef, // localId
+      isExternal ? pathRef : undefined, // hruid
+      isExternal ? pathLanguage : undefined, // language
+    );
+
+    // 3) Create assignment and teams in transaction
+    return prisma.$transaction(async (tx) => {
+      // Create the assignment
+      const assignment = await tx.assignment.create({
+        data: {
+          pathRef,
+          isExternal,
+          deadline,
+          title,
+          description,
+          teamSize,
+        },
+      });
+
+      //*
+      // Deze for loop moet blijven staan. Je mag geen Promise.all() gebruiken in een transaction.
+      // Error: PrismaClientTransactionInvalidError: Transaction API error: cannot run multiple operations in parallel on the same transaction.
+      // *//
+      // Create class assignments and teams
+      for (const [classId, teams] of Object.entries(classTeams)) {
+        await tx.classAssignment.create({
+          data: {
+            assignmentId: assignment.id,
+            classId: parseInt(classId),
+          },
+        });
+        await createTeamsInAssignment(
+          assignment.id,
+          parseInt(classId),
+          teams,
+          tx,
+        );
+      }
+
+      return assignment;
+    });
+  }
+
+  /**
+   * Update an assignment and its team structure
+   */
+  static async updateAssignmentWithTeams(
+    assignmentId: number,
+    teacherId: number,
+    pathRef: string,
+    pathLanguage: string,
+    isExternal: boolean,
+    deadline: Date,
+    title: string,
+    description: string,
+    classTeams: ClassTeams,
+    teamSize: number,
+  ): Promise<Assignment> {
+    // 1) Check authorization for all classes and assignment
+    if (!(await canUpdateOrDelete(teacherId, assignmentId))) {
+      throw new Error("The teacher is unauthorized to update the assignment");
+    }
+
+    await Promise.all(
+      Object.keys(classTeams).map(async (classId) => {
+        const authorized = await isAuthorized(
+          teacherId,
+          Role.TEACHER,
+          parseInt(classId),
+        );
+        if (!authorized) {
+          throw new Error(`Teacher is unauthorized to access class ${classId}`);
+        }
+      }),
+    );
+
+    // 2) Validate pathRef
+    await ReferenceValidationService.validateLearningPath(
+      isExternal,
+      isExternal ? undefined : pathRef, // localId
+      isExternal ? pathRef : undefined, // hruid
+      isExternal ? pathLanguage : undefined, // language
+    );
+
+    // 3) Update assignment and teams in transaction
+    return prisma.$transaction(async (tx) => {
+      // Update the assignment
+      const assignment = await tx.assignment.update({
+        where: { id: assignmentId },
+        data: {
+          pathRef,
+          isExternal,
+          deadline,
+          title,
+          description,
+          teamSize,
+        },
+      });
+
+      // Delete existing teams
+      await tx.team.deleteMany({
+        where: {
+          teamAssignment: {
+            assignmentId: assignmentId,
+          },
+        },
+      });
+
+      //*
+      // Deze for loops moet blijven staan. Je mag geen Promise.all() gebruiken in een transaction.
+      // Error: PrismaClientTransactionInvalidError: Transaction API error: cannot run multiple operations in parallel on the same transaction.
+      // *//
+      // Ensure all classAssignments exist for the provided classes
+      for (const classId of Object.keys(classTeams)) {
+        const existingClassAssignment = await tx.classAssignment.findFirst({
+          where: {
+            assignmentId: assignmentId,
+            classId: parseInt(classId),
+          },
+        });
+
+        if (!existingClassAssignment) {
+          await tx.classAssignment.create({
+            data: {
+              assignmentId: assignment.id,
+              classId: parseInt(classId),
+            },
+          });
+        }
+      }
+
+      // Create new teams for each class
+      for (const [classId, teams] of Object.entries(classTeams)) {
+        await createTeamsInAssignment(
+          assignment.id,
+          parseInt(classId),
+          teams,
+          tx,
+        );
+      }
+
+      return assignment;
     });
   }
 }

@@ -1,6 +1,6 @@
-import { ContentType, PrismaClient } from "@prisma/client";
+import { ContentType, LearningObject } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
 
 export interface LocalLearningObjectData {
   // De data die een teacher kan opgeven bij het aanmaken of updaten
@@ -26,10 +26,10 @@ export default class LocalLearningObjectService {
    */
   static async createLearningObject(
     teacherId: number,
-    data: LocalLearningObjectData
-  ) {
+    data: LocalLearningObjectData,
+  ): Promise<LearningObject> {
     // Prisma create
-    const newObject = await prisma.learningObject.create({
+    return prisma.learningObject.create({
       data: {
         hruid: `${data.title.toLowerCase()}-${Date.now()}`,
         language: "nl", // Kan ook dynamisch
@@ -49,8 +49,6 @@ export default class LocalLearningObjectService {
         creatorId: teacherId,
       },
     });
-
-    return newObject;
   }
 
   /**
@@ -58,11 +56,10 @@ export default class LocalLearningObjectService {
    * Of (afhankelijk van je wensen) alle leerobjecten in de DB als je dat wilt.
    */
   static async getAllLearningObjectsByTeacher(teacherId: number) {
-    const objects = await prisma.learningObject.findMany({
+    return prisma.learningObject.findMany({
       where: { creatorId: teacherId },
       orderBy: { createdAt: "desc" },
     });
-    return objects;
   }
 
   /**
@@ -81,7 +78,7 @@ export default class LocalLearningObjectService {
    */
   static async updateLearningObject(
     id: string,
-    data: Partial<LocalLearningObjectData>
+    data: Partial<LocalLearningObjectData>,
   ) {
     // Prisma update
     return prisma.learningObject.update({

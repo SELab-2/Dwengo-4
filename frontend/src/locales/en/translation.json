@@ -1,0 +1,91 @@
+{
+  "role": {
+    "choose": "Choose a role",
+    "student": "Student",
+    "teacher": "Teacher"
+  },
+  "login": {
+    "teacher": "Log in as a teacher",
+    "student": "Log in as a student",
+    "email": {
+      "label": "E-mail address",
+      "placeholder": "Enter your e-mail address"
+    },
+    "password": {
+      "label": "Password",
+      "placeholder": "Enter your password"
+    },
+    "firstName": {
+      "label": "First name",
+      "placeholder": "Enter your first name"
+    },
+    "lastName": {
+      "label": "Surname",
+      "placeholder": "Enter your last name"
+    },
+    "error": "Something went wrong while logging in",
+    "submit": "Log in"
+  },
+  "register": {
+    "teacher": "Register as a teacher",
+    "student": "Register as a student",
+    "submit": "Register",
+    "error": "Something went wrong while registering"
+  },
+  "nav": {
+    "home": "Home",
+    "login": "Log in",
+    "register": "Register",
+    "logout": "Logout",
+    "profile": "Profile",
+    "settings": "Settings",
+    "classes": "Classes",
+    "learning_paths": "Learning paths",
+    "logged_in_as": "Logged in as {{name}}"
+  },
+  "class": {
+    "create": "Create new class",
+    "name": {
+      "label": "Class name",
+      "placeholder": "Enter the class name"
+    },
+    "error": "Something went wrong while creating the class",
+    "submit": "Create",
+    "my_classes": "My classes"
+  },
+  "loading": {
+    "loading": "Loading ...",
+    "error": "Something went wrong while loading the data"
+  },
+  "home": "Home",
+  "assignments": {
+    "label": "Assignments",
+    "view_all": "View all assignments",
+    "error": "Something went wrong while loading the assignments",
+    "view": "View assignment",
+    "not_found": "No assignments found"
+  },
+  "classes": {
+    "label": "Classes",
+    "error": "Something went wrong while loading the classes",
+    "not_found": "No classes found",
+    "view": "View class",
+    "leave_class": {
+      "label": "Leave class",
+      "confirmation": "Are you sure you want to leave this class? To rejoin, you will need an invitation code.",
+      "error": "Something went wrong while leaving the class"
+    }
+  },
+  "deadline": "Deadline: {{date}}",
+  "join_class": {
+    "title": "Join class",
+    "code": {
+      "label": "Class code",
+      "placeholder": "Enter the class code"
+    },
+    "error": "Something went wrong while joining the class",
+    "submit": "Request access",
+    "success": "You have successfully requested access to the class. The teacher will approve your request soon."
+  },
+  "code": "Class code"
+}

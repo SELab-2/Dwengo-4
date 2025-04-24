@@ -1,32 +1,32 @@
 import { dwengoAPI } from "../config/dwengoAPI";
-import axios from "axios";
 
 /**
  * De mogelijke content types (zie je enum in de oorspronkelijke code).
  */
 enum ContentType {
-  TEXT_PLAIN = "text/plain",
-  TEXT_MARKDOWN = "text/markdown",
-  IMAGE_IMAGE_BLOCK = "image/image-block",
-  IMAGE_IMAGE = "image/image",
-  AUDIO_MPEG = "audio/mpeg",
-  VIDEO = "video",
-  EVAL_MULTIPLE_CHOICE = "evaluation/multiple-choice",
-  EVAL_OPEN_QUESTION = "evaluation/open-question",
+  // Dit zijn momenteel "unused variables" dus eslint wil dat deze voorafgegaan worden door een "_"
+  _TEXT_PLAIN = "text/plain",
+  _TEXT_MARKDOWN = "text/markdown",
+  _IMAGE_IMAGE_BLOCK = "image/image-block",
+  _IMAGE_IMAGE = "image/image",
+  _AUDIO_MPEG = "audio/mpeg",
+  _VIDEO = "video",
+  _EVAL_MULTIPLE_CHOICE = "evaluation/multiple-choice",
+  _EVAL_OPEN_QUESTION = "evaluation/open-question",
 }
 
 /**
  * Mapping van Dwengo string => onze enum
  */
 const permittedContentTypes = {
-  "text/plain": ContentType.TEXT_PLAIN,
-  "text/markdown": ContentType.TEXT_MARKDOWN,
-  "image/image-block": ContentType.IMAGE_IMAGE_BLOCK,
-  "image/image": ContentType.IMAGE_IMAGE,
-  "audio/mpeg": ContentType.AUDIO_MPEG,
-  "video": ContentType.VIDEO,
-  "evaluation/multiple-choice": ContentType.EVAL_MULTIPLE_CHOICE,
-  "evaluation/open-question": ContentType.EVAL_OPEN_QUESTION,
+  "text/plain": ContentType._TEXT_PLAIN,
+  "text/markdown": ContentType._TEXT_MARKDOWN,
+  "image/image-block": ContentType._IMAGE_IMAGE_BLOCK,
+  "image/image": ContentType._IMAGE_IMAGE,
+  "audio/mpeg": ContentType._AUDIO_MPEG,
+  video: ContentType._VIDEO,
+  "evaluation/multiple-choice": ContentType._EVAL_MULTIPLE_CHOICE,
+  "evaluation/open-question": ContentType._EVAL_OPEN_QUESTION,
 };
 
 interface DwengoLearningObject {
@@ -91,7 +91,7 @@ function mapDwengoToLocal(dwengoObj: DwengoLearningObject): LearningObjectDto {
     contentType:
       permittedContentTypes[
         (dwengoObj.content_type as keyof typeof permittedContentTypes) ?? ""
-      ] ?? ContentType.TEXT_PLAIN,
+      ] ?? ContentType._TEXT_PLAIN,
     keywords: dwengoObj.keywords ?? [],
     targetAges: dwengoObj.target_ages ?? [],
     teacherExclusive: Boolean(dwengoObj.teacher_exclusive),
@@ -109,14 +109,18 @@ function mapDwengoToLocal(dwengoObj: DwengoLearningObject): LearningObjectDto {
 }
 
 // Alle Dwengo-objects
-export async function fetchAllDwengoObjects(isTeacher: boolean): Promise<LearningObjectDto[]> {
+export async function fetchAllDwengoObjects(
+  isTeacher: boolean,
+): Promise<LearningObjectDto[]> {
   try {
     const params: Record<string, any> = {};
     if (!isTeacher) {
       params.teacher_exclusive = false;
       params.available = true;
     }
-    const response = await dwengoAPI.get("/api/learningObject/search", { params });
+    const response = await dwengoAPI.get("/api/learningObject/search", {
+      params,
+    });
     const dwengoData: DwengoLearningObject[] = response.data;
     return dwengoData.map(mapDwengoToLocal);
   } catch (error) {
@@ -128,11 +132,13 @@ export async function fetchAllDwengoObjects(isTeacher: boolean): Promise<Learnin
 // Eén Dwengo-object op basis van _id
 export async function fetchDwengoObjectById(
   id: string,
-  isTeacher: boolean
+  isTeacher: boolean,
 ): Promise<LearningObjectDto | null> {
   try {
     const params = { _id: id };
-    const response = await dwengoAPI.get("/api/learningObject/getMetadata", { params });
+    const response = await dwengoAPI.get("/api/learningObject/getMetadata", {
+      params,
+    });
     const dwengoObj: DwengoLearningObject = response.data;
     const mapped = mapDwengoToLocal(dwengoObj);
 
@@ -154,14 +160,16 @@ export async function fetchDwengoObjectByHruidLangVersion(
   hruid: string,
   language: string,
   version: number,
-  isTeacher: boolean
+  isTeacher: boolean,
 ): Promise<LearningObjectDto | null> {
   try {
     // Dwengo-API: /api/learningObject/getMetadata?hruid=...&language=...&version=...
     const params = { hruid, language, version };
     console.log("Dwengo params:", params);
 
-    const response = await dwengoAPI.get("/api/learningObject/getMetadata", { params });
+    const response = await dwengoAPI.get("/api/learningObject/getMetadata", {
+      params,
+    });
     const dwengoObj: DwengoLearningObject = response.data;
     const mapped = mapDwengoToLocal(dwengoObj);
 
@@ -181,7 +189,7 @@ export async function fetchDwengoObjectByHruidLangVersion(
 // Zoeken Dwengo-objects
 export async function searchDwengoObjects(
   isTeacher: boolean,
-  searchTerm: string
+  searchTerm: string,
 ): Promise<LearningObjectDto[]> {
   try {
     const params: Record<string, any> = {};
@@ -192,7 +200,9 @@ export async function searchDwengoObjects(
     if (searchTerm) {
       params.searchTerm = searchTerm;
     }
-    const response = await dwengoAPI.get("/api/learningObject/search", { params });
+    const response = await dwengoAPI.get("/api/learningObject/search", {
+      params,
+    });
     const dwengoData: DwengoLearningObject[] = response.data;
     return dwengoData.map(mapDwengoToLocal);
   } catch (error) {
@@ -204,10 +214,12 @@ export async function searchDwengoObjects(
 // Haal leerobjecten op voor een leerpad (Dwengo)
 export async function getDwengoObjectsForPath(
   pathId: string,
-  isTeacher: boolean
+  isTeacher: boolean,
 ): Promise<LearningObjectDto[]> {
   try {
-    const pathResp = await dwengoAPI.get("/api/learningPath/search", { params: { all: "" } });
+    const pathResp = await dwengoAPI.get("/api/learningPath/search", {
+      params: { all: "" },
+    });
     const allPaths: any[] = pathResp.data;
     const learningPath = allPaths.find((lp) => lp._id === pathId);
     if (!learningPath) {
@@ -215,28 +227,45 @@ export async function getDwengoObjectsForPath(
       return [];
     }
     const nodes = learningPath.nodes || [];
-    const results: LearningObjectDto[] = [];
+    const results: LearningObjectDto[] = await Promise.all(
+      nodes.map(
+        async (node: {
+          learningobject_hruid: any;
+          version: any;
+          language: any;
+        }) => {
+          try {
+            const params = {
+              hruid: node.learningobject_hruid,
+              version: node.version,
+              language: node.language,
+            };
 
-    for (const node of nodes) {
-      try {
-        const params = {
-          hruid: node.learningobject_hruid,
-          version: node.version,
-          language: node.language,
-        };
-        const response = await dwengoAPI.get("/api/learningObject/getMetadata", { params });
-        const dwengoObj: DwengoLearningObject = response.data;
-        const mapped = mapDwengoToLocal(dwengoObj);
+            const response = await dwengoAPI.get(
+              "/api/learningObject/getMetadata",
+              {
+                params,
+              },
+            );
 
-        if (!isTeacher && (mapped.teacherExclusive || !mapped.available)) {
-          continue;
-        }
-        results.push(mapped);
-      } catch (err) {
-        console.error("Fout bij ophalen node:", err);
-      }
-    }
-    return results;
+            const dwengoObj: DwengoLearningObject = response.data;
+            const mapped = mapDwengoToLocal(dwengoObj);
+
+            if (!isTeacher && (mapped.teacherExclusive || !mapped.available)) {
+              return null;
+            }
+
+            return mapped;
+          } catch (err) {
+            console.error("Fout bij ophalen node:", err);
+            return null;
+          }
+        },
+      ),
+    );
+
+    // Filter out nulls (skipped or failed nodes)
+    return results.filter((r) => r !== null);
   } catch (error) {
     console.error("Fout bij getDwengoObjectsForPath:", error);
     return [];

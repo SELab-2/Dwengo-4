@@ -1,15 +1,13 @@
-
-
-import { PrismaClient, LearningObject } from "@prisma/client";
+import { LearningObject } from "@prisma/client";
 import { LearningObjectDto } from "./dwengoLearningObjectService";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
 
 /**
  * Converteert een Prisma LearningObject record naar ons LearningObjectDto
  * (origin = "local")
  */
-function mapLocalToDto(localObj: LearningObject, isTeacher: boolean): LearningObjectDto {
+function mapLocalToDto(localObj: LearningObject): LearningObjectDto {
   return {
     id: localObj.id,
     uuid: localObj.uuid,
@@ -39,19 +37,15 @@ function mapLocalToDto(localObj: LearningObject, isTeacher: boolean): LearningOb
  * Haal alle lokale leerobjecten op,
  * filter op teacherExclusive/available als de gebruiker geen teacher is.
  */
-export async function getLocalLearningObjects(
-  isTeacher: boolean
-): Promise<LearningObjectDto[]> {
-  const whereClause = isTeacher
-    ? {}
-    : { teacherExclusive: false, available: true };
+export async function getLocalLearningObjects(isTeacher: boolean): Promise<LearningObjectDto[]> {
+  const whereClause = isTeacher ? {} : { teacherExclusive: false, available: true };
 
   const localObjects = await prisma.learningObject.findMany({
     where: whereClause,
     orderBy: { createdAt: "desc" },
   });
 
-  return localObjects.map((obj) => mapLocalToDto(obj, isTeacher));
+  return localObjects.map((obj) => mapLocalToDto(obj));
 }
 
 /**
@@ -67,7 +61,7 @@ export async function getLocalLearningObjectById(
   if (!isTeacher && (localObj.teacherExclusive || !localObj.available)) {
     return null;
   }
-  return mapLocalToDto(localObj, isTeacher);
+  return mapLocalToDto(localObj);
 }
 
 /**
@@ -94,7 +88,7 @@ export async function searchLocalLearningObjects(
     orderBy: { createdAt: "desc" },
   });
 
-  return localObjects.map((obj) => mapLocalToDto(obj, isTeacher));
+  return localObjects.map((obj) => mapLocalToDto(obj));
 }
 
 // [NIEUW] Haal lokaal leerobject op via hruid+language+version
@@ -105,20 +99,17 @@ export async function getLocalLearningObjectByHruidLangVersion(
   isTeacher: boolean
 ): Promise<LearningObjectDto | null> {
   const localObj = await prisma.learningObject.findUnique({
-    
-
-  
-     where: {
-       hruid,
-       language,
-       version,
-     },
-   });
+    where: {
+      hruid,
+      language,
+      version,
+    },
+  });
 
   if (!localObj) return null;
 
   if (!isTeacher && (localObj.teacherExclusive || !localObj.available)) {
     return null;
   }
-  return mapLocalToDto(localObj, isTeacher);
+  return mapLocalToDto(localObj);
 }

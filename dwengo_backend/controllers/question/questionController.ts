@@ -1,123 +1,201 @@
 import { Response } from "express";
 import QuestionService from "../../services/questionsService";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
-import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
-/**
- * Een type voor een AuthenticatedRequest met een getypeerde user-property.
- */
+import { BadRequestError } from "../../errors/errors";
+import { Role } from "@prisma/client";
 
-
-// Higher-order function to handle errors and reduce duplication, copied from joinRequestController.ts
-const handleRequest = (handler: (req: AuthenticatedRequest, res: Response) => Promise<void>) =>
-    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-        try {
-            await handler(req, res);
-        } catch (error) {
-            const message: string = error instanceof Error ? error.message : "An unknown error occurred";
-            res.status(400).json({ error: message });
-            return;
-        }
-    };
-
-
-
-export const createQuestionGeneral = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { assignmentId, learningPathId } = req.params;
-    const { title, text, teamId }: { title: string, text: string, teamId: number } = req.body;
-    const studentId = getUserFromAuthRequest(req).id;
-    if (studentId === undefined) {
-        res.status(400).json({ error: "Student ID is required" });
-        return;
+const handleRequest =
+  (handler: (_req: AuthenticatedRequest, _res: Response) => Promise<void>) =>
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      await handler(req, res);
+    } catch (err: any) {
+      const msg = err.message || "Unknown error";
+      const status = err.statusCode || 400;
+      res.status(status).json({ error: msg });
     }
+  };
 
-    const questionGeneral = await QuestionService.createQuestionGeneral(Number(assignmentId), title, text, teamId, studentId, "GENERAL", learningPathId);
-    res.status(201).json(questionGeneral);
+// CREATE SPECIFIC
+export const createQuestionSpecific = handleRequest(async (req, res) => {
+  const { assignmentId } = req.params;
+  const {
+    teamId,
+    title,
+    text,
+    isExternal,
+    localLearningObjectId,
+    dwengoHruid,
+    dwengoLanguage,
+    dwengoVersion,
+    isPrivate,
+  } = req.body;
+
+  if (!assignmentId || !teamId || !title || !text) {
+    throw new BadRequestError(
+      "Missing required fields (assignmentId, teamId, title, text).",
+    );
+  }
+  const userId = req.user!.id;
+  const role: Role = req.user!.role || Role.STUDENT;
+
+  const questionSpec = await QuestionService.createQuestionSpecific(
+    Number(assignmentId),
+    Number(teamId),
+    userId,
+    role,
+    title,
+    text,
+    !!isExternal,
+    !!isPrivate,
+    localLearningObjectId,
+    dwengoHruid,
+    dwengoLanguage,
+    dwengoVersion ? Number(dwengoVersion) : undefined,
+  );
+
+  res.status(201).json(questionSpec);
 });
 
+// CREATE GENERAL
+export const createQuestionGeneral = handleRequest(async (req, res) => {
+  const { assignmentId } = req.params;
+  const {
+    teamId,
+    title,
+    text,
+    isExternal,
+    pathRef,
+    dwengoLanguage,
+    isPrivate,
+  } = req.body;
 
+  if (!assignmentId || !teamId || !title || !text || !pathRef) {
+    throw new BadRequestError(
+      "Missing required fields (assignmentId, teamId, title, text, pathRef).",
+    );
+  }
+  const userId = req.user!.id;
+  const role: Role = req.user!.role || Role.STUDENT;
 
-export const createQuestionSpecific = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { assignmentId, learningPathId, learningObjectId } = req.params;
-    const { title, text, teamId }: { title: string, text: string, teamId: number } = req.body;
-    const studentId = getUserFromAuthRequest(req).id;
-    if (studentId === undefined) {
-        res.status(400).json({ error: "Student ID is required" });
-        return;
-    }
-    const questionSpecific = await QuestionService.createQuestionSpecific(Number(assignmentId), title, learningPathId, text, teamId, studentId, "SPECIFIC", learningObjectId);
-    res.status(201).json(questionSpecific);
+  const questionGen = await QuestionService.createQuestionGeneral(
+    Number(assignmentId),
+    Number(teamId),
+    userId,
+    role,
+    title,
+    text,
+    !!isExternal,
+    !!isPrivate,
+    pathRef,
+    dwengoLanguage,
+  );
+
+  res.status(201).json(questionGen);
 });
 
-export const createQuestionMessage = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { questionId } = req.params;
-    const { text } = req.body;
-    const userId = getUserFromAuthRequest(req).id;
-    if (userId === undefined) {
-        res.status(400).json({ error: "Student ID is required" });
-        return;
-    }
-    const questionMessage = await QuestionService.createQuestionMessage(Number(questionId), text, Number(userId));
-    res.status(201).json(questionMessage);
+// CREATE message
+export const createQuestionMessage = handleRequest(async (req, res) => {
+  const { questionId } = req.params;
+  const { text } = req.body;
+
+  if (!questionId || !text) {
+    throw new BadRequestError("Missing questionId or text");
+  }
+  const userId = req.user!.id;
+
+  const msg = await QuestionService.createQuestionMessage(
+    Number(questionId),
+    userId,
+    text,
+  );
+  res.status(201).json(msg);
 });
 
-export const updateQuestion = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { questionId } = req.params;
-    const { title } = req.body;
-    const question = await QuestionService.updateQuestion(Number(questionId), title);
-    res.status(201).json(question);
+// UPDATE question
+export const updateQuestion = handleRequest(async (req, res) => {
+  const { questionId } = req.params;
+  const { title } = req.body;
+  if (!title) {
+    throw new BadRequestError("Missing title");
+  }
+  const updated = await QuestionService.updateQuestion(
+    Number(questionId),
+    title,
+  );
+  res.status(200).json(updated);
 });
 
-export const updateQuestionMessage = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { questionId, questionMessageId } = req.params;
-    const { text } = req.body;
-    const userId = getUserFromAuthRequest(req).id;
-    if (userId === undefined) {
-        res.status(400).json({ error: "Student ID is required" });
-        return;
-    }
-    const questionMessage = await QuestionService.updateQuestionMessage(Number(questionId), Number(questionMessageId), text, userId);
-    res.status(201).json(questionMessage);
+// UPDATE message
+export const updateQuestionMessage = handleRequest(async (req, res) => {
+  const { questionMessageId } = req.params;
+  const { text } = req.body;
+
+  if (!text) {
+    throw new BadRequestError("Missing text for question message update.");
+  }
+  const updatedMsg = await QuestionService.updateQuestionMessage(
+    Number(questionMessageId),
+    text,
+  );
+  res.status(200).json(updatedMsg);
 });
 
-export const getQuestion = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { questionId } = req.params;
-    const question = await QuestionService.getQuestion(Number(questionId));
-    res.status(200).json(question);
+// GET question
+export const getQuestion = handleRequest(async (req, res) => {
+  const { questionId } = req.params;
+  const q = await QuestionService.getQuestion(Number(questionId));
+  res.json(q);
 });
 
-export const getQuestionsTeam = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { teamId } = req.params;
-    const questions = await QuestionService.getQuestionsTeam(Number(teamId));
-    res.status(200).json(questions);
+// GET questions by team
+export const getQuestionsTeam = handleRequest(async (req, res) => {
+  const { teamId } = req.params;
+  const questions = await QuestionService.getQuestionsForTeam(
+    Number(teamId),
+    req.user!, // pass user => filtering
+  );
+  res.json(questions);
 });
 
-export const getQuestionsClass = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { classId } = req.params;
-    const questions = await QuestionService.getQuestionsClass(Number(classId));
-    res.status(200).json(questions);
+// GET questions by class
+export const getQuestionsClass = handleRequest(async (req, res) => {
+  const { classId } = req.params;
+  const questions = await QuestionService.getQuestionsForClass(
+    Number(classId),
+    req.user!,
+  );
+  res.json(questions);
 });
 
-export const getQuestionsAssignment = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { assignmentId, classId } = req.params;
-    const questions = await QuestionService.getQuestionsAssignment(Number(assignmentId), Number(classId));
-    res.status(200).json(questions);
+// GET questions for assignment + class
+export const getQuestionsAssignment = handleRequest(async (req, res) => {
+  const { assignmentId, classId } = req.params;
+  const questions = await QuestionService.getQuestionsForAssignment(
+    Number(assignmentId),
+    Number(classId),
+    req.user!,
+  );
+  res.json(questions);
 });
 
-export const getQuestionMessages = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { questionId } = req.params;
-    const messages = await QuestionService.getQuestionMessages(Number(questionId));
-    res.status(200).json(messages);
+// GET question messages
+export const getQuestionMessages = handleRequest(async (req, res) => {
+  const { questionId } = req.params;
+  const msgs = await QuestionService.getQuestionMessages(Number(questionId));
+  res.json(msgs);
 });
 
-export const deleteQuestion = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { questionId } = req.params;
-    await QuestionService.deleteQuestion(Number(questionId));
-    res.status(204).end();
+// DELETE question
+export const deleteQuestion = handleRequest(async (req, res) => {
+  const { questionId } = req.params;
+  await QuestionService.deleteQuestion(Number(questionId));
+  res.status(204).end();
 });
 
-export const deleteQuestionMessage = handleRequest(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { questionId, questionMessageId } = req.params;
-    await QuestionService.deleteQuestionMessage(Number(questionId), Number(questionMessageId));
-    res.status(204).end();
+// DELETE message
+export const deleteQuestionMessage = handleRequest(async (req, res) => {
+  const { questionMessageId } = req.params;
+  await QuestionService.deleteQuestionMessage(Number(questionMessageId));
+  res.status(204).end();
 });
-

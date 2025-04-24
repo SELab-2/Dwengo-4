@@ -1,25 +1,80 @@
-import {Assignment, PrismaClient} from "@prisma/client";
+import { Assignment } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
+import { AccesDeniedError } from "../errors/errors";
 
-export const getAssignmentsForStudent = async (studentId: number, sortFields: string[], order: "asc" | "desc", limit: number): Promise<Assignment[]> => {
-    return prisma.assignment.findMany({
-        where: {
-            classAssignments: {
-                some: {
-                    class: {
-                        classLinks: {
-                            some: {
-                                studentId: studentId
-                            }
-                        }
-                    }
-                }
-            }
+/**
+ * Haalt alle assignments op die een student (studentId) kan zien,
+ * gesorteerd op meegegeven velden, en limiteer met 'limit'.
+ *
+ * Let op: 'pathRef' en 'isExternal' staan nu in Assignment,
+ * we laten ze gewoon meekomen in de resultaten.
+ */
+export const getAssignmentsForStudent = async (
+  studentId: number,
+  sortFields: string[],
+  order: "asc" | "desc",
+  limit: number,
+): Promise<Assignment[]> => {
+  return prisma.assignment.findMany({
+    where: {
+      classAssignments: {
+        some: {
+          class: {
+            classLinks: {
+              some: {
+                studentId: studentId,
+              },
+            },
+          },
         },
-        // Sort by multiple fields
-        orderBy: sortFields.map((field: string): {[x: string]: "asc" | "desc"} => ({ [field]: order })),
-        take: limit,
-        include: { learningPath: true },
-    });
+      },
+    },
+    orderBy: sortFields.map((field: string) => ({ [field]: order })),
+    take: limit,
+    // We hebben geen 'learningPath' relation meer, dus geen include needed
+  });
+};
+
+export const getAssignmentsForStudentInClass = async (
+  studentId: number,
+  classId: number,
+  sortFields: string[],
+  order: "asc" | "desc",
+  limit: number,
+): Promise<Assignment[]> => {
+  return prisma.assignment.findMany({
+    where: {
+      classAssignments: {
+        some: {
+          classId: classId,
+          class: {
+            classLinks: {
+              some: {
+                studentId: studentId,
+              },
+            },
+          },
+        },
+      },
+    },
+    orderBy: sortFields.map((field: string) => ({ [field]: order })),
+    take: limit,
+  });
+};
+
+export const isStudentInClass = async (
+  studentId: number,
+  classId: number,
+): Promise<void> => {
+  const studentInClass = await prisma.classStudent.findFirst({
+    where: {
+      studentId: studentId,
+      classId: classId,
+    },
+  });
+
+  if (!studentInClass) {
+    throw new AccesDeniedError("Student is not a part of this class.");
+  }
 };
