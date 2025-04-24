@@ -38,10 +38,14 @@ export const getLearningPathById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const pathId = req.params.pathId;
     const { isExternal } = req.query; // Check if the path is external
+    const isExternalBool =
+      typeof isExternal === "string"
+        ? isExternal.toLowerCase() === "true"
+        : false;
     let learningPath;
 
     // Check if it's a local path (UUID format)
-    if (isExternal === "false") {
+    if (!isExternalBool) {
       learningPath = await LocalLearningPathService.getLearningPathById(pathId);
     } else {
       // If not local, fetch from API

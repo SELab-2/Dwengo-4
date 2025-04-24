@@ -66,6 +66,13 @@ export class LocalLearningPathService {
       prisma.learningPath.findMany({
         where: { creatorId: teacherId },
         orderBy: { createdAt: "desc" },
+        include: {
+          creator: {
+            include: {
+              user: true,
+            },
+          },
+        },
       })
     );
   }

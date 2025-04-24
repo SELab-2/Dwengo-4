@@ -35,18 +35,18 @@ const NavTeacher: React.FC = () => {
             />
             {firstName ? (
               <div className="flex space-x-4">
+
                 <NavButton to="/teacher" label={t('nav.home')} />
                 <NavButton to="/teacher/classes" label={t('nav.classes')} />
                 <NavButton
-                  to="/learning-paths"
+                  to="/teacher/learning-paths"
                   label={t('nav.learning_paths')}
                 />
               </div>
             ) : (
               <div
-                className={`flex flex-row justify-end w-full ${
-                  styles.navLinks
-                } ${menuOpen ? styles.open : ''}`}
+                className={`flex flex-row justify-end w-full ${styles.navLinks
+                  } ${menuOpen ? styles.open : ''}`}
               >
                 <NavButton to="/teacher/inloggen" label={t('nav.login')} />
                 <NavButton
