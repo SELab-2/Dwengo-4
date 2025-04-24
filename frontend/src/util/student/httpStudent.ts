@@ -168,6 +168,38 @@ export async function fetchAssignments(): Promise<AssignmentItem[]> {
 
   return assignments;
 }
+
+export async function fetchAssignmentsForClass({
+  classId,
+}: {
+  classId: string;
+}): Promise<AssignmentItem[]> {
+  const response = await fetch(
+    `${BACKEND}/assignment/student/class/${classId}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het ophalen van de opdrachten.',
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  const assignments = await response.json();
+  console.log('GETTING ASSIGNMENTS', assignments);
+
+  return assignments;
+}
+
 /*
  * Fetches a specific assignment by ID for a student
  * @param {string} assignmentId - The ID of the assignment
@@ -251,7 +283,7 @@ export async function fetchConversation(assignmentId: string) {
     error.info = await response.json();
     throw error;
   }
-  
+
   const resp = await response.json();
 
   const responseQuestion = await fetch(
@@ -299,4 +331,44 @@ export async function addMessageToQuestion(
   }
 
   return await response.json();
+}
+
+export async function fetchClass({
+  classId,
+}: {
+  classId: string;
+}): Promise<ClassItem> {
+  const response = await fetch(`${BACKEND}/class/student/${classId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het ophalen van de klasnaam.',
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  const classData = await response.json();
+  console.log('GETTING CLASSDATA', classData);
+
+  return classData;
+}
+
+export async function fetchLeaveClass({ classId }: { classId: string }) {
+  const response = await fetch(`${BACKEND}/class/student/${classId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+  });
+
+  return response;
 }
