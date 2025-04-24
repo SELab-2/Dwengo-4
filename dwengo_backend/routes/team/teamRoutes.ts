@@ -1,9 +1,9 @@
 import { Router } from "express";
 
 import { getTeamMembers } from "../../controllers/student/studentTeamController";
-import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
 import teacherTeamRoutes from "./teacherTeamRoutes";
 import studentTeamRoutes from "./studentTeamRoutes";
+import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
 
 const router = Router();
 

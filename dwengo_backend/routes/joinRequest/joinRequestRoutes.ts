@@ -4,8 +4,8 @@ import {
   updateJoinRequestStatus,
 } from "../../controllers/joinrequest/joinRequestController";
 import express from "express";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
-import { protectStudent } from "../../middleware/studentAuthMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
+import { protectStudent } from "../../middleware/authMiddleware/studentAuthMiddleware";
 
 const router = express.Router();
 
@@ -38,7 +38,7 @@ router.post("/student", protectStudent, createJoinRequest);
 router.patch(
   "/teacher/:requestId/class/:classId",
   protectTeacher,
-  updateJoinRequestStatus
+  updateJoinRequestStatus,
 );
 
 export default router;
