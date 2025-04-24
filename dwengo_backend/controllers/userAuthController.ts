@@ -19,7 +19,7 @@ const generateToken = (id: number | string): string => {
       return crypto.randomBytes(32).toString("hex");
     } else {
       throw new InternalServerError(
-        "JWT_SECRET is not defined in the environment variables."
+        "JWT_SECRET is not defined in the environment variables.",
       );
     }
   }
@@ -29,7 +29,7 @@ const generateToken = (id: number | string): string => {
 const registerUser = async (
   req: AuthenticatedRequest,
   res: Response,
-  role: Role
+  role: Role,
 ): Promise<void> => {
   const { firstName, lastName, email, password } = req.body;
   // Controleer of er al een gebruiker bestaat met dit e-mailadres
@@ -44,7 +44,7 @@ const registerUser = async (
     lastName,
     email.toLowerCase(),
     hashedPassword,
-    role
+    role,
   );
 
   res.status(201).json({
@@ -55,7 +55,7 @@ const registerUser = async (
 const loginUser = async (
   req: Request,
   res: Response,
-  role: Role
+  role: Role,
 ): Promise<void> => {
   let email = req.body.email;
   const password = req.body.password;
@@ -81,7 +81,7 @@ const loginUser = async (
   // Vergelijk het opgegeven wachtwoord met de opgeslagen hash
   const passwordMatches = await bcrypt.compare(
     password,
-    studentOrTeacherRecord.user.password
+    studentOrTeacherRecord.user.password,
   );
   if (!passwordMatches) {
     throw new UnauthorizedError("Incorrect password.");
@@ -89,6 +89,8 @@ const loginUser = async (
 
   res.json({
     message: "Successfully logged in.",
+    firstName: user.firstName,
+    lastName: user.lastName,
     token: generateToken(studentOrTeacherRecord.userId),
   });
 };
@@ -99,7 +101,7 @@ const loginUser = async (
 export const registerTeacher = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     await registerUser(req, res, Role.TEACHER);
-  }
+  },
 );
 
 // @desc    Inloggen van een leerkracht
@@ -108,7 +110,7 @@ export const registerTeacher = asyncHandler(
 export const loginTeacher = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     await loginUser(req, res, Role.TEACHER);
-  }
+  },
 );
 
 // @desc    Registreer een nieuwe leerling
@@ -117,7 +119,7 @@ export const loginTeacher = asyncHandler(
 export const registerStudent = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     await registerUser(req, res, Role.STUDENT);
-  }
+  },
 );
 
 // @desc    Inloggen van een leerling
@@ -126,5 +128,5 @@ export const registerStudent = asyncHandler(
 export const loginStudent = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     await loginUser(req, res, Role.STUDENT);
-  }
+  },
 );
