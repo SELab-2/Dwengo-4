@@ -1,8 +1,10 @@
 import { ContentType, LearningObject } from "@prisma/client";
 
 import prisma from "../config/prisma";
-import { handlePrismaQuery } from "../errors/errorFunctions";
-import { NotFoundError } from "../errors/errors";
+import {
+  handlePrismaQuery,
+  handleQueryWithExistenceCheck,
+} from "../errors/errorFunctions";
 
 export interface LocalLearningObjectData {
   // De data die een teacher kan opgeven bij het aanmaken of updaten
@@ -75,15 +77,13 @@ export default class LocalLearningObjectService {
    * wel de creator is, als je dat in de controller wilt enforce'n.
    */
   static async getLearningObjectById(id: string): Promise<LearningObject> {
-    const lo: LearningObject | null = await handlePrismaQuery(() =>
-      prisma.learningObject.findUnique({
-        where: { id },
-      })
+    return await handleQueryWithExistenceCheck(
+      () =>
+        prisma.learningObject.findUnique({
+          where: { id },
+        }),
+      "Learning object not found."
     );
-    if (!lo) {
-      throw new NotFoundError("Learning object not found.");
-    }
-    return lo;
   }
 
   /**

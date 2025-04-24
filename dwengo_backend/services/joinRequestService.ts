@@ -1,19 +1,19 @@
-import { JoinRequestStatus, JoinRequest } from "@prisma/client";
-import classService from "./classService";
-import { ClassWithLinks } from "./classService";
-import { ConflictError, NotFoundError } from "../errors/errors";
+import { JoinRequest, JoinRequestStatus } from "@prisma/client";
+import classService, { ClassWithLinks } from "./classService";
+import { ConflictError } from "../errors/errors";
 
 import prisma from "../config/prisma";
-import { handlePrismaQuery } from "../errors/errorFunctions";
+import {
+  handlePrismaQuery,
+  handleQueryWithExistenceCheck,
+} from "../errors/errorFunctions";
 
 export default class joinRequestService {
   // Validate whether the class exists before proceeding
   private static async validateClassExists(
     joinCode: string
   ): Promise<ClassWithLinks> {
-    const classroom: ClassWithLinks =
-      await classService.getClassByJoinCode(joinCode);
-    return classroom;
+    return await classService.getClassByJoinCode(joinCode);
   }
 
   private static async updateAndValidateRequest(
@@ -25,16 +25,13 @@ export default class joinRequestService {
     // check if teacher is allowed to approve/deny the request
     await classService.isTeacherOfClass(classId, teacherId);
 
-    const joinRequest: JoinRequest | null = await handlePrismaQuery(() =>
-      prisma.joinRequest.findFirst({
-        where: { requestId, classId, status: JoinRequestStatus.PENDING },
-      })
+    await handleQueryWithExistenceCheck(
+      () =>
+        prisma.joinRequest.findFirst({
+          where: { requestId, classId, status: JoinRequestStatus.PENDING },
+        }),
+      `Join request for this class is not found or is not pending.`
     );
-    if (!joinRequest) {
-      throw new NotFoundError(
-        `Join request for this class is not found or is not pending.`
-      );
-    }
 
     // Update the join request status
     return await handlePrismaQuery(() =>

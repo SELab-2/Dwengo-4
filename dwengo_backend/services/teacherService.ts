@@ -1,26 +1,25 @@
 import { Teacher, User } from "@prisma/client";
 
 import prisma from "../config/prisma";
-import { NotFoundError } from "../errors/errors";
-import { handlePrismaQuery } from "../errors/errorFunctions";
+import {
+  handlePrismaQuery,
+  handleQueryWithExistenceCheck,
+} from "../errors/errorFunctions";
 
 export default class TeacherService {
   static async findTeacherById(
     userId: number
   ): Promise<Teacher & { user: User }> {
-    const teacher: (Teacher & { user: User }) | null = await handlePrismaQuery(
+    return await handleQueryWithExistenceCheck(
       () =>
         prisma.teacher.findUnique({
           where: { userId: userId },
           include: {
             user: true,
           },
-        })
+        }),
+      "Teacher not found"
     );
-    if (!teacher) {
-      throw new NotFoundError("Teacher not found");
-    }
-    return teacher;
   }
 
   static async getAllTeachers(): Promise<Teacher[]> {

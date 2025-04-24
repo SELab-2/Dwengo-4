@@ -1,25 +1,24 @@
-import { handlePrismaQuery } from "../errors/errorFunctions";
+import {
+  handlePrismaQuery,
+  handleQueryWithExistenceCheck,
+} from "../errors/errorFunctions";
 import { Role } from "@prisma/client";
 import prisma from "../config/prisma";
-import {
-  AccessDeniedError,
-  NotFoundError,
-  UnauthorizedError,
-} from "../errors/errors";
+import { AccessDeniedError, UnauthorizedError } from "../errors/errors";
 
 export const isAuthorized = async (
   userId: number,
   requiredRole: Role,
   classId?: number
 ): Promise<void> => {
-  const user = await handlePrismaQuery(() =>
-    prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true, teacher: true, student: true },
-    })
+  const user = await handleQueryWithExistenceCheck(
+    () =>
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true, teacher: true, student: true },
+      }),
+    `User with id: ${userId} not found.`
   );
-
-  if (!user) throw new NotFoundError("User not found.");
 
   // Admins are authorized for everything
   if (user.role === Role.ADMIN) return;
@@ -82,15 +81,14 @@ export const canUpdateOrDelete = async (
     throw new AccessDeniedError("This teacher teaches no classes.");
 
   // Check if at least one of the classes of the teacher has the assignment
-  const hasAssignment = await handlePrismaQuery(() =>
-    prisma.classAssignment.findFirst({
-      where: {
-        assignmentId: assignmentId,
-        classId: { in: allClassesTeacher.map((c) => c.classId) },
-      },
-    })
+  await handleQueryWithExistenceCheck(
+    () =>
+      prisma.classAssignment.findFirst({
+        where: {
+          assignmentId: assignmentId,
+          classId: { in: allClassesTeacher.map((c) => c.classId) },
+        },
+      }),
+    "No classes of this teacher have this assignment."
   );
-
-  if (!hasAssignment)
-    throw new NotFoundError("No classes of this teacher have this assignment.");
 };

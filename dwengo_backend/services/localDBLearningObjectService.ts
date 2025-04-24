@@ -1,11 +1,10 @@
 import { LearningObject } from "@prisma/client";
 import { LearningObjectDto } from "./dwengoLearningObjectService";
-import { handlePrismaQuery } from "../errors/errorFunctions";
 import {
-  AccessDeniedError,
-  NotFoundError,
-  UnavailableError,
-} from "../errors/errors";
+  handlePrismaQuery,
+  handleQueryWithExistenceCheck,
+} from "../errors/errorFunctions";
+import { AccessDeniedError, UnavailableError } from "../errors/errors";
 
 import prisma from "../config/prisma";
 
@@ -67,13 +66,10 @@ export async function getLocalLearningObjectById(
   id: string,
   isTeacher: boolean,
 ): Promise<LearningObjectDto> {
-  const localObj = await handlePrismaQuery(() =>
-    prisma.learningObject.findUnique({ where: { id } }),
+  const localObj = await handleQueryWithExistenceCheck(
+    () => prisma.learningObject.findUnique({ where: { id } }),
+    `Local learning object not found.`,
   );
-
-  if (!localObj) {
-    throw new NotFoundError(`Local learning object not found.`);
-  }
 
   if (!isTeacher && localObj.teacherExclusive) {
     throw new AccessDeniedError(
@@ -126,21 +122,17 @@ export async function getLocalLearningObjectByHruidLangVersion(
   version: number,
   isTeacher: boolean,
 ): Promise<LearningObjectDto> {
-  const localObj = await handlePrismaQuery(() =>
-    prisma.learningObject.findUnique({
-      where: {
-        hruid,
-        language,
-        version,
-      },
-    }),
+  const localObj = await handleQueryWithExistenceCheck(
+    () =>
+      prisma.learningObject.findUnique({
+        where: {
+          hruid,
+          language,
+          version,
+        },
+      }),
+    `Local learning object with hruid=${hruid}, language=${language}, version=${version} not found.`,
   );
-
-  if (!localObj) {
-    throw new NotFoundError(
-      `Local learning object with hruid=${hruid}, language=${language}, version=${version} not found.`,
-    );
-  }
 
   if (!isTeacher && localObj.teacherExclusive) {
     throw new AccessDeniedError(

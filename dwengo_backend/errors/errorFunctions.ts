@@ -23,6 +23,42 @@ export async function handlePrismaQuery<T>(
   }
 }
 
+type NullableQuery<T> = () => Promise<T | null>;
+
+/**
+ * Ensures the provided fetcher function returns a non-null entity.
+ * If the entity is null, an error is thrown with the specified error message.
+ *
+ * @param {NullableQuery<T>} fetcher - A function that fetches the entity and may return null.
+ * @param {string} [errorMessage="Entity not found"] - The error message to use if the entity is not found.
+ * @return {Promise<T>} A promise that resolves to the fetched entity if it exists.
+ * @throws {NotFoundError} If the fetched entity is null.
+ */
+export async function assertExists<T>(
+  fetcher: NullableQuery<T>,
+  errorMessage: string = "The Entity you were trying to fetch/update/delete did not exist.",
+): Promise<T> {
+  const entity = await fetcher();
+  if (entity === null) {
+    throw new NotFoundError(errorMessage);
+  }
+  return entity;
+}
+
+/**
+ * Handles a query function by ensuring the result is not null, throwing an error with the provided message if the result is null.
+ *
+ * @param {() => Promise<T | null>} queryFunction - A function that performs a query and returns a Promise resolving to the query result or null.
+ * @param {string} errorMessage - The error message to be used if the query result is null.
+ * @return {Promise<T>} A Promise resolving to the query result if it exists, or throwing an error if the result is null.
+ */
+export function handleQueryWithExistenceCheck<T>(
+  queryFunction: () => Promise<T | null>,
+  errorMessage: string,
+): Promise<T> {
+  return assertExists(() => handlePrismaQuery(queryFunction), errorMessage);
+}
+
 /**
  * This function is used to handle prisma transactions.
  * If the transaction fails, the error will be thrown as a DatabaseError with the same message.
