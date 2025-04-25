@@ -6,6 +6,7 @@ import {
 
 import prisma from "../config/prisma";
 import {
+  handlePrismaDelete,
   handlePrismaQuery,
   handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
@@ -25,7 +26,7 @@ type PrismaTransactionClient = Omit<
  * @return {PrismaTransactionClient} The resolved Prisma transaction client.
  */
 function resolveTx(
-  tx?: PrismaClient | PrismaTransactionClient
+  tx?: PrismaClient | PrismaTransactionClient,
 ): PrismaTransactionClient {
   return tx ?? prisma;
 }
@@ -39,7 +40,7 @@ export const createTeamsInAssignment = async (
   assignmentId: number,
   classId: number,
   teams: TeamDivision[],
-  tx?: PrismaTransactionClient
+  tx?: PrismaTransactionClient,
 ): Promise<Team[]> => {
   const createdTeams: Team[] = [];
 
@@ -57,7 +58,7 @@ export const createTeamsInAssignment = async (
           },
         },
       }),
-    "This assignment has not been assigned to this class yet."
+    "This assignment has not been assigned to this class yet.",
   );
 
   // Create teams in the database
@@ -77,7 +78,7 @@ export const createTeamsInAssignment = async (
 async function createTeam(
   teamName: string,
   classId: number,
-  tx?: PrismaTransactionClient
+  tx?: PrismaTransactionClient,
 ): Promise<Team> {
   return resolveTx(tx).team.create({
     data: {
@@ -92,7 +93,7 @@ async function createTeam(
 async function giveAssignmentToTeam(
   teamId: number,
   assignmentId: number,
-  tx?: PrismaTransactionClient
+  tx?: PrismaTransactionClient,
 ): Promise<Team> {
   return resolveTx(tx).team.update({
     where: { id: teamId },
@@ -113,7 +114,7 @@ async function giveAssignmentToTeam(
 async function assignStudentsToTeam(
   teamId: number,
   studentIds: number[],
-  tx?: PrismaTransactionClient
+  tx?: PrismaTransactionClient,
 ): Promise<void> {
   tx = resolveTx(tx);
   for (const studentId of studentIds) {
@@ -248,17 +249,17 @@ const validateStudentIds = async (studentIds: number[]): Promise<void> => {
     prisma.student.findMany({
       where: { userId: { in: studentIds } },
       select: { userId: true },
-    })
+    }),
   );
 
   // Extract the StudentIds
   const validStudentIds = new Set(
-    validStudents.map((student: Student): number => student.userId)
+    validStudents.map((student: Student): number => student.userId),
   );
 
   // Check if all the given StudentIds where found in the Database
   const invalidStudentIds: number[] = studentIds.filter(
-    (studentId: number): boolean => !validStudentIds.has(studentId)
+    (studentId: number): boolean => !validStudentIds.has(studentId),
   );
 
   // If any ID was not found this means that it isn't part of our Database and is therefore invalid
@@ -270,7 +271,7 @@ const validateStudentIds = async (studentIds: number[]): Promise<void> => {
 // Update the given list of teams that have a given assignment
 export const updateTeamsForAssignment = async (
   assignmentId: number,
-  teams: IdentifiableTeamDivision[]
+  teams: IdentifiableTeamDivision[],
 ): Promise<Team[]> => {
   const updatedTeams: Team[] = [];
 
@@ -279,7 +280,7 @@ export const updateTeamsForAssignment = async (
     const existingTeam: Team | null = await handlePrismaQuery(() =>
       prisma.team.findUnique({
         where: { id: team.teamId },
-      })
+      }),
     );
 
     if (!existingTeam) {
@@ -300,7 +301,7 @@ export const updateTeamsForAssignment = async (
             set: team.studentIds.map(
               (studentId: number): { userId: number } => ({
                 userId: studentId,
-              })
+              }),
             ),
           },
           teamAssignment: {
@@ -312,7 +313,7 @@ export const updateTeamsForAssignment = async (
             },
           },
         },
-      })
+      }),
     );
 
     updatedTeams.push(updatedTeam);
@@ -323,7 +324,7 @@ export const updateTeamsForAssignment = async (
 
 // Get all teams for a given assignment
 export const getTeamsThatHaveAssignment = async (
-  assignmentId: number
+  assignmentId: number,
 ): Promise<Team[]> => {
   return await handlePrismaQuery(() =>
     prisma.team.findMany({
@@ -332,18 +333,18 @@ export const getTeamsThatHaveAssignment = async (
           assignmentId: assignmentId,
         },
       },
-    })
+    }),
   );
 };
 
 // Delete a team from an assignment
 // The TeamAssignment record will be deleted is either the team or assignment are deleted because of onDelete: Cascade
 export const deleteTeam = async (teamId: number): Promise<void> => {
-  await handlePrismaQuery(() =>
+  await handlePrismaDelete(() =>
     prisma.team.delete({
       where: {
         id: teamId,
       },
-    })
+    }),
   );
 };

@@ -13,6 +13,7 @@ import { AuthenticatedUser } from "../interfaces/extendedTypeInterfaces";
 
 import prisma from "../config/prisma";
 import {
+  handlePrismaDelete,
   handlePrismaQuery,
   handlePrismaTransaction,
   handleQueryWithExistenceCheck,
@@ -488,7 +489,7 @@ export default class QuestionService {
       "Question not found.",
     );
 
-    return await handlePrismaQuery(() =>
+    return handlePrismaDelete(() =>
       prisma.question.delete({ where: { id: questionId } }),
     );
   }
@@ -507,7 +508,7 @@ export default class QuestionService {
       "QuestionMessage not found.",
     );
 
-    return await handlePrismaQuery(() =>
+    return handlePrismaDelete(() =>
       prisma.questionMessage.delete({ where: { id: questionMessageId } }),
     );
   }

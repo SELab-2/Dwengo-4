@@ -1,4 +1,5 @@
 import {
+  handlePrismaDelete,
   handlePrismaQuery,
   handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
@@ -17,7 +18,7 @@ export default class FeedbackService {
   static async getAllFeedbackForEvaluation(
     assignmentId: number,
     evaluationId: string,
-    teacherId: number
+    teacherId: number,
   ): Promise<Feedback[]> {
     await this.hasAssignmentRights(assignmentId, teacherId);
 
@@ -32,14 +33,14 @@ export default class FeedbackService {
         include: {
           submission: true,
         },
-      })
+      }),
     );
   }
 
   static async createFeedback(
     submissionId: number,
     teacherId: number,
-    description: string
+    description: string,
   ): Promise<Feedback> {
     this.validateSubmissionId(submissionId);
 
@@ -59,13 +60,13 @@ export default class FeedbackService {
             gte: new Date(),
           },
         },
-      })
+      }),
     );
 
     // Als deadline in de toekomst ligt: error
     if (deadline !== null) {
       throw new ForbiddenActionError(
-        "Deadline not over yet. Feedback can only be given after the deadline."
+        "Deadline not over yet. Feedback can only be given after the deadline.",
       );
     }
 
@@ -76,13 +77,13 @@ export default class FeedbackService {
           teacherId: teacherId,
           description: description,
         },
-      })
+      }),
     );
   }
 
   static async getFeedbackForSubmission(
     submissionId: number,
-    teacherId: number
+    teacherId: number,
   ): Promise<Feedback> {
     this.validateSubmissionId(submissionId);
 
@@ -94,7 +95,7 @@ export default class FeedbackService {
   static async updateFeedbackForSubmission(
     submissionId: number,
     description: string,
-    teacherId: number
+    teacherId: number,
   ): Promise<Feedback> {
     this.validateSubmissionId(submissionId);
 
@@ -111,13 +112,13 @@ export default class FeedbackService {
         data: {
           description: description,
         },
-      })
+      }),
     );
   }
 
   static async deleteFeedbackForSubmission(
     submissionId: number,
-    teacherId: number
+    teacherId: number,
   ): Promise<Feedback> {
     this.validateSubmissionId(submissionId);
 
@@ -125,18 +126,18 @@ export default class FeedbackService {
 
     await this.checkExistenceFeedback(submissionId);
 
-    return await handlePrismaQuery(() =>
+    return handlePrismaDelete(() =>
       prisma.feedback.delete({
         where: {
           submissionId: submissionId,
         },
-      })
+      }),
     );
   }
 
   static async hasAssignmentRights(
     assignmentId: number,
-    teacherId: number
+    teacherId: number,
   ): Promise<boolean> {
     // Tel aantal leerkrachten die rechten hebben op de evaluatie
     const teacherWithRights: Teacher | null = await handlePrismaQuery(() =>
@@ -157,7 +158,7 @@ export default class FeedbackService {
             },
           },
         },
-      })
+      }),
     );
 
     if (teacherWithRights === null) {
@@ -170,7 +171,7 @@ export default class FeedbackService {
 
   static async hasSubmissionRights(
     teacherId: number,
-    submissionId: number
+    submissionId: number,
   ): Promise<boolean> {
     // Ga na of de leerkracht rechten heeft op de submission
     const teacherWithRights: Teacher | null = await handlePrismaQuery(() =>
@@ -195,7 +196,7 @@ export default class FeedbackService {
             },
           },
         },
-      })
+      }),
     );
 
     if (teacherWithRights === null) {
@@ -221,7 +222,7 @@ export default class FeedbackService {
             submissionId: submissionId,
           },
         }),
-      "Feedback not found for this submission."
+      "Feedback not found for this submission.",
     );
   }
 }
