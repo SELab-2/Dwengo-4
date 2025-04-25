@@ -23,6 +23,33 @@ export async function handlePrismaQuery<T>(
   }
 }
 
+/**
+ * Wraps a Prisma delete operation and throws a NotFoundError if the record does not exist.
+ *
+ * @param deleteFn A function performing a Prisma delete operation.
+ * @param errorMessage Optional error message to return if the record is not found.
+ * @returns The deleted record.
+ * @throws NotFoundError if the record doesn't exist.
+ * @throws DatabaseError for other Prisma errors.
+ */
+export async function handlePrismaDelete<T>(
+  deleteFn: () => Promise<T>,
+  errorMessage = "The entity you tried to delete was not found.",
+): Promise<T> {
+  try {
+    return await deleteFn();
+  } catch (error: any) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      throw new NotFoundError(errorMessage);
+    }
+    console.error("Delete error:", error);
+    throw new DatabaseError("Something went wrong.");
+  }
+}
+
 type NullableQuery<T> = () => Promise<T | null>;
 
 /**
@@ -36,7 +63,7 @@ type NullableQuery<T> = () => Promise<T | null>;
  */
 export async function assertExists<T>(
   fetcher: NullableQuery<T>,
-  errorMessage: string = "The Entity you were trying to fetch/update/delete did not exist.",
+  errorMessage: string = "The entity you were trying to fetch/update/delete did not exist.",
 ): Promise<T> {
   const entity = await fetcher();
   if (entity === null) {
