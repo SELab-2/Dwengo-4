@@ -16,13 +16,13 @@ jobs:
 
       - name: Deploy yolo branch
         run: |
-          cd /home/selab2/Dwengo-4-yolo/Dwengo-4/
+          cd /home/selab2/Dwengo-4
           git pull
           git checkout yolo
-          cd /home/selab2/Dwengo-4-yolo/Dwengo-4/frontend
+          cd /home/selab2/Dwengo-4/frontend
           npm i
           npm run build
-          cd /home/selab2/Dwengo-4-yolo/Dwengo-4/dwengo_backend
+          cd /home/selab2/Dwengo-4/dwengo_backend
           npm i
           PORT=4000 npx nodemon server.js > /dev/null 2>&1 &
           sleep 3 #aapjes 
