@@ -54,6 +54,7 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
 });
 
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
+app.use("/img", express.static(path.join(__dirname, "../frontend/img")));
 
 app.options("*", (req, res) => {
   res.sendStatus(200);
