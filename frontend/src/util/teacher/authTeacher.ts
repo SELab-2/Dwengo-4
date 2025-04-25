@@ -1,7 +1,7 @@
-import { redirect } from "react-router-dom";
+import { redirect } from 'react-router-dom';
 
 export function getTokenDuration(): number {
-  const storedExpirationDate = localStorage.getItem("expiration");
+  const storedExpirationDate = localStorage.getItem('expiration');
 
   if (!storedExpirationDate) {
     return -1; // Retourneer een negatieve waarde als er geen expiration is opgeslagen
@@ -17,7 +17,7 @@ export function getTokenDuration(): number {
 }
 
 export function getAuthToken(): string | null {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
 
   if (!token) {
     return null;
@@ -26,7 +26,7 @@ export function getAuthToken(): string | null {
   const tokenDuration = getTokenDuration();
 
   if (tokenDuration < 0) {
-    return "EXPIRED";
+    return 'EXPIRED';
   }
 
   return token;
@@ -36,10 +36,15 @@ export function tokenLoader(): string | null {
   return getAuthToken();
 }
 
+export function checkAuthentication(): boolean {
+  const token = getAuthToken();
+
+  return !(!token || token === 'EXPIRED');
+}
 export function checkAuthLoader(): Response | void {
   const token = getAuthToken();
 
-  if (!token || token === "EXPIRED") {
-    return redirect("/teacher/inloggen");
+  if (!token || token === 'EXPIRED') {
+    return redirect('/teacher/inloggen');
   }
 }

@@ -52,7 +52,7 @@ const LoginTeacher: React.FC = () => {
       localStorage.setItem('firstName', data.firstName);
       localStorage.setItem('lastName', data.lastName);
 
-      navigate('/teacher');
+      navigate('/teacher', { replace: true });
     },
   });
 

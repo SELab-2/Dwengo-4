@@ -7,7 +7,7 @@ import LanguageChooser from '../components/shared/LanguageChooser';
 import Assignment from '../pages/teacher/Assignment';
 import AssignmentAdd from '../pages/teacher/AssignmentAdd';
 import AssignmentEdit from '../pages/teacher/AssignmentEdit';
-
+import { checkAuthentication as teacherCheckAuthentication } from '../util/teacher/authTeacher';
 import RootLayoutTeacher from '../components/teacher/RootLayoutTeacher';
 import LoginTeacher from '../pages/teacher/LoginTeacher';
 import ClassesPage from '../pages/teacher/ClassesTeacher';
@@ -80,6 +80,7 @@ export const router = createBrowserRouter([
   {
     path: 'teacher',
     element: <RootLayoutTeacher />,
+    loader: teacherCheckAuthentication,
     children: [
       {
         index: true,

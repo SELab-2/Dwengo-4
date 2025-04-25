@@ -1,5 +1,5 @@
-import React, { MouseEvent, useState } from 'react';
-import { useSubmit } from 'react-router-dom';
+import React, { MouseEvent, useEffect, useState } from 'react';
+import { useLoaderData, useSubmit } from 'react-router-dom';
 import Container from '../shared/Container';
 import styles from './Nav.module.css';
 import NavButton from '../shared/NavButton';
@@ -9,14 +9,18 @@ import LanguageChooser from '../shared/LanguageChooser';
 const NavTeacher: React.FC = () => {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
-  const [firstName] = useState<string | null>(
-    localStorage.getItem('firstName'),
-  );
+  const { loaderData } = useLoaderData();
+  const [firstName, setFirstName] = useState<String | null>();
   const submit = useSubmit();
 
   const toggleMenu = (): void => {
     setMenuOpen(!menuOpen);
   };
+
+  useEffect(() => {
+    const storedFirstName = localStorage.getItem('firstName');
+    setFirstName(storedFirstName);
+  }, [loaderData]);
 
   const handleLogout = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -35,7 +39,6 @@ const NavTeacher: React.FC = () => {
             />
             {firstName ? (
               <div className="flex space-x-4">
-
                 <NavButton to="/teacher" label={t('nav.home')} />
                 <NavButton to="/teacher/classes" label={t('nav.classes')} />
                 <NavButton
@@ -45,8 +48,9 @@ const NavTeacher: React.FC = () => {
               </div>
             ) : (
               <div
-                className={`flex flex-row justify-end w-full ${styles.navLinks
-                  } ${menuOpen ? styles.open : ''}`}
+                className={`flex flex-row justify-end w-full ${
+                  styles.navLinks
+                } ${menuOpen ? styles.open : ''}`}
               >
                 <NavButton to="/teacher/inloggen" label={t('nav.login')} />
                 <NavButton
