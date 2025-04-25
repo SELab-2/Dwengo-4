@@ -5,13 +5,12 @@ import styles from './Nav.module.css';
 import NavButton from '../shared/NavButton';
 import { useTranslation } from 'react-i18next';
 import LanguageChooser from '../shared/LanguageChooser';
+import { useFirstNameContext } from '@/util/shared/Contexts';
 
 const NavTeacher: React.FC = () => {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
-  const [firstName] = useState<string | null>(
-    localStorage.getItem('firstName'),
-  );
+  const { firstName, setFirstName } = useFirstNameContext();
   const submit = useSubmit();
 
   const toggleMenu = (): void => {
@@ -35,7 +34,6 @@ const NavTeacher: React.FC = () => {
             />
             {firstName ? (
               <div className="flex space-x-4">
-
                 <NavButton to="/teacher" label={t('nav.home')} />
                 <NavButton to="/teacher/classes" label={t('nav.classes')} />
                 <NavButton
@@ -45,8 +43,9 @@ const NavTeacher: React.FC = () => {
               </div>
             ) : (
               <div
-                className={`flex flex-row justify-end w-full ${styles.navLinks
-                  } ${menuOpen ? styles.open : ''}`}
+                className={`flex flex-row justify-end w-full ${
+                  styles.navLinks
+                } ${menuOpen ? styles.open : ''}`}
               >
                 <NavButton to="/teacher/inloggen" label={t('nav.login')} />
                 <NavButton

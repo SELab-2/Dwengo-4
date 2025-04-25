@@ -14,6 +14,7 @@ import { loginTeacher } from '../../util/teacher/httpTeacher';
 import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButton';
 import PrimaryButton from '../../components/shared/PrimaryButton';
 import { useTranslation } from 'react-i18next';
+import { useFirstNameContext } from '@/util/shared/Contexts.jsx';
 
 interface LoginFormData {
   email: string;
@@ -36,6 +37,7 @@ const LoginTeacher: React.FC = () => {
   const passwordRef = useRef<InputWithChecksHandle | null>(null);
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { firstName, setFirstName } = useFirstNameContext();
 
   const { mutate, isPending, isError, error } = useMutation<
     LoginResponse,
@@ -49,7 +51,7 @@ const LoginTeacher: React.FC = () => {
       expires.setDate(expires.getDate() + 7);
       localStorage.setItem('token', token);
       localStorage.setItem('expiration', expires.toISOString());
-      localStorage.setItem('firstName', data.firstName);
+      setFirstName(data.firstName);
       localStorage.setItem('lastName', data.lastName);
 
       navigate('/teacher');
