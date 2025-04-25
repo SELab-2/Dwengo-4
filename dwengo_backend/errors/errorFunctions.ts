@@ -18,34 +18,15 @@ export async function handlePrismaQuery<T>(
   try {
     return await queryFunction();
   } catch (error) {
-    console.error("Prisma error:", error);
-    throw new DatabaseError("Something went wrong.");
-  }
-}
-
-/**
- * Wraps a Prisma delete operation and throws a NotFoundError if the record does not exist.
- *
- * @param deleteFn A function performing a Prisma delete operation.
- * @param errorMessage Optional error message to return if the record is not found.
- * @returns The deleted record.
- * @throws NotFoundError if the record doesn't exist.
- * @throws DatabaseError for other Prisma errors.
- */
-export async function handlePrismaDelete<T>(
-  deleteFn: () => Promise<T>,
-  errorMessage = "The entity you tried to delete was not found.",
-): Promise<T> {
-  try {
-    return await deleteFn();
-  } catch (error: any) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2025"
     ) {
-      throw new NotFoundError(errorMessage);
+      throw new NotFoundError(
+        "The entity you tried to delete/update was not found.",
+      );
     }
-    console.error("Delete error:", error);
+    console.error("Prisma error:", error);
     throw new DatabaseError("Something went wrong.");
   }
 }

@@ -6,7 +6,6 @@ import { TeamDivision } from "../../interfaces/extendedTypeInterfaces";
 import { createTeamsInAssignment } from "../teacherTeamsService";
 import prisma from "../../config/prisma";
 import {
-  handlePrismaDelete,
   handlePrismaQuery,
   handlePrismaTransaction,
 } from "../../errors/errorFunctions";
@@ -133,7 +132,7 @@ export default class TeacherAssignmentService {
     await ReferenceValidationService.validateLearningPath(isExternal, pathRef);
 
     // 3) update
-    return await handlePrismaQuery(() =>
+    return handlePrismaQuery(() =>
       prisma.assignment.update({
         where: { id: assignmentId },
         data: {
@@ -156,7 +155,7 @@ export default class TeacherAssignmentService {
   ): Promise<Assignment> {
     await canUpdateOrDelete(teacherId, assignmentId);
 
-    return await handlePrismaDelete(() =>
+    return await handlePrismaQuery(() =>
       prisma.assignment.delete({
         where: { id: assignmentId },
       }),

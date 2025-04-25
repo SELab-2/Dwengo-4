@@ -5,7 +5,6 @@ import {
 import { LearningPathDto } from "./learningPathService"; // <-- We hergebruiken het type
 import prisma from "../config/prisma";
 import {
-  handlePrismaDelete,
   handlePrismaQuery,
   handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
@@ -94,7 +93,7 @@ export class LocalLearningPathService {
     pathId: string,
     data: LocalLearningPathData,
   ): Promise<LearningPath> {
-    return await handlePrismaQuery(() =>
+    return handlePrismaQuery(() =>
       prisma.learningPath.update({
         where: { id: pathId },
         data: {
@@ -108,7 +107,7 @@ export class LocalLearningPathService {
   }
 
   async deleteLearningPath(pathId: string): Promise<void> {
-    await handlePrismaDelete(() =>
+    await handlePrismaQuery(() =>
       prisma.learningPath.delete({
         where: { id: pathId },
       }),

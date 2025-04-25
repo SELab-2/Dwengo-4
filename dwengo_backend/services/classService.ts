@@ -12,7 +12,6 @@ import {
   ConflictError,
 } from "../errors/errors";
 import {
-  handlePrismaDelete,
   handlePrismaQuery,
   handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
@@ -70,9 +69,8 @@ export default class ClassService {
   // Delete a class by ID
   static async deleteClass(classId: number, teacherId: number): Promise<Class> {
     await this.verifyClassAndTeacher(classId, teacherId);
-    return handlePrismaDelete(
-      () => prisma.class.delete({ where: { id: classId } }),
-      `Class with ID ${classId} does not exist. Cannot delete.`,
+    return handlePrismaQuery(() =>
+      prisma.class.delete({ where: { id: classId } }),
     );
   }
 
@@ -148,7 +146,7 @@ export default class ClassService {
       );
     }
 
-    return handlePrismaDelete(() =>
+    return handlePrismaQuery(() =>
       prisma.classStudent.delete({
         where: {
           studentId_classId: {
@@ -168,10 +166,12 @@ export default class ClassService {
   ): Promise<Class> {
     await this.verifyClassAndTeacher(classId, teacherId);
 
-    return prisma.class.update({
-      where: { id: classId },
-      data: { name },
-    });
+    return handlePrismaQuery(() =>
+      prisma.class.update({
+        where: { id: classId },
+        data: { name },
+      }),
+    );
   }
 
   // Function to check if the requester is the teacher of the class

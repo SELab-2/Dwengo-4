@@ -6,7 +6,6 @@ import {
 
 import prisma from "../config/prisma";
 import {
-  handlePrismaDelete,
   handlePrismaQuery,
   handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
@@ -340,7 +339,7 @@ export const getTeamsThatHaveAssignment = async (
 // Delete a team from an assignment
 // The TeamAssignment record will be deleted is either the team or assignment are deleted because of onDelete: Cascade
 export const deleteTeam = async (teamId: number): Promise<void> => {
-  await handlePrismaDelete(() =>
+  await handlePrismaQuery(() =>
     prisma.team.delete({
       where: {
         id: teamId,

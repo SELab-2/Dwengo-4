@@ -238,7 +238,7 @@ class LocalLearningPathNodeService {
     }
 
     // Aantal nodes blijft hetzelfde → geen updateNumNodes nodig
-    return await handlePrismaQuery(() =>
+    return handlePrismaQuery(() =>
       prisma.learningPathNode.update({
         where: { nodeId },
         data: {

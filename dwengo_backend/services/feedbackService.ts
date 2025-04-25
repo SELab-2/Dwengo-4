@@ -1,5 +1,4 @@
 import {
-  handlePrismaDelete,
   handlePrismaQuery,
   handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
@@ -126,7 +125,7 @@ export default class FeedbackService {
 
     await this.checkExistenceFeedback(submissionId);
 
-    return handlePrismaDelete(() =>
+    return handlePrismaQuery(() =>
       prisma.feedback.delete({
         where: {
           submissionId: submissionId,

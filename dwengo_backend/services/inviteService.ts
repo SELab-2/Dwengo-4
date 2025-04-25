@@ -6,7 +6,6 @@ import {
   UnauthorizedError,
 } from "../errors/errors";
 import {
-  handlePrismaDelete,
   handlePrismaQuery,
   handlePrismaTransaction,
   handleQueryWithExistenceCheck,
@@ -175,7 +174,7 @@ export default class inviteService {
     );
 
     // Decline de invite
-    return await handlePrismaQuery(() =>
+    return handlePrismaQuery(() =>
       prisma.invite.update({
         where: {
           inviteId: invite.inviteId,
@@ -209,7 +208,7 @@ export default class inviteService {
     );
 
     // Verwijder de invite
-    return handlePrismaDelete(() =>
+    return handlePrismaQuery(() =>
       prisma.invite.delete({
         where: {
           inviteId,

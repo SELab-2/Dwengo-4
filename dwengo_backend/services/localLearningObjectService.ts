@@ -2,7 +2,6 @@ import { ContentType, LearningObject } from "@prisma/client";
 
 import prisma from "../config/prisma";
 import {
-  handlePrismaDelete,
   handlePrismaQuery,
   handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
@@ -96,7 +95,7 @@ export default class LocalLearningObjectService {
     data: Partial<LocalLearningObjectData>,
   ): Promise<LearningObject> {
     // Prisma update
-    return await handlePrismaQuery(() =>
+    return handlePrismaQuery(() =>
       prisma.learningObject.update({
         where: { id },
         data: {
@@ -124,7 +123,7 @@ export default class LocalLearningObjectService {
    * Verwijdert een leerobject op basis van zijn id.
    */
   static async deleteLearningObject(id: string): Promise<LearningObject> {
-    return handlePrismaDelete(() =>
+    return handlePrismaQuery(() =>
       prisma.learningObject.delete({
         where: { id },
       }),
