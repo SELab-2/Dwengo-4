@@ -23,7 +23,7 @@ export async function handlePrismaQuery<T>(
       error.code === "P2025"
     ) {
       throw new NotFoundError(
-        "The entity you tried to delete/update was not found.",
+        "The resource you tried to update/delete was not found.",
       );
     }
     console.error("Prisma error:", error);
