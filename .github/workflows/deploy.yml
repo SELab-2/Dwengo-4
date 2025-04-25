@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - yolo
   workflow_dispatch:
 
 jobs:
@@ -12,7 +11,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Kill existing Node processes
-        run: pkill -f "node.*server.js" || true
+        run: pkill -f "node.*index.ts" || true
 
       - name: Deploy main branch
         run: |
@@ -26,4 +25,4 @@ jobs:
           npm i
           npm run start > /dev/null 2>&1 &
           sleep 3 #aapjes 
-          echo "Yolo branch deployment completed successfully on port $PORT"
+          echo "Main branch deployment completed successfully on port $PORT"
