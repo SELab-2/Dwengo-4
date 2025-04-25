@@ -7,10 +7,19 @@ import { logger } from "../utils/logger";
  * This will not be seen in the production environment.
  */
 
-const SENSITIVE_KEYS: string[] = ["password", "token"];
+const SENSITIVE_KEYS: string[] = [
+  "password",
+  "token",
+  "email",
+  "firstname",
+  "lastname",
+];
+
+const FILE_PATH_REGEX = /(?:\/[\w.-]+)+|[A-Za-z]:\\(?:[\w.-]+\\)+[\w.-]+/g;
 
 /**
  * Recursively removes sensitive keys from an object.
+ * Also redacts strings that look like internal file paths.
  */
 function sanitizeResponse(obj: any): any {
   if (Array.isArray(obj)) {
@@ -25,6 +34,11 @@ function sanitizeResponse(obj: any): any {
       }
     }
     return sanitized;
+  } else if (typeof obj === "string") {
+    // Redact if a string matches a file path
+    if (FILE_PATH_REGEX.test(obj)) {
+      return obj.replace(FILE_PATH_REGEX, "[REDACTED_PATH]");
+    }
   }
   return obj;
 }
