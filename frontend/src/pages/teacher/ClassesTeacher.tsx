@@ -158,8 +158,7 @@ const ClassesPageTeacher: React.FC = () => {
                         {invite.class.name}
                       </td>
                       <td className="border px-2 py-1">
-                        {invite.otherTeacher.user.firstName}{" "}
-                        {invite.otherTeacher.user.lastName}
+                        {invite.classTeacher.teacher.user.email}
                       </td>
                       <td className="border px-2 py-1">
                         {invite.status}
@@ -190,15 +189,15 @@ const ClassesPageTeacher: React.FC = () => {
               </table>
               {(acceptMutation.isError ||
                 declineMutation.isError) && (
-                <p className="text-red-500 mt-2">
-                  {acceptMutation.error instanceof Error
-                    ? acceptMutation.error.message
-                    : ""}
-                  {declineMutation.error instanceof Error
-                    ? declineMutation.error.message
-                    : ""}
-                </p>
-              )}
+                  <p className="text-red-500 mt-2">
+                    {acceptMutation.error instanceof Error
+                      ? acceptMutation.error.message
+                      : ""}
+                    {declineMutation.error instanceof Error
+                      ? declineMutation.error.message
+                      : ""}
+                  </p>
+                )}
             </div>
           )}
       </div>
