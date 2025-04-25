@@ -1,7 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
 import { getAuthToken } from './authStudent';
 
-const BACKEND = 'http://localhost:5000';
+const BACKEND = import.meta.env.VITE_API_URL;
 
 export const queryClient = new QueryClient({
   defaultOptions: {

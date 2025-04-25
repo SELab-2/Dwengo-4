@@ -8,7 +8,7 @@ import {
   TeamAssignment,
 } from '../../types/type';
 
-const BACKEND = 'http://localhost:5000';
+const BACKEND = import.meta.env.VITE_API_URL;
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -317,8 +317,9 @@ export async function fetchLearningPaths(): Promise<LearningPath[]> {
       ...path,
       id: path._id || path.id,
     }))
-    .sort((a: LearningPath, b: LearningPath) => a.title.localeCompare(b.title)) as LearningPath[];
-
+    .sort((a: LearningPath, b: LearningPath) =>
+      a.title.localeCompare(b.title),
+    ) as LearningPath[];
 
   return learningPaths;
 }
@@ -364,16 +365,20 @@ export async function fetchLearningPath(
  * @returns {Promise<any>} List of learning objects
  * @throws {APIError} When fetching fails
  */
-export async function fetchLearningObjectsByLearningPath(pathId: string): Promise<any> {
-
-  const response = await fetch(`${BACKEND}/learningObject/learningPath/${pathId}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthToken()}`,
+export async function fetchLearningObjectsByLearningPath(
+  pathId: string,
+): Promise<any> {
+  const response = await fetch(
+    `${BACKEND}/learningObject/learningPath/${pathId}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
     },
-  });
-  console.log("fet  ")
+  );
+  console.log('fet  ');
 
   if (!response.ok) {
     const error: APIError = new Error(
