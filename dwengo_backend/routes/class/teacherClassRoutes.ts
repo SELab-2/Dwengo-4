@@ -8,9 +8,9 @@ import {
   regenerateJoinLink,
   getClassByIdAndTeacherId,
   updateClassroom,
-  getStudentsByClassId
+  getStudentsByClassId,
 } from "../../controllers/teacher/teacherClassController";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router = express.Router();
 router.use(protectTeacher);
@@ -32,7 +32,6 @@ router.post("/", createClassroom);
  */
 router.get("/", getTeacherClasses);
 
-
 /**
  * @route PATCH /class/teacher/:classId
  * @description Update a classroom
@@ -43,7 +42,7 @@ router.get("/", getTeacherClasses);
 router.patch("/:classId", updateClassroom);
 
 /**
- * @route GET /class/teacher/:classId/student
+ * @route GET /class/teacher/student
  * @description Get all students in all classroom
  * @param classId: number
  * @access Teacher

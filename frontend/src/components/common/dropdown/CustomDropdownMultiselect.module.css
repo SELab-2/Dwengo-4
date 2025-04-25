@@ -1,0 +1,70 @@
+.customDropdown {
+    position: relative;
+    width: 100%;
+}
+
+.dropdownToggle {
+    border: 1px solid #ccc;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 40px;
+}
+
+.placeholder {
+    color: #666;
+}
+
+.selectedChips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.chip {
+    background-color: #e0e0e0;
+    padding: 2px 8px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.chipRemove {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.arrow {
+    margin-left: 8px;
+}
+
+.dropdownMenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.dropdownOption {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.dropdownOption:hover {
+    background-color: #f5f5f5;
+}
+
+.dropdownOption label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}

@@ -5,7 +5,14 @@ import { PrismaClient, Teacher, Student, User } from "@prisma/client";
 import {
   AuthenticatedRequest,
   AuthenticatedUser,
-} from "../interfaces/extendedTypeInterfaces";
+} from "../../interfaces/extendedTypeInterfaces";
+import { UnauthorizedError } from "../../errors/errors";
+import {
+  invalidTokenMessage,
+  neitherTeacherNorStudentMessage,
+  noTokenProvidedMessage,
+  userNotFoundMessage,
+} from "./errorMessages";
 const prisma = new PrismaClient();
 
 interface JwtPayload {
@@ -23,7 +30,7 @@ export const protectAnyUser = asyncHandler(
         token = req.headers.authorization.split(" ")[1];
         const decoded = jwt.verify(
           token,
-          process.env.JWT_SECRET as string,
+          process.env.JWT_SECRET as string
         ) as JwtPayload;
 
         // Zoek de gebruiker in de database
@@ -31,8 +38,7 @@ export const protectAnyUser = asyncHandler(
           where: { id: decoded.id },
         });
         if (!user) {
-          res.status(401).json({ error: "Gebruiker niet gevonden." });
-          return;
+          throw new UnauthorizedError(userNotFoundMessage);
         }
 
         // Bouw het authUser object op met basisgegevens
@@ -42,9 +48,12 @@ export const protectAnyUser = asyncHandler(
           email: user.email,
         };
 
+        let teacher: Teacher | null = null;
+        let student: Student | null = null;
+
         // Als de gebruiker een teacher is, haal dan de teacher-specifieke data op
         if (user.role === "TEACHER") {
-          const teacher: Teacher | null = await prisma.teacher.findUnique({
+          teacher = await prisma.teacher.findUnique({
             where: { userId: user.id },
             include: {
               teacherFeedbacks: true,
@@ -60,7 +69,7 @@ export const protectAnyUser = asyncHandler(
         }
         // Als de gebruiker een student is, haal dan de student-specifieke data op
         else if (user.role === "STUDENT") {
-          const student: Student | null = await prisma.student.findUnique({
+          student = await prisma.student.findUnique({
             where: { userId: user.id },
             include: {
               progress: true,
@@ -73,14 +82,18 @@ export const protectAnyUser = asyncHandler(
           }
         }
 
+        if (!teacher && !student) {
+          // Make sure that user is either a teacher or a student
+          throw new UnauthorizedError(neitherTeacherNorStudentMessage);
+        }
+
         req.user = authUser;
         next();
-      } catch (error) {
-        console.error(error);
-        res.status(401).json({ error: "Niet geautoriseerd, token mislukt." });
+      } catch {
+        throw new UnauthorizedError(invalidTokenMessage);
       }
     } else {
-      res.status(401).json({ error: "Geen token, niet geautoriseerd." });
+      throw new UnauthorizedError(noTokenProvidedMessage);
     }
-  },
+  }
 );

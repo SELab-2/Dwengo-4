@@ -1,14 +1,18 @@
-import React, { useRef, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import InputWithChecks from "../../shared/InputWithChecks";
-import { validateRequired, validateForm } from "../../../util/shared/validation";
-import Container from "../../shared/Container";
-import PrimaryButton from "../../shared/PrimaryButton";
-import BoxBorder from "../../shared/BoxBorder";
-import { joinClass } from "../../../util/student/httpStudent"; // Nieuwe API-functie voor studenten
-import LoadingIndicatorButton from "../../shared/LoadingIndicatorButton";
-import Modal from "../../shared/Modal";
-import SuccessMessage from "../../shared/SuccessMessage";
+import React, { useRef } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import InputWithChecks from '../../shared/InputWithChecks';
+import {
+  validateForm,
+  validateRequired,
+} from '../../../util/shared/validation';
+import Container from '../../shared/Container';
+import PrimaryButton from '../../shared/PrimaryButton';
+import BoxBorder from '../../shared/BoxBorder';
+import { joinClass } from '../../../util/student/httpStudent'; // Nieuwe API-functie voor studenten
+import LoadingIndicatorButton from '../../shared/LoadingIndicatorButton';
+import Modal from '../../shared/Modal';
+import SuccessMessage from '../../shared/SuccessMessage';
+import { useTranslation } from 'react-i18next';
 
 interface InputWithChecksRef {
   validateInput: () => boolean;
@@ -20,14 +24,19 @@ interface JoinClassPayload {
 }
 
 const JoinClass: React.FC = () => {
+  const { t } = useTranslation();
   const joinCodeRef = useRef<InputWithChecksRef | null>(null);
   const queryClient = useQueryClient();
   const modalRef = useRef<{ open: () => void; close: () => void } | null>(null);
-  
-  const { mutate, isPending, isError, error } = useMutation<void, Error, JoinClassPayload>({
+
+  const { mutate, isPending, isError, error } = useMutation<
+    void,
+    Error,
+    JoinClassPayload
+  >({
     mutationFn: joinClass,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["studentClasses"] });
+      queryClient.invalidateQueries({ queryKey: ['studentClasses'] });
       modalRef.current?.open(); // Open modal on success
     },
   });
@@ -47,24 +56,25 @@ const JoinClass: React.FC = () => {
     <section>
       <Container>
         <BoxBorder extraClasses="mxw-700 m-a g-20">
-          <h2>Join request versturen</h2>
+          <h2>{t('join_class.title')}</h2>
           <form className="g-20" onSubmit={handleFormSubmit}>
             <InputWithChecks
               ref={joinCodeRef}
-              label="Klascode"
+              label={t('join_class.code.label')}
               inputType="text"
-              validate={(value: string) => validateForm(value, [validateRequired])}
-              placeholder="Voer de klascode in"
+              validate={(value: string) =>
+                validateForm(value, [validateRequired])
+              }
+              placeholder={t('join_class.code.placeholder')}
             />
             {isError && (
               <div className="c-r">
-                {(error as any)?.info?.message ||
-                  "Er is iets fout gelopen tijdens het versturen van de join request"}
+                {(error as any)?.info?.message || t('join_class.error')}
               </div>
             )}
             <div>
               <PrimaryButton type="submit" disabled={isPending}>
-                Join request versturen
+                {t('join_class.submit')}
                 {isPending && <LoadingIndicatorButton />}
               </PrimaryButton>
             </div>
@@ -73,7 +83,7 @@ const JoinClass: React.FC = () => {
       </Container>
       {/* Modal for success message */}
       <Modal ref={modalRef}>
-        <SuccessMessage title="Succes!" description="Je join request is verstuurd." />
+        <SuccessMessage title="Succes!" description={t('join_class.success')} />
       </Modal>
     </section>
   );
