@@ -68,7 +68,7 @@ export const getStudentAssignmentsInClass = asyncHandler(
     // Haal standaard 5 assignments op, andere hoeveelheden kunnen ook
 
     if (limit <= 0) {
-      throw new BadRequestError("Limit wasn't a valid number.");
+      throw new BadRequestError("Limit must be a positive number.");
     }
 
     const assignments: Assignment[] = await getAssignmentsForStudentInClass(
