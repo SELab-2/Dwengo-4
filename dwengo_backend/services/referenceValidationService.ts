@@ -139,7 +139,7 @@ export default class ReferenceValidationService {
     } else {
       if (!localId) {
         throw new BadRequestError(
-          "Missing localId voor niet-externe leerpadvalidatie",
+          "Missing localId for local learning path validation.",
         );
       }
       await this.validateLocalLearningPath(localId);
