@@ -43,7 +43,7 @@ router.patch("/:classId", updateClassroom);
 
 /**
  * @route GET /class/teacher/student
- * @description Get all students in all classroom
+ * @description Get all students in all classrooms
  * @param classId: number
  * @access Teacher
  */
