@@ -36,7 +36,9 @@ export const getStudentAssignments = asyncHandler(
     const limit: number = Number(req.query.limit) || 5;
     // Haal standaard 5 assignments op, andere hoeveelheden kunnen ook
 
-    if (isNaN(limit) || limit <= 0) {
+    console.log("Limit: ", limit);
+
+    if (limit <= 0) {
       throw new BadRequestError("Limit must be a positive number.");
     }
 
