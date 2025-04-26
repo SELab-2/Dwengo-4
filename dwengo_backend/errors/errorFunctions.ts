@@ -6,6 +6,7 @@ import {
   UnauthorizedError,
   UnavailableError,
 } from "./errors";
+import { logger } from "../utils/logger";
 
 /**
  * Every prisma query should be wrapped in this function to handle prisma errors correctly.
@@ -18,7 +19,7 @@ export async function handlePrismaQuery<T>(
   try {
     return await queryFunction();
   } catch (error) {
-    console.error("Prisma error:", error);
+    logger.error(`Prisma query error: ${error}`);
     throw new DatabaseError("Something went wrong.");
   }
 }
@@ -71,7 +72,7 @@ export async function handlePrismaTransaction<T>(
   try {
     return await transactionFunction(prisma);
   } catch (error) {
-    console.error("Prisma transaction error:", error);
+    logger.error(`Prisma transaction error: ${error}`);
     throw new DatabaseError("Something went wrong.");
   }
 }
