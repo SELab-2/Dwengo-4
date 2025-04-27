@@ -7,11 +7,11 @@ import {
 } from '../../../util/shared/validation';
 import Container from '../../shared/Container';
 import BoxBorder from '../../shared/BoxBorder';
-import { createClass } from '../../../util/teacher/httpTeacher';
 import LoadingIndicatorButton from '../../shared/LoadingIndicatorButton';
 import PrimaryButton from '../../shared/PrimaryButton';
 import { ClassItem } from '../../../types/type';
 import { useTranslation } from 'react-i18next';
+import { createClass } from '@/util/teacher/class';
 
 interface InputWithChecksRef {
   validateInput: () => boolean;

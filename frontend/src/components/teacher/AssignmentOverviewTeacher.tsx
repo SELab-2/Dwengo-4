@@ -1,10 +1,10 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchAllAssignments } from '../../util/teacher/httpTeacher';
 import { Link } from 'react-router-dom';
 import PrimaryButton from '../shared/PrimaryButton';
 import { AssignmentItem } from '../../util/student/httpStudent';
 import { useTranslation } from 'react-i18next';
+import { fetchAllAssignments } from '@/util/teacher/assignment';
 
 export default function AssignmentOverviewTeacher() {
   // Query: Haal alle klassen op

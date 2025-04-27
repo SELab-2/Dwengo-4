@@ -1,13 +1,9 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  fetchClasses,
-  fetchStudentsByClass,
-} from '../../util/teacher/httpTeacher';
-import CreateClass from '../../components/teacher/classes/CreateClassForm';
 import AddAssignmentForm from '../../components/teacher/assignment/AddAssignmentForm';
 import { useParams } from 'react-router-dom';
 import { ClassItem } from '../../types/type';
+import { fetchClasses } from '@/util/teacher/class';
 
 /**
  * AddAssignment Component
