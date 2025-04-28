@@ -44,21 +44,21 @@ function canUserSeeQuestionInList(
   },
   user: AuthenticatedUser,
 ): boolean {
-  const isAdmin = user.role === Role.ADMIN;
+  const isAdmin: boolean = user.role === Role.ADMIN;
 
   // Teacher in class?
-  const isTeacherInClass = question.team.class.ClassTeacher.some(
-    (ct) => ct.teacherId === user.id,
+  const isTeacherInClass: boolean = question.team.class.ClassTeacher.some(
+    (ct): boolean => ct.teacherId === user.id,
   );
 
-  // Student in team?
-  const isStudentInTeam = question.team.students.some(
-    (s) => s.userId === user.id,
+  // Student in a team?
+  const isStudentInTeam: boolean = question.team.students.some(
+    (s): boolean => s.userId === user.id,
   );
 
   if (question.isPrivate) {
     // Private => alleen creator, teacher in class, admin
-    const isCreator = question.createdBy === user.id;
+    const isCreator: boolean = question.createdBy === user.id;
     return isCreator || isTeacherInClass || isAdmin;
   } else {
     // Niet private => hele team, teacher, admin
