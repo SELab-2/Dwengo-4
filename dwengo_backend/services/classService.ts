@@ -13,6 +13,7 @@ import {
 } from "../errors/errors";
 import {
   handlePrismaQuery,
+  handlePrismaTransaction,
   handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
 
@@ -25,26 +26,25 @@ export default class ClassService {
     // Generate a unique join code (e.g., an 8-digit hex string)
     const joinCode = await this.generateUniqueCode();
 
-    const classroom = await handlePrismaQuery(() =>
-      prisma.class.create({
-        data: {
-          name: name, // name field matches the Class schema
-          code: joinCode, // code field matches the Class schema
-        },
+    return prisma.$transaction((tx) =>
+      handlePrismaTransaction(tx, async (prismaTx) => {
+        const createdClass = await prismaTx.class.create({
+          data: {
+            name: name,
+            code: joinCode,
+          },
+        });
+
+        await prismaTx.classTeacher.create({
+          data: {
+            teacherId: teacherId,
+            classId: createdClass.id,
+          },
+        });
+
+        return createdClass;
       }),
     );
-
-    // Now that you have the class id, create the ClassTeacher record
-    await handlePrismaQuery(() =>
-      prisma.classTeacher.create({
-        data: {
-          teacherId: teacherId, // teacherId links to the teacher record
-          classId: classroom.id, // Use the id of the newly created class
-        },
-      }),
-    );
-
-    return classroom;
   }
 
   // this function checks if the class exists and if the teacher is associated with the class
