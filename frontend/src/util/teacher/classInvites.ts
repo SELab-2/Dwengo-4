@@ -7,7 +7,7 @@ import {
   Team,
   TeamAssignment,
 } from '../../types/type';
-import { APIError } from '@/types/api.types';
+import { APIError, Invite } from '@/types/api.types';
 
 const BACKEND = 'http://localhost:5000';
 
@@ -19,17 +19,6 @@ export const queryClient = new QueryClient({
   },
 });
 
-
-
-export interface Invite {
-  inviteId: number;
-  status: 'PENDING' | 'APPROVED' | 'DENIED';
-  otherTeacher: {
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-}
 
 /**
  * Haal alle pending invites voor een klas op

@@ -1,5 +1,5 @@
 import { ClassItem } from '../../types/type';
-import { APIError } from '../../types/api.types';
+import { APIError, CreateClassPayload, StudentItem, UpdateClassPayload } from '../../types/api.types';
 import { BACKEND } from './config';
 import { getAuthToken } from './authTeacher';
 
@@ -55,10 +55,6 @@ export async function fetchClasses(
     return classrooms;
 }
 
-interface CreateClassPayload {
-    name: string;
-}
-
 /**
  * Creates a new class for the authenticated teacher
  * @param {CreateClassPayload} payload - The class details
@@ -87,11 +83,6 @@ export async function createClass({
     }
 
     return await response.json();
-}
-
-export interface UpdateClassPayload {
-    name: string;
-    classId: number;
 }
 
 /**
@@ -157,12 +148,6 @@ export async function fetchClass({
     return classroom;
 }
 
-interface StudentItem {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-}
 
 /**
  * Fetches all students in a specific class
