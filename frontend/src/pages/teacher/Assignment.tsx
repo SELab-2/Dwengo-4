@@ -1,14 +1,10 @@
 import React from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import {
-  fetchLearningPath,
-  fetchAssignment,
-  deleteAssignment,
-} from '../../util/teacher/httpTeacher';
-
 import { useParams } from 'react-router-dom';
 import { LearningPath } from '../../types/type';
 import { AssignmentPayload } from '../../types/type';
+import { deleteAssignment, fetchAssignment } from '@/util/teacher/assignment';
+import { fetchLearningPath } from '@/util/teacher/learningPath';
 
 /**
  * Assignment component for teachers to view and manage individual assignments.
@@ -90,7 +86,7 @@ const Assignment: React.FC = () => {
             <h2 className="text-2xl font-semibold">{assignmentData.title}</h2>
             <div className="space-x-2">
               <a
-                href={`/teacher/assignments/${assignmentId}/edit`}
+                href={`/teacher/assignment/${assignmentId}/edit`}
                 className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
               >
                 Edit

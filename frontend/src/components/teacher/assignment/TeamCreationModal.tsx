@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import styles from './TeamCreationModal.module.css';
 import { FaTrash, FaMinus } from 'react-icons/fa';
 import { ClassItem, StudentItem, Team } from '../../../types/type';
-import { c } from 'vite/dist/node/moduleRunnerTransport.d-CXw_Ws6P';
 
 interface Props {
   classes: ClassItem[];
