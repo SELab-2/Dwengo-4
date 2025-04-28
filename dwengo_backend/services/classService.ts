@@ -24,7 +24,7 @@ export type ClassWithLinks = Class & { classLinks: ClassStudent[] };
 export default class ClassService {
   static async createClass(name: string, teacherId: number): Promise<Class> {
     // Generate a unique join code (e.g., an 8-digit hex string)
-    const joinCode = await this.generateUniqueCode();
+    const joinCode: string = await this.generateUniqueCode();
 
     return prisma.$transaction((tx) =>
       handlePrismaTransaction(tx, async (prismaTx) => {
