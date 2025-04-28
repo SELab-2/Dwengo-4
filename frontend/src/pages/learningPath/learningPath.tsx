@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect, use } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchLearningPath, fetchLearningObjectsByLearningPath } from '../../util/teacher/httpTeacher';
 import { LearningPath } from '../../types/type';
 import { useParams } from 'react-router-dom';
 import { LearningObject } from '@prisma/client';
+import { fetchLearningObjectsByLearningPath, fetchLearningPath } from '@/util/teacher/learningPath';
 
 /**
  * LearningPaths component displays all available learning paths.

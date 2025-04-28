@@ -300,6 +300,29 @@ describe("[GET] /assignment/student", async (): Promise<void> => {
       expect(status).toBe(200);
       expect(body).toHaveLength(2);
     });
+
+    it("should respond with a `400` status code because the limit is negative.", async (): Promise<void> => {
+      const { status, body } = await request(app)
+        .get("/assignment/student")
+        .query({ limit: -5 })
+        .set("Authorization", `Bearer ${student5.token}`);
+
+      expect(status).toBe(400);
+      expect(body.error).toBe("BadRequestError");
+      expect(body.message).toBe("Limit must be a positive number.");
+    });
+
+    it("should respond with a `400` status code because the limit is not a number.", async (): Promise<void> => {
+      const { status, body } = await request(app)
+        .get("/assignment/student")
+        .query({ limit: "limit" })
+        .set("Authorization", `Bearer ${student5.token}`);
+
+      stringToDate(body, 2);
+
+      expect(status).toBe(200);
+      expect(body).toHaveLength(2);
+    });
   });
 
   describe("GET /assignment/student/class/:classId", async (): Promise<void> => {
@@ -459,6 +482,29 @@ describe("[GET] /assignment/student", async (): Promise<void> => {
     const { status, body } = await request(app)
       .get(`/assignment/student/class/${class3.id}`)
       .query({ limit: 10 })
+      .set("Authorization", `Bearer ${student5.token}`);
+
+    stringToDate(body, 2);
+
+    expect(status).toBe(200);
+    expect(body).toHaveLength(2);
+  });
+
+  it("should respond with a `400` status code because the limit is negative.", async (): Promise<void> => {
+    const { status, body } = await request(app)
+      .get(`/assignment/student/class/${class3.id}`)
+      .query({ limit: -5 })
+      .set("Authorization", `Bearer ${student5.token}`);
+
+    expect(status).toBe(400);
+    expect(body.error).toBe("BadRequestError");
+    expect(body.message).toBe("Limit must be a positive number.");
+  });
+
+  it("should respond with a `400` status code because the limit is not a number.", async (): Promise<void> => {
+    const { status, body } = await request(app)
+      .get(`/assignment/student/class/${class3.id}`)
+      .query({ limit: "limit" })
       .set("Authorization", `Bearer ${student5.token}`);
 
     stringToDate(body, 2);

@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchClasses } from '../../util/teacher/httpTeacher';
 import { Link } from 'react-router-dom';
 import PrimaryButton from '../shared/PrimaryButton';
 import React from 'react';
 import { ClassItem } from '../../types/type';
 import { useTranslation } from 'react-i18next';
+import { fetchClasses } from '@/util/teacher/class';
 
 export default function ClassesOverviewTeacher() {
   // Query: Haal alle klassen op

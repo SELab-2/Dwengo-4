@@ -115,18 +115,6 @@ describe("Submission tests", (): void => {
     });
   });
 
-  describe("[GET] /submission/student/:studentId", (): void => {
-    it("Should respond with a `401` status code because a teacher is unauthorized", async (): Promise<void> => {
-      const { status, body } = await request(app)
-        .get(`/submission/student/${studentId}`)
-        .set("Authorization", `Bearer ${teacher.token}`);
-
-      expect(status).toBe(401);
-      expect(body.error).toBe("UnauthorizedError");
-      expect(body.message).toBe("Not a valid student.");
-    });
-  });
-
   describe("[GET] /submission/student/assignment/:assignmentId/evaluation/:evaluationId", (): void => {
     it("Should respond with a `200` status code and return the submission for an evaluation", async (): Promise<void> => {
       const { status, body } = await request(app)

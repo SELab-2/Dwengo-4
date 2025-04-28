@@ -11,6 +11,7 @@ import {
 import {
   createAssignment,
   createSubmission,
+  createTeacher,
   giveAssignmentToTeam,
   giveFeedbackToSubmission,
   updateAssignmentForTeam,
@@ -158,6 +159,33 @@ describe("Feedback tests", (): void => {
       );
       expect(feedback).toBeDefined();
     });
+
+    it("Should respond with a `400` status when the submission id is not a valid number", async (): Promise<void> => {
+      const { status, body } = await request(app)
+        .post(`/feedback/submission/notANumber`)
+        .set("Authorization", `Bearer ${teacher.token}`)
+        .send({ description: "Mooie oplossing!" });
+
+      expect(status).toBe(400);
+      expect(body.error).toEqual("BadRequestError");
+      expect(body.message).toBe("Submission ID is not a valid number.");
+    });
+
+    it("Should respond with a `403` status (AccessDeniedError)", async (): Promise<void> => {
+      // In deze test wordt nagegaan dat je geen feedback kunt geven als leerkracht als je geen rechten hebt op die assignment
+      // Maak een nieuwe leekracht aan
+      const newTeacher: User & { teacher: Teacher; token: string } =
+        await createTeacher("new", "teacher", "newteacher@gmail.com");
+      const { status, body } = await request(app)
+        .post(`/feedback/submission/${passedAssignmentSubmissionId}`)
+        .set("Authorization", `Bearer ${newTeacher.token}`);
+
+      expect(status).toBe(403);
+      expect(body.error).toEqual("AccessDeniedError");
+      expect(body.message).toEqual(
+        "Teacher should teach this class to perform this action.",
+      );
+    });
   });
 
   describe("[GET] /feedback/submission/:submissionId", (): void => {
@@ -213,6 +241,28 @@ describe("Feedback tests", (): void => {
       expect(status).toBe(401);
       expect(body.error).toEqual("UnauthorizedError");
       expect(body.message).toEqual("Not a valid teacher.");
+    });
+
+    it("Should respxond with a `403` status meaning a teacher that has no rights over the assignment", async (): Promise<void> => {
+      // We first need to create feedback for a submission
+      await giveFeedbackToSubmission(
+        passedAssignmentSubmissionId,
+        teacherId,
+        "Goede oplossing!",
+      );
+
+      const newTeacher: User & { teacher: Teacher; token: string } =
+        await createTeacher("new", "teacher", "newteacher@gmail.com");
+
+      const { status, body } = await request(app)
+        .get(`/feedback/submission/${passedAssignmentSubmissionId}`)
+        .set("Authorization", `Bearer ${newTeacher.token}`);
+
+      expect(status).toBe(403);
+      expect(body.error).toEqual("AccessDeniedError");
+      expect(body.message).toEqual(
+        "Teacher should teach this class to perform this action.",
+      );
     });
   });
 
@@ -323,6 +373,21 @@ describe("Feedback tests", (): void => {
       expect(body.error).toEqual("NotFoundError");
       expect(body.message).toEqual("Feedback not found for this submission.");
     });
+
+    it("Should respond with a `403` status code (Unauthorized user - teacher)", async (): Promise<void> => {
+      const newTeacher: User & { teacher: Teacher; token: string } =
+        await createTeacher("new", "teacher", "newteacher@gmail.com");
+
+      const { status, body } = await request(app)
+        .patch(`/feedback/submission/176`)
+        .set("Authorization", `Bearer ${newTeacher.token}`);
+
+      expect(status).toBe(403);
+      expect(body.error).toEqual("AccessDeniedError");
+      expect(body.message).toEqual(
+        "Teacher should teach this class to perform this action.",
+      );
+    });
   });
 
   describe("[DELETE] /feedback/submission/:submissionId", (): void => {
@@ -379,6 +444,20 @@ describe("Feedback tests", (): void => {
       expect(status).toBe(401);
       expect(body.error).toEqual("UnauthorizedError");
       expect(body.message).toEqual("Not a valid teacher.");
+    });
+
+    it("Should respond with a `401` status code when a teacher without rights tries to delete something", async (): Promise<void> => {
+      const newTeacher: User & { teacher: Teacher; token: string } =
+        await createTeacher("new", "teacher", "newteacher@gmail.com");
+      const { status, body } = await request(app)
+        .delete(`/feedback/submission/${passedAssignmentSubmissionId}`)
+        .set("Authorization", `Bearer ${newTeacher.token}`);
+
+      expect(status).toBe(403);
+      expect(body.error).toEqual("AccessDeniedError");
+      expect(body.message).toEqual(
+        "Teacher should teach this class to perform this action.",
+      );
     });
   });
 });

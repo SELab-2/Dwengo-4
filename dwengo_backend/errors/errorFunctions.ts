@@ -37,7 +37,7 @@ type NullableQuery<T> = () => Promise<T | null>;
  */
 export async function assertExists<T>(
   fetcher: NullableQuery<T>,
-  errorMessage: string = "The Entity you were trying to fetch/update/delete did not exist.",
+  errorMessage: string = "The entity you were trying to fetch/update/delete did not exist.",
 ): Promise<T> {
   const entity = await fetcher();
   if (entity === null) {

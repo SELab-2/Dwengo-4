@@ -10,10 +10,10 @@ import {
 } from '../../util/shared/validation';
 import Container from '../../components/shared/Container';
 import BoxBorder from '../../components/shared/BoxBorder';
-import { loginTeacher } from '../../util/teacher/httpTeacher';
 import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButton';
 import PrimaryButton from '../../components/shared/PrimaryButton';
 import { useTranslation } from 'react-i18next';
+import { loginTeacher } from '@/util/teacher/auth';
 
 interface LoginFormData {
   email: string;
