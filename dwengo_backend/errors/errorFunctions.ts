@@ -18,6 +18,14 @@ export async function handlePrismaQuery<T>(
   try {
     return await queryFunction();
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      throw new NotFoundError(
+        "The resource you tried to update/delete was not found.",
+      );
+    }
     console.error("Prisma error:", error);
     throw new DatabaseError("Something went wrong.");
   }
@@ -36,7 +44,7 @@ type NullableQuery<T> = () => Promise<T | null>;
  */
 export async function assertExists<T>(
   fetcher: NullableQuery<T>,
-  errorMessage: string = "The Entity you were trying to fetch/update/delete did not exist.",
+  errorMessage: string = "The entity you were trying to fetch/update/delete did not exist.",
 ): Promise<T> {
   const entity = await fetcher();
   if (entity === null) {

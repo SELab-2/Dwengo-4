@@ -1,9 +1,5 @@
 import { Assignment, Role } from "@prisma/client";
-import {
-  canUpdateOrDelete,
-  classCheck,
-  isAuthorized,
-} from "../authorizationService";
+import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
 import ReferenceValidationService from "../../services/referenceValidationService";
 // ^ let op: named import, géén "default" meer.
 import { TeamDivision } from "../../interfaces/extendedTypeInterfaces";
@@ -13,6 +9,7 @@ import {
   handlePrismaQuery,
   handlePrismaTransaction,
 } from "../../errors/errorFunctions";
+
 interface ClassTeams {
   [classId: number]: TeamDivision[];
 }
@@ -30,7 +27,7 @@ export default class TeacherAssignmentService {
     deadline: Date,
     title: string,
     description: string,
-    teamSize: number
+    teamSize: number,
   ): Promise<Assignment> {
     // 1) check authorization
     await isAuthorized(teacherId, Role.TEACHER, classId);
@@ -42,7 +39,7 @@ export default class TeacherAssignmentService {
       isExternal,
       isExternal ? undefined : pathRef, // localId
       isExternal ? pathRef : undefined, // hruid
-      isExternal ? pathLanguage : undefined // language
+      isExternal ? pathLanguage : undefined, // language
     );
 
     // 3) Maak assignment
@@ -61,7 +58,7 @@ export default class TeacherAssignmentService {
           description,
           teamSize,
         },
-      })
+      }),
     );
   }
 
@@ -70,7 +67,7 @@ export default class TeacherAssignmentService {
    */
   static async getAllAssignments(
     teacherId: number,
-    limit: number | undefined
+    limit: number | undefined,
   ): Promise<Assignment[]> {
     return await handlePrismaQuery(() =>
       prisma.assignment.findMany({
@@ -91,7 +88,7 @@ export default class TeacherAssignmentService {
           deadline: "desc",
         },
         take: limit,
-      })
+      }),
     );
   }
 
@@ -100,7 +97,7 @@ export default class TeacherAssignmentService {
    */
   static async getAssignmentsByClass(
     classId: number,
-    teacherId: number
+    teacherId: number,
   ): Promise<Assignment[]> {
     await isAuthorized(teacherId, Role.TEACHER, classId);
     return await handlePrismaQuery(() =>
@@ -112,7 +109,7 @@ export default class TeacherAssignmentService {
             },
           },
         },
-      })
+      }),
     );
   }
 
@@ -126,7 +123,7 @@ export default class TeacherAssignmentService {
     teacherId: number,
     title: string,
     description: string,
-    teamSize: number
+    teamSize: number,
   ): Promise<Assignment> {
     // 1) autorisatie
     await canUpdateOrDelete(teacherId, assignmentId);
@@ -135,7 +132,7 @@ export default class TeacherAssignmentService {
     await ReferenceValidationService.validateLearningPath(isExternal, pathRef);
 
     // 3) update
-    return await handlePrismaQuery(() =>
+    return handlePrismaQuery(() =>
       prisma.assignment.update({
         where: { id: assignmentId },
         data: {
@@ -145,7 +142,7 @@ export default class TeacherAssignmentService {
           description: description,
           teamSize: teamSize,
         },
-      })
+      }),
     );
   }
 
@@ -154,14 +151,14 @@ export default class TeacherAssignmentService {
    */
   static async deleteAssignment(
     assignmentId: number,
-    teacherId: number
+    teacherId: number,
   ): Promise<Assignment> {
     await canUpdateOrDelete(teacherId, assignmentId);
 
     return await handlePrismaQuery(() =>
       prisma.assignment.delete({
         where: { id: assignmentId },
-      })
+      }),
     );
   }
 
@@ -177,13 +174,13 @@ export default class TeacherAssignmentService {
     title: string,
     description: string,
     classTeams: ClassTeams,
-    teamSize: number
+    teamSize: number,
   ): Promise<Assignment> {
     // 1) Check authorization for all classes
     await Promise.all(
       Object.keys(classTeams).map(async (classId) => {
         await isAuthorized(teacherId, Role.TEACHER, parseInt(classId));
-      })
+      }),
     );
 
     // 2) Validate pathRef
@@ -191,7 +188,7 @@ export default class TeacherAssignmentService {
       isExternal,
       isExternal ? undefined : pathRef, // localId
       isExternal ? pathRef : undefined, // hruid
-      isExternal ? pathLanguage : undefined // language
+      isExternal ? pathLanguage : undefined, // language
     );
 
     // 3) Create assignment and teams in transaction
@@ -224,7 +221,7 @@ export default class TeacherAssignmentService {
           assignment.id,
           parseInt(classId),
           teams,
-          tx
+          tx,
         );
       }
 
@@ -245,7 +242,7 @@ export default class TeacherAssignmentService {
     title: string,
     description: string,
     classTeams: ClassTeams,
-    teamSize: number
+    teamSize: number,
   ): Promise<Assignment> {
     // 1) Check authorization for all classes and assignment
     await canUpdateOrDelete(teacherId, assignmentId);
@@ -253,7 +250,7 @@ export default class TeacherAssignmentService {
     await Promise.all(
       Object.keys(classTeams).map(async (classId) => {
         await isAuthorized(teacherId, Role.TEACHER, parseInt(classId));
-      })
+      }),
     );
 
     // 2) Validate pathRef
@@ -261,7 +258,7 @@ export default class TeacherAssignmentService {
       isExternal,
       isExternal ? undefined : pathRef, // localId
       isExternal ? pathRef : undefined, // hruid
-      isExternal ? pathLanguage : undefined // language
+      isExternal ? pathLanguage : undefined, // language
     );
 
     // 3) Update assignment and teams in transaction
@@ -317,7 +314,7 @@ export default class TeacherAssignmentService {
           assignment.id,
           parseInt(classId),
           teams,
-          tx
+          tx,
         );
       }
 
