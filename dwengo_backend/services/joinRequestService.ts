@@ -1,10 +1,11 @@
-import { JoinRequest, JoinRequestStatus } from "@prisma/client";
+import { JoinRequest, JoinRequestStatus, Prisma } from "@prisma/client";
 import classService, { ClassWithLinks } from "./classService";
 import { ConflictError } from "../errors/errors";
 
 import prisma from "../config/prisma";
 import {
   handlePrismaQuery,
+  handlePrismaTransaction,
   handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
 
@@ -21,13 +22,15 @@ export default class joinRequestService {
     teacherId: number,
     classId: number,
     status: JoinRequestStatus,
+    tx?: Prisma.TransactionClient,
   ): Promise<JoinRequest> {
-    // check if teacher is allowed to approve/deny the request
+    const prismaClient = tx || prisma;
+    // check if the teacher is allowed to approve/deny the request
     await classService.isTeacherOfClass(classId, teacherId);
 
     await handleQueryWithExistenceCheck(
       () =>
-        prisma.joinRequest.findFirst({
+        prismaClient.joinRequest.findFirst({
           where: { requestId, classId, status: JoinRequestStatus.PENDING },
         }),
       `Join request for this class is not found or is not pending.`,
@@ -35,7 +38,7 @@ export default class joinRequestService {
 
     // Update the join request status
     return handlePrismaQuery(() =>
-      prisma.joinRequest.update({
+      prismaClient.joinRequest.update({
         where: { requestId },
         data: { status: status },
       }),
@@ -90,16 +93,25 @@ export default class joinRequestService {
     teacherId: number,
     classId: number,
   ): Promise<JoinRequest> {
-    const updatedRequest: JoinRequest = await this.updateAndValidateRequest(
-      requestId,
-      teacherId,
-      classId,
-      JoinRequestStatus.APPROVED,
-    );
+    return await handlePrismaTransaction(prisma, async (tx) => {
+      // Update and validate the join request
+      const updatedRequest = await this.updateAndValidateRequest(
+        requestId,
+        teacherId,
+        classId,
+        JoinRequestStatus.APPROVED,
+        tx, // Pass the transaction client to the function
+      );
 
-    // Add the student to the class
-    await classService.addStudentToClass(updatedRequest.studentId, classId);
-    return updatedRequest;
+      // Add the student to the class
+      await classService.addStudentToClass(
+        updatedRequest.studentId,
+        classId,
+        tx,
+      ); // Pass tx here as well
+
+      return updatedRequest;
+    });
   }
 
   static async denyJoinRequest(

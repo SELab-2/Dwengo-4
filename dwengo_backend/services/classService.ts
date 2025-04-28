@@ -2,6 +2,7 @@ import {
   Class,
   ClassStudent,
   ClassTeacher,
+  Prisma,
   Student,
   User,
 } from "@prisma/client";
@@ -217,9 +218,10 @@ export default class ClassService {
   static async addStudentToClass(
     studentId: number,
     classId: number,
+    tx: Prisma.TransactionClient,
   ): Promise<ClassStudent> {
     return await handlePrismaQuery(() =>
-      prisma.classStudent.create({
+      tx.classStudent.create({
         data: {
           studentId,
           classId,
