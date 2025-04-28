@@ -1,5 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
 import { getAuthToken } from './authStudent';
+import { APIError } from '@/types/api.types';
 
 const BACKEND = 'http://localhost:5000';
 
@@ -11,21 +12,6 @@ export const queryClient = new QueryClient({
   },
 });
 
-interface AuthCredentials {
-  firstName?: string;
-  lastName?: string;
-  email: string;
-  password: string;
-}
-
-interface AuthResponse {
-  token: string;
-}
-
-interface APIError extends Error {
-  code?: number;
-  info?: string;
-}
 
 /**
  * Laat een student een klas joinen met een joinCode
@@ -55,18 +41,6 @@ export async function joinClass({
     console.log(error.info);
     throw error;
   }
-}
-
-export interface ClassItem {
-  id: string;
-  name: string;
-}
-
-export interface AssignmentItem {
-  id: string;
-  title: string;
-  description: string;
-  deadline: string;
 }
 
 

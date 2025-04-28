@@ -40,3 +40,15 @@ export interface Invite {
     };
 }
 
+
+export interface ClassItem {
+  id: string;
+  name: string;
+}
+
+export interface AssignmentItem {
+  id: string;
+  title: string;
+  description: string;
+  deadline: string;
+}
