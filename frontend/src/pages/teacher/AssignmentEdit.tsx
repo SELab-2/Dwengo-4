@@ -1,15 +1,10 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  fetchAssignment,
-  fetchClasses,
-  fetchLearningPath,
-  fetchStudentsByClass,
-} from '../../util/teacher/httpTeacher';
-import CreateClass from '../../components/teacher/classes/CreateClassForm';
 import AddAssignmentForm from '../../components/teacher/assignment/AddAssignmentForm';
 import { useParams } from 'react-router-dom';
-import { AssignmentPayload, ClassItem, LearningPath } from '../../types/type';
+import { AssignmentPayload, ClassItem } from '../../types/type';
+import { fetchAssignment } from '@/util/teacher/assignment';
+import { fetchClasses } from '@/util/teacher/class';
 
 /**
  * Assignment edit component that allows teachers to modify existing assignments.

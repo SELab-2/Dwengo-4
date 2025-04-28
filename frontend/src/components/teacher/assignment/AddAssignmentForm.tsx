@@ -6,11 +6,6 @@ import CustomDropdownMultiselect from './CustomDropdownMultiselect';
 import FormFields from './FormFields';
 import AssignmentTypeSelection from './AssignmentTypeSelection';
 import TeamsDisplay from './TeamsDisplay';
-import {
-  fetchLearningPaths,
-  postAssignment,
-  updateAssignment,
-} from '../../../util/teacher/httpTeacher';
 import { useQuery } from '@tanstack/react-query';
 import {
   AssignmentPayload,
@@ -19,6 +14,8 @@ import {
   Team,
   StudentItem,
 } from '../../../types/type';
+import { fetchLearningPaths } from '@/util/teacher/learningPath';
+import { postAssignment, updateAssignment } from '@/util/teacher/assignment';
 
 /**
  * Builds assignment payload from form data
