@@ -1,10 +1,10 @@
+import {
+  addMessageToQuestion,
+  fetchConversation,
+} from '@/util/student/questions';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  fetchConversation,
-  addMessageToQuestion,
-} from '../../util/student/httpStudent';
 
 // Define proper interfaces
 interface Author {

@@ -1,8 +1,8 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
-import { fetchAssignment } from '../../util/student/httpStudent';
 import { AssignmentPayload } from '../../types/type';
+import { fetchAssignment } from '@/util/teacher/assignment';
 
 /**
  * AssignmentStudent component for students to view assignment details.

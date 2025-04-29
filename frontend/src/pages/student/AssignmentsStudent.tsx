@@ -1,11 +1,9 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  AssignmentItem,
-  fetchAssignments,
-} from '../../util/student/httpStudent';
 import { Link } from 'react-router-dom';
 import PrimaryButton from '../../components/shared/PrimaryButton';
+import { AssignmentItem } from '@/types/api.types';
+import { fetchAssignments } from '@/util/teacher/assignment';
 
 const AssignmentsStudent: React.FC = () => {
   /**

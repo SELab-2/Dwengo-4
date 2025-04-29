@@ -2,9 +2,9 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import PrimaryButton from '../shared/PrimaryButton';
-import { AssignmentItem } from '../../util/student/httpStudent';
 import { useTranslation } from 'react-i18next';
 import { fetchAllAssignments } from '@/util/teacher/assignment';
+import { AssignmentItem } from '@/types/api.types';
 
 export default function AssignmentOverviewTeacher() {
   // Query: Haal alle klassen op
