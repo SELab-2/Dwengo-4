@@ -63,8 +63,14 @@ const QuestionOverview: React.FC = () => {
 
   // Set the first question as selected as soon as data loads
   useEffect(() => {
+    if (questions?.questions) {
+      if (questions?.questions.length > 1) {
+        console.log('whoopsiedaisy how do we decide');
+      }
+      setSelectedQuestionId(questions.questions[0].id);
+    }
     if (questions?.length) {
-      setSelectedQuestionId(questions[0].id);
+      setSelectedQuestionId(questions.questions[0].id);
     }
   }, [questions]);
 
@@ -175,7 +181,7 @@ const QuestionOverview: React.FC = () => {
             question.questionConversation?.map((message: Message) => {
               // Try to find the student that matches the message's userId
               const student = questions.teams.students?.find(
-                ({ student }) => student.userId === message.userId,
+                (student) => student.userId === message.userId,
               );
 
               // Determine if this is the current user's message
