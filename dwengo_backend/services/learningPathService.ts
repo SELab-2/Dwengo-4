@@ -1,5 +1,8 @@
 import { dwengoAPI } from "../config/dwengoAPI";
-import { throwCorrectNetworkError } from "../errors/errorFunctions";
+import {
+  assertNonEmptyDwengoLearningPath,
+  throwCorrectNetworkError,
+} from "../errors/errorFunctions";
 import { NotFoundError } from "../errors/errors";
 
 export interface LearningPathDto {
@@ -50,37 +53,32 @@ export async function searchLearningPaths(
     title?: string;
     description?: string;
     all?: string;
-  } = {}
+  } = {},
 ): Promise<LearningPathDto[]> {
-  try {
-    const params: Record<string, any> = {};
-    if (filters.language) params.language = filters.language;
-    if (filters.hruid) params.hruid = filters.hruid;
-    if (filters.title) params.title = filters.title;
-    if (filters.description) params.description = filters.description;
-    if (filters.all !== undefined) {
-      params.all = filters.all;
-    }
+  const params: Record<string, any> = {};
+  if (filters.language) params.language = filters.language;
+  if (filters.hruid) params.hruid = filters.hruid;
+  if (filters.title) params.title = filters.title;
+  if (filters.description) params.description = filters.description;
+  if (filters.all !== undefined) {
+    params.all = filters.all;
+  }
 
-    // GET call
+  try {
     const response = await dwengoAPI.get("/api/learningPath/search", {
       params,
     });
 
-    if (!Array.isArray(response.data)) {
-      throw new NotFoundError(
-        `Dwengo learning path with specified filters not found.`
-      );
-    }
+    const data = await assertNonEmptyDwengoLearningPath(
+      async () => response.data,
+      `Dwengo learning path with specified filters not found.`,
+    );
 
-    const dwengoData = response.data; // array van leerpaden
-
-    // Map elk item naar LearningPathDto
-    return dwengoData.map(mapDwengoPathToLocal);
+    return data.map(mapDwengoPathToLocal);
   } catch (error) {
     throwCorrectNetworkError(
       error as Error,
-      "Something went wrong when communicating with the Dwengo API."
+      "Something went wrong when communicating with the Dwengo API.",
     );
   }
   // Dit zou nooit mogen gebeuren
@@ -95,39 +93,54 @@ export async function searchLearningPaths(
  * je zoekt typically via search + hruid=... of all=...
  */
 export async function getLearningPathByIdOrHruid(
-  idOrHruid: string
+  idOrHruid: string,
 ): Promise<LearningPathDto> {
   try {
-    // Dwengo heeft geen echte "getById", we doen search + filteren
+    // Dwengo heeft geen echte "getById", we searchen en filteren
     const params = { all: "" };
-    const response = await dwengoAPI.get("/api/learningPath/search", {
-      params,
-    });
 
-    if (!Array.isArray(response.data)) {
-      throw new NotFoundError("Dwengo learning paths not found.");
-    }
-
-    const allPaths = response.data;
+    const response = await assertNonEmptyDwengoLearningPath(
+      async () =>
+        (
+          await dwengoAPI.get("/api/learningPath/search", {
+            params,
+          })
+        ).data,
+      `Dwengo learning path with id/hruid "${idOrHruid}" not found.`,
+    );
 
     // Zoeken in array op basis van _id of hruid
-    const found = allPaths.find(
-      (lp: any) => lp._id === idOrHruid || lp.hruid === idOrHruid
+    const found = findOrThrow(
+      response,
+      (lp: any) => lp._id === idOrHruid || lp.hruid === idOrHruid,
+      `Learning path with id/hruid "${idOrHruid}" not found.`,
     );
-    if (!found) {
-      throw new NotFoundError(
-        `Learning path with id/hruid "${idOrHruid}" not found.`
-      );
-    }
 
     // map + isExternal = true
     return mapDwengoPathToLocal(found);
   } catch (error) {
     throwCorrectNetworkError(
       error as Error,
-      "Something went wrong when communicating with the Dwengo API."
+      "Something went wrong when communicating with the Dwengo API.",
     );
   }
   // Dit zou nooit mogen gebeuren
   return {} as LearningPathDto;
+}
+
+export function findOrThrow<T>(
+  array: T[] | null | undefined,
+  predicate: (_: T) => boolean,
+  errorMessage: string,
+): T {
+  if (!Array.isArray(array)) {
+    throw new NotFoundError(errorMessage);
+  }
+
+  const found = array.find(predicate);
+  if (!found) {
+    throw new NotFoundError(errorMessage);
+  }
+
+  return found;
 }
