@@ -175,7 +175,7 @@ const QuestionOverview: React.FC = () => {
             question.questionConversation?.map((message: Message) => {
               // Try to find the student that matches the message's userId
               const student = questions.teams.students?.find(
-                ({ userId }) => userId === message.userId,
+                ({ student }) => student.userId === message.userId,
               );
 
               // Determine if this is the current user's message
