@@ -57,6 +57,7 @@ const loginUser = async (
   res: Response,
   role: Role,
 ): Promise<void> => {
+  //todo this should have the asme functionality but its structured weird like this so that eslint will stfu
   const { password } = req.body;
   let { email } = req.body;
   email = email.toLowerCase();

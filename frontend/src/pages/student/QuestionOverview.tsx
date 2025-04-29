@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
-// Define proper interfaces
+// Updated interfaces to match the actual data structure
 interface Author {
   firstName?: string;
 }
@@ -15,11 +15,28 @@ interface Message {
   id: string;
   text: string;
   author?: Author;
+  userId: number; // Added userId field
+  createdAt: string;
+  updatedAt: string;
+  questionId: number;
 }
 
 interface Question {
   id: string;
   questionConversation?: Message[];
+  team?: {
+    id: number;
+    teamname: string;
+    classId: number;
+    students: Array<{
+      userId: number;
+      user?: {
+        firstName?: string;
+      };
+    }>;
+  };
+  title: string;
+  type: string;
 }
 
 const QuestionOverview: React.FC = () => {
@@ -96,6 +113,7 @@ const QuestionOverview: React.FC = () => {
   }, [questions, isLoading, isError, error]);
 
   const localName = localStorage.getItem('firstName');
+  const currentUserId = parseInt(localStorage.getItem('userId') || '0', 10);
 
   return (
     <div className="pt-10 w-full flex flex-col items-center">
@@ -153,31 +171,49 @@ const QuestionOverview: React.FC = () => {
         <div className="flex flex-col space-y-10 mt-10">
           {isLoading && <p>Laden...</p>}
           {isError && <p>Fout bij laden van vragen: {error?.message}</p>}
-          {questions?.map((question: Question) =>
-            question.questionConversation?.map((message: Message) => (
-              <div
-                key={message.id}
-                className={`p-4 rounded-lg ${question.id === selectedQuestionId ? '' : ''}`}
-              >
-                <div className="flex flex-row items-center gap-x-2">
-                  <div className="flex flex-row justify-center items-center bg-dwengo-green w-12 h-12 aspect-square rounded-full">
-                    <p className="text-2xl bg-dwengo-green">
-                      {message.author?.firstName
-                        ? message.author.firstName.charAt(0).toUpperCase()
-                        : '?'}
+          {questions?.questions.map((question: Question) =>
+            question.questionConversation?.map((message: Message) => {
+              // Try to find the student that matches the message's userId
+              const student = questions.teams.students?.find(
+                ({ userId }) => userId === message.userId,
+              );
+
+              // Determine if this is the current user's message
+              const isCurrentUser = message.userId === currentUserId;
+
+              // Determine the name to display
+              let displayName = message.userId.toString();
+              let firstInitial = '?';
+
+              if (isCurrentUser && localName) {
+                displayName = localName;
+                firstInitial = localName.charAt(0).toUpperCase();
+              } else if (student?.user?.firstName) {
+                displayName = student.user.firstName;
+                firstInitial = student.user.firstName.charAt(0).toUpperCase();
+              }
+
+              return (
+                <div
+                  key={message.id}
+                  className={`p-4 rounded-lg ${question.id === selectedQuestionId ? '' : ''}`}
+                >
+                  <div className="flex flex-row items-center gap-x-2">
+                    <div className="flex flex-row justify-center items-center bg-dwengo-green w-12 h-12 aspect-square rounded-full">
+                      <p className="text-2xl bg-dwengo-green">{firstInitial}</p>
+                    </div>
+                    <p className="text-2xl">
+                      <span className="text-dwengo-green-dark font-bold">
+                        {displayName}
+                      </span>{' '}
+                      zegt:
                     </p>
                   </div>
-                  <p className="text-2xl">
-                    <span className="text-dwengo-green-dark font-bold">
-                      {message.author?.firstName ?? 'Onbekend'}
-                    </span>{' '}
-                    zegt:
-                  </p>
+                  <p className="ml-14">{message.text}</p>
+                  <div className="border-b-1 border-gray-400 mt-2"></div>
                 </div>
-                <p className="ml-14">{message.text}</p>
-                <div className="border-b-1 border-gray-400 mt-2"></div>
-              </div>
-            )),
+              );
+            }),
           )}
         </div>
       </div>

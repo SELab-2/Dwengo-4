@@ -42,7 +42,7 @@ export async function fetchConversation(assignmentId: string) {
     throw new Error('Failed to fetch questions');
   }
 
-  const questions = await responseQuestion.json();
+  let questions = await responseQuestion.json();
 
   // If no questions exist, create one
   if (Array.isArray(questions) && questions.length === 0) {
@@ -70,10 +70,10 @@ export async function fetchConversation(assignmentId: string) {
       throw new Error('Failed to create a new question for the team');
     }
 
-    return [await createQuestionResponse.json()];
+    questions = createQuestionResponse.json();
   }
 
-  return questions;
+  return { questions: questions, teams: resp };
 }
 
 export async function addMessageToQuestion(
