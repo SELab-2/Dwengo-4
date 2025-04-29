@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
-import teacherAssignmentService from "../../services/teacherServices/teacherAssignmentService";
+import teacherAssignmentService from "../../services/teacherAssignmentService";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 import asyncHandler from "express-async-handler";
 
