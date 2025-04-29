@@ -34,7 +34,7 @@ interface JwtPayload {
 export const protectTeacher = asyncHandler(
   async (
     req: AuthenticatedRequest,
-    res: Response,
+    _: Response,
     next: NextFunction,
   ): Promise<void> => {
     let token: string | undefined;
