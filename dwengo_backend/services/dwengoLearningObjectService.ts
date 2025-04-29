@@ -171,9 +171,7 @@ export async function fetchDwengoObjectById(
     );
 
     const dwengoObj: DwengoLearningObject = response.data;
-    const mapped = mapDwengoToLocal(dwengoObj);
-
-    return mapped;
+    return mapDwengoToLocal(dwengoObj);
   } catch (error) {
     throwCorrectNetworkError(
       error as Error,
