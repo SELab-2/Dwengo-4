@@ -230,7 +230,7 @@ export default class ClassService {
     );
   }
 
-  // Check if student is already in the class
+  // Check if a student is already in the class
   static isStudentInClass(classroom: ClassWithLinks, studentId: number): void {
     const inClass: boolean = classroom.classLinks.some(
       (link: ClassStudent) => link.studentId === studentId,

@@ -24,7 +24,7 @@ export default class joinRequestService {
     status: JoinRequestStatus,
     tx?: Prisma.TransactionClient,
   ): Promise<JoinRequest> {
-    const prismaClient = tx || prisma;
+    const prismaClient = tx ?? prisma;
     // check if the teacher is allowed to approve/deny the request
     await classService.isTeacherOfClass(classId, teacherId);
 

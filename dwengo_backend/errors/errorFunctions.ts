@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import {
+  AppError,
   DatabaseError,
   NetworkError,
   NotFoundError,
@@ -80,6 +81,13 @@ export async function handlePrismaTransaction<T>(
     return await transactionFunction(prisma);
   } catch (error) {
     console.error("Prisma transaction error:", error);
+
+    // Re-throw if it's already a known AppError (like NotFoundError)
+    if (error instanceof AppError) {
+      throw error;
+    }
+
+    // Otherwise wrap it in a DatabaseError
     throw new DatabaseError("Something went wrong.");
   }
 }
