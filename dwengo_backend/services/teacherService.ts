@@ -1,4 +1,4 @@
-import { Teacher, User } from "@prisma/client";
+/*import { Teacher, User } from "@prisma/client";
 
 import prisma from "../config/prisma";
 import {
@@ -46,4 +46,4 @@ export default class TeacherService {
       })
     );
   }
-}
+}*/

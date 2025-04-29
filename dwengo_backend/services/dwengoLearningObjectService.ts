@@ -24,7 +24,7 @@ enum ContentType {
 }
 
 /**
- * Mapping van Dwengo string => onze enum
+ * Mapping van Dwengo string → onze enum
  */
 
 const permittedContentTypes = {
@@ -182,7 +182,7 @@ export async function fetchDwengoObjectById(
 }
 
 // Eén Dwengo-object op basis van _id
-export async function fetchDwengoObjectByIdRaw(
+/*export async function fetchDwengoObjectByIdRaw(
   id: string,
   isTeacher: boolean,
 ): Promise<LearningObjectDto> {
@@ -202,7 +202,7 @@ export async function fetchDwengoObjectByIdRaw(
   }
   // Dit mag nooit gebeuren
   return {} as LearningObjectDto;
-}
+}*/
 
 // [NIEUW] Dwengo-object op basis van hruid, language, version
 export async function fetchDwengoObjectByHruidLangVersion(
@@ -211,15 +211,15 @@ export async function fetchDwengoObjectByHruidLangVersion(
   version: number,
   isTeacher: boolean,
 ): Promise<LearningObjectDto> {
+  if (!hruid || !language || !version) {
+    throw new BadRequestError(
+      "Missing required parameters: hruid, language, and version.",
+    );
+  }
+
   try {
     // Dwengo-API: /api/learningObject/getMetadata?hruid=...&language=...&version=...
     const params = { hruid, language, version };
-
-    if (!hruid || !language || !version) {
-      throw new BadRequestError(
-        "Missing required parameters: hruid, language, and version.",
-      );
-    }
 
     const response = await dwengoAPI.get("/api/learningObject/getMetadata", {
       params,
@@ -380,7 +380,7 @@ function checkAll(
 }
 
 // Dwengo-object op basis van hruid (raw)
-export async function fetchDwengoObjectRawByHruid(
+/*export async function fetchDwengoObjectRawByHruid(
   hruid: string,
 ): Promise<DwengoLearningObject | null> {
   try {
@@ -396,4 +396,4 @@ export async function fetchDwengoObjectRawByHruid(
     console.error("Fout bij fetchDwengoObjectRawByHruid:", error);
     return null;
   }
-}
+}*/

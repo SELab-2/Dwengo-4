@@ -114,7 +114,7 @@ export class LocalLearningPathService {
     );
   }
 
-  async updateNumNodes(pathId: string): Promise<void> {
+  /*async updateNumNodes(pathId: string): Promise<void> {
     const count = await handlePrismaQuery(() =>
       prisma.learningPathNode.count({
         where: { learningPathId: pathId },
@@ -126,7 +126,7 @@ export class LocalLearningPathService {
         data: { num_nodes: count },
       }),
     );
-  }
+  }*/
 
   /**
    * [NIEUW] Zoeken naar lokale leerpaden op basis van filters

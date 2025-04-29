@@ -1,8 +1,8 @@
-import { defineConfig } from 'vitest/config'
+/*import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
-    include: ['./tests/**/*.test.ts'],
+    include: ['./tests/!**!/!*.test.ts'],
     poolOptions: {
         forks: {
           singleFork: true
@@ -13,4 +13,4 @@ export default defineConfig({
       provider: 'v8'
     }
   }
-});
+});*/
