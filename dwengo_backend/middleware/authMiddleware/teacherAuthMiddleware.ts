@@ -1,10 +1,9 @@
 import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 import { PrismaClient } from "@prisma/client";
-import { Response, NextFunction } from "express";
+import { NextFunction, Response } from "express";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import { AppError, UnauthorizedError } from "../../errors/errors";
-import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 import {
   invalidTokenMessage,
   noTokenProvidedMessage,
@@ -17,7 +16,7 @@ interface JwtPayload {
   id: number;
 }
 
-export const isTeacher = async (
+/*export const isTeacher = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction,
@@ -30,7 +29,7 @@ export const isTeacher = async (
   }
 
   next(); // Ensure next() is only called when valid
-};
+};*/
 
 export const protectTeacher = asyncHandler(
   async (

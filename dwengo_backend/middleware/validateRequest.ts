@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import { z, ZodIssue } from "zod";
-import { AuthenticatedRequest } from "./authMiddleware/teacherAuthMiddleware";
+import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
 
 const formatZodErrors = (error: z.ZodError, source: string) => {
   return error.issues.map((issue: ZodIssue) => ({

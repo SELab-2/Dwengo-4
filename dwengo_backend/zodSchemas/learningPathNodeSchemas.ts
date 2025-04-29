@@ -6,8 +6,8 @@ export const getLearningPathNodeParamsSchema = z.object({
   }),
 });
 
-export const createLearningPathNodeParamsSchema =
-  getLearningPathNodeParamsSchema;
+/*export const createLearningPathNodeParamsSchema =
+  getLearningPathNodeParamsSchema;*/
 
 export const updateLearningPathNodeParamsSchema = z.object({
   pathId: z.coerce.string({
@@ -19,5 +19,5 @@ export const updateLearningPathNodeParamsSchema = z.object({
   }),
 });
 
-export const deleteLearningPathNodeParamsSchema =
-  updateLearningPathNodeParamsSchema;
+/*export const deleteLearningPathNodeParamsSchema =
+  updateLearningPathNodeParamsSchema;*/

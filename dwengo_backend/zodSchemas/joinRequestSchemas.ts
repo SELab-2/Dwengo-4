@@ -12,7 +12,7 @@ export const createJoinRequestQuerySchema = z.object({
   joinCode: z.coerce.string({ message: "joinCode should be a string" }),
 });
 
-export const createCustomJoinRequestSchema = z
+/*export const createCustomJoinRequestSchema = z
   .object({
     body: createJoinRequestBodySchema,
     query: createJoinRequestQuerySchema,
@@ -21,10 +21,10 @@ export const createCustomJoinRequestSchema = z
     message: "joinCode must be present in either body or query",
   });
 
-/**
+/!**
  * Schemas for joinRequest updates
  * @route PATCH /teacher/classes/:classId/join-requests/:requestId
- */
+ *!/
 export const updateJoinRequestParamsSchema = z.object({
   classId: z.coerce
     .number({ message: "classId should be a number" })
@@ -42,13 +42,13 @@ export const updateJoinRequestBodySchema = z.object({
   }),
 });
 
-/**
+/!**
  * Schemas for joinRequest fetching
  * @route GET /teacher/classes/:classId/join-requests
- */
+ *!/
 export const getJoinRequestParamsSchema = z.object({
   classId: z.coerce
     .number({ message: "classId should be a number" })
     .int({ message: "classId should be an integer" })
     .positive({ message: "classId should be a positive integer" }),
-});
+});*/

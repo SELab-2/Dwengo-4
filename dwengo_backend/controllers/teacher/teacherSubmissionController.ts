@@ -30,7 +30,7 @@ export default class TeacherSubmissionController {
     },
   );
 
-  getAssignmentSubmissionsForStudent = asyncHandler(
+  /*getAssignmentSubmissionsForStudent = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
       const { studentId, assignmentId } = req.params;
       const teacherId: number = getUserFromAuthRequest(req).id;
@@ -44,7 +44,7 @@ export default class TeacherSubmissionController {
 
       res.status(200).json(submissions);
     },
-  );
+  );*/
 
   getAssignmentSubmissionsForTeam = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {

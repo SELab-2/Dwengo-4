@@ -79,7 +79,7 @@ describe("[GET] /assignment/student", async (): Promise<void> => {
     await addStudentToClass(student3.id, class1.id);
     await addStudentToClass(student4.id, class2.id);
     await addStudentToClass(student5.id, class3.id);
-    addStudentToClass(student2.id, class4.id);
+    await addStudentToClass(student2.id, class4.id);
 
     // Create assignments
     assignment1 = await createAssignment(

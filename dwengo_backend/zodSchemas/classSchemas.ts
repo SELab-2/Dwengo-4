@@ -7,8 +7,8 @@ export const deleteClassParamsSchema = z.object({
     .positive({ message: "classId should be a positive integer" }),
 });
 
-export const getJoinLinkParamSchema = deleteClassParamsSchema;
+/*export const getJoinLinkParamSchema = deleteClassParamsSchema;
 
 export const patchJoinLinkParamSchema = deleteClassParamsSchema;
 
-export const getClassroomParamSchema = deleteClassParamsSchema;
+export const getClassroomParamSchema = deleteClassParamsSchema;*/
