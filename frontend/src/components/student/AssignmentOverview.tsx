@@ -45,14 +45,14 @@ export default function AssignmentOverview() {
                       <h3 className="text-2xl font-bold bg-white">
                         {assignmentItem.title}
                       </h3>
-                      <p className="text-sm text-gray-700 translate-y-1.5">
+                      <p className="text-sm text-gray-700 translate-y-1.5 bg-white">
                         {t('deadline', { date: formattedDate })}
                       </p>
                     </div>
                     <div className="h-20 mt-1 text-gray-500 line-clamp-3 bg-white">
                       {assignmentItem.description}
                     </div>
-                    <div className="flex mt-1 flex-row justify-between items-center text-sm">
+                    <div className="flex mt-1 flex-row justify-between items-center bg-white text-sm">
                       <Link to={`/student/assignment/${assignmentItem.id}`}>
                         <PrimaryButton>{t('assignments.view')}</PrimaryButton>
                       </Link>

@@ -44,7 +44,7 @@ export default function ClassesStudent() {
                     <PrimaryButton
                       onClick={() => navigate(`/student/class/${classItem.id}`)}
                     >
-                      <span className="">{t('classes.view')}</span>
+                      {t('classes.view')}
                     </PrimaryButton>
                   </div>
                 </div>

@@ -20,7 +20,7 @@ export default function StudentIndex() {
 
         <div className="flex flex-row justify-end w-full ">
           <Link
-            to="/assignment"
+            to="assignments"
             className="font-bold hover:cursor-pointer hover:underline"
           >
             {t('assignments.view_all')}
