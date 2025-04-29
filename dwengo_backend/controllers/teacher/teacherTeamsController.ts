@@ -8,6 +8,8 @@ import {
 import asyncHandler from "express-async-handler";
 import { Team } from "@prisma/client";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
+import { handlePrismaTransaction } from "../../errors/errorFunctions";
+import prisma from "../../config/prisma";
 
 export const createTeamInAssignment = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -16,16 +18,18 @@ export const createTeamInAssignment = asyncHandler(
     const classId: number = Number(req.params.classId);
     const { teams } = req.body;
 
-    const createdTeams: Team[] = await createTeamsInAssignment(
-      assignmentId,
-      classId,
-      teams
+    const createdTeams: Team[] = await handlePrismaTransaction(
+      prisma,
+      async (tx) => {
+        return await createTeamsInAssignment(assignmentId, classId, teams, tx);
+      },
     );
+
     res.status(201).json({
       message: "Teams successfully created.",
       createdTeams,
     });
-  }
+  },
 );
 
 export const getTeamsInAssignment = asyncHandler(
@@ -33,7 +37,7 @@ export const getTeamsInAssignment = asyncHandler(
     const assignmentId: number = Number(req.params.assignmentId);
     const teams: Team[] = await getTeamsThatHaveAssignment(assignmentId);
     res.status(200).json(teams);
-  }
+  },
 );
 
 export const updateTeamsInAssignment = asyncHandler(
@@ -43,13 +47,13 @@ export const updateTeamsInAssignment = asyncHandler(
 
     const updatedTeams: Team[] = await updateTeamsForAssignment(
       assignmentId,
-      teams
+      teams,
     );
     res.status(200).json({
       message: "Teams successfully updated.",
       updatedTeams: updatedTeams,
     });
-  }
+  },
 );
 
 export const deleteTeamInAssignment = asyncHandler(
@@ -59,5 +63,5 @@ export const deleteTeamInAssignment = asyncHandler(
 
     await deleteTeam(teamId);
     res.status(204).end();
-  }
+  },
 );
