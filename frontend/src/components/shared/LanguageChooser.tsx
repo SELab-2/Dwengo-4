@@ -9,10 +9,10 @@ const LanguageChooser: React.FC = () => {
   };
 
   return (
-    <div className="flex">
+    <div className="flex bg-dwengo-green rounded-xl">
       <select
         aria-label="Language selector"
-        className="text-sm lg:text-lg hover:cursor-pointer"
+        className="text-sm lg:text-lg hover:cursor-pointer rounded-xl bg-dwengo-green text-white border-none font-bold mr-1.5"
         value={i18n.language}
         onChange={(e) => changeLanguage(e.target.value)}
       >

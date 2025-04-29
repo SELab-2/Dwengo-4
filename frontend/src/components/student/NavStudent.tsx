@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 
 const Navstudent: React.FC = () => {
   const { t } = useTranslation();
-  const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const [menuOpen] = useState<boolean>(false);
   const [firstName] = useState<string | null>(
     localStorage.getItem('firstName'),
   );
@@ -74,7 +74,6 @@ const Navstudent: React.FC = () => {
           {firstName && (
             <div className="flex items-center space-x-4">
               <span>{t('nav.logged_in_as', { name: firstName })}</span>
-              <LanguageChooser />
               <button
                 className="text-gray-700 hover:cursor-pointer hover:text-gray-600"
                 aria-label="Notifications"
@@ -139,6 +138,8 @@ const Navstudent: React.FC = () => {
                   />
                 </svg>
               </button>
+
+              <LanguageChooser />
             </div>
           )}
         </div>
