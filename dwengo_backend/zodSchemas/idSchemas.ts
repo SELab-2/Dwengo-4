@@ -21,6 +21,10 @@ export const teamIdParamsSchema = z.object({
   teamId: z.coerce.number().int().positive(),
 });
 
+export const studentIdParamsSchema = z.object({
+  studentId: z.coerce.number().int().positive(),
+});
+
 // MERGED SCHEMAS //
 export const classAndInviteIdParamsSchema =
   classIdParamsSchema.merge(inviteIdParamsSchema);
@@ -31,4 +35,8 @@ export const classAndRequestIdParamsSchema = classIdParamsSchema.merge(
 
 export const classAndAssignmentIdParamsSchema = classIdParamsSchema.merge(
   assignmentIdParamsSchema,
+);
+
+export const classAndStudentIdParamsSchema = classIdParamsSchema.merge(
+  studentIdParamsSchema,
 );
