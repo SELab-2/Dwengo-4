@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Router } from "express";
 import {
   createLocalLearningObject,
   getLocalLearningObjects,
@@ -8,7 +8,7 @@ import {
 } from "../../controllers/teacher/teacherLocalLearningObjectController";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // Alle routes hier alleen toegankelijk voor geauthenticeerde teachers
 router.use(protectTeacher);

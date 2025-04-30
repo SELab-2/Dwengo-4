@@ -15,7 +15,7 @@ import {
   inviteIdParamsSchema,
 } from "../../zodSchemas/idSchemas";
 import { otherTeacherEmailBodySchema } from "../../zodSchemas/emailSchemas";
-import { inviteActionBodySchema } from "../../zodSchemas/actionSchemas";
+import { inviteActionBodySchema } from "../../zodSchemas/bodySchemas";
 
 const router: Router = express.Router();
 

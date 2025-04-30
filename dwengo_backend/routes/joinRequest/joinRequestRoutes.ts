@@ -11,7 +11,7 @@ import {
   classAndRequestIdParamsSchema,
   classIdParamsSchema,
 } from "../../zodSchemas/idSchemas";
-import { joinRequestBodySchema } from "../../zodSchemas/actionSchemas";
+import { joinRequestBodySchema } from "../../zodSchemas/bodySchemas";
 
 const router: Router = express.Router();
 

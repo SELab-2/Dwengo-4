@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// SINGLE FIELD SCHEMAS //
 export const classIdParamsSchema = z.object({
   classId: z.coerce.number().int().positive(),
 });
@@ -12,6 +13,7 @@ export const requestIdParamsSchema = z.object({
   requestId: z.coerce.number().int().positive(),
 });
 
+// MERGED SCHEMAS //
 export const classAndInviteIdParamsSchema =
   classIdParamsSchema.merge(inviteIdParamsSchema);
 
