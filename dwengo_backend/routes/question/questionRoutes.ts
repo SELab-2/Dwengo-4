@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Router } from "express";
 import {
   createQuestionGeneral,
   createQuestionSpecific,
@@ -22,7 +22,7 @@ import {
   authorizeQuestionUpdate,
 } from "../../middleware/questionsAuthMiddleware";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // Gebruiker moet ingelogd zijn
 router.use(protectAnyUser);
