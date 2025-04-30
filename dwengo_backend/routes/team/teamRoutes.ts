@@ -5,7 +5,7 @@ import teacherTeamRoutes from "./teacherTeamRoutes";
 import studentTeamRoutes from "./studentTeamRoutes";
 import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
 
-const router = Router();
+const router: Router = Router();
 
 router.use("/student", studentTeamRoutes);
 router.use("/teacher", teacherTeamRoutes);

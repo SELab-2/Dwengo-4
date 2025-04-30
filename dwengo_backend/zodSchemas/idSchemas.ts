@@ -13,10 +13,22 @@ export const requestIdParamsSchema = z.object({
   requestId: z.coerce.number().int().positive(),
 });
 
+export const assignmentIdParamsSchema = z.object({
+  assignmentId: z.coerce.number().int().positive(),
+});
+
+export const teamIdParamsSchema = z.object({
+  teamId: z.coerce.number().int().positive(),
+});
+
 // MERGED SCHEMAS //
 export const classAndInviteIdParamsSchema =
   classIdParamsSchema.merge(inviteIdParamsSchema);
 
 export const classAndRequestIdParamsSchema = classIdParamsSchema.merge(
   requestIdParamsSchema,
+);
+
+export const classAndAssignmentIdParamsSchema = classIdParamsSchema.merge(
+  assignmentIdParamsSchema,
 );

@@ -23,11 +23,8 @@ export const getStudentTeams = asyncHandler(
 export const getTeamByAssignment = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const studentId: number = getUserFromAuthRequest(req).id;
-    const assignmentId: number = parseInt(req.params.assignmentId, 10);
+    const assignmentId: number = req.params.assignmentId as unknown as number;
 
-    if (isNaN(assignmentId)) {
-      throw new BadRequestError("Invalid assignment id.");
-    }
     const team = await StudentTeamService.getTeam(studentId, assignmentId);
     res.status(200).json(team);
   },

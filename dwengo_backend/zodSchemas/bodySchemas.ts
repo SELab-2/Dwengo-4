@@ -32,3 +32,33 @@ export const localLearningObjectBodySchema = z.object({
 // For updates (partial):
 export const partialLocalLearningObjectBodySchema =
   localLearningObjectBodySchema.partial();
+
+/*
+ * Check if the parameter teams conforms to the TeamDivision interface.
+ * This is nothing more than an interface specifying how a class of students gets divided into teams.
+ * */
+const TeamDivisionSchema = z.object({
+  teamName: z.string().min(1, { message: "Team name cannot be empty" }),
+  studentIds: z
+    .array(z.number().int().positive())
+    .nonempty({ message: "Each team must have at least one student" }),
+});
+
+/*
+ * Check if the parameter teams conform to the IdentifiableTeamDivision interface
+ * An IdentifiableTeamDivision is the same as a TeamDivision but with an ID for the team
+ * The reason for these interfaces is that when you are creating a team for the first time, it does not yet have
+ * an ID. Meaning that when you are creating, TeamDivision is all the info you need.
+ * On an update, however, you need to somehow find the team, which is why IdentifiableTeamDivision exists.
+ * */
+const IdentifiableTeamDivisionSchema = TeamDivisionSchema.extend({
+  teamId: z.number().int().positive(),
+});
+
+export const teamsBodySchema = z.object({
+  teams: z.array(TeamDivisionSchema),
+});
+
+export const identifiableTeamsBodySchema = z.object({
+  teams: z.array(IdentifiableTeamDivisionSchema),
+});
