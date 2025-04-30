@@ -4,6 +4,8 @@ import { getTeamMembers } from "../../controllers/student/studentTeamController"
 import teacherTeamRoutes from "./teacherTeamRoutes";
 import studentTeamRoutes from "./studentTeamRoutes";
 import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
+import { validateRequest } from "../../middleware/validateRequest";
+import { teamIdParamsSchema } from "../../zodSchemas/idSchemas";
 
 const router: Router = Router();
 
@@ -17,6 +19,14 @@ router.use("/teacher", teacherTeamRoutes);
  * @param teamId: number
  * @access Teacher/Student
  */
-router.get("/:teamId/members", protectAnyUser, getTeamMembers);
+router.get(
+  "/:teamId/members",
+  protectAnyUser,
+  validateRequest({
+    customErrorMessage: "invalid teamId request parameter",
+    paramsSchema: teamIdParamsSchema,
+  }),
+  getTeamMembers,
+);
 
 export default router;

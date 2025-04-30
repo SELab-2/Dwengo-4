@@ -4,7 +4,6 @@ import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 import StudentTeamService from "../../services/studentTeamService";
 import asyncHandler from "express-async-handler";
-import { BadRequestError } from "../../errors/errors";
 
 /**
  * Haalt alle teams op waarin de ingelogde student zit.
@@ -37,11 +36,8 @@ export const getTeamMembers = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     // Check if there is a user
     getUserFromAuthRequest(req);
-    const teamId: number = parseInt(req.params.teamId, 10);
+    const teamId: number = req.params.teamId as unknown as number;
 
-    if (isNaN(teamId)) {
-      throw new BadRequestError("Invalid team id.");
-    }
     const team = await StudentTeamService.getTeamById(teamId);
     res.status(200).json(team.students);
   },
