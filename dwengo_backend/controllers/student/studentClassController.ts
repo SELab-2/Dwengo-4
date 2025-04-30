@@ -20,7 +20,7 @@ export const getStudentClasses = asyncHandler(
 export const getStudentClassById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const studentId: number = getUserFromAuthRequest(req).id;
-    const classId: number = parseInt(req.params.classId);
+    const classId = req.params.classId as unknown as number;
     const classgroup = await classService.getStudentClassByClassId(
       studentId,
       classId,
@@ -32,7 +32,7 @@ export const getStudentClassById = asyncHandler(
 export const leaveClass = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const studentId: number = getUserFromAuthRequest(req).id;
-    const classId: number = parseInt(req.params.classId);
+    const classId = req.params.classId as unknown as number;
 
     await classService.leaveClassAsStudent(studentId, classId);
     res.status(204).end();

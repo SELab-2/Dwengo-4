@@ -5,6 +5,8 @@ import {
   getStudentClasses,
   leaveClass,
 } from "../../controllers/student/studentClassController";
+import { validateRequest } from "../../middleware/validateRequest";
+import { classIdParamsSchema } from "../../zodSchemas/studentClassSchemas/classIdSchema";
 
 const router = express.Router();
 router.use(protectStudent);
@@ -22,7 +24,14 @@ router.get("/", getStudentClasses);
  * @param classId: number
  * @access Student
  */
-router.get("/:classId", getStudentClassById);
+router.get(
+  "/:classId",
+  validateRequest({
+    paramsSchema: classIdParamsSchema,
+    customErrorMessage: "invalid classId request params",
+  }),
+  getStudentClassById,
+);
 
 /**
  * @route DELETE /class/student/:classId
@@ -30,6 +39,13 @@ router.get("/:classId", getStudentClassById);
  * @param classId: number
  * @access Student
  */
-router.delete("/:classId", leaveClass);
+router.delete(
+  "/:classId",
+  validateRequest({
+    paramsSchema: classIdParamsSchema,
+    customErrorMessage: "invalid classId request params",
+  }),
+  leaveClass,
+);
 
-export default router;
+export default router; // exports the student class router
