@@ -79,7 +79,14 @@
       "error": "Er is iets fout gelopen tijdens het ophalen van de leerpaden",
       "select": "- Selecteer een leerpad -"
     },
-    "description": "Beschrijving"
+    "description": "Beschrijving",
+    "type": {
+      "label": "Opdrachttype",
+      "select": "Selecteer een type",
+      "group": "Groepsopdracht",
+      "individual": "Individuele opdracht"
+    },
+    "teamsize": "Groepsgrootte:"
   },
   "classes": {
     "label": "Klasgroepen",

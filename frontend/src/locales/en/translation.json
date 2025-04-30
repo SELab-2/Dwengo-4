@@ -79,7 +79,14 @@
       "error": "Something went wrong while loading the learning paths",
       "select": "- Select learning path -"
     },
-    "description": "Description"
+    "description": "Description",
+    "type": {
+      "label": "Assignment type",
+      "select": "Select type",
+      "group": "Group assignment",
+      "individual": "Individual assignment"
+    },
+    "teamsize": "Teamsize:"
   },
   "classes": {
     "label": "Classes",
