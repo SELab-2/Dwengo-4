@@ -3,6 +3,7 @@ import { z, ZodIssue } from "zod";
 import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
 import { ParsedQs } from "qs";
 import { ParamsDictionary } from "express-serve-static-core";
+import { BadRequestError } from "../errors/errors";
 
 const formatZodErrors = (error: z.ZodError, source: string) => {
   return error.issues.map((issue: ZodIssue) => ({
@@ -78,12 +79,10 @@ export const validateRequest =
     }
 
     if (error_details.length > 0) {
-      res.status(400).json({
-        error: validationErrorMessage,
-        message: customErrorMessage || "Invalid request body/params/query",
-        details: error_details,
-      });
-      return;
+      throw new BadRequestError(
+        customErrorMessage || "Invalid request body/params/query",
+        error_details,
+      );
     }
 
     next();

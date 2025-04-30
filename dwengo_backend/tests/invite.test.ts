@@ -193,9 +193,7 @@ describe("invite tests", async (): Promise<void> => {
         });
 
       expect(status).toBe(400);
-      expect(body.error).toBe(
-        "Bad request due to invalid syntax or data (validation error)",
-      );
+      expect(body.error).toBe("BadRequestError");
       expect(body.message).toBe("invalid request for invite creation");
 
       expect(body.details).toEqual(
@@ -222,9 +220,7 @@ describe("invite tests", async (): Promise<void> => {
         .send({}); // empty body
 
       expect(status).toBe(400);
-      expect(body.error).toBe(
-        "Bad request due to invalid syntax or data (validation error)",
-      );
+      expect(body.error).toBe("BadRequestError");
       expect(body.message).toBe("invalid request for invite creation");
       expect(body.details).toEqual(
         expect.arrayContaining([
@@ -379,9 +375,7 @@ describe("invite tests", async (): Promise<void> => {
         });
 
       expect(status).toBe(400);
-      expect(body.error).toBe(
-        "Bad request due to invalid syntax or data (validation error)",
-      );
+      expect(body.error).toBe("BadRequestError");
       expect(body.message).toBe("invalid request for invite update");
       expect(body.details).toEqual(
         expect.arrayContaining([
@@ -480,9 +474,7 @@ describe("invite tests", async (): Promise<void> => {
         });
 
       expect(status).toBe(400);
-      expect(body.error).toBe(
-        "Bad request due to invalid syntax or data (validation error)",
-      );
+      expect(body.error).toBe("BadRequestError");
       expect(body.message).toBe("invalid request for invite update");
       expect(body.details).toEqual(
         expect.arrayContaining([
@@ -571,9 +563,7 @@ describe("invite tests", async (): Promise<void> => {
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(400);
-      expect(body.error).toBe(
-        "Bad request due to invalid syntax or data (validation error)",
-      );
+      expect(body.error).toBe("BadRequestError");
       expect(body.message).toBe("invalid request params");
       expect(body.details).toEqual(
         expect.arrayContaining([
@@ -658,9 +648,7 @@ describe("invite tests", async (): Promise<void> => {
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(400);
-      expect(body.error).toBe(
-        "Bad request due to invalid syntax or data (validation error)",
-      );
+      expect(body.error).toBe("BadRequestError");
       expect(body.message).toBe("invalid request params");
       expect(body.details).toEqual(
         expect.arrayContaining([

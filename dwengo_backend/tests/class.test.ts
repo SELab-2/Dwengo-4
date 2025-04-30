@@ -324,6 +324,16 @@ describe("classroom tests", (): void => {
       expect(body.joinLink).toBeUndefined();
     });
 
+    it("should respond with `400` status code for invalid classId", async (): Promise<void> => {
+      const { status, body } = await request(app)
+        .delete("/class/teacher/not-a-number")
+        .set("Authorization", `Bearer ${teacherUser1.token}`);
+
+      expect(status).toBe(400);
+      expect(body.error).toBe("BadRequestError");
+      expect(body.message).toBe("invalid classId request parameter");
+    });
+
     it("should respond with a `404` status code if the class does not exist", async (): Promise<void> => {
       // get an id that isn't used for any existing class in the database
       const maxClass: Class | null = await prisma.class.findFirst({
