@@ -1,8 +1,13 @@
-import express from "express";
+import express, { Router } from "express";
 import FeedbackController from "../../controllers/teacher/feedbackController";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
+import { validateRequest } from "../../middleware/validateRequest";
+import {
+  assignmentIdParamsSchema,
+  submissionIdParamsSchema,
+} from "../../zodSchemas/idSchemas";
 
-const router = express.Router();
+const router: Router = express.Router();
 const controller = new FeedbackController();
 
 router.use(protectTeacher);
@@ -16,6 +21,10 @@ router.use(protectTeacher);
  */
 router.get(
   "/assignment/:assignmentId/evaluation/:evaluationId",
+  validateRequest({
+    customErrorMessage: "invalid request for getting feedback",
+    paramsSchema: assignmentIdParamsSchema,
+  }),
   controller.getAllFeedbackForEvaluation,
 );
 
@@ -25,7 +34,14 @@ router.get(
  * @param submissionId: number
  * @access Teacher
  */
-router.get("/submission/:submissionId", controller.getFeedbackForSubmission);
+router.get(
+  "/submission/:submissionId",
+  validateRequest({
+    customErrorMessage: "invalid request for getting feedback",
+    paramsSchema: submissionIdParamsSchema,
+  }),
+  controller.getFeedbackForSubmission,
+);
 
 /**
  * @route PATCH /feedback/submission/:submissionId
@@ -35,6 +51,10 @@ router.get("/submission/:submissionId", controller.getFeedbackForSubmission);
  */
 router.patch(
   "/submission/:submissionId",
+  validateRequest({
+    customErrorMessage: "invalid request for updating feedback",
+    paramsSchema: submissionIdParamsSchema,
+  }),
   controller.updateFeedbackForSubmission,
 );
 
@@ -46,6 +66,10 @@ router.patch(
  */
 router.delete(
   "/submission/:submissionId",
+  validateRequest({
+    customErrorMessage: "invalid request for updating feedback",
+    paramsSchema: submissionIdParamsSchema,
+  }),
   controller.deleteFeedbackForSubmission,
 );
 
@@ -56,6 +80,13 @@ router.delete(
  * @body description: string
  * @access Teacher
  */
-router.post("/submission/:submissionId", controller.createFeedback);
+router.post(
+  "/submission/:submissionId",
+  validateRequest({
+    customErrorMessage: "invalid request for updating feedback",
+    paramsSchema: submissionIdParamsSchema,
+  }),
+  controller.createFeedback,
+);
 
 export default router;

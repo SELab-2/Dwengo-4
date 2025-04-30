@@ -25,6 +25,10 @@ export const studentIdParamsSchema = z.object({
   studentId: z.coerce.number().int().positive(),
 });
 
+export const submissionIdParamsSchema = z.object({
+  submissionId: z.coerce.number().int().positive(),
+});
+
 // MERGED SCHEMAS //
 export const classAndInviteIdParamsSchema =
   classIdParamsSchema.merge(inviteIdParamsSchema);

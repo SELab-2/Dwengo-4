@@ -10,11 +10,12 @@ export default class FeedbackController {
   // http-command: GET
   getAllFeedbackForEvaluation = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-      const { assignmentId, evaluationId } = req.params;
+      const assignmentId: number = req.params.assignmentId as unknown as number;
+      const evaluationId: string = req.params.evaluationId;
       const teacherId: number = getUserFromAuthRequest(req).id;
 
       const feedback: Feedback[] = await service.getAllFeedbackForEvaluation(
-        Number(assignmentId),
+        assignmentId,
         evaluationId,
         teacherId,
       );
@@ -27,7 +28,7 @@ export default class FeedbackController {
   createFeedback = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
       const teacherId: number = getUserFromAuthRequest(req).id;
-      const submissionId: number = Number(req.params.submissionId);
+      const submissionId: number = req.params.submissionId as unknown as number;
 
       const description: string = req.body.description;
 
@@ -46,7 +47,7 @@ export default class FeedbackController {
   // http-command: GET
   getFeedbackForSubmission = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-      const submissionId: number = Number(req.params.submissionId);
+      const submissionId: number = req.params.submissionId as unknown as number;
       const teacherId: number = getUserFromAuthRequest(req).id;
 
       const feedback: Feedback = await service.getFeedbackForSubmission(
@@ -61,10 +62,10 @@ export default class FeedbackController {
   // http-command: PATCH
   updateFeedbackForSubmission = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-      const submissionId: number = Number(req.params.submissionId);
+      const submissionId: number = req.params.submissionId as unknown as number;
       const teacherId: number = getUserFromAuthRequest(req).id;
 
-      const { description }: { description: string } = req.body;
+      const description: string = req.body.description;
       const feedback: Feedback = await service.updateFeedbackForSubmission(
         submissionId,
         description,
@@ -78,7 +79,7 @@ export default class FeedbackController {
   // http-command: DELETE
   deleteFeedbackForSubmission = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-      const submissionId: number = Number(req.params.submissionId);
+      const submissionId: number = req.params.submissionId as unknown as number;
       const teacherId: number = getUserFromAuthRequest(req).id;
 
       await service.deleteFeedbackForSubmission(submissionId, teacherId);
