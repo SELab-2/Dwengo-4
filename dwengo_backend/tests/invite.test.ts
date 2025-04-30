@@ -200,7 +200,7 @@ describe("invite tests", async (): Promise<void> => {
         expect.arrayContaining([
           expect.objectContaining({
             field: "classId",
-            message: "classId should be a number",
+            message: expect.stringContaining("number"),
             source: "params",
           }),
         ]),

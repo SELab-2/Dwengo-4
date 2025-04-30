@@ -12,7 +12,7 @@ import {
 } from "../../controllers/teacher/teacherClassController";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 import { validateRequest } from "../../middleware/validateRequest";
-import { classIdParamsSchema } from "../../zodSchemas/studentClassSchemas/classIdSchema";
+import { classIdParamsSchema } from "../../zodSchemas/idSchemas";
 
 const router: Router = express.Router();
 router.use(protectTeacher);

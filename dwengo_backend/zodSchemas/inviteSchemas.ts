@@ -32,10 +32,3 @@ export const updateInviteParamsSchema = z.object({
     .int({ message: "inviteId should be an integer" })
     .positive({ message: "inviteId should be a positive integer" }),
 });
-
-/**
- * schema for delete invite route (DELETE /teacher/classes/:classId/invites/:inviteId)
- */
-export const deleteInviteParamsSchema = createInviteParamsSchema.merge(
-  updateInviteParamsSchema,
-); // classId and inviteId
