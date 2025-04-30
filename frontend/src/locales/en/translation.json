@@ -65,6 +65,22 @@
     "view": "View assignment",
     "not_found": "No assignments found"
   },
+  "assignments_form": {
+    "edit": "Edit assignment",
+    "assign": "Assign assignment",
+    "class": {
+      "choose": "Choose class",
+      "select": "Select a class"
+    },
+    "title": "Title",
+    "learning_path": {
+      "choose": "Choose learning path",
+      "loading": "Loading learning paths ...",
+      "error": "Something went wrong while loading the learning paths",
+      "select": "- Select learning path -"
+    },
+    "description": "Description"
+  },
   "classes": {
     "label": "Classes",
     "error": "Something went wrong while loading the classes",

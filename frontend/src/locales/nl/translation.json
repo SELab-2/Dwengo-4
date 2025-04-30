@@ -65,6 +65,22 @@
     "view": "Opdracht bekijken",
     "not_found": "Geen opdrachten gevonden"
   },
+  "assignments_form": {
+    "edit": "Opdracht bewerken",
+    "assign": "Opdracht toewijzen",
+    "class": {
+      "choose": "Kies klas",
+      "select": "Selecteer een klas"
+    },
+    "title": "Titel",
+    "learning_path": {
+      "choose": "Kies leerpad",
+      "loading": "Leerpaden inladen...",
+      "error": "Er is iets fout gelopen tijdens het ophalen van de leerpaden",
+      "select": "- Selecteer een leerpad -"
+    },
+    "description": "Beschrijving"
+  },
   "classes": {
     "label": "Klasgroepen",
     "error": "Er is iets fout gelopen tijdens het ophalen van de klasgroepen",
