@@ -8,5 +8,13 @@ export const inviteIdParamsSchema = z.object({
   inviteId: z.coerce.number().int().positive(),
 });
 
+export const requestIdParamsSchema = z.object({
+  requestId: z.coerce.number().int().positive(),
+});
+
 export const classAndInviteIdParamsSchema =
   classIdParamsSchema.merge(inviteIdParamsSchema);
+
+export const classAndRequestIdParamsSchema = classIdParamsSchema.merge(
+  requestIdParamsSchema,
+);

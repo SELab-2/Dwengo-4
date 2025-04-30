@@ -68,7 +68,7 @@ export const getPendingInvitesForTeacher = asyncHandler(
  */
 export const updateInviteStatus = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const inviteId: number = parseInt(req.params.inviteId);
+    const inviteId: number = req.params.inviteId as unknown as number;
     const { action }: { action: string } = req.body;
     const teacherId: number = getUserFromAuthRequest(req).id;
 

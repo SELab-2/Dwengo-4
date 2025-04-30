@@ -15,7 +15,7 @@ import {
   inviteIdParamsSchema,
 } from "../../zodSchemas/idSchemas";
 import { otherTeacherEmailBodySchema } from "../../zodSchemas/emailSchemas";
-import { actionBodySchema } from "../../zodSchemas/actionSchemas";
+import { inviteActionBodySchema } from "../../zodSchemas/actionSchemas";
 
 const router: Router = express.Router();
 
@@ -69,7 +69,7 @@ router.patch(
   "/:inviteId",
   validateRequest({
     customErrorMessage: "invalid request for invite update",
-    bodySchema: actionBodySchema,
+    bodySchema: inviteActionBodySchema,
     paramsSchema: inviteIdParamsSchema,
   }),
   updateInviteStatus,
