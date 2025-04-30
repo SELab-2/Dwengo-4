@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Router } from "express";
 import { protectStudent } from "../../middleware/authMiddleware/studentAuthMiddleware";
 import {
   getStudentClassById,
@@ -8,7 +8,7 @@ import {
 import { validateRequest } from "../../middleware/validateRequest";
 import { classIdParamsSchema } from "../../zodSchemas/studentClassSchemas/classIdSchema";
 
-const router = express.Router();
+const router: Router = express.Router();
 router.use(protectStudent);
 
 /**
