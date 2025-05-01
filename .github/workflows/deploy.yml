@@ -10,9 +10,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  test-develop:
     runs-on: self-hosted
-
     if: github.ref == 'refs/heads/develop'
     steps:
       - name: Checkout code
@@ -26,6 +25,8 @@ jobs:
           npm ci
           npm run test:int
 
+  test-automated:
+    runs-on: self-hosted
     if: github.ref == 'refs/heads/automated-tests'
     steps:
       - name: Checkout code
@@ -39,11 +40,10 @@ jobs:
           npm ci
           npm run test:int
 
-
   deploy:
     runs-on: self-hosted
-    needs: test
-    if: success() && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/yolo' || || github.ref == 'refs/heads/automated-tests')
+    needs: [test-develop, test-automated]
+    if: success() && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/yolo' || github.ref == 'refs/heads/automated-tests')
     steps:
       - name: Kill existing Node processes
         run: pkill -f "node.*server.ts" || true
