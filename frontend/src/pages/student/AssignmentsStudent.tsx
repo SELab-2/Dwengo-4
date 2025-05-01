@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import PrimaryButton from '../../components/shared/PrimaryButton';
 import { AssignmentItem } from '@/types/api.types';
-import { fetchAssignments } from '@/util/teacher/assignment';
+import { fetchAssignments } from '@/util/student/assignment';
 
 const AssignmentsStudent: React.FC = () => {
   /**
