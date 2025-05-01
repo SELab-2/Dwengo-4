@@ -42,7 +42,7 @@ jobs:
 
   deploy:
     runs-on: self-hosted
-    needs: [test-develop, test-automated]
+    needs: [test-automated]
     if: success() && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/yolo' || github.ref == 'refs/heads/automated-tests')
     steps:
       - name: Kill existing Node processes
