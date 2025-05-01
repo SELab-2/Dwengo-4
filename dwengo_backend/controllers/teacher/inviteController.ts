@@ -102,13 +102,19 @@ export const updateInviteStatus = asyncHandler(
  *
  * Any teacher of the class can delete the invite (not just the teacher who created the invite).
  */
+
 export const deleteInvite = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const inviteId: number = parseInt(req.params.inviteId);
-    const classId: number = parseInt(req.params.classId);
-    const classTeacherId: number = getUserFromAuthRequest(req).id;
+    const inviteId = parseInt(req.params.inviteId, 10);
+    const classId  = parseInt(req.params.classId, 10);
+    const classTeacherId = getUserFromAuthRequest(req).id;
 
+    // 1) eerst controleren of invite bestaat en PENDING is
+    await inviteService.ensureInviteExists(inviteId, classId);
+
+    // 2) daarna pas de rechten-check & delete
     await inviteService.deleteInvite(classTeacherId, inviteId, classId);
+
     res.status(204).end();
-  },
+  }
 );

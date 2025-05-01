@@ -1,10 +1,12 @@
 import { Invite, JoinRequestStatus, Class, PrismaClient } from "@prisma/client";
 import classService from "./classService";
-import { AccesDeniedError, BadRequestError, ConflictError, NotFoundError } from "../errors/errors";
+import { AccessDeniedError, BadRequestError, ConflictError, NotFoundError } from "../errors/errors";
 
 const prisma = new PrismaClient();
 
 export default class inviteService {
+
+
 
     private static async validateInvitePending(inviteId: number, otherTeacherId: number): Promise<Invite> {
         const invite: Invite | null = await prisma.invite.findFirst({
@@ -15,7 +17,7 @@ export default class inviteService {
             },
         });
         if (!invite) {
-            throw new BadRequestError("Uitnodiging is niet pending of bestaat niet");
+            throw new BadRequestError("Invite is not pending or does not exist.");
         }
         return invite;
     }
@@ -28,10 +30,7 @@ export default class inviteService {
         }
 
         // Check of de leerkracht die de invite verstuurt beheerder is van de klas
-        const isTeacher: boolean = await classService.isTeacherOfClass(classId, classTeacherId);
-        if (!isTeacher) {
-            throw new AccesDeniedError("Leerkracht is geen beheerder van de klas");
-        }
+        await classService.isTeacherOfClass(classId, classTeacherId);
 
         // Zoek de leerkracht op basis van het e-mailadres
         const teacherUser = await prisma.user.findUnique({
@@ -51,14 +50,11 @@ export default class inviteService {
             },
         });
         if (existingInvite) {
-            throw new ConflictError("Er bestaat al een pending uitnodiging voor deze leerkracht en klas");
+            throw new ConflictError("There is already a pending invite for this teacher and class.");
         }
 
         // Controleer of de teacher nog geen lid is van de klas
-        const isAlreadyTeacher: boolean = await classService.isTeacherOfClass(classId, otherTeacherId);
-        if (isAlreadyTeacher) {
-            throw new BadRequestError("Leerkracht is al lid van de klas");
-        }
+        await classService.ensureTeacherNotInClass(classId, otherTeacherId);
 
         // Maak de invite aan
         return await prisma.invite.create({
@@ -76,13 +72,10 @@ export default class inviteService {
         classId: number
     ): Promise<Invite[]> {
         // Alleen een teacher van de klas mag de invites zien
-        const isTeacher: boolean = await classService.isTeacherOfClass(
+        await classService.isTeacherOfClass(
             classId,
             classTeacherId
         );
-        if (!isTeacher) {
-            throw new AccesDeniedError("Leerkracht is geen beheerder van de klas");
-        }
 
         return await prisma.invite.findMany({
             where: {
@@ -180,10 +173,7 @@ export default class inviteService {
 
     static async deleteInvite(classTeacherId: number, inviteId: number, classId: number): Promise<Invite> {
         // Check of de teacher een teacher van de klas is
-        const isTeacher: boolean = await classService.isTeacherOfClass(classId, classTeacherId);
-        if (!isTeacher) {
-            throw new AccesDeniedError("Leerkracht is geen beheerder van de klas");
-        }
+        await classService.isTeacherOfClass(classId, classTeacherId);
 
         // Verwijder de invite
         return await prisma.invite.delete({
@@ -193,3 +183,21 @@ export default class inviteService {
             },
         });
     }
+
+    /**
+ * Controleert of een invite bestaat voor de gegeven inviteId en classId en of de status PENDING is.
+ * Werpt NotFoundError als dat niet het geval is.
+ */
+    static async ensureInviteExists(inviteId: number, classId: number): Promise<Invite> {
+        const invite = await prisma.invite.findUnique({
+            where: {
+                inviteId,
+                classId,
+            },
+        });
+        if (!invite || invite.status !== JoinRequestStatus.PENDING) {
+            throw new NotFoundError("Invite does not exist or is not pending.");
+        }
+        return invite;
+    }
+}

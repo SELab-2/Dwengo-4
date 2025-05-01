@@ -102,7 +102,7 @@ describe("join request tests", async (): Promise<void> => {
         });
       expect(status).toBe(409);
       expect(body.error).toBe("ConflictError");
-      expect(body.message).toBe("Student is already a member of this class.");
+      expect(body.message).toBe("Student is already a part of this class.");
     });
 
     it("should respond with a `409` status code when there is already a pending join request for the student and class", async (): Promise<void> => {
