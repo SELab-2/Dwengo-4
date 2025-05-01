@@ -55,6 +55,7 @@ jobs:
           cd /home/selab2/Dwengo-4/dwengo_backend
           git pull
           git checkout automated-tests
+          cd /home/selab2/Dwengo-4/dwengo_backend/frontend
           npm ci
           npm run build
           cd /home/selab2/Dwengo-4/Dwengo-4/dwengo_backend
