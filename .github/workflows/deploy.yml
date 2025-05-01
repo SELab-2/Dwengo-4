@@ -52,14 +52,14 @@ jobs:
       - name: Deploy branch
         if: github.ref == 'refs/heads/automated-tests'
         run: |
-          cd /home/selab2/Dwengo-4/dwengo_backend
+          cd /home/selab2/Dwengo-4/
           git pull
           git checkout automated-tests
-          cd /home/selab2/Dwengo-4/dwengo_backend/frontend
+          cd /home/selab2/Dwengo-4/frontend
           npm ci
           npm run build
           cd /home/selab2/Dwengo-4/Dwengo-4/dwengo_backend
-          npm i
+          npm ci
           PORT=4000 npx nodemon server.ts > /dev/null 2>&1 &
           sleep 3
           echo "Branch deployment completed successfully on port $PORT"
