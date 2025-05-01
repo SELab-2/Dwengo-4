@@ -5,25 +5,59 @@ on:
     branches:
       - main
       - yolo
+      - develop
+      - automated-tests
   workflow_dispatch:
 
 jobs:
+  test:
+    runs-on: self-hosted
+
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run integration tests
+        run: |
+          cd /home/selab2/Dwengo-4/dwengo_backend
+          git pull
+          git checkout develop
+          npm ci
+          npm run test:int
+
+    if: github.ref == 'refs/heads/automated-tests'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run integration tests
+        run: |
+          cd /home/selab2/Dwengo-4/dwengo_backend
+          git pull
+          git checkout automated-tests
+          npm ci
+          npm run test:int
+
   deploy:
     runs-on: self-hosted
+    needs: test
+    if: success() && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/yolo' || || github.ref == 'refs/heads/automated-tests')
     steps:
       - name: Kill existing Node processes
-        run: pkill -f "node.*server.js" || true
+        run: pkill -f "node.*server.ts" || true
 
-      - name: Deploy yolo branch
+      # Your existing deployment steps...
+      - name: Deploy branch
+        if: github.ref == 'refs/heads/automated-tests'
         run: |
-          cd /home/selab2/Dwengo-4-yolo/Dwengo-4/
+          cd /home/selab2/Dwengo-4/dwengo_backend
           git pull
-          git checkout yolo
-          cd /home/selab2/Dwengo-4-yolo/Dwengo-4/frontend
-          npm i
+          git checkout automated-tests
+          npm ci
           npm run build
-          cd /home/selab2/Dwengo-4-yolo/Dwengo-4/dwengo_backend
+          cd /home/selab2/Dwengo-4/Dwengo-4/dwengo_backend
           npm i
-          PORT=4000 npx nodemon server.js > /dev/null 2>&1 &
-          sleep 3 #aapjes 
-          echo "Yolo branch deployment completed successfully on port $PORT"
+          PORT=4000 npx nodemon server.ts > /dev/null 2>&1 &
+          sleep 3
+          echo "Branch deployment completed successfully on port $PORT"
