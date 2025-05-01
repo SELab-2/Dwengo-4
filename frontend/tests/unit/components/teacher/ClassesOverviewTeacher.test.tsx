@@ -105,8 +105,8 @@ describe('ClassesOverviewTeacher', () => {
     expect(classB).toBeInTheDocument();
     expect(screen.getAllByText('Bekijk klas')).toHaveLength(2);
 
-    // ✅ Vind de juiste paragrafen en check textContent
-    const allParagraphs = screen.getAllByText((content, element) => {
+    // ✅ Vind de paragrafen die de code bevatten en controleer hun textContent
+    const allParagraphs = screen.getAllByText((_, element) => {
       return element?.tagName.toLowerCase() === 'p';
     });
 
