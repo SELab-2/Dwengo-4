@@ -12,8 +12,9 @@ import { LearningPathDto } from "../services/learningPathService";
 import { LearningObjectDto } from "../services/dwengoLearningObjectService";
 
 // note: since these tests make use of the actual dwengo API, they can be quite slow
+// so set timeout to 10 seconds for all tests in this file (instead of the standard 5 seconds)
 
-describe("learning object tests", async () => {
+describe("learning object tests", { timeout: 10000 }, async () => {
   let teacherUser1: User & { teacher: Teacher; token: string };
   let studentUser1: User & { student: Student; token: string };
   let lo: LearningObject;
