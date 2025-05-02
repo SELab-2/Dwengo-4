@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction, Express } from "express";
+import express, { Express, NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
 import errorHandler from "./middleware/errorMiddleware";
 import learningObjectRoutes from "./routes/learningObject/learningObjectRoutes";
@@ -54,7 +54,6 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
 });
 
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
-app.use("/img", express.static(path.join(__dirname, "../frontend/img")));
 
 app.options("*", (req, res) => {
   res.sendStatus(200);
