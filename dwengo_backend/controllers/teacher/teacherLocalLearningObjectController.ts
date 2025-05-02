@@ -37,10 +37,8 @@ export const getLocalLearningObjects = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = getUserFromAuthRequest(req).id;
     const objects =
-      await LocalLearningObjectService.getAllLearningObjectsByTeacher(
-        teacherId,
-      );
-    res.status(200).json({ objects });
+      await LocalLearningObjectService.getAllLearningObjectsByTeacher(teacherId);
+    res.status(200).json(objects);
   },
 );
 
@@ -52,25 +50,20 @@ export const getLocalLearningObjectById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = getUserFromAuthRequest(req).id;
     const { createdLearningObjectId } = req.params;
-    const found: LearningObject =
-      await LocalLearningObjectService.getLearningObjectById(
-        createdLearningObjectId,
-      );
-
-    // Check of deze teacher de eigenaar is
-    checkIfTeacherIsCreator(
-      teacherId,
-      found.creatorId,
-      Property.LearningObject,
+    const found: LearningObject = await LocalLearningObjectService.getLearningObjectById(
+      createdLearningObjectId,
     );
 
-    res.status(200).json({ learningObject: found });
+    // Check of deze teacher de eigenaar is
+    checkIfTeacherIsCreator(teacherId, found.creatorId, Property.LearningObject);
+
+    res.status(200).json(found);
   },
 );
 
 /**
  * Update een leerobject.
- * PUT /learningObjectByTeacher/:createdLearningObjectId
+ * PATCH /learningObjectByTeacher/:createdLearningObjectId
  */
 export const updateLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -84,11 +77,7 @@ export const updateLocalLearningObject = asyncHandler(
       createdLearningObjectId,
     );
 
-    checkIfTeacherIsCreator(
-      teacherId,
-      existing.creatorId,
-      Property.LearningObject,
-    );
+    checkIfTeacherIsCreator(teacherId, existing.creatorId, Property.LearningObject);
 
     const updated = await LocalLearningObjectService.updateLearningObject(
       createdLearningObjectId,
@@ -114,14 +103,8 @@ export const deleteLocalLearningObject = asyncHandler(
       createdLearningObjectId,
     );
 
-    checkIfTeacherIsCreator(
-      teacherId,
-      existing.creatorId,
-      Property.LearningObject,
-    );
-    await LocalLearningObjectService.deleteLearningObject(
-      createdLearningObjectId,
-    );
+    checkIfTeacherIsCreator(teacherId, existing.creatorId, Property.LearningObject);
+    await LocalLearningObjectService.deleteLearningObject(createdLearningObjectId);
     res.status(204).end();
   },
 );

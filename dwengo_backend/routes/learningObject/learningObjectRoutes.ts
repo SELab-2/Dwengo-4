@@ -46,8 +46,6 @@ router.get(
  * @description Haal bepaald leerobject op
  * @param learningObjectId: string
  * @access Teacher/Student
- * DON'T USE THIS ROUTE: SINCE THE DWENGO API DOESN'T IMPLEMENT SEARCHING BY ID CORRECTLY,
- * THIS ROUTE ONLY CHECKS LOCAL LEARNING OBJECTS. (it's kept in in case the Dwengo API is fixed in the future)
  */
 router.get("/:learningObjectId", protectAnyUser, getLearningObjectController);
 

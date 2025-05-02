@@ -92,9 +92,7 @@ export interface LearningObjectDtoWithRaw extends LearningObjectDto {
 /**
  * Converteer Dwengo-object naar onze LearningObjectDto
  */
-function mapDwengoToLocal(
-  dwengoObj: DwengoLearningObject,
-): LearningObjectDtoWithRaw {
+function mapDwengoToLocal(dwengoObj: DwengoLearningObject): LearningObjectDtoWithRaw {
   return {
     id: dwengoObj._id ?? "",
     uuid: dwengoObj.uuid ?? "",
@@ -153,8 +151,6 @@ export async function fetchAllDwengoObjects(
   return [];
 }
 
-// Since the dwengo API doesn't implement this correctly, comment out this code
-// this may be only be used once the dwengo API is fixed
 // Eén Dwengo-object op basis van _id
 export async function fetchDwengoObjectById(
   id: string,
@@ -166,11 +162,7 @@ export async function fetchDwengoObjectById(
       params,
     });
 
-    checkAll(
-      response.data,
-      `Dwengo learning object with id ${id} not found.`,
-      isTeacher,
-    );
+    checkAll(response.data, `Dwengo learning object with id ${id} not found.`, isTeacher);
 
     const dwengoObj: DwengoLearningObject = response.data;
     const mapped = mapDwengoToLocal(dwengoObj);
@@ -293,18 +285,11 @@ export async function getDwengoObjectsForPath(
     });
     const allPaths: any[] = pathResp.data;
     const learningPath = allPaths.find((lp) => lp._id === pathId);
-    checkFetchedObject(
-      learningPath,
-      "Learning path with id=${pathId} not found.",
-    );
+    checkFetchedObject(learningPath, "Learning path with id=${pathId} not found.");
     const nodes = learningPath.nodes || [];
     const results = await Promise.all(
       nodes.map(
-        async (node: {
-          learningobject_hruid: any;
-          version: any;
-          language: any;
-        }) => {
+        async (node: { learningobject_hruid: any; version: any; language: any }) => {
           try {
             const params = {
               hruid: node.learningobject_hruid,
@@ -350,10 +335,7 @@ export async function getDwengoObjectsForPath(
 // Helper functies voor error handling //
 /////////////////////////////////////////
 
-function checkFetchedObject<T>(
-  fetchedObject: T | null,
-  notFoundMessage: string,
-) {
+function checkFetchedObject<T>(fetchedObject: T | null, notFoundMessage: string) {
   if (!fetchedObject) {
     throw new NotFoundError(notFoundMessage);
   }
@@ -368,9 +350,7 @@ function checkAvailabilityAndTeacherExclusive(
   }
 
   if (!dwengoObj.available) {
-    throw new UnavailableError(
-      "This learning object is temporarily not available.",
-    );
+    throw new UnavailableError("This learning object is temporarily not available.");
   }
 }
 
