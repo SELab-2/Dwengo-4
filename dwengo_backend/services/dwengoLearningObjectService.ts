@@ -136,11 +136,6 @@ export async function fetchAllDwengoObjects(
     const response = await dwengoAPI.get("/api/learningObject/search", {
       params,
     });
-    checkAll(
-      response.data,
-      "Something went wrong while searching for learning objects.",
-      isTeacher,
-    );
     const dwengoData: DwengoLearningObject[] = response.data;
     return dwengoData.map(mapDwengoToLocal);
   } catch (error) {
@@ -154,6 +149,7 @@ export async function fetchAllDwengoObjects(
 }
 
 // Eén Dwengo-object op basis van _id
+// the dwengo API doesn't implement this correctly, so don't use this function until it's fixed
 export async function fetchDwengoObjectById(
   id: string,
   isTeacher: boolean,
@@ -227,6 +223,13 @@ export async function fetchDwengoObjectByHruidLangVersion(
       params,
     });
 
+    if (typeof response.data !== "object") {
+      // dwengo API returns error string if object not found
+      throw new NotFoundError(
+        `Dwengo learning object with hruid=${hruid}, language=${language}, version=${version} not found.`,
+      );
+    }
+
     checkAll(
       response.data,
       `Dwengo learning object with hruid=${hruid}, language=${language}, version=${version} not found.`,
@@ -262,11 +265,6 @@ export async function searchDwengoObjects(
     const response = await dwengoAPI.get("/api/learningObject/search", {
       params,
     });
-    checkAll(
-      response.data,
-      `The search term: ${searchTerm} didn't correspond with any learning object.`,
-      isTeacher,
-    );
 
     const dwengoData: DwengoLearningObject[] = response.data;
     return dwengoData.map(mapDwengoToLocal);
@@ -291,18 +289,11 @@ export async function getDwengoObjectsForPath(
     });
     const allPaths: any[] = pathResp.data;
     const learningPath = allPaths.find((lp) => lp._id === pathId);
-    checkFetchedObject(
-      learningPath,
-      "Learning path with id=${pathId} not found.",
-    );
+    checkFetchedObject(learningPath, "Learning path with id=${pathId} not found.");
     const nodes = learningPath.nodes || [];
     const results = await Promise.all(
       nodes.map(
-        async (node: {
-          learningobject_hruid: any;
-          version: any;
-          language: any;
-        }) => {
+        async (node: { learningobject_hruid: any; version: any; language: any }) => {
           try {
             const params = {
               hruid: node.learningobject_hruid,
@@ -348,10 +339,7 @@ export async function getDwengoObjectsForPath(
 // Helper functies voor error handling //
 /////////////////////////////////////////
 
-function checkFetchedObject<T>(
-  fetchedObject: T | null,
-  notFoundMessage: string,
-) {
+function checkFetchedObject<T>(fetchedObject: T | null, notFoundMessage: string) {
   if (!fetchedObject) {
     throw new NotFoundError(notFoundMessage);
   }
@@ -366,9 +354,7 @@ function checkAvailabilityAndTeacherExclusive(
   }
 
   if (!dwengoObj.available) {
-    throw new UnavailableError(
-      "This learning object is temporarily not available.",
-    );
+    throw new UnavailableError("This learning object is temporarily not available.");
   }
 }
 

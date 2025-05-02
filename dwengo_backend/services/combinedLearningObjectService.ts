@@ -1,7 +1,6 @@
 import { NotFoundError } from "../errors/errors";
 import {
   fetchAllDwengoObjects,
-  fetchDwengoObjectById,
   searchDwengoObjects,
   getDwengoObjectsForPath,
   LearningObjectDto,
@@ -20,7 +19,7 @@ import {
  * Haalt ALLE leerobjecten op: Dwengo + lokaal.
  */
 export async function getAllLearningObjects(
-  isTeacher: boolean
+  isTeacher: boolean,
 ): Promise<LearningObjectDto[]> {
   const dwengoObjs = await fetchAllDwengoObjects(isTeacher);
   const localObjs = await getLocalLearningObjects(isTeacher);
@@ -32,7 +31,7 @@ export async function getAllLearningObjects(
  */
 export async function searchLearningObjects(
   isTeacher: boolean,
-  searchTerm: string
+  searchTerm: string,
 ): Promise<LearningObjectDto[]> {
   const dwengoResults = await searchDwengoObjects(isTeacher, searchTerm);
   const localResults = await searchLocalLearningObjects(isTeacher, searchTerm);
@@ -44,8 +43,13 @@ export async function searchLearningObjects(
  */
 export async function getLearningObjectById(
   id: string,
-  isTeacher: boolean
+  isTeacher: boolean,
 ): Promise<LearningObjectDto> {
+  // the dwengo API doesn't implement this correctly
+  // so comment out code, and just search local objects
+  // if the dwengo API is fixed in the future, this code can be uncommented
+
+  /**
   // Eerst Dwengo checken
   // Deze functie zal een NotFoundError gooien als het object niet bestaat
   // Anders zal het object teruggegeven worden
@@ -61,6 +65,9 @@ export async function getLearningObjectById(
     // Rethrow de error als het geen NotFoundError is
     throw error;
   }
+  */
+
+  return await getLocalLearningObjectById(id, isTeacher);
 }
 
 /**
@@ -69,7 +76,7 @@ export async function getLearningObjectById(
  */
 export async function getLearningObjectsForPath(
   pathId: string,
-  isTeacher: boolean
+  isTeacher: boolean,
 ): Promise<LearningObjectDto[]> {
   return await getDwengoObjectsForPath(pathId, isTeacher);
 }
@@ -79,7 +86,7 @@ export async function getLearningObjectByHruidLangVersion(
   hruid: string,
   language: string,
   version: number,
-  isTeacher: boolean
+  isTeacher: boolean,
 ): Promise<LearningObjectDto> {
   // 1) Probeer Dwengo
   try {
@@ -87,7 +94,7 @@ export async function getLearningObjectByHruidLangVersion(
       hruid,
       language,
       version,
-      isTeacher
+      isTeacher,
     );
   } catch (error) {
     if (error instanceof NotFoundError) {
@@ -97,7 +104,7 @@ export async function getLearningObjectByHruidLangVersion(
         hruid,
         language,
         version,
-        isTeacher
+        isTeacher,
       );
     }
     // Rethrow de error als het geen NotFoundError is
