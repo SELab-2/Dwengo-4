@@ -60,10 +60,6 @@ app.options("*", (req, res) => {
   res.sendStatus(200);
 });
 
-app.options("*", (req, res) => {
-  res.sendStatus(200);
-});
-
 app.use(httpLogger);
 
 if (process.env.NODE_ENV !== "production") {
@@ -114,6 +110,11 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Routes voor indieningen
 app.use("/submission", submissionRoutes);
+
+// Catch-all route for React Router
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
+});
 
 // Error Handler
 app.use(errorHandler);
