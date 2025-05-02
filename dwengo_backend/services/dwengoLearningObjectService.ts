@@ -92,7 +92,9 @@ export interface LearningObjectDtoWithRaw extends LearningObjectDto {
 /**
  * Converteer Dwengo-object naar onze LearningObjectDto
  */
-function mapDwengoToLocal(dwengoObj: DwengoLearningObject): LearningObjectDtoWithRaw {
+function mapDwengoToLocal(
+  dwengoObj: DwengoLearningObject,
+): LearningObjectDtoWithRaw {
   return {
     id: dwengoObj._id ?? "",
     uuid: dwengoObj.uuid ?? "",
@@ -134,11 +136,6 @@ export async function fetchAllDwengoObjects(
     const response = await dwengoAPI.get("/api/learningObject/search", {
       params,
     });
-    checkAll(
-      response.data,
-      "Something went wrong while searching for learning objects.",
-      isTeacher,
-    );
     const dwengoData: DwengoLearningObject[] = response.data;
     return dwengoData.map(mapDwengoToLocal);
   } catch (error) {
@@ -152,6 +149,7 @@ export async function fetchAllDwengoObjects(
 }
 
 // Eén Dwengo-object op basis van _id
+// the dwengo API doesn't implement this correctly, so don't use this function until it's fixed
 export async function fetchDwengoObjectById(
   id: string,
   isTeacher: boolean,
@@ -162,7 +160,11 @@ export async function fetchDwengoObjectById(
       params,
     });
 
-    checkAll(response.data, `Dwengo learning object with id ${id} not found.`, isTeacher);
+    checkAll(
+      response.data,
+      `Dwengo learning object with id ${id} not found.`,
+      isTeacher,
+    );
 
     const dwengoObj: DwengoLearningObject = response.data;
     const mapped = mapDwengoToLocal(dwengoObj);
@@ -221,6 +223,13 @@ export async function fetchDwengoObjectByHruidLangVersion(
       params,
     });
 
+    if (typeof response.data !== "object") {
+      // dwengo API returns error string if object not found
+      throw new NotFoundError(
+        `Dwengo learning object with hruid=${hruid}, language=${language}, version=${version} not found.`,
+      );
+    }
+
     checkAll(
       response.data,
       `Dwengo learning object with hruid=${hruid}, language=${language}, version=${version} not found.`,
@@ -256,11 +265,6 @@ export async function searchDwengoObjects(
     const response = await dwengoAPI.get("/api/learningObject/search", {
       params,
     });
-    checkAll(
-      response.data,
-      `The search term: ${searchTerm} didn't correspond with any learning object.`,
-      isTeacher,
-    );
 
     const dwengoData: DwengoLearningObject[] = response.data;
     return dwengoData.map(mapDwengoToLocal);

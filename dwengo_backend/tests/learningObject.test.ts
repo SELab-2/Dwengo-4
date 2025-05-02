@@ -9,11 +9,7 @@ import {
 import { LearningObject, Student, Teacher, User } from "@prisma/client";
 import { LocalLearningObjectData } from "../services/localLearningObjectService";
 import { LearningPathDto } from "../services/learningPathService";
-
-// TODO: once request validation with zod has been added, add tests for that as well
-// TODO: learning objects and paths definitely need unit tests, where the dwengo API is mocked
-// if we have both integration tests that make use of the actual dwengo API and unit tests that mock the API
-// we can easily detect if a failing test is due to a bug in our code or a change in the dwengo API
+import { LearningObjectDto } from "../services/dwengoLearningObjectService";
 
 // note: since these tests make use of the actual dwengo API, they can be quite slow
 
@@ -43,9 +39,8 @@ describe("learning object tests", async () => {
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
-      expect(body.objects).toBeDefined();
       // response should contain both local and dwengo learning objects
-      expect(body.objects).toEqual(
+      expect(body).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             origin: "dwengo",
@@ -63,7 +58,7 @@ describe("learning object tests", async () => {
         .set("Authorization", `Bearer ${studentUser1.token}`);
 
       expect(status).toBe(401);
-      expect(body.object).toBeUndefined();
+      expect(body.error).toEqual("UnauthorizedError");
     });
   });
 
@@ -75,10 +70,9 @@ describe("learning object tests", async () => {
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
-      expect(body.results).toBeDefined();
 
       // check that all returned objects contain the search term in at least one relevant field
-      const allMatch = body.results.every(
+      const allMatch = body.every(
         (obj: any) =>
           ["title", "description"].some((field) =>
             obj[field]?.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -117,7 +111,7 @@ describe("learning object tests", async () => {
       expect(res1.status).toBe(200);
 
       // should contain the mixed case object
-      expect(res1.body.results).toEqual(
+      expect(res1.body).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             origin: "local",
@@ -133,23 +127,22 @@ describe("learning object tests", async () => {
         .set("Authorization", `Bearer ${studentUser1.token}`);
 
       expect(status).toBe(401);
-      expect(body.object).toBeUndefined();
+      expect(body.error).toEqual("UnauthorizedError");
     });
   });
 
-  describe("[GET] learningObject/teacher/lookup", async () => {
+  describe("[GET] learningObject/teacher/lookup/:hruid/:language/:version", async () => {
     it("should return the local learning object with the given hruid, language and version", async () => {
       const { status, body } = await request(app)
         .get(
-          `/learningObject/teacher/lookup?hruid=${lo.hruid}&language=${lo.language}&version=${lo.version}`,
+          `/learningObject/teacher/lookup/${lo.hruid}/${lo.language}/${lo.version}`,
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
-      expect(body.learningObject).toBeDefined();
-      expect(body.learningObject.hruid).toEqual(lo.hruid);
-      expect(body.learningObject.language).toEqual(lo.language);
-      expect(body.learningObject.version).toEqual(lo.version);
+      expect(body.hruid).toEqual(lo.hruid);
+      expect(body.language).toEqual(lo.language);
+      expect(body.version).toEqual(lo.version);
     });
 
     it("should return the dwengo learning object with the given hruid, language and version", async () => {
@@ -157,25 +150,24 @@ describe("learning object tests", async () => {
       const res1 = await request(app)
         .get("/learningObject/teacher")
         .set("Authorization", `Bearer ${teacherUser1.token}`);
-      const dwengo_lo: LearningObject = res1.body.objects[0]; // get first dwengo learning object
+      const dwengo_lo: LearningObject = res1.body[0]; // get first dwengo learning object
 
       const { status, body } = await request(app)
         .get(
-          `/learningObject/teacher/lookup?hruid=${dwengo_lo.hruid}&language=${dwengo_lo.language}&version=${dwengo_lo.version}`,
+          `/learningObject/teacher/lookup/${dwengo_lo.hruid}/${dwengo_lo.language}/${dwengo_lo.version}`,
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
-      expect(body.learningObject).toBeDefined();
-      expect(body.learningObject.hruid).toEqual(dwengo_lo.hruid);
-      expect(body.learningObject.language).toEqual(dwengo_lo.language);
-      expect(body.learningObject.version).toEqual(dwengo_lo.version);
+      expect(body.hruid).toEqual(dwengo_lo.hruid);
+      expect(body.language).toEqual(dwengo_lo.language);
+      expect(body.version).toEqual(dwengo_lo.version);
     });
 
     it("shouldn't let a student access this route", async () => {
       const { status, body } = await request(app)
         .get(
-          "/learningObject/teacher/lookup?hruid=test-v1&language=nl&version=3",
+          `/learningObject/teacher/lookup/${lo.hruid}/${lo.language}/${lo.version}`,
         )
         .set("Authorization", `Bearer ${studentUser1.token}`);
 
@@ -194,28 +186,25 @@ describe("learning object tests", async () => {
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
-      expect(body.learningObject).toBeDefined();
-      expect(body.learningObject.id).toEqual(lo.id);
+      expect(body.id).toEqual(lo.id);
     });
 
     it("shouldn't let an unauthorized user use this route", async () => {
-      const { status, body } = await request(app).get(
-        `/learningObject/${lo.id}`,
-      ); // don't add auth header
+      const { status, body } = await request(app).get(`/learningObject/${lo.id}`); // don't add auth header
 
       expect(status).toBe(401);
       expect(body.learningObject).toBeUndefined();
     });
   });
 
-  describe("[GET] /learningObject/learningPath/:pathId", async () => {
+  describe("[GET] /learningObject/learningPath/:learningPathId", async () => {
     let lp: LearningPathDto;
     beforeEach(async () => {
       // get a dwengo learning path
       const res = await request(app)
         .get("/learningPath?all=")
         .set("Authorization", `Bearer ${teacherUser1.token}`);
-      lp = res.body.results[0]; // get first dwengo learning path
+      lp = res.body[0]; // get first dwengo learning path
     });
     it("should return all learning objects that belong to the given learning path", async () => {
       const { status, body } = await request(app)
@@ -223,9 +212,8 @@ describe("learning object tests", async () => {
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
-      expect(body.objects).toBeDefined();
       // check that all returned objects belong to the given learning path
-      expect(body.objects.map((obj: any) => obj.hruid)).toEqual(
+      expect(body.map((obj: LearningObjectDto) => obj.hruid)).toEqual(
         expect.arrayContaining(
           lp.nodes.map((node: any) => node.learningobject_hruid),
         ),
@@ -238,7 +226,7 @@ describe("learning object tests", async () => {
       );
 
       expect(status).toBe(401);
-      expect(body.objects).toBeUndefined();
+      expect(body.error).toEqual("UnauthorizedError");
     });
   });
 });

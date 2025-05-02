@@ -23,7 +23,7 @@ export const getAllLearningObjectsController = asyncHandler(
     const isTeacher: boolean = userIsTeacherOrAdmin(req);
     const objects: LearningObjectDto[] = await getAllLearningObjects(isTeacher);
     res.json(objects);
-  }
+  },
 );
 
 // Haal één leerobject op (via :id)
@@ -33,10 +33,10 @@ export const getLearningObjectController = asyncHandler(
     const isTeacher: boolean = userIsTeacherOrAdmin(req);
     const lo: LearningObjectDto = await getLearningObjectById(
       learningObjectId,
-      isTeacher
+      isTeacher,
     );
     res.json(lo);
-  }
+  },
 );
 
 // Zoeken naar leerobjecten (Dwengo + lokaal)
@@ -46,10 +46,10 @@ export const searchLearningObjectsController = asyncHandler(
     const isTeacher: boolean = userIsTeacherOrAdmin(req);
     const results: LearningObjectDto[] = await searchLearningObjects(
       isTeacher,
-      searchTerm
+      searchTerm,
     );
     res.json(results);
-  }
+  },
 );
 
 // Haal alle leerobjecten op die horen bij een specifiek leerpad (op basis van pathId)
@@ -59,16 +59,16 @@ export const getLearningObjectsForPathController = asyncHandler(
     const isTeacher: boolean = userIsTeacherOrAdmin(req);
     const objects: LearningObjectDto[] = await getLearningObjectsForPath(
       learningPathId,
-      isTeacher
+      isTeacher,
     );
     res.json(objects);
-  }
+  },
 );
 
 // [NIEUW] Haal één leerobject op basis van hruid + language + version
 export const getLearningObjectByHruidLangVersionController = async (
   req: AuthenticatedRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const { hruid, language, version } = req.params;
   if (!hruid || !language || !version) {
@@ -86,7 +86,7 @@ export const getLearningObjectByHruidLangVersionController = async (
     hruid.toString(),
     language.toString(),
     verNum,
-    isTeacher
+    isTeacher,
   );
 
   res.json(lo);
