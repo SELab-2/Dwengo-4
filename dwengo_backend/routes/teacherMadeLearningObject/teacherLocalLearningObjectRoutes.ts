@@ -6,7 +6,7 @@ import {
   updateLocalLearningObject,
   deleteLocalLearningObject,
 } from "../../controllers/teacher/teacherLocalLearningObjectController";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router = express.Router();
 

@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import {
-  searchLearningPaths,
-  getLearningPathByIdOrHruid,
-  LearningPathDto,
-} from "../../services/learningPathService";
+  searchAllLearningPaths,
+  getCombinedLearningPathByIdOrHruid,
+} from "../../services/combinedLearningPathService";
+import { LearningPathDto } from "../../services/learningPathService";
+import asyncHandler from "express-async-handler";
 
 interface LearningPathFilters {
   language?: string;
@@ -14,19 +15,11 @@ interface LearningPathFilters {
 }
 
 /**
- * Zoekt leerpaden via Dwengo-API.
- * Mogelijke queryparams:
- *  ?language=nl
- *  ?hruid=...
- *  ?title=...
- *  ?description=...
- *  ?all=  (leeg om alles op te halen)
+ * GET /learningPath?language=...&hruid=...&title=...&description=...&all=
+ * Zoekt in Dwengo + lokale leerpaden
  */
-export const searchLearningPathsController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  try {
+export const searchLearningPathsController = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
     const filters: LearningPathFilters = {
       language: req.query.language?.toString(),
       hruid: req.query.hruid?.toString(),
@@ -35,35 +28,21 @@ export const searchLearningPathsController = async (
       all: req.query.all?.toString(),
     };
 
-    const results: LearningPathDto[] = await searchLearningPaths(filters);
-    res.json({ results });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Fout bij zoeken naar leerpaden" });
-  }
-};
+    const results: LearningPathDto[] = await searchAllLearningPaths(filters);
+    res.json(results);
+  },
+);
 
 /**
- * Haalt 1 leerpad op (op basis van _id of hruid).
- * We gebruiken de service getLearningPathByIdOrHruid voor 'idOrHruid'
+ * GET /learningPath/:pathId
+ * Haalt 1 leerpad op (Dwengo of lokaal).
  */
-export const getLearningPathByIdController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  try {
+export const getLearningPathByIdController = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
     const { pathId } = req.params; // pathId is een string
-    const path: LearningPathDto | null =
-      await getLearningPathByIdOrHruid(pathId);
-
-    if (!path) {
-      res.status(404).json({ error: "Leerpad niet gevonden" });
-      return;
-    }
+    const path: LearningPathDto =
+      await getCombinedLearningPathByIdOrHruid(pathId);
 
     res.json(path);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Fout bij ophalen leerpad" });
-  }
-};
+  },
+);

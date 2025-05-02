@@ -1,6 +1,6 @@
 import express, { Router } from "express";
 import { AssignmentTeacherController } from "../../controllers/teacher/teacherAssignmentController";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router: Router = express.Router();
 const controller = new AssignmentTeacherController();
@@ -27,12 +27,44 @@ router.get("/", controller.getAllAssignments);
 router.post("/", controller.createAssignmentForClass);
 
 /**
+ * @route POST /assignment/teacher/team
+ * @description Create an assignment with teams for a class
+ * @body pathRef: string
+ * @body pathLanguage: string
+ * @body isExternal: boolean
+ * @body deadline: string
+ * @body title: string
+ * @body description: string
+ * @body teamSize: number
+ * @access Teacher
+ */
+router.post("/team", controller.createAssignmentWithTeams);
+
+/**
+ * @route PATCH /assignment/teacher/team/:assignmentId
+ * @description Update a team assignment
+ * @param assignmentId: number
+ * @body teamSize: number
+ * @access Teacher
+ */
+router.patch("/team/:assignmentId", controller.updateAssignmentWithTeams);
+
+/**
  * @route GET /assignment/teacher/class/:classId
  * @description Get all assignments for a class
  * @param classId: number
  * @access Teacher
  */
 router.get("/class/:classId", controller.getAssignmentsByClass);
+
+/**
+ * @route PATCH /assignment/teacher/team/:assignmentId
+ * @description Update a team assignment
+ * @param assignmentId: number
+ * @body teamSize: number
+ * @access Teacher
+ */
+router.patch("/team/:assignmentId", controller.updateAssignmentWithTeams);
 
 /**
  * @route PATCH /assignment/teacher/:assignmentId

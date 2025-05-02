@@ -1,17 +1,18 @@
 import { Router } from "express";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
 import {
   getNodesForPath,
   createNodeForPath,
   updateNodeForPath,
   deleteNodeFromPath,
 } from "../../controllers/teacher/teacherLocalLearningPathNodesController";
-import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
+import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
-const router = Router();
+// Enable merging of route parameters from parent routes
+const router = Router({ mergeParams: true });
 
 /**
- * @route GET /learningPath/:pathId/node
+ * @route GET /learningPath/:learningPathId/node
  * @description Haal alle nodes op voor dat leerpad
  * @param pathId: string
  * @access User
@@ -19,7 +20,7 @@ const router = Router();
 router.get("/", protectAnyUser, getNodesForPath);
 
 /**
- * @route POST /learningPath/:pathId/node
+ * @route POST /learningPath/:learningPathId/node
  * @description Maak een nieuwe node in dit leerpad
  * @param pathId: string
  * @body NodeMetadata
@@ -28,7 +29,7 @@ router.get("/", protectAnyUser, getNodesForPath);
 router.post("/", protectTeacher, createNodeForPath);
 
 /**
- * @route PATCH /learningPath/:pathId/node/:nodeId
+ * @route PATCH /learningPath/:learningPathId/node/:nodeId
  * @description Update de node
  * @param pathId: string
  * @param nodeId: string
@@ -38,7 +39,7 @@ router.post("/", protectTeacher, createNodeForPath);
 router.patch("/:nodeId", protectTeacher, updateNodeForPath);
 
 /**
- * @route DELETE /learningPath/:pathId/node/:nodeId
+ * @route DELETE /learningPath/:learningPathId/node/:nodeId
  * @description Verwijder de node
  * @param pathId: string
  * @param nodeId: string

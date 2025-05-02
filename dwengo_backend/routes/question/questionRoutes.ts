@@ -1,4 +1,3 @@
-
 import express from "express";
 import {
   createQuestionGeneral,
@@ -12,15 +11,15 @@ import {
   getQuestionsAssignment,
   getQuestionMessages,
   deleteQuestion,
-  deleteQuestionMessage
+  deleteQuestionMessage,
 } from "../../controllers/question/questionController";
 
-import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
+import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
 import {
   authorizeQuestion,
   authorizeMessageUpdate,
   authorizeMessageDelete,
-  authorizeQuestionUpdate
+  authorizeQuestionUpdate,
 } from "../../middleware/questionsAuthMiddleware";
 
 const router = express.Router();
@@ -40,7 +39,11 @@ router.post("/:questionId/message", authorizeQuestion, createQuestionMessage);
 // UPDATE question (titel)
 router.patch("/:questionId", authorizeQuestionUpdate, updateQuestion);
 // UPDATE message
-router.patch("/:questionId/message/:questionMessageId", authorizeMessageUpdate, updateQuestionMessage);
+router.patch(
+  "/:questionId/message/:questionMessageId",
+  authorizeMessageUpdate,
+  updateQuestionMessage,
+);
 
 // GET question
 router.get("/:questionId", authorizeQuestion, getQuestion);
@@ -61,6 +64,10 @@ router.get("/assignment/:assignmentId/class/:classId", getQuestionsAssignment);
 router.delete("/:questionId", authorizeQuestion, deleteQuestion);
 
 // DELETE message
-router.delete("/:questionId/message/:questionMessageId", authorizeMessageDelete, deleteQuestionMessage);
+router.delete(
+  "/:questionId/message/:questionMessageId",
+  authorizeMessageDelete,
+  deleteQuestionMessage,
+);
 
 export default router;

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 import {
   createLocalLearningPath,
   getLocalLearningPaths,
@@ -7,6 +7,7 @@ import {
   updateLocalLearningPath,
   deleteLocalLearningPath,
 } from "../../controllers/teacher/teacherLocalLearningPathController";
+import { getAllLearningPaths, getLearningPathById } from "../../controllers/teacher/teacherLearningPathController";
 
 const router = Router();
 
@@ -29,6 +30,24 @@ router.post("/", createLocalLearningPath);
 router.get("/", getLocalLearningPaths);
 
 /**
+ * @route GET /pathByTeacher/all
+ * @description Haal alle leerpaden op (zowel van de teacher als van de API)
+ * @access Teacher
+ */
+router.get("/all", getAllLearningPaths);
+
+/**
+ * @route GET /pathByTeacher/all/:pathId
+ * @description Haal één leerpad op (van teacher of API)
+ * @param pathId: string
+ * @access Teacher
+ */
+router.get("/all/:pathId", getLearningPathById);
+
+
+/**
+ * GET /teacher/learningPaths/:pathId
+ *   -> haal één leerpad op (mits je eigenaar bent)
  * @route GET /pathByTeacher/:pathId
  * @description Haal één leerpad op (mits je eigenaar bent)
  * @param pathId: string

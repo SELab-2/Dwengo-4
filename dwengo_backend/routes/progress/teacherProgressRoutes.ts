@@ -3,7 +3,7 @@ import {
   getTeamProgressTeacher,
   getAssignmentAverageProgress,
 } from "../../controllers/progressController";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router: Router = express.Router();
 
@@ -36,7 +36,7 @@ router.get("/team/:teamid", protectTeacher, getTeamProgressTeacher);
 router.get(
   "/assignment/:assignmentId/average",
   protectTeacher,
-  getAssignmentAverageProgress
+  getAssignmentAverageProgress,
 );
 
 export default router;

@@ -1,5 +1,10 @@
 import { LearningObject } from "@prisma/client";
 import { LearningObjectDto } from "./dwengoLearningObjectService";
+import {
+  handlePrismaQuery,
+  handleQueryWithExistenceCheck,
+} from "../errors/errorFunctions";
+import { AccessDeniedError, UnavailableError } from "../errors/errors";
 
 import prisma from "../config/prisma";
 
@@ -44,10 +49,12 @@ export async function getLocalLearningObjects(
     ? {}
     : { teacherExclusive: false, available: true };
 
-  const localObjects = await prisma.learningObject.findMany({
-    where: whereClause,
-    orderBy: { createdAt: "desc" },
-  });
+  const localObjects: LearningObject[] = await handlePrismaQuery(() =>
+    prisma.learningObject.findMany({
+      where: whereClause,
+      orderBy: { createdAt: "desc" },
+    }),
+  );
 
   return localObjects.map((obj) => mapLocalToDto(obj));
 }
@@ -58,13 +65,24 @@ export async function getLocalLearningObjects(
 export async function getLocalLearningObjectById(
   id: string,
   isTeacher: boolean,
-): Promise<LearningObjectDto | null> {
-  const localObj = await prisma.learningObject.findUnique({ where: { id } });
-  if (!localObj) return null;
+): Promise<LearningObjectDto> {
+  const localObj = await handleQueryWithExistenceCheck(
+    () => prisma.learningObject.findUnique({ where: { id } }),
+    `Local learning object not found.`,
+  );
 
-  if (!isTeacher && (localObj.teacherExclusive || !localObj.available)) {
-    return null;
+  if (!isTeacher && localObj.teacherExclusive) {
+    throw new AccessDeniedError(
+      `Local learning object with hruid=${localObj.hruid}, language=${localObj.language}, version=${localObj.version} is teacher exclusive.`,
+    );
   }
+
+  if (!localObj.available) {
+    throw new UnavailableError(
+      `Local learning object with hruid=${localObj.hruid}, language=${localObj.language}, version=${localObj.version} is temporarily not available.`,
+    );
+  }
+
   return mapLocalToDto(localObj);
 }
 
@@ -87,10 +105,12 @@ export async function searchLocalLearningObjects(
     whereClause.AND = [{ teacherExclusive: false }, { available: true }];
   }
 
-  const localObjects = await prisma.learningObject.findMany({
-    where: whereClause,
-    orderBy: { createdAt: "desc" },
-  });
+  const localObjects = await handlePrismaQuery(() =>
+    prisma.learningObject.findMany({
+      where: whereClause,
+      orderBy: { createdAt: "desc" },
+    }),
+  );
 
   return localObjects.map((obj) => mapLocalToDto(obj));
 }
@@ -101,19 +121,30 @@ export async function getLocalLearningObjectByHruidLangVersion(
   language: string,
   version: number,
   isTeacher: boolean,
-): Promise<LearningObjectDto | null> {
-  const localObj = await prisma.learningObject.findUnique({
-    where: {
-      hruid,
-      language,
-      version,
-    },
-  });
+): Promise<LearningObjectDto> {
+  const localObj = await handleQueryWithExistenceCheck(
+    () =>
+      prisma.learningObject.findUnique({
+        where: {
+          hruid,
+          language,
+          version,
+        },
+      }),
+    `Local learning object with hruid=${hruid}, language=${language}, version=${version} not found.`,
+  );
 
-  if (!localObj) return null;
-
-  if (!isTeacher && (localObj.teacherExclusive || !localObj.available)) {
-    return null;
+  if (!isTeacher && localObj.teacherExclusive) {
+    throw new AccessDeniedError(
+      `Local learning object with hruid=${hruid}, language=${language}, version=${version} is teacher exclusive.`,
+    );
   }
+
+  if (!localObj.available) {
+    throw new UnavailableError(
+      `Local learning object with hruid=${hruid}, language=${language}, version=${version} is temporarily not available.`,
+    );
+  }
+
   return mapLocalToDto(localObj);
 }

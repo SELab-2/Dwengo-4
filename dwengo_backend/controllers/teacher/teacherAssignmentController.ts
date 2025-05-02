@@ -2,13 +2,11 @@ import { Response } from "express";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import teacherAssignmentService from "../../services/teacherServices/teacherAssignmentService";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
+import asyncHandler from "express-async-handler";
 
 export class AssignmentTeacherController {
-  createAssignmentForClass = async (
-    req: AuthenticatedRequest,
-    res: Response,
-  ): Promise<void> => {
-    try {
+  createAssignmentForClass = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
       const teacherId: number = getUserFromAuthRequest(req).id;
       const {
         classId,
@@ -18,6 +16,7 @@ export class AssignmentTeacherController {
         deadline,
         title,
         description,
+        teamSize,
       }: {
         classId: number;
         pathRef: string;
@@ -26,6 +25,7 @@ export class AssignmentTeacherController {
         deadline: string;
         title: string;
         description: string;
+        teamSize: number;
       } = req.body;
 
       const parsedDeadline = new Date(deadline);
@@ -40,32 +40,69 @@ export class AssignmentTeacherController {
           parsedDeadline,
           title,
           description,
+          teamSize,
         );
-      res.status(201).json(assignment);
-    } catch {
-      res.status(500).json({ error: "Failed to create assignment" });
-    }
-  };
+      res
+        .status(201)
+        .json({ message: "Assignment successfully created.", assignment });
+    },
+  );
 
-  getAllAssignments = async (
+  createAssignmentWithTeams = async (
     req: AuthenticatedRequest,
     res: Response,
   ): Promise<void> => {
     try {
       const teacherId: number = getUserFromAuthRequest(req).id;
-      const assignments =
-        await teacherAssignmentService.getAllAssignments(teacherId);
-      res.status(200).json(assignments);
+      const {
+        pathRef,
+        pathLanguage,
+        isExternal,
+        deadline,
+        title,
+        description,
+        classTeams,
+        teamSize,
+      } = req.body;
+
+      const parsedDeadline = new Date(deadline);
+
+      const assignment =
+        await teacherAssignmentService.createAssignmentWithTeams(
+          teacherId,
+          pathRef,
+          pathLanguage,
+          isExternal,
+          parsedDeadline,
+          title,
+          description,
+          classTeams,
+          teamSize,
+        );
+      res.status(201).json(assignment);
     } catch {
-      res.status(500).json({ error: "Failed to retrieve assignments" });
+      res.status(500).json({ error: "Failed to create assignment with teams" });
     }
   };
 
-  getAssignmentsByClass = async (
-    req: AuthenticatedRequest,
-    res: Response,
-  ): Promise<void> => {
-    try {
+  getAllAssignments = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+      const teacherId: number = getUserFromAuthRequest(req).id;
+      const limit: number | undefined = req.query.limit
+        ? parseInt(req.query.limit as string)
+        : undefined;
+
+      const assignments = await teacherAssignmentService.getAllAssignments(
+        teacherId,
+        limit,
+      );
+
+      res.status(200).json(assignments);
+    },
+  );
+
+  getAssignmentsByClass = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
       const classId: number = parseInt(req.params.classId);
       const teacherId: number = getUserFromAuthRequest(req).id;
       const assignments = await teacherAssignmentService.getAssignmentsByClass(
@@ -73,20 +110,14 @@ export class AssignmentTeacherController {
         teacherId,
       );
       res.status(200).json(assignments);
-    } catch {
-      res.status(500).json({ error: "Failed to retrieve assignments" });
-    }
-  };
+    },
+  );
 
-  updateAssignment = async (
-    req: AuthenticatedRequest,
-    res: Response,
-  ): Promise<void> => {
-    try {
+  updateAssignment = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
       const assignmentId: number = parseInt(req.params.assignmentId);
-      const { pathRef, isExternal, title, description } = req.body;
+      const { pathRef, isExternal, title, description, teamSize } = req.body;
       const teacherId: number = getUserFromAuthRequest(req).id;
-
       const updatedAssignment = await teacherAssignmentService.updateAssignment(
         assignmentId,
         pathRef,
@@ -94,24 +125,59 @@ export class AssignmentTeacherController {
         teacherId,
         title,
         description,
+        teamSize,
       );
-      res.json(updatedAssignment);
-    } catch {
-      res.status(500).json({ error: "Failed to update assignment" });
-    }
-  };
+      res.json({
+        message: "Assignment successfully updated.",
+        updatedAssignment,
+      });
+    },
+  );
 
-  deleteAssignment = async (
+  deleteAssignment = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+      const assignmentId: number = parseInt(req.params.assignmentId);
+      const teacherId: number = getUserFromAuthRequest(req).id;
+      await teacherAssignmentService.deleteAssignment(assignmentId, teacherId);
+      res.status(204).end();
+    },
+  );
+
+  updateAssignmentWithTeams = async (
     req: AuthenticatedRequest,
     res: Response,
   ): Promise<void> => {
     try {
       const assignmentId: number = parseInt(req.params.assignmentId);
+      const {
+        pathRef,
+        pathLanguage,
+        isExternal,
+        deadline,
+        title,
+        description,
+        classTeams,
+        teamSize,
+      } = req.body;
       const teacherId: number = getUserFromAuthRequest(req).id;
-      await teacherAssignmentService.deleteAssignment(assignmentId, teacherId);
-      res.status(204).send();
+      const parsedDeadline = new Date(deadline);
+
+      const updatedAssignment =
+        await teacherAssignmentService.updateAssignmentWithTeams(
+          assignmentId,
+          teacherId,
+          pathRef,
+          pathLanguage,
+          isExternal,
+          parsedDeadline,
+          title,
+          description,
+          classTeams,
+          teamSize,
+        );
+      res.json(updatedAssignment);
     } catch {
-      res.status(500).json({ error: "Failed to delete assignment" });
+      res.status(500).json({ error: "Failed to update assignment and teams" });
     }
   };
 }

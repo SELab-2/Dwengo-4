@@ -7,6 +7,7 @@ import {
   ClassTeacher,
   Invite,
   JoinRequestStatus,
+  Student,
   Teacher,
   User,
 } from "@prisma/client";
@@ -14,6 +15,7 @@ import {
   addTeacherToClass,
   createClass,
   createInvite,
+  createStudent,
   createTeacher,
 } from "./helpers/testDataCreation";
 
@@ -96,8 +98,9 @@ describe("invite tests", async (): Promise<void> => {
           otherTeacherEmail: teacherUser2.email,
         });
 
-      expect(body.message).toBe("Klas niet gevonden");
+      expect(body.message).toBe("Class not found.");
       expect(status).toBe(404);
+      expect(body.error).toBe("NotFoundError");
       // verify that no invite was created
       await prisma.invite.findMany().then((invites: Invite[]): void => {
         expect(invites.length).toBe(0);
@@ -114,8 +117,9 @@ describe("invite tests", async (): Promise<void> => {
           otherTeacherEmail: teacherUser2.email,
         });
 
-      expect(body.message).toBe("Leerkracht is geen beheerder van de klas");
+      expect(body.message).toBe("Teacher is not a part of this class.");
       expect(status).toBe(403);
+      expect(body.error).toBe("AccessDeniedError");
       // verify that no invite was created
       await prisma.invite.findMany().then((invites: Invite[]): void => {
         expect(invites.length).toBe(0);
@@ -135,8 +139,9 @@ describe("invite tests", async (): Promise<void> => {
           otherTeacherEmail: teacherUser2.email,
         });
 
-      expect(body.message).toBe("Leerkracht is al lid van de klas");
+      expect(body.message).toBe("Teacher is already a member of this class.");
       expect(status).toBe(400);
+      expect(body.error).toBe("BadRequestError");
       // verify that no invite was created
       await prisma.invite.findMany().then((invites: Invite[]): void => {
         expect(invites.length).toBe(0);
@@ -172,9 +177,10 @@ describe("invite tests", async (): Promise<void> => {
       });
 
       expect(body.message).toBe(
-        "Er bestaat al een pending uitnodiging voor deze leerkracht en klas",
+        "There is already a pending invite for this teacher and class.",
       );
       expect(status).toBe(409);
+      expect(body.error).toBe("ConflictError");
     });
 
     it("should respond with a `400` status code when request body/params are incorrect", async (): Promise<void> => {
@@ -230,6 +236,49 @@ describe("invite tests", async (): Promise<void> => {
       );
 
       // verify no invite was created
+      await prisma.invite.findMany().then((invites: Invite[]): void => {
+        expect(invites.length).toBe(0);
+      });
+    });
+
+    it("should respond with a `404` status code when the teacher does not exist", async (): Promise<void> => {
+      await addTeacherToClass(teacherUser1.id, classroom.id);
+      const { status, body } = await request(app)
+        .post(`/invite/class/${classroom.id}`)
+        .set("Authorization", `Bearer ${teacherUser1.token}`)
+        .send({
+          otherTeacherEmail: "ikbestaniet@gmail.com",
+        });
+
+      expect(body.message).toBe(
+        "Given email doesn't correspond to any existing teachers.",
+      );
+      expect(status).toBe(404);
+      expect(body.error).toBe("NotFoundError");
+      // verify that no invite was created
+      await prisma.invite.findMany().then((invites: Invite[]): void => {
+        expect(invites.length).toBe(0);
+      });
+    });
+
+    it("should respond with a `401` status code when the teacher does not exist", async (): Promise<void> => {
+      await addTeacherToClass(teacherUser1.id, classroom.id);
+
+      const student: User & { student: Student; token: string } =
+        await createStudent("new", "student", "newstudent@gmail.com");
+      const { status, body } = await request(app)
+        .post(`/invite/class/${classroom.id}`)
+        .set("Authorization", `Bearer ${teacherUser1.token}`)
+        .send({
+          otherTeacherEmail: student.email,
+        });
+
+      expect(body.message).toBe(
+        "User is not a teacher. Only teachers can receive invites.",
+      );
+      expect(status).toBe(401);
+      expect(body.error).toBe("UnauthorizedError");
+      // verify that no invite was created
       await prisma.invite.findMany().then((invites: Invite[]): void => {
         expect(invites.length).toBe(0);
       });
@@ -378,7 +427,8 @@ describe("invite tests", async (): Promise<void> => {
           action: "accept",
         });
       expect(status).toBe(400);
-      expect(body.message).toBe("Uitnodiging is niet pending of bestaat niet");
+      expect(body.message).toBe("Invite is not pending or does not exist.");
+      expect(body.error).toBe("BadRequestError");
       // verify that the teacher was not added to the class
       const classTeacher2: ClassTeacher | null =
         await prisma.classTeacher.findFirst({
@@ -408,7 +458,8 @@ describe("invite tests", async (): Promise<void> => {
           action: "accept",
         });
       expect(status).toBe(400);
-      expect(body.message).toBe("Uitnodiging is niet pending of bestaat niet");
+      expect(body.message).toBe("Invite is not pending or does not exist.");
+      expect(body.error).toBe("BadRequestError");
       // verify that the invite wasn't updated
       const checkInvite: Invite | null = await prisma.invite.findFirst({
         where: {
@@ -456,17 +507,14 @@ describe("invite tests", async (): Promise<void> => {
       );
     });
 
-    it("should respond with a `200` status code and the deleted invite", async (): Promise<void> => {
+    it("should respond with a `204` status code", async (): Promise<void> => {
       // test deleting the invite
-      const { status, body } = await request(app)
+      const { status } = await request(app)
         .delete(`/invite/${invite.inviteId}/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
-      expect(status).toBe(200);
-      await expectBodyToContainDeletedInviteAndVerifyInviteDeleted(
-        body,
-        invite,
-      );
+      expect(status).toBe(204);
+      await expectBodyToContainDeletedInviteAndVerifyInviteDeleted(invite);
     });
 
     it("should respond with a `403` status code when the teacher trying to delete the invite is not part of the class", async (): Promise<void> => {
@@ -477,7 +525,8 @@ describe("invite tests", async (): Promise<void> => {
         .set("Authorization", `Bearer ${teacherUser3.token}`);
 
       expect(status).toBe(403);
-      expect(body.message).toBe("Leerkracht is geen beheerder van de klas");
+      expect(body.error).toBe("AccessDeniedError");
+      expect(body.message).toBe("Teacher is not a part of this class.");
       // verify that the invite was not deleted
       const checkInvite: Invite | null = await prisma.invite.findUnique({
         where: {
@@ -491,15 +540,12 @@ describe("invite tests", async (): Promise<void> => {
       const teacherUser3: User & { teacher: Teacher; token: string } =
         await createTeacher("Jane", "Doe", "jane.doe@gmail.com");
       await addTeacherToClass(teacherUser3.id, classroom.id);
-      const { status, body } = await request(app)
+      const { status } = await request(app)
         .delete(`/invite/${invite.inviteId}/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser3.token}`); // teacher3 didn't create the invite, but is part of the class
 
-      expect(status).toBe(200);
-      await expectBodyToContainDeletedInviteAndVerifyInviteDeleted(
-        body,
-        invite,
-      );
+      expect(status).toBe(204);
+      await expectBodyToContainDeletedInviteAndVerifyInviteDeleted(invite);
     });
 
     it("should respond with a `404` status code when the invite does not exist", async (): Promise<void> => {
@@ -515,7 +561,8 @@ describe("invite tests", async (): Promise<void> => {
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(404);
-      expect(body.error).toBe("Resource not found"); // this error message is defined in `errorMiddleware.ts`
+      expect(body.error).toBe("NotFoundError");
+      expect(body.message).toBe("Invite does not exist or is not pending.");
     });
 
     it("should respond with a `400` status code when the params are not correct", async (): Promise<void> => {
@@ -540,6 +587,25 @@ describe("invite tests", async (): Promise<void> => {
           }),
         ]),
       );
+    });
+
+    it("should not delete the invite if a teacher that is not part of the class tries it", async (): Promise<void> => {
+      const teacherUser3: User & { teacher: Teacher; token: string } =
+        await createTeacher("Jane", "Doe", "jane.doe@gmail.com");
+      const { status, body } = await request(app)
+        .delete(`/invite/${invite.inviteId}/class/${classroom.id}`)
+        .set("Authorization", `Bearer ${teacherUser3.token}`); // not part of the class
+
+      expect(status).toBe(403);
+      expect(body.error).toBe("AccessDeniedError");
+      expect(body.message).toBe("Teacher is not a part of this class.");
+      // verify that the invite was not deleted
+      const checkInvite: Invite | null = await prisma.invite.findUnique({
+        where: {
+          inviteId: invite.inviteId,
+        },
+      });
+      expect(checkInvite).toStrictEqual(invite);
     });
   });
 
@@ -581,7 +647,8 @@ describe("invite tests", async (): Promise<void> => {
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(403);
-      expect(body.message).toBe("Leerkracht is geen beheerder van de klas");
+      expect(body.message).toBe("Teacher is not a part of this class.");
+      expect(body.error).toBe("AccessDeniedError");
       expect(body.invites).toBeUndefined();
     });
 
@@ -608,11 +675,8 @@ describe("invite tests", async (): Promise<void> => {
 });
 
 async function expectBodyToContainDeletedInviteAndVerifyInviteDeleted(
-  body: any,
   invite: Invite,
 ) {
-  expect(body.invite).toStrictEqual(invite);
-  expect(body.message).toBe("invite was successfully deleted");
   // verify that the invite was deleted
   const deletedInvite: Invite | null = await prisma.invite.findUnique({
     where: {

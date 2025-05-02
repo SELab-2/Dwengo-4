@@ -2,12 +2,20 @@ import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import prisma from "./helpers/prisma";
 import app from "../index";
-import { Assignment, Class, LearningPath, Teacher, User } from "@prisma/client";
+import {
+  Assignment,
+  Class,
+  LearningPath,
+  Student,
+  Teacher,
+  User,
+} from "@prisma/client";
 import {
   addTeacherToClass,
   createAssignment,
   createClass,
   createLearningPath,
+  createStudent,
   createTeacher,
   stringToDate,
 } from "./helpers/testDataCreation";
@@ -16,6 +24,8 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
   let teacher1: User & { teacher: Teacher; token: string };
   let teacher2: User & { teacher: Teacher; token: string };
   let teacher3: User & { teacher: Teacher; token: string };
+
+  let student: User & { student: Student; token: string };
 
   let class1: Class;
   let class2: Class;
@@ -43,6 +53,8 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
       "Ceulemans",
       "charlie.ceulemans@gmail.com",
     );
+
+    student = await createStudent("Daan", "De Bruyn", "daan@gmail.com");
     // create some learning paths
     lp1 = await createLearningPath(
       "LP1",
@@ -105,13 +117,34 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
           pathLanguage: "nl",
           title: "Learning Path 1",
           description: "description1",
+          teamSize: 2,
         });
       expect(status).toBe(201);
-      expect(body.deadline).toStrictEqual(new Date("2026-10-23").toISOString());
-      expect(body.pathRef).toBe(lp1.id);
+      expect(body.assignment.deadline).toStrictEqual(
+        new Date("2026-10-23").toISOString(),
+      );
+      expect(body.assignment.pathRef).toBe(lp1.id);
     });
 
-    it("should respond with a `500` status code because the teacher is not a member of the class", async (): Promise<void> => {
+    it("should respond with a `401` status code because a student is not allowed to perform this action", async (): Promise<void> => {
+      // class3 has no assignments
+      const { status, body } = await request(app)
+        .post("/assignment/teacher")
+        .set("Authorization", `Bearer ${student.token}`)
+        .send({
+          classId: class3.id,
+          pathRef: lp1.id,
+          deadline: "2026-10-23",
+          pathLanguage: "nl",
+          title: "Learning Path 1",
+          description: "description1",
+        });
+      expect(status).toBe(401);
+      expect(body.error).toBe("UnauthorizedError");
+      expect(body.message).toBe("Not a valid teacher.");
+    });
+
+    it("should respond with a `403` status code because the teacher is not a member of the class", async (): Promise<void> => {
       // class3 has no assignments
       const { status, body } = await request(app)
         .post("/assignment/teacher")
@@ -124,8 +157,90 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
           title: "Learning Path 1",
           description: "description1",
         });
-      expect(status).toBe(500);
-      expect(body.error).toBe("Failed to create assignment");
+      expect(status).toBe(403);
+      expect(body.error).toBe("AccessDeniedError");
+      expect(body.message).toBe("Teacher does not teach this class.");
+    });
+
+    it("should respond with a `400` status code because there is no language given", async (): Promise<void> => {
+      // class3 has no assignments
+      const { status, body } = await request(app)
+        .post("/assignment/teacher")
+        .set("Authorization", `Bearer ${teacher1.token}`)
+        .send({
+          classId: class3.id,
+          pathRef: lp1.id,
+          deadline: "2026-10-23",
+          title: "Learning Path 1",
+          description: "description1",
+          teamSize: 2,
+          isExternal: true,
+        });
+      expect(status).toBe(400);
+      expect(body.error).toBe("BadRequestError");
+      expect(body.message).toBe(
+        "Missing Dwengo leerpad references (hruid/language).",
+      );
+    });
+
+    it("should respond with a `400` status code because there is no pathRef given", async (): Promise<void> => {
+      // class3 has no assignments
+      const { status, body } = await request(app)
+        .post("/assignment/teacher")
+        .set("Authorization", `Bearer ${teacher1.token}`)
+        .send({
+          classId: class3.id,
+          deadline: "2026-10-23",
+          title: "Learning Path 1",
+          description: "description1",
+          pathLanguage: "nl",
+          teamSize: 2,
+          isExternal: true,
+        });
+      expect(status).toBe(400);
+      expect(body.error).toBe("BadRequestError");
+      expect(body.message).toBe(
+        "Missing Dwengo leerpad references (hruid/language).",
+      );
+    });
+
+    it("should respond with a `400` status code because there is no localId given", async (): Promise<void> => {
+      // class3 has no assignments
+      const { status, body } = await request(app)
+        .post("/assignment/teacher")
+        .set("Authorization", `Bearer ${teacher1.token}`)
+        .send({
+          classId: class3.id,
+          deadline: "2026-10-23",
+          title: "Learning Path 1",
+          description: "description1",
+          pathLanguage: "nl",
+          teamSize: 2,
+        });
+      expect(status).toBe(400);
+      expect(body.error).toBe("BadRequestError");
+      expect(body.message).toBe(
+        "Missing localId for local learning path validation.",
+      );
+    });
+
+    it("should respond with a `404` status code because there is no existing localId given", async (): Promise<void> => {
+      // class3 has no assignments
+      const { status, body } = await request(app)
+        .post("/assignment/teacher")
+        .set("Authorization", `Bearer ${teacher1.token}`)
+        .send({
+          classId: class3.id,
+          deadline: "2026-10-23",
+          title: "Learning Path 1",
+          description: "description1",
+          pathLanguage: "nl",
+          pathRef: "nonExistingId",
+          teamSize: 2,
+        });
+      expect(status).toBe(404);
+      expect(body.error).toBe("NotFoundError");
+      expect(body.message).toBe("Learning path not found.");
     });
   });
 
@@ -167,16 +282,17 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get(`/assignment/teacher/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher3.token}`);
-      expect(status).toBe(500);
-      expect(body.error).toBe("Failed to retrieve assignments");
+      expect(status).toBe(403);
+      expect(body.error).toBe("AccessDeniedError");
+      expect(body.message).toBe("Teacher does not teach this class.");
     });
   });
 
   describe("[PATCH] /assignment/teacher/:assignmentId", async (): Promise<void> => {
-    it("should respond with a `200` status code and the updated assignment", async (): Promise<void> => {
+    it("should respond with a `201` status code and the updated assignment", async (): Promise<void> => {
       // First create assignment for class3
       const { status, body } = await request(app)
-        .post("/assignment/teacher")
+        .post(`/assignment/teacher`)
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
@@ -185,10 +301,11 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
           pathLanguage: "nl",
           title: "Learning Path 1",
           description: "description1",
+          teamSize: 2,
         });
 
       expect(status).toBe(201);
-      const assignmentId: number = body.id;
+      const assignmentId: number = body.assignment.id;
 
       const req = await request(app)
         .patch(`/assignment/teacher/${assignmentId}`)
@@ -198,14 +315,34 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
         });
 
       expect(req.status).toBe(200);
-      expect(req.body.pathRef).toBe(lp2.id);
-      expect(req.body.deadline).toStrictEqual(
+      expect(req.body.updatedAssignment.pathRef).toBe(lp2.id);
+      expect(req.body.updatedAssignment.deadline).toStrictEqual(
         new Date("2026-10-23").toISOString(),
       );
-      expect(req.body.updatedAt).not.toStrictEqual(body.updatedAt);
+      expect(req.body.updatedAssignment.updatedAt).not.toStrictEqual(
+        body.updatedAt,
+      );
     });
 
-    it("should respond with a `500` status code because the teacher is not a member of the class", async (): Promise<void> => {
+    it("should respond with a `403` status code because the teacher has no classes", async (): Promise<void> => {
+      const newTeacher = await createTeacher(
+        "David",
+        "De Bruyn",
+        "david@gmail.com",
+      );
+      const { status, body } = await request(app)
+        .patch(`/assignment/teacher/${assignment1.id}`)
+        .set("Authorization", `Bearer ${newTeacher.token}`)
+        .send({
+          learningPathId: lp2.id,
+        });
+
+      expect(status).toBe(403);
+      expect(body.error).toBe("AccessDeniedError");
+      expect(body.message).toBe("This teacher teaches no classes.");
+    });
+
+    it("should respond with a `404` status code because the teacher is not a member of the class", async (): Promise<void> => {
       // First create assignment for class3
       await request(app)
         .post("/assignment/teacher")
@@ -223,8 +360,93 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
           learningPathId: lp2.id,
         });
 
-      expect(status).toBe(500);
-      expect(body.error).toBe("Failed to update assignment");
+      expect(status).toBe(404);
+      expect(body.error).toBe("NotFoundError");
+      expect(body.message).toBe(
+        "No classes of this teacher have this assignment.",
+      );
+    });
+
+    it("should respond with a `400` status code because there is no language given", async (): Promise<void> => {
+      // class3 has no assignments
+      const { status, body } = await request(app)
+        .patch(`/assignment/teacher/${assignment1.id}`)
+        .set("Authorization", `Bearer ${teacher2.token}`)
+        .send({
+          classId: class3.id,
+          pathRef: lp1.id,
+          deadline: "2026-10-23",
+          title: "Learning Path 1",
+          description: "description1",
+          teamSize: 2,
+          isExternal: true,
+        });
+      expect(status).toBe(400);
+      expect(body.error).toBe("BadRequestError");
+      expect(body.message).toBe(
+        "Missing Dwengo leerpad references (hruid/language).",
+      );
+    });
+
+    it("should respond with a `400` status code because there is no pathRef given", async (): Promise<void> => {
+      // class3 has no assignments
+      const { status, body } = await request(app)
+        .patch(`/assignment/teacher/${assignment1.id}`)
+        .set("Authorization", `Bearer ${teacher2.token}`)
+        .send({
+          classId: class3.id,
+          deadline: "2026-10-23",
+          title: "Learning Path 1",
+          description: "description1",
+          pathLanguage: "nl",
+          teamSize: 2,
+          isExternal: true,
+        });
+      console.log(body);
+      expect(status).toBe(400);
+      expect(body.error).toBe("BadRequestError");
+      expect(body.message).toBe(
+        "Missing Dwengo leerpad references (hruid/language).",
+      );
+    });
+
+    it("should respond with a `400` status code because there is no localId given", async (): Promise<void> => {
+      // class3 has no assignments
+      const { status, body } = await request(app)
+        .patch(`/assignment/teacher/${assignment1.id}`)
+        .set("Authorization", `Bearer ${teacher2.token}`)
+        .send({
+          classId: class3.id,
+          deadline: "2026-10-23",
+          title: "Learning Path 1",
+          description: "description1",
+          pathLanguage: "nl",
+          teamSize: 2,
+        });
+      expect(status).toBe(400);
+      expect(body.error).toBe("BadRequestError");
+      expect(body.message).toBe(
+        "Missing localId for local learning path validation.",
+      );
+    });
+
+    it("should respond with a `404` status code because there is no existing localId given", async (): Promise<void> => {
+      // class3 has no assignments
+      const { status, body } = await request(app)
+        .patch(`/assignment/teacher/${assignment1.id}`)
+        .set("Authorization", `Bearer ${teacher2.token}`)
+        .send({
+          classId: class3.id,
+          deadline: "2026-10-23",
+          title: "Learning Path 1",
+          description: "description1",
+          pathLanguage: "nl",
+          pathRef: "nonExistingId",
+          teamSize: 2,
+        });
+      expect(status).toBe(404);
+      expect(body.error).toBe("NotFoundError");
+      expect(body.message).toBe("Learning path not found.");
     });
   });
 
@@ -242,13 +464,34 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
       expect(assignment).toBeNull();
     });
 
-    it("should respond with a `500` status code because the teacher is not a member of the class", async (): Promise<void> => {
+    it("should respond with a `404` status code because the teacher is not a member of the class", async (): Promise<void> => {
       const { status, body } = await request(app)
         .delete(`/assignment/teacher/${assignment1.id}`)
         .set("Authorization", `Bearer ${teacher3.token}`);
 
-      expect(status).toBe(500);
-      expect(body.error).toBe("Failed to delete assignment");
+      expect(status).toBe(404);
+      expect(body.error).toBe("NotFoundError");
+      expect(body.message).toBe(
+        "No classes of this teacher have this assignment.",
+      );
+    });
+
+    it("should respond with a `401` status code because a student is not allowed to perform this action", async (): Promise<void> => {
+      // class3 has no assignments
+      const { status, body } = await request(app)
+        .delete(`/assignment/teacher/${assignment1.id}`)
+        .set("Authorization", `Bearer ${student.token}`)
+        .send({
+          classId: class3.id,
+          pathRef: lp1.id,
+          deadline: "2026-10-23",
+          pathLanguage: "nl",
+          title: "Learning Path 1",
+          description: "description1",
+        });
+      expect(status).toBe(401);
+      expect(body.error).toBe("UnauthorizedError");
+      expect(body.message).toBe("Not a valid teacher.");
     });
   });
 

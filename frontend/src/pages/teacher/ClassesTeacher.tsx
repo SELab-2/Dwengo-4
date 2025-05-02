@@ -4,21 +4,17 @@ import {
   approveJoinRequest,
   createInvite,
   denyJoinRequest,
-  fetchClasses,
   fetchJoinRequests,
   getPendingInvitesForClass,
-} from '../../util/teacher/httpTeacher';
+} from '../../util/teacher/classInvites';
 import PrimaryButton from '../../components/shared/PrimaryButton';
 import CreateClass from '../../components/teacher/classes/CreateClassForm';
 import Modal from '../../components/shared/Modal';
 import SuccessMessage from '../../components/shared/SuccessMessage';
 import { Link } from 'react-router-dom';
-
-interface ClassItem {
-  id: string;
-  name: string;
-  code: string;
-}
+import { ClassItem } from '../../types/type';
+import { useTranslation } from 'react-i18next';
+import { fetchClasses } from '@/util/teacher/class';
 
 interface TeacherInvite {
   inviteId: number;
@@ -42,6 +38,7 @@ interface JoinRequest {
 
 const ClassesPageTeacher: React.FC = () => {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   // Refs voor de modals
   const teacherInvitesModalRef = useRef<{
@@ -72,6 +69,7 @@ const ClassesPageTeacher: React.FC = () => {
     error,
   } = useQuery<ClassItem[]>({
     queryKey: ['classes'],
+
     queryFn: fetchClasses,
   });
 
@@ -184,17 +182,16 @@ const ClassesPageTeacher: React.FC = () => {
       <div className="">
         <CreateClass />
 
-        {isLoading && <p>Loading...</p>}
+        {isLoading && <p>{t('loading.loading')}</p>}
         {isError && (
           <p className="c-r">
-            {(error as any)?.info?.message ||
-              'Er is iets fout gegaan bij het ophalen van de klassen.'}
+            {(error as any)?.info?.message || t('loading.error')}
           </p>
         )}
 
         {!isLoading && !isError && classes && classes.length > 0 ? (
           <div className="px-10 py-10">
-            <h2>Mijn Klassen</h2>
+            <h2>{t('class.my_classes')}</h2>
             <table className="tableSimpleStyling">
               <thead>
                 <tr>
@@ -235,7 +232,7 @@ const ClassesPageTeacher: React.FC = () => {
             </table>
           </div>
         ) : (
-          !isLoading && <p>Geen klassen gevonden.</p>
+          !isLoading && isError && <p>Geen klassen gevonden.</p>
         )}
 
         {/* Modal voor teacher invites */}

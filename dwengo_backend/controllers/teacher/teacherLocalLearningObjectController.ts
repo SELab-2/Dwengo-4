@@ -4,12 +4,12 @@ import LocalLearningObjectService, {
   LocalLearningObjectData,
 } from "../../services/localLearningObjectService";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
+import { LearningObject } from "@prisma/client";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
-import { AccesDeniedError, NotFoundError } from "../../errors/errors";
+import { Property, checkIfTeacherIsCreator } from "./teacherChecks";
 
 /**
  * Maak een nieuw leerobject.
- * POST /learningObjectByTeacher
  */
 export const createLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -23,7 +23,7 @@ export const createLocalLearningObject = asyncHandler(
       data,
     );
     res.status(201).json({
-      message: "Learning object created",
+      message: "Learning object successfully created.",
       learningObject: createdLO,
     });
   },
@@ -36,7 +36,6 @@ export const createLocalLearningObject = asyncHandler(
 export const getLocalLearningObjects = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = getUserFromAuthRequest(req).id;
-
     const objects =
       await LocalLearningObjectService.getAllLearningObjectsByTeacher(
         teacherId,
@@ -52,20 +51,18 @@ export const getLocalLearningObjects = asyncHandler(
 export const getLocalLearningObjectById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = getUserFromAuthRequest(req).id;
-
     const { createdLearningObjectId } = req.params;
-    const found = await LocalLearningObjectService.getLearningObjectById(
-      createdLearningObjectId,
-    );
-
-    if (!found) {
-      throw new NotFoundError("Leerobject niet gevonden");
-    }
+    const found: LearningObject =
+      await LocalLearningObjectService.getLearningObjectById(
+        createdLearningObjectId,
+      );
 
     // Check of deze teacher de eigenaar is
-    if (found.creatorId !== teacherId) {
-      throw new AccesDeniedError("Je bent niet de eigenaar van dit leerobject");
-    }
+    checkIfTeacherIsCreator(
+      teacherId,
+      found.creatorId,
+      Property.LearningObject,
+    );
 
     res.status(200).json({ learningObject: found });
   },
@@ -86,19 +83,19 @@ export const updateLocalLearningObject = asyncHandler(
     const existing = await LocalLearningObjectService.getLearningObjectById(
       createdLearningObjectId,
     );
-    if (!existing) {
-      throw new NotFoundError("Leerobject niet gevonden");
-    }
-    if (existing.creatorId !== teacherId) {
-      throw new AccesDeniedError("Je bent niet de eigenaar van dit leerobject");
-    }
+
+    checkIfTeacherIsCreator(
+      teacherId,
+      existing.creatorId,
+      Property.LearningObject,
+    );
 
     const updated = await LocalLearningObjectService.updateLearningObject(
       createdLearningObjectId,
       data,
     );
-    res.status(200).json({
-      message: "Leerobject bijgewerkt",
+    res.json({
+      message: "Learning object successfully updated.",
       learningObject: updated,
     });
   },
@@ -116,16 +113,15 @@ export const deleteLocalLearningObject = asyncHandler(
     const existing = await LocalLearningObjectService.getLearningObjectById(
       createdLearningObjectId,
     );
-    if (!existing) {
-      throw new NotFoundError("Learning object not found");
-    }
-    if (existing.creatorId !== teacherId) {
-      throw new AccesDeniedError("Je bent niet de eigenaar van dit leerobject");
-    }
 
+    checkIfTeacherIsCreator(
+      teacherId,
+      existing.creatorId,
+      Property.LearningObject,
+    );
     await LocalLearningObjectService.deleteLearningObject(
       createdLearningObjectId,
     );
-    res.status(200).json({ message: "Learning object deleted" });
+    res.status(204).end();
   },
 );

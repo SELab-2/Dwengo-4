@@ -7,8 +7,8 @@ import {
   getLearningObjectByHruidLangVersionController,
   getLearningObjectsForPathController,
 } from "../../controllers/learningObject/learningObjectController";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
-import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
+import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 
 const router = express.Router();
 
@@ -36,7 +36,7 @@ router.get("/teacher/search", protectTeacher, searchLearningObjectsController);
  * @access Teacher
  */
 router.get(
-  "/teacher/lookup",
+  "/teacher/lookup/:hruid/:language/:version",
   protectTeacher,
   getLearningObjectByHruidLangVersionController,
 );
@@ -52,13 +52,13 @@ router.get(
 router.get("/:learningObjectId", protectAnyUser, getLearningObjectController);
 
 /**
- * @route GET /learningObject/learningPath/:pathId
+ * @route GET /learningObject/learningPath/:learningPathId
  * @description Haal alle leerobjecten op die horen bij een specifiek leerpad
  * @param pathId: string
  * @access Teacher/Student
  */
 router.get(
-  "/learningPath/:pathId",
+  "/learningPath/:learningPathId",
   protectAnyUser,
   getLearningObjectsForPathController,
 );

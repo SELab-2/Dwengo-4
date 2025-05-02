@@ -3,9 +3,8 @@ import { Router } from "express";
 import {
   getStudentTeams,
   getTeamByAssignment,
-  getTeamMembers,
 } from "../../controllers/student/studentTeamController";
-import { protectStudent } from "../../middleware/studentAuthMiddleware";
+import { protectStudent } from "../../middleware/authMiddleware/studentAuthMiddleware";
 
 const router = Router();
 router.use(protectStudent);
@@ -32,7 +31,7 @@ router.get("/", getStudentTeams);
 router.get(
   "/assignment/:assignmentId/studentTeam",
   protectStudent,
-  getTeamByAssignment
+  getTeamByAssignment,
 );
 
 export default router;
