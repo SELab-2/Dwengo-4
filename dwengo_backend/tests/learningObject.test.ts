@@ -12,9 +12,9 @@ import { LearningPathDto } from "../services/learningPathService";
 import { LearningObjectDto } from "../services/dwengoLearningObjectService";
 
 // note: since these tests make use of the actual dwengo API, they can be quite slow
-// so set timeout to 10 seconds for all tests in this file (instead of the standard 5 seconds)
+// so set timeout to 15 seconds for all tests in this file (instead of the standard 5 seconds)
 
-describe("learning object tests", { timeout: 10000 }, async () => {
+describe("learning object tests", { timeout: 15000 }, async () => {
   let teacherUser1: User & { teacher: Teacher; token: string };
   let studentUser1: User & { student: Student; token: string };
   let lo: LearningObject;
@@ -163,6 +163,17 @@ describe("learning object tests", { timeout: 10000 }, async () => {
       expect(body.hruid).toEqual(dwengo_lo.hruid);
       expect(body.language).toEqual(dwengo_lo.language);
       expect(body.version).toEqual(dwengo_lo.version);
+    });
+
+    it("should return 404 if the learning object doesn't exist", async () => {
+      const { status, body } = await request(app)
+        .get(
+          `/learningObject/teacher/lookup/invalidhruid/invalidlang/112423904`, // non-existing hruid, language and version
+        )
+        .set("Authorization", `Bearer ${teacherUser1.token}`);
+
+      expect(status).toBe(404);
+      expect(body.error).toEqual("NotFoundError");
     });
 
     it("shouldn't let a student access this route", async () => {
