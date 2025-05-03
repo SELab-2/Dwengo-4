@@ -1,9 +1,10 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchAllAssignments } from '../../util/teacher/httpTeacher';
 import { Link } from 'react-router-dom';
 import PrimaryButton from '../shared/PrimaryButton';
 import { AssignmentItem } from '../../util/student/httpStudent';
+import { useTranslation } from 'react-i18next';
+import { fetchAllAssignments } from '@/util/teacher/assignment';
 
 export default function AssignmentOverviewTeacher() {
   // Query: Haal alle klassen op
@@ -16,15 +17,15 @@ export default function AssignmentOverviewTeacher() {
     queryKey: ['assignments'],
     queryFn: fetchAllAssignments,
   });
+  const { t } = useTranslation();
 
   return (
     <>
       <div className="flex flex-row gap-x-5 h-[12.5rem]  ">
-        {isLoading && <p>Laden ...</p>}
+        {isLoading && <p>{t('loading.loading')}</p>}
         {isError && (
           <p className="c-r">
-            {error?.info?.message ||
-              'Er is iets fout gegaan bij het ophalen van de taken.'}
+            {error?.info?.message || t('assignments.error')}
           </p>
         )}
 
@@ -45,7 +46,7 @@ export default function AssignmentOverviewTeacher() {
                         {assignmentItem.title}
                       </h3>
                       <p className="text-sm text-gray-700 translate-y-1.5">
-                        Deadline: {formattedDate}
+                        {t('deadline', { date: formattedDate })}
                       </p>
                     </div>
                     <div className="h-20 mt-1 text-gray-500 line-clamp-3">
@@ -53,7 +54,7 @@ export default function AssignmentOverviewTeacher() {
                     </div>
                     <div className="flex mt-1 flex-row justify-between items-center text-sm">
                       <Link to={`/teacher/assignment/${assignmentItem.id}`}>
-                        <PrimaryButton>Leerpad bekijken</PrimaryButton>
+                        <PrimaryButton>{t('assignments.view')}</PrimaryButton>
                       </Link>
                       {/*<p>12/50 completed</p> Replace with actual progress*/}
                     </div>
@@ -63,7 +64,7 @@ export default function AssignmentOverviewTeacher() {
             })}
           </>
         ) : (
-          !isLoading && <p>Geen opdrachten gevonden.</p>
+          !isLoading && <p>{t('assignments.not_found')}</p>
         )}
       </div>
     </>

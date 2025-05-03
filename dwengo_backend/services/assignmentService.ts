@@ -1,34 +1,39 @@
+import { handleQueryWithExistenceCheck } from "../errors/errorFunctions";
 import { Assignment } from "@prisma/client";
 import prisma from "../config/prisma";
 
-
-
 export default class AssignmentService {
-  static async getAssignmentById(assignmentId: number, includeClass: boolean, includeTeams: boolean): Promise<Assignment | null> {
-    return prisma.assignment.findUnique({
-      where: { id: assignmentId },
-      include: {
-        classAssignments: {
+  static async getAssignmentById(
+    assignmentId: number,
+    includeClass: boolean,
+    includeTeams: boolean,
+  ): Promise<Assignment> {
+    return await handleQueryWithExistenceCheck(
+      () =>
+        prisma.assignment.findUnique({
+          where: { id: assignmentId },
           include: {
-            class: includeClass
-          }
-        },
-        teamAssignments: {
-          include: {
-            team: {
+            classAssignments: {
               include: {
-                students: {
+                class: includeClass,
+              },
+            },
+            teamAssignments: {
+              include: {
+                team: {
                   include: {
-                    user: includeTeams
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-
-    });
+                    students: {
+                      include: {
+                        user: includeTeams,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }),
+      `Assignment not found.`,
+    );
   }
 }
-

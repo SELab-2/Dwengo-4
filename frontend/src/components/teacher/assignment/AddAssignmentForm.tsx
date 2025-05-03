@@ -2,11 +2,10 @@ import React, { use, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './AddAssignmentForm.module.css';
 import TeamCreationModal from './TeamCreationModal';
-import {
-  fetchLearningPaths,
-  postAssignment,
-  updateAssignment,
-} from '../../../util/teacher/httpTeacher';
+import CustomDropdownMultiselect from './CustomDropdownMultiselect';
+import FormFields from './FormFields';
+import AssignmentTypeSelection from './AssignmentTypeSelection';
+import TeamsDisplay from './TeamsDisplay';
 import { useQuery } from '@tanstack/react-query';
 import {
   AssignmentPayload,
@@ -15,77 +14,70 @@ import {
   Team,
   StudentItem,
 } from '../../../types/type';
+import { fetchLearningPaths } from '@/util/teacher/learningPath';
+import { postAssignment, updateAssignment } from '@/util/teacher/assignment';
 
 /**
- * Custom multiselect dropdown component for selecting multiple classes
- * @param options - Array of available classes to select from
- * @param selectedOptions - Array of currently selected classes
- * @param onChange - Callback function when selection changes
+ * Builds assignment payload from form data
  */
-const CustomDropdownMultiselect = ({
-  options,
-  selectedOptions,
-  onChange,
+const buildAssignmentPayload = ({
+  title,
+  description,
+  date,
+  selectedLearningPath,
+  teams,
+  assignmentType,
+  teamSize,
+  selectedClasses,
+  individualStudents,
+  assignmentId,
 }: {
-  options: ClassItem[];
-  selectedOptions: ClassItem[];
-  onChange: (selected: ClassItem[]) => void;
+  title: string;
+  description: string;
+  date: string;
+  selectedLearningPath?: LearningPath;
+  teams: Record<string, Team[]>;
+  assignmentType: string;
+  teamSize: number;
+  selectedClasses: ClassItem[];
+  individualStudents: Record<string, StudentItem[]>;
+  assignmentId?: string;
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  // Convert teams object keys from string to number
+  const teamsWithNumberKeys: Record<number, Team[]> = {};
 
-  const handleOptionToggle = (option: ClassItem) => {
-    const isSelected = selectedOptions.some((item) => item.id === option.id);
-    const updatedSelection = isSelected
-      ? selectedOptions.filter((item) => item.id !== option.id)
-      : [...selectedOptions, option];
-    onChange(updatedSelection);
+  if (assignmentType === 'group') {
+    Object.entries(teams).forEach(([key, team]) => {
+      teamsWithNumberKeys[Number(key)] = team.map((team) => ({
+        ...team,
+        teamName: team.id,
+        studentIds: team.students.map((member) => member.id as unknown as number),
+      }));
+    });
+  } else {
+    selectedClasses.forEach((classItem) => {
+      const selectedStudents = individualStudents[classItem.id] || [];
+      teamsWithNumberKeys[Number(classItem.id)] = selectedStudents.map((student) => ({
+        id: `individual-${student.id}`,
+        teamName: `individual-${student.id}`,
+        studentIds: [student.id as unknown as number],
+        students: [student],
+      }));
+    });
+  }
+
+  const payload = {
+    title,
+    description,
+    pathLanguage: 'nl',
+    isExternal: selectedLearningPath?.isExternal || false,
+    deadline: date,
+    pathRef: selectedLearningPath?.id || '',
+    classTeams: teamsWithNumberKeys,
+    teamSize: assignmentType === 'individual' ? 1 : teamSize,
   };
 
-  return (
-    <div className={styles.customDropdown}>
-      <div className={styles.dropdownToggle} onClick={() => setIsOpen(!isOpen)}>
-        {selectedOptions.length === 0 ? (
-          <span className={styles.placeholder}>Select classes</span>
-        ) : (
-          <div className={styles.selectedChips}>
-            {selectedOptions.map((option) => (
-              <span key={option.id} className={styles.chip}>
-                {option.name}
-                <span
-                  className={styles.chipRemove}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleOptionToggle(option);
-                  }}
-                >
-                  ×
-                </span>
-              </span>
-            ))}
-          </div>
-        )}
-        <span className={styles.arrow}>▼</span>
-      </div>
-      {isOpen && (
-        <div className={styles.dropdownMenu}>
-          {options.map((option) => (
-            <div key={option.id} className={styles.dropdownOption}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={selectedOptions.some(
-                    (item) => item.id === option.id,
-                  )}
-                  onChange={() => handleOptionToggle(option)}
-                />
-                {option.name}
-              </label>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  return assignmentId ? { ...payload, id: Number(assignmentId) } : payload;
 };
 
 /**
@@ -172,11 +164,15 @@ const AddAssignmentForm = ({
       }
       setTeams(assignmentData.classTeams!);
 
-      // Initialize individual students from existing teams
+      // Only set selected students from existing teams for individual assignments
       if (assignmentData.teamSize === 1) {
         const studentsPerClass: Record<string, StudentItem[]> = {};
         Object.entries(assignmentData.classTeams || {}).forEach(([classId, teams]) => {
-          studentsPerClass[classId] = teams.flatMap(team => team.students);
+          // Only include students that were actually in teams
+          const selectedStudents = teams.flatMap(team => team.students);
+          if (selectedStudents.length > 0) {
+            studentsPerClass[classId] = selectedStudents;
+          }
         });
         setIndividualStudents(studentsPerClass);
       }
@@ -202,14 +198,14 @@ const AddAssignmentForm = ({
 
   // Add effect to initialize all students when switching to individual
   useEffect(() => {
-    if (assignmentType === 'individual') {
+    if (assignmentType === 'individual' && !isEditing) {
       const allStudents: Record<string, StudentItem[]> = {};
       selectedClasses.forEach(classItem => {
-        allStudents[classItem.id] = classItem.students;
+        allStudents[classItem.id] = [];  // Initialize empty array instead of all students
       });
       setIndividualStudents(allStudents);
     }
-  }, [assignmentType, selectedClasses]);
+  }, [assignmentType, selectedClasses, isEditing]);
 
   const handleTeamClicks = () => {
     setIsTeamOpen(true);
@@ -284,7 +280,7 @@ const AddAssignmentForm = ({
    * Processes team data and makes appropriate API calls
    * @param e - Form submission event
    */
-  const handleSubmission = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmission = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateForm()) {
       return;
@@ -293,94 +289,30 @@ const AddAssignmentForm = ({
     setIsSubmitting(true);
     setSubmitError(null);
 
-    // Convert teams object keys from string to number
-    const teamsWithNumberKeys: Record<number, Team[]> = {};
-
-    // Handle both group and individual assignments
-    if (assignmentType === 'group') {
-      Object.entries(teams).forEach(([key, team]) => {
-        teamsWithNumberKeys[Number(key)] = team.map((team) => ({
-          ...team,
-          teamName: team.id,
-          studentIds: team.students.map((member) => member.id as unknown as number),
-        }));
-      });
-    } else {
-      // For individual assignments
-      selectedClasses.forEach((classItem) => {
-        const selectedStudents = individualStudents[classItem.id] || [];
-        teamsWithNumberKeys[Number(classItem.id)] = selectedStudents.map((student) => ({
-          id: `individual-${student.id}`,
-          teamName: `individual-${student.id}`,
-          studentIds: [student.id as unknown as number],
-          students: [student],
-        }));
-      });
-    }
-
-    const payload = {
+    const payload = buildAssignmentPayload({
       title,
       description,
-      pathLanguage: 'nl',
-      isExternal: selectedLearningPath?.isExternal || false,
-      deadline: date,
-      pathRef: selectedLearningPath?.id || '',
-      classTeams: teamsWithNumberKeys,
-      teamSize: assignmentType === 'individual' ? 1 : teamSize,
-    };
+      date,
+      selectedLearningPath,
+      teams,
+      assignmentType,
+      teamSize,
+      selectedClasses,
+      individualStudents,
+      assignmentId: assignmentData?.id?.toString(),
+    });
 
-    if (isEditing) {
-      updateAssignment({
-        id: assignmentData?.id,
-        title,
-        description,
-        pathLanguage: 'nl',
-        isExternal: selectedLearningPath?.isExternal || false,
-        deadline: date,
-        pathRef: selectedLearningPath?.id || '',
-        classTeams: teamsWithNumberKeys,
-        teamSize: assignmentType === 'individual' ? 1 : teamSize, // Fix team size here
-      })
-        .then(() => {
-          console.log('Assignment updated successfully');
-          navigate(`/teacher/assignments/${assignmentData?.id}`);
-        })
-        .catch((error) => {
-          console.error('Error updating assignment:', error);
-          setSubmitError(error.message || 'Failed to update assignment');
-          setIsSubmitting(false);
-        });
-    } else {
-      postAssignment({
-        title,
-        description,
-        pathLanguage: 'nl',
-        isExternal: selectedLearningPath?.isExternal || false,
-        deadline: date,
-        pathRef: selectedLearningPath?.id || '',
-        classTeams: teamsWithNumberKeys,
-        teamSize: teamSize,
-      })
-        .then(() => {
-          console.log('Assignment created successfully');
-          navigate(`/teacher/classes/${classId}`);
-        })
-        .catch((error) => {
-          console.error('Error creating assignment:', error);
-          setSubmitError(error.message || 'Failed to create assignment');
-          setIsSubmitting(false);
-        });
+    const action = isEditing ? updateAssignment : postAssignment;
+
+    try {
+      await action(payload);
+      console.log(`Assignment ${isEditing ? 'updated' : 'created'} successfully`);
+      navigate(isEditing ? `/teacher/assignments/${assignmentData?.id}` : `/teacher/classes/${classId}`);
+    } catch (error: any) {
+      console.error(`Error ${isEditing ? 'updating' : 'creating'} assignment:`, error);
+      setSubmitError(error.message || `Failed to ${isEditing ? 'update' : 'create'} assignment`);
+      setIsSubmitting(false);
     }
-  };
-
-  // Add handler for individual student selection
-  const handleIndividualStudentToggle = (classId: string, student: StudentItem) => {
-    setIndividualStudents(prev => ({
-      ...prev,
-      [classId]: prev[classId]?.includes(student)
-        ? prev[classId].filter(s => s.id !== student.id)
-        : [...(prev[classId] || []), student]
-    }));
   };
 
   return (
@@ -391,168 +323,42 @@ const AddAssignmentForm = ({
 
       <div className={styles.form}>
         <form onSubmit={handleSubmission}>
-          <div className={styles.formGroup}>
-            <label htmlFor="class" className={styles.label}>
-              Choose Class:
-            </label>
-            <CustomDropdownMultiselect
-              options={classesData || []}
-              selectedOptions={selectedClasses}
-              onChange={setSelectedClasses}
-            />
-            {formErrors.classes && (
-              <span className={styles.error}>{formErrors.classes}</span>
-            )}
-          </div>
-          <div>
-            <label htmlFor="title">
-              {' '}
-              {isEditing ? 'Edit Title:' : 'Add Title:'}
-            </label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={title}
-              required
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="learningPath">Choose Learning Path:</label>
-            {isLearningPathsLoading ? (
-              <div>Loading learning paths...</div>
-            ) : isLearningPathsError ? (
-              <div>
-                Error loading learning paths: {learningPathsError?.message}
-              </div>
-            ) : (
-              <select
-                required
-                id="learningPath"
-                name="learningPath"
-                onChange={handleLearningPathChange}
-                value={selectedLearningPath?.id || ''}
-              >
-                <option value="">-Select a Path-</option>
-                {learningPaths.map((path) => (
-                  <option key={path.id} value={path.id}>
-                    {path.title}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="description">
-              {isEditing ? 'Edit Description:' : 'Add Description:'}
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              required
-              onChange={(e) => setDescription(e.target.value)}
-              value={description}
-              rows={5}
-              cols={50}
-            ></textarea>
-          </div>
+          <FormFields
+            title={title}
+            setTitle={setTitle}
+            description={description}
+            setDescription={setDescription}
+            selectedClasses={selectedClasses}
+            setSelectedClasses={setSelectedClasses}
+            classesData={classesData}
+            isEditing={isEditing}
+            formErrors={formErrors}
+            learningPaths={learningPaths}
+            selectedLearningPath={selectedLearningPath}
+            handleLearningPathChange={handleLearningPathChange}
+            isLearningPathsLoading={isLearningPathsLoading}
+            isLearningPathsError={isLearningPathsError}
+            learningPathsError={learningPathsError}
+          />
 
           <div className={styles.middle}>
-            <div className={styles.leftSide}>
-              <div>
-                <label htmlFor="AssignmentPath">Assignment Type:</label>
-                <select
-                  required
-                  id="AssignmentPath"
-                  name="AssignmentPath"
-                  onChange={handleAssignmentTypeChange}
-                  value={assignmentType}
-                >
-                  <option value="">Select a type</option>
-                  <option value="group">Group</option>
-                  <option value="individual">Individual</option>
-                </select>
-              </div>
-              {assignmentType === 'group' && (
-                <div className={styles.inputTeam}>
-                  <h6>Choose Team Size: </h6>
-                  <input
-                    type="number"
-                    id="teamSize"
-                    name="teamSize"
-                    min={1}
-                    value={teamSize}
-                    onChange={handleTeamSizeChange}
-                  />
-                </div>
-              )}
-            </div>
-            {assignmentType === 'group' && teamSize > 0 && (
-              <div className={styles.rightSide}>
-                <h6>Teams:</h6>
-                <div className={styles.teamsList}>
-                  {Object.entries(teams).map(([classId, classTeams]) => (
-                    <div key={classId}>
-                      <h6>
-                        KLAS:{' '}
-                        {selectedClasses.find((c) => c.id == classId)?.name}
-                      </h6>
-                      {classTeams.map((team) => (
-                        <div key={team.id} className={styles.teamPreview}>
-                          <p>
-                            {team.id}:{' '}
-                            {team.students
-                              .map(
-                                (member) =>
-                                  `${member.firstName} ${member.lastName}`,
-                              )
-                              .join(', ')}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-                <button
-                  className={styles.editButton}
-                  type="button"
-                  onClick={() => handleTeamClicks()}
-                >
-                  Edit Teams
-                </button>
-              </div>
-            )}
-            {assignmentType === 'individual' && (
-              <div className={styles.rightSide}>
-                <h6>Select Students:</h6>
-                <div className={styles.teamsList}>
-                  {selectedClasses.map((classItem) => (
-                    <div key={classItem.id}>
-                      <h6>CLASS: {classItem.name}</h6>
-                      <div className={styles.selectedCount}>
-                        Selected: {individualStudents[classItem.id]?.length || 0} / {classItem.students.length}
-                      </div>
-                      {individualStudents[classItem.id]?.map((student) => (
-                        <div key={student.id} className={styles.teamPreview}>
-                          <p>{`${student.firstName} ${student.lastName}`}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-                <button
-                  className={styles.editButton}
-                  type="button"
-                  onClick={() => handleTeamClicks()}
-                >
-                  Edit Students
-                </button>
-              </div>
+            <AssignmentTypeSelection
+              assignmentType={assignmentType}
+              teamSize={teamSize}
+              onAssignmentTypeChange={handleAssignmentTypeChange}
+              onTeamSizeChange={handleTeamSizeChange}
+            />
+            {assignmentType && (
+              <TeamsDisplay
+                assignmentType={assignmentType}
+                teams={teams}
+                selectedClasses={selectedClasses}
+                individualStudents={individualStudents}
+                onEditClick={() => handleTeamClicks()}
+              />
             )}
           </div>
-          {assignmentType === 'group' && formErrors.teams && (
+          {formErrors.teams && (
             <div className={styles.error}>{formErrors.teams}</div>
           )}
 

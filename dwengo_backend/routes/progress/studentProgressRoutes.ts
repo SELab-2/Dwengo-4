@@ -7,7 +7,7 @@ import {
   getStudentAssignmentProgress,
   getStudentLearningPathProgress,
 } from "../../controllers/progressController";
-import { protectStudent } from "../../middleware/studentAuthMiddleware";
+import { protectStudent } from "../../middleware/authMiddleware/studentAuthMiddleware";
 
 const router: Router = express.Router();
 router.use(protectStudent);

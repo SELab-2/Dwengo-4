@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchClasses } from '../../util/teacher/httpTeacher';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import PrimaryButton from '../shared/PrimaryButton';
 import React from 'react';
 import { ClassItem } from '../../types/type';
+import { useTranslation } from 'react-i18next';
+import { fetchClasses } from '@/util/teacher/class';
 
 export default function ClassesOverviewTeacher() {
   // Query: Haal alle klassen op
@@ -16,18 +17,14 @@ export default function ClassesOverviewTeacher() {
     queryKey: ['classes'],
     queryFn: fetchClasses,
   });
-
-  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <>
       <div className="w-full flex flex-row gap-5 flex-wrap">
-        {isLoading && <p>Laden ...</p>}
+        {isLoading && <p>{t('loading.loading')}</p>}
         {isError && (
-          <p className="c-r">
-            {error?.info?.message ||
-              'Er is iets fout gegaan bij het ophalen van de klassen.'}
-          </p>
+          <p className="c-r">{error?.info?.message || t('classes.error')}</p>
         )}
 
         {!isLoading && !isError && classes && classes.length > 0 ? (
@@ -43,24 +40,22 @@ export default function ClassesOverviewTeacher() {
                   </div>
 
                   <p>
-                    <b>Code:</b> {classItem.code}
+                    <b>{t('code')}:</b> {classItem.code}
                   </p>
 
                   <div className="flex mt-4 flex-row justify-between items-center text-sm">
-                    <PrimaryButton
-                      onClick={() =>
-                        navigate(`/teacher/classes/${classItem.id}`)
-                      }
-                    >
-                      <span className="">Klas bekijken</span>
-                    </PrimaryButton>
+                    <Link to={`/teacher/classes/${classItem.id}`}>
+                      <PrimaryButton>
+                        <span className="">{t('classes.view')}</span>
+                      </PrimaryButton>
+                    </Link>
                   </div>
                 </div>
               </div>
             ))}
           </>
         ) : (
-          !isLoading && <p>Geen klassen gevonden.</p>
+          !isLoading && <p>{t('classes.not_found')}</p>
         )}
       </div>
     </>

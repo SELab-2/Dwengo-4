@@ -79,7 +79,10 @@ describe("Submission tests", (): void => {
         .set("Authorization", `Bearer ${student.token}`);
 
       expect(status).toBe(403);
-      expect(body.message).toBe("Student is not in a team for this assignment");
+      expect(body.error).toBe("AccessDeniedError");
+      expect(body.message).toBe(
+        "Student is not part of a team for this assignment.",
+      );
     });
 
     it("Should respond with a `201` status code and the created submission", async (): Promise<void> => {
@@ -89,13 +92,13 @@ describe("Submission tests", (): void => {
         )
         .set("Authorization", `Bearer ${student.token}`);
 
-      expectSuccessfulSubmissionCreation(status, body);
+      expectSuccessfulSubmissionCreation(status, body.submission);
 
       // Double check that the database now contains the submission
       const newSubmission: Submission | null =
         await prisma.submission.findUnique({
           where: {
-            submissionId: body.submissionId,
+            submissionId: body.submission.submissionId,
           },
         });
       expect(newSubmission).toBeDefined();
@@ -109,17 +112,6 @@ describe("Submission tests", (): void => {
         .set("Authorization", `Bearer ${student.token}`);
 
       expectSuccessfulSubmissionRetrieval(status, body);
-    });
-  });
-
-  describe("[GET] /submission/student/:studentId", (): void => {
-    it("Should respond with a `401` status code because a teacher is unauthorized", async (): Promise<void> => {
-      const { status, body } = await request(app)
-        .get(`/submission/student/${studentId}`)
-        .set("Authorization", `Bearer ${teacher.token}`);
-
-      expect(status).toBe(401);
-      expect(body.error).toBe("Student niet gevonden.");
     });
   });
 
@@ -142,7 +134,8 @@ describe("Submission tests", (): void => {
         .set("Authorization", `Bearer ${student.token}`);
 
       expect(status).toBe(401);
-      expect(body.error).toBe("Leerkracht niet gevonden.");
+      expect(body.error).toBe("UnauthorizedError");
+      expect(body.message).toBe("Not a valid teacher.");
     });
   });
 

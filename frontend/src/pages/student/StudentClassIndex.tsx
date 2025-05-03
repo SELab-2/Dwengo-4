@@ -2,12 +2,14 @@ import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AssignmentsForClassOverview from '../../components/student/AssignmentClassOverview';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchClass, fetchLeaveClass } from '../../util/student/httpStudent';
 import { ClassItem } from '../../types/type';
+import { useTranslation } from 'react-i18next';
+import { fetchClass, fetchLeaveClass } from '@/util/student/class';
 
 const StudentClassIndex: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const { classId } = useParams<{ classId: string }>();
 
@@ -22,19 +24,14 @@ const StudentClassIndex: React.FC = () => {
   });
 
   const handleLeaveClass = async () => {
-    if (
-      window.confirm(
-        'Weet je zeker dat je deze klas wilt verlaten? Om opnieuw lid te worden heb je een uitnodigingscode nodig.',
-      )
-    ) {
+    if (window.confirm(t('classes.leave_class.confirmation'))) {
       try {
         const response = await fetchLeaveClass({ classId: classId });
 
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(
-            errorData.message ||
-              'Er is iets misgegaan bij het verlaten van de klas.',
+            errorData.message || t('classes.leave_classes.error'),
           );
         }
 
@@ -51,11 +48,10 @@ const StudentClassIndex: React.FC = () => {
       <div className="px-10">
         <div className="flex flex-row justify-between items-end pr-10">
           <div className="text-6xl pt-12 font-bold">
-            {isLoading && <p>Laden ...</p>}
+            {isLoading && <p>{t('loading.loading')}</p>}
             {isError && (
               <p className="c-r">
-                {error?.info?.message ||
-                  'Er is iets fout gegaan bij het ophalen van de klas.'}
+                {error?.info?.message || t('classes.error')}
               </p>
             )}
             {!isLoading && !isError && classItem && classItem.name}
@@ -64,10 +60,10 @@ const StudentClassIndex: React.FC = () => {
             onClick={handleLeaveClass}
             className="font-bold hover:cursor-pointer hover:underline"
           >
-            Klas verlaten
+            {t('classes.leave_class.label')}
           </button>
         </div>
-        <h2 className="mt-8 text-2xl font-bold">Opdrachten</h2>
+        <h2 className="mt-8 text-2xl font-bold">{t('assignments.label')}</h2>
         <div className="w-full mt-4 ">
           <AssignmentsForClassOverview classId={classId} />
         </div>

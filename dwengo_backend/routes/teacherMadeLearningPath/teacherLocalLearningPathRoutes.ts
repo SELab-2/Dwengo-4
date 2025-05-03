@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 import {
   createLocalLearningPath,
   getLocalLearningPaths,

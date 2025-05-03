@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { fetchAssignments, fetchClass, updateClass } from '../../util/teacher/httpTeacher'; // Adjust the import path as needed
-
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Container from '../../components/shared/Container';
@@ -11,6 +9,8 @@ import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButt
 import { validateRequired, validateForm } from '../../util/shared/validation';
 import NavButton from '../../components/shared/NavButton';
 import { ClassItem } from '../../types/type';
+import { fetchAssignments } from '@/util/teacher/assignment';
+import { fetchClass, updateClass } from '@/util/teacher/class';
 
 interface InputWithChecksRef {
   validateInput: () => boolean;
@@ -286,7 +286,7 @@ const EditClassTeacher: React.FC = () => {
                       <div
                         key={assignment.id}
                         onClick={() =>
-                          navigate(`/teacher/assignments/${assignment.id}`)
+                          navigate(`/teacher/assignment/${assignment.id}`)
                         }
                         className="p-4 border rounded hover:bg-gray-50 cursor-pointer transition-colors"
                       >

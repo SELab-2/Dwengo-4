@@ -1,6 +1,6 @@
+import { NotFoundError } from "../errors/errors";
 import {
   fetchAllDwengoObjects,
-  fetchDwengoObjectById,
   searchDwengoObjects,
   getDwengoObjectsForPath,
   LearningObjectDto,
@@ -44,16 +44,30 @@ export async function searchLearningObjects(
 export async function getLearningObjectById(
   id: string,
   isTeacher: boolean,
-): Promise<LearningObjectDto | null> {
+): Promise<LearningObjectDto> {
+  // the dwengo API doesn't implement this correctly
+  // so comment out code, and just search local objects
+  // if the dwengo API is fixed in the future, this code can be uncommented
+
+  /**
   // Eerst Dwengo checken
-  const fromDwengo = await fetchDwengoObjectById(id, isTeacher);
-  if (fromDwengo) return fromDwengo;
+  // Deze functie zal een NotFoundError gooien als het object niet bestaat
+  // Anders zal het object teruggegeven worden
+  try {
+    return await fetchDwengoObjectById(id, isTeacher);
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      // Dwengo-object niet gevonden, ga verder met lokaal
+      // Deze functie zal ook een error opgooien als het object niet gevonden wordt of als er andere fouten zijn
+      // Dit zal dan door de error middleware opgevangen worden
+      return await getLocalLearningObjectById(id, isTeacher);
+    }
+    // Rethrow de error als het geen NotFoundError is
+    throw error;
+  }
+  */
 
-  // Anders lokaal checken
-  const fromLocal = await getLocalLearningObjectById(id, isTeacher);
-  if (fromLocal) return fromLocal;
-
-  return null;
+  return await getLocalLearningObjectById(id, isTeacher);
 }
 
 /**
@@ -73,24 +87,28 @@ export async function getLearningObjectByHruidLangVersion(
   language: string,
   version: number,
   isTeacher: boolean,
-): Promise<LearningObjectDto | null> {
+): Promise<LearningObjectDto> {
   // 1) Probeer Dwengo
-  const fromDwengo = await fetchDwengoObjectByHruidLangVersion(
-    hruid,
-    language,
-    version,
-    isTeacher,
-  );
-  if (fromDwengo) return fromDwengo;
-
-  // 2) Probeer lokaal
-  const fromLocal = await getLocalLearningObjectByHruidLangVersion(
-    hruid,
-    language,
-    version,
-    isTeacher,
-  );
-  if (fromLocal) return fromLocal;
-
-  return null;
+  try {
+    return await fetchDwengoObjectByHruidLangVersion(
+      hruid,
+      language,
+      version,
+      isTeacher,
+    );
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      // Dwengo-object niet gevonden, ga verder met lokaal
+      // 2) Probeer lokaal
+      return await getLocalLearningObjectByHruidLangVersion(
+        hruid,
+        language,
+        version,
+        isTeacher,
+      );
+    }
+    // Rethrow de error als het geen NotFoundError is
+    // Laat de error middleware dit afhandelen
+    throw error;
+  }
 }

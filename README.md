@@ -1,4 +1,4 @@
-# Dwengo-4
+# Dwengo - groep 4
 
 ## Informatie project
 
@@ -6,25 +6,44 @@
 - [UML](docs/uml.md) + [use-cases](docs/use_cases.md)
 - [Groepsindeling](docs/groepsindeling.md)
 
-## Instructies voor lokale databank/prisma running te krijgen
+## Instructies voor het opzetten van een ontwikkelomgeving
 
-1. installeer docker engine (https://docs.docker.com/engine/install/)
-2. Zorg dat je in de root van het project zit.
-3. Run `sudo docker compose up -d`
-4. Maak een .env file in de root van het project
-5. in je .env file steek het volgende
+1. **Installeer Docker Engine**  
+   Volg de instructies op de officiële Docker
+   Engine-pagina: [Docker Engine Installatie](https://docs.docker.com/engine/install/).
 
-```
-POSTGRES_PASSWORD=passwor
+2. **Start Docker Compose**  
+   Start de benodigde containers met het volgende commando:
+   ```bash
+   sudo docker compose up -d
+   ```
 
-DATABASE_URL="postgresql://selab2:passwor@localhost:2002/selab2?schema=public"
-```
+3. **Maak een `.env`-bestand**  
+   Plaats de .env-bestanden in de root-, frontend- en backend-folders en gebruik [.env.template](.env.template) als
+   basis.
 
-(note: deze link bepaald of je de remote of lokale databank gebruikt, De link voor de remote databank kan je vinden in pinned messages in discord)
+   > **Opmerking:**  
+   > De waarde van `DATABASE_URL` bepaalt of je de lokale of remote database gebruikt. De link voor de remote database
+   is te vinden in de pinned messages op Discord.
 
-6. Run `cp .env dwengo_backend`
-7. Run `cd dwengo_backend`
-8. Run `npx prisma migrate dev`
-9. Run `npx prisma studio`. Dit zal je een link geven waar je prisma studio kunt raadplegen in je browser, Als je de tabellen ziet staan als volgt zit je goed :)
+### Databank lokaal opzetten
 
-![alt text](image.png)
+6. **Navigeer naar de backend-map**  
+   Ga naar de `dwengo_backend`-map:
+   ```bash
+   cd dwengo_backend
+   ```
+
+7. **Voer Prisma-migraties uit**  
+   Migreer de database met het volgende commando:
+   ```bash
+   npx prisma migrate dev
+   ```
+
+**Prisma Studio**  
+Met Prisma Studio kun je de database bekijken en bewerken. Om Prisma Studio te starten, gebruik je het volgende
+commando:
+
+   ```bash
+   npx prisma studio
+   ```

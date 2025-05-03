@@ -4,10 +4,9 @@ import {
   approveJoinRequest,
   createInvite,
   denyJoinRequest,
-  fetchClasses,
   fetchJoinRequests,
   getPendingInvitesForClass,
-} from '../../util/teacher/httpTeacher';
+} from '../../util/teacher/classInvites';
 import PrimaryButton from '../../components/shared/PrimaryButton';
 import CreateClass from '../../components/teacher/classes/CreateClassForm';
 import Modal from '../../components/shared/Modal';
@@ -15,6 +14,7 @@ import SuccessMessage from '../../components/shared/SuccessMessage';
 import { Link } from 'react-router-dom';
 import { ClassItem } from '../../types/type';
 import { useTranslation } from 'react-i18next';
+import { fetchClasses } from '@/util/teacher/class';
 
 interface TeacherInvite {
   inviteId: number;

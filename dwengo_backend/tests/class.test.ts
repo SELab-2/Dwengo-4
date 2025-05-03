@@ -97,7 +97,8 @@ describe("classroom tests", (): void => {
 
       expect(body.classrooms).not.toBeDefined();
       expect(status).toBe(401);
-      expect(body.error).toBe("Leerkracht niet gevonden.");
+      expect(body.error).toBe("UnauthorizedError");
+      expect(body.message).toBe("Not a valid teacher.");
     });
   });
 
@@ -131,7 +132,8 @@ describe("classroom tests", (): void => {
 
       expect(body.classrooms).not.toBeDefined();
       expect(status).toBe(401);
-      expect(body.error).toBe("Student niet gevonden.");
+      expect(body.error).toBe("UnauthorizedError");
+      expect(body.message).toBe("Not a valid student.");
     });
   });
 
@@ -143,7 +145,7 @@ describe("classroom tests", (): void => {
         .send({ name: "6A" });
 
       expect(status).toBe(201);
-      expect(body.message).toBe("Klas aangemaakt");
+      expect(body.message).toBe("Class successfully created.");
       expect(body.classroom).toBeDefined();
 
       // verify that class was created
@@ -166,7 +168,8 @@ describe("classroom tests", (): void => {
         .send({ name: "" });
 
       expect(status).toBe(400);
-      expect(body.message).toBe("Vul een geldige klasnaam in");
+      expect(body.error).toBe("BadRequestError");
+      expect(body.message).toBe("Class name is not valid.");
     });
 
     it("should not allow a student to create a class", async (): Promise<void> => {
@@ -183,12 +186,13 @@ describe("classroom tests", (): void => {
         .send({ name: "6A" });
 
       expect(status).toBe(401);
-      expect(body.error).toBe("Leerkracht niet gevonden.");
+      expect(body.error).toBe("UnauthorizedError");
+      expect(body.message).toBe("Not a valid teacher.");
     });
   });
 
   describe("[DELETE] /class/teacher/:classId", (): void => {
-    it("should respond with a `200` status code and a message when the class is deleted", async (): Promise<void> => {
+    it("should respond with a `204` status code", async (): Promise<void> => {
       // add teacherUser1 to class, so we can test deleting it
       await addTeacherToClass(teacherUser1.id, classroom.id);
 
@@ -234,12 +238,11 @@ describe("classroom tests", (): void => {
         });
 
       // now test deleting the class
-      const { status, body } = await request(app)
+      const { status } = await request(app)
         .delete(`/class/teacher/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
-      expect(status).toBe(200);
-      expect(body.message).toBe(`Klas met id ${classroom.id} verwijderd`);
+      expect(status).toBe(204);
       // verify that class was deleted
       const deletedClass: Class | null = await prisma.class.findFirst({
         where: { id: classroom.id },
@@ -257,15 +260,25 @@ describe("classroom tests", (): void => {
         .set("Authorization", `Bearer ${teacherUser1.token}`); // teacherUser1 is not associated with the class
 
       expect(status).toBe(403);
-      expect(body.message).toBe(
-        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`,
-      );
+      expect(body.error).toBe("AccessDeniedError");
+      expect(body.message).toBe("Teacher is not a part of this class.");
       // verfiy that class not deleted
       await prisma.class
         .findUnique({ where: { id: classroom.id } })
         .then((classroom: Class | null): void => {
           expect(classroom).toBeDefined();
         });
+    });
+
+    it("should respond with a `404` status code when the class doesn't exist", async (): Promise<void> => {
+      // try having a teacher delete a class they are not associated with
+      const { status, body } = await request(app)
+        .delete(`/class/teacher/1235`)
+        .set("Authorization", `Bearer ${teacherUser1.token}`); // teacherUser1 is not associated with the class
+
+      expect(status).toBe(404);
+      expect(body.error).toBe("NotFoundError");
+      expect(body.message).toBe("Class not found.");
     });
   });
 
@@ -279,7 +292,7 @@ describe("classroom tests", (): void => {
 
       expect(status).toBe(200);
       expect(body.joinLink).toStrictEqual(
-        `${APP_URL}/class/teacher/join?joinCode=${classroom.code}`,
+        `${APP_URL}/join-request/student/join?joinCode=${classroom.code}`,
       );
 
       // also test if the join link works
@@ -306,9 +319,8 @@ describe("classroom tests", (): void => {
         .set("Authorization", `Bearer ${teacherUser1.token}`); // teacherUser1 is not associated with the class
 
       expect(status).toBe(403);
-      expect(body.message).toBe(
-        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`,
-      );
+      expect(body.error).toBe("AccessDeniedError");
+      expect(body.message).toBe("Teacher is not a part of this class.");
       expect(body.joinLink).toBeUndefined();
     });
 
@@ -326,7 +338,8 @@ describe("classroom tests", (): void => {
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(404);
-      expect(body.message).toBe(`Class with id ${invalidClassId} not found`);
+      expect(body.error).toBe("NotFoundError");
+      expect(body.message).toBe("Class not found.");
       expect(body.joinLink).toBeUndefined();
     });
   });
@@ -347,7 +360,7 @@ describe("classroom tests", (): void => {
       expect(updatedClass).toBeDefined();
       expect(updatedClass!.code).not.toBe(classroom.code);
       expect(body.joinLink).toStrictEqual(
-        `${APP_URL}/class/teacher/join?joinCode=${updatedClass!.code}`,
+        `${APP_URL}/join-request/student/join?joinCode=${updatedClass!.code}`,
       );
     });
 
@@ -357,9 +370,8 @@ describe("classroom tests", (): void => {
         .set("Authorization", `Bearer ${teacherUser1.token}`); // teacherUser1 is not associated with the class
 
       expect(status).toBe(403);
-      expect(body.message).toBe(
-        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`,
-      );
+      expect(body.error).toBe("AccessDeniedError");
+      expect(body.message).toBe("Teacher is not a part of this class.");
     });
 
     it("should respond with a `404` status code if the class does not exist", async (): Promise<void> => {
@@ -376,7 +388,8 @@ describe("classroom tests", (): void => {
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(404);
-      expect(body.message).toBe(`Class with id ${invalidClassId} not found`);
+      expect(body.error).toBe("NotFoundError");
+      expect(body.message).toBe("Class not found.");
     });
   });
 
@@ -418,10 +431,19 @@ describe("classroom tests", (): void => {
         .set("Authorization", `Bearer ${teacherUser1.token}`); // teacherUser1 is not associated with the class
 
       expect(status).toBe(403);
-      expect(body.message).toBe(
-        `Acces denied: Teacher ${teacherUser1.id} is not part of class ${classroom.id}`,
-      );
+      expect(body.error).toBe("AccessDeniedError");
+      expect(body.message).toBe("Teacher is not a part of this class.");
       expect(body.students).toBeUndefined();
+    });
+
+    it("should respond with a `404` status code when the class does not exist", async (): Promise<void> => {
+      const { status, body } = await request(app)
+        .get(`/class/teacher/17839/student`)
+        .set("Authorization", `Bearer ${teacherUser1.token}`);
+
+      expect(status).toBe(404);
+      expect(body.error).toBe("NotFoundError");
+      expect(body.message).toBe("Class not found.");
     });
   });
 
@@ -515,6 +537,62 @@ describe("classroom tests", (): void => {
 
       expect(status).toBe(403);
       expect(body.message).toBe("Student is not a part of the given class.");
+    });
+
+    // Deze test moet later nog toegevoegd worden
+    // it("should respond with a `404` status code when the class does not exist", async (): Promise<void> => {
+    //   const { status, body } = await request(app)
+    //     .get(`/class/student/78676`)
+    //     .set("Authorization", `Bearer ${student2.token}`);
+
+    //   expect(status).toBe(404);
+    //   expect(body.error).toBe("NotFoundError");
+    //   expect(body.message).toBe("Class not found.");
+    // });
+  });
+
+  describe("[GET] /class/teacher/student", async (): Promise<void> => {
+    it("should respond with a `200` status code and a list of classes", async (): Promise<void> => {
+      // add teacherUser1 to some classes
+      await addTeacherToClass(teacherUser1.id, classroom.id);
+
+      // add a student to the classes
+      await addStudentToClass(student1.id, classroom.id);
+
+      const { status, body } = await request(app)
+        .get("/class/teacher/student")
+        .set("Authorization", `Bearer ${teacherUser1.token}`);
+
+      expect(status).toBe(200);
+      expect(body.classrooms).toBeDefined();
+      expect(body.classrooms.length).toBe(1);
+      expect(body.classrooms).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: classroom.id,
+          }),
+        ]),
+      );
+      expect(body.classrooms[0].classLinks).toBeDefined();
+      expect(body.classrooms[0].classLinks[0].studentId).toBe(student1.id);
+      expect(body.classrooms[0].classLinks[0].student.user).toEqual(
+        expect.objectContaining({
+          firstName: student1.firstName,
+          lastName: student1.lastName,
+          email: student1.email,
+        }),
+      );
+    });
+
+    it("should respond with a `200` status code and an empty list when the teacher has no classes", async (): Promise<void> => {
+      const { status, body } = await request(app)
+        .get("/class/teacher/student")
+        .set("Authorization", `Bearer ${teacherUser1.token}`);
+
+      expect(status).toBe(200);
+      expect(body.classrooms).toBeDefined();
+      expect(body.classrooms.length).toBe(0);
+      expect(body.classrooms).toEqual([]);
     });
   });
 });

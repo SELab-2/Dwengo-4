@@ -10,6 +10,18 @@ interface LearningPath {
   title: string;
   isExternal: boolean;
   description: string;
+  creator?: {
+    id: string;
+    user: {
+      id: string;
+      firstName: string;
+      lastName: string;
+    };
+  };
+  createdAt: string;
+  updatedAt: string;
+  language: string;
+  image?: string;
 }
 
 interface LearningPathTransition {
