@@ -42,6 +42,10 @@ interface ClassItem {
   code: number;
 }
 
+interface CreateClassPayload {
+  name: string;
+}
+
 interface AssignmentPayload {
   id?: number;
   title: string;
@@ -78,4 +82,5 @@ export type {
   ClassItem,
   AssignmentPayload,
   TeamAssignment,
+  CreateClassPayload
 };
