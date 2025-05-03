@@ -6,6 +6,7 @@ import {
   UnauthorizedError,
   UnavailableError,
 } from "../errors/errors";
+import { LearningPathDto } from "./learningPathService";
 
 /**
  * De mogelijke content types (zie je enum in de oorspronkelijke code).
@@ -285,12 +286,9 @@ export async function getDwengoObjectsForPath(
   isTeacher: boolean,
 ): Promise<LearningObjectDtoWithRaw[]> {
   try {
-    const pathResp = await dwengoAPI.get("/api/learningPath/search", {
-      params: { all: "" },
-    });
-    const allPaths: any[] = pathResp.data;
-    const learningPath = allPaths.find((lp) => lp._id === pathId);
-    checkFetchedObject(learningPath, "Learning path with id=${pathId} not found.");
+    const pathResp = await dwengoAPI.get(`/api/learningPath/${pathId}`);
+    const learningPath: LearningPathDto = pathResp.data;
+    checkFetchedObject(learningPath, `Learning path with id=${pathId} not found.`);
     const nodes = learningPath.nodes || [];
     const results = await Promise.all(
       nodes.map(
