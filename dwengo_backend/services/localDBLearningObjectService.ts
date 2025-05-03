@@ -45,9 +45,7 @@ function mapLocalToDto(localObj: LearningObject): LearningObjectDto {
 export async function getLocalLearningObjects(
   isTeacher: boolean,
 ): Promise<LearningObjectDto[]> {
-  const whereClause = isTeacher
-    ? {}
-    : { teacherExclusive: false, available: true };
+  const whereClause = isTeacher ? {} : { teacherExclusive: false, available: true };
 
   const localObjects: LearningObject[] = await handlePrismaQuery(() =>
     prisma.learningObject.findMany({
