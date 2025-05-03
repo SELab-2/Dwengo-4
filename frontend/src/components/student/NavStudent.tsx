@@ -1,22 +1,25 @@
-import React, { MouseEvent, useState } from 'react';
-import { Link, useSubmit } from 'react-router-dom';
+import React, { MouseEvent, useEffect, useState } from 'react';
+import { Link, useSubmit, useLocation } from 'react-router-dom';
 import Container from '../shared/Container';
 import styles from './Nav.module.css';
 import NavButton from '../shared/NavButton';
 import LanguageChooser from '../shared/LanguageChooser';
 import { useTranslation } from 'react-i18next';
 
-const Navstudent: React.FC = () => {
+const NavStudent: React.FC = () => {
   const { t } = useTranslation();
-  const [menuOpen, setMenuOpen] = useState<boolean>(false);
-  const [firstName] = useState<string | null>(
-    localStorage.getItem('firstName'),
-  );
   const submit = useSubmit();
+  const location = useLocation();
 
-  const toggleMenu = (): void => {
-    setMenuOpen(!menuOpen);
-  };
+  // mobile menu toggle
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const toggleMenu = () => setMenuOpen(prev => !prev);
+
+  // read firstName on every navigation change
+  const [firstName, setFirstName] = useState<string | null>(null);
+  useEffect(() => {
+    setFirstName(localStorage.getItem('firstName'));
+  }, [location]);
 
   const handleLogout = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -24,49 +27,66 @@ const Navstudent: React.FC = () => {
   };
 
   const routes = [
-    {
-      to: '/student',
-      label: t('nav.home'),
-    },
-    {
-      to: '/student/klassen',
-      label: t('nav.classes'),
-    },
+    { to: '/student', label: t('nav.home') },
+    { to: '/student/klassen', label: t('nav.classes') },
   ];
 
   return (
     <nav className="bg-gray-200 py-2">
       <Container>
         <div className="flex text-sm lg:text-lg justify-between items-center">
-          <div className="flex flex-row items-center justify-center">
-            <Link to={'/student'}>
+          <div className="flex flex-row items-center">
+            <Link to="/student">
               <img
-                className="h-8 lg:h-12 xl:h-16 w-fit"
+                className="h-8 lg:h-12 xl:h-16 w-fit cursor-pointer"
                 src="/img/dwengo-groen-zwart.png"
+                alt="Logo"
               />
             </Link>
+
             {firstName ? (
-              <div className="flex space-x-4">
+              <div className="flex space-x-4 ml-4">
                 {routes.map(({ to, label }) => (
-                  <NavButton to={to} label={label} />
+                  <NavButton key={to} to={to} label={label} />
                 ))}
               </div>
             ) : (
-              <div
-                className={`flex flex-row justify-end w-full ${
-                  styles.navLinks
-                } ${menuOpen ? styles.open : ''}`}
-              >
-                <NavButton to="/student/inloggen" label={t('nav.login')} />
-                <NavButton
-                  to="/student/registreren"
-                  label={t('nav.register')}
-                />
+              <div className="flex items-center ml-4">
+                <button
+                  onClick={toggleMenu}
+                  className="md:hidden p-2"
+                  aria-label="Toggle menu"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                </button>
+                <div
+                  className={`flex flex-row justify-end w-full md:flex ${
+                    styles.navLinks
+                  } ${menuOpen ? styles.open : ''}`}
+                >
+                  <NavButton to="/student/inloggen" label={t('nav.login')} />
+                  <NavButton
+                    to="/student/registreren"
+                    label={t('nav.register')}
+                  />
+                </div>
               </div>
             )}
           </div>
 
-          {/* Right side icons */}
           {firstName && (
             <div className="flex items-center space-x-4">
               <span>{t('nav.logged_in_as', { name: firstName })}</span>
@@ -143,4 +163,4 @@ const Navstudent: React.FC = () => {
   );
 };
 
-export default Navstudent;
+export default NavStudent;

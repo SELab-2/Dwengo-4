@@ -51,7 +51,7 @@ const LoginStudent: React.FC = () => {
       localStorage.setItem('lastName', data.lastName);
       localStorage.setItem('expiration', expires.toISOString());
 
-      navigate('/student/dashboard');
+      navigate('/student/');
     },
   });
 
