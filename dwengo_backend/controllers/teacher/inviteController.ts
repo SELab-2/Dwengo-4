@@ -109,9 +109,6 @@ export const deleteInvite = asyncHandler(
     const classId : number  = parseInt(req.params.classId, 10);
     const classTeacherId : number = getUserFromAuthRequest(req).id;
 
-    // 1) eerst controleren of invite bestaat en PENDING is
-    await inviteService.ensureInviteExists(inviteId, classId);
-
     // 2) daarna pas de rechten-check & delete
     await inviteService.deleteInvite(classTeacherId, inviteId, classId);
 

@@ -1,13 +1,17 @@
-import { Invite, JoinRequestStatus, Class, PrismaClient, ClassTeacher } from "@prisma/client";
+import { ClassTeacher, Invite, JoinRequestStatus } from "@prisma/client";
 import classService from "./classService";
-import { BadRequestError, ConflictError, UnauthorizedError } from "../errors/errors";
+import {
+    BadRequestError,
+    ConflictError,
+    UnauthorizedError,
+} from "../errors/errors";
 import {
     handlePrismaQuery,
     handlePrismaTransaction,
     handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
 
-const prisma = new PrismaClient();
+import prisma from "../config/prisma";
 
 export default class inviteService {
     private static async validateInvitePending(
@@ -28,6 +32,7 @@ export default class inviteService {
         }
         return invite;
     }
+
     static async createInvite(
         classTeacherId: number,
         otherTeacherEmail: string,
@@ -45,7 +50,7 @@ export default class inviteService {
                 prisma.user.findUnique({
                     where: { email: otherTeacherEmail },
                 }),
-            "User is not a teacher. Only teachers can receive invites.",
+            "Given email doesn't correspond to any existing teachers.",
         );
 
         if (teacherUser.role !== "TEACHER") {
@@ -81,7 +86,7 @@ export default class inviteService {
             }),
         );
         if (alreadyInClass) {
-            throw new BadRequestError("Teacher is already a part of this class.");
+            throw new BadRequestError("Teacher is already a member of this class.");
         }
 
         // Maak de invite aan
@@ -99,73 +104,33 @@ export default class inviteService {
 
     static async getPendingInvitesForClass(
         classTeacherId: number,
-        classId: number
+        classId: number,
     ): Promise<Invite[]> {
         // Alleen een teacher van de klas mag de invites zien
-        await classService.isTeacherOfClass(
-            classId,
-            classTeacherId
-        );
-        return await handlePrismaQuery(() =>
+        await classService.isTeacherOfClass(classId, classTeacherId);
 
+        return await handlePrismaQuery(() =>
             prisma.invite.findMany({
                 where: {
                     classId,
                     status: JoinRequestStatus.PENDING,
                 },
-                include: {
-                    otherTeacher: {
-                        include: {
-                            user: {
-                                select: {
-                                    firstName: true,
-                                    lastName: true,
-                                    email: true,
-                                },
-                            }
-                        },
-                    },
-                },
-            })
+            }),
         );
     }
 
-
-    static async getPendingInvitesForTeacher(teacherId: number): Promise<Invite[]> {
+    static async getPendingInvitesForTeacher(
+        teacherId: number,
+    ): Promise<Invite[]> {
         return await handlePrismaQuery(() =>
             prisma.invite.findMany({
                 where: {
                     otherTeacherId: teacherId,
                     status: JoinRequestStatus.PENDING,
                 },
-                include: {
-                    classTeacher: {
-                        select: {
-                            teacher: {
-                                select: {
-                                    user: {
-                                        select: {
-                                            email: true,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-
-                    // de klas
-                    class: {
-                        select: {
-                            id: true,
-                            name: true,
-                        },
-                    },
-                },
-            })
+            }),
         );
     }
-
-
 
     static async acceptInviteAndJoinClass(
         teacherId: number,
@@ -252,5 +217,4 @@ export default class inviteService {
             }),
         );
     }
-
 }

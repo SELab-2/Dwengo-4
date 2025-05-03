@@ -261,7 +261,7 @@ describe("invite tests", async (): Promise<void> => {
       });
     });
 
-    it("should respond with a `404` status code when the teacher does not exist", async (): Promise<void> => {
+    it("should respond with a `401` status code when the teacher does not exist", async (): Promise<void> => {
       await addTeacherToClass(teacherUser1.id, classroom.id);
 
       const student: User & { student: Student; token: string } =
@@ -276,8 +276,8 @@ describe("invite tests", async (): Promise<void> => {
       expect(body.message).toBe(
         "User is not a teacher. Only teachers can receive invites.",
       );
-      expect(status).toBe(404);
-      expect(body.error).toBe("NotFoundError");
+      expect(status).toBe(401);
+      expect(body.error).toBe("UnauthorizedError");
       // verify that no invite was created
       await prisma.invite.findMany().then((invites: Invite[]): void => {
         expect(invites.length).toBe(0);
