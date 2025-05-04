@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  APIError,
   createLearningPath,
   CreateLearningPathPayload,
 } from '../../../util/teacher/httpLearningPaths';
@@ -14,6 +13,7 @@ import {
 } from '../../../util/shared/validation';
 import PrimaryButton from '../../../components/shared/PrimaryButton';
 import LoadingIndicatorButton from '../../../components/shared/LoadingIndicatorButton';
+import { APIError } from '@/types/api.types';
 
 interface InputWithChecksRef {
   validateInput: () => boolean;

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { LearningPath } from '../../../types/type';
 import { useQuery } from '@tanstack/react-query';
 import { fetchLearningPaths } from '@/util/teacher/learningPath';
-import { LPObjectSelector } from '@/components/teacher/learningPath/LPObjectSelector';
+import { LPObjectSelector } from '@/components/teacher/editLearningPath/LPObjectSelector';
 
 const SelectLearningObject: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');

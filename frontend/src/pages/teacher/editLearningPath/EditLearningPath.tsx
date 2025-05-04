@@ -6,10 +6,10 @@ import {
   fetchLocalLearningPath,
   fetchLocalLearningPathNodes,
 } from '../../../util/teacher/httpLearningPaths';
-import AddNodeButton from '../../../components/teacher/learningPath/AddNodeButton';
+import AddNodeButton from '../../../components/teacher/editLearningPath/AddNodeButton';
 import SelectLearningObject from './SelectLearningObject';
 import { useLPEditContext } from '../../../context/LearningPathEditContext';
-import NodeList from '../../../components/teacher/learningPath/NodeList';
+import NodeList from '../../../components/teacher/editLearningPath/NodeList';
 
 const getOrderedNodes = (nodes: LearningPathNodeWithObject[]) => {
   const nodeMap = new Map(nodes.map((node) => [node.nodeId, node]));
