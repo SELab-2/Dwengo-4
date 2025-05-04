@@ -7,12 +7,37 @@ interface AddNodeButtonProps {
 }
 
 const AddNodeButton: React.FC<AddNodeButtonProps> = ({ label, nodeIndex }) => {
-  const { isAddingNode, startAddingNode: startCreatingNode } =
+  const { isAddingNode, startAddingNode, cancelAddingNode } =
     useLPEditContext();
 
   return isAddingNode ? (
-    <div className="w-full text-left p-4 border-b border-gray-200 bg-gray-100">
+    <div className="w-full p-3 bg-gray-100 flex justify-between items-center">
       <span className="text-gray-500 italic">Adding node...</span>
+      <button
+        className={`
+          px-2 py-1 cursor-pointer rounded 
+          bg-dwengo-red-200 text-white transition-colors duration-200 hover:bg-dwengo-red-dark 
+          flex items-center gap-1
+        `}
+        onClick={() => cancelAddingNode()}
+      >
+        {/* Cancel Icon */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          className="size-5"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6 18 18 6M6 6l12 12"
+          />
+        </svg>
+        <span className="text-sm font-medium">Cancel</span>
+      </button>
     </div>
   ) : (
     <button
@@ -22,7 +47,7 @@ const AddNodeButton: React.FC<AddNodeButtonProps> = ({ label, nodeIndex }) => {
         border border-gray-300 cursor-pointer transition-colors 
         duration-200 hover:bg-gray-200 flex items-center gap-2
       `}
-      onClick={() => startCreatingNode(nodeIndex)}
+      onClick={() => startAddingNode(nodeIndex)}
     >
       {/* Plus Icon */}
       <svg

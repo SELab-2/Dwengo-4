@@ -16,6 +16,7 @@ interface LPEditContextProps {
   isAddingNode: boolean;
   currentNodeIndex: number;
   startAddingNode: (nodeIndex: number) => void;
+  cancelAddingNode: () => void;
   addNode: (
     objectTitle: string,
     index: number,
@@ -85,12 +86,18 @@ export const LPEditProvider: React.FC<{
     setDraftIdCounter((prev) => prev + 1);
   };
 
+  const cancelAddingNode = () => {
+    setIsAddingNode(false);
+    setCurrentNodeIndex(0);
+  };
+
   return (
     <LPEditContext.Provider
       value={{
         isAddingNode,
         currentNodeIndex,
         startAddingNode,
+        cancelAddingNode,
         addNode,
         orderedNodes,
         setOrderedNodes,
