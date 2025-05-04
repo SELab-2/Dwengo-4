@@ -49,7 +49,7 @@ const EditLearningPath: React.FC = () => {
   }
 
   const {
-    data: learningPathData,
+    data: thisLearningPath,
     isLoading: isLoadingPath,
     isError: isErrorPath,
     error: errorPath,
@@ -75,9 +75,6 @@ const EditLearningPath: React.FC = () => {
       setOrderedNodes(ordered);
     }
   }, [nodesData]);
-
-  console.log('nodesData', orderedNodes);
-  console.log('learningPathData', learningPathData);
 
   return (
     <div className="flex max-h-[calc(100vh-80px)]">

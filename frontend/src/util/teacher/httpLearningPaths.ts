@@ -4,13 +4,8 @@ import {
   LearningPathNodeWithObject,
 } from '../../types/type';
 import { getAuthToken } from './authTeacher';
-
-const BACKEND = 'http://localhost:5000'; // shouldn't we be getting this from env instead?
-
-export interface APIError extends Error {
-  code?: number;
-  info?: any;
-}
+import { BACKEND } from './config';
+import { APIError } from '@/types/api.types';
 
 export interface CreateLearningPathPayload {
   title: string;
