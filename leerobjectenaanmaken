@@ -1,0 +1,40 @@
+Voor leerobjeten aan te maken in de frontend hebben we een html editor nodig.
+
+We hebben hiervoor packages nodig die niet compatibel zijn met react 19 volgens npm
+
+PS C:\Users\maxim\Desktop\ugent\selab_2\Dwengo-4\frontend> npm install --save @ckeditor/ckeditor5-react @ckeditor/ckeditor5-build-classic
+npm error code ERESOLVE
+npm error ERESOLVE could not resolve
+npm error
+npm error While resolving: react-quill@2.0.0
+npm error Found: react@19.1.0
+npm error node_modules/react
+npm error   peer react@"^18 || ^19" from @tanstack/react-query@5.74.0
+npm error   node_modules/@tanstack/react-query
+npm error     @tanstack/react-query@"^5.74.0" from the root project
+npm error   peer react@"^18.0.0 || ^19.0.0" from @testing-library/react@16.3.0
+npm error   node_modules/@testing-library/react
+npm error     @testing-library/react@"^16.3.0" from the root project
+npm error   9 more (primereact, react-dom, react-i18next, react-icons, ...)
+npm error
+npm error Could not resolve dependency:
+npm error peer react@"^16 || ^17 || ^18" from react-quill@2.0.0
+npm error node_modules/react-quill
+npm error   react-quill@"^2.0.0" from the root project
+npm error
+npm error Conflicting peer dependency: react@18.3.1
+npm error node_modules/react
+npm error   peer react@"^16 || ^17 || ^18" from react-quill@2.0.0
+npm error   node_modules/react-quill
+npm error     react-quill@"^2.0.0" from the root project
+npm error
+npm error Fix the upstream dependency conflict, or retry
+npm error this command with --force or --legacy-peer-deps
+npm error to accept an incorrect (and potentially broken) dependency resolution.
+npm error
+npm error
+npm error For a full report see:
+npm error C:\Users\maxim\AppData\Local\npm-cache\_logs\2025-05-04T19_35_00_023Z-eresolve-report.txt
+npm error A complete log of this run can be found in: C:\Users\maxim\AppData\Local\npm-cache\_logs\2025-05-04T19_35_00_023Z-debug-0.log
+
+Ik heb naar best wel wat alternatieve gezocht voor html editors maar ze blijven gebaseerd op react quill

@@ -1,11 +1,8 @@
 // src/components/learning-object/HtmlInput.tsx
 
 import React from 'react';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-
-// import de Base64‑adapter
-import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
+import { Editor } from '@tinymce/tinymce-react';
+import 'tinymce/skins/ui/oxide/skin.min.css';
 
 interface HtmlInputProps {
   value: string;
@@ -19,31 +16,62 @@ const HtmlInput: React.FC<HtmlInputProps> = ({
   onChange,
   error,
   label = 'Content',
-}) => (
-  <div className="mb-6">
-    <label className="block mb-2 font-medium">{label}</label>
+}) => {
+  // Base64-upload handler
+  const imagesUploadHandler = (blobInfo: any): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        // reader.result is a data URL (<string>)
+        resolve(reader.result as string);
+      };
+      reader.readAsDataURL(blobInfo.blob());
+    });
+  };
 
-    <CKEditor
-      editor={ClassicEditor}
-      data={value}
-      onChange={(_, editor) => {
-        onChange(editor.getData());
-      }}
-      config={{
-        // voeg de Base64UploadAdapter toe
-        extraPlugins: [ Base64UploadAdapter ],
-        toolbar: [
-          'heading', '|',
-          'bold','italic','underline','link',
-          'bulletedList','numberedList','blockQuote','|',
-          'insertTable','imageUpload','undo','redo',
-        ],
-        // voor Base64-adapter is verder geen uploadUrl nodig
-      }}
-    />
+  return (
+    <div className="mb-6">
+      <label className="block mb-2 font-medium">{label}</label>
 
-    {error && <div className="text-red-600 mt-1">{error}</div>}
-  </div>
-);
+      <Editor
+        value={value}
+        init={{
+          height: 300,
+          menubar: false,
+          // toolbar-setup vergelijkbaar met CKEditor
+          toolbar: [
+            'formatselect |',
+            'bold italic underline |',
+            'link |',
+            'bullist numlist blockquote |',
+            'table |',
+            'image |',
+            'undo redo',
+          ].join(' '),
+          plugins: [
+            'link',
+            'lists',
+            'table',
+            'image',
+            'paste',      // voor Base64-paste support
+            'help',
+          ],
+          // Base64-image upload via custom handler
+          images_upload_handler: async (blobInfo: any) => {
+            const dataUrl = await imagesUploadHandler(blobInfo);
+            return { location: dataUrl };
+          },
+          // Zorg dat pasted images ook als Base64 werken
+          paste_data_images: true,
+        }}
+        onEditorChange={(content) => {
+          onChange(content);
+        }}
+      />
+
+      {error && <div className="text-red-600 mt-1">{error}</div>}
+    </div>
+  );
+};
 
 export default HtmlInput;
