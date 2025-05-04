@@ -97,4 +97,13 @@ export const LPObjectSelector: React.FC<LPObjectSelectorProps> = memo(
       </div>
     );
   },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.path.id === nextProps.path.id &&
+      // only re-render if the selected LOCard is/was in this LP
+      !prevProps.selectedComponentId?.startsWith(`${prevProps.path.id}-`) &&
+      !nextProps.selectedComponentId?.startsWith(`${nextProps.path.id}-`) &&
+      prevProps.setSelectedComponentId === nextProps.setSelectedComponentId
+    );
+  },
 );
