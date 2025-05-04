@@ -1,11 +1,10 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import prisma from "../../../config/prisma";
 import { authorizeQuestion } from "../../../middleware/questionsAuthMiddleware";
 
 vi.mock("../../../config/prisma");
 
-const buildReq = (params = {}, user = null) =>
-  ({ params, user } as any);
+const buildReq = (params = {}, user = null) => ({ params, user }) as any;
 
 const buildRes = () => {
   const res = {
@@ -33,7 +32,9 @@ describe(" authorizeQuestion", () => {
   };
 
   it(" should allow access to creator", async () => {
-    (prisma.question.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(baseQuestion);
+    (prisma.question.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
+      baseQuestion,
+    );
     const req = buildReq({ questionId: "1" }, { id: 99, role: "STUDENT" });
     const res = buildRes();
     const next = vi.fn();
@@ -43,7 +44,9 @@ describe(" authorizeQuestion", () => {
   });
 
   it(" should allow teacher in class", async () => {
-    (prisma.question.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(baseQuestion);
+    (prisma.question.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
+      baseQuestion,
+    );
     const req = buildReq({ questionId: "1" }, { id: 3, role: "TEACHER" });
     const res = buildRes();
     const next = vi.fn();
@@ -65,8 +68,4 @@ describe(" authorizeQuestion", () => {
     await authorizeQuestion(req, res as any, next);
     expect(next).toHaveBeenCalled();
   });
-
-  
-
-  
 });

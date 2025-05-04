@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { verify } from "jsonwebtoken";
 import type { AuthenticatedRequest } from "../../../interfaces/extendedTypeInterfaces";
-import prisma from "../../../config/__mocks__/prisma";
-
 
 vi.mock("../../../config/prisma");
 vi.mock("jsonwebtoken", async (importOriginal) => {
@@ -21,7 +19,8 @@ describe(" protectAnyUser Middleware (met prisma mock)", () => {
 
   beforeEach(async () => {
     // Laad de middleware LAAT (pas NA mocks)
-    protectAnyUser = (await import("../../../middleware/authAnyUserMiddleware")).protectAnyUser;
+    protectAnyUser = (await import("../../../middleware/authAnyUserMiddleware"))
+      .protectAnyUser;
 
     req = { headers: {}, user: undefined } as AuthenticatedRequest;
     res = {
@@ -32,7 +31,7 @@ describe(" protectAnyUser Middleware (met prisma mock)", () => {
     vi.clearAllMocks();
   });
 
-  it("⚠️ Geen token aanwezig", async () => {
+  it(" Geen token aanwezig", async () => {
     await protectAnyUser(req, res, next);
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({
@@ -40,7 +39,7 @@ describe(" protectAnyUser Middleware (met prisma mock)", () => {
     });
   });
 
-  it("⚠️ Ongeldige token", async () => {
+  it(" Ongeldige token", async () => {
     req.headers.authorization = "Bearer fake.token";
     (verify as any).mockImplementation(() => {
       throw new Error("invalid");
@@ -52,8 +51,4 @@ describe(" protectAnyUser Middleware (met prisma mock)", () => {
       error: "Niet geautoriseerd, token mislukt.",
     });
   });
-
-  
-
-  
 });

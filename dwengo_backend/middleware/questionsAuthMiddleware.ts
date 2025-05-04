@@ -28,12 +28,12 @@ export const authorizeQuestion = asyncHandler(
             students: true,
             class: {
               include: {
-                ClassTeacher: true
-              }
-            }
-          }
-        }
-      }
+                ClassTeacher: true,
+              },
+            },
+          },
+        },
+      },
     });
     if (!question) {
       throw new NotFoundError("Question not found");
@@ -41,10 +41,12 @@ export const authorizeQuestion = asyncHandler(
 
     // check teacher
     const isTeacherInClass = question.team.class.ClassTeacher.some(
-      ct => ct.teacherId === user.id
+      (ct) => ct.teacherId === user.id,
     );
     // check student in team
-    const isStudentInTeam = question.team.students.some(s => s.userId === user.id);
+    const isStudentInTeam = question.team.students.some(
+      (s) => s.userId === user.id,
+    );
 
     // check admin
     const isAdmin = user.role === "ADMIN";
@@ -63,14 +65,13 @@ export const authorizeQuestion = asyncHandler(
     }
 
     next();
-  }
+  },
 );
-
 
 /**
  * authorizeQuestionUpdate:
  *  - Alleen de *owner* (question.createdBy)  of *admin* mag de vraagtitel updaten.
- *  - Dit is strenger dan authorizeQuestion (zien). 
+ *  - Dit is strenger dan authorizeQuestion (zien).
  */
 export const authorizeQuestionUpdate = asyncHandler(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -87,31 +88,31 @@ export const authorizeQuestionUpdate = asyncHandler(
           include: {
             class: {
               include: {
-                ClassTeacher: true
-              }
-            }
-          }
-        }
-      }
+                ClassTeacher: true,
+              },
+            },
+          },
+        },
+      },
     });
     if (!question) {
       throw new NotFoundError("Question not found");
     }
 
     // Is user the owner?
-    const isOwner = (question.createdBy === user.id);
-
-    
+    const isOwner = question.createdBy === user.id;
 
     // Is user admin?
-    const isAdmin = (user.role === "ADMIN");
+    const isAdmin = user.role === "ADMIN";
 
-    if (!isOwner  && !isAdmin) {
-      throw new AccesDeniedError("Only the question owner, or admin can update this question.");
+    if (!isOwner && !isAdmin) {
+      throw new AccesDeniedError(
+        "Only the question owner, or admin can update this question.",
+      );
     }
 
     next();
-  }
+  },
 );
 
 /**
@@ -127,22 +128,24 @@ export const authorizeMessageUpdate = asyncHandler(
     }
 
     const message = await prisma.questionMessage.findUnique({
-      where: { id: Number(questionMessageId) }
+      where: { id: Number(questionMessageId) },
     });
     if (!message) {
       throw new NotFoundError("QuestionMessage not found");
     }
 
-    const isOwner = (message.userId === user.id);
-    const isAdmin = (user.role === "ADMIN");
+    const isOwner = message.userId === user.id;
+    const isAdmin = user.role === "ADMIN";
 
     if (!isOwner && !isAdmin) {
-      throw new AccesDeniedError("Only the owner or admin can update this message");
+      throw new AccesDeniedError(
+        "Only the owner or admin can update this message",
+      );
     }
 
     // OK
     next();
-  }
+  },
 );
 
 /**
@@ -159,7 +162,7 @@ export const authorizeMessageDelete = asyncHandler(
 
     // 1) Vind de message
     const message = await prisma.questionMessage.findUnique({
-      where: { id: Number(questionMessageId) }
+      where: { id: Number(questionMessageId) },
     });
     if (!message) {
       throw new NotFoundError("QuestionMessage not found");
@@ -178,25 +181,28 @@ export const authorizeMessageDelete = asyncHandler(
           include: {
             class: {
               include: {
-                ClassTeacher: true
-              }
-            }
-          }
-        }
-      }
+                ClassTeacher: true,
+              },
+            },
+          },
+        },
+      },
     });
     if (!question) {
       throw new NotFoundError("Question not found for this message");
     }
 
-    const isTeacherInClass = question.team.class.ClassTeacher.some(ct => ct.teacherId === user.id);
-    const isAdmin = (user.role === "ADMIN");
+    const isTeacherInClass = question.team.class.ClassTeacher.some(
+      (ct) => ct.teacherId === user.id,
+    );
+    const isAdmin = user.role === "ADMIN";
 
     if (!isTeacherInClass && !isAdmin) {
-      throw new AccesDeniedError("Only owner, teacher, or admin can delete this message");
+      throw new AccesDeniedError(
+        "Only owner, teacher, or admin can delete this message",
+      );
     }
 
     next();
-  }
+  },
 );
-export { prisma };
