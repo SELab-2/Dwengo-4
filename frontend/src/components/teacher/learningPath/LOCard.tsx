@@ -44,7 +44,18 @@ export const LOCard: React.FC<LOCardProps> = memo(
         {isSelectedObject && (
           <button
             className={`px-5 h-9.5 font-bold rounded-md text-white bg-dwengo-blue-dark hover:bg-dwengo-blue hover:cursor-pointer`}
-            onClick={() => addNode(object.id, object.title, currentNodeIndex)} // pass other id stuff if external dwengo object
+            onClick={() =>
+              object.origin === 'dwengo'
+                ? addNode(
+                    object.title,
+                    currentNodeIndex,
+                    undefined,
+                    object.hruid,
+                    object.language,
+                    object.version,
+                  )
+                : addNode(object.title, currentNodeIndex, object.id)
+            }
           >
             Add learning object to path
           </button>

@@ -46,6 +46,7 @@ interface LearningPathNode {
 
 interface LearningObject {
   id: string;
+  hruid: string;
   version: number;
   language: string;
   description: string;
@@ -63,6 +64,7 @@ interface LearningObject {
   creatorId?: number; // for local objects
   createdAt: Date;
   updatedAt: Date;
+  origin: string; // 'local' or 'dwengo'
 }
 
 type LearningPathNodeWithObject = LearningPathNode & {

@@ -17,9 +17,12 @@ interface LPEditContextProps {
   currentNodeIndex: number;
   startAddingNode: (nodeIndex: number) => void;
   addNode: (
-    localLearningObjectId: string,
     objectTitle: string,
     index: number,
+    localLearningObjectId?: string,
+    dwengoHruid?: string,
+    dwengoLanguage?: string,
+    dwengoVersion?: number,
   ) => void;
   orderedNodes: (LearningPathNodeWithObject | DraftNode)[];
   setOrderedNodes: (
@@ -48,19 +51,35 @@ export const LPEditProvider: React.FC<{
   };
 
   const addNode = (
-    localLearningObjectId: string,
     objectTitle: string,
     index: number,
+    localLearningObjectId?: string,
+    dwengoHruid?: string,
+    dwengoLanguage?: string,
+    dwengoVersion?: number,
   ) => {
     setIsAddingNode(false);
     setCurrentNodeIndex(0);
     const updatedNodes = Array.from(orderedNodes);
-    const newNode: DraftNode = {
-      draftId: draftIdCounter, // Generate a unique ID for the draft node
-      localLearningObjectId: localLearningObjectId,
-      isExternal: false,
-      learningObject: { title: objectTitle },
-    };
+    let newNode: DraftNode;
+    if (localLearningObjectId) {
+      newNode = {
+        draftId: draftIdCounter, // Generate a unique ID for the draft node
+        localLearningObjectId: localLearningObjectId,
+        isExternal: false,
+        learningObject: { title: objectTitle },
+      };
+    } else {
+      newNode = {
+        draftId: draftIdCounter, // Generate a unique ID for the draft node
+        dwengoHruid: dwengoHruid,
+        dwengoLanguage: dwengoLanguage,
+        dwengoVersion: dwengoVersion,
+        isExternal: true,
+        learningObject: { title: objectTitle },
+      };
+    }
+
     updatedNodes.splice(index + 1, 0, newNode); // insert new node at given index
     setOrderedNodes(updatedNodes);
     setDraftIdCounter((prev) => prev + 1);
