@@ -20,13 +20,14 @@ describe("Assignment test", (): void => {
 
   describe("[GET] /assignment/:assignmentId", (): void => {
     const nonExistentId = 123;
-    it("should return 400 when the assignment isn't found", async (): Promise<void> => {
+    it("should return 404 when the assignment isn't found", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get(`/assignment/${nonExistentId}`)
         .set(getAuthHeaders(teacherUser1));
 
       expect(status).toBe(404);
-      expect(body.error).toBe("Assignment not found");
+      expect(body.error).toBe("NotFoundError");
+      expect(body.message).toBe("Assignment not found.");
 
       // Verify the assignment does not actually exist in the database
       const assignment: Assignment | null = await prisma.assignment.findUnique({

@@ -24,7 +24,7 @@ export const protectAnyUser = asyncHandler(
         token = req.headers.authorization.split(" ")[1];
         const decoded = jwt.verify(
           token,
-          process.env.JWT_SECRET as string
+          process.env.JWT_SECRET as string,
         ) as JwtPayload;
 
         const user: User | null = await prisma.user.findUnique({
@@ -79,5 +79,5 @@ export const protectAnyUser = asyncHandler(
     } else {
       res.status(401).json({ error: "Geen token, niet geautoriseerd." });
     }
-  }
+  },
 );

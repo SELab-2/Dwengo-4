@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { protectTeacher } from "../../middleware/teacherAuthMiddleware";
+import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 import {
   createLocalLearningPath,
   getLocalLearningPaths,
@@ -7,7 +7,10 @@ import {
   updateLocalLearningPath,
   deleteLocalLearningPath,
 } from "../../controllers/teacher/teacherLocalLearningPathController";
-import { getAllLearningPaths, getLearningPathById } from "../../controllers/teacher/teacherLearningPathController";
+import {
+  getAllLearningPaths,
+  getLearningPathById,
+} from "../../controllers/teacher/teacherLearningPathController";
 
 const router = Router();
 
@@ -43,7 +46,6 @@ router.get("/all", getAllLearningPaths);
  * @access Teacher
  */
 router.get("/all/:pathId", getLearningPathById);
-
 
 /**
  * GET /teacher/learningPaths/:pathId

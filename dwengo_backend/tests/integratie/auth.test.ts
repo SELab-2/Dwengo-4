@@ -20,7 +20,9 @@ describe("Authentication API Tests", () => {
       expect(response.status).toBe(201);
 
       // verify user was created
-      const user = await prisma.user.findUnique({ where: { email: "student1@example.com" } });
+      const user = await prisma.user.findUnique({
+        where: { email: "student1@example.com" },
+      });
       expect(user).not.toBeNull();
       expect(user!.role).toBe("STUDENT");
       expect(user!.email).toBe("student1@example.com");
@@ -28,11 +30,15 @@ describe("Authentication API Tests", () => {
       expect(user!.lastName).toBe("Jansen");
 
       // verify student was created
-      const student = await prisma.student.findUnique({ where: { userId: user!.id } });
+      const student = await prisma.student.findUnique({
+        where: { userId: user!.id },
+      });
       expect(student).not.toBeNull();
     });
     it("should respond with `400` when some fields are missing", async () => {
-      const response = await request(app).post("/auth/student/register").send({}); // empty body
+      const response = await request(app)
+        .post("/auth/student/register")
+        .send({}); // empty body
 
       expect(response.status).toBe(400);
       expect(response.body.details).toEqual(
@@ -53,7 +59,7 @@ describe("Authentication API Tests", () => {
             field: "password",
             source: "body",
           }),
-        ])
+        ]),
       );
 
       // verify no user was created
@@ -76,7 +82,7 @@ describe("Authentication API Tests", () => {
             field: "email",
             source: "body",
           }),
-        ])
+        ]),
       );
 
       // verify no user was created
@@ -99,7 +105,7 @@ describe("Authentication API Tests", () => {
             field: "password",
             source: "body",
           }),
-        ])
+        ]),
       );
 
       // verify no user was created
@@ -109,7 +115,11 @@ describe("Authentication API Tests", () => {
     });
     it("should respond with `409` when email is already in use by a student", async () => {
       // create a student with the email
-      const studentUser = await createStudent("Jan", "Jansen", "student1@example.com");
+      const studentUser = await createStudent(
+        "Jan",
+        "Jansen",
+        "student1@example.com",
+      );
 
       // test creating a new student with the same email
       const response = await request(app).post("/auth/student/register").send({
@@ -120,16 +130,23 @@ describe("Authentication API Tests", () => {
       });
 
       expect(response.status).toBe(409);
-      expect(response.body.message).toBe("Email is already in use");
+      expect(response.body.error).toBe("ConflictError");
+      expect(response.body.message).toBe("Email already in use.");
 
       // verify no additional student was created
-      await prisma.user.findMany({ where: { email: studentUser.email } }).then((users) => {
-        expect(users).toHaveLength(1);
-      });
+      await prisma.user
+        .findMany({ where: { email: studentUser.email } })
+        .then((users) => {
+          expect(users).toHaveLength(1);
+        });
     });
     it("should respond with `409` when email is already in use by a teacher", async () => {
       // create a teacher with the email
-      const teacherUser = await createTeacher("Jan", "Jansen", "teacher1@example.com");
+      const teacherUser = await createTeacher(
+        "Jan",
+        "Jansen",
+        "teacher1@example.com",
+      );
 
       // test creating a new student with the same email
       const response = await request(app).post("/auth/student/register").send({
@@ -140,12 +157,15 @@ describe("Authentication API Tests", () => {
       });
 
       expect(response.status).toBe(409);
-      expect(response.body.message).toBe("Email is already in use");
+      expect(response.body.error).toBe("ConflictError");
+      expect(response.body.message).toBe("Email already in use.");
 
       // verify no additional user was created
-      await prisma.user.findMany({ where: { email: teacherUser.email } }).then((users) => {
-        expect(users).toHaveLength(1);
-      });
+      await prisma.user
+        .findMany({ where: { email: teacherUser.email } })
+        .then((users) => {
+          expect(users).toHaveLength(1);
+        });
     });
     it("should convert emails to lower case", async () => {
       // create a student with an uppercase email
@@ -158,7 +178,9 @@ describe("Authentication API Tests", () => {
 
       expect(response.status).toBe(201);
       // email should be converted to lowercase in the database
-      const user = await prisma.user.findUnique({ where: { email: "test@example.com" } });
+      const user = await prisma.user.findUnique({
+        where: { email: "test@example.com" },
+      });
       expect(user).not.toBeNull();
     });
   });
@@ -209,8 +231,9 @@ describe("Authentication API Tests", () => {
         })
         .set("Content-Type", "application/json");
 
-      expect(response.status).toBe(401);
-      expect(response.body.message).toBe("Invalid user");
+      expect(response.status).toBe(404);
+      expect(response.body.error).toBe("NotFoundError");
+      expect(response.body.message).toBe("Existing user not found.");
     });
     it("should fail login with correct email but wrong password", async () => {
       const response = await request(app)
@@ -222,7 +245,8 @@ describe("Authentication API Tests", () => {
         .set("Content-Type", "application/json");
 
       expect(response.status).toBe(401);
-      expect(response.body.message).toBe("Incorrect password");
+      expect(response.body.error).toBe("UnauthorizedError");
+      expect(response.body.message).toBe("Incorrect password.");
     });
     it("should fail if request body is incorrect", async () => {
       const response = await request(app).post("/auth/student/login").send({}); // empty body
@@ -238,7 +262,7 @@ describe("Authentication API Tests", () => {
             field: "password",
             source: "body",
           }),
-        ])
+        ]),
       );
     });
   });
@@ -259,7 +283,9 @@ describe("Authentication API Tests", () => {
       expect(response.status).toBe(201);
 
       // verify user was created
-      const user = await prisma.user.findUnique({ where: { email: "teacher1@example.com" } });
+      const user = await prisma.user.findUnique({
+        where: { email: "teacher1@example.com" },
+      });
       expect(user).not.toBeNull();
       expect(user!.role).toBe("TEACHER");
       expect(user!.email).toBe("teacher1@example.com");
@@ -267,11 +293,15 @@ describe("Authentication API Tests", () => {
       expect(user!.lastName).toBe("Pietersen");
 
       // verify teacher was created
-      const teacher = await prisma.teacher.findUnique({ where: { userId: user!.id } });
+      const teacher = await prisma.teacher.findUnique({
+        where: { userId: user!.id },
+      });
       expect(teacher).not.toBeNull();
     });
     it("should respond with `400` when some fields are missing", async () => {
-      const response = await request(app).post("/auth/teacher/register").send({}); // empty body
+      const response = await request(app)
+        .post("/auth/teacher/register")
+        .send({}); // empty body
 
       expect(response.status).toBe(400);
       expect(response.body.details).toEqual(
@@ -292,7 +322,7 @@ describe("Authentication API Tests", () => {
             field: "password",
             source: "body",
           }),
-        ])
+        ]),
       );
 
       // verify no user was created
@@ -315,7 +345,7 @@ describe("Authentication API Tests", () => {
             field: "email",
             source: "body",
           }),
-        ])
+        ]),
       );
 
       // verify no user was created
@@ -338,7 +368,7 @@ describe("Authentication API Tests", () => {
             field: "password",
             source: "body",
           }),
-        ])
+        ]),
       );
 
       // verify no user was created
@@ -348,7 +378,11 @@ describe("Authentication API Tests", () => {
     });
     it("should respond with `409` when email is already in use by a student", async () => {
       // create a student with the email
-      const studentUser = await createStudent("Jan", "Jansen", "student1@example.com");
+      const studentUser = await createStudent(
+        "Jan",
+        "Jansen",
+        "student1@example.com",
+      );
 
       // test creating a new teacher with the same email
       const response = await request(app).post("/auth/teacher/register").send({
@@ -359,16 +393,23 @@ describe("Authentication API Tests", () => {
       });
 
       expect(response.status).toBe(409);
-      expect(response.body.message).toBe("Email is already in use");
+      expect(response.body.error).toBe("ConflictError");
+      expect(response.body.message).toBe("Email already in use.");
 
       // verify no additional user was created
-      await prisma.user.findMany({ where: { email: studentUser.email } }).then((users) => {
-        expect(users).toHaveLength(1);
-      });
+      await prisma.user
+        .findMany({ where: { email: studentUser.email } })
+        .then((users) => {
+          expect(users).toHaveLength(1);
+        });
     });
     it("should respond with `409` when email is already in use by a teacher", async () => {
       // create a teacher with the email
-      const teacherUser = await createTeacher("Jan", "Jansen", "teacher1@example.com");
+      const teacherUser = await createTeacher(
+        "Jan",
+        "Jansen",
+        "teacher1@example.com",
+      );
 
       // test creating a new teacher with the same email
       const response = await request(app).post("/auth/teacher/register").send({
@@ -379,12 +420,15 @@ describe("Authentication API Tests", () => {
       });
 
       expect(response.status).toBe(409);
-      expect(response.body.message).toBe("Email is already in use");
+      expect(response.body.error).toBe("ConflictError");
+      expect(response.body.message).toBe("Email already in use.");
 
       // verify no additional user was created
-      await prisma.user.findMany({ where: { email: teacherUser.email } }).then((users) => {
-        expect(users).toHaveLength(1);
-      });
+      await prisma.user
+        .findMany({ where: { email: teacherUser.email } })
+        .then((users) => {
+          expect(users).toHaveLength(1);
+        });
     });
     it("should convert emails to lowercase", async () => {
       // create a teacher with an uppercase email
@@ -397,7 +441,9 @@ describe("Authentication API Tests", () => {
 
       expect(response.status).toBe(201);
       // email should be converted to lowercase in the database
-      const user = await prisma.user.findUnique({ where: { email: "test@example.com" } });
+      const user = await prisma.user.findUnique({
+        where: { email: "test@example.com" },
+      });
       expect(user).not.toBeNull();
     });
   });
@@ -444,8 +490,9 @@ describe("Authentication API Tests", () => {
         })
         .set("Content-Type", "application/json");
 
-      expect(response.status).toBe(401);
-      expect(response.body.message).toBe("Invalid user");
+      expect(response.status).toBe(404);
+      expect(response.body.error).toBe("NotFoundError");
+      expect(response.body.message).toBe("Existing user not found.");
     });
     it("should fail login with correct email but wrong password", async () => {
       const response = await request(app)
@@ -457,7 +504,8 @@ describe("Authentication API Tests", () => {
         .set("Content-Type", "application/json");
 
       expect(response.status).toBe(401);
-      expect(response.body.message).toBe("Incorrect password");
+      expect(response.body.error).toBe("UnauthorizedError");
+      expect(response.body.message).toBe("Incorrect password.");
     });
     it("should fail if request body is incorrect", async () => {
       const response = await request(app).post("/auth/teacher/login").send({}); // empty body
@@ -473,7 +521,7 @@ describe("Authentication API Tests", () => {
             field: "password",
             source: "body",
           }),
-        ])
+        ]),
       );
     });
   });

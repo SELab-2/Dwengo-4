@@ -1,10 +1,9 @@
-
 import express, { Router } from "express";
 import {
   searchLearningPathsController,
   getLearningPathByIdController,
 } from "../../controllers/learningPath/learningPathController";
-import { protectAnyUser } from "../../middleware/authAnyUserMiddleware";
+import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
 
 const router: Router = express.Router();
 

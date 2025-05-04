@@ -106,15 +106,18 @@ describe("Feedback tests", (): void => {
   });
 
   describe("[POST] /feedback/submission/:submissionId", (): void => {
-    it("Should respond with a `500` status saying 'Failed to create feedback'", async (): Promise<void> => {
+    it("Should respond with a `403` status saying 'Failed to create feedback'", async (): Promise<void> => {
       // In deze test wordt nagegaan dat je geen feedback kan geven op een submission van een assignment
       // waarvan de deadline nog niet verstreken is
       const { status, body } = await request(app)
         .post(`/feedback/submission/${onGoingAssignmentSubmissionId}`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
-      expect(status).toBe(500);
-      expect(body.error).toEqual("Failed to create feedback");
+      expect(status).toBe(403);
+      expect(body.error).toBe("ForbiddenActionError");
+      expect(body.message).toEqual(
+        "Deadline not over yet. Feedback can only be given after the deadline.",
+      );
 
       // Gaat na dat er geen feedback is aangemaakt
       const feedback: Feedback | null = await findFeedback(
@@ -130,7 +133,8 @@ describe("Feedback tests", (): void => {
         .set("Authorization", `Bearer ${student.token}`);
 
       expect(status).toBe(401);
-      expect(body.error).toEqual("Leerkracht niet gevonden.");
+      expect(body.error).toEqual("UnauthorizedError");
+      expect(body.message).toEqual("Not a valid teacher.");
 
       // Gaat na dat er geen feedback is aangemaakt
       const feedback: Feedback | null = await findFeedback(
@@ -146,7 +150,7 @@ describe("Feedback tests", (): void => {
         .send({ description: "Mooie oplossing!" });
 
       expect(status).toBe(201);
-      expectCorrectFeedbackBody(body);
+      expectCorrectFeedbackBody(body.feedback);
 
       // Gaat na dat de feedback is aangemaakt
       const feedback: Feedback | null = await findFeedback(
@@ -180,17 +184,18 @@ describe("Feedback tests", (): void => {
         .set("Authorization", `Bearer ${teacher.token}`);
 
       expect(status).toBe(404);
-      expect(body.error).toEqual("Feedback not found");
+      expect(body.error).toEqual("NotFoundError");
+      expect(body.message).toBe("Feedback not found for this submission.");
     });
 
-    it("Should respond with a `500` status when the ID is not a number", async (): Promise<void> => {
-      // Check if this returns a 404 when searching for feedback that does not yet exist
+    it("Should respond with a `400` status when the ID is not a number", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get(`/feedback/submission/notANumber`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
-      expect(status).toBe(500);
-      expect(body.error).toEqual("Failed to retrieve feedback");
+      expect(status).toBe(400);
+      expect(body.error).toEqual("BadRequestError");
+      expect(body.message).toBe("Submission ID is not a valid number.");
     });
 
     it("Should respond with a `401` status meaning a student not allowed to fetch feedback for a submission", async (): Promise<void> => {
@@ -206,12 +211,13 @@ describe("Feedback tests", (): void => {
         .set("Authorization", `Bearer ${student.token}`);
 
       expect(status).toBe(401);
-      expect(body.error).toEqual("Leerkracht niet gevonden.");
+      expect(body.error).toEqual("UnauthorizedError");
+      expect(body.message).toEqual("Not a valid teacher.");
     });
   });
 
   describe("[GET] /feedback/assignment/:assignmentId/evaluation/:evaluationId", (): void => {
-    it("Should respond with a `500` status (the teacher can only access feedback from assignments that are given to classes he teaches)", async (): Promise<void> => {
+    it("Should respond with a `403` status (the teacher can only access feedback from assignments that are given to classes he teaches)", async (): Promise<void> => {
       const assignmentIdFromOtherClass = 123;
       const { status, body } = await request(app)
         .get(
@@ -219,8 +225,11 @@ describe("Feedback tests", (): void => {
         )
         .set("Authorization", `Bearer ${teacher.token}`);
 
-      expect(status).toBe(500);
-      expect(body.error).toEqual("Failed to retrieve feedback");
+      expect(status).toBe(403);
+      expect(body.error).toEqual("AccessDeniedError");
+      expect(body.message).toEqual(
+        "Teacher should teach this class to perform this action.",
+      );
     });
 
     it("Should respond with a `401` status when a student tries to access the information", async (): Promise<void> => {
@@ -231,7 +240,8 @@ describe("Feedback tests", (): void => {
         .set("Authorization", `Bearer ${student.token}`);
 
       expect(status).toBe(401);
-      expect(body.error).toEqual("Leerkracht niet gevonden.");
+      expect(body.error).toEqual("UnauthorizedError");
+      expect(body.message).toEqual("Not a valid teacher.");
     });
 
     it("Should respond with a `200` status and all the feedback for an assignment and evaluation combination", async (): Promise<void> => {
@@ -271,16 +281,18 @@ describe("Feedback tests", (): void => {
         .set("Authorization", `Bearer ${student.token}`);
 
       expect(status).toBe(401);
-      expect(body.error).toEqual("Leerkracht niet gevonden.");
+      expect(body.error).toEqual("UnauthorizedError");
+      expect(body.message).toEqual("Not a valid teacher.");
     });
 
-    it("Should respond with a `500` status code when the submissionID is not valid", async (): Promise<void> => {
+    it("Should respond with a `400` status code when the submissionID is not valid", async (): Promise<void> => {
       const { status, body } = await request(app)
         .patch(`/feedback/submission/invalidSubmissionId`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
-      expect(status).toBe(500);
-      expect(body.error).toEqual("Failed to update feedback");
+      expect(status).toBe(400);
+      expect(body.error).toEqual("BadRequestError");
+      expect(body.message).toEqual("Submission ID is not a valid number.");
     });
 
     it("Should respond with a `200` status code and the updated feedback", async (): Promise<void> => {
@@ -297,18 +309,19 @@ describe("Feedback tests", (): void => {
         .send({ description: "Zeer netjes!" });
 
       expect(status).toBe(200);
-      expectCorrectFeedbackBody(body);
-      expect(body.description).toEqual("Zeer netjes!");
+      expectCorrectFeedbackBody(body.feedback);
+      expect(body.feedback.description).toEqual("Zeer netjes!");
     });
 
-    it("Should respond with a `500` status code when updating feedback that does not exist", async (): Promise<void> => {
+    it("Should respond with a `404` status code when updating feedback that does not exist", async (): Promise<void> => {
       const { status, body } = await request(app)
         .patch(`/feedback/submission/${passedAssignmentSubmissionId}`)
         .set("Authorization", `Bearer ${teacher.token}`)
         .send({ description: "Zeer netjes!" });
 
-      expect(status).toBe(500);
-      expect(body.error).toEqual("Failed to update feedback");
+      expect(status).toBe(404);
+      expect(body.error).toEqual("NotFoundError");
+      expect(body.message).toEqual("Feedback not found for this submission.");
     });
   });
 
@@ -338,22 +351,24 @@ describe("Feedback tests", (): void => {
       expect(feedback).toBeNull();
     });
 
-    it("Should respond with a `500` status code when trying to delete feedback that doesn't exist", async (): Promise<void> => {
+    it("Should respond with a `404` status code when trying to delete feedback that doesn't exist", async (): Promise<void> => {
       const { status, body } = await request(app)
         .delete(`/feedback/submission/${passedAssignmentSubmissionId}`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
-      expect(status).toBe(500);
-      expect(body.error).toEqual("Failed to delete feedback");
+      expect(status).toBe(404);
+      expect(body.error).toEqual("NotFoundError");
+      expect(body.message).toEqual("Feedback not found for this submission.");
     });
 
-    it("Should respond with a `500` status code when :submissionId is not valid", async (): Promise<void> => {
+    it("Should respond with a `400` status code when :submissionId is not valid", async (): Promise<void> => {
       const { status, body } = await request(app)
         .delete(`/feedback/submission/invalidId`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
-      expect(status).toBe(500);
-      expect(body.error).toEqual("Failed to delete feedback");
+      expect(status).toBe(400);
+      expect(body.error).toEqual("BadRequestError");
+      expect(body.message).toEqual("Submission ID is not a valid number.");
     });
 
     it("Should respond with a `401` status code when a student tries to delete something", async (): Promise<void> => {
@@ -362,7 +377,8 @@ describe("Feedback tests", (): void => {
         .set("Authorization", `Bearer ${student.token}`);
 
       expect(status).toBe(401);
-      expect(body.error).toEqual("Leerkracht niet gevonden.");
+      expect(body.error).toEqual("UnauthorizedError");
+      expect(body.message).toEqual("Not a valid teacher.");
     });
   });
 });

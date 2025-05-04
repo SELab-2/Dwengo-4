@@ -1,13 +1,13 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors/errors";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { logger } from "../utils/logger";
 
 const errorHandler = (
   err: Error,
   req: Request,
   res: Response,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _next: NextFunction
+  _next: NextFunction,
 ): void => {
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
@@ -19,14 +19,15 @@ const errorHandler = (
     res.status(statusCode);
   }
 
-  if (err instanceof PrismaClientKnownRequestError) {
-    if (err.code == "P2025") {
-      res.status(404).json({ error: "Resource not found", details: err.meta });
-    } else {
-      // TODO: figure out how to handle other PrismaClientKnownRequestErrors (add more cases as needed)
-      res.status(500).json({ error: "a database error occured", details: err.meta });
-    }
-  }
+  logger.error(
+    `${req.method} ${req.originalUrl} ${res.statusCode} - ${err.message}`,
+    {
+      stack: err.stack,
+      body: req.body,
+      params: req.params,
+      query: req.query,
+    },
+  );
 
   res.json({
     message: err.message,
