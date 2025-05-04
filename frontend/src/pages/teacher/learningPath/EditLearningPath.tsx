@@ -77,9 +77,9 @@ const EditLearningPath: React.FC = () => {
   }, [nodesData]);
 
   return (
-    <div className="flex max-h-[calc(100vh-80px)]">
+    <div className="flex h-screen">
       {/* Sidebar */}
-      <div className="p-4 max-w-[416px] w-full bg-gray-50  max-h-[calc(100vh-80px)] min-h-[calc(100vh-80px)] overflow-y-scroll ">
+      <div className={`p-4 max-w-[405px] w-full bg-gray-50 overflow-y-scroll`}>
         <div className="rounded-lg border border-gray-200 p-2.5 bg-white">
           {isLoadingNodes ? (
             <p>Loading learning objects...</p>
@@ -93,43 +93,24 @@ const EditLearningPath: React.FC = () => {
         </div>
       </div>
 
-      {/* Main content */}
+      {/* LO selection screen */}
       {isAddingNode && <SelectLearningObject />}
-      {/* <div className="border-l border-gray-200 w-full p-6 pb-[74px] max-h-[calc(100vh-80px)] overflow-y-scroll">
-        <div className="header">
-          {!selectedLearningObject ? (
-            <>
-              <h3 className="w-fit mx-auto font-bold text-2xl">
-                {learningPath?.title}
-              </h3>
-              <p className="py-2 pb-6 w-fit mx-auto">
-                {learningPath?.description}
-              </p>
-            </>
-          ) : (
-            <div className="w-full max-w-3xl">
-              <h4 className="text-2xl mb-4">{selectedLearningObject.title}</h4>
-              <div
-                className="prose max-w-none [&_img]:max-w-[200px] [&_img]:max-h-[400px] [&_img]:object-contain"
-                dangerouslySetInnerHTML={{
-                  __html: selectedLearningObject.raw || '',
-                }}
-              />
-            </div>
-          )}
-        </div>
-        <div className="fixed bottom-0 right-0 flex p-4 justify-end border-t border-l border-gray-200 bg-white w-[calc(100%-416px)] z-10">
-          <button
-            className="px-4 py-2 text-base font-normal rounded bg-blue-600 text-white border-none cursor-pointer transition-opacity duration-200 disabled:opacity-50"
-            onClick={handleNextClick}
-            disabled={!getNextLearningObject()}
-          >
-            {getNextLearningObject()
-              ? `Up Next: ${getNextLearningObject()?.title}`
-              : 'End of Path'}
-          </button>
-        </div>
-      </div> */}
+
+      {/* Confirm / Candel edit */}
+      <div
+        className={`fixed bottom-0 right-0 flex gap-2.5 p-2.5 justify-end border-t border-gray-200 bg-white w-full`}
+      >
+        <button
+          className={`px-6 h-10 font-bold rounded-md text-white bg-dwengo-green hover:bg-dwengo-green-dark hover:cursor-pointer`}
+        >
+          Confirm
+        </button>
+        <button
+          className={`px-6 h-10 font-bold rounded-md bg-dwengo-red-200 text-white hover:bg-dwengo-red-dark hover:cursor-pointer`}
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   );
 };

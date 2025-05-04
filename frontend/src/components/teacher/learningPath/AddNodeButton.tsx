@@ -42,7 +42,7 @@ const AddNodeButton: React.FC<AddNodeButtonProps> = ({ label, nodeIndex }) => {
   ) : (
     <button
       className={`
-        mt-4 px-4 py-2 text-base font-normal rounded 
+        px-3 py-2 text-base font-normal rounded 
         bg-dwengo-neutral-ivory text-gray 
         border border-gray-300 cursor-pointer transition-colors 
         duration-200 hover:bg-gray-200 flex items-center gap-2
