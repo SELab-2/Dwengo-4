@@ -29,6 +29,7 @@ interface LPEditContextProps {
   setOrderedNodes: (
     newNodes: (LearningPathNodeWithObject | DraftNode)[],
   ) => void;
+  deleteNode: (index: number) => void;
 }
 
 const LPEditContext = createContext<LPEditContextProps | undefined>(undefined);
@@ -91,6 +92,13 @@ export const LPEditProvider: React.FC<{
     setCurrentNodeIndex(0);
   };
 
+  const deleteNode = (index: number) => {
+    // straighforward for draft nodes, gotta think about if we should keep track of deleted existing nodes to send to backend
+    const updatedNodes = Array.from(orderedNodes);
+    updatedNodes.splice(index, 1); // remove node at given index
+    setOrderedNodes(updatedNodes);
+  };
+
   return (
     <LPEditContext.Provider
       value={{
@@ -101,6 +109,7 @@ export const LPEditProvider: React.FC<{
         addNode,
         orderedNodes,
         setOrderedNodes,
+        deleteNode,
       }}
     >
       {children}
