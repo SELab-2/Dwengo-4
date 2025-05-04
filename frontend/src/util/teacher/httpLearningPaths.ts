@@ -1,3 +1,4 @@
+import { DraftNode } from '@/context/LearningPathEditContext';
 import {
   LearningObject,
   LearningPath,
@@ -136,4 +137,41 @@ export async function fetchLocalLearningObjects(): Promise<LearningObject[]> {
   }
 
   return response.json();
+}
+
+export interface UpdateLearningPathNodesPayload {
+  learningPathId: string;
+  newNodes: (LearningPathNodeWithObject | DraftNode)[];
+}
+
+/**
+ * Updates the nodes of a learning path.
+ * This list contains (possibly reodered) existing nodes (LearningPathNodeWithObject) and new nodes (DraftNode).
+ * @param {UpdateLearningPathNodesPayload} learning path id and new nodes
+ * @throws {APIError} when updating the nodes fails
+ */
+export async function updateLearningPathNodes({
+  learningPathId,
+  newNodes,
+}: UpdateLearningPathNodesPayload) {
+  const response = await fetch(
+    `${BACKEND}/learningPath/${learningPathId}/node`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+      body: JSON.stringify(newNodes),
+    },
+  );
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      'Something went wrong when updating the learning path nodes.',
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
 }

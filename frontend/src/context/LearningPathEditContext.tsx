@@ -1,5 +1,13 @@
 import React, { createContext, useContext, useState } from 'react';
 import { LearningPathNodeWithObject } from '../types/type';
+import { useMutation } from '@tanstack/react-query';
+import { APIError } from '@/types/api.types';
+import {
+  updateLearningPathNodes,
+  UpdateLearningPathNodesPayload,
+} from '@/util/teacher/httpLearningPaths';
+import { useNavigate } from 'react-router-dom';
+import { queryClient } from '@/util/teacher/config';
 
 // not yet added to the path, will be added once the user confirms entire learning path edit
 export interface DraftNode {
@@ -30,6 +38,8 @@ interface LPEditContextProps {
     newNodes: (LearningPathNodeWithObject | DraftNode)[],
   ) => void;
   deleteNode: (index: number) => void;
+  savePath: (payload: UpdateLearningPathNodesPayload) => void;
+  isSavingPath: boolean;
 }
 
 const LPEditContext = createContext<LPEditContextProps | undefined>(undefined);
@@ -93,11 +103,24 @@ export const LPEditProvider: React.FC<{
   };
 
   const deleteNode = (index: number) => {
-    // straighforward for draft nodes, gotta think about if we should keep track of deleted existing nodes to send to backend
     const updatedNodes = Array.from(orderedNodes);
     updatedNodes.splice(index, 1); // remove node at given index
     setOrderedNodes(updatedNodes);
   };
+
+  const navigate = useNavigate();
+  const { mutate: savePath, isPending: isSavingPath } = useMutation<
+    void,
+    APIError,
+    UpdateLearningPathNodesPayload
+  >({
+    mutationFn: updateLearningPathNodes,
+    onSuccess: () => {
+      console.log('Learning path nodes updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['learningPaths'] });
+      navigate(`/teacher/learning-paths`);
+    },
+  });
 
   return (
     <LPEditContext.Provider
@@ -110,6 +133,8 @@ export const LPEditProvider: React.FC<{
         orderedNodes,
         setOrderedNodes,
         deleteNode,
+        savePath,
+        isSavingPath,
       }}
     >
       {children}

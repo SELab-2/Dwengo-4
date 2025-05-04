@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { LearningPath, LearningPathNodeWithObject } from '../../../types/type';
+import { LearningPath } from '../../../types/type';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -11,31 +11,15 @@ import SelectLearningObject from './SelectLearningObject';
 import { useLPEditContext } from '../../../context/LearningPathEditContext';
 import NodeList from '../../../components/teacher/editLearningPath/NodeList';
 
-const getOrderedNodes = (nodes: LearningPathNodeWithObject[]) => {
-  const nodeMap = new Map(nodes.map((node) => [node.nodeId, node]));
-  const startNode = nodes.find((node) => node.start_node);
-
-  const orderedNodes = [];
-  let currentNode = startNode;
-
-  while (currentNode) {
-    orderedNodes.push(currentNode);
-
-    // check if there's at least one transition
-    if (!currentNode.transitions || currentNode.transitions.length === 0) {
-      break; // stop adding nodes if there are no transitions
-    }
-
-    const nextNodeId = currentNode.transitions[0].nextNodeId; // assumes the first transition is the default one
-    currentNode = nextNodeId ? nodeMap.get(nextNodeId) : undefined;
-  }
-
-  return orderedNodes;
-};
-
 const EditLearningPath: React.FC = () => {
   const [learningPath, setLearningPath] = useState<LearningPath | null>(null);
-  const { isAddingNode, setOrderedNodes, orderedNodes } = useLPEditContext();
+  const {
+    isAddingNode,
+    setOrderedNodes,
+    orderedNodes,
+    savePath,
+    isSavingPath,
+  } = useLPEditContext();
 
   const { learningPathId } = useParams<{ learningPathId: string }>();
   // handle undefined learningPathId
@@ -71,8 +55,7 @@ const EditLearningPath: React.FC = () => {
   // initialize orderedNodes when nodesData is fetched
   useEffect(() => {
     if (nodesData) {
-      const ordered = getOrderedNodes(nodesData);
-      setOrderedNodes(ordered);
+      setOrderedNodes(nodesData);
     }
   }, [nodesData]);
 
@@ -102,11 +85,20 @@ const EditLearningPath: React.FC = () => {
       >
         <button
           className={`px-6 h-10 font-bold rounded-md text-white bg-dwengo-green hover:bg-dwengo-green-dark hover:cursor-pointer`}
+          onClick={() => {
+            if (learningPathId) {
+              savePath({ learningPathId, newNodes: orderedNodes });
+            } else {
+              console.error('Learning path is not defined');
+            }
+          }}
+          disabled={isSavingPath}
         >
-          Confirm
+          {isSavingPath ? 'Saving...' : 'Confirm'}
         </button>
         <button
           className={`px-6 h-10 font-bold rounded-md bg-dwengo-red-200 text-white hover:bg-dwengo-red-dark hover:cursor-pointer`}
+          disabled={isSavingPath}
         >
           Cancel
         </button>

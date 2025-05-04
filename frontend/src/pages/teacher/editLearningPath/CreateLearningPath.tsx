@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import {
   createLearningPath,
   CreateLearningPathPayload,
@@ -14,6 +14,7 @@ import {
 import PrimaryButton from '../../../components/shared/PrimaryButton';
 import LoadingIndicatorButton from '../../../components/shared/LoadingIndicatorButton';
 import { APIError } from '@/types/api.types';
+import { queryClient } from '@/util/teacher/config';
 
 interface InputWithChecksRef {
   validateInput: () => boolean;
@@ -22,7 +23,6 @@ interface InputWithChecksRef {
 
 const CreateLearningPath: React.FC = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const learningPathNameRef = useRef<InputWithChecksRef | null>(null);
   const languageRef = useRef<InputWithChecksRef | null>(null); // should default to preferred language
   const [description, setDescription] = useState<string>('');
