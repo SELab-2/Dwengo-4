@@ -174,6 +174,26 @@ export default class ClassService {
     );
   }
 
+  static async ensureTeacherNotInClass(
+    classId: number,
+    teacherId: number
+  ): Promise<void> {
+    const existingLink: ClassTeacher | null = await handlePrismaQuery(() =>
+      prisma.classTeacher.findUnique({
+        where: {
+          teacherId_classId: {
+            teacherId: teacherId,
+            classId: classId,
+          },
+        },
+      })
+    );
+
+    if (existingLink) {
+      throw new BadRequestError("Teacher is already a part of this class.");
+    }
+  }
+
   // Function to check if the requester is the teacher of the class
   static async isTeacherOfClass(
     classId: number,
@@ -251,7 +271,7 @@ export default class ClassService {
       }
     }
     // The student is already in the class
-    throw new ConflictError(`Student is already a member of this class.`);
+    throw new ConflictError(`Student is already a part of this class.`);
   }
 
   /*  static async removeStudentFromClass(
@@ -416,16 +436,16 @@ export default class ClassService {
         },
         include: includeStudents
           ? {
-              classLinks: {
-                include: {
-                  student: {
-                    include: {
-                      user: true,
-                    },
+            classLinks: {
+              include: {
+                student: {
+                  include: {
+                    user: true,
                   },
                 },
               },
-            }
+            },
+          }
           : undefined,
       }),
     );
