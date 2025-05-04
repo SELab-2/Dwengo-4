@@ -1,5 +1,5 @@
-import React, { MouseEvent, useState } from 'react';
-import { useSubmit } from 'react-router-dom';
+import React, { MouseEvent, useEffect, useState } from 'react';
+import { useSubmit, useLocation } from 'react-router-dom';
 import Container from '../shared/Container';
 import styles from './Nav.module.css';
 import NavButton from '../shared/NavButton';
@@ -8,15 +8,20 @@ import LanguageChooser from '../shared/LanguageChooser';
 
 const NavTeacher: React.FC = () => {
   const { t } = useTranslation();
-  const [menuOpen, setMenuOpen] = useState<boolean>(false);
-  const [firstName] = useState<string | null>(
-    localStorage.getItem('firstName'),
-  );
   const submit = useSubmit();
+  const location = useLocation();
 
+  // state for mobile menu toggle
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const toggleMenu = (): void => {
-    setMenuOpen(!menuOpen);
+    setMenuOpen(prev => !prev);
   };
+
+  // read firstName on every navigation change
+  const [firstName, setFirstName] = useState<string | null>(null);
+  useEffect(() => {
+    setFirstName(localStorage.getItem('firstName'));
+  }, [location]);
 
   const handleLogout = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -27,15 +32,17 @@ const NavTeacher: React.FC = () => {
     <nav className="bg-gray-200 py-2">
       <Container>
         <div className="flex text-sm lg:text-lg justify-between items-center">
-          <div className="flex flex-row items-center justify-center">
+          <div className="flex flex-row items-center">
             <img
-              className="h-8 lg:h-12 xl:h-16 w-fit"
+              className="h-8 lg:h-12 xl:h-16 w-fit cursor-pointer"
               src="/img/dwengo-groen-zwart.png"
+              alt="Logo"
               onClick={() => (window.location.href = '/teacher')}
             />
-            {firstName ? (
-              <div className="flex space-x-4">
 
+            {firstName ? (
+              // beschermd: toon navigatie voor ingelogde teacher
+              <div className="flex space-x-4 ml-4">
                 <NavButton to="/teacher" label={t('nav.home')} />
                 <NavButton to="/teacher/classes" label={t('nav.classes')} />
                 <NavButton
@@ -44,21 +51,46 @@ const NavTeacher: React.FC = () => {
                 />
               </div>
             ) : (
-              <div
-                className={`flex flex-row justify-end w-full ${styles.navLinks
+              // publiek: login / register, met mobile toggle
+              <div className="flex items-center ml-4">
+                <button
+                  onClick={toggleMenu}
+                  className="md:hidden p-2"
+                  aria-label="Toggle menu"
+                >
+                  {/* eenvoudige hamburger icon */}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                </button>
+                <div
+                  className={`flex flex-row justify-end w-full md:flex ${
+                    styles.navLinks
                   } ${menuOpen ? styles.open : ''}`}
-              >
-                <NavButton to="/teacher/inloggen" label={t('nav.login')} />
-                <NavButton
-                  to="/teacher/registreren"
-                  label={t('nav.register')}
-                />
+                >
+                  <NavButton to="/teacher/inloggen" label={t('nav.login')} />
+                  <NavButton
+                    to="/teacher/registreren"
+                    label={t('nav.register')}
+                  />
+                </div>
               </div>
             )}
           </div>
 
-          {/* Right side icons */}
           {firstName && (
+            // rechts: user info & actions
             <div className="flex items-center space-x-4">
               <span>{t('nav.logged_in_as', { name: firstName })}</span>
               <LanguageChooser />
@@ -66,6 +98,7 @@ const NavTeacher: React.FC = () => {
                 className="text-gray-700 hover:cursor-pointer hover:text-gray-600"
                 aria-label="Notifications"
               >
+                {/* notification bell icon */}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"
@@ -85,6 +118,7 @@ const NavTeacher: React.FC = () => {
                 className="text-gray-700 hover:cursor-pointer hover:text-gray-600"
                 aria-label="Settings"
               >
+                {/* settings gear icon */}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"
@@ -111,6 +145,7 @@ const NavTeacher: React.FC = () => {
                 className="text-gray-700 hover:cursor-pointer hover:text-red-600"
                 aria-label="Logout"
               >
+                {/* logout icon */}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"

@@ -9,13 +9,19 @@ import Container from '../../shared/Container';
 import BoxBorder from '../../shared/BoxBorder';
 import LoadingIndicatorButton from '../../shared/LoadingIndicatorButton';
 import PrimaryButton from '../../shared/PrimaryButton';
-import { ClassItem } from '../../../types/type';
+// import { ClassItem } from '../../../types/type';
 import { useTranslation } from 'react-i18next';
 import { createClass } from '@/util/teacher/class';
 
 interface InputWithChecksRef {
   validateInput: () => boolean;
   getValue: () => string;
+}
+
+interface ClassItem {
+  id: string;
+  name: string;
+  code: string;
 }
 
 interface CreateClassPayload {
