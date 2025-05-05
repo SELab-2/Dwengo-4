@@ -77,7 +77,7 @@ export const router = createBrowserRouter([
     element: <HomePage />,
   },
   {
-    path: '/learning-path/:pathId',
+    path: '/learning-paths/:pathId',
     element: <LearningPath />,
   },
   {
@@ -138,10 +138,10 @@ export const router = createBrowserRouter([
       },
       {
         path: 'learning-paths',
-        element: <LearningPaths />,
+        element: <LearningPaths canCreatePath={true} />,
       },
       {
-        path: 'learning-path/:pathId',
+        path: 'learning-paths/:pathId',
         element: <LearningPath />,
       },
     ],
@@ -176,7 +176,7 @@ export const router = createBrowserRouter([
         action: studentLogoutAction,
       },
       {
-        path: 'learning-path/:pathId',
+        path: 'learning-paths/:pathId',
         element: <LearningPath />,
       },
       {
