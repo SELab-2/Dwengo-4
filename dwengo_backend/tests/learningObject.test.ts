@@ -202,7 +202,9 @@ describe("learning object tests", { timeout: 15000 }, async () => {
     });
 
     it("shouldn't let an unauthorized user use this route", async () => {
-      const { status, body } = await request(app).get(`/learningObject/${lo.id}`); // don't add auth header
+      const { status, body } = await request(app).get(
+        `/learningObject/${lo.id}`,
+      ); // don't add auth header
 
       expect(status).toBe(401);
       expect(body.learningObject).toBeUndefined();
