@@ -36,7 +36,7 @@ export const getStudentAssignments = asyncHandler(
     const limit: number = Number(req.query.limit) || 5;
     // Haal standaard 5 assignments op, andere hoeveelheden kunnen ook
 
-    if (isNaN(limit) || limit <= 0) {
+    if (limit <= 0) {
       throw new BadRequestError("Limit must be a positive number.");
     }
 
@@ -67,8 +67,8 @@ export const getStudentAssignmentsInClass = asyncHandler(
     const limit: number = Number(req.query.limit) || 5;
     // Haal standaard 5 assignments op, andere hoeveelheden kunnen ook
 
-    if (isNaN(limit) || limit <= 0) {
-      throw new BadRequestError("Limit wasn't a valid number.");
+    if (limit <= 0) {
+      throw new BadRequestError("Limit must be a positive number.");
     }
 
     const assignments: Assignment[] = await getAssignmentsForStudentInClass(

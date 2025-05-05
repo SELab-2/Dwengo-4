@@ -265,6 +265,54 @@ describe("Authentication API Tests", () => {
         ]),
       );
     });
+    it("should fail if a teacher wants to log in as a student", async () => {
+      const teacherMail = "teacher90@example.com";
+      const teacherPW = "password123";
+      // Register teacher
+      const res = await request(app).post("/auth/teacher/register").send({
+        firstName: "Peter",
+        lastName: "Petersen",
+        email: teacherMail,
+        password: teacherPW,
+      });
+      expect(res.status).toBe(201);
+
+      const { status, body } = await request(app)
+        .post("/auth/student/login")
+        .send({
+          email: teacherMail,
+          password: teacherPW,
+        });
+
+      expect(status).toBe(400);
+      expect(body.error).toBe("BadRequestError");
+      expect(body.message).toBe("Teacher cannot login as student.");
+    });
+    it("should fail if admin wants to login as a student", async () => {
+      // register admin
+      const adminMail = "admin@admin.com";
+      const adminPW = "admin";
+      await prisma.user.create({
+        data: {
+          firstName: "admin",
+          lastName: "admin",
+          email: adminMail,
+          password: adminPW,
+          role: "ADMIN",
+        },
+      });
+
+      const { status, body } = await request(app)
+        .post("/auth/student/login")
+        .send({
+          email: adminMail,
+          password: adminPW,
+        });
+
+      expect(status).toBe(404);
+      expect(body.error).toBe("NotFoundError");
+      expect(body.message).toBe("Student not found.");
+    });
   });
 
   // same test cases as for student, but now for teacher routes
@@ -523,6 +571,54 @@ describe("Authentication API Tests", () => {
           }),
         ]),
       );
+    });
+    it("should fail if a student wants to log in as a teacher", async () => {
+      const studentMail = "student90@example.com";
+      const studentPW = "password123";
+      // Register teacher
+      const res = await request(app).post("/auth/student/register").send({
+        firstName: "Peter",
+        lastName: "Petersen",
+        email: studentMail,
+        password: studentPW,
+      });
+      expect(res.status).toBe(201);
+
+      const { status, body } = await request(app)
+        .post("/auth/teacher/login")
+        .send({
+          email: studentMail,
+          password: studentPW,
+        });
+
+      expect(status).toBe(400);
+      expect(body.error).toBe("BadRequestError");
+      expect(body.message).toBe("Student cannot login as teacher.");
+    });
+    it("should fail if admin wants to login as a teacher", async () => {
+      // register admin
+      const adminMail = "admin@admin.com";
+      const adminPW = "admin";
+      await prisma.user.create({
+        data: {
+          firstName: "admin",
+          lastName: "admin",
+          email: adminMail,
+          password: adminPW,
+          role: "ADMIN",
+        },
+      });
+
+      const { status, body } = await request(app)
+        .post("/auth/teacher/login")
+        .send({
+          email: adminMail,
+          password: adminPW,
+        });
+
+      expect(status).toBe(404);
+      expect(body.error).toBe("NotFoundError");
+      expect(body.message).toBe("Teacher not found.");
     });
   });
 });

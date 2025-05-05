@@ -7,6 +7,7 @@ import {
   UnauthorizedError,
   UnavailableError,
 } from "./errors";
+import { logger } from "../utils/logger";
 
 /**
  * Every prisma query should be wrapped in this function to handle prisma errors correctly.
@@ -19,15 +20,7 @@ export async function handlePrismaQuery<T>(
   try {
     return await queryFunction();
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2025"
-    ) {
-      throw new NotFoundError(
-        "The resource you tried to update/delete was not found.",
-      );
-    }
-    console.error("Prisma error:", error);
+    logger.error(`Prisma query error: ${error}`);
     throw new DatabaseError("Something went wrong.");
   }
 }
@@ -88,6 +81,7 @@ export async function handlePrismaTransaction<T>(
     }
 
     // Otherwise wrap it in a DatabaseError
+    logger.error(`Prisma transaction error: ${error}`);
     throw new DatabaseError("Something went wrong.");
   }
 }
