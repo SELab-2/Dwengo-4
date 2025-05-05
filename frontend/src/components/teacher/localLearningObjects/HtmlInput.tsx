@@ -2,9 +2,10 @@
 import React from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
-import Underline from '@tiptap/extension-underline';  // <-- import
+import Underline from '@tiptap/extension-underline';
+// hernoem de Image-extension
+import ImageExtension from '@tiptap/extension-image';
 
 interface HtmlInputProps {
   value: string;
@@ -23,8 +24,8 @@ const HtmlInput: React.FC<HtmlInputProps> = ({
     extensions: [
       StarterKit,
       Link,
-      Underline,                          // <-- hier toevoegen
-      Image.configure({ allowBase64: true }),
+      Underline,
+      ImageExtension.configure({ allowBase64: true }),
     ],
     content: value,
     onUpdate({ editor }) {
@@ -32,9 +33,55 @@ const HtmlInput: React.FC<HtmlInputProps> = ({
     },
   });
 
+  // compressie met de globale Image-constructor
+  const compressImage = (
+    file: File,
+    quality = 0.4,
+    maxWidth = 600,
+    maxHeight = 600
+  ): Promise<Blob> =>
+    new Promise((resolve, reject) => {
+      // gebruik expliciet de browser-Image
+      const img = new window.Image();
+      const reader = new FileReader();
+
+      reader.onerror = reject;
+      reader.onload = () => {
+        img.src = reader.result as string;
+      };
+
+      img.onerror = reject;
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width *= ratio;
+          height *= ratio;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          return reject(new Error('Canvas context error'));
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          blob => {
+            if (blob) resolve(blob);
+            else reject(new Error('Compression failed'));
+          },
+          'image/webp',
+          quality
+        );
+      };
+
+      reader.readAsDataURL(file);
+    });
+
   const handleSelectImage = async () => {
     if (!editor) return;
-    const file = await new Promise<File | undefined>((res) => {
+    const file = await new Promise<File | undefined>(res => {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
@@ -42,11 +89,20 @@ const HtmlInput: React.FC<HtmlInputProps> = ({
       input.click();
     });
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        editor.chain().focus().setImage({ src: reader.result as string }).run();
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressedBlob = await compressImage(file);
+        const reader2 = new FileReader();
+        reader2.onload = () => {
+          editor
+            .chain()
+            .focus()
+            .setImage({ src: reader2.result as string })
+            .run();
+        };
+        reader2.readAsDataURL(compressedBlob);
+      } catch (err) {
+        console.error('Image compression error:', err);
+      }
     }
   };
 
@@ -54,7 +110,6 @@ const HtmlInput: React.FC<HtmlInputProps> = ({
     <div className="mb-6">
       <label className="block mb-2 font-medium">{label}</label>
 
-      {/* Toolbar */}
       <div className="flex gap-2 mb-2">
         <button
           type="button"
@@ -70,7 +125,7 @@ const HtmlInput: React.FC<HtmlInputProps> = ({
         </button>
         <button
           type="button"
-          onClick={() => editor?.chain().focus().toggleUnderline().run()} 
+          onClick={() => editor?.chain().focus().toggleUnderline().run()}
         >
           <u>U</u>
         </button>
