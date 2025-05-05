@@ -34,6 +34,7 @@ function mapLocalToDto(localObj: LearningObject): LearningObjectDto {
     contentLocation: localObj.contentLocation ?? "",
     createdAt: localObj.createdAt.toISOString(),
     updatedAt: localObj.updatedAt.toISOString(),
+    creatorId: localObj.creatorId ?? undefined,
     origin: "local",
   };
 }
