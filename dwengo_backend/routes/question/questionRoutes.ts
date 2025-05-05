@@ -1,26 +1,29 @@
 import express, { Router } from "express";
 import {
   createQuestionGeneral,
-  createQuestionSpecific,
   createQuestionMessage,
-  updateQuestion,
-  updateQuestionMessage,
-  getQuestion,
-  getQuestionsTeam,
-  getQuestionsClass,
-  getQuestionsAssignment,
-  getQuestionMessages,
+  createQuestionSpecific,
   deleteQuestion,
   deleteQuestionMessage,
+  getQuestion,
+  getQuestionMessages,
+  getQuestionsAssignment,
+  getQuestionsClass,
+  getQuestionsTeam,
+  updateQuestion,
+  updateQuestionMessage,
 } from "../../controllers/question/questionController";
 
 import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
 import {
-  authorizeQuestion,
-  authorizeMessageUpdate,
   authorizeMessageDelete,
+  authorizeMessageUpdate,
+  authorizeQuestion,
   authorizeQuestionUpdate,
 } from "../../middleware/questionsAuthMiddleware";
+import { assignmentIdParamsSchema } from "../../zodSchemas/idSchemas";
+import { validateRequest } from "../../middleware/validateRequest";
+import { createQuestionSpecificBodySchema } from "../../zodSchemas/bodySchemas";
 
 const router: Router = express.Router();
 
@@ -28,7 +31,15 @@ const router: Router = express.Router();
 router.use(protectAnyUser);
 
 // CREATE SPECIFIC question
-router.post("/specific/assignment/:assignmentId", createQuestionSpecific);
+router.post(
+  "/specific/assignment/:assignmentId",
+  validateRequest({
+    customErrorMessage: "invalid request for creating a specific question",
+    paramsSchema: assignmentIdParamsSchema,
+    bodySchema: createQuestionSpecificBodySchema,
+  }),
+  createQuestionSpecific,
+);
 
 // CREATE GENERAL question
 router.post("/general/assignment/:assignmentId", createQuestionGeneral);

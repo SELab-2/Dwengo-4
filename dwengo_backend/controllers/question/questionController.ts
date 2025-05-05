@@ -29,17 +29,15 @@ export const createQuestionSpecific = asyncHandler(
       isPrivate,
     } = req.body;
 
-    if (!assignmentId || !teamId || !title || !text) {
-      throw new BadRequestError(badRequestMessage);
-    }
     const user: AuthenticatedUser = getUserFromAuthRequest(req);
+
     if (!user.role) {
       throw new BadRequestError(missingRole);
     }
 
     const questionSpec = await QuestionService.createQuestionSpecific(
-      Number(assignmentId),
-      Number(teamId),
+      assignmentId as unknown as number,
+      teamId,
       user.id,
       user.role,
       title,

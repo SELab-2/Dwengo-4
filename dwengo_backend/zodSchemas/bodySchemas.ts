@@ -62,3 +62,16 @@ export const teamsBodySchema = z.object({
 export const identifiableTeamsBodySchema = z.object({
   teams: z.array(IdentifiableTeamDivisionSchema),
 });
+
+export const createQuestionSpecificBodySchema = z.object({
+  teamId: z.coerce.number().int().positive(),
+  title: z.string().min(1, "Title is required"),
+  text: z.string().min(1, "Text is required"),
+
+  isExternal: z.boolean(),
+  isPrivate: z.boolean(),
+  localLearningObjectId: z.string().optional(),
+  dwengoHruid: z.string().optional(),
+  dwengoLanguage: z.string().optional(),
+  dwengoVersion: z.number().optional(),
+});

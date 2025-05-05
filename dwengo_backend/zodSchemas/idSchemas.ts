@@ -40,7 +40,3 @@ export const classAndRequestIdParamsSchema = classIdParamsSchema.merge(
 export const classAndAssignmentIdParamsSchema = classIdParamsSchema.merge(
   assignmentIdParamsSchema,
 );
-
-export const classAndStudentIdParamsSchema = classIdParamsSchema.merge(
-  studentIdParamsSchema,
-);
