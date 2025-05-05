@@ -90,3 +90,12 @@ export const textBodySchema = z.object({
 export const titleBodySchema = z.object({
   title: z.string().min(1, "Title is required"),
 });
+
+export const nodeMetadataSchema = z.object({
+  isExternal: z.boolean(),
+  localLearningObjectId: z.string().optional(),
+  dwengoHruid: z.string().optional(),
+  dwengoLanguage: z.string().optional(),
+  dwengoVersion: z.number().optional(),
+  start_node: z.boolean().optional(),
+});

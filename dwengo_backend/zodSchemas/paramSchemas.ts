@@ -12,3 +12,14 @@ export const learningObjectParamsSchema = z.object({
 export const pathIdSchema = z.object({
   pathId: z.string().min(1, "PathId is required."),
 });
+
+export const learningPathIdSchema = z.object({
+  learningPathId: z.string().min(1, "LearningPathId is required."),
+});
+
+export const nodeIdSchema = z.object({
+  nodeId: z.string().min(1, "NodeId is required."),
+});
+
+export const nodeAndLearningPathIdSchema =
+  nodeIdSchema.merge(learningPathIdSchema);
