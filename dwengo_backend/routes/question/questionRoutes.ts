@@ -23,7 +23,10 @@ import {
 } from "../../middleware/questionsAuthMiddleware";
 import { assignmentIdParamsSchema } from "../../zodSchemas/idSchemas";
 import { validateRequest } from "../../middleware/validateRequest";
-import { createQuestionSpecificBodySchema } from "../../zodSchemas/bodySchemas";
+import {
+  createQuestionGeneralBodySchema,
+  createQuestionSpecificBodySchema,
+} from "../../zodSchemas/bodySchemas";
 
 const router: Router = express.Router();
 
@@ -42,7 +45,14 @@ router.post(
 );
 
 // CREATE GENERAL question
-router.post("/general/assignment/:assignmentId", createQuestionGeneral);
+router.post(
+  "/general/assignment/:assignmentId",
+  validateRequest({
+    paramsSchema: assignmentIdParamsSchema,
+    bodySchema: createQuestionGeneralBodySchema,
+  }),
+  createQuestionGeneral,
+);
 
 // CREATE message
 router.post("/:questionId/message", authorizeQuestion, createQuestionMessage);

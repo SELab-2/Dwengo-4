@@ -9,8 +9,6 @@ import { Response } from "express";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 const createdQuestionMessage = "Question successfully created.";
-const badRequestMessage =
-  "Missing required fields (assignmentId, teamId, title, text).";
 const missingRole = "User role is missing.";
 
 // CREATE SPECIFIC
@@ -29,17 +27,15 @@ export const createQuestionSpecific = asyncHandler(
       isPrivate,
     } = req.body;
 
-    const user: AuthenticatedUser = getUserFromAuthRequest(req);
-
-    if (!user.role) {
-      throw new BadRequestError(missingRole);
-    }
+    const user: AuthenticatedUser = assertUserHasRole(
+      getUserFromAuthRequest(req),
+    );
 
     const questionSpec = await QuestionService.createQuestionSpecific(
       assignmentId as unknown as number,
       teamId,
       user.id,
-      user.role,
+      user.role!,
       title,
       text,
       !!isExternal,
@@ -47,7 +43,7 @@ export const createQuestionSpecific = asyncHandler(
       localLearningObjectId,
       dwengoHruid,
       dwengoLanguage,
-      dwengoVersion ? Number(dwengoVersion) : undefined,
+      dwengoVersion ? dwengoVersion : undefined,
     );
 
     res.status(201).json({
@@ -57,6 +53,11 @@ export const createQuestionSpecific = asyncHandler(
     });
   },
 );
+
+const assertUserHasRole = (user: AuthenticatedUser) => {
+  if (!user.role) throw new BadRequestError(missingRole);
+  return user;
+};
 
 // CREATE GENERAL
 export const createQuestionGeneral = asyncHandler(
@@ -72,19 +73,13 @@ export const createQuestionGeneral = asyncHandler(
       isPrivate,
     } = req.body;
 
-    if (!assignmentId || !teamId || !title || !text || !pathRef) {
-      throw new BadRequestError(badRequestMessage);
-    }
-    const user = getUserFromAuthRequest(req);
-    if (!user.role) {
-      throw new BadRequestError(missingRole);
-    }
+    const user = assertUserHasRole(getUserFromAuthRequest(req));
 
     const questionGen = await QuestionService.createQuestionGeneral(
-      Number(assignmentId),
-      Number(teamId),
+      assignmentId as unknown as number,
+      teamId as unknown as number,
       user.id,
-      user.role,
+      user.role!,
       title,
       text,
       !!isExternal,
