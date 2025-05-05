@@ -9,6 +9,14 @@ export const learningObjectParamsSchema = z.object({
     .positive("Version must be a positive number."),
 });
 
+export const learningObjectIdParamSchema = z.object({
+  learningObjectId: z.string().min(1, "LearningObjectId is required."),
+});
+
+export const learningPathIdParamSchema = z.object({
+  learningPathId: z.string().min(1, "LearningPathId is required."),
+});
+
 export const pathIdSchema = z.object({
   pathId: z.string().min(1, "PathId is required."),
 });
