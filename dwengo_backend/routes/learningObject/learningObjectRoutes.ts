@@ -1,16 +1,17 @@
-import express from "express";
+import express, { Router } from "express";
 import {
   getAllLearningObjectsController,
-  getLearningObjectController,
-  searchLearningObjectsController,
-  // [NIEUW] importeer de extra controller-functie:
   getLearningObjectByHruidLangVersionController,
+  getLearningObjectController,
   getLearningObjectsForPathController,
+  searchLearningObjectsController,
 } from "../../controllers/learningObject/learningObjectController";
 import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
+import { learningObjectParamsSchema } from "../../zodSchemas/paramSchemas";
+import { validateRequest } from "../../middleware/validateRequest";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 /**
  * @route GET /learningObject/teacher
@@ -38,6 +39,10 @@ router.get("/teacher/search", protectTeacher, searchLearningObjectsController);
 router.get(
   "/teacher/lookup/:hruid/:language/:version",
   protectTeacher,
+  validateRequest({
+    customErrorMessage: "Invalid parameters for getting learning object.",
+    paramsSchema: learningObjectParamsSchema,
+  }),
   getLearningObjectByHruidLangVersionController,
 );
 

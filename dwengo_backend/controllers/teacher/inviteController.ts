@@ -6,14 +6,14 @@ import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 /**
- * Create an invite for a teacher to join a class
+ * Create an invitation for a teacher to join a class
  * @route POST /invite/class/:classId
  * @param classId - id of the class to which the teacher is getting invited
  * returns the created invite in the response body
  */
 export const createInvite = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const classId: number = parseInt(req.params.classId);
+    const classId: number = req.params.classId as unknown as number;
     const { otherTeacherEmail }: { otherTeacherEmail: string } = req.body;
     const classTeacherId: number = getUserFromAuthRequest(req).id;
 
@@ -34,7 +34,7 @@ export const createInvite = asyncHandler(
  */
 export const getPendingInvitesForClass = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const classId: number = parseInt(req.params.classId);
+    const classId: number = req.params.classId as unknown as number;
     const classTeacherId: number = getUserFromAuthRequest(req).id;
 
     const invites: Invite[] = await inviteService.getPendingInvitesForClass(
@@ -61,14 +61,14 @@ export const getPendingInvitesForTeacher = asyncHandler(
 );
 
 /**
- * Update the status of an invite
+ * Update the status of an invitation
  * @route PATCH /invite/:inviteId
  * @param inviteId - id of the invite to be updated
  * returns the updated invite in the response body
  */
 export const updateInviteStatus = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const inviteId: number = parseInt(req.params.inviteId);
+    const inviteId: number = req.params.inviteId as unknown as number;
     const { action }: { action: string } = req.body;
     const teacherId: number = getUserFromAuthRequest(req).id;
 
@@ -94,7 +94,7 @@ export const updateInviteStatus = asyncHandler(
 );
 
 /**
- * Delete an invite
+ * Delete an invitation
  * @route DELETE /invite/:inviteId/class/:classId
  * @param classId - id of the class for which the invite is deleted
  * @param inviteId - id of the invite to be deleted
@@ -104,8 +104,8 @@ export const updateInviteStatus = asyncHandler(
  */
 export const deleteInvite = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const inviteId: number = parseInt(req.params.inviteId);
-    const classId: number = parseInt(req.params.classId);
+    const inviteId: number = req.params.inviteId as unknown as number;
+    const classId: number = req.params.classId as unknown as number;
     const classTeacherId: number = getUserFromAuthRequest(req).id;
 
     await inviteService.deleteInvite(classTeacherId, inviteId, classId);

@@ -1,6 +1,12 @@
 import express, { Router } from "express";
 import { AssignmentTeacherController } from "../../controllers/teacher/teacherAssignmentController";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
+import { validateRequest } from "../../middleware/validateRequest";
+import { optionalLimitQuerySchema } from "../../zodSchemas/querySchemas";
+import {
+  assignmentIdParamsSchema,
+  classIdParamsSchema,
+} from "../../zodSchemas/idSchemas";
 
 const router: Router = express.Router();
 const controller = new AssignmentTeacherController();
@@ -12,7 +18,14 @@ router.use(protectTeacher);
  * @description Get all assignments that the teacher has created
  * @access Teacher
  */
-router.get("/", controller.getAllAssignments);
+router.get(
+  "/",
+  validateRequest({
+    customErrorMessage: "invalid request for teacher assignments",
+    querySchema: optionalLimitQuerySchema,
+  }),
+  controller.getAllAssignments,
+);
 
 /**
  * @route POST /assignment/teacher
@@ -47,7 +60,14 @@ router.post("/team", controller.createAssignmentWithTeams);
  * @body teamSize: number
  * @access Teacher
  */
-router.patch("/team/:assignmentId", controller.updateAssignmentWithTeams);
+router.patch(
+  "/team/:assignmentId",
+  validateRequest({
+    customErrorMessage: "invalid request for updating assignment with teams",
+    paramsSchema: assignmentIdParamsSchema,
+  }),
+  controller.updateAssignmentWithTeams,
+);
 
 /**
  * @route GET /assignment/teacher/class/:classId
@@ -55,7 +75,14 @@ router.patch("/team/:assignmentId", controller.updateAssignmentWithTeams);
  * @param classId: number
  * @access Teacher
  */
-router.get("/class/:classId", controller.getAssignmentsByClass);
+router.get(
+  "/class/:classId",
+  validateRequest({
+    customErrorMessage: "invalid request for teacher assignments",
+    paramsSchema: classIdParamsSchema,
+  }),
+  controller.getAssignmentsByClass,
+);
 
 /**
  * @route PATCH /assignment/teacher/team/:assignmentId
@@ -64,7 +91,14 @@ router.get("/class/:classId", controller.getAssignmentsByClass);
  * @body teamSize: number
  * @access Teacher
  */
-router.patch("/team/:assignmentId", controller.updateAssignmentWithTeams);
+router.patch(
+  "/team/:assignmentId",
+  validateRequest({
+    customErrorMessage: "invalid request for updating assignment with teams",
+    paramsSchema: assignmentIdParamsSchema,
+  }),
+  controller.updateAssignmentWithTeams,
+);
 
 /**
  * @route PATCH /assignment/teacher/:assignmentId
@@ -75,7 +109,14 @@ router.patch("/team/:assignmentId", controller.updateAssignmentWithTeams);
  * @param deadline: string
  * @access Teacher
  */
-router.patch("/:assignmentId", controller.updateAssignment);
+router.patch(
+  "/:assignmentId",
+  validateRequest({
+    customErrorMessage: "invalid request for updating assignment",
+    paramsSchema: assignmentIdParamsSchema,
+  }),
+  controller.updateAssignment,
+);
 
 /**
  * @route DELETE /assignment/teacher/:assignmentId
@@ -83,6 +124,13 @@ router.patch("/:assignmentId", controller.updateAssignment);
  * @param assignmentId: number
  * @access Teacher
  */
-router.delete("/:assignmentId", controller.deleteAssignment);
+router.delete(
+  "/:assignmentId",
+  validateRequest({
+    customErrorMessage: "invalid request for deleting assignment",
+    paramsSchema: assignmentIdParamsSchema,
+  }),
+  controller.deleteAssignment,
+);
 
 export default router;

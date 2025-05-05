@@ -79,7 +79,7 @@ describe("[GET] /assignment/student", async (): Promise<void> => {
     await addStudentToClass(student3.id, class1.id);
     await addStudentToClass(student4.id, class2.id);
     await addStudentToClass(student5.id, class3.id);
-    addStudentToClass(student2.id, class4.id);
+    await addStudentToClass(student2.id, class4.id);
 
     // Create assignments
     assignment1 = await createAssignment(
@@ -309,7 +309,7 @@ describe("[GET] /assignment/student", async (): Promise<void> => {
 
       expect(status).toBe(400);
       expect(body.error).toBe("BadRequestError");
-      expect(body.message).toBe("Limit must be a positive number.");
+      expect(body.message).toBe("invalid request for student assignments");
     });
 
     it("should respond with a `400` status code because the limit is not a number.", async (): Promise<void> => {
@@ -318,10 +318,9 @@ describe("[GET] /assignment/student", async (): Promise<void> => {
         .query({ limit: "limit" })
         .set("Authorization", `Bearer ${student5.token}`);
 
-      stringToDate(body, 2);
-
-      expect(status).toBe(200);
-      expect(body).toHaveLength(2);
+      expect(status).toBe(400);
+      expect(body.error).toBe("BadRequestError");
+      expect(body.message).toBe("invalid request for student assignments");
     });
   });
 
@@ -498,18 +497,6 @@ describe("[GET] /assignment/student", async (): Promise<void> => {
 
     expect(status).toBe(400);
     expect(body.error).toBe("BadRequestError");
-    expect(body.message).toBe("Limit must be a positive number.");
-  });
-
-  it("should respond with a `400` status code because the limit is not a number.", async (): Promise<void> => {
-    const { status, body } = await request(app)
-      .get(`/assignment/student/class/${class3.id}`)
-      .query({ limit: "limit" })
-      .set("Authorization", `Bearer ${student5.token}`);
-
-    stringToDate(body, 2);
-
-    expect(status).toBe(200);
-    expect(body).toHaveLength(2);
+    expect(body.message).toBe("invalid request for student assignments");
   });
 });

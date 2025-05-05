@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Router } from "express";
 import {
   createClassroom,
   deleteClassroom,
@@ -11,8 +11,10 @@ import {
   getStudentsByClassId,
 } from "../../controllers/teacher/teacherClassController";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
+import { validateRequest } from "../../middleware/validateRequest";
+import { classIdParamsSchema } from "../../zodSchemas/idSchemas";
 
-const router = express.Router();
+const router: Router = express.Router();
 router.use(protectTeacher);
 
 // routes for classes
@@ -39,12 +41,18 @@ router.get("/", getTeacherClasses);
  * @body name: string
  * @access Teacher
  */
-router.patch("/:classId", updateClassroom);
+router.patch(
+  "/:classId",
+  validateRequest({
+    customErrorMessage: "invalid classId request parameter",
+    paramsSchema: classIdParamsSchema,
+  }),
+  updateClassroom,
+);
 
 /**
  * @route GET /class/teacher/student
  * @description Get all students in all classrooms
- * @param classId: number
  * @access Teacher
  */
 router.get("/student", getClassroomsStudents);
@@ -55,7 +63,14 @@ router.get("/student", getClassroomsStudents);
  * @param classId: number
  * @access Teacher
  */
-router.get("/:classId/student", getStudentsByClassId);
+router.get(
+  "/:classId/student",
+  validateRequest({
+    customErrorMessage: "invalid classId request parameter",
+    paramsSchema: classIdParamsSchema,
+  }),
+  getStudentsByClassId,
+);
 
 /**
  * @route GET /class/teacher/:classId/join-link
@@ -63,7 +78,14 @@ router.get("/:classId/student", getStudentsByClassId);
  * @param classId: string
  * @access Teacher
  */
-router.get("/:classId/join-link", getJoinLink);
+router.get(
+  "/:classId/join-link",
+  validateRequest({
+    customErrorMessage: "invalid classId request parameter",
+    paramsSchema: classIdParamsSchema,
+  }),
+  getJoinLink,
+);
 
 /**
  * @route PATCH /class/teacher/:classId/join-link
@@ -71,7 +93,14 @@ router.get("/:classId/join-link", getJoinLink);
  * @param classId: string
  * @access Teacher
  */
-router.patch("/:classId/join-link", regenerateJoinLink);
+router.patch(
+  "/:classId/join-link",
+  validateRequest({
+    customErrorMessage: "invalid classId request parameter",
+    paramsSchema: classIdParamsSchema,
+  }),
+  regenerateJoinLink,
+);
 
 /**
  * @route GET /class/teacher/:classId
@@ -79,7 +108,14 @@ router.patch("/:classId/join-link", regenerateJoinLink);
  * @param classId: string
  * @access Teacher
  */
-router.get("/:classId", getClassByIdAndTeacherId);
+router.get(
+  "/:classId",
+  validateRequest({
+    customErrorMessage: "invalid classId request parameter",
+    paramsSchema: classIdParamsSchema,
+  }),
+  getClassByIdAndTeacherId,
+);
 
 /**
  * @route DELETE /class/teacher/:classId
@@ -87,6 +123,13 @@ router.get("/:classId", getClassByIdAndTeacherId);
  * @param classId: string
  * @access Teacher
  */
-router.delete("/:classId", deleteClassroom);
+router.delete(
+  "/:classId",
+  validateRequest({
+    customErrorMessage: "invalid classId request parameter",
+    paramsSchema: classIdParamsSchema,
+  }),
+  deleteClassroom,
+);
 
 export default router;

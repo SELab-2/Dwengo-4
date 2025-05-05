@@ -209,7 +209,7 @@ describe("join request tests", async (): Promise<void> => {
 
       expect(status).toBe(400);
       expect(body.error).toBe("BadRequestError");
-      expect(body.message).toBe("Action must be 'approve' or 'deny'.");
+      expect(body.message).toBe("invalid request params");
       await verifyJoinRequestNotUpdatedStudentNotAdded(
         joinRequest,
         studentUser1,

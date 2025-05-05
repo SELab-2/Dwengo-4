@@ -10,7 +10,6 @@ import asyncHandler from "express-async-handler";
 import { LearningObjectDto } from "../../services/dwengoLearningObjectService";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
-import { BadRequestError } from "../../errors/errors";
 
 function userIsTeacherOrAdmin(req: AuthenticatedRequest): boolean {
   const role: string | undefined = getUserFromAuthRequest(req).role;
@@ -26,7 +25,7 @@ export const getAllLearningObjectsController = asyncHandler(
   },
 );
 
-// Haal één leerobject op (via :id)
+// Haal één leerobject op (via: id)
 export const getLearningObjectController = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { learningObjectId } = req.params;
@@ -66,26 +65,22 @@ export const getLearningObjectsForPathController = asyncHandler(
 );
 
 // [NIEUW] Haal één leerobject op basis van hruid + language + version
-export const getLearningObjectByHruidLangVersionController = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { hruid, language, version } = req.params;
-    if (!hruid || !language || !version) {
-      throw new BadRequestError("Hruid, language and version are required.");
-    }
+export const getLearningObjectByHruidLangVersionController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
+  const { hruid, language, version } = req.params;
 
-    const isTeacher: boolean = userIsTeacherOrAdmin(req);
-    const verNum = parseInt(version.toString(), 10);
-    if (isNaN(verNum)) {
-      throw new BadRequestError("Version must be a number.");
-    }
+  const isTeacher: boolean = userIsTeacherOrAdmin(req);
+  const verNum: number = Number(version);
 
-    // Servicecall
-    const lo = await getLearningObjectByHruidLangVersion(
-      hruid.toString(),
-      language.toString(),
-      verNum,
-      isTeacher,
-    );
+  // Servicecall
+  const lo: LearningObjectDto = await getLearningObjectByHruidLangVersion(
+    hruid.toString(),
+    language.toString(),
+    verNum,
+    isTeacher,
+  );
 
     res.json(lo);
   },

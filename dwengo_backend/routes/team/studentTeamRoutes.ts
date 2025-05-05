@@ -5,8 +5,10 @@ import {
   getTeamByAssignment,
 } from "../../controllers/student/studentTeamController";
 import { protectStudent } from "../../middleware/authMiddleware/studentAuthMiddleware";
+import { validateRequest } from "../../middleware/validateRequest";
+import { assignmentIdParamsSchema } from "../../zodSchemas/idSchemas";
 
-const router = Router();
+const router: Router = Router();
 router.use(protectStudent);
 
 //////////////////////
@@ -31,6 +33,10 @@ router.get("/", getStudentTeams);
 router.get(
   "/assignment/:assignmentId/studentTeam",
   protectStudent,
+  validateRequest({
+    customErrorMessage: "invalid assignmentId request parameter",
+    paramsSchema: assignmentIdParamsSchema,
+  }),
   getTeamByAssignment,
 );
 
