@@ -6,7 +6,6 @@ import { LearningPathDto } from "./learningPathService"; // <-- We hergebruiken 
 import prisma from "../config/prisma";
 import {
   handlePrismaQuery,
-  handlePrismaTransaction,
   handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
 import { NotFoundError } from "../errors/errors";
@@ -115,20 +114,18 @@ export class LocalLearningPathService {
     );
   }
 
-  async updateNumNodes(pathId: string): Promise<void> {
-    await handlePrismaTransaction(prisma, async (tx) => {
-      // Count the number of nodes within the transaction
-      const count = await tx.learningPathNode.count({
-        where: { learningPathId: pathId },
-      });
-
-      // Update the learning path's num_nodes within the same transaction
-      await tx.learningPath.update({
-        where: { id: pathId },
-        data: { num_nodes: count },
-      });
+  /*async updateNumNodes(pathId: string): Promise<void> {
+    // Count the number of nodes within the transaction
+    const count: number = await prisma.learningPathNode.count({
+      where: { learningPathId: pathId },
     });
-  }
+
+    // Update the learning path's num_nodes within the same transaction
+    await prisma.learningPath.update({
+      where: { id: pathId },
+      data: { num_nodes: count },
+    });
+  }*/
 
   /**
    * [NIEUW] Zoeken naar lokale leerpaden op basis van filters

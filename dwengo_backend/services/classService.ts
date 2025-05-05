@@ -27,25 +27,23 @@ export default class ClassService {
     // Generate a unique join code (e.g., an 8-digit hex string)
     const joinCode: string = await this.generateUniqueCode();
 
-    return prisma.$transaction((tx) =>
-      handlePrismaTransaction(tx, async (prismaTx) => {
-        const createdClass = await prismaTx.class.create({
-          data: {
-            name: name,
-            code: joinCode,
-          },
-        });
+    return handlePrismaTransaction(prisma, async (prismaTx) => {
+      const createdClass = await prismaTx.class.create({
+        data: {
+          name: name,
+          code: joinCode,
+        },
+      });
 
-        await prismaTx.classTeacher.create({
-          data: {
-            teacherId: teacherId,
-            classId: createdClass.id,
-          },
-        });
+      await prismaTx.classTeacher.create({
+        data: {
+          teacherId: teacherId,
+          classId: createdClass.id,
+        },
+      });
 
-        return createdClass;
-      }),
-    );
+      return createdClass;
+    });
   }
 
   // this function checks if the class exists and if the teacher is associated with the class
