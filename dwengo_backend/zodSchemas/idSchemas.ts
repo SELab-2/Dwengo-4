@@ -1,33 +1,21 @@
 import { z } from "zod";
 
 // SINGLE FIELD SCHEMAS //
-export const classIdParamsSchema = z.object({
-  classId: z.coerce.number().int().positive(),
-});
+const makeIdParamSchema = (key: string) =>
+  z.object({
+    [key]: z.coerce.number().int().positive(),
+  });
 
-export const inviteIdParamsSchema = z.object({
-  inviteId: z.coerce.number().int().positive(),
-});
-
-export const requestIdParamsSchema = z.object({
-  requestId: z.coerce.number().int().positive(),
-});
-
-export const assignmentIdParamsSchema = z.object({
-  assignmentId: z.coerce.number().int().positive(),
-});
-
-export const teamIdParamsSchema = z.object({
-  teamId: z.coerce.number().int().positive(),
-});
-
-export const submissionIdParamsSchema = z.object({
-  submissionId: z.coerce.number().int().positive(),
-});
-
-export const questionIdParamsSchema = z.object({
-  questionId: z.coerce.number().int().positive(),
-});
+// Usage
+export const classIdParamsSchema = makeIdParamSchema("classId");
+export const inviteIdParamsSchema = makeIdParamSchema("inviteId");
+export const requestIdParamsSchema = makeIdParamSchema("requestId");
+export const assignmentIdParamsSchema = makeIdParamSchema("assignmentId");
+export const teamIdParamsSchema = makeIdParamSchema("teamId");
+export const submissionIdParamsSchema = makeIdParamSchema("submissionId");
+export const questionIdParamsSchema = makeIdParamSchema("questionId");
+export const questionMessageIdParamsSchema =
+  makeIdParamSchema("questionMessageId");
 
 // MERGED SCHEMAS //
 export const classAndInviteIdParamsSchema =

@@ -23,7 +23,10 @@ import {
 } from "../../middleware/questionsAuthMiddleware";
 import {
   assignmentIdParamsSchema,
+  classIdParamsSchema,
   questionIdParamsSchema,
+  questionMessageIdParamsSchema,
+  teamIdParamsSchema,
 } from "../../zodSchemas/idSchemas";
 import { validateRequest } from "../../middleware/validateRequest";
 import {
@@ -87,26 +90,69 @@ router.patch(
 router.patch(
   "/:questionId/message/:questionMessageId",
   authorizeMessageUpdate,
+  validateRequest({
+    customErrorMessage: "invalid request for updating a message",
+    bodySchema: textBodySchema,
+    paramsSchema: questionMessageIdParamsSchema,
+  }),
   updateQuestionMessage,
 );
 
 // GET question
-router.get("/:questionId", authorizeQuestion, getQuestion);
+router.get(
+  "/:questionId",
+  authorizeQuestion,
+  validateRequest({
+    customErrorMessage: "invalid request for getting a question",
+    paramsSchema: questionIdParamsSchema,
+  }),
+  getQuestion,
+);
 
 // GET messages
-router.get("/:questionId/messages", authorizeQuestion, getQuestionMessages);
+router.get(
+  "/:questionId/messages",
+  authorizeQuestion,
+  validateRequest({
+    customErrorMessage: "invalid request for getting messages",
+    paramsSchema: questionIdParamsSchema,
+  }),
+  getQuestionMessages,
+);
 
 // GET questions by team
-router.get("/team/:teamId", getQuestionsTeam);
+router.get(
+  "/team/:teamId",
+  validateRequest({
+    customErrorMessage: "invalid request for getting questions by team",
+    paramsSchema: teamIdParamsSchema,
+  }),
+  getQuestionsTeam,
+);
 
 // GET questions by class
-router.get("/class/:classId", getQuestionsClass);
+router.get(
+  "/class/:classId",
+  validateRequest({
+    customErrorMessage: "invalid request for getting questions by class",
+    paramsSchema: classIdParamsSchema,
+  }),
+  getQuestionsClass,
+);
 
 // GET questions for assignment + class
 router.get("/assignment/:assignmentId/class/:classId", getQuestionsAssignment);
 
 // DELETE question
-router.delete("/:questionId", authorizeQuestion, deleteQuestion);
+router.delete(
+  "/:questionId",
+  authorizeQuestion,
+  validateRequest({
+    customErrorMessage: "invalid request for deleting a question",
+    paramsSchema: questionIdParamsSchema,
+  }),
+  deleteQuestion,
+);
 
 // DELETE message
 router.delete(

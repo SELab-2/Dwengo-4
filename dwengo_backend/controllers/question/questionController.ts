@@ -139,11 +139,8 @@ export const updateQuestionMessage = asyncHandler(
     const { questionMessageId } = req.params;
     const { text } = req.body;
 
-    if (!text) {
-      throw new BadRequestError("Missing text for question message update.");
-    }
     const updatedMsg = await QuestionService.updateQuestionMessage(
-      Number(questionMessageId),
+      questionMessageId as unknown as number,
       text,
     );
     res
@@ -155,8 +152,8 @@ export const updateQuestionMessage = asyncHandler(
 // GET question
 export const getQuestion = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { questionId } = req.params;
-    const q = await QuestionService.getQuestion(Number(questionId));
+    const questionId = req.params.questionId as unknown as number;
+    const q = await QuestionService.getQuestion(questionId);
     res.json(q);
   },
 );
@@ -164,10 +161,10 @@ export const getQuestion = asyncHandler(
 // GET questions by team
 export const getQuestionsTeam = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { teamId } = req.params;
+    const teamId = req.params.teamId as unknown as number;
     const user = getUserFromAuthRequest(req);
     const questions = await QuestionService.getQuestionsForTeam(
-      Number(teamId),
+      teamId,
       user, // pass user => filtering
     );
     res.json(questions);
@@ -177,12 +174,9 @@ export const getQuestionsTeam = asyncHandler(
 // GET questions by class
 export const getQuestionsClass = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { classId } = req.params;
+    const classId = req.params.classId as unknown as number;
     const user = getUserFromAuthRequest(req);
-    const questions = await QuestionService.getQuestionsForClass(
-      Number(classId),
-      user,
-    );
+    const questions = await QuestionService.getQuestionsForClass(classId, user);
     res.json(questions);
   },
 );
@@ -204,8 +198,8 @@ export const getQuestionsAssignment = asyncHandler(
 // GET question messages
 export const getQuestionMessages = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { questionId } = req.params;
-    const msgs = await QuestionService.getQuestionMessages(Number(questionId));
+    const questionId: number = req.params.questionId as unknown as number;
+    const msgs = await QuestionService.getQuestionMessages(questionId);
     res.json(msgs);
   },
 );
@@ -213,8 +207,8 @@ export const getQuestionMessages = asyncHandler(
 // DELETE question
 export const deleteQuestion = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { questionId } = req.params;
-    await QuestionService.deleteQuestion(Number(questionId));
+    const questionId: number = req.params.questionId as unknown as number;
+    await QuestionService.deleteQuestion(questionId);
     res.status(204).end();
   },
 );
