@@ -82,5 +82,6 @@ export const getLearningObjectByHruidLangVersionController = async (
     isTeacher,
   );
 
-  res.json(lo);
-};
+    res.json(lo);
+  },
+);
