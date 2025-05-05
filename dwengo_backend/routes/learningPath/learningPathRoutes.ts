@@ -1,10 +1,11 @@
-
 import express, { Router } from "express";
 import {
-  searchLearningPathsController,
   getLearningPathByIdController,
+  searchLearningPathsController,
 } from "../../controllers/learningPath/learningPathController";
 import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
+import { validateRequest } from "../../middleware/validateRequest";
+import { pathIdSchema } from "../../zodSchemas/paramSchemas";
 
 const router: Router = express.Router();
 
@@ -21,6 +22,13 @@ router.get("/", searchLearningPathsController);
  * @route GET /learningPath/:pathId
  * @description Haal 1 leerpad op, Dwengo of lokaal
  */
-router.get("/:pathId", getLearningPathByIdController);
+router.get(
+  "/:pathId",
+  validateRequest({
+    customErrorMessage: "invalid pathId request parameter",
+    paramsSchema: pathIdSchema,
+  }),
+  getLearningPathByIdController,
+);
 
 export default router;
