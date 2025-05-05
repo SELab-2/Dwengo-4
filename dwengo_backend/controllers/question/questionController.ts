@@ -181,14 +181,15 @@ export const getQuestionsClass = asyncHandler(
   },
 );
 
-// GET questions for assignment + class
+// GET questions for assignment and class
 export const getQuestionsAssignment = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { assignmentId, classId } = req.params;
+    const assignmentId = req.params.assignmentId as unknown as number;
+    const classId = req.params.classId as unknown as number;
     const user = getUserFromAuthRequest(req);
     const questions = await QuestionService.getQuestionsForAssignment(
-      Number(assignmentId),
-      Number(classId),
+      assignmentId,
+      classId,
       user,
     );
     res.json(questions);
@@ -213,11 +214,11 @@ export const deleteQuestion = asyncHandler(
   },
 );
 
-// DELETE message
+// DELETE a message
 export const deleteQuestionMessage = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { questionMessageId } = req.params;
-    await QuestionService.deleteQuestionMessage(Number(questionMessageId));
+    const questionMessageId = req.params.questionMessageId as unknown as number;
+    await QuestionService.deleteQuestionMessage(questionMessageId);
     res.status(204).end();
   },
 );

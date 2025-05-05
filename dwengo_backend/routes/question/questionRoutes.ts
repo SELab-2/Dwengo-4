@@ -23,6 +23,7 @@ import {
 } from "../../middleware/questionsAuthMiddleware";
 import {
   assignmentIdParamsSchema,
+  classAndAssignmentIdParamsSchema,
   classIdParamsSchema,
   questionIdParamsSchema,
   questionMessageIdParamsSchema,
@@ -140,8 +141,16 @@ router.get(
   getQuestionsClass,
 );
 
-// GET questions for assignment + class
-router.get("/assignment/:assignmentId/class/:classId", getQuestionsAssignment);
+// GET questions for assignment and class
+router.get(
+  "/assignment/:assignmentId/class/:classId",
+  validateRequest({
+    customErrorMessage:
+      "invalid request for getting questions for assignment and class",
+    paramsSchema: classAndAssignmentIdParamsSchema,
+  }),
+  getQuestionsAssignment,
+);
 
 // DELETE question
 router.delete(
@@ -158,6 +167,10 @@ router.delete(
 router.delete(
   "/:questionId/message/:questionMessageId",
   authorizeMessageDelete,
+  validateRequest({
+    customErrorMessage: "invalid request for deleting a message",
+    paramsSchema: questionMessageIdParamsSchema,
+  }),
   deleteQuestionMessage,
 );
 
