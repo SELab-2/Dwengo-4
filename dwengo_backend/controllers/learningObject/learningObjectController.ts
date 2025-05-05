@@ -65,22 +65,21 @@ export const getLearningObjectsForPathController = asyncHandler(
 );
 
 // [NIEUW] Haal één leerobject op basis van hruid + language + version
-export const getLearningObjectByHruidLangVersionController = async (
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> => {
-  const { hruid, language, version } = req.params;
+export const getLearningObjectByHruidLangVersionController = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { hruid, language, version } = req.params;
 
-  const isTeacher: boolean = userIsTeacherOrAdmin(req);
-  const verNum: number = Number(version);
+    const isTeacher: boolean = userIsTeacherOrAdmin(req);
+    const verNum: number = Number(version);
 
-  // Servicecall
-  const lo: LearningObjectDto = await getLearningObjectByHruidLangVersion(
-    hruid.toString(),
-    language.toString(),
-    verNum,
-    isTeacher,
-  );
+    // Servicecall
+    const lo: LearningObjectDto = await getLearningObjectByHruidLangVersion(
+      hruid.toString(),
+      language.toString(),
+      verNum,
+      isTeacher,
+    );
 
-  res.json(lo);
-};
+    res.json(lo);
+  },
+);
