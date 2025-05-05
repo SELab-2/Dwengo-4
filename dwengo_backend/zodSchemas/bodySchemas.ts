@@ -82,3 +82,11 @@ export const createQuestionSpecificBodySchema = baseQuestionSchema.extend({
 export const createQuestionGeneralBodySchema = baseQuestionSchema.extend({
   pathRef: z.string().min(1, "PathRef is required"),
 });
+
+export const textBodySchema = z.object({
+  text: z.string().min(1, "Text is required"),
+});
+
+export const titleBodySchema = z.object({
+  title: z.string().min(1, "Title is required"),
+});

@@ -21,12 +21,12 @@ export const teamIdParamsSchema = z.object({
   teamId: z.coerce.number().int().positive(),
 });
 
-export const studentIdParamsSchema = z.object({
-  studentId: z.coerce.number().int().positive(),
-});
-
 export const submissionIdParamsSchema = z.object({
   submissionId: z.coerce.number().int().positive(),
+});
+
+export const questionIdParamsSchema = z.object({
+  questionId: z.coerce.number().int().positive(),
 });
 
 // MERGED SCHEMAS //

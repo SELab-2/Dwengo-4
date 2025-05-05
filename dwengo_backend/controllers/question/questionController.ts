@@ -102,17 +102,10 @@ export const createQuestionMessage = asyncHandler(
     const { questionId } = req.params;
     const { text } = req.body;
 
-    if (!questionId) {
-      throw new BadRequestError("Missing question id.");
-    }
-
-    if (!text) {
-      throw new BadRequestError("Missing text.");
-    }
     const userId = getUserFromAuthRequest(req).id;
 
     const msg = await QuestionService.createQuestionMessage(
-      Number(questionId),
+      questionId as unknown as number,
       userId,
       text,
     );
@@ -129,11 +122,9 @@ export const updateQuestion = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { questionId } = req.params;
     const { title } = req.body;
-    if (!title) {
-      throw new BadRequestError("Missing title.");
-    }
+
     const updated = await QuestionService.updateQuestion(
-      Number(questionId),
+      questionId as unknown as number,
       title,
     );
     res

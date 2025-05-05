@@ -21,11 +21,16 @@ import {
   authorizeQuestion,
   authorizeQuestionUpdate,
 } from "../../middleware/questionsAuthMiddleware";
-import { assignmentIdParamsSchema } from "../../zodSchemas/idSchemas";
+import {
+  assignmentIdParamsSchema,
+  questionIdParamsSchema,
+} from "../../zodSchemas/idSchemas";
 import { validateRequest } from "../../middleware/validateRequest";
 import {
   createQuestionGeneralBodySchema,
   createQuestionSpecificBodySchema,
+  textBodySchema,
+  titleBodySchema,
 } from "../../zodSchemas/bodySchemas";
 
 const router: Router = express.Router();
@@ -48,6 +53,7 @@ router.post(
 router.post(
   "/general/assignment/:assignmentId",
   validateRequest({
+    customErrorMessage: "invalid request for creating a general question",
     paramsSchema: assignmentIdParamsSchema,
     bodySchema: createQuestionGeneralBodySchema,
   }),
@@ -55,10 +61,28 @@ router.post(
 );
 
 // CREATE message
-router.post("/:questionId/message", authorizeQuestion, createQuestionMessage);
+router.post(
+  "/:questionId/message",
+  authorizeQuestion,
+  validateRequest({
+    customErrorMessage: "invalid request for creating a message",
+    paramsSchema: questionIdParamsSchema,
+    bodySchema: textBodySchema,
+  }),
+  createQuestionMessage,
+);
 
 // UPDATE question (titel)
-router.patch("/:questionId", authorizeQuestionUpdate, updateQuestion);
+router.patch(
+  "/:questionId",
+  authorizeQuestionUpdate,
+  validateRequest({
+    customErrorMessage: "invalid request for updating a question",
+    paramsSchema: questionIdParamsSchema,
+    bodySchema: titleBodySchema,
+  }),
+  updateQuestion,
+);
 // UPDATE message
 router.patch(
   "/:questionId/message/:questionMessageId",
