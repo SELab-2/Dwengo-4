@@ -1,4 +1,4 @@
-import React, { memo, useRef, useState } from 'react';
+import React, { memo, useRef } from 'react';
 import AddNodeButton from './AddNodeButton';
 import {
   DraftNode,
@@ -23,8 +23,6 @@ interface NodeComponentProps {
 const NodeComponent: React.FC<NodeComponentProps> = memo(
   ({ node, index, moveNode, onOpenLearningObject }) => {
     const { isAddingNode, currentNodeIndex, deleteNode } = useLPEditContext();
-    const [isHovered, setIsHovered] = useState(false); // use to conditionally render the button to add new node underneath current node
-
     const nodeRef = useRef<HTMLDivElement | null>(null);
     const dragHandleRef = useRef<HTMLDivElement | null>(null);
 
@@ -79,17 +77,13 @@ const NodeComponent: React.FC<NodeComponentProps> = memo(
     return (
       <div
         ref={nodeRef}
-        className="border p-2 border-gray-200 bg-white hover:bg-gray-100 transition-colors duration-200"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        className="group border p-2 border-gray-200 bg-white hover:bg-gray-100 transition-colors duration-200"
       >
         <div className="flex items-center">
-          {/* drag handle - exclude from hover effects */}
+          {/* drag handle */}
           <div
             ref={dragHandleRef}
             className="cursor-grab p-2 mr-4 bg-gray-200 rounded flex-shrink-0"
-            onMouseEnter={() => setIsHovered(false)}
-            onMouseLeave={() => setIsHovered(true)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -118,15 +112,19 @@ const NodeComponent: React.FC<NodeComponentProps> = memo(
             </button>
 
             {/* delete button */}
-            {isHovered && !isDragging && !isAddingNode && (
-              <DeleteNodeButton onDelete={() => deleteNode(index)} />
+            {!isDragging && !isAddingNode && (
+              <div className="hidden group-hover:block">
+                <DeleteNodeButton onDelete={() => deleteNode(index)} />
+              </div>
             )}
           </div>
         </div>
 
         {/* button for adding a new node underneath current node */}
-        {((isHovered && !isAddingNode) || (isAddingNode && isCurrentNode)) && (
-          <div className="mt-2">
+        {(isCurrentNode || !isAddingNode) && !isDragging && (
+          <div
+            className={`mt-2 ${!isAddingNode ? 'hidden group-hover:block' : ''}`}
+          >
             <AddNodeButton nodeIndex={index} label="Add node here" />
           </div>
         )}
