@@ -100,21 +100,20 @@ export function throwCorrectNetworkError(
 }
 
 /**
- * Asserts that the result of the provided fetcher function is a non-empty array.
- * If the fetcher returns null, undefined, or an empty array, it throws a NotFoundError with the provided error message.
+ * Asserts that the result of the given fetcher function is a valid array.
+ * If the result is not an array, null, or undefined, the method throws a NotFoundError with the provided error message.
  *
- * @param {() => Promise<T[] | null | undefined>} fetcher - A function that returns a Promise resolving to an array or null/undefined.
- * @param {string} errorMessage - The error message to include when throwing a NotFoundError if the assertion fails.
- * @return {Promise<T[]>} A Promise that resolves to a non-empty array of type T.
+ * @param {() => Promise<T[] | null | undefined>} fetcher - A function returning a Promise that resolves to an array, null, or undefined.
+ * @param {string} errorMessage - The message to be included in the NotFoundError if the assertion fails.
+ * @return {Promise<T[]>} A promise that resolves to the result of the fetcher if it is a valid array.
  */
-export function assertNonEmptyDwengoLearningPath<T>(
+export async function assertArrayDwengoLearningPath<T>(
   fetcher: () => Promise<T[] | null | undefined>,
   errorMessage: string,
 ): Promise<T[]> {
-  return fetcher().then((result) => {
-    if (!Array.isArray(result) || result.length === 0) {
-      throw new NotFoundError(errorMessage);
-    }
-    return result;
-  });
+  const result = await fetcher();
+  if (!Array.isArray(result) || result === null || result === undefined) {
+    throw new NotFoundError(errorMessage);
+  }
+  return result;
 }

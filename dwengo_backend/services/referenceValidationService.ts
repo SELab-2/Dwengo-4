@@ -2,7 +2,7 @@ import { dwengoAPI } from "../config/dwengoAPI";
 import { BadRequestError } from "../errors/errors";
 import {
   assertExists,
-  assertNonEmptyDwengoLearningPath,
+  assertArrayDwengoLearningPath,
   handleQueryWithExistenceCheck,
   throwCorrectNetworkError,
 } from "../errors/errorFunctions";
@@ -101,7 +101,7 @@ export default class ReferenceValidationService {
     // Dwengo: /api/learningPath/search?hruid=...&language=...
     // (versie voor paden is meestal niet gedefinieerd in Dwengo)
     try {
-      await assertNonEmptyDwengoLearningPath(async () => {
+      await assertArrayDwengoLearningPath(async () => {
         const resp = await dwengoAPI.get(
           `/api/learningPath/search?hruid=${hruid}&language=${language}`,
         );

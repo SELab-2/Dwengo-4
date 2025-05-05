@@ -1,6 +1,6 @@
 import { dwengoAPI } from "../config/dwengoAPI";
 import {
-  assertNonEmptyDwengoLearningPath,
+  assertArrayDwengoLearningPath,
   throwCorrectNetworkError,
 } from "../errors/errorFunctions";
 import { NotFoundError } from "../errors/errors";
@@ -69,7 +69,7 @@ export async function searchLearningPaths(
       params,
     });
 
-    const data = await assertNonEmptyDwengoLearningPath(
+    const data = await assertArrayDwengoLearningPath(
       async () => response.data,
       `Dwengo learning path with specified filters not found.`,
     );
@@ -99,7 +99,7 @@ export async function getLearningPathByIdOrHruid(
     // Dwengo heeft geen echte "getById", we searchen en filteren
     const params = { all: "" };
 
-    const response = await assertNonEmptyDwengoLearningPath(
+    const response = await assertArrayDwengoLearningPath(
       async () =>
         (
           await dwengoAPI.get("/api/learningPath/search", {
