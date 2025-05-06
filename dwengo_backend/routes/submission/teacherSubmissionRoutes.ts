@@ -6,7 +6,7 @@ import {
   studentIdParamsSchema,
   teamAndAssignmentIdParamsSchema,
   teamIdParamsSchema,
-} from "../../zodSchemas/idSchemas";
+} from "../../zodSchemas";
 
 const router: Router = express.Router();
 const controller: TeacherSubmissionController =

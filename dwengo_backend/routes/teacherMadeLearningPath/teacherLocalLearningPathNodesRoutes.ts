@@ -11,8 +11,8 @@ import { validateRequest } from "../../middleware/validateRequest";
 import {
   learningPathIdSchema,
   nodeAndLearningPathIdSchema,
-} from "../../zodSchemas/paramSchemas";
-import { nodeMetadataSchema } from "../../zodSchemas/bodySchemas";
+  nodeMetadataSchema,
+} from "../../zodSchemas";
 
 // Enable merging of route parameters from parent routes
 const router: Router = Router({ mergeParams: true });

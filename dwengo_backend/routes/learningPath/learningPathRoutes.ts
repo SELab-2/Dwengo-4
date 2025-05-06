@@ -5,7 +5,7 @@ import {
 } from "../../controllers/learningPath/learningPathController";
 import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
 import { validateRequest } from "../../middleware/validateRequest";
-import { pathIdSchema } from "../../zodSchemas/paramSchemas";
+import { pathIdSchema } from "../../zodSchemas";
 
 const router: Router = express.Router();
 

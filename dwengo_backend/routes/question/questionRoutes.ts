@@ -21,21 +21,19 @@ import {
   authorizeQuestion,
   authorizeQuestionUpdate,
 } from "../../middleware/questionsAuthMiddleware";
+import { validateRequest } from "../../middleware/validateRequest";
 import {
   assignmentIdParamsSchema,
   classAndAssignmentIdParamsSchema,
   classIdParamsSchema,
+  createQuestionGeneralBodySchema,
+  createQuestionSpecificBodySchema,
   questionIdParamsSchema,
   questionMessageIdParamsSchema,
   teamIdParamsSchema,
-} from "../../zodSchemas/idSchemas";
-import { validateRequest } from "../../middleware/validateRequest";
-import {
-  createQuestionGeneralBodySchema,
-  createQuestionSpecificBodySchema,
   textBodySchema,
   titleBodySchema,
-} from "../../zodSchemas/bodySchemas";
+} from "../../zodSchemas";
 
 const router: Router = express.Router();
 
@@ -163,7 +161,7 @@ router.delete(
   deleteQuestion,
 );
 
-// DELETE message
+// DELETE a message
 router.delete(
   "/:questionId/message/:questionMessageId",
   authorizeMessageDelete,

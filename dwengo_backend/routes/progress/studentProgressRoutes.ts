@@ -12,11 +12,9 @@ import { validateRequest } from "../../middleware/validateRequest";
 import {
   learningObjectIdParamSchema,
   learningPathIdParamSchema,
-} from "../../zodSchemas/paramSchemas";
-import {
   assignmentIdParamsSchema,
   teamIdParamsSchema,
-} from "../../zodSchemas/idSchemas";
+} from "../../zodSchemas";
 
 const router: Router = express.Router();
 router.use(protectStudent);

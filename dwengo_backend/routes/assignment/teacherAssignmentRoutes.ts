@@ -2,11 +2,11 @@ import express, { Router } from "express";
 import { AssignmentTeacherController } from "../../controllers/teacher/teacherAssignmentController";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 import { validateRequest } from "../../middleware/validateRequest";
-import { optionalLimitQuerySchema } from "../../zodSchemas/querySchemas";
 import {
   assignmentIdParamsSchema,
   classIdParamsSchema,
-} from "../../zodSchemas/idSchemas";
+  optionalLimitQuerySchema,
+} from "../../zodSchemas";
 
 const router: Router = express.Router();
 const controller = new AssignmentTeacherController();

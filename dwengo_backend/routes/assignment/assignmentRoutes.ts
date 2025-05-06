@@ -3,7 +3,7 @@ import { AssignmentController } from "../../controllers/assignmentController";
 import teacherAssignmentRoutes from "./teacherAssignmentRoutes";
 import studentAssignmentRoutes from "./studentAssignmentRoutes";
 import { validateRequest } from "../../middleware/validateRequest";
-import { assignmentIdParamsSchema } from "../../zodSchemas/idSchemas";
+import { assignmentIdParamsSchema } from "../../zodSchemas";
 
 const router: Router = Router();
 const controller = new AssignmentController();

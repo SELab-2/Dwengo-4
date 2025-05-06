@@ -6,7 +6,7 @@ import {
   leaveClass,
 } from "../../controllers/student/studentClassController";
 import { validateRequest } from "../../middleware/validateRequest";
-import { classIdParamsSchema } from "../../zodSchemas/idSchemas";
+import { classIdParamsSchema } from "../../zodSchemas";
 
 const router: Router = express.Router();
 router.use(protectStudent);

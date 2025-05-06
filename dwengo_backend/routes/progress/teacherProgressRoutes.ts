@@ -4,10 +4,7 @@ import {
   getTeamProgressTeacher,
 } from "../../controllers/progressController";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
-import {
-  assignmentIdParamsSchema,
-  teamIdParamsSchema,
-} from "../../zodSchemas/idSchemas";
+import { assignmentIdParamsSchema, teamIdParamsSchema } from "../../zodSchemas";
 import { validateRequest } from "../../middleware/validateRequest";
 
 const router: Router = express.Router();

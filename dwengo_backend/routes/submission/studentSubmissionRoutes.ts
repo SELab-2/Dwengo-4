@@ -2,8 +2,10 @@ import express, { Router } from "express";
 import { protectStudent } from "../../middleware/authMiddleware/studentAuthMiddleware";
 import StudentSubmissionController from "../../controllers/student/studentSubmissionController";
 import { validateRequest } from "../../middleware/validateRequest";
-import { assignmentIdParamsSchema } from "../../zodSchemas/idSchemas";
-import { assignmentAndEvaluationIdParamSchema } from "../../zodSchemas/paramSchemas";
+import {
+  assignmentAndEvaluationIdParamSchema,
+  assignmentIdParamsSchema,
+} from "../../zodSchemas";
 
 const router: Router = express.Router();
 const controller = new StudentSubmissionController();
