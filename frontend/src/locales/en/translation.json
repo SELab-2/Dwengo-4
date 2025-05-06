@@ -92,7 +92,15 @@
       "students": "Students",
       "class": "Class",
       "edit": "Edit",
-      "selected": "Selected"
+      "selected": "Selected",
+      "select_student": "Select students",
+      "select_team": "Create teams",
+      "student_help": "Select students to assign to the group",
+      "team_help": "Create teams of  {{size}} students or generate random teams",
+      "available_students": "Available students",
+      "generate_random_teams": "Generate random teams",
+      "create_team": "Create team",
+      "incomplete_team_warning": "Create incomplete team?"
     },
     "deadline": "Deadline",
     "cancel": "Cancel",
@@ -121,5 +129,6 @@
     "submit": "Request access",
     "success": "You have successfully requested access to the class. The teacher will approve your request soon."
   },
-  "code": "Class code"
+  "code": "Class code",
+  "close": "Close"
 }

@@ -88,11 +88,19 @@
     },
     "teamsize": "Groepsgrootte:",
     "assign_team": {
-      "teams": "Teams",
+      "teams": "Groepen",
       "students": "Leerlingen",
       "class": "Klas",
       "edit": "Bewerken",
-      "selected": "Geselecteerd"
+      "selected": "Geselecteerd",
+      "select_student": "Studenten selecteren",
+      "select_team": "Groepen aanmaken",
+      "student_help": "Selecteer de leerlingen die je wilt toevoegen aan deze opdracht",
+      "team_help": "Maak groepen van {{size}} of genereer willekeurige groepen",
+      "available_students": "Beschikbare leerlingen",
+      "generate_random_teams": "Genereer willekeurige groepen",
+      "create_team": "Maak groep",
+      "incomplete_team_warning": "Onvolledige groep maken?"
     },
     "deadline": "Deadline",
     "cancel": "Annuleer",
@@ -121,5 +129,6 @@
     "submit": "Toegang aanvragen",
     "success": "Je hebt een aanvraag verzonden om lid te worden van deze klas. Wacht op goedkeuring van de lesgever."
   },
-  "code": "Klascode"
+  "code": "Klascode",
+  "close": "Sluiten"
 }
