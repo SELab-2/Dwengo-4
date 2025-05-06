@@ -23,7 +23,6 @@ router.get(
     paramsSchema: assignmentIdParamsSchema,
   }),
   controller.getSubmissionsForAssignment,
-  // controller.getSubmissionsForAssignment,
 );
 
 /**

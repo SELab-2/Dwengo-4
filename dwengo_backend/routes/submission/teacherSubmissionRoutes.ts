@@ -1,6 +1,12 @@
 import express, { Router } from "express";
 import TeacherSubmissionController from "../../controllers/teacher/teacherSubmissionController";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
+import { validateRequest } from "../../middleware/validateRequest";
+import {
+  studentIdParamsSchema,
+  teamAndAssignmentIdParamsSchema,
+  teamIdParamsSchema,
+} from "../../zodSchemas/idSchemas";
 
 const router: Router = express.Router();
 const controller: TeacherSubmissionController =
@@ -14,7 +20,14 @@ router.use(protectTeacher);
  * @param studentId: number
  * @access Teacher
  */
-router.get("/student/:studentId", controller.getSubmissionsForStudent);
+router.get(
+  "/student/:studentId",
+  validateRequest({
+    customErrorMessage: "invalid studentId request parameter",
+    paramsSchema: studentIdParamsSchema,
+  }),
+  controller.getSubmissionsForStudent,
+);
 
 /**
  * @route GET /submission/teacher/team/:teamId
@@ -22,7 +35,14 @@ router.get("/student/:studentId", controller.getSubmissionsForStudent);
  * @param teamId: number
  * @access Teacher
  */
-router.get("/team/:teamId", controller.getSubmissionsForTeam);
+router.get(
+  "/team/:teamId",
+  validateRequest({
+    customErrorMessage: "invalid teamId request parameter",
+    paramsSchema: teamIdParamsSchema,
+  }),
+  controller.getSubmissionsForTeam,
+);
 
 /**
  * @route GET /submission/teacher/assignment/:assignmentId/team/:teamId
@@ -33,6 +53,10 @@ router.get("/team/:teamId", controller.getSubmissionsForTeam);
  */
 router.get(
   "/assignment/:assignmentId/team/:teamId",
+  validateRequest({
+    customErrorMessage: "invalid assignmentId or teamId request parameter",
+    paramsSchema: teamAndAssignmentIdParamsSchema,
+  }),
   controller.getAssignmentSubmissionsForTeam,
 );
 
