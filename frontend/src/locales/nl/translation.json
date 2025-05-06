@@ -86,7 +86,14 @@
       "group": "Groepsopdracht",
       "individual": "Individuele opdracht"
     },
-    "teamsize": "Groepsgrootte:"
+    "teamsize": "Groepsgrootte:",
+    "assign_team": {
+      "teams": "Teams",
+      "students": "Leerlingen",
+      "class": "Klas",
+      "edit": "Bewerken",
+      "selected": "Geselecteerd"
+    }
   },
   "classes": {
     "label": "Klasgroepen",

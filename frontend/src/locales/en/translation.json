@@ -86,7 +86,14 @@
       "group": "Group assignment",
       "individual": "Individual assignment"
     },
-    "teamsize": "Teamsize:"
+    "teamsize": "Teamsize:",
+    "assign_team": {
+      "teams": "Teams",
+      "students": "Students",
+      "class": "Class",
+      "edit": "Edit",
+      "selected": "Selected"
+    }
   },
   "classes": {
     "label": "Classes",
