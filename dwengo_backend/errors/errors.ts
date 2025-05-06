@@ -1,9 +1,14 @@
 export class AppError extends Error {
   public statusCode: number;
-  constructor(message: string, statusCode: number) {
+  public details?: unknown;
+
+  constructor(message: string, statusCode: number, details?: unknown) {
     super(message);
     this.name = this.constructor.name;
     this.statusCode = statusCode;
+    this.details = details;
+
+    Error.captureStackTrace(this, this.constructor);
   }
 }
 
@@ -26,8 +31,8 @@ export class ForbiddenActionError extends AppError {
 }
 
 export class BadRequestError extends AppError {
-  constructor(message: string) {
-    super(message, 400);
+  constructor(message: string, details?: unknown) {
+    super(message, 400, details);
   }
 }
 

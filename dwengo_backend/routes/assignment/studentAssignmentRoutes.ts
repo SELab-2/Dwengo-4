@@ -4,6 +4,9 @@ import {
   getStudentAssignmentsInClass,
 } from "../../controllers/student/studentAssignmentController";
 import { protectStudent } from "../../middleware/authMiddleware/studentAuthMiddleware";
+import { validateRequest } from "../../middleware/validateRequest";
+import { limitQuerySchema } from "../../zodSchemas/querySchemas";
+import { classIdParamsSchema } from "../../zodSchemas/idSchemas";
 
 const router: Router = express.Router();
 
@@ -15,7 +18,15 @@ const router: Router = express.Router();
  * @queryparam limit: number
  * @access Student
  */
-router.get("/", protectStudent, getStudentAssignments);
+router.get(
+  "/",
+  protectStudent,
+  validateRequest({
+    customErrorMessage: "invalid request for student assignments",
+    querySchema: limitQuerySchema,
+  }),
+  getStudentAssignments,
+);
 
 /**
  * @route GET /assignment/student/class/:classId
@@ -26,6 +37,15 @@ router.get("/", protectStudent, getStudentAssignments);
  * @queryparam limit: number
  * @access Student
  */
-router.get("/class/:classId", protectStudent, getStudentAssignmentsInClass);
+router.get(
+  "/class/:classId",
+  protectStudent,
+  validateRequest({
+    customErrorMessage: "invalid request for student assignments",
+    paramsSchema: classIdParamsSchema,
+    querySchema: limitQuerySchema,
+  }),
+  getStudentAssignmentsInClass,
+);
 
 export default router;

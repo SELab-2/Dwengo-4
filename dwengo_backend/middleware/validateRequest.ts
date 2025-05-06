@@ -1,6 +1,9 @@
 import { Response, NextFunction } from "express";
 import { z, ZodIssue } from "zod";
-import { AuthenticatedRequest } from "./authMiddleware/teacherAuthMiddleware";
+import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
+import { ParsedQs } from "qs";
+import { ParamsDictionary } from "express-serve-static-core";
+import { BadRequestError } from "../errors/errors";
 
 const formatZodErrors = (error: z.ZodError, source: string) => {
   return error.issues.map((issue: ZodIssue) => ({
@@ -54,28 +57,32 @@ export const validateRequest =
       const bodyResult = bodySchema.safeParse(req.body);
       if (!bodyResult.success) {
         error_details.push(...formatZodErrors(bodyResult.error, "body"));
+      } else {
+        req.body = bodyResult.data;
       }
     }
     if (paramsSchema) {
       const paramsResult = paramsSchema.safeParse(req.params);
       if (!paramsResult.success) {
         error_details.push(...formatZodErrors(paramsResult.error, "params"));
+      } else if (paramsResult.data) {
+        req.params = paramsResult.data as unknown as ParamsDictionary;
       }
     }
     if (querySchema) {
       const queryResult = querySchema.safeParse(req.query);
       if (!queryResult.success) {
         error_details.push(...formatZodErrors(queryResult.error, "query"));
+      } else {
+        req.query = queryResult.data as unknown as ParsedQs;
       }
     }
 
     if (error_details.length > 0) {
-      res.status(400).json({
-        error: validationErrorMessage,
-        message: customErrorMessage || "Invalid request body/params/query",
-        details: error_details,
-      });
-      return;
+      throw new BadRequestError(
+        customErrorMessage || "Invalid request body/params/query",
+        error_details,
+      );
     }
 
     next();

@@ -3,11 +3,17 @@ import {
   getJoinRequestsByClass,
   updateJoinRequestStatus,
 } from "../../controllers/joinrequest/joinRequestController";
-import express from "express";
+import express, { Router } from "express";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 import { protectStudent } from "../../middleware/authMiddleware/studentAuthMiddleware";
+import { validateRequest } from "../../middleware/validateRequest";
+import {
+  classAndRequestIdParamsSchema,
+  classIdParamsSchema,
+} from "../../zodSchemas/idSchemas";
+import { joinRequestBodySchema } from "../../zodSchemas/bodySchemas";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // routes for join requests
 
@@ -17,7 +23,15 @@ const router = express.Router();
  * @param classId: number
  * @access Teacher
  */
-router.get("/teacher/class/:classId", protectTeacher, getJoinRequestsByClass);
+router.get(
+  "/teacher/class/:classId",
+  protectTeacher,
+  validateRequest({
+    customErrorMessage: "invalid classId request parameter",
+    paramsSchema: classIdParamsSchema,
+  }),
+  getJoinRequestsByClass,
+);
 
 /**
  * @route POST /join-request/student
@@ -38,6 +52,11 @@ router.post("/student", protectStudent, createJoinRequest);
 router.patch(
   "/teacher/:requestId/class/:classId",
   protectTeacher,
+  validateRequest({
+    customErrorMessage: "invalid request params",
+    paramsSchema: classAndRequestIdParamsSchema,
+    bodySchema: joinRequestBodySchema,
+  }),
   updateJoinRequestStatus,
 );
 

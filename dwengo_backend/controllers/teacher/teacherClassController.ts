@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { Response } from "express";
-import { AuthenticatedRequest } from "../../middleware/authMiddleware/teacherAuthMiddleware";
+import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import classService from "../../services/classService";
 import { Student } from "@prisma/client";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
@@ -52,10 +52,10 @@ export const createClassroom = asyncHandler(
  */
 export const deleteClassroom = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { classId } = req.params;
-    const teacherId = getUserFromAuthRequest(req).id;
+    const classId: number = req.params.classId as unknown as number;
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
-    await classService.deleteClass(Number(classId), teacherId);
+    await classService.deleteClass(classId, teacherId);
     res.status(204).end();
   },
 );
@@ -67,7 +67,7 @@ export const deleteClassroom = asyncHandler(
 export const updateClassroom = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { name } = req.body;
-    const classId: number = parseInt(req.params.classId);
+    const classId: number = req.params.classId as unknown as number;
     const teacherId: number = getUserFromAuthRequest(req).id;
 
     isNameValid(req); // if invalid, an error is thrown
@@ -83,10 +83,10 @@ export const updateClassroom = asyncHandler(
  */
 export const getJoinLink = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { classId } = req.params;
-    const teacherId = getUserFromAuthRequest(req).id;
+    const classId: number = req.params.classId as unknown as number;
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
-    const joinCode = await classService.getJoinCode(Number(classId), teacherId);
+    const joinCode: string = await classService.getJoinCode(classId, teacherId);
 
     const joinLink = `${APP_URL}/join-request/student/join?joinCode=${joinCode}`;
     res.status(200).json({ joinLink });
@@ -99,10 +99,10 @@ export const getJoinLink = asyncHandler(
  */
 export const regenerateJoinLink = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { classId } = req.params;
-    const teacherId = getUserFromAuthRequest(req).id;
-    const newJoinCode = await classService.regenerateJoinCode(
-      Number(classId),
+    const classId: number = req.params.classId as unknown as number;
+    const teacherId: number = getUserFromAuthRequest(req).id;
+    const newJoinCode: string = await classService.regenerateJoinCode(
+      classId,
       teacherId,
     );
     const joinLink = `${APP_URL}/join-request/student/join?joinCode=${newJoinCode}`;
@@ -131,11 +131,11 @@ export const getClassroomsStudents = asyncHandler(
  */
 export const getStudentsByClassId = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { classId } = req.params;
-    const teacherId = getUserFromAuthRequest(req).id;
+    const classId: number = req.params.classId as unknown as number;
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
     const students: Student[] = await classService.getStudentsByClass(
-      Number(classId),
+      classId,
       teacherId,
     );
 
@@ -168,7 +168,7 @@ export const getAllClassrooms = asyncHandler(
  */
 export const getClassByIdAndTeacherId = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const classId: number = parseInt(req.params.classId);
+    const classId: number = req.params.classId as unknown as number;
     const teacherId: number = getUserFromAuthRequest(req).id;
 
     const classroom = await classService.getClassByIdAndTeacherId(

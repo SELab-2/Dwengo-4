@@ -6,6 +6,7 @@ import {
   Invite,
   JoinRequest,
   JoinRequestStatus,
+  LearningObject,
   LearningPath,
   Student,
   Submission,
@@ -16,6 +17,7 @@ import {
 } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { LocalLearningObjectData } from "../../services/localLearningObjectService";
 
 dotenv.config();
 
@@ -136,6 +138,32 @@ export async function createLearningPath(
           userId: creatorId,
         },
       },
+    },
+  });
+}
+
+export async function createLearningObject(
+  teacherId: number,
+  data: LocalLearningObjectData,
+): Promise<LearningObject> {
+  return prisma.learningObject.create({
+    data: {
+      hruid: `${data.title.toLowerCase()}-${Date.now()}`,
+      language: "nl",
+      title: data.title,
+      description: data.description,
+      contentType: data.contentType,
+      keywords: data.keywords ?? [],
+      targetAges: data.targetAges ?? [],
+      teacherExclusive: data.teacherExclusive ?? false,
+      skosConcepts: data.skosConcepts ?? [],
+      copyright: data.copyright ?? "",
+      licence: data.licence ?? "CC BY Dwengo",
+      difficulty: data.difficulty ?? 1,
+      estimatedTime: data.estimatedTime ?? 0,
+      available: data.available ?? true,
+      contentLocation: data.contentLocation ?? "",
+      creatorId: teacherId,
     },
   });
 }

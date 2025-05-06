@@ -1,14 +1,13 @@
 import { describe, it, beforeEach, expect } from "vitest";
 import request from "supertest";
 import app from "../index";
-import prisma from "../config/prisma"; // <- important for DB assertions 
+import prisma from "../config/prisma"; // <- important for DB assertions
 
 import {
   createTeacher,
   createStudent,
   createClass,
   addTeacherToClass,
-  addStudentToClass,
   createLearningPath,
   createAssignment,
   createTeamWithStudents,
@@ -32,16 +31,31 @@ describe("🧪 Question Endpoints with DB assertions", () => {
     classroom = await createClass("QClass", "JOINQ1");
     await addTeacherToClass(teacherUser.id, classroom.id);
 
-    learningPath = await createLearningPath("Q Path", "desc", teacherUser.teacher.userId);
-    assignment = await createAssignment(classroom.id, learningPath.id, "Q Assignment", "desc", new Date(Date.now() + 86400000));
-    team = await createTeamWithStudents("Q Team", classroom.id, [studentUser.student]);
+    learningPath = await createLearningPath(
+      "Q Path",
+      "desc",
+      teacherUser.teacher.userId,
+    );
+    assignment = await createAssignment(
+      classroom.id,
+      learningPath.id,
+      "Q Assignment",
+      "desc",
+      new Date(Date.now() + 86400000),
+    );
+    team = await createTeamWithStudents("Q Team", classroom.id, [
+      studentUser.student,
+    ]);
     await giveAssignmentToTeam(assignment.id, team.id);
 
-    const lo = await LocalLearningObjectService.createLearningObject(teacherUser.id, {
-      title: "Q LO",
-      description: "For testing",
-      contentType: "TEXT_PLAIN"
-    });
+    const lo = await LocalLearningObjectService.createLearningObject(
+      teacherUser.id,
+      {
+        title: "Q LO",
+        description: "For testing",
+        contentType: "TEXT_PLAIN",
+      },
+    );
     localLOId = lo.id;
   });
 
@@ -55,7 +69,7 @@ describe("🧪 Question Endpoints with DB assertions", () => {
         text: "Explain quantum physics",
         isExternal: false,
         isPrivate: false,
-        localLearningObjectId: localLOId
+        localLearningObjectId: localLOId,
       });
 
     expect(res.status).toBe(201);
@@ -86,7 +100,7 @@ describe("🧪 Question Endpoints with DB assertions", () => {
         text: "What is knowledge?",
         isExternal: false,
         isPrivate: false,
-        pathRef: learningPath.id
+        pathRef: learningPath.id,
       });
 
     expect(res.status).toBe(201);
@@ -120,7 +134,7 @@ describe("🧪 Question Endpoints with DB assertions", () => {
         text: "Old title",
         isExternal: false,
         isPrivate: false,
-        localLearningObjectId: localLOId
+        localLearningObjectId: localLOId,
       });
 
     const qId = createQ.body.questionId;
@@ -145,7 +159,7 @@ describe("🧪 Question Endpoints with DB assertions", () => {
         text: "Base Q",
         isExternal: false,
         isPrivate: false,
-        localLearningObjectId: localLOId
+        localLearningObjectId: localLOId,
       });
 
     const qId = createQ.body.questionId;
@@ -155,7 +169,9 @@ describe("🧪 Question Endpoints with DB assertions", () => {
       .send({ text: "Hello msg" });
 
     expect(msg.status).toBe(201);
-    const dbMsg = await prisma.questionMessage.findUnique({ where: { id: msg.body.id } });
+    const dbMsg = await prisma.questionMessage.findUnique({
+      where: { id: msg.body.id },
+    });
     expect(dbMsg?.text).toBe("Hello msg");
     expect(dbMsg?.questionId).toBe(qId);
   });
@@ -170,7 +186,7 @@ describe("🧪 Question Endpoints with DB assertions", () => {
         text: "Test Delete",
         isExternal: false,
         isPrivate: false,
-        localLearningObjectId: localLOId
+        localLearningObjectId: localLOId,
       });
 
     const qId = createQ.body.questionId;
@@ -185,7 +201,9 @@ describe("🧪 Question Endpoints with DB assertions", () => {
       .set("Authorization", `Bearer ${teacherUser.token}`);
 
     expect(del.status).toBe(204);
-    const dbCheck = await prisma.questionMessage.findUnique({ where: { id: msgId } });
+    const dbCheck = await prisma.questionMessage.findUnique({
+      where: { id: msgId },
+    });
     expect(dbCheck).toBeNull();
   });
 });
@@ -205,16 +223,30 @@ describe("🔐 Authorization & integrity tests", () => {
     const klass = await createClass("Class A", "JOIN1234");
     await addTeacherToClass(teacherA.id, klass.id);
 
-    learningPathA = await createLearningPath("LP A", "desc", teacherA.teacher.userId);
-    assignmentA = await createAssignment(klass.id, learningPathA.id, "AssignA", "Desc", new Date(Date.now() + 86400000));
-    teamA = await createTeamWithStudents("TeamA", klass.id, [studentInTeam.student]);
+    learningPathA = await createLearningPath(
+      "LP A",
+      "desc",
+      teacherA.teacher.userId,
+    );
+    assignmentA = await createAssignment(
+      klass.id,
+      learningPathA.id,
+      "AssignA",
+      "Desc",
+      new Date(Date.now() + 86400000),
+    );
+    teamA = await createTeamWithStudents("TeamA", klass.id, [
+      studentInTeam.student,
+    ]);
     await giveAssignmentToTeam(assignmentA.id, teamA.id);
 
-    loA = (await LocalLearningObjectService.createLearningObject(teacherA.id, {
-      title: "Shared LO",
-      description: "Test",
-      contentType: "TEXT_PLAIN"
-    })).id;
+    loA = (
+      await LocalLearningObjectService.createLearningObject(teacherA.id, {
+        title: "Shared LO",
+        description: "Test",
+        contentType: "TEXT_PLAIN",
+      })
+    ).id;
 
     const q = await request(app)
       .post(`/question/specific/assignment/${assignmentA.id}`)
@@ -246,16 +278,12 @@ describe("🔐 Authorization & integrity tests", () => {
     expect(res.body.id).toBe(questionId);
   });
 
-  
-
   it("❌ Other teacher cannot DELETE question", async () => {
     const del = await request(app)
       .delete(`/question/${questionId}`)
       .set("Authorization", `Bearer ${teacherB.token}`);
     expect([401, 403]).toContain(del.status);
   });
-
-  
 
   it("✅ Student in team can POST message", async () => {
     const postMsg = await request(app)

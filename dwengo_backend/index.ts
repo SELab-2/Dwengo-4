@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction, Express } from "express";
+import express, { Express, NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
 import errorHandler from "./middleware/errorMiddleware";
 import learningObjectRoutes from "./routes/learningObject/learningObjectRoutes";
@@ -23,7 +23,8 @@ import authRoutes from "./routes/authentication/authRoutes";
 import { httpLogger, logger } from "./utils/logger";
 import { Logger } from "winston";
 import { logResponseBody } from "./middleware/logResponse";
-
+import path from "path"; // Add this import
+//
 dotenv.config();
 
 const app: Express = express();
@@ -35,6 +36,7 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
     "https://dwengo.org",
     "http://localhost:5173",
     "http://localhost:5000",
+    "https://sel2-4.ugent.be",
   ];
   const origin: string | undefined = req.headers.origin;
   if (origin && allowedOrigins.includes(origin)) {
@@ -42,17 +44,16 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
   }
   res.setHeader(
     "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    "GET, POST, PUT, DELETE, OPTIONS, PATCH",
   );
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "X-Requested-With, Content-Type, Authorization"
+    "X-Requested-With, Content-Type, Authorization",
   );
   next();
 });
-app.options("*", (req, res) => {
-  res.sendStatus(200);
-});
+
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
 app.options("*", (req, res) => {
   res.sendStatus(200);
@@ -100,7 +101,7 @@ app.use("/learningPath", learningPathRoutes);
 
 app.use(
   "/learningPath/:learningPathId/node",
-  teacherLocalLearningPathNodesRoutes
+  teacherLocalLearningPathNodesRoutes,
 );
 
 app.use("/progress", progressRoutes);
@@ -108,6 +109,11 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Routes voor indieningen
 app.use("/submission", submissionRoutes);
+
+// Catch-all route for React Router
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
+});
 
 // Error Handler
 app.use(errorHandler);
