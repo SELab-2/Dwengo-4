@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import { AssignmentPayload, ClassItem } from '../../types/type';
 import { fetchAssignment } from '@/util/teacher/assignment';
 import { fetchClasses } from '@/util/teacher/class';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Assignment edit component that allows teachers to modify existing assignments.
@@ -13,6 +14,7 @@ import { fetchClasses } from '@/util/teacher/class';
  */
 const AddAssignment: React.FC = () => {
   const { assignmentId } = useParams<{ assignmentId: string }>();
+  const { t } = useTranslation();
 
   /**
    * Query hook to fetch the assignment data
@@ -46,7 +48,7 @@ const AddAssignment: React.FC = () => {
   return (
     <div>
       {isLoading && isClassLoading ? (
-        'Assignment Loading...'
+        <div>{t('loading.loading')}</div>
       ) : (
         <AddAssignmentForm
           classesData={classesData ?? []}
