@@ -386,7 +386,7 @@ const AddAssignmentForm = ({
           )}
 
           <div>
-            <label htmlFor="deadline">Choose Deadline:</label>
+            <label htmlFor="deadline">{t('assignments_form.deadline')}</label>
             <input
               type="date"
               id="deadline"
@@ -405,14 +405,16 @@ const AddAssignmentForm = ({
               formNoValidate
               onClick={() => navigate(-1)}
             >
-              Cancel
+              {t('assignments_form.cancel')}
             </button>
             <button
               className={styles.submitButton}
               type="submit"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Submitting...' : 'Confirm'}
+              {isSubmitting
+                ? t('assignments_form.submitting')
+                : t('assignments_form.submit')}
             </button>
           </div>
           {submitError && <div className={styles.error}>{submitError}</div>}

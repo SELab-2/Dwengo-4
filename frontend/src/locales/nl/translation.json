@@ -93,7 +93,11 @@
       "class": "Klas",
       "edit": "Bewerken",
       "selected": "Geselecteerd"
-    }
+    },
+    "deadline": "Deadline",
+    "cancel": "Annuleer",
+    "submit": "Opslaan",
+    "submitting": "Opslaan..."
   },
   "classes": {
     "label": "Klasgroepen",

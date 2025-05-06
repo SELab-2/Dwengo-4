@@ -93,7 +93,11 @@
       "class": "Class",
       "edit": "Edit",
       "selected": "Selected"
-    }
+    },
+    "deadline": "Deadline",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "submitting": "Submitting..."
   },
   "classes": {
     "label": "Classes",
