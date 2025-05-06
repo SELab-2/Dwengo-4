@@ -384,3 +384,26 @@ export async function fetchDwengoObjectRawByHruid(
     return null;
   }
 }
+
+// check if dwengo object exists
+export async function validateDwengoObject(
+  hruid: string,
+  language: string,
+  version: number,
+): Promise<void> {
+  try {
+    const resp = await dwengoAPI.get(
+      `/api/learningObject/getMetadata?hruid=${hruid}&language=${language}&version=${version}`,
+    );
+    if (!resp.data) {
+      throw new NotFoundError(
+        `Dwengo-object (hruid=${hruid}, lang=${language}, ver=${version}) not found.`,
+      );
+    }
+  } catch (err: any) {
+    throwCorrectNetworkError(
+      err as Error,
+      "Could not fetch the requested learning object from the Dwengo API.",
+    );
+  }
+}

@@ -3,7 +3,7 @@ import {
   getNodesForPath,
   updateNodeForPath,
   deleteNodeFromPath,
-  updateAllNodesForPath,
+  createNodeForPath,
 } from "../../controllers/teacher/teacherLocalLearningPathNodesController";
 import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
@@ -18,6 +18,15 @@ const router = Router({ mergeParams: true });
  * @access User
  */
 router.get("/", protectAnyUser, getNodesForPath);
+
+/**
+ * @route POST /learningPath/:learningPathId/node
+ * @description Maak een nieuwe node in dit leerpad
+ * @param pathId: string
+ * @body NodeMetadata
+ * @access Teacher
+ */
+router.post("/", protectTeacher, createNodeForPath);
 
 /**
  * @route PATCH /learningPath/:learningPathId/node/:nodeId
@@ -37,15 +46,5 @@ router.patch("/:nodeId", protectTeacher, updateNodeForPath);
  * @access Teacher
  */
 router.delete("/:nodeId", protectTeacher, deleteNodeFromPath);
-
-/**
- * @route POST /learningPath/:learningPathId/node
- * @description updates (or creates) all nodes in the learning path
- * @param pathId: string
- * @body NodeMetadata[]: ordered list of nodes
- * -> can contain existing (re-ordered) nodes and new nodes, nodes not present in the list will be deleted
- * @access Teacher
- */
-router.post("/", protectTeacher, updateAllNodesForPath);
 
 export default router;

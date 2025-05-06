@@ -7,7 +7,10 @@ import {
   updateLocalLearningPath,
   deleteLocalLearningPath,
 } from "../../controllers/teacher/teacherLocalLearningPathController";
-import { getAllLearningPaths, getLearningPathById } from "../../controllers/teacher/teacherLearningPathController";
+import {
+  getAllLearningPaths,
+  getLearningPathById,
+} from "../../controllers/teacher/teacherLearningPathController";
 
 const router = Router();
 
@@ -16,8 +19,8 @@ router.use(protectTeacher);
 
 /**
  * @route POST /pathByTeacher
- * @description Maak een nieuw leerpad aan (standaard zonder nodes)
- * @body PathMetadata
+ * @description Maak een nieuw leerpad aan
+ * @body LocalLearningPathData
  * @access Teacher
  */
 router.post("/", createLocalLearningPath);
@@ -44,7 +47,6 @@ router.get("/all", getAllLearningPaths);
  */
 router.get("/all/:pathId", getLearningPathById);
 
-
 /**
  * GET /teacher/learningPaths/:pathId
  *   -> haal één leerpad op (mits je eigenaar bent)
@@ -59,7 +61,7 @@ router.get("/:pathId", getLocalLearningPathById);
  * @route PATCH /pathByTeacher/:pathId
  * @description Update een leerpad
  * @param pathId: string
- * @body PathMetadata
+ * @body LocalLearningPathData
  * @access Teacher
  */
 router.patch("/:pathId", updateLocalLearningPath);

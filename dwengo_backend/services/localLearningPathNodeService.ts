@@ -1,19 +1,17 @@
 import { LearningObject, LearningPathNode } from "@prisma/client";
-import { dwengoAPI } from "../config/dwengoAPI";
 import prisma from "../config/prisma";
 import {
   fetchDwengoObjectByHruidLangVersion,
   LearningObjectDto,
+  validateDwengoObject,
 } from "./dwengoLearningObjectService";
 import LocalLearningObjectService from "./localLearningObjectService";
 import {
   handlePrismaQuery,
   handlePrismaTransaction,
   handleQueryWithExistenceCheck,
-  throwCorrectNetworkError,
 } from "../errors/errorFunctions";
-import { AccessDeniedError, BadRequestError, NotFoundError } from "../errors/errors";
-import { NodeMetadata } from "../controllers/teacher/teacherLocalLearningPathNodesController";
+import { AccessDeniedError, BadRequestError } from "../errors/errors";
 
 /**
  * Data object om een node te maken/updaten.
@@ -100,6 +98,67 @@ class LocalLearningPathNodeService {
   }
 
   /**
+   * Creëer nieuwe node in path, atomaire transactie:
+   *  1) Node maken
+   *  2) Aantal nodes updaten
+   */
+  async createNodeForPath(
+    teacherId: number,
+    pathId: string,
+    data: NodeData,
+  ): Promise<LearningPathNode> {
+    await this.checkTeacherOwnsPath(teacherId, pathId);
+
+    // 1) Valideer => afhankelijk van isExternal
+    if (data.isExternal) {
+      this.checkHruidLanguageVersion(data);
+      await validateDwengoObject(
+        data.dwengoHruid!,
+        data.dwengoLanguage!,
+        data.dwengoVersion!,
+      );
+    } else {
+      if (!data.localLearningObjectId) {
+        throw new BadRequestError("Missing localLearningObjectId for local node.");
+      }
+      await LocalLearningObjectService.getLearningObjectById(
+        data.localLearningObjectId,
+      );
+    }
+
+    // 2) Transactie:
+    return await handlePrismaTransaction(prisma, async (tx) => {
+      const count = await tx.learningPathNode.count({
+        where: { learningPathId: pathId },
+      });
+
+      // 2a) Node maken
+      const newNode = await tx.learningPathNode.create({
+        data: {
+          learningPathId: pathId,
+          isExternal: data.isExternal,
+          localLearningObjectId: data.isExternal
+            ? undefined
+            : data.localLearningObjectId,
+          dwengoHruid: data.isExternal ? data.dwengoHruid : undefined,
+          dwengoLanguage: data.isExternal ? data.dwengoLanguage : undefined,
+          dwengoVersion: data.isExternal ? data.dwengoVersion : undefined,
+          start_node: data.start_node ?? false,
+          position: count, // nieuwe node komt achteraan
+        },
+      });
+
+      // 2b) Aantal nodes bijwerken
+      await tx.learningPath.update({
+        where: { id: pathId },
+        data: { num_nodes: count },
+      });
+
+      return newNode;
+    });
+  }
+
+  /**
    * Update existing node
    * (Geen transactie nodig, want we doen 1 DB-call en we
    *  updaten niet het aantal nodes.)
@@ -138,7 +197,7 @@ class LocalLearningPathNodeService {
       if (newIsExternal) {
         // van false => true
         this.checkHruidLanguageVersion(data);
-        await this.validateDwengoObject(
+        await validateDwengoObject(
           data.dwengoHruid!,
           data.dwengoLanguage!,
           data.dwengoVersion!,
@@ -156,7 +215,9 @@ class LocalLearningPathNodeService {
         if (!data.localLearningObjectId) {
           throw new BadRequestError("Missing localLearningObjectId for local node.");
         }
-        await this.validateLocalObject(data.localLearningObjectId);
+        await LocalLearningObjectService.getLearningObjectById(
+          data.localLearningObjectId,
+        );
 
         newLocalLearningObjectId = data.localLearningObjectId;
         // wis dwengo
@@ -190,7 +251,7 @@ class LocalLearningPathNodeService {
             throw new BadRequestError("Version must be a number.");
           }
 
-          await this.validateDwengoObject(newHruid, newLang, newVer);
+          await validateDwengoObject(newHruid, newLang, newVer);
         }
 
         newDwengoHruid = newHruid;
@@ -200,7 +261,9 @@ class LocalLearningPathNodeService {
         // lokaal node
         if (data.localLearningObjectId !== undefined) {
           // user gaf nieuwe local ID
-          await this.validateLocalObject(data.localLearningObjectId);
+          await LocalLearningObjectService.getLearningObjectById(
+            data.localLearningObjectId,
+          );
           newLocalLearningObjectId = data.localLearningObjectId;
         }
       }
@@ -264,196 +327,6 @@ class LocalLearningPathNodeService {
         data: { num_nodes: count },
       });
     });
-  }
-
-  async updateAllNodesForPath(
-    teacherId: number,
-    pathId: string,
-    nodes: NodeMetadata[],
-  ): Promise<void> {
-    await this.checkTeacherOwnsPath(teacherId, pathId);
-
-    const existingNodeIds: string[] = await handlePrismaQuery(() =>
-      prisma.learningPathNode
-        .findMany({
-          where: { learningPathId: pathId },
-          select: { nodeId: true, position: true },
-          orderBy: { position: "asc" },
-        })
-        .then((nodes) => nodes.map((node) => node.nodeId)),
-    );
-
-    // start transaction
-    await handlePrismaTransaction(prisma, async (tx) => {
-      // track updated/created node id's (in order!)
-      const processedNodeIds: string[] = [];
-
-      // update existing nodes / add new nodes
-      for (let newPosition = 0; newPosition < nodes.length; newPosition++) {
-        const nodeData = nodes[newPosition];
-
-        if (nodeData.nodeId) {
-          // if nodeId is provided, this is an existing node that we need to update
-          // only needs an upadate if the position is different
-          if (
-            newPosition >= existingNodeIds.length ||
-            existingNodeIds[newPosition] !== nodeData.nodeId
-          ) {
-            await tx.learningPathNode.update({
-              where: { nodeId: nodeData.nodeId },
-              data: {
-                position: newPosition, // update position in the list
-                start_node: newPosition === 0, // first node is always start node
-              },
-            });
-          }
-
-          processedNodeIds.push(nodeData.nodeId);
-        } else {
-          // if nodeId is not provided, this is a new node that we need to create
-
-          // first validate that the learning object exists
-          if (nodeData.isExternal) {
-            await this.validateDwengoObject(
-              nodeData.dwengoHruid!,
-              nodeData.dwengoLanguage!,
-              nodeData.dwengoVersion!,
-            );
-          } else {
-            if (!nodeData.localLearningObjectId) {
-              throw new BadRequestError(
-                "Missing localLearningObjectId for local node.",
-              );
-            }
-            await this.validateLocalObject(nodeData.localLearningObjectId);
-          }
-
-          // now create the new node
-          const node = await tx.learningPathNode.create({
-            data: {
-              learningPathId: pathId,
-              isExternal: nodeData.isExternal,
-              localLearningObjectId: nodeData.isExternal
-                ? null
-                : (nodeData.localLearningObjectId ?? null),
-              dwengoHruid: nodeData.isExternal ? nodeData.dwengoHruid : null,
-              dwengoLanguage: nodeData.isExternal ? nodeData.dwengoLanguage : null,
-              dwengoVersion: nodeData.isExternal ? nodeData.dwengoVersion : null,
-              start_node: newPosition === 0,
-              position: newPosition,
-            },
-          });
-
-          processedNodeIds.push(node.nodeId);
-        }
-      }
-
-      // update/create default transitions
-      for (let i = 0; i < processedNodeIds.length - 1; i++) {
-        const currentNodeId = processedNodeIds[i];
-        const nextNodeId = processedNodeIds[i + 1];
-
-        // find current node's original position if it existed
-        const currentOriginalIndex: number = existingNodeIds.indexOf(currentNodeId);
-
-        if (
-          currentOriginalIndex >= 0 && // current node is a node that already existed
-          currentOriginalIndex < existingNodeIds.length - 1 // and it isn't the last node (so there's already an existing default transition)
-        ) {
-          if (existingNodeIds[currentOriginalIndex + 1] === nextNodeId) {
-            // relative position is the same and both nodes already existed, so don't update transition
-            continue;
-          } else {
-            // update existing default transition
-            // there should only be one default transition, but we have to use updateMany since i don't have the transitionId
-            tx.learningPathTransition.updateMany({
-              where: { nodeId: currentNodeId, default: true },
-              data: { nextNodeId },
-            });
-          }
-        } else {
-          // create new default transition
-          await tx.learningPathTransition.create({
-            data: {
-              nodeId: currentNodeId,
-              nextNodeId,
-              default: true,
-            },
-          });
-        }
-      }
-      // delete default transition for last node (if it had one) (indicates end of path)
-      const lastNodeId = processedNodeIds[processedNodeIds.length - 1];
-      await tx.learningPathTransition.deleteMany({
-        where: {
-          nodeId: lastNodeId,
-          default: true,
-        },
-      });
-
-      // delete nodes that were not in list of nodes passed in the argument
-      const nodesToDelete: string[] = existingNodeIds.filter(
-        (id) => !processedNodeIds.includes(id),
-      );
-      // since prisma schema has ON DELETE CASCADE, the transistions involving these nodes will be deleted aswell
-      if (nodesToDelete.length > 0) {
-        await tx.learningPathNode.deleteMany({
-          where: {
-            nodeId: {
-              in: nodesToDelete,
-            },
-          },
-        });
-      }
-
-      // update the number of nodes in the learning path
-      await tx.learningPath.update({
-        where: { id: pathId },
-        data: { num_nodes: processedNodeIds.length },
-      });
-    });
-  }
-
-  /**
-   *  ================================
-   *  1) Check of local LearningObject bestaat
-   *  ================================
-   */
-  private async validateLocalObject(loId: string): Promise<void> {
-    await handleQueryWithExistenceCheck(
-      () =>
-        prisma.learningObject.findUnique({
-          where: { id: loId },
-        }),
-      `Local learning object not found.`,
-    );
-  }
-
-  /**
-   *  ================================
-   *  2) Check of external Dwengo object bestaat
-   *  ================================
-   */
-  private async validateDwengoObject(
-    hruid: string,
-    language: string,
-    version: number,
-  ): Promise<void> {
-    try {
-      const resp = await dwengoAPI.get(
-        `/api/learningObject/getMetadata?hruid=${hruid}&language=${language}&version=${version}`,
-      );
-      if (!resp.data) {
-        throw new NotFoundError(
-          `Dwengo-object (hruid=${hruid}, lang=${language}, ver=${version}) not found.`,
-        );
-      }
-    } catch (err: any) {
-      throwCorrectNetworkError(
-        err as Error,
-        "Could not fetch the requested learning object from the Dwengo API.",
-      );
-    }
   }
 
   private checkHruidLanguageVersion(data: NodeData) {

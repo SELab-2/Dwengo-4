@@ -16,7 +16,6 @@ import SignupTeacher from '../pages/teacher/SignupTeacher';
 import { action as teacherLogoutAction } from '../pages/teacher/LogoutTeacher';
 import EditClassTeacher from '../pages/teacher/EditClassTeacher';
 import TeacherIndex from '../pages/teacher/TeacherIndex';
-import CreateLearningPath from '../pages/teacher/editLearningPath/CreateLearningPath';
 import EditLearningPath from '../pages/teacher/editLearningPath/EditLearningPath';
 
 // ==== STUDENT ROUTES ==== //
@@ -126,12 +125,16 @@ export const router = createBrowserRouter([
       },
       {
         path: 'learning-paths/create',
-        element: <CreateLearningPath></CreateLearningPath>,
+        element: (
+          <LPEditProvider isCreateMode={true}>
+            <EditLearningPath />
+          </LPEditProvider>
+        ),
       },
       {
         path: 'learning-paths/:learningPathId/edit',
         element: (
-          <LPEditProvider>
+          <LPEditProvider isCreateMode={false}>
             <EditLearningPath />
           </LPEditProvider>
         ),

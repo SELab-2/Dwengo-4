@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState } from 'react';
-import { LearningPathNodeWithObject } from '../types/type';
+import { LearningPath, LearningPathNodeWithObject } from '../types/type';
 import { useMutation } from '@tanstack/react-query';
 import { APIError } from '@/types/api.types';
 import {
-  updateLearningPathNodes,
-  UpdateLearningPathNodesPayload,
+  updateOrCreateLearningPath,
+  updateOrCreateLearningPathPayload,
 } from '@/util/teacher/httpLearningPaths';
 import { useNavigate } from 'react-router-dom';
 import { queryClient } from '@/util/teacher/config';
@@ -22,7 +22,7 @@ export interface DraftNode {
 
 interface LPEditContextProps {
   isAddingNode: boolean;
-  currentNodeIndex: number;
+  currentNodeIndex: number; // indicates the index of the node where the user is adding a new node
   startAddingNode: (nodeIndex: number) => void;
   cancelAddingNode: () => void;
   addNode: (
@@ -38,8 +38,9 @@ interface LPEditContextProps {
     newNodes: (LearningPathNodeWithObject | DraftNode)[],
   ) => void;
   deleteNode: (index: number) => void;
-  savePath: (payload: UpdateLearningPathNodesPayload) => void;
+  savePath: (payload: updateOrCreateLearningPathPayload) => void;
   isSavingPath: boolean;
+  isCreateMode: boolean; // indicates whether the user is creating a new learning path or editing an existing one
 }
 
 const LPEditContext = createContext<LPEditContextProps | undefined>(undefined);
@@ -49,7 +50,8 @@ const LPEditContext = createContext<LPEditContextProps | undefined>(undefined);
  */
 export const LPEditProvider: React.FC<{
   children: React.ReactNode;
-}> = ({ children }) => {
+  isCreateMode: boolean;
+}> = ({ children, isCreateMode }) => {
   const [isAddingNode, setIsAddingNode] = useState(false);
   const [currentNodeIndex, setCurrentNodeIndex] = useState<number>(0);
   const [orderedNodes, setOrderedNodes] = useState<
@@ -110,15 +112,15 @@ export const LPEditProvider: React.FC<{
 
   const navigate = useNavigate();
   const { mutate: savePath, isPending: isSavingPath } = useMutation<
-    void,
+    LearningPath,
     APIError,
-    UpdateLearningPathNodesPayload
+    updateOrCreateLearningPathPayload
   >({
-    mutationFn: updateLearningPathNodes,
-    onSuccess: () => {
-      console.log('Learning path nodes updated successfully');
+    mutationFn: updateOrCreateLearningPath,
+    onSuccess: (path) => {
+      console.log('Learning path updated/created successfully');
       queryClient.invalidateQueries({ queryKey: ['learningPaths'] });
-      navigate(`/teacher/learning-paths`);
+      navigate(`/teacher/learning-paths/${path.id}`);
     },
   });
 
@@ -135,6 +137,7 @@ export const LPEditProvider: React.FC<{
         deleteNode,
         savePath,
         isSavingPath,
+        isCreateMode,
       }}
     >
       {children}

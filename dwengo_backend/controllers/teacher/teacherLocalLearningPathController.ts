@@ -1,23 +1,16 @@
 import { Response } from "express";
 import asyncHandler from "express-async-handler";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
-import LocalLearningPathService from "../../services/localLearningPathService";
+import LocalLearningPathService, {
+  LocalLearningPathData,
+} from "../../services/localLearningPathService";
 import { BadRequestError } from "../../errors/errors";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 import { checkIfTeacherIsCreator, Property } from "./teacherChecks";
 
-// Een interface om je body te structureren.
-// Je kunt er bijvoorbeeld nog meer velden in opnemen, afhankelijk van je noden.
-interface PathMetadata {
-  title: string;
-  language: string;
-  description?: string;
-  image?: string | null;
-}
-
 /**
  * POST /teacher/learningPaths
- *   -> nieuw leerpad (zonder nodes)
+ *   -> nieuw leerpad
  */
 export const createLocalLearningPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -29,17 +22,16 @@ export const createLocalLearningPath = asyncHandler(
       throw new BadRequestError("Title and language are required fields.");
     }
 
-    const { title, language, description, image } = req.body as PathMetadata;
+    const { title, language, description, image, nodes } =
+      req.body as LocalLearningPathData;
 
-    const newPath = await LocalLearningPathService.createLearningPath(
-      teacherId,
-      {
-        title,
-        language,
-        description: description || "",
-        image: image || null,
-      },
-    );
+    const newPath = await LocalLearningPathService.createLearningPath(teacherId, {
+      title: title,
+      language: language,
+      description: description !== undefined ? description : "",
+      image: image !== undefined ? image : null,
+      nodes: nodes !== undefined ? nodes : [],
+    });
 
     res.status(201).json({
       message: "Learning path successfully created.",
@@ -86,30 +78,27 @@ export const getLocalLearningPathById = asyncHandler(
 export const updateLocalLearningPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const teacherId = getUserFromAuthRequest(req).id;
-
     const { pathId } = req.params;
-    const existingPath =
-      await LocalLearningPathService.getLearningPathById(pathId);
+
+    const existingPath = await LocalLearningPathService.getLearningPathById(pathId);
     checkIfTeacherIsCreator(
       teacherId,
       existingPath.creatorId,
       Property.LearningPath,
     );
 
-    // Hier kun je gedeeltelijk updaten
-    const { title, language, description, image } =
-      req.body as Partial<PathMetadata>;
+    // any of these can be undefined
+    const { title, language, description, image, nodes } =
+      req.body as Partial<LocalLearningPathData>;
 
-    const updatedPath = await LocalLearningPathService.updateLearningPath(
-      pathId,
-      {
-        title: title !== undefined ? title : existingPath.title,
-        language: language !== undefined ? language : existingPath.language,
-        description:
-          description !== undefined ? description : existingPath.description,
-        image: image !== undefined ? image : existingPath.image || null,
-      },
-    );
+    const updatedPath = await LocalLearningPathService.updateLearningPath(pathId, {
+      title: title !== undefined ? title : existingPath.title,
+      language: language !== undefined ? language : existingPath.language,
+      description:
+        description !== undefined ? description : existingPath.description,
+      image: image !== undefined ? image : existingPath.image || null,
+      nodes: nodes,
+    });
 
     res.json({
       message: "Learning path successfully updated.",
@@ -126,8 +115,7 @@ export const deleteLocalLearningPath = asyncHandler(
     const teacherId = getUserFromAuthRequest(req).id;
 
     const { pathId } = req.params;
-    const existingPath =
-      await LocalLearningPathService.getLearningPathById(pathId);
+    const existingPath = await LocalLearningPathService.getLearningPathById(pathId);
     checkIfTeacherIsCreator(
       teacherId,
       existingPath.creatorId,

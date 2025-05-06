@@ -12,7 +12,9 @@ const AddNodeButton: React.FC<AddNodeButtonProps> = ({ label, nodeIndex }) => {
 
   return isAddingNode ? (
     <div className="w-full p-3 bg-gray-100 flex justify-between items-center">
-      <span className="text-gray-500 italic">Adding node...</span>
+      <span className="text-gray-500 italic cursor-default">
+        Adding node...
+      </span>
       <button
         className={`
           px-2 py-1 cursor-pointer rounded 
