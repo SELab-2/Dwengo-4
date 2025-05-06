@@ -16,7 +16,7 @@ import SignupTeacher from '../pages/teacher/SignupTeacher';
 import { action as teacherLogoutAction } from '../pages/teacher/LogoutTeacher';
 import EditClassTeacher from '../pages/teacher/EditClassTeacher';
 import TeacherIndex from '../pages/teacher/TeacherIndex';
-import EditLearningPath from '../pages/teacher/editLearningPath/EditLearningPath';
+import EditLearningPath from '../pages/teacher/EditLearningPath';
 
 // ==== STUDENT ROUTES ==== //
 import RootLayoutStudent from '../components/student/RootLayoutStudent';
