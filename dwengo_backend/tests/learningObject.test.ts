@@ -202,7 +202,9 @@ describe("learning object tests", { timeout: 15000 }, async () => {
     });
 
     it("shouldn't let an unauthorized user use this route", async () => {
-      const { status, body } = await request(app).get(`/learningObject/${lo.id}`); // don't add auth header
+      const { status, body } = await request(app).get(
+        `/learningObject/${lo.id}`,
+      ); // don't add auth header
 
       expect(status).toBe(401);
       expect(body.learningObject).toBeUndefined();
@@ -217,7 +219,7 @@ describe("learning object tests", { timeout: 15000 }, async () => {
         .get("/learningPath?all=")
         .set("Authorization", `Bearer ${teacherUser1.token}`);
       lp = res.body[0]; // get first dwengo learning path
-    });
+    }, 20_000);
     it("should return all learning objects that belong to the given learning path", async () => {
       const { status, body } = await request(app)
         .get(`/learningObject/learningPath/${lp._id}`)

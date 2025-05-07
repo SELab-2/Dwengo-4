@@ -12,7 +12,7 @@ import {
 } from "../errors/errorFunctions";
 import { NotFoundError } from "../errors/errors";
 
-type TeamWithStudentAndAssignment = Team & {
+export type TeamWithStudentAndAssignment = Team & {
   students: Student[];
   teamAssignment: TeamAssignment | null;
 };

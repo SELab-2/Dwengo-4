@@ -8,14 +8,16 @@ import asyncHandler from "express-async-handler";
 export default class StudentSubmissionController {
   createSubmission = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-      const { assignmentId, evaluationId } = req.params;
+      const evaluationId: string = req.params.evaluationId;
+      const assignmentId: number = req.params.assignmentId as unknown as number;
       const studentId: number = getUserFromAuthRequest(req).id;
 
       const submission: Submission = await service.createSubmission(
         studentId,
         evaluationId,
-        Number(assignmentId),
+        assignmentId,
       );
+
       res
         .status(201)
         .json({ message: "Submission successfully created.", submission });
@@ -24,7 +26,7 @@ export default class StudentSubmissionController {
 
   getSubmissionsForAssignment = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-      const assignmentId: number = Number(req.params.assignmentId);
+      const assignmentId: number = req.params.assignmentId as unknown as number;
       const studentId: number = getUserFromAuthRequest(req).id;
 
       const submissions: Submission[] =
@@ -36,12 +38,13 @@ export default class StudentSubmissionController {
 
   getSubmissionsForEvaluation = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-      const { assignmentId, evaluationId } = req.params;
+      const evaluationId: string = req.params.evaluationId;
+      const assignmentId: number = req.params.assignmentId as unknown as number;
       const studentId: number = getUserFromAuthRequest(req).id;
 
       const submissions: Submission[] =
         await service.getSubmissionsForEvaluation(
-          Number(assignmentId),
+          assignmentId,
           evaluationId,
           studentId,
         );

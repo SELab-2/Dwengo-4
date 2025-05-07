@@ -3,7 +3,6 @@ import { Response } from "express";
 import joinRequestService from "../../services/joinRequestService";
 import { JoinRequest } from "@prisma/client";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
-import { BadRequestError } from "../../errors/errors";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 /**
@@ -32,14 +31,10 @@ export const createJoinRequest = asyncHandler(
  */
 export const updateJoinRequestStatus = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const classId: number = parseInt(req.params.classId);
-    const requestId: number = parseInt(req.params.requestId);
+    const classId: number = req.params.classId as unknown as number;
+    const requestId: number = req.params.requestId as unknown as number;
     const { action }: { action: string } = req.body; // 'approve' or 'deny' from the request body
     const teacherId: number = getUserFromAuthRequest(req).id;
-
-    if (!action || (action !== "approve" && action !== "deny")) {
-      throw new BadRequestError("Action must be 'approve' or 'deny'.");
-    }
 
     if (action === "approve") {
       const joinRequest: JoinRequest =
@@ -67,7 +62,7 @@ export const updateJoinRequestStatus = asyncHandler(
  */
 export const getJoinRequestsByClass = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const classId: number = parseInt(req.params.classId);
+    const classId: number = req.params.classId as unknown as number;
     const teacherId: number = getUserFromAuthRequest(req).id;
     const joinRequests: JoinRequest[] =
       await joinRequestService.getJoinRequestsByClass(teacherId, classId);

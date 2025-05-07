@@ -88,9 +88,7 @@ export class AssignmentTeacherController {
   getAllAssignments = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
       const teacherId: number = getUserFromAuthRequest(req).id;
-      const limit: number | undefined = req.query.limit
-        ? parseInt(req.query.limit as string)
-        : undefined;
+      const limit: number | undefined = req.query.limit as unknown as number;
 
       const assignments = await teacherAssignmentService.getAllAssignments(
         teacherId,
@@ -103,7 +101,7 @@ export class AssignmentTeacherController {
 
   getAssignmentsByClass = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-      const classId: number = parseInt(req.params.classId);
+      const classId: number = req.params.classId as unknown as number;
       const teacherId: number = getUserFromAuthRequest(req).id;
       const assignments = await teacherAssignmentService.getAssignmentsByClass(
         classId,
@@ -115,7 +113,7 @@ export class AssignmentTeacherController {
 
   updateAssignment = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-      const assignmentId: number = parseInt(req.params.assignmentId);
+      const assignmentId: number = req.params.assignmentId as unknown as number;
       const { pathRef, isExternal, title, description, teamSize } = req.body;
       const teacherId: number = getUserFromAuthRequest(req).id;
       const updatedAssignment = await teacherAssignmentService.updateAssignment(
@@ -136,7 +134,7 @@ export class AssignmentTeacherController {
 
   deleteAssignment = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-      const assignmentId: number = parseInt(req.params.assignmentId);
+      const assignmentId: number = req.params.assignmentId as unknown as number;
       const teacherId: number = getUserFromAuthRequest(req).id;
       await teacherAssignmentService.deleteAssignment(assignmentId, teacherId);
       res.status(204).end();
@@ -148,7 +146,7 @@ export class AssignmentTeacherController {
     res: Response,
   ): Promise<void> => {
     try {
-      const assignmentId: number = parseInt(req.params.assignmentId);
+      const assignmentId: number = req.params.assignmentId as unknown as number;
       const {
         pathRef,
         pathLanguage,

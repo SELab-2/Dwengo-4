@@ -14,8 +14,8 @@ import prisma from "../../config/prisma";
 export const createTeamInAssignment = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     // This is guaranteed to be possible by "makeAssignmentIdParamValid" in middleware/teamValidationMiddleware.ts
-    const assignmentId: number = Number(req.params.assignmentId);
-    const classId: number = Number(req.params.classId);
+    const assignmentId: number = req.params.assignmentId as unknown as number;
+    const classId: number = req.params.classId as unknown as number;
     const { teams } = req.body;
 
     const createdTeams: Team[] = await handlePrismaTransaction(
@@ -34,7 +34,7 @@ export const createTeamInAssignment = asyncHandler(
 
 export const getTeamsInAssignment = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const assignmentId: number = Number(req.params.assignmentId);
+    const assignmentId: number = req.params.assignmentId as unknown as number;
     const teams: Team[] = await getTeamsThatHaveAssignment(assignmentId);
     res.status(200).json(teams);
   },
@@ -42,7 +42,7 @@ export const getTeamsInAssignment = asyncHandler(
 
 export const updateTeamsInAssignment = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const assignmentId: number = Number(req.params.assignmentId);
+    const assignmentId: number = req.params.assignmentId as unknown as number;
     const { teams } = req.body;
 
     const updatedTeams: Team[] = await updateTeamsForAssignment(
@@ -58,8 +58,7 @@ export const updateTeamsInAssignment = asyncHandler(
 
 export const deleteTeamInAssignment = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    // This is guaranteed to be possible by "makeTeamIdParamValid" in middleware/teamValidationMiddleware.ts
-    const teamId: number = Number(req.params.teamId);
+    const teamId: number = req.params.teamId as unknown as number;
 
     await deleteTeam(teamId);
     res.status(204).end();

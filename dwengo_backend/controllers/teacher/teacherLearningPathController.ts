@@ -4,6 +4,7 @@ import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import LocalLearningPathService from "../../services/localLearningPathService";
 import {
   getLearningPathByIdOrHruid,
+  LearningPathDto,
   searchLearningPaths,
 } from "../../services/learningPathService";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
@@ -15,19 +16,19 @@ import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 export const getAllLearningPaths = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     // Get local learning paths for the teacher
-    const teacherId = getUserFromAuthRequest(req).id;
+    const teacherId: number = getUserFromAuthRequest(req).id;
     const localPaths =
       await LocalLearningPathService.getAllLearningPathsByTeacher(teacherId);
 
     // Get all learning paths from API
-    const apiPaths = await searchLearningPaths({ all: "" });
+    const apiPaths: LearningPathDto[] = await searchLearningPaths({ all: "" });
 
     // Combine local and API paths into a single array
     const combinedPaths = [...localPaths, ...apiPaths];
 
     // Return combined results
     res.json(combinedPaths);
-  }
+  },
 );
 
 /**
@@ -36,12 +37,14 @@ export const getAllLearningPaths = asyncHandler(
  */
 export const getLearningPathById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const pathId = req.params.pathId;
+    const pathId: string = req.params.pathId;
+
     const { isExternal } = req.query; // Check if the path is external
     const isExternalBool =
       typeof isExternal === "string"
         ? isExternal.toLowerCase() === "true"
         : false;
+
     let learningPath;
 
     // Check if it's a local path (UUID format)
@@ -53,5 +56,5 @@ export const getLearningPathById = asyncHandler(
     }
 
     res.json(learningPath);
-  }
+  },
 );
