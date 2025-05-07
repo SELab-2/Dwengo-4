@@ -205,21 +205,21 @@ const ClassesPageTeacher: React.FC = () => {
               <tbody className="">
                 {classes.map((classItem) => (
                   <tr key={classItem.id}>
-                    <td className="px-4 py-2">
+                    <td className="text-center">
                       <Link to={`/teacher/classes/${classItem.id}`}>
                         <PrimaryButton>Beheer</PrimaryButton>
                       </Link>
                     </td>
-                    <td className="px-4 py-2">{classItem.name}</td>
-                    <td className="px-4 py-2">{classItem.code}</td>
-                    <td>
+                    <td className="text-center">{classItem.name}</td>
+                    <td className="text-center">{classItem.code}</td>
+                    <td className='text-center'>
                       <PrimaryButton
                         onClick={() => handleManageTeacherInvites(classItem.id)}
                       >
                         <span className="f-s">Beheer</span>
                       </PrimaryButton>
                     </td>
-                    <td>
+                    <td className='text-center'>
                       <PrimaryButton
                         onClick={() =>
                           handleManageStudentJoinRequests(classItem.id)
