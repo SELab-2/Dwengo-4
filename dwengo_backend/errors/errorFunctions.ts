@@ -41,7 +41,7 @@ export async function assertExists<T>(
   errorMessage: string = "The entity you were trying to fetch/update/delete did not exist.",
 ): Promise<T> {
   const entity = await fetcher();
-  if (entity === null) {
+  if (entity == null) {
     throw new NotFoundError(errorMessage);
   }
   return entity;
@@ -106,4 +106,23 @@ export function throwCorrectNetworkError(
   } else {
     throw new NetworkError(networkErrorMessage);
   }
+}
+
+/**
+ * Asserts that the result of the given fetcher function is a valid array.
+ * If the result is not an array, null, or undefined, the method throws a NotFoundError with the provided error message.
+ *
+ * @param {() => Promise<T[] | null | undefined>} fetcher - A function returning a Promise that resolves to an array, null, or undefined.
+ * @param {string} errorMessage - The message to be included in the NotFoundError if the assertion fails.
+ * @return {Promise<T[]>} A promise that resolves to the result of the fetcher if it is a valid array.
+ */
+export async function assertArrayDwengoLearningPath<T>(
+  fetcher: () => Promise<T[] | null | undefined>,
+  errorMessage: string,
+): Promise<T[]> {
+  const result = await fetcher();
+  if (!Array.isArray(result) || result === null || result === undefined) {
+    throw new NotFoundError(errorMessage);
+  }
+  return result;
 }

@@ -148,7 +148,7 @@ export const getStudentsByClassId = asyncHandler(
  * @query includeStudents - optional query parameter to include student details
  * returns a list of all classes for the authenticated teacher in the response body
  */
-export const getAllClassrooms = asyncHandler(
+/*export const getAllClassrooms = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const teacherId: number = getUserFromAuthRequest(req).id;
     const includeStudents = req.query.includeStudents === "true";
@@ -158,7 +158,7 @@ export const getAllClassrooms = asyncHandler(
     );
     res.status(200).json({ classrooms });
   },
-);
+);*/
 
 /**
  * Get classroom by ID
