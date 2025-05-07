@@ -1,8 +1,6 @@
-import { Response, NextFunction } from "express";
+import { NextFunction, Response } from "express";
 import { z, ZodIssue } from "zod";
 import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
-import { ParsedQs } from "qs";
-import { ParamsDictionary } from "express-serve-static-core";
 import { BadRequestError } from "../errors/errors";
 
 const formatZodErrors = (error: z.ZodError, source: string) => {
@@ -13,8 +11,12 @@ const formatZodErrors = (error: z.ZodError, source: string) => {
   }));
 };
 
-export const validationErrorMessage: string =
-  "Bad request due to invalid syntax or data (validation error)";
+type SchemaMap = {
+  source: "body" | "params" | "query" | "request";
+  schema?: z.ZodTypeAny;
+  data?: unknown;
+  assignTo?: keyof AuthenticatedRequest;
+};
 
 /**
  * use before controller to validate request body and params
@@ -40,41 +42,37 @@ export const validateRequest =
     querySchema?: z.AnyZodObject | z.ZodOptional<z.AnyZodObject>;
     customSchema?: z.ZodTypeAny;
   }) =>
-  (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+  (req: AuthenticatedRequest, _: Response, next: NextFunction): void => {
     const error_details: Array<{
       field: string;
       message: string;
       source: string;
     }> = [];
 
-    if (customSchema) {
-      const result = customSchema.safeParse(req);
+    const validations: SchemaMap[] = [
+      { source: "request", schema: customSchema, data: req },
+      { source: "body", schema: bodySchema, data: req.body, assignTo: "body" },
+      {
+        source: "params",
+        schema: paramsSchema,
+        data: req.params,
+        assignTo: "params",
+      },
+      {
+        source: "query",
+        schema: querySchema,
+        data: req.query,
+        assignTo: "query",
+      },
+    ];
+
+    for (const { source, schema, data, assignTo } of validations) {
+      if (!schema) continue;
+      const result = schema.safeParse(data);
       if (!result.success) {
-        error_details.push(...formatZodErrors(result.error, "request"));
-      }
-    }
-    if (bodySchema) {
-      const bodyResult = bodySchema.safeParse(req.body);
-      if (!bodyResult.success) {
-        error_details.push(...formatZodErrors(bodyResult.error, "body"));
-      } else {
-        req.body = bodyResult.data;
-      }
-    }
-    if (paramsSchema) {
-      const paramsResult = paramsSchema.safeParse(req.params);
-      if (!paramsResult.success) {
-        error_details.push(...formatZodErrors(paramsResult.error, "params"));
-      } else if (paramsResult.data) {
-        req.params = paramsResult.data as unknown as ParamsDictionary;
-      }
-    }
-    if (querySchema) {
-      const queryResult = querySchema.safeParse(req.query);
-      if (!queryResult.success) {
-        error_details.push(...formatZodErrors(queryResult.error, "query"));
-      } else {
-        req.query = queryResult.data as unknown as ParsedQs;
+        error_details.push(...formatZodErrors(result.error, source));
+      } else if (assignTo) {
+        (req[assignTo] as any) = result.data;
       }
     }
 

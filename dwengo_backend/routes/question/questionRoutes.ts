@@ -20,7 +20,7 @@ import {
   authorizeMessageUpdate,
   authorizeMessageDelete,
   authorizeQuestionUpdate,
-} from "../../middleware/questionsAuthMiddleware";
+} from "../../middleware/authMiddleware/questionsAuthMiddleware";
 
 const router: Router = express.Router();
 
