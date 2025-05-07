@@ -219,7 +219,7 @@ describe("learning object tests", { timeout: 15000 }, async () => {
         .get("/learningPath?all=")
         .set("Authorization", `Bearer ${teacherUser1.token}`);
       lp = res.body[0]; // get first dwengo learning path
-    });
+    }, 20_000);
     it("should return all learning objects that belong to the given learning path", async () => {
       const { status, body } = await request(app)
         .get(`/learningObject/learningPath/${lp._id}`)

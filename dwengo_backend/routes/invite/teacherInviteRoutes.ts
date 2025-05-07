@@ -12,10 +12,10 @@ import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddl
 import {
   classAndInviteIdParamsSchema,
   classIdParamsSchema,
+  inviteActionBodySchema,
   inviteIdParamsSchema,
-} from "../../zodSchemas/idSchemas";
-import { otherTeacherEmailBodySchema } from "../../zodSchemas/emailSchemas";
-import { inviteActionBodySchema } from "../../zodSchemas/bodySchemas";
+  otherTeacherEmailBodySchema,
+} from "../../zodSchemas";
 
 const router: Router = express.Router();
 

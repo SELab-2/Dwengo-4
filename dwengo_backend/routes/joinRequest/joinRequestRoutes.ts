@@ -10,8 +10,8 @@ import { validateRequest } from "../../middleware/validateRequest";
 import {
   classAndRequestIdParamsSchema,
   classIdParamsSchema,
-} from "../../zodSchemas/idSchemas";
-import { joinRequestBodySchema } from "../../zodSchemas/bodySchemas";
+  joinRequestBodySchema,
+} from "../../zodSchemas";
 
 const router: Router = express.Router();
 

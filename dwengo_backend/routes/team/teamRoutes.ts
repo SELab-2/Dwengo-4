@@ -5,7 +5,7 @@ import teacherTeamRoutes from "./teacherTeamRoutes";
 import studentTeamRoutes from "./studentTeamRoutes";
 import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
 import { validateRequest } from "../../middleware/validateRequest";
-import { teamIdParamsSchema } from "../../zodSchemas/idSchemas";
+import { teamIdParamsSchema } from "../../zodSchemas";
 
 const router: Router = Router();
 

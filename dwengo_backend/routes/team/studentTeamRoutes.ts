@@ -6,7 +6,7 @@ import {
 } from "../../controllers/student/studentTeamController";
 import { protectStudent } from "../../middleware/authMiddleware/studentAuthMiddleware";
 import { validateRequest } from "../../middleware/validateRequest";
-import { assignmentIdParamsSchema } from "../../zodSchemas/idSchemas";
+import { assignmentIdParamsSchema } from "../../zodSchemas";
 
 const router: Router = Router();
 router.use(protectStudent);

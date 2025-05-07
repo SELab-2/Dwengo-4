@@ -10,7 +10,7 @@ import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddl
 import {
   localLearningObjectBodySchema,
   partialLocalLearningObjectBodySchema,
-} from "../../zodSchemas/bodySchemas";
+} from "../../zodSchemas";
 import { validateRequest } from "../../middleware/validateRequest";
 
 const router: Router = express.Router();

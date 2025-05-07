@@ -5,8 +5,7 @@ import {
 } from "../../controllers/student/studentAssignmentController";
 import { protectStudent } from "../../middleware/authMiddleware/studentAuthMiddleware";
 import { validateRequest } from "../../middleware/validateRequest";
-import { limitQuerySchema } from "../../zodSchemas/querySchemas";
-import { classIdParamsSchema } from "../../zodSchemas/idSchemas";
+import { classIdParamsSchema, limitQuerySchema } from "../../zodSchemas";
 
 const router: Router = express.Router();
 

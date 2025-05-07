@@ -12,7 +12,7 @@ import {
   getLearningPathById,
 } from "../../controllers/teacher/teacherLearningPathController";
 import { validateRequest } from "../../middleware/validateRequest";
-import { titleAndLanguageBodySchema } from "../../zodSchemas/bodySchemas";
+import { titleAndLanguageBodySchema } from "../../zodSchemas";
 
 const router: Router = Router();
 

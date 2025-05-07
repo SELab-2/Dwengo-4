@@ -9,8 +9,6 @@ import { Response } from "express";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 
 const createdQuestionMessage = "Question successfully created.";
-const badRequestMessage =
-  "Missing required fields (assignmentId, teamId, title, text).";
 const missingRole = "User role is missing.";
 
 // CREATE SPECIFIC
@@ -29,19 +27,15 @@ export const createQuestionSpecific = asyncHandler(
       isPrivate,
     } = req.body;
 
-    if (!assignmentId || !teamId || !title || !text) {
-      throw new BadRequestError(badRequestMessage);
-    }
-    const user: AuthenticatedUser = getUserFromAuthRequest(req);
-    if (!user.role) {
-      throw new BadRequestError(missingRole);
-    }
+    const user: AuthenticatedUser = assertUserHasRole(
+      getUserFromAuthRequest(req),
+    );
 
     const questionSpec = await QuestionService.createQuestionSpecific(
-      Number(assignmentId),
-      Number(teamId),
+      assignmentId as unknown as number,
+      teamId,
       user.id,
-      user.role,
+      user.role!,
       title,
       text,
       !!isExternal,
@@ -49,7 +43,7 @@ export const createQuestionSpecific = asyncHandler(
       localLearningObjectId,
       dwengoHruid,
       dwengoLanguage,
-      dwengoVersion ? Number(dwengoVersion) : undefined,
+      dwengoVersion ? dwengoVersion : undefined,
     );
 
     res.status(201).json({
@@ -59,6 +53,11 @@ export const createQuestionSpecific = asyncHandler(
     });
   },
 );
+
+const assertUserHasRole = (user: AuthenticatedUser) => {
+  if (!user.role) throw new BadRequestError(missingRole);
+  return user;
+};
 
 // CREATE GENERAL
 export const createQuestionGeneral = asyncHandler(
@@ -74,19 +73,13 @@ export const createQuestionGeneral = asyncHandler(
       isPrivate,
     } = req.body;
 
-    if (!assignmentId || !teamId || !title || !text || !pathRef) {
-      throw new BadRequestError(badRequestMessage);
-    }
-    const user = getUserFromAuthRequest(req);
-    if (!user.role) {
-      throw new BadRequestError(missingRole);
-    }
+    const user = assertUserHasRole(getUserFromAuthRequest(req));
 
     const questionGen = await QuestionService.createQuestionGeneral(
-      Number(assignmentId),
-      Number(teamId),
+      assignmentId as unknown as number,
+      teamId as unknown as number,
       user.id,
-      user.role,
+      user.role!,
       title,
       text,
       !!isExternal,
@@ -109,17 +102,10 @@ export const createQuestionMessage = asyncHandler(
     const { questionId } = req.params;
     const { text } = req.body;
 
-    if (!questionId) {
-      throw new BadRequestError("Missing question id.");
-    }
-
-    if (!text) {
-      throw new BadRequestError("Missing text.");
-    }
     const userId = getUserFromAuthRequest(req).id;
 
     const msg = await QuestionService.createQuestionMessage(
-      Number(questionId),
+      questionId as unknown as number,
       userId,
       text,
     );
@@ -136,11 +122,9 @@ export const updateQuestion = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { questionId } = req.params;
     const { title } = req.body;
-    if (!title) {
-      throw new BadRequestError("Missing title.");
-    }
+
     const updated = await QuestionService.updateQuestion(
-      Number(questionId),
+      questionId as unknown as number,
       title,
     );
     res
@@ -155,11 +139,8 @@ export const updateQuestionMessage = asyncHandler(
     const { questionMessageId } = req.params;
     const { text } = req.body;
 
-    if (!text) {
-      throw new BadRequestError("Missing text for question message update.");
-    }
     const updatedMsg = await QuestionService.updateQuestionMessage(
-      Number(questionMessageId),
+      questionMessageId as unknown as number,
       text,
     );
     res
@@ -171,8 +152,8 @@ export const updateQuestionMessage = asyncHandler(
 // GET question
 export const getQuestion = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { questionId } = req.params;
-    const q = await QuestionService.getQuestion(Number(questionId));
+    const questionId = req.params.questionId as unknown as number;
+    const q = await QuestionService.getQuestion(questionId);
     res.json(q);
   },
 );
@@ -180,10 +161,10 @@ export const getQuestion = asyncHandler(
 // GET questions by team
 export const getQuestionsTeam = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { teamId } = req.params;
+    const teamId = req.params.teamId as unknown as number;
     const user = getUserFromAuthRequest(req);
     const questions = await QuestionService.getQuestionsForTeam(
-      Number(teamId),
+      teamId,
       user, // pass user => filtering
     );
     res.json(questions);
@@ -193,24 +174,22 @@ export const getQuestionsTeam = asyncHandler(
 // GET questions by class
 export const getQuestionsClass = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { classId } = req.params;
+    const classId = req.params.classId as unknown as number;
     const user = getUserFromAuthRequest(req);
-    const questions = await QuestionService.getQuestionsForClass(
-      Number(classId),
-      user,
-    );
+    const questions = await QuestionService.getQuestionsForClass(classId, user);
     res.json(questions);
   },
 );
 
-// GET questions for assignment + class
+// GET questions for assignment and class
 export const getQuestionsAssignment = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { assignmentId, classId } = req.params;
+    const assignmentId = req.params.assignmentId as unknown as number;
+    const classId = req.params.classId as unknown as number;
     const user = getUserFromAuthRequest(req);
     const questions = await QuestionService.getQuestionsForAssignment(
-      Number(assignmentId),
-      Number(classId),
+      assignmentId,
+      classId,
       user,
     );
     res.json(questions);
@@ -220,8 +199,8 @@ export const getQuestionsAssignment = asyncHandler(
 // GET question messages
 export const getQuestionMessages = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { questionId } = req.params;
-    const msgs = await QuestionService.getQuestionMessages(Number(questionId));
+    const questionId: number = req.params.questionId as unknown as number;
+    const msgs = await QuestionService.getQuestionMessages(questionId);
     res.json(msgs);
   },
 );
@@ -229,17 +208,17 @@ export const getQuestionMessages = asyncHandler(
 // DELETE question
 export const deleteQuestion = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { questionId } = req.params;
-    await QuestionService.deleteQuestion(Number(questionId));
+    const questionId: number = req.params.questionId as unknown as number;
+    await QuestionService.deleteQuestion(questionId);
     res.status(204).end();
   },
 );
 
-// DELETE message
+// DELETE a message
 export const deleteQuestionMessage = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { questionMessageId } = req.params;
-    await QuestionService.deleteQuestionMessage(Number(questionMessageId));
+    const questionMessageId = req.params.questionMessageId as unknown as number;
+    await QuestionService.deleteQuestionMessage(questionMessageId);
     res.status(204).end();
   },
 );

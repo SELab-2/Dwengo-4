@@ -1,12 +1,45 @@
 import { NextFunction, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { PrismaClient } from "@prisma/client";
-import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
-import { NotFoundError, AccessDeniedError } from "../../errors/errors";
+import { Prisma, PrismaClient } from "@prisma/client";
+import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
+import { AccessDeniedError, NotFoundError } from "../errors/errors";
+import { handleQueryWithExistenceCheck } from "../errors/errorFunctions";
 
 const prisma = new PrismaClient();
 const accessDeniedErrorMessage = "Not logged in.";
 const notFoundErrorMessage = "Question not found.";
+
+const baseTeamInclude = {
+  class: {
+    include: {
+      ClassTeacher: true,
+    },
+  },
+} as const;
+
+const questionInclude = Prisma.validator<Prisma.QuestionInclude>()({
+  team: {
+    include: baseTeamInclude,
+  },
+});
+
+const questionWithTeamAndClassInclude =
+  Prisma.validator<Prisma.QuestionInclude>()({
+    team: {
+      include: {
+        ...baseTeamInclude,
+        students: true,
+      },
+    },
+  });
+
+type QuestionWithTeamClassAndTeacher = Prisma.QuestionGetPayload<{
+  include: typeof questionInclude;
+}>;
+
+type QuestionWithTeamAndClass = Prisma.QuestionGetPayload<{
+  include: typeof questionWithTeamAndClassInclude;
+}>;
 
 /**
  * authorizeQuestion:
@@ -22,24 +55,15 @@ export const authorizeQuestion = asyncHandler(
       throw new AccessDeniedError(accessDeniedErrorMessage);
     }
 
-    const question = await prisma.question.findUnique({
-      where: { id: Number(questionId) },
-      include: {
-        team: {
-          include: {
-            students: true,
-            class: {
-              include: {
-                ClassTeacher: true,
-              },
-            },
-          },
-        },
-      },
-    });
-    if (!question) {
-      throw new NotFoundError(notFoundErrorMessage);
-    }
+    const question: QuestionWithTeamAndClass =
+      await handleQueryWithExistenceCheck(
+        () =>
+          prisma.question.findUnique({
+            where: { id: Number(questionId) },
+            include: questionWithTeamAndClassInclude,
+          }),
+        notFoundErrorMessage,
+      );
 
     // check teacher
     const isTeacherInClass = question.team.class.ClassTeacher.some(
@@ -83,23 +107,15 @@ export const authorizeQuestionUpdate = asyncHandler(
       throw new AccessDeniedError(accessDeniedErrorMessage);
     }
 
-    const question = await prisma.question.findUnique({
-      where: { id: Number(questionId) },
-      include: {
-        team: {
-          include: {
-            class: {
-              include: {
-                ClassTeacher: true,
-              },
-            },
-          },
-        },
-      },
-    });
-    if (!question) {
-      throw new NotFoundError(notFoundErrorMessage);
-    }
+    const question: QuestionWithTeamClassAndTeacher =
+      await handleQueryWithExistenceCheck(
+        () =>
+          prisma.question.findUnique({
+            where: { id: Number(questionId) },
+            include: questionInclude,
+          }),
+        notFoundErrorMessage,
+      );
 
     // Is user the owner?
     const isOwner = question.createdBy === user.id;
@@ -122,7 +138,7 @@ export const authorizeQuestionUpdate = asyncHandler(
  *  - Alleen de eigenaar (message.userId) of admin mag de tekst updaten
  */
 export const authorizeMessageUpdate = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, _: Response, next: NextFunction) => {
     const { questionMessageId } = req.params;
     const user = req.user;
     if (!user) {
@@ -155,7 +171,7 @@ export const authorizeMessageUpdate = asyncHandler(
  *  - De eigenaar (student/teacher), *teacher in klas*, of admin mag deleten
  */
 export const authorizeMessageDelete = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, _: Response, next: NextFunction) => {
     const { questionId, questionMessageId } = req.params;
     const user = req.user;
     if (!user) {
@@ -163,12 +179,13 @@ export const authorizeMessageDelete = asyncHandler(
     }
 
     // 1) Vind de message
-    const message = await prisma.questionMessage.findUnique({
-      where: { id: Number(questionMessageId) },
-    });
-    if (!message) {
-      throw new NotFoundError("QuestionMessage not found.");
-    }
+    const message = await handleQueryWithExistenceCheck(
+      () =>
+        prisma.questionMessage.findUnique({
+          where: { id: Number(questionMessageId) },
+        }),
+      "QuestionMessage not found.",
+    );
 
     // 2) Ben je de owner?
     if (message.userId === user.id) {
@@ -176,23 +193,14 @@ export const authorizeMessageDelete = asyncHandler(
     }
 
     // 3) of ben je teacher in de bijbehorende class? of admin?
-    const question = await prisma.question.findUnique({
-      where: { id: Number(questionId) },
-      include: {
-        team: {
-          include: {
-            class: {
-              include: {
-                ClassTeacher: true,
-              },
-            },
-          },
-        },
-      },
-    });
-    if (!question) {
-      throw new NotFoundError("Question not found for this message.");
-    }
+    const question = await handleQueryWithExistenceCheck(
+      () =>
+        prisma.question.findUnique({
+          where: { id: Number(questionId) },
+          include: questionInclude,
+        }),
+      "Question not found for this message.",
+    );
 
     const isTeacherInClass = question.team.class.ClassTeacher.some(
       (ct) => ct.teacherId === user.id,

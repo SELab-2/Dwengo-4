@@ -10,13 +10,11 @@ import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddl
 import { validateRequest } from "../../middleware/validateRequest";
 import {
   assignmentIdParamsSchema,
-  classAndAssignmentIdParamsSchema,
   teamIdParamsSchema,
-} from "../../zodSchemas/idSchemas";
-import {
   identifiableTeamsBodySchema,
   teamsBodySchema,
-} from "../../zodSchemas/bodySchemas";
+  classAndAssignmentIdParamsSchema,
+} from "../../zodSchemas";
 
 const router: Router = Router();
 router.use(protectTeacher);

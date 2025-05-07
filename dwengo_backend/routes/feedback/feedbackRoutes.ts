@@ -5,7 +5,7 @@ import { validateRequest } from "../../middleware/validateRequest";
 import {
   assignmentIdParamsSchema,
   submissionIdParamsSchema,
-} from "../../zodSchemas/idSchemas";
+} from "../../zodSchemas";
 
 const router: Router = express.Router();
 const controller = new FeedbackController();
