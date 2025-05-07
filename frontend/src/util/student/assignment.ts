@@ -1,6 +1,6 @@
 import { APIError, AssignmentItem } from '@/types/api.types';
 import { getAuthToken } from './authStudent';
-import { BACKEND } from './config';
+import { BACKEND } from '../shared/config';
 
 export async function fetchAssignments(): Promise<AssignmentItem[]> {
   const response = await fetch(`${BACKEND}/assignment/student`, {

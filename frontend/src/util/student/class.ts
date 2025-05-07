@@ -1,5 +1,5 @@
 import { ClassItem } from '@/types/type';
-import { BACKEND } from './config';
+import { BACKEND } from '../shared/config';
 import { getAuthToken } from './authStudent';
 import { APIError } from '@/types/api.types';
 
@@ -58,16 +58,15 @@ export async function fetchClass({
 
 
 export async function fetchLeaveClass({ classId }: { classId: string }) {
-    const response = await fetch(`${BACKEND}/class/student/${classId}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-  
-    return response;
-  }
-  
+  const response = await fetch(`${BACKEND}/class/student/${classId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+  });
 
-  
+  return response;
+}
+
+

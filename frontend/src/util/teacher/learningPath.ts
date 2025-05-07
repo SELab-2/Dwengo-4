@@ -1,7 +1,7 @@
 import { APIError } from '@/types/api.types';
 import { LearningPath } from '../../types/type';
 import { getAuthToken } from './authTeacher';
-import { BACKEND } from './config';
+import { apiRequest, BACKEND } from '../shared/config';
 
 /**
  * Fetches all learning paths for the authenticated teacher
@@ -9,25 +9,14 @@ import { BACKEND } from './config';
  * @throws {APIError} When fetching fails
  */
 export async function fetchLearningPaths(): Promise<LearningPath[]> {
-  const response = await fetch(`${BACKEND}/pathByTeacher/all`, {
+
+  const response = await apiRequest({
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
-  });
+    endpoint: '/pathByTeacher/all',
+    getToken: getAuthToken,
+  }) as { learningPaths: LearningPath[] };
 
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het ophalen van de leerpaden.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
-
-  let learningPaths = await response.json();
-  learningPaths = learningPaths
+  const learningPaths = response
     .map((path: any) => ({
       ...path,
       id: path._id || path.id,
@@ -49,28 +38,14 @@ export async function fetchLearningPath(
   learningPathId: string,
   isExternal: boolean = false,
 ): Promise<LearningPath> {
-  const response = await fetch(
-    `${BACKEND}/pathByTeacher/all/${learningPathId}?isExternal=${isExternal}`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
-    },
-  );
 
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het ophalen van het leerpad.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
+  return (await apiRequest({
+    method: 'GET',
+    endpoint: `/pathByTeacher/all/${learningPathId}?isExternal=${isExternal}`,
+    getToken: getAuthToken,
+  }) as { learningPath: LearningPath });
 
-  const learningPath = await response.json();
-  return learningPath;
+
 }
 
 /**
@@ -81,23 +56,9 @@ export async function fetchLearningPath(
  */
 export async function fetchLearningObjectsByLearningPath(pathId: string): Promise<any> {
 
-  const response = await fetch(`${BACKEND}/learningObject/learningPath/${pathId}`, {
+  return await apiRequest({
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
-  });
-  console.log("fet  ")
-
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het ophalen van de leerobjecten.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
-
-  return await response.json();
+    endpoint: `/learningObject/learningPath/${pathId}`,
+    getToken: getAuthToken,
+  }) as { learningObjects: any[] };
 }

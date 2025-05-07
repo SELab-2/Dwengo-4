@@ -1,4 +1,4 @@
-import { BACKEND } from './config';
+import { BACKEND } from '../shared/config';
 import { APIError, AuthCredentials, AuthResponse } from '@/types/api.types';
 
 export async function loginStudent({

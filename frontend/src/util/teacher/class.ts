@@ -1,7 +1,7 @@
 import { ClassItem } from '../../types/type';
 import { APIError, CreateClassPayload, StudentItem, UpdateClassPayload } from '../../types/api.types';
-import { BACKEND } from './config';
 import { getAuthToken } from './authTeacher';
+import { apiRequest, BACKEND } from '../shared/config';
 
 
 
@@ -64,25 +64,13 @@ export async function fetchClasses(
 export async function createClass({
     name,
 }: CreateClassPayload): Promise<ClassItem> {
-    const response = await fetch(`${BACKEND}/class/teacher`, {
+
+    return await apiRequest({
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${getAuthToken()}`,
-        },
-        body: JSON.stringify({ name }),
+        endpoint: '/class/teacher',
+        body: { name },
+        getToken: getAuthToken,
     });
-
-    if (!response.ok) {
-        const error: APIError = new Error(
-            'Er is iets misgegaan bij het aanmaken van de klas.',
-        );
-        error.code = response.status;
-        error.info = await response.json();
-        throw error;
-    }
-
-    return await response.json();
 }
 
 /**
@@ -95,25 +83,13 @@ export async function updateClass({
     name,
     classId,
 }: UpdateClassPayload): Promise<ClassItem> {
-    const response = await fetch(`${BACKEND}/class/teacher/${classId}`, {
+
+    return await apiRequest({
         method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${getAuthToken()}`,
-        },
-        body: JSON.stringify({ name }),
+        endpoint: `/class/teacher/${classId}`,
+        body: { name },
+        getToken: getAuthToken,
     });
-
-    if (!response.ok) {
-        const error: APIError = new Error(
-            'Er is iets misgegaan bij het updaten van de klas.',
-        );
-        error.code = response.status;
-        error.info = await response.json();
-        throw error;
-    }
-
-    return await response.json();
 }
 
 /**
@@ -127,25 +103,12 @@ export async function fetchClass({
 }: {
     classId: number;
 }): Promise<ClassItem> {
-    const response = await fetch(`${BACKEND}/class/teacher/${classId}`, {
+    const response = await apiRequest<{ classroom: ClassItem }>({
         method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${getAuthToken()}`,
-        },
+        endpoint: `/class/teacher/${classId}`,
+        getToken: getAuthToken,
     });
-
-    if (!response.ok) {
-        const error: APIError = new Error(
-            'Er is iets misgegaan bij het ophalen van de klas.',
-        );
-        error.code = response.status;
-        error.info = await response.json();
-        throw error;
-    }
-    let classroom = await response.json();
-    classroom = classroom.classroom;
-    return classroom;
+    return response.classroom;
 }
 
 
@@ -160,24 +123,12 @@ export async function fetchStudentsByClass({
 }: {
     classId: number;
 }): Promise<StudentItem[]> {
-    const response = await fetch(`${BACKEND}/class/teacher/${classId}/student`, {
+
+    const response = await apiRequest<{ students: StudentItem[] }>({
         method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${getAuthToken()}`,
-        },
-    });
+        endpoint: `/class/teacher/${classId}/student`,
+        getToken: getAuthToken,
+    })
 
-    if (!response.ok) {
-        const error: APIError = new Error(
-            'Er is iets misgegaan bij het ophalen van de studenten.',
-        );
-        error.code = response.status;
-        error.info = await response.json();
-        throw error;
-    }
-
-    let students = await response.json();
-    students = students.students;
-    return students;
+    return response.students;
 }

@@ -1,5 +1,5 @@
 import { AuthCredentials, AuthResponse, APIError } from '../../types/api.types';
-import { BACKEND } from './config';
+import { apiRequest, BACKEND } from '../shared/config';
 
 
 /**
@@ -12,24 +12,14 @@ export async function loginTeacher({
   email,
   password,
 }: AuthCredentials): Promise<AuthResponse> {
-  const response = await fetch(`${BACKEND}/auth/teacher/login`, {
+
+  return await apiRequest({
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
+    endpoint: '/auth/teacher/login',
+    body: { email, password },
+    getToken: () => null,
   });
 
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan tijdens het inloggen.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
-
-  return await response.json();
 }
 
 /**
@@ -44,22 +34,11 @@ export async function signupTeacher({
   email,
   password,
 }: AuthCredentials): Promise<AuthResponse> {
-  const response = await fetch(`${BACKEND}/auth/teacher/register`, {
+
+  return await apiRequest({
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ firstName, lastName, email, password }),
+    endpoint: '/auth/teacher/register',
+    body: { firstName, lastName, email, password },
+    getToken: () => null,
   });
-
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan tijdens het registreren.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
-
-  return await response.json();
 }

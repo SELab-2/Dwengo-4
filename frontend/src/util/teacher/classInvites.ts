@@ -1,24 +1,8 @@
-import { QueryClient } from '@tanstack/react-query';
 import { getAuthToken } from './authTeacher';
-import {
-  AssignmentPayload,
-  ClassItem,
-  LearningPath,
-  Team,
-  TeamAssignment,
-} from '../../types/type';
 import { APIError, Invite } from '@/types/api.types';
 
-const BACKEND = 'http://localhost:5000';
-
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-    },
-  },
-});
-
+import { apiRequest, BACKEND } from '../shared/config';
+import { AwardIcon } from 'lucide-react';
 
 /**
  * Haal alle pending invites voor een klas op
@@ -28,24 +12,13 @@ export const queryClient = new QueryClient({
 export async function getPendingInvitesForClass(
   classId: string,
 ): Promise<Invite[]> {
-  const response = await fetch(`${BACKEND}/invite/class/${classId}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
-  });
 
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het ophalen van de invites.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
-  const data = await response.json();
-  return data.invites;
+  const response = await apiRequest({
+    method: 'GET',
+    endpoint: `/invite/class/${classId}`,
+    getToken: getAuthToken,
+  }) as { invites: Invite[] };
+  return response.invites;
 }
 
 /**
@@ -61,25 +34,13 @@ export async function createInvite({
   classId: string;
   otherTeacherEmail: string;
 }): Promise<Invite> {
-  const response = await fetch(`${BACKEND}/invite/class/${classId}`, {
+  const response = await apiRequest({
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
-    body: JSON.stringify({ otherTeacherEmail }),
-  });
-
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan tijdens het uitnodigen.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
-  const data = await response.json();
-  return data.invite;
+    endpoint: `/invite/class/${classId}`,
+    body: { otherTeacherEmail },
+    getToken: getAuthToken,
+  }) as { invite: Invite };
+  return response.invite;
 }
 
 /**
@@ -88,23 +49,12 @@ export async function createInvite({
  * @returns Een lijst met join requests
  */
 export async function fetchJoinRequests(classId: string): Promise<any> {
-  const response = await fetch(
-    `${BACKEND}/join-request/teacher/class/${classId}`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
-    },
-  );
-  if (!response.ok) {
-    const error = new Error(
-      'Er is iets misgegaan bij het ophalen van de join requests.',
-    );
-    throw error;
-  }
-  return await response.json();
+
+  return await apiRequest({
+    method: 'GET',
+    endpoint: `/join-request/teacher/class/${classId}`,
+    getToken: getAuthToken,
+  }) as { joinRequests: any[] };
 }
 
 /**
@@ -119,26 +69,13 @@ export async function approveJoinRequest({
   classId: string;
   requestId: number;
 }): Promise<any> {
-  const response = await fetch(
-    `${BACKEND}/join-request/teacher/${requestId}/class/${classId}`,
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
-      body: JSON.stringify({ action: 'approve' }),
-    },
-  );
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het approven van de join request.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
-  return await response.json();
+
+  return await apiRequest({
+    method: 'PATCH',
+    endpoint: `/join-request/teacher/${requestId}/class/${classId}`,
+    body: { action: 'approve' },
+    getToken: getAuthToken,
+  }) as { joinRequest: any };
 }
 
 /**
@@ -153,24 +90,11 @@ export async function denyJoinRequest({
   classId: string;
   requestId: number;
 }): Promise<any> {
-  const response = await fetch(
-    `${BACKEND}/join-request/teacher/${requestId}/class/${classId}`,
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
-      body: JSON.stringify({ action: 'deny' }),
-    },
-  );
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het denyen van de join request.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
-  return await response.json();
+
+  return await apiRequest({
+    method: 'PATCH',
+    endpoint: `/join-request/teacher/${requestId}/class/${classId}`,
+    body: { action: 'deny' },
+    getToken: getAuthToken,
+  }) as { joinRequest: any };
 }
