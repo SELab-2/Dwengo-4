@@ -7,6 +7,7 @@ import {
 import prisma from "../config/prisma";
 import {
   handlePrismaQuery,
+  handlePrismaTransaction,
   handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
 import { BadRequestError } from "../errors/errors";
@@ -14,21 +15,6 @@ type PrismaTransactionClient = Omit<
   PrismaClient,
   "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
 >;
-
-/**
- * Resolves the transaction client to be used.
- *
- * If a transaction client is provided, it will return the provided client.
- * Otherwise, it falls back to the default Prisma client.
- *
- * @param {PrismaClient | PrismaTransactionClient} [tx] - Optional transaction or Prisma client instance.
- * @return {PrismaTransactionClient} The resolved Prisma transaction client.
- */
-function resolveTx(
-  tx?: PrismaClient | PrismaTransactionClient,
-): PrismaTransactionClient {
-  return tx ?? prisma;
-}
 
 /**
  * This function assumes that the division of a group of people into teams has already been done
@@ -39,14 +25,10 @@ export const createTeamsInAssignment = async (
   assignmentId: number,
   classId: number,
   teams: TeamDivision[],
-  tx?: PrismaTransactionClient,
+  // createTeamsInAssignment moet eigenlijk altijd een transactie gebruiken
+  // omdat er in een for loop teams worden aangemaakt, dit mag nooit in het midden van de lus onderbroken worden
+  tx: PrismaTransactionClient,
 ): Promise<Team[]> => {
-  const createdTeams: Team[] = [];
-
-  // Check if a class has been assigned an Assignment before splitting this class up into
-  // Teams to solve this assignment.
-  tx = resolveTx(tx);
-
   await handleQueryWithExistenceCheck(
     () =>
       tx.classAssignment.findUnique({
@@ -59,6 +41,8 @@ export const createTeamsInAssignment = async (
       }),
     "This assignment has not been assigned to this class yet.",
   );
+
+  const createdTeams: Team[] = [];
 
   // Create teams in the database
   for (const team of teams) {
@@ -79,7 +63,7 @@ async function createTeam(
   classId: number,
   tx?: PrismaTransactionClient,
 ): Promise<Team> {
-  return resolveTx(tx).team.create({
+  return (tx ?? prisma).team.create({
     data: {
       teamname: teamName,
       classId: classId,
@@ -94,7 +78,7 @@ async function giveAssignmentToTeam(
   assignmentId: number,
   tx?: PrismaTransactionClient,
 ): Promise<Team> {
-  return resolveTx(tx).team.update({
+  return (tx ?? prisma).team.update({
     where: { id: teamId },
     data: {
       teamAssignment: {
@@ -115,7 +99,7 @@ async function assignStudentsToTeam(
   studentIds: number[],
   tx?: PrismaTransactionClient,
 ): Promise<void> {
-  tx = resolveTx(tx);
+  tx = tx ?? prisma;
   for (const studentId of studentIds) {
     // Ga eerst na of deze student en dit team zelfs bestaan
     const student: Student | null = await tx.student.findUnique({
@@ -261,7 +245,7 @@ const validateStudentIds = async (studentIds: number[]): Promise<void> => {
     (studentId: number): boolean => !validStudentIds.has(studentId),
   );
 
-  // If any ID was not found this means that it isn't part of our Database and is therefore invalid
+  // If any ID was not found, this means that it isn't part of our Database and is therefore invalid
   if (invalidStudentIds.length > 0) {
     throw new BadRequestError("There are invalid students in the request.");
   }
@@ -272,53 +256,49 @@ export const updateTeamsForAssignment = async (
   assignmentId: number,
   teams: IdentifiableTeamDivision[],
 ): Promise<Team[]> => {
-  const updatedTeams: Team[] = [];
+  return await handlePrismaTransaction(prisma, async (tx) => {
+    const updatedTeams: Team[] = [];
+    for (const team of teams) {
+      // Check if the team exists
+      await handleQueryWithExistenceCheck(
+        () => tx.team.findUnique({ where: { id: team.teamId } }),
+        "Some of the teams do not exist.",
+      );
 
-  for (const team of teams) {
-    // Check if the team exists
-    const existingTeam: Team | null = await handlePrismaQuery(() =>
-      prisma.team.findUnique({
-        where: { id: team.teamId },
-      }),
-    );
+      // Validate students before updating
+      await validateStudentIds(team.studentIds);
 
-    if (!existingTeam) {
-      throw new BadRequestError("Some of the teams do not exist.");
-    }
-
-    // Validate students before updating
-    await validateStudentIds(team.studentIds);
-
-    // Update team name and students
-    const updatedTeam: Team = await handlePrismaQuery(() =>
-      prisma.team.update({
-        where: { id: team.teamId },
-        data: {
-          teamname: team.teamName,
-          students: {
-            // The set operation removes all existing students from the team and replaces them with the new list of students (team.studentIds).
-            set: team.studentIds.map(
-              (studentId: number): { userId: number } => ({
-                userId: studentId,
-              }),
-            ),
-          },
-          teamAssignment: {
-            connectOrCreate: {
-              where: {
-                teamId_assignmentId: { teamId: team.teamId, assignmentId },
+      // Update team name and students
+      const updatedTeam: Team = await handlePrismaQuery(() =>
+        tx.team.update({
+          where: { id: team.teamId },
+          data: {
+            teamname: team.teamName,
+            students: {
+              // The set operation removes all existing students from the team and replaces them with the new list of students (team.studentIds).
+              set: team.studentIds.map(
+                (studentId: number): { userId: number } => ({
+                  userId: studentId,
+                }),
+              ),
+            },
+            teamAssignment: {
+              connectOrCreate: {
+                where: {
+                  teamId_assignmentId: { teamId: team.teamId, assignmentId },
+                },
+                create: { assignmentId: assignmentId },
               },
-              create: { assignmentId: assignmentId },
             },
           },
-        },
-      }),
-    );
+        }),
+      );
 
-    updatedTeams.push(updatedTeam);
-  }
+      updatedTeams.push(updatedTeam);
+    }
 
-  return updatedTeams;
+    return updatedTeams;
+  });
 };
 
 // Get all teams for a given assignment

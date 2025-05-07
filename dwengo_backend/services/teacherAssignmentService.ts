@@ -1,14 +1,14 @@
 import { Assignment, Role } from "@prisma/client";
-import { canUpdateOrDelete, isAuthorized } from "../authorizationService";
-import ReferenceValidationService from "../../services/referenceValidationService";
+import { canUpdateOrDelete, isAuthorized } from "./authorizationService";
+import ReferenceValidationService from "./referenceValidationService";
 // ^ let op: named import, géén "default" meer.
-import { TeamDivision } from "../../interfaces/extendedTypeInterfaces";
-import { createTeamsInAssignment } from "../teacherTeamsService";
-import prisma from "../../config/prisma";
+import { TeamDivision } from "../interfaces/extendedTypeInterfaces";
+import { createTeamsInAssignment } from "./teacherTeamsService";
+import prisma from "../config/prisma";
 import {
   handlePrismaQuery,
   handlePrismaTransaction,
-} from "../../errors/errorFunctions";
+} from "../errors/errorFunctions";
 
 interface ClassTeams {
   [classId: number]: TeamDivision[];
