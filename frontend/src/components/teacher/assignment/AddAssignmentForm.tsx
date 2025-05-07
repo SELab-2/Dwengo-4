@@ -1,8 +1,7 @@
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './AddAssignmentForm.module.css';
 import TeamCreationModal from './TeamCreationModal';
-import CustomDropdownMultiselect from './CustomDropdownMultiselect';
 import FormFields from './FormFields';
 import AssignmentTypeSelection from './AssignmentTypeSelection';
 import TeamsDisplay from './TeamsDisplay';
@@ -11,11 +10,12 @@ import {
   AssignmentPayload,
   ClassItem,
   LearningPath,
-  Team,
   StudentItem,
+  Team,
 } from '../../../types/type';
 import { fetchLearningPaths } from '@/util/teacher/learningPath';
 import { postAssignment, updateAssignment } from '@/util/teacher/assignment';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Builds assignment payload from form data
@@ -51,18 +51,22 @@ const buildAssignmentPayload = ({
       teamsWithNumberKeys[Number(key)] = team.map((team) => ({
         ...team,
         teamName: team.id,
-        studentIds: team.students.map((member) => member.id as unknown as number),
+        studentIds: team.students.map(
+          (member) => member.id as unknown as number,
+        ),
       }));
     });
   } else {
     selectedClasses.forEach((classItem) => {
       const selectedStudents = individualStudents[classItem.id] || [];
-      teamsWithNumberKeys[Number(classItem.id)] = selectedStudents.map((student) => ({
-        id: `individual-${student.id}`,
-        teamName: `individual-${student.id}`,
-        studentIds: [student.id as unknown as number],
-        students: [student],
-      }));
+      teamsWithNumberKeys[Number(classItem.id)] = selectedStudents.map(
+        (student) => ({
+          id: `individual-${student.id}`,
+          teamName: `individual-${student.id}`,
+          studentIds: [student.id as unknown as number],
+          students: [student],
+        }),
+      );
     });
   }
 
@@ -123,9 +127,12 @@ const AddAssignmentForm = ({
   }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [individualStudents, setIndividualStudents] = useState<Record<string, StudentItem[]>>({});
+  const [individualStudents, setIndividualStudents] = useState<
+    Record<string, StudentItem[]>
+  >({});
 
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   /**
    * Fetches learning paths data using React Query
@@ -167,13 +174,15 @@ const AddAssignmentForm = ({
       // Only set selected students from existing teams for individual assignments
       if (assignmentData.teamSize === 1) {
         const studentsPerClass: Record<string, StudentItem[]> = {};
-        Object.entries(assignmentData.classTeams || {}).forEach(([classId, teams]) => {
-          // Only include students that were actually in teams
-          const selectedStudents = teams.flatMap(team => team.students);
-          if (selectedStudents.length > 0) {
-            studentsPerClass[classId] = selectedStudents;
-          }
-        });
+        Object.entries(assignmentData.classTeams || {}).forEach(
+          ([classId, teams]) => {
+            // Only include students that were actually in teams
+            const selectedStudents = teams.flatMap((team) => team.students);
+            if (selectedStudents.length > 0) {
+              studentsPerClass[classId] = selectedStudents;
+            }
+          },
+        );
         setIndividualStudents(studentsPerClass);
       }
     }
@@ -200,8 +209,8 @@ const AddAssignmentForm = ({
   useEffect(() => {
     if (assignmentType === 'individual' && !isEditing) {
       const allStudents: Record<string, StudentItem[]> = {};
-      selectedClasses.forEach(classItem => {
-        allStudents[classItem.id] = [];  // Initialize empty array instead of all students
+      selectedClasses.forEach((classItem) => {
+        allStudents[classItem.id] = []; // Initialize empty array instead of all students
       });
       setIndividualStudents(allStudents);
     }
@@ -264,7 +273,9 @@ const AddAssignmentForm = ({
       }
     } else if (assignmentType === 'individual') {
       const missingStudents = selectedClasses.some(
-        (classItem) => !individualStudents[classItem.id] || individualStudents[classItem.id].length === 0
+        (classItem) =>
+          !individualStudents[classItem.id] ||
+          individualStudents[classItem.id].length === 0,
       );
       if (missingStudents) {
         errors.teams = 'Please select at least one student for each class';
@@ -306,11 +317,23 @@ const AddAssignmentForm = ({
 
     try {
       await action(payload);
-      console.log(`Assignment ${isEditing ? 'updated' : 'created'} successfully`);
-      navigate(isEditing ? `/teacher/assignments/${assignmentData?.id}` : `/teacher/classes/${classId}`);
+      console.log(
+        `Assignment ${isEditing ? 'updated' : 'created'} successfully`,
+      );
+      navigate(
+        isEditing
+          ? `/teacher/assignments/${assignmentData?.id}`
+          : `/teacher/classes/${classId}`,
+      );
     } catch (error: any) {
-      console.error(`Error ${isEditing ? 'updating' : 'creating'} assignment:`, error);
-      setSubmitError(error.message || `Failed to ${isEditing ? 'update' : 'create'} assignment`);
+      console.error(
+        `Error ${isEditing ? 'updating' : 'creating'} assignment:`,
+        error,
+      );
+      setSubmitError(
+        error.message ||
+          `Failed to ${isEditing ? 'update' : 'create'} assignment`,
+      );
       setIsSubmitting(false);
     }
   };
@@ -318,7 +341,7 @@ const AddAssignmentForm = ({
   return (
     <section className={styles.wrapper}>
       <h2 className={styles.header}>
-        {isEditing ? 'Edit' : 'Assign'} Assignment to Classes:
+        {isEditing ? t('assignments_form.edit') : t('assignments_form.assign')}
       </h2>
 
       <div className={styles.form}>
@@ -363,7 +386,7 @@ const AddAssignmentForm = ({
           )}
 
           <div>
-            <label htmlFor="deadline">Choose Deadline:</label>
+            <label htmlFor="deadline">{t('assignments_form.deadline')}</label>
             <input
               type="date"
               id="deadline"
@@ -382,14 +405,16 @@ const AddAssignmentForm = ({
               formNoValidate
               onClick={() => navigate(-1)}
             >
-              Cancel
+              {t('assignments_form.cancel')}
             </button>
             <button
               className={styles.submitButton}
               type="submit"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Submitting...' : 'Confirm'}
+              {isSubmitting
+                ? t('assignments_form.submitting')
+                : t('assignments_form.submit')}
             </button>
           </div>
           {submitError && <div className={styles.error}>{submitError}</div>}
