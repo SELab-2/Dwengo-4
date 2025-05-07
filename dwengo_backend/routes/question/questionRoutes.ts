@@ -20,7 +20,7 @@ import {
   authorizeMessageUpdate,
   authorizeQuestion,
   authorizeQuestionUpdate,
-} from "../../middleware/questionsAuthMiddleware";
+} from "../../middleware/authMiddleware/questionsAuthMiddleware";
 import { validateRequest } from "../../middleware/validateRequest";
 import {
   assignmentIdParamsSchema,

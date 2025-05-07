@@ -1,9 +1,9 @@
 import { NextFunction, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { Prisma, PrismaClient } from "@prisma/client";
-import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
-import { AccessDeniedError, NotFoundError } from "../errors/errors";
-import { handleQueryWithExistenceCheck } from "../errors/errorFunctions";
+import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
+import { AccessDeniedError, NotFoundError } from "../../errors/errors";
+import { handleQueryWithExistenceCheck } from "../../errors/errorFunctions";
 
 const prisma = new PrismaClient();
 const accessDeniedErrorMessage = "Not logged in.";
