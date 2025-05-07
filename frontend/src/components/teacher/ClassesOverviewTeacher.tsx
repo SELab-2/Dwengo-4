@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import PrimaryButton from '../shared/PrimaryButton';
 import React from 'react';
-import { ClassItem } from '../../types/type';
+import { ClassItem } from '@/types/type';
 import { useTranslation } from 'react-i18next';
 import { fetchClasses } from '@/util/teacher/class';
 
@@ -32,7 +32,7 @@ export default function ClassesOverviewTeacher() {
             {classes.map((classItem) => (
               <div
                 key={classItem.id}
-                className="flex items-center flex-row w-[20rem] p-4 justify-between bg-gray-100 rounded-lg shrink-0"
+                className="flex items-center flex-row w-[20rem] p-4 justify-between bg-gray-100 rounded-lg shrink-0 mb-4" // added mb-4 here
               >
                 <div className="flex flex-col">
                   <div className="flex flex-row w-full justify-between mb-1">
