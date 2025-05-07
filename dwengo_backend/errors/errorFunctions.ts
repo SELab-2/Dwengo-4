@@ -1,5 +1,6 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import {
+  AppError,
   DatabaseError,
   NetworkError,
   NotFoundError,
@@ -66,12 +67,20 @@ export function handleQueryWithExistenceCheck<T>(
  * If the transaction does not have a clear error message, a generic DatabaseError will be thrown.
  */
 export async function handlePrismaTransaction<T>(
-  prisma: Prisma.TransactionClient,
+  prisma: PrismaClient,
   transactionFunction: (_: Prisma.TransactionClient) => Promise<T>,
 ): Promise<T> {
   try {
-    return await transactionFunction(prisma);
+    return await prisma.$transaction(transactionFunction);
   } catch (error) {
+    console.error("Prisma transaction error:", error);
+
+    // Re-throw if it's already a known AppError (like NotFoundError)
+    if (error instanceof AppError) {
+      throw error;
+    }
+
+    // Otherwise wrap it in a DatabaseError
     logger.error(`Prisma transaction error: ${error}`);
     throw new DatabaseError("Something went wrong.");
   }

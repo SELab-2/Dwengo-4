@@ -114,19 +114,18 @@ export class LocalLearningPathService {
     );
   }
 
-  async updateNumNodes(pathId: string): Promise<void> {
-    const count = await handlePrismaQuery(() =>
-      prisma.learningPathNode.count({
-        where: { learningPathId: pathId },
-      }),
-    );
-    await handlePrismaQuery(() =>
-      prisma.learningPath.update({
-        where: { id: pathId },
-        data: { num_nodes: count },
-      }),
-    );
-  }
+  /*async updateNumNodes(pathId: string): Promise<void> {
+    // Count the number of nodes within the transaction
+    const count: number = await prisma.learningPathNode.count({
+      where: { learningPathId: pathId },
+    });
+
+    // Update the learning path's num_nodes within the same transaction
+    await prisma.learningPath.update({
+      where: { id: pathId },
+      data: { num_nodes: count },
+    });
+  }*/
 
   /**
    * [NIEUW] Zoeken naar lokale leerpaden op basis van filters

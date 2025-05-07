@@ -8,6 +8,8 @@ import {
 import asyncHandler from "express-async-handler";
 import { Team } from "@prisma/client";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
+import { handlePrismaTransaction } from "../../errors/errorFunctions";
+import prisma from "../../config/prisma";
 
 export const createTeamInAssignment = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -16,10 +18,11 @@ export const createTeamInAssignment = asyncHandler(
     const classId: number = req.params.classId as unknown as number;
     const { teams } = req.body;
 
-    const createdTeams: Team[] = await createTeamsInAssignment(
-      assignmentId,
-      classId,
-      teams,
+    const createdTeams: Team[] = await handlePrismaTransaction(
+      prisma,
+      async (tx) => {
+        return await createTeamsInAssignment(assignmentId, classId, teams, tx);
+      },
     );
 
     res.status(201).json({
