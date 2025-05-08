@@ -8,7 +8,7 @@ import asyncHandler from "express-async-handler";
 export default class TeacherSubmissionController {
   getSubmissionsForStudent = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-      const studentId: number = parseInt(req.params.studentId);
+      const studentId: number = req.params.studentId as unknown as number;
       const teacherId: number = getUserFromAuthRequest(req).id;
 
       const submissions: Submission[] =
@@ -20,7 +20,7 @@ export default class TeacherSubmissionController {
 
   getSubmissionsForTeam = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-      const teamId: number = Number(req.params.teamId);
+      const teamId: number = req.params.teamId as unknown as number;
       const teacherId: number = getUserFromAuthRequest(req).id;
 
       const submissions: Submission[] =
@@ -30,7 +30,7 @@ export default class TeacherSubmissionController {
     },
   );
 
-  getAssignmentSubmissionsForStudent = asyncHandler(
+  /*getAssignmentSubmissionsForStudent = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
       const { studentId, assignmentId } = req.params;
       const teacherId: number = getUserFromAuthRequest(req).id;
@@ -44,18 +44,19 @@ export default class TeacherSubmissionController {
 
       res.status(200).json(submissions);
     },
-  );
+  );*/
 
   getAssignmentSubmissionsForTeam = asyncHandler(
     async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-      const { teamId, assignmentId } = req.params;
+      const teamId = req.params.teamId as unknown as number;
+      const assignmentId = req.params.assignmentId as unknown as number;
       const teacherId: number = getUserFromAuthRequest(req).id;
 
       const submissions: Submission[] =
         await service.teacherGetSubmissionsForTeam(
-          Number(teamId),
+          teamId,
           teacherId,
-          Number(assignmentId),
+          assignmentId,
         );
 
       res.status(200).json(submissions);

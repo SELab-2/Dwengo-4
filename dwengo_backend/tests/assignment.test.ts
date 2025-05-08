@@ -67,7 +67,7 @@ describe("Assignment test", (): void => {
 
     it("should return the assignment when it is found", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(`/assignment/${assignment1.id}}`)
+        .get(`/assignment/${assignment1.id}`)
         .set(getAuthHeaders(teacherUser1));
 
       expect(status).toBe(200);

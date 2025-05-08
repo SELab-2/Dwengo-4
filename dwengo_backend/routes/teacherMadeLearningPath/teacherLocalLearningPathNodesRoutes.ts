@@ -1,15 +1,21 @@
 import { Router } from "express";
 import {
-  getNodesForPath,
   createNodeForPath,
-  updateNodeForPath,
   deleteNodeFromPath,
+  getNodesForPath,
+  updateNodeForPath,
 } from "../../controllers/teacher/teacherLocalLearningPathNodesController";
 import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
+import { validateRequest } from "../../middleware/validateRequest";
+import {
+  learningPathIdSchema,
+  nodeAndLearningPathIdSchema,
+  nodeMetadataSchema,
+} from "../../zodSchemas";
 
 // Enable merging of route parameters from parent routes
-const router = Router({ mergeParams: true });
+const router: Router = Router({ mergeParams: true });
 
 /**
  * @route GET /learningPath/:learningPathId/node
@@ -17,7 +23,15 @@ const router = Router({ mergeParams: true });
  * @param pathId: string
  * @access User
  */
-router.get("/", protectAnyUser, getNodesForPath);
+router.get(
+  "/",
+  protectAnyUser,
+  validateRequest({
+    customErrorMessage: "invalid learningPathId request parameter",
+    paramsSchema: learningPathIdSchema,
+  }),
+  getNodesForPath,
+);
 
 /**
  * @route POST /learningPath/:learningPathId/node
@@ -26,7 +40,16 @@ router.get("/", protectAnyUser, getNodesForPath);
  * @body NodeMetadata
  * @access Teacher
  */
-router.post("/", protectTeacher, createNodeForPath);
+router.post(
+  "/",
+  protectTeacher,
+  validateRequest({
+    customErrorMessage: "invalid learningPathId request parameter",
+    bodySchema: nodeMetadataSchema,
+    paramsSchema: learningPathIdSchema,
+  }),
+  createNodeForPath,
+);
 
 /**
  * @route PATCH /learningPath/:learningPathId/node/:nodeId
@@ -36,7 +59,15 @@ router.post("/", protectTeacher, createNodeForPath);
  * @body NodeMetadata
  * @access Teacher
  */
-router.patch("/:nodeId", protectTeacher, updateNodeForPath);
+router.patch(
+  "/:nodeId",
+  protectTeacher,
+  validateRequest({
+    customErrorMessage: "invalid learningPathId request parameter",
+    paramsSchema: nodeAndLearningPathIdSchema,
+  }),
+  updateNodeForPath,
+);
 
 /**
  * @route DELETE /learningPath/:learningPathId/node/:nodeId
@@ -45,6 +76,14 @@ router.patch("/:nodeId", protectTeacher, updateNodeForPath);
  * @param nodeId: string
  * @access Teacher
  */
-router.delete("/:nodeId", protectTeacher, deleteNodeFromPath);
+router.delete(
+  "/:nodeId",
+  protectTeacher,
+  validateRequest({
+    customErrorMessage: "invalid learningPathId request parameter",
+    paramsSchema: nodeAndLearningPathIdSchema,
+  }),
+  deleteNodeFromPath,
+);
 
 export default router;

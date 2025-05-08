@@ -21,12 +21,12 @@ const AuthenticatedUserSchema = z.object({
 export function getUserFromAuthRequest(
   req: AuthenticatedRequest,
 ): AuthenticatedUser {
-  // check that user is set
+  // check that the user is set
   if (!req.user) {
     throw new UnauthorizedError("Authentication required.");
   }
 
-  // check that user object has correct structure
+  // check that a user object has the correct structure
   try {
     return AuthenticatedUserSchema.parse(req.user);
   } catch (error) {

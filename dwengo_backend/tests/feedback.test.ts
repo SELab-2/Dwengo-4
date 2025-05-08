@@ -168,7 +168,7 @@ describe("Feedback tests", (): void => {
 
       expect(status).toBe(400);
       expect(body.error).toEqual("BadRequestError");
-      expect(body.message).toBe("Submission ID is not a valid number.");
+      expect(body.message).toBe("invalid request for updating feedback");
     });
 
     it("Should respond with a `403` status (AccessDeniedError)", async (): Promise<void> => {
@@ -223,7 +223,7 @@ describe("Feedback tests", (): void => {
 
       expect(status).toBe(400);
       expect(body.error).toEqual("BadRequestError");
-      expect(body.message).toBe("Submission ID is not a valid number.");
+      expect(body.message).toBe("invalid request for getting feedback");
     });
 
     it("Should respond with a `401` status meaning a student not allowed to fetch feedback for a submission", async (): Promise<void> => {
@@ -342,7 +342,7 @@ describe("Feedback tests", (): void => {
 
       expect(status).toBe(400);
       expect(body.error).toEqual("BadRequestError");
-      expect(body.message).toEqual("Submission ID is not a valid number.");
+      expect(body.message).toEqual("invalid request for updating feedback");
     });
 
     it("Should respond with a `200` status code and the updated feedback", async (): Promise<void> => {
@@ -433,7 +433,7 @@ describe("Feedback tests", (): void => {
 
       expect(status).toBe(400);
       expect(body.error).toEqual("BadRequestError");
-      expect(body.message).toEqual("Submission ID is not a valid number.");
+      expect(body.message).toEqual("invalid request for updating feedback");
     });
 
     it("Should respond with a `401` status code when a student tries to delete something", async (): Promise<void> => {

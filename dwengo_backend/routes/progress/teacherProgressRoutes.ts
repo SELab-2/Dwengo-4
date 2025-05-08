@@ -1,9 +1,11 @@
 import express, { Router } from "express";
 import {
-  getTeamProgressTeacher,
   getAssignmentAverageProgress,
+  getTeamProgressTeacher,
 } from "../../controllers/progressController";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
+import { assignmentIdParamsSchema, teamIdParamsSchema } from "../../zodSchemas";
+import { validateRequest } from "../../middleware/validateRequest";
 
 const router: Router = express.Router();
 
@@ -23,7 +25,15 @@ const router: Router = express.Router();
  * @param  teamid: number
  * @access  Teacher
  */
-router.get("/team/:teamid", protectTeacher, getTeamProgressTeacher);
+router.get(
+  "/team/:teamId",
+  protectTeacher,
+  validateRequest({
+    customErrorMessage: "invalid teamId request parameter",
+    paramsSchema: teamIdParamsSchema,
+  }),
+  getTeamProgressTeacher,
+);
 
 /**
  * @route   GET /progress/teacher/assignment/:assignmentId/average
@@ -36,6 +46,10 @@ router.get("/team/:teamid", protectTeacher, getTeamProgressTeacher);
 router.get(
   "/assignment/:assignmentId/average",
   protectTeacher,
+  validateRequest({
+    customErrorMessage: "invalid assignmentId request parameter",
+    paramsSchema: assignmentIdParamsSchema,
+  }),
   getAssignmentAverageProgress,
 );
 

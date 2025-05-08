@@ -12,7 +12,7 @@ import {
 } from "../errors/errorFunctions";
 import { NotFoundError } from "../errors/errors";
 
-type TeamWithStudentAndAssignment = Team & {
+export type TeamWithStudentAndAssignment = Team & {
   students: Student[];
   teamAssignment: TeamAssignment | null;
 };
@@ -87,22 +87,17 @@ class ProgressService {
   async getTeamWithAssignment(
     teamId: number,
   ): Promise<TeamWithStudentAndAssignment> {
-    const team: TeamWithStudentAndAssignment | null =
-      await handleQueryWithExistenceCheck(
-        () =>
-          prisma.team.findUnique({
-            where: { id: teamId },
-            include: {
-              students: true,
-              teamAssignment: true,
-            },
-          }),
-        "Team not found.",
-      );
-    if (!team.teamAssignment) {
-      throw new NotFoundError("Team assignment not found.");
-    }
-    return team;
+    return await handleQueryWithExistenceCheck(
+      () =>
+        prisma.team.findUnique({
+          where: { id: teamId },
+          include: {
+            students: true,
+            teamAssignment: true,
+          },
+        }),
+      '"Team assignment not found.',
+    );
   }
 
   /**
