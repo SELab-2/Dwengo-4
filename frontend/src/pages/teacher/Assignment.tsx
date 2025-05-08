@@ -1,8 +1,8 @@
 import React from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
-import { LearningPath } from '../../types/type';
-import { AssignmentPayload } from '../../types/type';
+import { LearningPath } from '@/types/type';
+import { AssignmentPayload } from '@/types/type';
 import { deleteAssignment, fetchAssignment } from '@/util/teacher/assignment';
 import { fetchLearningPath } from '@/util/teacher/learningPath';
 
@@ -10,13 +10,13 @@ import { fetchLearningPath } from '@/util/teacher/learningPath';
  * Assignment component for teachers to view and manage individual assignments.
  * Displays assignment details, associated learning path information, and provides
  * options to edit or delete the assignment.
- * 
+ *
  * Features:
  * - Displays assignment title, description, language, and deadline
  * - Shows associated learning path details
  * - Provides edit and delete functionality
  * - Handles loading and error states
- * 
+ *
  * @component
  * @returns {JSX.Element} The rendered Assignment component
  */

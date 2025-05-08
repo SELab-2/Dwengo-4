@@ -12,7 +12,7 @@ function RootLayoutTeacher() {
 
       {/* Main content wrapper */}
       <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-xl p-6 max-w-6xl mx-auto w-full">
+        <div className="bg-white shadow rounded-xl p-6 max-w-screen-xl mx-auto w-full">
           <Outlet />
         </div>
       </main>

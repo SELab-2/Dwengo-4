@@ -21,7 +21,7 @@ export default function ClassesOverviewTeacher() {
 
   return (
     <>
-      <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {isLoading && <p>{t('loading.loading')}</p>}
         {isError && (
           <p className="c-r">{error?.info?.message || t('classes.error')}</p>
@@ -32,7 +32,7 @@ export default function ClassesOverviewTeacher() {
             {classes.map((classItem) => (
               <div
                 key={classItem.id}
-                className="flex flex-col p-4 justify-between bg-gray-100 rounded-lg mb-4 max-w-[20rem] w-full"
+                className="flex flex-col p-4 justify-between bg-white shadow-md rounded-lg mb-4 max-w-[20rem] w-full"
               >
                 <div className="flex flex-col">
                   <div className="flex flex-row w-full justify-between mb-1">
