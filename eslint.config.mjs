@@ -5,6 +5,9 @@ import prettierConfig from "eslint-config-prettier";
 import unusedImports from "eslint-plugin-unused-imports"; // <– Add this import
 
 export default [
+  {
+    ignores: ["frontend/**"],
+  },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import PrimaryButton from '../shared/PrimaryButton';
 import React from 'react';
-import { ClassItem } from '../../types/type';
+import { ClassItem } from '@/types/type';
 import { useTranslation } from 'react-i18next';
 import { fetchClasses } from '@/util/teacher/class';
 
@@ -21,7 +21,7 @@ export default function ClassesOverviewTeacher() {
 
   return (
     <>
-      <div className="w-full flex flex-row gap-5 flex-wrap">
+      <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {isLoading && <p>{t('loading.loading')}</p>}
         {isError && (
           <p className="c-r">{error?.info?.message || t('classes.error')}</p>
@@ -32,7 +32,7 @@ export default function ClassesOverviewTeacher() {
             {classes.map((classItem) => (
               <div
                 key={classItem.id}
-                className="flex items-center flex-row w-[20rem] p-4 justify-between bg-gray-100 rounded-lg shrink-0"
+                className="flex flex-col p-4 justify-between bg-white shadow-md rounded-lg mb-4 max-w-[20rem] w-full"
               >
                 <div className="flex flex-col">
                   <div className="flex flex-row w-full justify-between mb-1">
