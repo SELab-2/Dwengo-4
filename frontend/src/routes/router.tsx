@@ -28,6 +28,9 @@ import {
 import { action as studentLogoutAction } from '../pages/student/LogoutStudent';
 import StudentIndex from '../pages/student';
 import JoinClass from '../components/student/classes/JoinRequestForm';
+import AssignmentStudent from '../pages/student/AssignmentStudent';
+import AssignmentsStudent from '../pages/student/AssignmentsStudent';
+import QuestionOverview from '../pages/student/QuestionOverview';
 import StudentClassIndex from '../pages/student/StudentClassIndex';
 
 // ==== LEARNING PATHS ==== //
@@ -159,6 +162,18 @@ export const router = createBrowserRouter([
       {
         path: 'logout',
         action: studentLogoutAction,
+      },
+      {
+        path: 'assignment/:assignmentId',
+        element: <AssignmentStudent></AssignmentStudent>,
+      },
+      {
+        path: 'assignments',
+        element: <AssignmentsStudent></AssignmentsStudent>,
+      },
+      {
+        path: 'question/:assignmentId',
+        element: <QuestionOverview></QuestionOverview>,
       },
       {
         path: 'learning-path/:pathId',

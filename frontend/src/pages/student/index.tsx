@@ -10,8 +10,8 @@ export default function StudentIndex() {
 
   return (
     <>
-      <div className="px-10 bg-gray-300">
-        <div className="text-6xl pt-12 font-bold">{t('home')}</div>
+      <div className="px-10">
+        <div className="text-6xl pt-12 font-bold">Home</div>
 
         <h2 className="mt-8 text-2xl font-bold">{t('assignments.label')}</h2>
         <div className="w-full mt-4 overflow-x-auto ">
@@ -20,7 +20,7 @@ export default function StudentIndex() {
 
         <div className="flex flex-row justify-end w-full ">
           <Link
-            to="/assignment"
+            to="assignments"
             className="font-bold hover:cursor-pointer hover:underline"
           >
             {t('assignments.view_all')}

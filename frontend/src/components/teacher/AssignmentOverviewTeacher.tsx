@@ -2,9 +2,9 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import PrimaryButton from '../shared/PrimaryButton';
-import { AssignmentItem } from '../../util/student/httpStudent';
 import { useTranslation } from 'react-i18next';
 import { fetchAllAssignments } from '@/util/teacher/assignment';
+import { AssignmentItem } from '@/types/api.types';
 
 export default function AssignmentOverviewTeacher() {
   // Query: Haal alle klassen op
@@ -38,7 +38,7 @@ export default function AssignmentOverviewTeacher() {
               return (
                 <div
                   key={assignmentItem.id}
-                  className="flex items-center flex-row py-2 px-3.5 w-[30rem] h-[11.5rem] justify-between bg-gray-100 rounded-lg shrink-0"
+                  className="flex items-center flex-row py-2 px-3.5 w-[30rem] h-[11.5rem] justify-between rounded-lg shrink-0"
                 >
                   <div className="flex flex-col w-full">
                     <div className="flex flex-row w-full justify-between">
