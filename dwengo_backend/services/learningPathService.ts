@@ -14,7 +14,15 @@ export interface LearningPathDto {
   image?: string;
   num_nodes?: number;
   num_nodes_left: number;
-  nodes: any[];
+  // properderr dan die any
+  nodes: Array<{
+    nodeId: string;
+    isExternal: boolean;
+    localLearningObjectId?: string;
+    dwengoHruid?: string;
+    done: boolean;
+  }>;
+
   createdAt?: string;
   updatedAt?: string;
 
