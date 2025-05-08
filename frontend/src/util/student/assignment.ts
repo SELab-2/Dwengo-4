@@ -1,29 +1,14 @@
 import { APIError, AssignmentItem } from '@/types/api.types';
 import { getAuthToken } from './authStudent';
 import { BACKEND } from '../shared/config';
+import { apiRequest } from '../shared/config';
 
 export async function fetchAssignments(): Promise<AssignmentItem[]> {
-  const response = await fetch(`${BACKEND}/assignment/student`, {
+  return await apiRequest({
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
-  });
-
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het ophalen van de opdrachten.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
-
-  const assignments = await response.json();
-  console.log('GETTING ASSIGNMENTS', assignments);
-
-  return assignments;
+    endpoint: '/assignment/student',
+    getToken: getAuthToken,
+  }) as AssignmentItem[];
 }
 
 export async function fetchAssignmentsForClass({
@@ -31,28 +16,10 @@ export async function fetchAssignmentsForClass({
 }: {
   classId: string;
 }): Promise<AssignmentItem[]> {
-  const response = await fetch(
-    `${BACKEND}/assignment/student/class/${classId}`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
-    },
-  );
 
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het ophalen van de opdrachten.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
-
-  const assignments = await response.json();
-  console.log('GETTING ASSIGNMENTS', assignments);
-
-  return assignments;
+  return await apiRequest({
+    method: 'GET',
+    endpoint: `/assignment/student/class/${classId}`,
+    getToken: getAuthToken,
+  }) as AssignmentItem[];
 }

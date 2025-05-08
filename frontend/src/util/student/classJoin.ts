@@ -1,6 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
 import { getAuthToken } from './authStudent';
 import { APIError } from '@/types/api.types';
+import { apiRequest } from '../shared/config';
 
 const BACKEND = 'http://localhost:5000';
 
@@ -22,38 +23,23 @@ export async function joinClass({
 }: {
   joinCode: string;
 }): Promise<void> {
-  const response = await fetch(`${BACKEND}/join-request/student`, {
+  return await apiRequest({
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
-    body: JSON.stringify({ joinCode }),
+    endpoint: '/join-request/student',
+    body: { joinCode },
+    getToken: getAuthToken,
   });
 
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het joinen van de klas.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-
-    console.log(error.info);
-    throw error;
-  }
 }
 
 
 
 
 export async function fetchLeaveClass({ classId }: { classId: string }) {
-  const response = await fetch(`${BACKEND}/class/student/${classId}`, {
+  return await apiRequest({
     method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
+    endpoint: `/class/student/leave/${classId}`,
+    getToken: getAuthToken,
   });
 
-  return response;
 }
