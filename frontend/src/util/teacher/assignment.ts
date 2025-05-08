@@ -4,38 +4,6 @@ import { BACKEND } from '../shared/config';
 import { getAuthToken } from './authTeacher';
 import { apiRequest } from '../shared/config';
 
-/**
- * Creates a new assignment
- * @param {Object} payload - The assignment details
- * @throws {APIError} When creation fails
- */
-export async function createAssignment({
-  name,
-  learningPathId,
-  students,
-  dueDate,
-  description,
-}: {
-  name: string;
-  learningPathId: string;
-  students: StudentItem[];
-  dueDate: string;
-  description: string;
-}): Promise<void> {
-
-  return await apiRequest({
-    method: 'POST',
-    endpoint: '/assignment/teacher',
-    body: {
-      name,
-      learningPathId,
-      students: students.map((student) => student.id),
-      dueDate,
-      description,
-    },
-    getToken: getAuthToken
-  });
-}
 
 /**
  * Fetches all assignments for a class
