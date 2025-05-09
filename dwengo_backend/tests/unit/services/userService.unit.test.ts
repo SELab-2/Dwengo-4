@@ -2,6 +2,7 @@ import { Role, User, Teacher, Student } from "@prisma/client";
 import prisma from "../../../config/prisma";
 import UserService from "../../../services/userService";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { NotFoundError } from "../../../errors/errors";
 
 vi.mock("../../../config/prisma");
 
@@ -18,31 +19,7 @@ describe("UserService", () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks(); // reset alle mocks
-  });
-
-  describe("findUser", () => {
-    it("should return user if found", async () => {
-      (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
-        mockUser,
-      );
-
-      const user = await UserService.findUser("test@example.com");
-
-      expect(user).toEqual(mockUser);
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({
-        where: { email: "test@example.com" },
-      });
-    });
-
-    it("should return null if user not found", async () => {
-      (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
-        null,
-      );
-
-      const user = await UserService.findUser("nope@example.com");
-      expect(user).toBeNull();
-    });
+    vi.clearAllMocks();
   });
 
   describe("createUser", () => {
@@ -90,22 +67,30 @@ describe("UserService", () => {
 
   describe("findUserByEmail", () => {
     it("should return user if found", async () => {
-      (
-        prisma.user.findUniqueOrThrow as ReturnType<typeof vi.fn>
-      ).mockResolvedValue(mockUser);
+      (prisma.user.findFirst as ReturnType<typeof vi.fn>).mockResolvedValue(
+        mockUser,
+      );
 
       const result = await UserService.findUserByEmail("test@example.com");
+
       expect(result).toEqual(mockUser);
+      expect(prisma.user.findFirst).toHaveBeenCalledWith({
+        where: { email: "test@example.com" },
+      });
     });
 
-    it("should throw if user not found", async () => {
-      (
-        prisma.user.findUniqueOrThrow as ReturnType<typeof vi.fn>
-      ).mockRejectedValue(new Error("Not found"));
+    it("should throw NotFoundError if user not found", async () => {
+      (prisma.user.findFirst as ReturnType<typeof vi.fn>).mockResolvedValue(
+        null,
+      );
 
       await expect(
         UserService.findUserByEmail("nope@example.com"),
-      ).rejects.toThrow("Not found");
+      ).rejects.toThrow(NotFoundError);
+
+      await expect(
+        UserService.findUserByEmail("nope@example.com"),
+      ).rejects.toThrow("Existing user not found.");
     });
   });
 
@@ -121,16 +106,25 @@ describe("UserService", () => {
       );
 
       const result = await UserService.findTeacherUserById(1);
+
       expect(result).toEqual(teacher);
+      expect(prisma.teacher.findUnique).toHaveBeenCalledWith({
+        where: { userId: 1 },
+        include: { user: true },
+      });
     });
 
-    it("should return null if teacher not found", async () => {
+    it("should throw NotFoundError if teacher not found", async () => {
       (prisma.teacher.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
         null,
       );
 
-      const result = await UserService.findTeacherUserById(999);
-      expect(result).toBeNull();
+      await expect(UserService.findTeacherUserById(999)).rejects.toThrow(
+        NotFoundError,
+      );
+      await expect(UserService.findTeacherUserById(999)).rejects.toThrow(
+        "Teacher not found.",
+      );
     });
   });
 
@@ -146,16 +140,25 @@ describe("UserService", () => {
       );
 
       const result = await UserService.findStudentUserById(1);
+
       expect(result).toEqual(student);
+      expect(prisma.student.findUnique).toHaveBeenCalledWith({
+        where: { userId: 1 },
+        include: { user: true },
+      });
     });
 
-    it("should return null if student not found", async () => {
+    it("should throw NotFoundError if student not found", async () => {
       (prisma.student.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
         null,
       );
 
-      const result = await UserService.findStudentUserById(999);
-      expect(result).toBeNull();
+      await expect(UserService.findStudentUserById(999)).rejects.toThrow(
+        NotFoundError,
+      );
+      await expect(UserService.findStudentUserById(999)).rejects.toThrow(
+        "Student not found.",
+      );
     });
   });
 });
