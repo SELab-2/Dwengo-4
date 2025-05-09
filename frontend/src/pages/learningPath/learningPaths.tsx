@@ -71,10 +71,6 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ path }) => {
   );
 };
 
-interface LearningPathsProps {
-  canCreatePath: boolean;
-}
-
 /**
  * LearningPaths component displays all available learning paths.
  *
@@ -87,7 +83,7 @@ interface LearningPathsProps {
  * @component
  * @returns {JSX.Element} The rendered LearningPaths component
  */
-const LearningPaths: React.FC<LearningPathsProps> = ({ canCreatePath }) => {
+const LearningPaths: React.FC = () => {
   const [filters, setFilters] = useState<Filter[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
@@ -136,6 +132,8 @@ const LearningPaths: React.FC<LearningPathsProps> = ({ canCreatePath }) => {
     [learningPaths, filters, searchQuery],
   );
 
+  const isTeacherView = window.location.pathname.includes('/teacher');
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Learning Paths</h1>
@@ -160,7 +158,7 @@ const LearningPaths: React.FC<LearningPathsProps> = ({ canCreatePath }) => {
         </div>
 
         {/* create learning path button */}
-        {canCreatePath && (
+        {isTeacherView && (
           <button
             className={`
             px-4 py-2 whitespace-nowrap font-bold rounded-md hover:cursor-pointer
