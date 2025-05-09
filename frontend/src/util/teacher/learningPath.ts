@@ -1,7 +1,6 @@
-import { APIError } from '@/types/api.types';
-import { LearningPath } from '../../types/type';
+import { LearningPath } from '@/types/type';
 import { getAuthToken } from './authTeacher';
-import { apiRequest, BACKEND } from '../shared/config';
+import { apiRequest } from '../shared/config';
 
 /**
  * Fetches all learning paths for the authenticated teacher
@@ -9,22 +8,20 @@ import { apiRequest, BACKEND } from '../shared/config';
  * @throws {APIError} When fetching fails
  */
 export async function fetchLearningPaths(): Promise<LearningPath[]> {
-
-  const response = await apiRequest({
+  const response = (await apiRequest({
     method: 'GET',
     endpoint: '/pathByTeacher/all',
     getToken: getAuthToken,
-  }) as { learningPaths: LearningPath[] };
+  })) as { learningPaths: LearningPath[] };
 
-  const learningPaths = response
+  return response
     .map((path: any) => ({
       ...path,
       id: path._id || path.id,
     }))
-    .sort((a: LearningPath, b: LearningPath) => a.title.localeCompare(b.title)) as LearningPath[];
-
-
-  return learningPaths;
+    .sort((a: LearningPath, b: LearningPath) =>
+      a.title.localeCompare(b.title),
+    ) as LearningPath[];
 }
 
 /**
@@ -38,14 +35,11 @@ export async function fetchLearningPath(
   learningPathId: string,
   isExternal: boolean = false,
 ): Promise<LearningPath> {
-
   return (await apiRequest({
     method: 'GET',
     endpoint: `/pathByTeacher/all/${learningPathId}?isExternal=${isExternal}`,
     getToken: getAuthToken,
-  }) as { learningPath: LearningPath });
-
-
+  })) as { learningPath: LearningPath };
 }
 
 /**
@@ -54,11 +48,12 @@ export async function fetchLearningPath(
  * @returns {Promise<any>} List of learning objects
  * @throws {APIError} When fetching fails
  */
-export async function fetchLearningObjectsByLearningPath(pathId: string): Promise<any> {
-
-  return await apiRequest({
+export async function fetchLearningObjectsByLearningPath(
+  pathId: string,
+): Promise<any> {
+  return (await apiRequest({
     method: 'GET',
     endpoint: `/learningObject/learningPath/${pathId}`,
     getToken: getAuthToken,
-  }) as { learningObjects: any[] };
+  })) as { learningObjects: any[] };
 }

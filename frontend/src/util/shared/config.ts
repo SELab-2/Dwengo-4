@@ -1,14 +1,14 @@
 import { QueryClient } from '@tanstack/react-query';
-import { APIError } from '../../types/api.types';
+import { APIError } from '@/types/api.types';
 
-export const BACKEND = import.meta.env.VITE_API_URL;;
+export const BACKEND = import.meta.env.VITE_API_URL;
 
 export const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            retry: 1,
-        },
+  defaultOptions: {
+    queries: {
+      retry: 1,
     },
+  },
 });
 
 export interface RequestConfig {

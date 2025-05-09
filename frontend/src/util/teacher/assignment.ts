@@ -1,9 +1,7 @@
-import { AssignmentPayload, Team, TeamAssignment } from '../../types/type';
-import { APIError, StudentItem } from '../../types/api.types';
-import { BACKEND } from '../shared/config';
+import { AssignmentPayload, Team, TeamAssignment } from '@/types/type';
+import { APIError } from '@/types/api.types';
+import { apiRequest, BACKEND } from '../shared/config';
 import { getAuthToken } from './authTeacher';
-import { apiRequest } from '../shared/config';
-
 
 /**
  * Fetches all assignments for a class
@@ -12,11 +10,10 @@ import { apiRequest } from '../shared/config';
  * @throws {APIError} When fetching fails
  */
 export async function fetchAssignments(classId: string): Promise<any> {
-
   return await apiRequest({
     method: 'GET',
     endpoint: `/assignment/teacher/class/${classId}`,
-    getToken: getAuthToken
+    getToken: getAuthToken,
   });
 }
 
@@ -30,7 +27,7 @@ export async function fetchAllAssignments(): Promise<any> {
   return await apiRequest({
     method: 'GET',
     endpoint: `/assignment/teacher?limit=5`,
-    getToken: getAuthToken
+    getToken: getAuthToken,
   });
 }
 
@@ -67,11 +64,10 @@ export async function fetchAssignment(
     throw error;
   }
 
-
   const assignment: any = await apiRequest({
     method: 'GET',
     endpoint: `/assignment/${assignmentId}?includeClass=${includeClass}&includeTeams=${includeTeams}`,
-    getToken: getAuthToken
+    getToken: getAuthToken,
   });
 
   if (includeTeams && assignment.teamAssignments) {
@@ -107,7 +103,7 @@ export async function deleteAssignment(assignmentId: number): Promise<void> {
   return await apiRequest({
     method: 'DELETE',
     endpoint: `/assignment/teacher/${assignmentId}`,
-    getToken: getAuthToken
+    getToken: getAuthToken,
   });
 }
 
@@ -126,8 +122,7 @@ export async function postAssignment({
   classTeams,
   teamSize,
 }: AssignmentPayload): Promise<void> {
-
-  apiRequest({
+  await apiRequest({
     method: 'POST',
     endpoint: '/assignment/teacher/team',
     body: {
@@ -140,9 +135,8 @@ export async function postAssignment({
       classTeams,
       teamSize,
     },
-    getToken: getAuthToken
+    getToken: getAuthToken,
   });
-
 }
 
 /**
@@ -161,8 +155,7 @@ export async function updateAssignment({
   classTeams,
   teamSize,
 }: AssignmentPayload): Promise<void> {
-
-  apiRequest({
+  await apiRequest({
     method: 'PATCH',
     endpoint: `/assignment/teacher/team/${id}`,
     body: {
@@ -175,6 +168,6 @@ export async function updateAssignment({
       classTeams,
       teamSize,
     },
-    getToken: getAuthToken
+    getToken: getAuthToken,
   });
 }

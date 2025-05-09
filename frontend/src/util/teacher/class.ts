@@ -1,9 +1,12 @@
-import { ClassItem } from '../../types/type';
-import { APIError, CreateClassPayload, StudentItem, UpdateClassPayload } from '../../types/api.types';
+import { ClassItem } from '@/types/type';
+import {
+  APIError,
+  CreateClassPayload,
+  StudentItem,
+  UpdateClassPayload,
+} from '@/types/api.types';
 import { getAuthToken } from './authTeacher';
 import { apiRequest, BACKEND } from '../shared/config';
-
-
 
 /**
  * Fetches all classes for the authenticated teacher
@@ -12,47 +15,47 @@ import { apiRequest, BACKEND } from '../shared/config';
  * @throws {APIError} When fetching fails
  */
 export async function fetchClasses(
-    includeStudents: boolean = false,
+  includeStudents: boolean = false,
 ): Promise<ClassItem[]> {
-    let response;
-    if (includeStudents) {
-        response = await fetch(`${BACKEND}/class/teacher/student`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${getAuthToken()}`,
-            },
-        });
-    } else {
-        response = await fetch(`${BACKEND}/class/teacher`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${getAuthToken()}`,
-            },
-        });
-    }
+  let response;
+  if (includeStudents) {
+    response = await fetch(`${BACKEND}/class/teacher/student`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+    });
+  } else {
+    response = await fetch(`${BACKEND}/class/teacher`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+    });
+  }
 
-    if (!response.ok) {
-        const error: APIError = new Error(
-            'Er is iets misgegaan bij het ophalen van de klassen.',
-        );
-        error.code = response.status;
-        error.info = await response.json();
-        throw error;
-    }
+  if (!response.ok) {
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het ophalen van de klassen.',
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
 
-    let classrooms = await response.json();
-    classrooms = classrooms.classrooms;
+  let classrooms = await response.json();
+  classrooms = classrooms.classrooms;
 
-    if (includeStudents) {
-        classrooms.forEach((classroom: any) => {
-            classroom.students = classroom.classLinks.map(
-                (link: any) => link.student.user,
-            );
-        });
-    }
-    return classrooms;
+  if (includeStudents) {
+    classrooms.forEach((classroom: any) => {
+      classroom.students = classroom.classLinks.map(
+        (link: any) => link.student.user,
+      );
+    });
+  }
+  return classrooms;
 }
 
 /**
@@ -62,15 +65,14 @@ export async function fetchClasses(
  * @throws {APIError} When creation fails
  */
 export async function createClass({
-    name,
+  name,
 }: CreateClassPayload): Promise<ClassItem> {
-
-    return await apiRequest({
-        method: 'POST',
-        endpoint: '/class/teacher',
-        body: { name },
-        getToken: getAuthToken,
-    });
+  return await apiRequest({
+    method: 'POST',
+    endpoint: '/class/teacher',
+    body: { name },
+    getToken: getAuthToken,
+  });
 }
 
 /**
@@ -80,16 +82,15 @@ export async function createClass({
  * @throws {APIError} When update fails
  */
 export async function updateClass({
-    name,
-    classId,
+  name,
+  classId,
 }: UpdateClassPayload): Promise<ClassItem> {
-
-    return await apiRequest({
-        method: 'PATCH',
-        endpoint: `/class/teacher/${classId}`,
-        body: { name },
-        getToken: getAuthToken,
-    });
+  return await apiRequest({
+    method: 'PATCH',
+    endpoint: `/class/teacher/${classId}`,
+    body: { name },
+    getToken: getAuthToken,
+  });
 }
 
 /**
@@ -99,18 +100,17 @@ export async function updateClass({
  * @throws {APIError} When fetching fails
  */
 export async function fetchClass({
-    classId,
+  classId,
 }: {
-    classId: number;
+  classId: number;
 }): Promise<ClassItem> {
-    const response = await apiRequest<{ classroom: ClassItem }>({
-        method: 'GET',
-        endpoint: `/class/teacher/${classId}`,
-        getToken: getAuthToken,
-    });
-    return response.classroom;
+  const response = await apiRequest<{ classroom: ClassItem }>({
+    method: 'GET',
+    endpoint: `/class/teacher/${classId}`,
+    getToken: getAuthToken,
+  });
+  return response.classroom;
 }
-
 
 /**
  * Fetches all students in a specific class
@@ -119,16 +119,15 @@ export async function fetchClass({
  * @throws {APIError} When fetching fails
  */
 export async function fetchStudentsByClass({
-    classId,
+  classId,
 }: {
-    classId: number;
+  classId: number;
 }): Promise<StudentItem[]> {
+  const response = await apiRequest<{ students: StudentItem[] }>({
+    method: 'GET',
+    endpoint: `/class/teacher/${classId}/student`,
+    getToken: getAuthToken,
+  });
 
-    const response = await apiRequest<{ students: StudentItem[] }>({
-        method: 'GET',
-        endpoint: `/class/teacher/${classId}/student`,
-        getToken: getAuthToken,
-    })
-
-    return response.students;
+  return response.students;
 }

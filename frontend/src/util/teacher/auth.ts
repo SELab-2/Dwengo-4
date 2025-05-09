@@ -1,6 +1,5 @@
-import { AuthCredentials, AuthResponse, APIError } from '../../types/api.types';
-import { apiRequest, BACKEND } from '../shared/config';
-
+import { APIError, AuthCredentials, AuthResponse } from '@/types/api.types';
+import { apiRequest } from '../shared/config';
 
 /**
  * Authenticates a teacher with email and password
@@ -12,14 +11,12 @@ export async function loginTeacher({
   email,
   password,
 }: AuthCredentials): Promise<AuthResponse> {
-
   return await apiRequest({
     method: 'POST',
     endpoint: '/auth/teacher/login',
     body: { email, password },
     getToken: () => null,
   });
-
 }
 
 /**
@@ -34,7 +31,6 @@ export async function signupTeacher({
   email,
   password,
 }: AuthCredentials): Promise<AuthResponse> {
-
   return await apiRequest({
     method: 'POST',
     endpoint: '/auth/teacher/register',

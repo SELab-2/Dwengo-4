@@ -1,8 +1,7 @@
 import { getAuthToken } from './authTeacher';
-import { APIError, Invite } from '@/types/api.types';
+import { Invite } from '@/types/api.types';
 
-import { apiRequest, BACKEND } from '../shared/config';
-import { AwardIcon } from 'lucide-react';
+import { apiRequest } from '../shared/config';
 
 /**
  * Haal alle pending invites voor een klas op
@@ -12,12 +11,11 @@ import { AwardIcon } from 'lucide-react';
 export async function getPendingInvitesForClass(
   classId: string,
 ): Promise<Invite[]> {
-
-  const response = await apiRequest({
+  const response = (await apiRequest({
     method: 'GET',
     endpoint: `/invite/class/${classId}`,
     getToken: getAuthToken,
-  }) as { invites: Invite[] };
+  })) as { invites: Invite[] };
   return response.invites;
 }
 
@@ -34,12 +32,12 @@ export async function createInvite({
   classId: string;
   otherTeacherEmail: string;
 }): Promise<Invite> {
-  const response = await apiRequest({
+  const response = (await apiRequest({
     method: 'POST',
     endpoint: `/invite/class/${classId}`,
     body: { otherTeacherEmail },
     getToken: getAuthToken,
-  }) as { invite: Invite };
+  })) as { invite: Invite };
   return response.invite;
 }
 
@@ -49,12 +47,11 @@ export async function createInvite({
  * @returns Een lijst met join requests
  */
 export async function fetchJoinRequests(classId: string): Promise<any> {
-
-  return await apiRequest({
+  return (await apiRequest({
     method: 'GET',
     endpoint: `/join-request/teacher/class/${classId}`,
     getToken: getAuthToken,
-  }) as { joinRequests: any[] };
+  })) as { joinRequests: any[] };
 }
 
 /**
@@ -69,13 +66,12 @@ export async function approveJoinRequest({
   classId: string;
   requestId: number;
 }): Promise<any> {
-
-  return await apiRequest({
+  return (await apiRequest({
     method: 'PATCH',
     endpoint: `/join-request/teacher/${requestId}/class/${classId}`,
     body: { action: 'approve' },
     getToken: getAuthToken,
-  }) as { joinRequest: any };
+  })) as { joinRequest: any };
 }
 
 /**
@@ -90,11 +86,10 @@ export async function denyJoinRequest({
   classId: string;
   requestId: number;
 }): Promise<any> {
-
-  return await apiRequest({
+  return (await apiRequest({
     method: 'PATCH',
     endpoint: `/join-request/teacher/${requestId}/class/${classId}`,
     body: { action: 'deny' },
     getToken: getAuthToken,
-  }) as { joinRequest: any };
+  })) as { joinRequest: any };
 }

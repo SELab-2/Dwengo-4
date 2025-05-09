@@ -1,14 +1,13 @@
-import { APIError, AssignmentItem } from '@/types/api.types';
+import { AssignmentItem } from '@/types/api.types';
 import { getAuthToken } from './authStudent';
-import { BACKEND } from '../shared/config';
 import { apiRequest } from '../shared/config';
 
 export async function fetchAssignments(): Promise<AssignmentItem[]> {
-  return await apiRequest({
+  return (await apiRequest({
     method: 'GET',
     endpoint: '/assignment/student',
     getToken: getAuthToken,
-  }) as AssignmentItem[];
+  })) as AssignmentItem[];
 }
 
 export async function fetchAssignmentsForClass({
@@ -16,10 +15,9 @@ export async function fetchAssignmentsForClass({
 }: {
   classId: string;
 }): Promise<AssignmentItem[]> {
-
-  return await apiRequest({
+  return (await apiRequest({
     method: 'GET',
     endpoint: `/assignment/student/class/${classId}`,
     getToken: getAuthToken,
-  }) as AssignmentItem[];
+  })) as AssignmentItem[];
 }
