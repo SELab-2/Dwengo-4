@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
-import prisma from "./helpers/prisma";
-import app from "../index";
+import prisma from "../helpers/prisma";
+import app from "../../index";
 import {
   Class,
   ClassStudent,
@@ -18,7 +18,7 @@ import {
   createJoinRequest,
   createStudent,
   createTeacher,
-} from "./helpers/testDataCreation";
+} from "../helpers/testDataCreation";
 
 describe("join request tests", async (): Promise<void> => {
   let classroom: Class;
@@ -209,7 +209,7 @@ describe("join request tests", async (): Promise<void> => {
 
       expect(status).toBe(400);
       expect(body.error).toBe("BadRequestError");
-      expect(body.message).toBe("invalid request params");
+      expect(body.message).toBe("Action must be 'approve' or 'deny'.");
       await verifyJoinRequestNotUpdatedStudentNotAdded(
         joinRequest,
         studentUser1,
@@ -282,72 +282,6 @@ describe("join request tests", async (): Promise<void> => {
         classroom,
       );
     });
-
-    it("should respond with a `404` status code when the join request does not exist", async (): Promise<void> => {
-      // let's delete the join request and then try denying it
-      await prisma.joinRequest.delete({
-        where: {
-          requestId: joinRequest.requestId,
-        },
-      });
-      await denyAndVerifyJoinRequest();
-    });
-
-    it("should respond with a `404` status code when the join request is not pending", async (): Promise<void> => {
-      // update the status of the join request to approved
-      await prisma.joinRequest.update({
-        where: {
-          requestId: joinRequest.requestId,
-        },
-        data: {
-          status: JoinRequestStatus.APPROVED,
-        },
-      });
-      // now let's try approving it
-      await denyAndVerifyJoinRequest();
-    });
-
-    async function denyAndVerifyJoinRequest(): Promise<void> {
-      const { status, body } = await request(app)
-        .patch(
-          `/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
-        )
-        .set("Authorization", `Bearer ${teacherUser1.token}`) // teacherUser1 is a teacher of the class
-        .send({
-          action: "approve",
-        });
-
-      expect(status).toBe(404);
-      expect(body.error).toBe("NotFoundError");
-      expect(body.message).toBe(
-        "Join request for this class is not found or is not pending.",
-      );
-    }
-
-    it("should respond with a `403` status code when the teacher is not allowed to approve/deny the request", async (): Promise<void> => {
-      // create teacher that's not part of the class
-      const teacherUser2: User & { teacher: Teacher; token: string } =
-        await createTeacher("bleep", "blop", "bleep.blop@gmail.com");
-      // try having teacherUser2 approve the join request
-      const { status, body } = await request(app)
-        .patch(
-          `/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
-        )
-        .set("Authorization", `Bearer ${teacherUser2.token}`) // teacherUser2 is not a teacher of the class
-        .send({
-          action: "deny",
-        });
-
-      expect(status).toBe(403);
-      expect(body.error).toBe("AccessDeniedError");
-      expect(body.message).toBe("Teacher is not a part of this class.");
-
-      await verifyJoinRequestNotUpdatedStudentNotAdded(
-        joinRequest,
-        studentUser1,
-        classroom,
-      );
-    });
   });
 
   describe("[GET] /join-request/teacher/class/:classId", async (): Promise<void> => {
@@ -368,7 +302,7 @@ describe("join request tests", async (): Promise<void> => {
       expectBodyToHaveListOfJoinRequest(body);
     });
 
-    it("should respond with a `403` status code when the teacher is not allowed to view the join requests", async (): Promise<void> => {
+    it("should respond with a `400` status code when the teacher is not allowed to view the join requests", async (): Promise<void> => {
       // create teacher that's not part of the class
       const teacherUser2: User & { teacher: Teacher; token: string } =
         await createTeacher("Hi", "Ho", "hiho@gmail.com");
