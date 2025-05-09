@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import prisma from "../../../config/__mocks__/prisma";
+import prisma from "../../../config/prisma";
 import ProgressService from "../../../services/progressService";
+import { NotFoundError } from "../../../errors/errors";
 
 vi.mock("../../../config/prisma");
 
@@ -11,20 +12,14 @@ describe("ProgressService", () => {
 
   describe("createProgress", () => {
     it("should create progress and studentProgress in a transaction", async () => {
-      const fakeProgress = {
-        id: 1,
-        learningObjectId: "lo1",
-        done: false,
-      };
+      const fakeProgress = { id: 1, learningObjectId: "lo1", done: false };
 
       prisma.$transaction.mockImplementationOnce(async (callback: any) =>
         callback({
           learningObjectProgress: {
             create: vi.fn().mockResolvedValue(fakeProgress),
           },
-          studentProgress: {
-            create: vi.fn().mockResolvedValue({}),
-          },
+          studentProgress: { create: vi.fn().mockResolvedValue({}) },
         }),
       );
 
@@ -32,58 +27,55 @@ describe("ProgressService", () => {
       expect(result).toEqual(fakeProgress);
     });
 
-    it("should throw if transaction fails", async () => {
+    it("should throw error if transaction fails", async () => {
       prisma.$transaction.mockRejectedValueOnce(new Error("DB Error"));
-      await expect(() =>
-        ProgressService.createProgress(5, "lo1"),
-      ).rejects.toThrow("DB Error");
+      await expect(ProgressService.createProgress(5, "lo1")).rejects.toThrow(
+        "Something went wrong.",
+      );
     });
   });
 
   describe("getStudentProgress", () => {
-    it("should return student progress with progress included", async () => {
+    it("should return the progress object when found", async () => {
       const mockResult = {
         studentId: 3,
         progressId: 1,
-        progress: {
-          id: 1,
-          learningObjectId: "lo1",
-          done: false,
-        },
-      };
+        progress: { id: 1, learningObjectId: "lo1", done: false },
+      } as any;
+
       prisma.studentProgress.findFirst.mockResolvedValue(mockResult);
 
       const result = await ProgressService.getStudentProgress(3, "lo1");
-      expect(result).toEqual(mockResult);
+      expect(result).toEqual(mockResult.progress);
     });
 
-    it("should return null if no progress found", async () => {
+    it("should throw NotFoundError if no progress found", async () => {
       prisma.studentProgress.findFirst.mockResolvedValue(null);
-      const result = await ProgressService.getStudentProgress(999, "xyz");
-      expect(result).toBeNull();
+      await expect(
+        ProgressService.getStudentProgress(999, "xyz"),
+      ).rejects.toThrow(NotFoundError);
+      await expect(
+        ProgressService.getStudentProgress(999, "xyz"),
+      ).rejects.toThrow("Progress not found.");
     });
   });
 
   describe("updateProgressToDone", () => {
     it("should update progress to done=true", async () => {
-      const mockUpdate = {
-        id: 1,
-        learningObjectId: "lo1",
-        done: true,
-      };
+      const mockUpdate = { id: 1, learningObjectId: "lo1", done: true };
       prisma.learningObjectProgress.update.mockResolvedValue(mockUpdate);
 
       const result = await ProgressService.updateProgressToDone(1);
       expect(result).toEqual(mockUpdate);
     });
 
-    it("should throw if update fails", async () => {
+    it("should throw error if update fails", async () => {
       prisma.learningObjectProgress.update.mockRejectedValueOnce(
         new Error("fail"),
       );
-      await expect(() =>
-        ProgressService.updateProgressToDone(1),
-      ).rejects.toThrow("fail");
+      await expect(ProgressService.updateProgressToDone(1)).rejects.toThrow(
+        "Something went wrong.",
+      );
     });
   });
 
@@ -94,21 +86,22 @@ describe("ProgressService", () => {
         teamname: "Team A",
         classId: 10,
         students: [],
-        teamAssignment: {
-          assignmentId: 5,
-          teamId: 1,
-        },
-      };
+        teamAssignment: { assignmentId: 5, teamId: 1 },
+      } as any;
       prisma.team.findUnique.mockResolvedValue(team);
 
       const result = await ProgressService.getTeamWithAssignment(1);
       expect(result).toEqual(team);
     });
 
-    it("should return null if team not found", async () => {
+    it("should throw NotFoundError if team not found", async () => {
       prisma.team.findUnique.mockResolvedValue(null);
-      const result = await ProgressService.getTeamWithAssignment(999);
-      expect(result).toBeNull();
+      await expect(ProgressService.getTeamWithAssignment(999)).rejects.toThrow(
+        NotFoundError,
+      );
+      await expect(ProgressService.getTeamWithAssignment(999)).rejects.toThrow(
+        '"Team assignment not found.',
+      );
     });
   });
 
@@ -123,7 +116,7 @@ describe("ProgressService", () => {
         deadline: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
-      };
+      } as any;
       prisma.assignment.findUnique.mockResolvedValue(assignment);
 
       const result = await ProgressService.getAssignment(3);
@@ -137,12 +130,22 @@ describe("ProgressService", () => {
       const result = await ProgressService.countNodesInPath("path1");
       expect(result).toBe(7);
     });
+
+    it("should throw NotFoundError if count is zero", async () => {
+      prisma.learningPathNode.count.mockResolvedValue(0);
+      await expect(ProgressService.countNodesInPath("empty")).rejects.toThrow(
+        NotFoundError,
+      );
+      await expect(ProgressService.countNodesInPath("empty")).rejects.toThrow(
+        "Learning path not found.",
+      );
+    });
   });
 
   describe("getLocalObjectIdsInPath", () => {
     it("should return filtered list of localLearningObjectId's", async () => {
       prisma.learningPathNode.findMany.mockResolvedValue([
-        { localLearningObjectId: "lo1" } as any,
+        { localLearningObjectId: "lo1" },
         { localLearningObjectId: null },
         { localLearningObjectId: "lo2" },
       ]);
@@ -175,12 +178,7 @@ describe("ProgressService", () => {
         {
           assignmentId: 22,
           teamId: 1,
-          team: {
-            id: 1,
-            teamname: "Mock Team",
-            classId: 101,
-            students: [],
-          },
+          team: { id: 1, teamname: "Mock Team", classId: 101, students: [] },
         },
       ];
       prisma.teamAssignment.findMany.mockResolvedValue(fakeTeams);

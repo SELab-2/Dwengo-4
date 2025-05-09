@@ -3,11 +3,13 @@ import joinRequestService from "../../../services/joinRequestService";
 import prisma from "../../../config/prisma";
 import classService from "../../../services/classService";
 import { JoinRequestStatus } from "@prisma/client";
-import { AccesDeniedError, BadRequestError } from "../../../errors/errors";
+import {
+  BadRequestError,
+  ConflictError,
+  AccessDeniedError,
+} from "../../../errors/errors";
 
 vi.mock("../../../config/prisma");
-
-// classService mock
 vi.mock("../../../services/classService");
 
 describe("joinRequestService", () => {
@@ -15,9 +17,13 @@ describe("joinRequestService", () => {
   const teacherId = 2;
   const classId = 10;
   const joinCode = "JOIN123";
+  const mockClass = { id: classId };
 
   beforeEach(() => {
     vi.clearAllMocks();
+    (prisma.$transaction as ReturnType<typeof vi.fn>).mockImplementation(
+      async (fn: any) => fn(prisma),
+    );
   });
 
   describe("createJoinRequest", () => {
@@ -44,10 +50,12 @@ describe("joinRequestService", () => {
     it("throws if student is already in class", async () => {
       (
         classService.getClassByJoinCode as ReturnType<typeof vi.fn>
-      ).mockResolvedValue({ id: classId });
+      ).mockResolvedValue(mockClass);
       (
-        classService.isStudentInClass as ReturnType<typeof vi.fn>
-      ).mockResolvedValue(true);
+        classService.alreadyMemberOfClass as ReturnType<typeof vi.fn>
+      ).mockImplementation(() => {
+        throw new BadRequestError("Already in class");
+      });
 
       await expect(
         joinRequestService.createValidJoinRequest(studentId, joinCode),
@@ -57,17 +65,17 @@ describe("joinRequestService", () => {
     it("throws if pending request already exists", async () => {
       (
         classService.getClassByJoinCode as ReturnType<typeof vi.fn>
-      ).mockResolvedValue({ id: classId });
+      ).mockResolvedValue(mockClass);
       (
-        classService.isStudentInClass as ReturnType<typeof vi.fn>
-      ).mockResolvedValue(false);
+        classService.alreadyMemberOfClass as ReturnType<typeof vi.fn>
+      ).mockReturnValue(undefined);
       (
         prisma.joinRequest.findFirst as ReturnType<typeof vi.fn>
       ).mockResolvedValue({});
 
       await expect(
         joinRequestService.createValidJoinRequest(studentId, joinCode),
-      ).rejects.toThrow(BadRequestError);
+      ).rejects.toThrow(ConflictError);
     });
 
     it("creates valid request successfully", async () => {
@@ -79,10 +87,10 @@ describe("joinRequestService", () => {
       };
       (
         classService.getClassByJoinCode as ReturnType<typeof vi.fn>
-      ).mockResolvedValue({ id: classId });
+      ).mockResolvedValue(mockClass);
       (
-        classService.isStudentInClass as ReturnType<typeof vi.fn>
-      ).mockResolvedValue(false);
+        classService.alreadyMemberOfClass as ReturnType<typeof vi.fn>
+      ).mockReturnValue(undefined);
       (
         prisma.joinRequest.findFirst as ReturnType<typeof vi.fn>
       ).mockResolvedValue(null);
@@ -110,14 +118,14 @@ describe("joinRequestService", () => {
         classService.isTeacherOfClass as ReturnType<typeof vi.fn>
       ).mockResolvedValue(true);
       (
+        classService.addStudentToClass as ReturnType<typeof vi.fn>
+      ).mockResolvedValue(undefined);
+      (
         prisma.joinRequest.findFirst as ReturnType<typeof vi.fn>
       ).mockResolvedValue(req);
       (prisma.joinRequest.update as ReturnType<typeof vi.fn>).mockResolvedValue(
         { ...req, status: JoinRequestStatus.APPROVED },
       );
-      (
-        classService.addStudentToClass as ReturnType<typeof vi.fn>
-      ).mockResolvedValue(undefined);
 
       const result =
         await joinRequestService.approveRequestAndAddStudentToClass(
@@ -160,11 +168,11 @@ describe("joinRequestService", () => {
     it("throws error if teacher not part of class", async () => {
       (
         classService.isTeacherOfClass as ReturnType<typeof vi.fn>
-      ).mockResolvedValue(false);
+      ).mockRejectedValue(new AccessDeniedError("Not allowed"));
 
       await expect(
         joinRequestService.getJoinRequestsByClass(teacherId, classId),
-      ).rejects.toThrow(AccesDeniedError);
+      ).rejects.toThrow(AccessDeniedError);
     });
 
     it("returns all join requests including student info", async () => {
@@ -180,11 +188,7 @@ describe("joinRequestService", () => {
           classId,
           status: JoinRequestStatus.PENDING,
           student: {
-            user: {
-              firstName: "Jane",
-              lastName: "Doe",
-              email: "jane@doe.com",
-            },
+            user: { firstName: "Jane", lastName: "Doe", email: "jane@doe.com" },
           },
         },
       ]);
@@ -206,21 +210,6 @@ describe("joinRequestService", () => {
           },
         },
       ]);
-    });
-  });
-
-  describe("handleError", () => {
-    it("throws wrapped Error", () => {
-      const err = new Error("Some issue");
-      expect(() => joinRequestService["handleError"](err, "Wrapped")).toThrow(
-        "Wrapped: Some issue",
-      );
-    });
-
-    it("throws unknown error", () => {
-      expect(() =>
-        joinRequestService["handleError"]("string err", "BOOM"),
-      ).toThrow("BOOM: Unknown error occurred.");
     });
   });
 });

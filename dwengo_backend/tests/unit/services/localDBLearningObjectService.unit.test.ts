@@ -2,10 +2,16 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import * as service from "../../../services/localDBLearningObjectService";
 import prisma from "../../../config/prisma";
 import { LearningObject } from "@prisma/client";
+import {
+  AccessDeniedError,
+  UnavailableError,
+  NotFoundError,
+} from "../../../errors/errors";
 
 vi.mock("../../../config/prisma");
 
-const mockObject: LearningObject = {
+type LO = LearningObject;
+const mockObject: LO = {
   id: "abc123",
   uuid: "uuid-123",
   hruid: "obj-hruid",
@@ -40,7 +46,6 @@ describe("localDBLearningObjectService", () => {
       ).mockResolvedValue([mockObject]);
 
       const result = await service.getLocalLearningObjects(true);
-
       expect(result[0].origin).toBe("local");
       expect(prisma.learningObject.findMany).toHaveBeenCalledWith({
         where: {},
@@ -54,7 +59,6 @@ describe("localDBLearningObjectService", () => {
       ).mockResolvedValue([mockObject]);
 
       const result = await service.getLocalLearningObjects(false);
-
       expect(result).toHaveLength(1);
       expect(prisma.learningObject.findMany).toHaveBeenCalledWith({
         where: { teacherExclusive: false, available: true },
@@ -68,34 +72,35 @@ describe("localDBLearningObjectService", () => {
       (
         prisma.learningObject.findUnique as ReturnType<typeof vi.fn>
       ).mockResolvedValue(mockObject);
-
       const result = await service.getLocalLearningObjectById("abc123", true);
-      expect(result?.id).toBe("abc123");
+      expect(result.id).toBe("abc123");
     });
 
-    it("retourneert null als object niet bestaat", async () => {
+    it("gooit NotFoundError als object niet bestaat", async () => {
       (
         prisma.learningObject.findUnique as ReturnType<typeof vi.fn>
       ).mockResolvedValue(null);
-
-      const result = await service.getLocalLearningObjectById(
-        "niet-bestaat",
-        false,
-      );
-      expect(result).toBeNull();
+      await expect(
+        service.getLocalLearningObjectById("niet-bestaat", false),
+      ).rejects.toThrow(NotFoundError);
     });
 
-    it("weigert toegang voor student als object niet beschikbaar is", async () => {
+    it("weigert toegang voor student als object is teacherExclusive", async () => {
       (
         prisma.learningObject.findUnique as ReturnType<typeof vi.fn>
-      ).mockResolvedValue({
-        ...mockObject,
-        teacherExclusive: true,
-        available: false,
-      });
+      ).mockResolvedValue({ ...mockObject, teacherExclusive: true });
+      await expect(
+        service.getLocalLearningObjectById("abc123", false),
+      ).rejects.toThrow(AccessDeniedError);
+    });
 
-      const result = await service.getLocalLearningObjectById("abc123", false);
-      expect(result).toBeNull();
+    it("gooit UnavailableError als object niet beschikbaar is voor student", async () => {
+      (
+        prisma.learningObject.findUnique as ReturnType<typeof vi.fn>
+      ).mockResolvedValue({ ...mockObject, available: false });
+      await expect(
+        service.getLocalLearningObjectById("abc123", false),
+      ).rejects.toThrow(UnavailableError);
     });
   });
 
@@ -104,9 +109,7 @@ describe("localDBLearningObjectService", () => {
       (
         prisma.learningObject.findMany as ReturnType<typeof vi.fn>
       ).mockResolvedValue([mockObject]);
-
       const result = await service.searchLocalLearningObjects(true, "Titel");
-
       expect(result[0].title).toBe("Titel");
       expect(prisma.learningObject.findMany).toHaveBeenCalledWith({
         where: {
@@ -124,10 +127,7 @@ describe("localDBLearningObjectService", () => {
       (
         prisma.learningObject.findMany as ReturnType<typeof vi.fn>
       ).mockResolvedValue([mockObject]);
-
-      const result = await service.searchLocalLearningObjects(false, "code");
-
-      expect(result.length).toBe(1);
+      await service.searchLocalLearningObjects(false, "code");
       expect(prisma.learningObject.findMany).toHaveBeenCalledWith({
         where: {
           OR: [
@@ -143,50 +143,59 @@ describe("localDBLearningObjectService", () => {
   });
 
   describe("getLocalLearningObjectByHruidLangVersion", () => {
-    it("haalt object op met combinatie hruid/language/version", async () => {
+    it("haalt object op met combinatie hruid/language/version als teacher", async () => {
       (
         prisma.learningObject.findUnique as ReturnType<typeof vi.fn>
       ).mockResolvedValue(mockObject);
-
       const result = await service.getLocalLearningObjectByHruidLangVersion(
         "obj-hruid",
         "nl",
         1,
         true,
       );
-      expect(result?.uuid).toBe("uuid-123");
+      expect(result.uuid).toBe("uuid-123");
     });
 
-    it("retourneert null als object niet bestaat", async () => {
+    it("gooit NotFoundError als object niet bestaat", async () => {
       (
         prisma.learningObject.findUnique as ReturnType<typeof vi.fn>
       ).mockResolvedValue(null);
-
-      const result = await service.getLocalLearningObjectByHruidLangVersion(
-        "missing",
-        "en",
-        99,
-        false,
-      );
-      expect(result).toBeNull();
+      await expect(
+        service.getLocalLearningObjectByHruidLangVersion(
+          "missing",
+          "en",
+          99,
+          false,
+        ),
+      ).rejects.toThrow(NotFoundError);
     });
 
-    it("filtert niet-toegankelijke objecten weg voor niet-teachers", async () => {
+    it("weigert toegang voor student als object is teacherExclusive", async () => {
       (
         prisma.learningObject.findUnique as ReturnType<typeof vi.fn>
-      ).mockResolvedValue({
-        ...mockObject,
-        teacherExclusive: true,
-        available: false,
-      });
+      ).mockResolvedValue({ ...mockObject, teacherExclusive: true });
+      await expect(
+        service.getLocalLearningObjectByHruidLangVersion(
+          "secret",
+          "nl",
+          1,
+          false,
+        ),
+      ).rejects.toThrow(AccessDeniedError);
+    });
 
-      const result = await service.getLocalLearningObjectByHruidLangVersion(
-        "secret",
-        "nl",
-        1,
-        false,
-      );
-      expect(result).toBeNull();
+    it("gooit UnavailableError als object niet beschikbaar is voor student", async () => {
+      (
+        prisma.learningObject.findUnique as ReturnType<typeof vi.fn>
+      ).mockResolvedValue({ ...mockObject, available: false });
+      await expect(
+        service.getLocalLearningObjectByHruidLangVersion(
+          "secret",
+          "nl",
+          1,
+          false,
+        ),
+      ).rejects.toThrow(UnavailableError);
     });
   });
 });
