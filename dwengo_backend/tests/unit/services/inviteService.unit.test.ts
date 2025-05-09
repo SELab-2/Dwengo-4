@@ -1,3 +1,5 @@
+// dwengo_backend/tests/unit/services/inviteService.unit.test.ts
+
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import inviteService from "../../../services/inviteService";
 import prisma from "../../../config/__mocks__/prisma";
@@ -6,7 +8,8 @@ import {
   BadRequestError,
   ConflictError,
   NotFoundError,
-  AccesDeniedError,
+  AccessDeniedError,
+  UnauthorizedError,
 } from "../../../errors/errors";
 import { JoinRequestStatus } from "@prisma/client";
 
@@ -42,10 +45,10 @@ describe("inviteService", () => {
       );
       (
         classService.isTeacherOfClass as ReturnType<typeof vi.fn>
-      ).mockResolvedValue(false);
+      ).mockRejectedValue(new AccessDeniedError("not allowed"));
       await expect(
         inviteService.createInvite(1, "teacher@example.com", 1),
-      ).rejects.toThrow(AccesDeniedError);
+      ).rejects.toThrow(AccessDeniedError);
     });
 
     it("throws if email doesn't belong to teacher", async () => {
@@ -54,7 +57,7 @@ describe("inviteService", () => {
       );
       (
         classService.isTeacherOfClass as ReturnType<typeof vi.fn>
-      ).mockResolvedValue(true);
+      ).mockResolvedValue(undefined);
       (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
         null,
       );
@@ -64,6 +67,12 @@ describe("inviteService", () => {
     });
 
     it("throws if role is not TEACHER", async () => {
+      (classService.getClassById as ReturnType<typeof vi.fn>).mockResolvedValue(
+        { id: 1 } as any,
+      );
+      (
+        classService.isTeacherOfClass as ReturnType<typeof vi.fn>
+      ).mockResolvedValue(undefined);
       (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
         id: 99,
         role: "STUDENT",
@@ -76,10 +85,16 @@ describe("inviteService", () => {
       });
       await expect(
         inviteService.createInvite(1, "student@example.com", 1),
-      ).rejects.toThrow(NotFoundError);
+      ).rejects.toThrow(UnauthorizedError);
     });
 
     it("throws if there is an existing pending invite", async () => {
+      (classService.getClassById as ReturnType<typeof vi.fn>).mockResolvedValue(
+        { id: 1 } as any,
+      );
+      (
+        classService.isTeacherOfClass as ReturnType<typeof vi.fn>
+      ).mockResolvedValue(undefined);
       (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
         id: 3,
         role: "TEACHER",
@@ -103,21 +118,22 @@ describe("inviteService", () => {
     it("throws if not class teacher", async () => {
       (
         classService.isTeacherOfClass as ReturnType<typeof vi.fn>
-      ).mockResolvedValue(false);
+      ).mockRejectedValue(new AccessDeniedError("not allowed"));
       await expect(
         inviteService.getPendingInvitesForClass(1, 1),
-      ).rejects.toThrow(AccesDeniedError);
+      ).rejects.toThrow(AccessDeniedError);
     });
 
     it("returns invites for class", async () => {
       (
         classService.isTeacherOfClass as ReturnType<typeof vi.fn>
-      ).mockResolvedValue(true);
+      ).mockResolvedValue(undefined);
       (prisma.invite.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([
         mockInvite,
       ]);
       const result = await inviteService.getPendingInvitesForClass(1, 1);
       expect(result).toHaveLength(1);
+      expect(result[0]).toEqual(mockInvite);
     });
   });
 
@@ -145,9 +161,9 @@ describe("inviteService", () => {
       (prisma.invite.findFirst as ReturnType<typeof vi.fn>).mockResolvedValue(
         mockInvite,
       );
-      (prisma.$transaction as ReturnType<typeof vi.fn>).mockResolvedValue([
+      (prisma.$transaction as ReturnType<typeof vi.fn>).mockResolvedValue(
         mockInvite,
-      ]);
+      );
       const result = await inviteService.acceptInviteAndJoinClass(3, 1);
       expect(result).toEqual(mockInvite);
     });
@@ -180,16 +196,19 @@ describe("inviteService", () => {
     it("throws if not class teacher", async () => {
       (
         classService.isTeacherOfClass as ReturnType<typeof vi.fn>
-      ).mockResolvedValue(false);
+      ).mockRejectedValue(new AccessDeniedError("not allowed"));
       await expect(inviteService.deleteInvite(2, 1, 1)).rejects.toThrow(
-        AccesDeniedError,
+        AccessDeniedError,
       );
     });
 
     it("deletes invite", async () => {
       (
         classService.isTeacherOfClass as ReturnType<typeof vi.fn>
-      ).mockResolvedValue(true);
+      ).mockResolvedValue(undefined);
+      (prisma.invite.findFirst as ReturnType<typeof vi.fn>).mockResolvedValue(
+        mockInvite,
+      );
       (prisma.invite.delete as ReturnType<typeof vi.fn>).mockResolvedValue(
         mockInvite,
       );
