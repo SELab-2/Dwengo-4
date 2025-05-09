@@ -1,6 +1,8 @@
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { Team } from "@prisma/client";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import StudentTeamService from "../../../services/studentTeamService";
 import prisma from "../../../config/prisma";
+import { NotFoundError } from "../../../errors/errors";
 
 vi.mock("../../../config/prisma");
 
@@ -18,14 +20,14 @@ describe("StudentTeamService", () => {
         title: "Assignment X",
       },
     },
-  };
+  } as Team & { teamAssignment: { assignment: { id: number; title: string } } };
 
   beforeEach(() => {
-    // wordt automatisch gereset door __mocks__/prisma.ts
+    vi.clearAllMocks();
   });
 
   describe("getStudentTeams", () => {
-    test("returns teams student is part of", async () => {
+    it("returns teams student is part of", async () => {
       (prisma.team.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([
         mockTeam,
       ]);
@@ -50,7 +52,7 @@ describe("StudentTeamService", () => {
       expect(result).toEqual([mockTeam]);
     });
 
-    test("returns empty array when student is not in any team", async () => {
+    it("returns empty array when student is not in any team", async () => {
       (prisma.team.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
 
       const result = await StudentTeamService.getStudentTeams(mockStudentId);
@@ -60,7 +62,7 @@ describe("StudentTeamService", () => {
   });
 
   describe("getTeam", () => {
-    test("returns the team for a student and assignment", async () => {
+    it("returns the team for a student and assignment", async () => {
       const mockResponse = {
         ...mockTeam,
         students: [
@@ -119,22 +121,22 @@ describe("StudentTeamService", () => {
       expect(result).toEqual(mockResponse);
     });
 
-    test("returns null if no team found", async () => {
+    it("throws NotFoundError if no team found", async () => {
       (prisma.team.findFirst as ReturnType<typeof vi.fn>).mockResolvedValue(
         null,
       );
 
-      const result = await StudentTeamService.getTeam(
-        mockStudentId,
-        mockAssignmentId,
-      );
-
-      expect(result).toBeNull();
+      await expect(
+        StudentTeamService.getTeam(mockStudentId, mockAssignmentId),
+      ).rejects.toThrow(NotFoundError);
+      await expect(
+        StudentTeamService.getTeam(mockStudentId, mockAssignmentId),
+      ).rejects.toThrow("Student is not part of a team for this assignment.");
     });
   });
 
   describe("getTeamById", () => {
-    test("returns the team with full student info", async () => {
+    it("returns the team with full student info", async () => {
       const mockResponse = {
         id: mockTeamId,
         students: [
@@ -178,14 +180,17 @@ describe("StudentTeamService", () => {
       expect(result).toEqual(mockResponse);
     });
 
-    test("returns null if no team found", async () => {
+    it("throws NotFoundError if no team found", async () => {
       (prisma.team.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
         null,
       );
 
-      const result = await StudentTeamService.getTeamById(mockTeamId);
-
-      expect(result).toBeNull();
+      await expect(StudentTeamService.getTeamById(mockTeamId)).rejects.toThrow(
+        NotFoundError,
+      );
+      await expect(StudentTeamService.getTeamById(mockTeamId)).rejects.toThrow(
+        "Team not found.",
+      );
     });
   });
 });
