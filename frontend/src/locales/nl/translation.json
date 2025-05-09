@@ -130,5 +130,10 @@
     "success": "Je hebt een aanvraag verzonden om lid te worden van deze klas. Wacht op goedkeuring van de lesgever."
   },
   "code": "Klascode",
-  "close": "Sluiten"
+  "close": "Sluiten",
+  "learning_paths": {
+    "label": "Leerpaden",
+    "search_name": "Zoek op naam",
+    "not_found_filter": "Geen leerpaden gevonden met deze filter"
+  }
 }
