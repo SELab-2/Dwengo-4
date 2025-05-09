@@ -46,43 +46,47 @@ describe("errorHandler – AppError", () => {
   });
 });
 
-// ========== 2. PrismaClientKnownRequestError: P2025 ==========
+// ========== 2. PrismaClientKnownRequestError (P2025) ==========
 describe("errorHandler – PrismaClientKnownRequestError (P2025)", () => {
-  it("should return 404 when code is P2025", () => {
+  it("should be handled as generic 500", () => {
     const err = new PrismaClientKnownRequestError("Not found", {
       clientVersion: "4.x",
       code: "P2025",
     }) as PrismaClientKnownRequestError;
-
     (err.meta as any) = { target: "user" };
 
     errorHandler(err, mockReq, mockRes, vi.fn());
 
-    expect(mockStatus).toHaveBeenCalledWith(404);
-    expect(mockJson).toHaveBeenCalledWith({
-      error: "Resource not found",
-      details: { target: "user" },
-    });
+    // fallback to 500
+    expect(mockStatus).toHaveBeenCalledWith(500);
+    // generic JSON shape
+    expect(mockJson).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Not found",
+        stack: expect.any(String),
+      }),
+    );
   });
 });
 
-// ========== 3. PrismaClientKnownRequestError: UNKNOWN CODE ==========
+// ========== 3. PrismaClientKnownRequestError (unknown code) ==========
 describe("errorHandler – PrismaClientKnownRequestError (unknown code)", () => {
-  it("should return 500 with generic database error", () => {
+  it("should be handled as generic 500", () => {
     const err = new PrismaClientKnownRequestError("DB broke", {
       clientVersion: "4.x",
       code: "P9999",
     }) as PrismaClientKnownRequestError;
-
     (err.meta as any) = { query: "SELECT" };
 
     errorHandler(err, mockReq, mockRes, vi.fn());
 
     expect(mockStatus).toHaveBeenCalledWith(500);
-    expect(mockJson).toHaveBeenCalledWith({
-      error: "a database error occured",
-      details: { query: "SELECT" },
-    });
+    expect(mockJson).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "DB broke",
+        stack: expect.any(String),
+      }),
+    );
   });
 });
 
@@ -112,6 +116,7 @@ describe("errorHandler – Generic Error", () => {
     expect(mockJson).toHaveBeenCalledWith(
       expect.objectContaining({
         message: "Teapot error",
+        stack: expect.any(String),
       }),
     );
   });

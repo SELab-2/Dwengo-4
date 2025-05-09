@@ -5,10 +5,15 @@ import {
   canUpdateOrDelete,
 } from "../../../services/authorizationService";
 import prisma from "../../../config/prisma";
+import {
+  AccessDeniedError,
+  UnauthorizedError,
+  NotFoundError,
+} from "../../../errors/errors";
 
 vi.mock("../../../config/prisma");
 
-// Helper om een volledige User te mocken
+// Helper to build a complete User
 const mockUser = (overrides?: Partial<User>): User => ({
   id: 1,
   firstName: "John",
@@ -27,94 +32,116 @@ describe("authorizationService", () => {
   });
 
   describe("isAuthorized()", () => {
-    it("should return true for ADMIN regardless of role/classId", async () => {
+    it("resolves for ADMIN regardless of role or classId", async () => {
       (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
         mockUser({ role: Role.ADMIN }),
       );
-      const result = await isAuthorized(1, Role.TEACHER, 123);
-      expect(result).toBe(true);
+
+      await expect(isAuthorized(1, Role.TEACHER, 123)).resolves.toBeUndefined();
     });
 
-    it("should return false if user has wrong role", async () => {
+    it("throws UnauthorizedError if role mismatches", async () => {
       (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
         mockUser({ role: Role.STUDENT }),
       );
-      const result = await isAuthorized(1, Role.TEACHER);
-      expect(result).toBe(false);
+
+      await expect(isAuthorized(1, Role.TEACHER)).rejects.toThrow(
+        UnauthorizedError,
+      );
     });
 
-    it("should throw error if user not found", async () => {
+    it("throws NotFoundError if user not found", async () => {
       (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
         null,
       );
+
       await expect(isAuthorized(1, Role.TEACHER)).rejects.toThrow(
-        "User not found",
+        NotFoundError,
       );
     });
 
-    it("should return true for TEACHER without class check", async () => {
+    it("resolves for TEACHER when no classId check", async () => {
       (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
         mockUser({ role: Role.TEACHER }),
       );
-      const result = await isAuthorized(2, Role.TEACHER);
-      expect(result).toBe(true);
+
+      await expect(isAuthorized(2, Role.TEACHER)).resolves.toBeUndefined();
     });
 
-    it("should return false if TEACHER not linked to classId", async () => {
+    it("throws AccessDeniedError if TEACHER not linked to class", async () => {
       (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
         mockUser({ role: Role.TEACHER }),
       );
       (
         prisma.classTeacher.findFirst as ReturnType<typeof vi.fn>
       ).mockResolvedValue(null);
-      const result = await isAuthorized(3, Role.TEACHER, 99);
-      expect(result).toBe(false);
+
+      await expect(isAuthorized(3, Role.TEACHER, 99)).rejects.toThrow(
+        AccessDeniedError,
+      );
     });
 
-    it("should return true if TEACHER linked to classId", async () => {
+    it("resolves if TEACHER is linked to class", async () => {
       (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
         mockUser({ role: Role.TEACHER }),
       );
       (
         prisma.classTeacher.findFirst as ReturnType<typeof vi.fn>
       ).mockResolvedValue({ id: 1 });
-      const result = await isAuthorized(3, Role.TEACHER, 99);
-      expect(result).toBe(true);
+
+      await expect(isAuthorized(3, Role.TEACHER, 99)).resolves.toBeUndefined();
     });
 
-    it("should return false if STUDENT not enrolled in classId", async () => {
+    it("throws AccessDeniedError if STUDENT not enrolled in class", async () => {
       (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
         mockUser({ role: Role.STUDENT }),
       );
       (
         prisma.classStudent.findFirst as ReturnType<typeof vi.fn>
       ).mockResolvedValue(null);
-      const result = await isAuthorized(4, Role.STUDENT, 321);
-      expect(result).toBe(false);
+
+      await expect(isAuthorized(4, Role.STUDENT, 321)).rejects.toThrow(
+        AccessDeniedError,
+      );
     });
 
-    it("should return true if STUDENT is enrolled in classId", async () => {
+    it("resolves if STUDENT is enrolled in class", async () => {
       (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
         mockUser({ role: Role.STUDENT }),
       );
       (
         prisma.classStudent.findFirst as ReturnType<typeof vi.fn>
       ).mockResolvedValue({ id: 10 });
-      const result = await isAuthorized(4, Role.STUDENT, 321);
-      expect(result).toBe(true);
+
+      await expect(isAuthorized(4, Role.STUDENT, 321)).resolves.toBeUndefined();
     });
   });
 
   describe("canUpdateOrDelete()", () => {
-    it("should return false if user is not TEACHER", async () => {
+    it("throws UnauthorizedError if user is not TEACHER", async () => {
       (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
         mockUser({ role: Role.STUDENT }),
       );
-      const result = await canUpdateOrDelete(5, 100);
-      expect(result).toBe(false);
+
+      await expect(canUpdateOrDelete(5, 100)).rejects.toThrow(
+        UnauthorizedError,
+      );
     });
 
-    it("should return false if no assignments found for teacher’s classes", async () => {
+    it("throws AccessDeniedError if teacher has no classes", async () => {
+      (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
+        mockUser({ role: Role.TEACHER }),
+      );
+      (
+        prisma.classTeacher.findMany as ReturnType<typeof vi.fn>
+      ).mockResolvedValue([]);
+
+      await expect(canUpdateOrDelete(6, 100)).rejects.toThrow(
+        AccessDeniedError,
+      );
+    });
+
+    it("throws NotFoundError if no assignment found for any of teacher’s classes", async () => {
       (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
         mockUser({ role: Role.TEACHER }),
       );
@@ -124,11 +151,11 @@ describe("authorizationService", () => {
       (
         prisma.classAssignment.findFirst as ReturnType<typeof vi.fn>
       ).mockResolvedValue(null);
-      const result = await canUpdateOrDelete(6, 100);
-      expect(result).toBe(false);
+
+      await expect(canUpdateOrDelete(7, 100)).rejects.toThrow(NotFoundError);
     });
 
-    it("should return true if assignment is linked to teacher’s class", async () => {
+    it("resolves if assignment is linked to one of teacher’s classes", async () => {
       (prisma.user.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
         mockUser({ role: Role.TEACHER }),
       );
@@ -137,11 +164,9 @@ describe("authorizationService", () => {
       ).mockResolvedValue([{ classId: 1 }, { classId: 2 }]);
       (
         prisma.classAssignment.findFirst as ReturnType<typeof vi.fn>
-      ).mockResolvedValue({
-        assignmentId: 100,
-      });
-      const result = await canUpdateOrDelete(7, 100);
-      expect(result).toBe(true);
+      ).mockResolvedValue({ assignmentId: 100 });
+
+      await expect(canUpdateOrDelete(7, 100)).resolves.toBeUndefined();
     });
   });
 });

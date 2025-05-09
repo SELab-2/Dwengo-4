@@ -1,10 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { isTeacher } from "../../../middleware/teacherAuthMiddleware";
+import { protectTeacher } from "../../../middleware/authMiddleware/teacherAuthMiddleware";
 import { Response, NextFunction } from "express";
 import { AuthenticatedRequest } from "../../../interfaces/extendedTypeInterfaces";
 import prisma from "../../../config/prisma";
+import jwt from "jsonwebtoken";
+import { UnauthorizedError } from "../../../errors/errors";
+import {
+  invalidTokenMessage,
+  noTokenProvidedMessage,
+  teacherNotFoundMessage,
+} from "../../../middleware/authMiddleware/errorMessages";
 
 vi.mock("../../../config/prisma");
+vi.mock("jsonwebtoken");
 
 const createMockRes = () => {
   const res: Partial<Response> = {};
@@ -13,59 +21,59 @@ const createMockRes = () => {
   return res as Response;
 };
 
-const mockNext: NextFunction = vi.fn();
+describe("Middleware - protectTeacher", () => {
+  let mockNext: NextFunction;
 
-describe("Middleware - teacherAuthMiddleware", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.JWT_SECRET = "test-secret";
+    mockNext = vi.fn();
   });
 
-  describe("isTeacher", () => {
-    it("denies access if user is not a teacher", async () => {
-      const req = {
-        user: { id: 2 },
-      } as AuthenticatedRequest;
+  it("denies access if no Authorization header", async () => {
+    const req = { headers: {} } as AuthenticatedRequest;
+    const res = createMockRes();
 
-      const res = createMockRes();
+    await protectTeacher(req, res, mockNext);
 
-      (prisma.teacher.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
-        null,
-      );
+    expect(mockNext).toHaveBeenCalledOnce();
+    const err = (mockNext as any).mock.calls[0][0];
+    expect(err).toBeInstanceOf(UnauthorizedError);
+    expect(err.message).toBe(noTokenProvidedMessage);
+  });
 
-      await isTeacher(req, res, mockNext);
+  it("denies access if token is invalid", async () => {
+    const req = {
+      headers: { authorization: "Bearer badtoken" },
+    } as AuthenticatedRequest;
+    const res = createMockRes();
 
-      expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({
-        error: "Access denied. Only teachers can perform this action.",
-      });
-      expect(mockNext).not.toHaveBeenCalled();
+    (jwt.verify as vi.Mock).mockImplementation(() => {
+      throw new Error("jwt fail");
     });
 
-    it("denies access if no user ID is present", async () => {
-      const req = {} as AuthenticatedRequest;
-      const res = createMockRes();
+    await protectTeacher(req, res, mockNext);
 
-      await isTeacher(req, res, mockNext);
+    expect(mockNext).toHaveBeenCalledOnce();
+    const err = (mockNext as any).mock.calls[0][0];
+    expect(err).toBeInstanceOf(UnauthorizedError);
+    expect(err.message).toBe(invalidTokenMessage);
+  });
 
-      expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({ error: "Unauthorized" });
-      expect(mockNext).not.toHaveBeenCalled();
-    });
+  it("denies access if no teacher record for user", async () => {
+    const req = {
+      headers: { authorization: "Bearer validtoken" },
+    } as AuthenticatedRequest;
+    const res = createMockRes();
 
-    it("calls next() when user is a teacher", async () => {
-      const req = {
-        user: { id: 1 },
-      } as AuthenticatedRequest;
+    (jwt.verify as vi.Mock).mockReturnValue({ id: 42 });
+    (prisma.teacher.findUnique as vi.Mock).mockResolvedValue(null);
 
-      const res = createMockRes();
+    await protectTeacher(req, res, mockNext);
 
-      (prisma.teacher.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
-        { userId: 1 },
-      );
-
-      await isTeacher(req, res, mockNext);
-
-      expect(mockNext).toHaveBeenCalled();
-    });
+    expect(mockNext).toHaveBeenCalledOnce();
+    const err = (mockNext as any).mock.calls[0][0];
+    expect(err).toBeInstanceOf(UnauthorizedError);
+    expect(err.message).toBe(teacherNotFoundMessage);
   });
 });

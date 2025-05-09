@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import prisma from "../../../config/prisma";
-import { authorizeQuestion } from "../../../middleware/questionsAuthMiddleware";
+import { authorizeQuestion } from "../../../middleware/authMiddleware/questionsAuthMiddleware";
 
 vi.mock("../../../config/prisma");
 

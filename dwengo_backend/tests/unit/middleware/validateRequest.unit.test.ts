@@ -1,185 +1,134 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import {
-  validateRequest,
-  validationErrorMessage,
-} from "../../../middleware/validateRequest";
+import { validateRequest } from "../../../middleware/validateRequest";
 import { z } from "zod";
 import { AuthenticatedRequest } from "../../../interfaces/extendedTypeInterfaces";
-import { Response, NextFunction } from "express";
-
-const getMockRes = (): Response => {
-  const json = vi.fn();
-  const status = vi.fn(() => ({ json }));
-  return {
-    status,
-    json,
-  } as unknown as Response;
-};
-
-const getMockNext = (): NextFunction => vi.fn();
+import { BadRequestError } from "../../../errors/errors";
 
 describe("validateRequest middleware", () => {
-  let next: NextFunction;
-  let res: Response;
+  let next: ReturnType<typeof vi.fn>;
+  const noopResponse = {} as any; // not used since we throw
 
   beforeEach(() => {
-    res = getMockRes();
-    next = getMockNext();
+    next = vi.fn();
   });
 
-  it("roept next() aan bij geldige body", () => {
-    const bodySchema = z.object({
-      name: z.string(),
-    });
+  function runAndCatch(fn: () => void): any {
+    try {
+      fn();
+    } catch (err) {
+      return err;
+    }
+    throw new Error("Expected middleware to throw");
+  }
 
-    const req = {
-      body: { name: "Jake" },
-    } as AuthenticatedRequest;
+  it("calls next() on valid body", () => {
+    const bodySchema = z.object({ name: z.string() });
+    const req = { body: { name: "Jake" } } as AuthenticatedRequest;
 
     const middleware = validateRequest({ bodySchema });
-    middleware(req, res, next);
+    middleware(req, noopResponse, next);
 
     expect(next).toHaveBeenCalled();
   });
 
-  it("stuurt 400 terug bij ongeldige body", () => {
-    const bodySchema = z.object({
-      name: z.string(),
-    });
-
-    const req = {
-      body: { name: 123 }, // fout type
-    } as AuthenticatedRequest;
+  it("throws BadRequestError on invalid body", () => {
+    const bodySchema = z.object({ name: z.string() });
+    const req = { body: { name: 123 } } as AuthenticatedRequest;
 
     const middleware = validateRequest({ bodySchema });
-    middleware(req, res, next);
+    const err = runAndCatch(() => middleware(req, noopResponse, next));
 
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.status(400).json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        error: validationErrorMessage,
-        message: "Invalid request body/params/query",
-        details: expect.arrayContaining([
-          expect.objectContaining({
-            field: "name",
-            message: expect.any(String),
-            source: "body",
-          }),
-        ]),
-      }),
+    expect(err).toBeInstanceOf(BadRequestError);
+    // no assertion on message here, since BadRequestError.message is the default
+    expect(Array.isArray(err.details)).toBe(true);
+    expect(err.details).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          field: "name",
+          source: "body",
+          message: expect.any(String),
+        }),
+      ]),
     );
   });
 
-  it("valideert ook params", () => {
-    const paramsSchema = z.object({
-      id: z.string().uuid(),
-    });
-
-    const req = {
-      params: { id: "not-a-uuid" },
-    } as AuthenticatedRequest;
+  it("throws on invalid params", () => {
+    const paramsSchema = z.object({ id: z.string().uuid() });
+    const req = { params: { id: "not-a-uuid" } } as AuthenticatedRequest;
 
     const middleware = validateRequest({ paramsSchema });
-    middleware(req, res, next);
+    const err = runAndCatch(() => middleware(req, noopResponse, next));
 
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.status(400).json).toHaveBeenCalled();
+    expect(err).toBeInstanceOf(BadRequestError);
+    expect(err.details[0].source).toBe("params");
   });
 
-  it("valideert ook query", () => {
-    const querySchema = z.object({
-      page: z.string().regex(/^\d+$/),
-    });
-
-    const req = {
-      query: { page: "abc" },
-    } as AuthenticatedRequest;
+  it("throws on invalid query", () => {
+    const querySchema = z.object({ page: z.string().regex(/^\d+$/) });
+    const req = { query: { page: "abc" } } as AuthenticatedRequest;
 
     const middleware = validateRequest({ querySchema });
-    middleware(req, res, next);
+    const err = runAndCatch(() => middleware(req, noopResponse, next));
 
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.status(400).json).toHaveBeenCalled();
+    expect(err).toBeInstanceOf(BadRequestError);
+    expect(err.details[0].source).toBe("query");
   });
 
-  it("valideert een customSchema op de volledige request", () => {
+  it("validates customSchema against entire request", () => {
     const customSchema = z.object({
-      body: z.object({
-        value: z.string(),
-      }),
-      headers: z.object({
-        authorization: z.string().startsWith("Bearer "),
-      }),
+      body: z.object({ value: z.string() }),
+      headers: z.object({ authorization: z.string().startsWith("Bearer ") }),
     });
-
     const req = {
       body: { value: "ok" },
       headers: { authorization: "wrong" },
     } as AuthenticatedRequest;
 
     const middleware = validateRequest({ customSchema });
-    middleware(req, res, next);
+    const err = runAndCatch(() => middleware(req, noopResponse, next));
 
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.status(400).json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        details: expect.arrayContaining([
-          expect.objectContaining({ source: "request" }),
-        ]),
-      }),
+    expect(err).toBeInstanceOf(BadRequestError);
+    expect(err.details).toEqual(
+      expect.arrayContaining([expect.objectContaining({ source: "request" })]),
     );
   });
 
-  it("combineert fouten uit verschillende schemas", () => {
+  it("combines errors from multiple schemas", () => {
     const middleware = validateRequest({
       bodySchema: z.object({ foo: z.string() }),
       querySchema: z.object({ q: z.string().uuid() }),
     });
-
     const req = {
       body: { foo: 123 },
       query: { q: "nope" },
     } as AuthenticatedRequest;
 
-    middleware(req, res, next);
-
-    expect(res.status).toHaveBeenCalledWith(400);
-    const jsonCall = res.status(400).json as any;
-    const callArgs = jsonCall.mock.calls[0][0];
-
-    expect(callArgs.details.length).toBe(2);
-    expect(callArgs.details[0].source).toBeDefined();
+    const err = runAndCatch(() => middleware(req, noopResponse, next));
+    expect(err).toBeInstanceOf(BadRequestError);
+    expect(err.details).toHaveLength(2);
+    expect(err.details.map((d: any) => d.source)).toEqual(
+      expect.arrayContaining(["body", "query"]),
+    );
   });
 
-  it("geeft custom foutmelding terug als opgegeven", () => {
-    const bodySchema = z.object({
-      name: z.string(),
-    });
-
-    const req = {
-      body: { name: 123 },
-    } as AuthenticatedRequest;
+  it("honors a customErrorMessage when provided", () => {
+    const bodySchema = z.object({ name: z.string() });
+    const req = { body: { name: 123 } } as AuthenticatedRequest;
 
     const middleware = validateRequest({
       bodySchema,
       customErrorMessage: "Niet geldig formulier",
     });
+    const err = runAndCatch(() => middleware(req, noopResponse, next));
 
-    middleware(req, res, next);
-
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.status(400).json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: "Niet geldig formulier",
-      }),
-    );
+    expect(err).toBeInstanceOf(BadRequestError);
+    expect(err.message).toBe("Niet geldig formulier");
   });
 
-  it("roept next() aan als geen schemas zijn meegegeven", () => {
+  it("calls next() when no schemas given", () => {
     const req = {} as AuthenticatedRequest;
     const middleware = validateRequest({});
-    middleware(req, res, next);
-
+    middleware(req, noopResponse, next);
     expect(next).toHaveBeenCalled();
   });
 });

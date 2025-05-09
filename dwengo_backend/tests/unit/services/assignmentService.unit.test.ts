@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import prisma from "../../../config/prisma";
 import AssignmentService from "../../../services/assignmentService";
+import { NotFoundError } from "../../../errors/errors";
 
 vi.mock("../../../config/prisma");
 
 describe("AssignmentService.getAssignmentById", () => {
   beforeEach(() => {
-    // Mocks worden automatisch gereset door beforeEach in __mocks__/prisma.ts
+    vi.clearAllMocks();
   });
 
   it("haalt assignment op met volledige includes", async () => {
@@ -133,13 +134,14 @@ describe("AssignmentService.getAssignmentById", () => {
     expect(result).toEqual(mockAssignment);
   });
 
-  it("geeft null terug als assignment niet bestaat", async () => {
+  it("gooit NotFoundError als assignment niet bestaat", async () => {
     (
       prisma.assignment.findUnique as ReturnType<typeof vi.fn>
     ).mockResolvedValue(null);
 
-    const result = await AssignmentService.getAssignmentById(999, false, false);
-    expect(result).toBeNull();
+    await expect(
+      AssignmentService.getAssignmentById(999, false, false),
+    ).rejects.toThrow(NotFoundError);
   });
 
   it("bubblet een Prisma error correct", async () => {
@@ -147,9 +149,9 @@ describe("AssignmentService.getAssignmentById", () => {
       prisma.assignment.findUnique as ReturnType<typeof vi.fn>
     ).mockRejectedValue(new Error("DB FAIL"));
 
-    await expect(() =>
+    await expect(
       AssignmentService.getAssignmentById(1, true, true),
-    ).rejects.toThrow("DB FAIL");
+    ).rejects.toThrow("Something went wrong.");
   });
 
   it("roept prisma.assignment.findUnique exact één keer aan", async () => {
@@ -161,19 +163,23 @@ describe("AssignmentService.getAssignmentById", () => {
     expect(prisma.assignment.findUnique).toHaveBeenCalledTimes(1);
   });
 
-  it("werkt met negatieve ID (Prisma faalt niet, maar geeft null)", async () => {
+  it("gooit NotFoundError bij negatieve ID", async () => {
     (
       prisma.assignment.findUnique as ReturnType<typeof vi.fn>
     ).mockResolvedValue(null);
-    const result = await AssignmentService.getAssignmentById(-1, false, false);
-    expect(result).toBeNull();
+
+    await expect(
+      AssignmentService.getAssignmentById(-1, false, false),
+    ).rejects.toThrow(NotFoundError);
   });
 
-  it("werkt met ID = 0 (Prisma faalt niet, maar geeft null)", async () => {
+  it("gooit NotFoundError bij ID = 0", async () => {
     (
       prisma.assignment.findUnique as ReturnType<typeof vi.fn>
     ).mockResolvedValue(null);
-    const result = await AssignmentService.getAssignmentById(0, false, false);
-    expect(result).toBeNull();
+
+    await expect(
+      AssignmentService.getAssignmentById(0, false, false),
+    ).rejects.toThrow(NotFoundError);
   });
 });

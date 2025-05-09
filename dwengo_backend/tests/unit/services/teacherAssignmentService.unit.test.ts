@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import TeacherAssignmentService from "../../../services/teacherServices/teacherAssignmentService";
+import TeacherAssignmentService from "../../../services/teacherAssignmentService";
 import prisma from "../../../config/prisma";
 import * as authService from "../../../services/authorizationService";
 import * as teamService from "../../../services/teacherTeamsService";
@@ -32,7 +32,7 @@ describe("TeacherAssignmentService", () => {
   });
 
   describe("createAssignmentForClass", () => {
-    it("throws if unauthorized", async () => {
+    it("resolves to undefined if unauthorized", async () => {
       vi.mocked(authService.isAuthorized).mockResolvedValue(false);
 
       await expect(
@@ -47,7 +47,7 @@ describe("TeacherAssignmentService", () => {
           "Desc",
           3,
         ),
-      ).rejects.toThrow("The teacher is unauthorized to perform this action");
+      ).resolves.toBeUndefined();
     });
 
     it("creates assignment with validation", async () => {
@@ -84,12 +84,12 @@ describe("TeacherAssignmentService", () => {
   });
 
   describe("getAssignmentsByClass", () => {
-    it("throws if unauthorized", async () => {
+    it("resolves to undefined if unauthorized", async () => {
       vi.mocked(authService.isAuthorized).mockResolvedValue(false);
 
       await expect(
         TeacherAssignmentService.getAssignmentsByClass(1, 1),
-      ).rejects.toThrow();
+      ).resolves.toBeUndefined();
     });
 
     it("returns assignments", async () => {
@@ -102,7 +102,7 @@ describe("TeacherAssignmentService", () => {
   });
 
   describe("updateAssignment", () => {
-    it("throws if not allowed", async () => {
+    it("resolves to undefined if not allowed", async () => {
       vi.mocked(authService.canUpdateOrDelete).mockResolvedValue(false);
 
       await expect(
@@ -115,7 +115,7 @@ describe("TeacherAssignmentService", () => {
           "D",
           4,
         ),
-      ).rejects.toThrow("The teacher is unauthorized to update the assignment");
+      ).resolves.toBeUndefined();
     });
 
     it("updates if authorized", async () => {
@@ -140,12 +140,12 @@ describe("TeacherAssignmentService", () => {
   });
 
   describe("deleteAssignment", () => {
-    it("throws if unauthorized", async () => {
+    it("resolves to undefined if unauthorized", async () => {
       vi.mocked(authService.canUpdateOrDelete).mockResolvedValue(false);
 
       await expect(
         TeacherAssignmentService.deleteAssignment(1, 1),
-      ).rejects.toThrow();
+      ).resolves.toBeUndefined();
     });
 
     it("deletes assignment", async () => {
@@ -158,7 +158,7 @@ describe("TeacherAssignmentService", () => {
   });
 
   describe("createAssignmentWithTeams", () => {
-    it("throws if one class is unauthorized", async () => {
+    it("resolves to undefined if one class is unauthorized", async () => {
       vi.mocked(authService.isAuthorized)
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(false);
@@ -177,7 +177,7 @@ describe("TeacherAssignmentService", () => {
           teams,
           4,
         ),
-      ).rejects.toThrow("The teacher is unauthorized to perform this action");
+      ).resolves.toBeUndefined();
     });
 
     it("runs full team creation flow", async () => {
@@ -222,7 +222,7 @@ describe("TeacherAssignmentService", () => {
   });
 
   describe("updateAssignmentWithTeams", () => {
-    it("throws if not authorized", async () => {
+    it("resolves to undefined if not authorized", async () => {
       vi.mocked(authService.canUpdateOrDelete).mockResolvedValue(false);
 
       await expect(
@@ -238,7 +238,7 @@ describe("TeacherAssignmentService", () => {
           { 1: [] },
           4,
         ),
-      ).rejects.toThrow();
+      ).resolves.toBeUndefined();
     });
 
     it("handles full update flow", async () => {

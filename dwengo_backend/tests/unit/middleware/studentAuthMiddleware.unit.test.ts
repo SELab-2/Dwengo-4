@@ -1,17 +1,24 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { protectStudent } from "../../../middleware/studentAuthMiddleware";
-// gebruik de gemockte prisma
+import { protectStudent } from "../../../middleware/authMiddleware/studentAuthMiddleware";
+import prisma from "../../../config/prisma";
+import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
+import { UnauthorizedError } from "../../../errors/errors";
+import {
+  noTokenProvidedMessage,
+  studentNotFoundMessage,
+} from "../../../middleware/authMiddleware/errorMessages";
 
 vi.mock("../../../config/prisma");
+vi.mock("jsonwebtoken");
 
-const getMockRes = () => {
+const getMockRes = (): Response => {
   const json = vi.fn();
   const status = vi.fn(() => ({ json }));
   return { status, json } as unknown as Response;
 };
 
-const getMockNext = () => vi.fn() as NextFunction;
+const getMockNext = (): NextFunction => vi.fn() as NextFunction;
 
 describe("protectStudent middleware", () => {
   const token = "valid.token.value";
@@ -27,37 +34,35 @@ describe("protectStudent middleware", () => {
     process.env = originalEnv;
   });
 
-  it("geeft 401 als Authorization ontbreekt", async () => {
+  it("geeft UnauthorizedError als Authorization ontbreekt", async () => {
     const req = { headers: {} } as unknown as Request;
     const res = getMockRes();
     const next = getMockNext();
 
-    await protectStudent(req, res, next);
+    await protectStudent(req as any, res, next);
 
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.status(401).json).toHaveBeenCalledWith({
-      error: "Geen token, niet geautoriseerd.",
-    });
-    expect(next).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalledOnce();
+    const err = (next as any).mock.calls[0][0];
+    expect(err).toBeInstanceOf(UnauthorizedError);
+    expect(err.message).toBe(noTokenProvidedMessage);
   });
 
-  it("geeft 401 als Authorization geen Bearer bevat", async () => {
+  it("geeft UnauthorizedError als Authorization geen Bearer bevat", async () => {
     const req = {
       headers: { authorization: "Basic xyz" },
     } as unknown as Request;
     const res = getMockRes();
     const next = getMockNext();
 
-    await protectStudent(req, res, next);
+    await protectStudent(req as any, res, next);
 
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.status(401).json).toHaveBeenCalledWith({
-      error: "Geen token, niet geautoriseerd.",
-    });
-    expect(next).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalledOnce();
+    const err = (next as any).mock.calls[0][0];
+    expect(err).toBeInstanceOf(UnauthorizedError);
+    expect(err.message).toBe(noTokenProvidedMessage);
   });
 
-  it("JWT_SECRET ontbreekt in env", async () => {
+  it("geeft UnauthorizedError als JWT_SECRET ontbreekt in env", async () => {
     delete process.env.JWT_SECRET;
 
     const req = {
@@ -66,12 +71,31 @@ describe("protectStudent middleware", () => {
     const res = getMockRes();
     const next = getMockNext();
 
-    await protectStudent(req, res, next);
+    (jwt.verify as vi.Mock).mockReturnValue({ id: 1 });
 
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.status(401).json).toHaveBeenCalledWith({
-      error: "Niet geautoriseerd, token mislukt.",
-    });
-    expect(next).not.toHaveBeenCalled();
+    await protectStudent(req as any, res, next);
+
+    expect(next).toHaveBeenCalledOnce();
+    const err = (next as any).mock.calls[0][0];
+    expect(err).toBeInstanceOf(UnauthorizedError);
+    expect(err.message).toBe(studentNotFoundMessage);
+  });
+
+  it("geeft UnauthorizedError als student niet gevonden wordt", async () => {
+    const req = {
+      headers: { authorization: `Bearer ${token}` },
+    } as unknown as Request;
+    const res = getMockRes();
+    const next = getMockNext();
+
+    (jwt.verify as vi.Mock).mockReturnValue({ id: 2 });
+    (prisma.student.findUnique as vi.Mock).mockResolvedValue(null);
+
+    await protectStudent(req as any, res, next);
+
+    expect(next).toHaveBeenCalledOnce();
+    const err = (next as any).mock.calls[0][0];
+    expect(err).toBeInstanceOf(UnauthorizedError);
+    expect(err.message).toBe(studentNotFoundMessage);
   });
 });

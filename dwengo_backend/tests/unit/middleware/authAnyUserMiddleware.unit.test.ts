@@ -19,8 +19,9 @@ describe(" protectAnyUser Middleware (met prisma mock)", () => {
 
   beforeEach(async () => {
     // Laad de middleware LAAT (pas NA mocks)
-    protectAnyUser = (await import("../../../middleware/authAnyUserMiddleware"))
-      .protectAnyUser;
+    protectAnyUser = (
+      await import("../../../middleware/authMiddleware/authAnyUserMiddleware")
+    ).protectAnyUser;
 
     req = { headers: {}, user: undefined } as AuthenticatedRequest;
     res = {
