@@ -1,171 +1,223 @@
-import { Class, ClassStudent } from "@prisma/client";
-import crypto from "crypto";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import ClassService, { ClassWithLinks } from "../../../services/classService";
+import prisma from "../../../config/prisma"; // auto-mocked
 import {
   AccessDeniedError,
   BadRequestError,
   NotFoundError,
 } from "../../../errors/errors";
-import { handlePrismaQuery } from "../../../errors/errorFunctions";
-import prisma from "../../../config/prisma";
+import { Class, ClassStudent } from "@prisma/client";
 
-export type ClassWithLinks = Class & { classLinks: ClassStudent[] };
+// stub handlePrismaTransaction so createClass invokes our mocks directly
+vi.mock("../../../errors/errorFunctions", async () => {
+  const actual = await vi.importActual("../../../errors/errorFunctions");
+  return {
+    ...actual,
+    handlePrismaTransaction: vi.fn((prismaClient, callback: any) =>
+      callback(prismaClient),
+    ),
+  };
+});
+vi.mock("../../../config/prisma");
 
-export default class ClassService {
-  static async createClass(name: string, teacherId: number): Promise<Class> {
-    const joinCode = await this.generateUniqueCode();
-    const createdClass = await prisma.class.create({
-      data: {
-        name,
-        code: joinCode,
-      },
+describe("ClassService", () => {
+  const now = new Date();
+  const mockClass: Class = {
+    id: 1,
+    name: "Science",
+    code: "abc123",
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe("createClass", () => {
+    it("maakt een klas aan en koppelt een leerkracht", async () => {
+      (prisma.class.create as jest.Mock).mockResolvedValue(mockClass);
+      (prisma.classTeacher.create as jest.Mock).mockResolvedValue({});
+
+      const result = await ClassService.createClass("Science", 1);
+
+      expect(prisma.class.create).toHaveBeenCalledWith({
+        data: { name: "Science", code: expect.any(String) },
+      });
+      expect(prisma.classTeacher.create).toHaveBeenCalledWith({
+        data: { teacherId: 1, classId: mockClass.id },
+      });
+      expect(result).toEqual(mockClass);
     });
-    await prisma.classTeacher.create({
-      data: {
-        teacherId,
-        classId: createdClass.id,
-      },
+  });
+
+  describe("deleteClass", () => {
+    it("verwijdert klas als teacher rechten heeft", async () => {
+      (prisma.class.findUnique as jest.Mock).mockResolvedValue(mockClass);
+      (prisma.class.delete as jest.Mock).mockResolvedValue(mockClass);
+      vi.spyOn(ClassService, "isTeacherOfClass").mockResolvedValue();
+
+      const res = await ClassService.deleteClass(1, 1);
+      expect(res).toEqual(mockClass);
     });
-    return createdClass;
-  }
 
-  private static async verifyClassAndTeacher(
-    classId: number,
-    teacherId: number,
-  ): Promise<void> {
-    const c = await prisma.class.findUnique({ where: { id: classId } });
-    if (!c) {
-      throw new NotFoundError("Class not found.");
-    }
-    const isTeacher = await this.isTeacherOfClass(classId, teacherId);
-    if (!isTeacher) {
-      throw new AccessDeniedError("Teacher is not a part of this class.");
-    }
-  }
-
-  static async deleteClass(classId: number, teacherId: number): Promise<Class> {
-    await this.verifyClassAndTeacher(classId, teacherId);
-    return handlePrismaQuery(() =>
-      prisma.class.delete({ where: { id: classId } }),
-    );
-  }
-
-  static async getClassesByTeacher(teacherId: number): Promise<Class[]> {
-    return handlePrismaQuery(() =>
-      prisma.class.findMany({
-        where: {
-          ClassTeacher: { some: { teacherId } },
-        },
-      }),
-    );
-  }
-
-  static async getClassesByStudent(studentId: number): Promise<Class[]> {
-    return handlePrismaQuery(() =>
-      prisma.class.findMany({
-        where: {
-          classLinks: { some: { studentId } },
-        },
-      }),
-    );
-  }
-
-  static async leaveClassAsStudent(
-    studentId: number,
-    classId: number,
-  ): Promise<ClassStudent> {
-    const inClass = await prisma.classStudent.findUnique({
-      where: { studentId_classId: { studentId, classId } },
-    });
-    if (!inClass) {
-      throw new BadRequestError(
-        "Student is not a part of this class and is therefore not able to leave it.",
+    it("gooit NotFoundError bij onbekende klas", async () => {
+      (prisma.class.findUnique as jest.Mock).mockResolvedValue(null);
+      await expect(ClassService.deleteClass(1, 1)).rejects.toThrow(
+        NotFoundError,
       );
-    }
-    return handlePrismaQuery(() =>
-      prisma.classStudent.delete({
-        where: { studentId_classId: { studentId, classId } },
-      }),
-    );
-  }
-
-  static async updateClass(
-    classId: number,
-    teacherId: number,
-    name: string,
-  ): Promise<Class> {
-    await this.verifyClassAndTeacher(classId, teacherId);
-    return handlePrismaQuery(() =>
-      prisma.class.update({ where: { id: classId }, data: { name } }),
-    );
-  }
-
-  static async getJoinCode(
-    classId: number,
-    teacherId: number,
-  ): Promise<string> {
-    const c = await prisma.class.findUnique({
-      where: { id: classId },
-      select: { code: true },
     });
-    if (!c) {
-      throw new NotFoundError("Class not found.");
-    }
-    const isTeacher = await this.isTeacherOfClass(classId, teacherId);
-    if (!isTeacher) {
-      throw new AccessDeniedError("Teacher is not a part of this class.");
-    }
-    return c.code;
-  }
 
-  static async generateUniqueCode(): Promise<string> {
-    let newJoinCode: string;
-    do {
-      newJoinCode = crypto.randomBytes(4).toString("hex");
-    } while (await prisma.class.findUnique({ where: { code: newJoinCode } }));
-    return newJoinCode;
-  }
-
-  static async getClassByJoinCode(joinCode: string): Promise<ClassWithLinks> {
-    if (!joinCode) {
-      throw new BadRequestError(`Invalid join code: ${joinCode}.`);
-    }
-    const c = await prisma.class.findUnique({
-      where: { code: joinCode },
-      include: { classLinks: true },
-    });
-    if (!c) {
-      throw new NotFoundError(
-        `Class corresponding to join code ${joinCode} not found.`,
+    it("gooit AccessDeniedError bij geen rechten", async () => {
+      (prisma.class.findUnique as jest.Mock).mockResolvedValue(mockClass);
+      vi.spyOn(ClassService, "isTeacherOfClass").mockRejectedValue(
+        new AccessDeniedError("not allowed"),
       );
-    }
-    return c;
-  }
-
-  static async isTeacherOfClass(
-    classId: number,
-    teacherId: number,
-  ): Promise<boolean> {
-    const ct = await prisma.classTeacher.findUnique({
-      where: { teacherId_classId: { teacherId, classId } },
+      await expect(ClassService.deleteClass(1, 2)).rejects.toThrow(
+        AccessDeniedError,
+      );
     });
-    return !!ct;
-  }
+  });
 
-  static isStudentInClass(
-    classroom: ClassWithLinks,
-    studentId: number,
-  ): boolean {
-    return classroom.classLinks.some((link) => link.studentId === studentId);
-  }
+  describe("getClassesByTeacher", () => {
+    it("geeft alle klassen van een teacher terug", async () => {
+      (prisma.class.findMany as jest.Mock).mockResolvedValue([mockClass]);
+      const res = await ClassService.getClassesByTeacher(1);
+      expect(res).toEqual([mockClass]);
+    });
+  });
 
-  static async removeStudentFromClass(
-    studentId: number,
-    classId: number,
-  ): Promise<ClassStudent> {
-    return handlePrismaQuery(() =>
-      prisma.classStudent.delete({
-        where: { studentId_classId: { studentId, classId } },
-      }),
-    );
-  }
-}
+  describe("getClassesByStudent", () => {
+    it("geeft alle klassen van student", async () => {
+      (prisma.class.findMany as jest.Mock).mockResolvedValue([mockClass]);
+      const res = await ClassService.getClassesByStudent(1);
+      expect(res).toEqual([mockClass]);
+    });
+  });
+
+  describe("leaveClassAsStudent", () => {
+    it("verwijdert student uit klas", async () => {
+      const rel = { studentId: 1, classId: 1 };
+      (prisma.classStudent.findUnique as jest.Mock).mockResolvedValue(rel);
+      (prisma.classStudent.delete as jest.Mock).mockResolvedValue(rel);
+
+      const result = await ClassService.leaveClassAsStudent(1, 1);
+      expect(result).toEqual(rel);
+    });
+
+    it("gooit error als student niet in klas zit", async () => {
+      (prisma.classStudent.findUnique as jest.Mock).mockResolvedValue(null);
+      await expect(ClassService.leaveClassAsStudent(1, 1)).rejects.toThrow(
+        BadRequestError,
+      );
+    });
+  });
+
+  describe("updateClass", () => {
+    it("update klas naam na controle teacher", async () => {
+      (prisma.class.findUnique as jest.Mock).mockResolvedValue(mockClass);
+      vi.spyOn(ClassService, "isTeacherOfClass").mockResolvedValue();
+      (prisma.class.update as jest.Mock).mockResolvedValue({
+        ...mockClass,
+        name: "Wiskunde",
+      });
+
+      const res = await ClassService.updateClass(1, 1, "Wiskunde");
+      expect(res.name).toBe("Wiskunde");
+    });
+  });
+
+  describe("getJoinCode", () => {
+    it("geeft joincode als teacher rechten heeft", async () => {
+      (prisma.class.findUnique as jest.Mock).mockResolvedValue({
+        code: "abcdef",
+      });
+      vi.spyOn(ClassService, "isTeacherOfClass").mockResolvedValue();
+      const res = await ClassService.getJoinCode(1, 1);
+      expect(res).toBe("abcdef");
+    });
+
+    it("gooit NotFoundError bij onbekende klas", async () => {
+      (prisma.class.findUnique as jest.Mock).mockResolvedValue(null);
+      await expect(ClassService.getJoinCode(99, 1)).rejects.toThrow(
+        NotFoundError,
+      );
+    });
+
+    it("gooit AccessDeniedError bij geen rechten", async () => {
+      (prisma.class.findUnique as jest.Mock).mockResolvedValue({
+        code: "abcdef",
+      });
+      vi.spyOn(ClassService, "isTeacherOfClass").mockRejectedValue(
+        new AccessDeniedError("no"),
+      );
+      await expect(ClassService.getJoinCode(1, 2)).rejects.toThrow(
+        AccessDeniedError,
+      );
+    });
+  });
+
+  describe("generateUniqueCode", () => {
+    it("genereert unieke code", async () => {
+      (prisma.class.findUnique as jest.Mock).mockResolvedValue(null);
+      const code = await ClassService.generateUniqueCode();
+      expect(code).toHaveLength(8);
+    });
+  });
+
+  describe("getClassByJoinCode", () => {
+    it("gooit error als join code ontbreekt", async () => {
+      await expect(ClassService.getClassByJoinCode("")).rejects.toThrow(
+        BadRequestError,
+      );
+    });
+
+    it("geeft klas terug als join code geldig is", async () => {
+      (prisma.class.findUnique as jest.Mock).mockResolvedValue({
+        ...mockClass,
+        classLinks: [],
+      });
+      const res = await ClassService.getClassByJoinCode("abc123");
+      expect(res.code).toBe("abc123");
+    });
+  });
+
+  describe("isStudentInClass", () => {
+    it("laat niets vallen als student in klas zit", () => {
+      const classroom: ClassWithLinks = {
+        ...mockClass,
+        classLinks: [{ studentId: 1, classId: 1 }],
+      };
+      expect(() => ClassService.isStudentInClass(classroom, 1)).not.toThrow();
+    });
+
+    it("gooit AccessDeniedError als student niet in klas zit", () => {
+      const classroom: ClassWithLinks = {
+        ...mockClass,
+        classLinks: [{ studentId: 99, classId: 1 }],
+      };
+      expect(() => ClassService.isStudentInClass(classroom, 1)).toThrow(
+        AccessDeniedError,
+      );
+    });
+  });
+
+  describe("leaveClassAsStudent (alias removeStudentFromClass)", () => {
+    it("verwijdert student uit klas", async () => {
+      const deletionResult: ClassStudent = {
+        studentId: 1,
+        classId: 1,
+      };
+      (prisma.classStudent.findUnique as jest.Mock).mockResolvedValue(
+        deletionResult,
+      );
+      (prisma.classStudent.delete as jest.Mock).mockResolvedValue(
+        deletionResult,
+      );
+
+      // call the existing leaveClassAsStudent
+      const res = await ClassService.leaveClassAsStudent(1, 1);
+      expect(res.studentId).toBe(1);
+    });
+  });
+});
