@@ -7,6 +7,7 @@ import {
   ClassTeacher,
   Invite,
   JoinRequestStatus,
+  Student,
   Teacher,
   User,
 } from "@prisma/client";
@@ -14,6 +15,7 @@ import {
   addTeacherToClass,
   createClass,
   createInvite,
+  createStudent,
   createTeacher,
 } from "../helpers/testDataCreation";
 
@@ -191,16 +193,14 @@ describe("invite tests", async (): Promise<void> => {
         });
 
       expect(status).toBe(400);
-      expect(body.error).toBe(
-        "Bad request due to invalid syntax or data (validation error)",
-      );
+      expect(body.error).toBe("BadRequestError");
       expect(body.message).toBe("invalid request for invite creation");
 
       expect(body.details).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             field: "classId",
-            message: "classId should be a number",
+            message: expect.stringContaining("number"),
             source: "params",
           }),
         ]),
@@ -220,9 +220,7 @@ describe("invite tests", async (): Promise<void> => {
         .send({}); // empty body
 
       expect(status).toBe(400);
-      expect(body.error).toBe(
-        "Bad request due to invalid syntax or data (validation error)",
-      );
+      expect(body.error).toBe("BadRequestError");
       expect(body.message).toBe("invalid request for invite creation");
       expect(body.details).toEqual(
         expect.arrayContaining([
@@ -234,6 +232,49 @@ describe("invite tests", async (): Promise<void> => {
       );
 
       // verify no invite was created
+      await prisma.invite.findMany().then((invites: Invite[]): void => {
+        expect(invites.length).toBe(0);
+      });
+    });
+
+    it("should respond with a `404` status code when the teacher does not exist", async (): Promise<void> => {
+      await addTeacherToClass(teacherUser1.id, classroom.id);
+      const { status, body } = await request(app)
+        .post(`/invite/class/${classroom.id}`)
+        .set("Authorization", `Bearer ${teacherUser1.token}`)
+        .send({
+          otherTeacherEmail: "ikbestaniet@gmail.com",
+        });
+
+      expect(body.message).toBe(
+        "Given email doesn't correspond to any existing teachers.",
+      );
+      expect(status).toBe(404);
+      expect(body.error).toBe("NotFoundError");
+      // verify that no invite was created
+      await prisma.invite.findMany().then((invites: Invite[]): void => {
+        expect(invites.length).toBe(0);
+      });
+    });
+
+    it("should respond with a `401` status code when the teacher does not exist", async (): Promise<void> => {
+      await addTeacherToClass(teacherUser1.id, classroom.id);
+
+      const student: User & { student: Student; token: string } =
+        await createStudent("new", "student", "newstudent@gmail.com");
+      const { status, body } = await request(app)
+        .post(`/invite/class/${classroom.id}`)
+        .set("Authorization", `Bearer ${teacherUser1.token}`)
+        .send({
+          otherTeacherEmail: student.email,
+        });
+
+      expect(body.message).toBe(
+        "User is not a teacher. Only teachers can receive invites.",
+      );
+      expect(status).toBe(401);
+      expect(body.error).toBe("UnauthorizedError");
+      // verify that no invite was created
       await prisma.invite.findMany().then((invites: Invite[]): void => {
         expect(invites.length).toBe(0);
       });
@@ -334,9 +375,7 @@ describe("invite tests", async (): Promise<void> => {
         });
 
       expect(status).toBe(400);
-      expect(body.error).toBe(
-        "Bad request due to invalid syntax or data (validation error)",
-      );
+      expect(body.error).toBe("BadRequestError");
       expect(body.message).toBe("invalid request for invite update");
       expect(body.details).toEqual(
         expect.arrayContaining([
@@ -435,9 +474,7 @@ describe("invite tests", async (): Promise<void> => {
         });
 
       expect(status).toBe(400);
-      expect(body.error).toBe(
-        "Bad request due to invalid syntax or data (validation error)",
-      );
+      expect(body.error).toBe("BadRequestError");
       expect(body.message).toBe("invalid request for invite update");
       expect(body.details).toEqual(
         expect.arrayContaining([
@@ -526,9 +563,7 @@ describe("invite tests", async (): Promise<void> => {
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(400);
-      expect(body.error).toBe(
-        "Bad request due to invalid syntax or data (validation error)",
-      );
+      expect(body.error).toBe("BadRequestError");
       expect(body.message).toBe("invalid request params");
       expect(body.details).toEqual(
         expect.arrayContaining([
@@ -542,6 +577,25 @@ describe("invite tests", async (): Promise<void> => {
           }),
         ]),
       );
+    });
+
+    it("should not delete the invite if a teacher that is not part of the class tries it", async (): Promise<void> => {
+      const teacherUser3: User & { teacher: Teacher; token: string } =
+        await createTeacher("Jane", "Doe", "jane.doe@gmail.com");
+      const { status, body } = await request(app)
+        .delete(`/invite/${invite.inviteId}/class/${classroom.id}`)
+        .set("Authorization", `Bearer ${teacherUser3.token}`); // not part of the class
+
+      expect(status).toBe(403);
+      expect(body.error).toBe("AccessDeniedError");
+      expect(body.message).toBe("Teacher is not a part of this class.");
+      // verify that the invite was not deleted
+      const checkInvite: Invite | null = await prisma.invite.findUnique({
+        where: {
+          inviteId: invite.inviteId,
+        },
+      });
+      expect(checkInvite).toStrictEqual(invite);
     });
   });
 
@@ -594,9 +648,7 @@ describe("invite tests", async (): Promise<void> => {
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(400);
-      expect(body.error).toBe(
-        "Bad request due to invalid syntax or data (validation error)",
-      );
+      expect(body.error).toBe("BadRequestError");
       expect(body.message).toBe("invalid request params");
       expect(body.details).toEqual(
         expect.arrayContaining([
