@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
-import { vi, beforeEach, describe, expect, it } from 'vitest';
 
 import AddAssignmentForm from '@/components/teacher/assignment/AddAssignmentForm';
 import * as httpTeacher from '@/util/teacher/httpTeacher';
@@ -32,7 +32,6 @@ type AssignmentT = {
   >;
 };
 
-/* Router – voorkom echte navigation */
 vi.mock('react-router-dom', async () => {
   const actual =
     await vi.importActual<typeof import('react-router-dom')>(
@@ -41,12 +40,10 @@ vi.mock('react-router-dom', async () => {
   return { ...actual, useNavigate: () => vi.fn() };
 });
 
-/* vertalingen */
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k: string) => k }),
 }));
 
-/* API-helpers */
 vi.mock('@/util/teacher/httpTeacher');
 
 const renderWithProviders = (ui: React.ReactElement) => {
@@ -74,22 +71,21 @@ const learningPaths: LearningPathT[] = [
   { id: 'lp1', title: 'LP-1', isExternal: false },
 ];
 
-describe('AddAssignmentForm – teacher', () => {
+describe('AddAssignmentForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    /* laat de learning-path-query meteen data teruggeven */
     vi.spyOn(httpTeacher, 'fetchLearningPaths').mockResolvedValue(
       learningPaths,
     );
   });
 
-  it('voert géén API-call uit wanneer er geen klas is geselecteerd', async () => {
+  it('roept géén API-call wanneer geen klas is geselecteerd', async () => {
     renderWithProviders(<AddAssignmentForm classesData={classesData} />);
 
     /* wachten tot learning paths zichtbaar zijn */
     await screen.findByText('LP-1');
 
-    /* overige velden invullen */
+    /* verplichte velden invullen (behalve klas) */
     fireEvent.change(screen.getByLabelText(/add title/i), {
       target: { value: 'Opdracht' },
     });
@@ -99,15 +95,12 @@ describe('AddAssignmentForm – teacher', () => {
     fireEvent.change(screen.getByLabelText(/choose learning path/i), {
       target: { value: 'lp1' },
     });
-
-    /* deadline = morgen */
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     fireEvent.change(screen.getByLabelText(/choose deadline/i), {
       target: { value: tomorrow.toISOString().slice(0, 10) },
     });
 
-    /* submit */
     fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
 
     await waitFor(() =>
@@ -115,7 +108,7 @@ describe('AddAssignmentForm – teacher', () => {
     );
   });
 
-  it('roept updateAssignment met juist payload in edit-modus', async () => {
+  it('roept updateAssignment met correct payload in edit-modus', async () => {
     const assignmentData: AssignmentT = {
       id: 1,
       title: 'Bestaande opdracht',
@@ -157,7 +150,6 @@ describe('AddAssignmentForm – teacher', () => {
       />,
     );
 
-    /* direct submit (geen wijzigingen) */
     fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
 
     await waitFor(() =>
