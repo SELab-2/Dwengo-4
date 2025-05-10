@@ -1,6 +1,6 @@
 import {
   addMessageToQuestion,
-  fetchConversation,
+  fetchQuestionConversation,
 } from '@/util/student/questions';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import React, { useState, useEffect } from 'react';
@@ -21,58 +21,29 @@ interface Message {
   questionId: number;
 }
 
-interface Question {
-  id: string;
-  questionConversation?: Message[];
-  team?: {
-    id: number;
-    teamname: string;
-    classId: number;
-    students: Array<{
-      userId: number;
-      user?: {
-        firstName?: string;
-      };
-    }>;
-  };
-  title: string;
-  type: string;
-}
-
 const QuestionOverview: React.FC = () => {
-  const { assignmentId } = useParams<{
-    assignmentId: string;
+  const { questionId } = useParams<{
+    questionId: string;
   }>();
 
   const [newMessage, setNewMessage] = useState('');
-  const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(
-    null,
-  );
   const queryClient = useQueryClient();
 
   const {
-    data: questions,
+    data: question,
     isLoading,
     isError,
     error,
   } = useQuery({
-    queryKey: ['questionId', assignmentId],
-    queryFn: () => fetchConversation(assignmentId!),
-    enabled: !!assignmentId,
+    queryKey: ['questionId', questionId],
+    queryFn: () => fetchQuestionConversation(questionId!),
+    enabled: !!questionId,
   });
 
   // Set the first question as selected as soon as data loads
   useEffect(() => {
-    if (questions?.questions) {
-      if (questions?.questions.length > 1) {
-        console.log('whoopsiedaisy how do we decide');
-      }
-      setSelectedQuestionId(questions.questions[0].id);
-    }
-    if (questions?.length) {
-      setSelectedQuestionId(questions.questions[0].id);
-    }
-  }, [questions]);
+    console.log('Questions data:', question);
+  }, [question]);
 
   const addMessageMutation = useMutation({
     mutationFn: ({
@@ -83,8 +54,7 @@ const QuestionOverview: React.FC = () => {
       content: string;
     }) => addMessageToQuestion(questionId, content),
     onSuccess: () => {
-      // Refresh the questions data after successfully adding a message
-      queryClient.invalidateQueries({ queryKey: ['questionId', assignmentId] });
+      queryClient.invalidateQueries({ queryKey: ['questionId', questionId] });
       setNewMessage(''); // Clear the input field
     },
   });
@@ -92,18 +62,13 @@ const QuestionOverview: React.FC = () => {
   const handleSubmitMessage = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!selectedQuestionId) {
-      alert('Geen vraag beschikbaar om op te reageren');
-      return;
-    }
-
     if (!newMessage.trim()) {
       alert('Voer een bericht in');
       return;
     }
 
     addMessageMutation.mutate({
-      questionId: selectedQuestionId,
+      questionId: questionId,
       content: newMessage,
     });
   };
@@ -111,12 +76,12 @@ const QuestionOverview: React.FC = () => {
   // Log whenever the query results change
   React.useEffect(() => {
     console.log('Current query state:', {
-      questions,
+      question,
       isLoading,
       isError,
       error,
     });
-  }, [questions, isLoading, isError, error]);
+  }, [question, isLoading, isError, error]);
 
   const localName = localStorage.getItem('firstName');
   const currentUserId = parseInt(localStorage.getItem('userId') || '0', 10);
@@ -177,50 +142,50 @@ const QuestionOverview: React.FC = () => {
         <div className="flex flex-col space-y-10 mt-10">
           {isLoading && <p>Laden...</p>}
           {isError && <p>Fout bij laden van vragen: {error?.message}</p>}
-          {questions?.questions.map((question: Question) =>
-            question.questionConversation?.map((message: Message) => {
-              // Try to find the student that matches the message's userId
-              const student = questions.teams.students?.find(
-                (student) => student.userId === message.userId,
-              );
 
-              // Determine if this is the current user's message
-              const isCurrentUser = message.userId === currentUserId;
+          {question?.questionConversation?.map((message: Message) => {
+            // Try to find the student that matches the message's userId
 
-              // Determine the name to display
-              let displayName = message.userId.toString();
-              let firstInitial = '?';
+            console.log('question', question);
 
-              if (isCurrentUser && localName) {
-                displayName = localName;
-                firstInitial = localName.charAt(0).toUpperCase();
-              } else if (student?.user?.firstName) {
-                displayName = student.user.firstName;
-                firstInitial = student.user.firstName.charAt(0).toUpperCase();
-              }
+            // const student = question.teams.students?.find(
+            //   (student) => student.userId === message.userId,
+            // );
+            const student = 'hobbes';
 
-              return (
-                <div
-                  key={message.id}
-                  className={`p-4 rounded-lg ${question.id === selectedQuestionId ? '' : ''}`}
-                >
-                  <div className="flex flex-row items-center gap-x-2">
-                    <div className="flex flex-row justify-center items-center bg-dwengo-green w-12 h-12 aspect-square rounded-full">
-                      <p className="text-2xl bg-dwengo-green">{firstInitial}</p>
-                    </div>
-                    <p className="text-2xl">
-                      <span className="text-dwengo-green-dark font-bold">
-                        {displayName}
-                      </span>{' '}
-                      zegt:
-                    </p>
+            // Determine if this is the current user's message
+            const isCurrentUser = message.userId === currentUserId;
+
+            // Determine the name to display
+            let displayName = message.userId.toString();
+            let firstInitial = '?';
+
+            if (isCurrentUser && localName) {
+              displayName = localName;
+              firstInitial = localName.charAt(0).toUpperCase();
+            } else if (student?.user?.firstName) {
+              displayName = student.user.firstName;
+              firstInitial = student.user.firstName.charAt(0).toUpperCase();
+            }
+
+            return (
+              <div key={message.id} className={`p-4 rounded-lg `}>
+                <div className="flex flex-row items-center gap-x-2">
+                  <div className="flex flex-row justify-center items-center bg-dwengo-green w-12 h-12 aspect-square rounded-full">
+                    <p className="text-2xl bg-dwengo-green">{firstInitial}</p>
                   </div>
-                  <p className="ml-14">{message.text}</p>
-                  <div className="border-b-1 border-gray-400 mt-2"></div>
+                  <p className="text-2xl">
+                    <span className="text-dwengo-green-dark font-bold">
+                      {displayName}
+                    </span>{' '}
+                    zegt:
+                  </p>
                 </div>
-              );
-            }),
-          )}
+                <p className="ml-14">{message.text}</p>
+                <div className="border-b-1 border-gray-400 mt-2"></div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

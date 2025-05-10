@@ -3,7 +3,7 @@ import { getAuthToken } from './authStudent';
 import { BACKEND } from './config';
 import { ClassItem } from '@/types/type';
 
-export async function fetchConversation(assignmentId: string) {
+export async function fetchQuestionsForTeam(assignmentId: string) {
   // First fetch: Get the student's team for this assignment
   const response = await fetch(
     `${BACKEND}/team/student/assignment/${assignmentId}/studentTeam`,
@@ -42,38 +42,36 @@ export async function fetchConversation(assignmentId: string) {
     throw new Error('Failed to fetch questions');
   }
 
-  let questions = await responseQuestion.json();
+  const questions = await responseQuestion.json();
 
-  // If no questions exist, create one
-  if (Array.isArray(questions) && questions.length === 0) {
-    const createQuestionResponse = await fetch(
-      `${BACKEND}/question/general/assignment/${assignmentId}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getAuthToken()}`,
-        },
-        body: JSON.stringify({
-          teamId: teamId,
-          assignmentId: assignmentId,
-          title: 'Team Discussion',
-          type: 'GENERAL',
-          text: 'text',
-          pathRef: 'todo',
-          isPrivate: false,
-        }),
-      },
-    );
-
-    if (!createQuestionResponse.ok) {
-      throw new Error('Failed to create a new question for the team');
-    }
-
-    questions = createQuestionResponse.json();
-  }
+  console.log('questions', questions);
 
   return { questions: questions, teams: resp };
+}
+
+export async function fetchQuestionConversation(
+  questionId: string,
+): Promise<any> {
+  const response = await fetch(`${BACKEND}/question/${questionId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het ophalen van de berichten.',
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  const messages = await response.json();
+  console.log('messages for question', messages);
+  return messages;
 }
 
 export async function addMessageToQuestion(
@@ -127,4 +125,70 @@ export async function fetchClass({
   console.log('GETTING CLASSDATA', classData);
 
   return classData;
+}
+
+export async function createNewQuestion(
+  assignmentId: string,
+  title: string,
+  text: string,
+  isExternal: boolean,
+  isPrivate: boolean,
+) {
+  // First fetch: Get the student's team for this assignment
+  const response = await fetch(
+    `${BACKEND}/team/student/assignment/${assignmentId}/studentTeam`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het ophalen van het team.',
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  const resp = await response.json();
+  console.log(resp);
+  const teamId = resp.teamAssignment.teamId;
+  console.log('teamId', teamId);
+  const pathRef = 'todo';
+
+  // Now create the question with team information
+  const response2 = await fetch(
+    `${BACKEND}/question/general/assignment/${assignmentId}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+      body: JSON.stringify({
+        teamId,
+        title,
+        text,
+        isExternal,
+        isPrivate,
+        pathRef,
+      }),
+    },
+  );
+
+  if (!response2.ok) {
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het aanmaken van de vraag.',
+    );
+    error.code = response2.status;
+    error.info = await response2.json();
+    throw error;
+  }
+
+  return await response2.json();
 }
