@@ -8,7 +8,7 @@ import {
 } from "../../../errors/errors";
 import { Class, ClassStudent } from "@prisma/client";
 
-// stub handlePrismaTransaction so createClass invokes our mocks directly
+// stub handlePrismaTransaction zodat createClass onze mocks direct aanroept
 vi.mock("../../../errors/errorFunctions", async () => {
   const actual = await vi.importActual("../../../errors/errorFunctions");
   return {
@@ -36,8 +36,8 @@ describe("ClassService", () => {
 
   describe("createClass", () => {
     it("maakt een klas aan en koppelt een leerkracht", async () => {
-      (prisma.class.create as jest.Mock).mockResolvedValue(mockClass);
-      (prisma.classTeacher.create as jest.Mock).mockResolvedValue({});
+      (prisma.class.create as vi.Mock).mockResolvedValue(mockClass);
+      (prisma.classTeacher.create as vi.Mock).mockResolvedValue({});
 
       const result = await ClassService.createClass("Science", 1);
 
@@ -53,8 +53,8 @@ describe("ClassService", () => {
 
   describe("deleteClass", () => {
     it("verwijdert klas als teacher rechten heeft", async () => {
-      (prisma.class.findUnique as jest.Mock).mockResolvedValue(mockClass);
-      (prisma.class.delete as jest.Mock).mockResolvedValue(mockClass);
+      (prisma.class.findUnique as vi.Mock).mockResolvedValue(mockClass);
+      (prisma.class.delete as vi.Mock).mockResolvedValue(mockClass);
       vi.spyOn(ClassService, "isTeacherOfClass").mockResolvedValue();
 
       const res = await ClassService.deleteClass(1, 1);
@@ -62,14 +62,14 @@ describe("ClassService", () => {
     });
 
     it("gooit NotFoundError bij onbekende klas", async () => {
-      (prisma.class.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.class.findUnique as vi.Mock).mockResolvedValue(null);
       await expect(ClassService.deleteClass(1, 1)).rejects.toThrow(
         NotFoundError,
       );
     });
 
     it("gooit AccessDeniedError bij geen rechten", async () => {
-      (prisma.class.findUnique as jest.Mock).mockResolvedValue(mockClass);
+      (prisma.class.findUnique as vi.Mock).mockResolvedValue(mockClass);
       vi.spyOn(ClassService, "isTeacherOfClass").mockRejectedValue(
         new AccessDeniedError("not allowed"),
       );
@@ -81,7 +81,7 @@ describe("ClassService", () => {
 
   describe("getClassesByTeacher", () => {
     it("geeft alle klassen van een teacher terug", async () => {
-      (prisma.class.findMany as jest.Mock).mockResolvedValue([mockClass]);
+      (prisma.class.findMany as vi.Mock).mockResolvedValue([mockClass]);
       const res = await ClassService.getClassesByTeacher(1);
       expect(res).toEqual([mockClass]);
     });
@@ -89,7 +89,7 @@ describe("ClassService", () => {
 
   describe("getClassesByStudent", () => {
     it("geeft alle klassen van student", async () => {
-      (prisma.class.findMany as jest.Mock).mockResolvedValue([mockClass]);
+      (prisma.class.findMany as vi.Mock).mockResolvedValue([mockClass]);
       const res = await ClassService.getClassesByStudent(1);
       expect(res).toEqual([mockClass]);
     });
@@ -98,15 +98,15 @@ describe("ClassService", () => {
   describe("leaveClassAsStudent", () => {
     it("verwijdert student uit klas", async () => {
       const rel = { studentId: 1, classId: 1 };
-      (prisma.classStudent.findUnique as jest.Mock).mockResolvedValue(rel);
-      (prisma.classStudent.delete as jest.Mock).mockResolvedValue(rel);
+      (prisma.classStudent.findUnique as vi.Mock).mockResolvedValue(rel);
+      (prisma.classStudent.delete as vi.Mock).mockResolvedValue(rel);
 
       const result = await ClassService.leaveClassAsStudent(1, 1);
       expect(result).toEqual(rel);
     });
 
     it("gooit error als student niet in klas zit", async () => {
-      (prisma.classStudent.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.classStudent.findUnique as vi.Mock).mockResolvedValue(null);
       await expect(ClassService.leaveClassAsStudent(1, 1)).rejects.toThrow(
         BadRequestError,
       );
@@ -115,9 +115,9 @@ describe("ClassService", () => {
 
   describe("updateClass", () => {
     it("update klas naam na controle teacher", async () => {
-      (prisma.class.findUnique as jest.Mock).mockResolvedValue(mockClass);
+      (prisma.class.findUnique as vi.Mock).mockResolvedValue(mockClass);
       vi.spyOn(ClassService, "isTeacherOfClass").mockResolvedValue();
-      (prisma.class.update as jest.Mock).mockResolvedValue({
+      (prisma.class.update as vi.Mock).mockResolvedValue({
         ...mockClass,
         name: "Wiskunde",
       });
@@ -129,7 +129,7 @@ describe("ClassService", () => {
 
   describe("getJoinCode", () => {
     it("geeft joincode als teacher rechten heeft", async () => {
-      (prisma.class.findUnique as jest.Mock).mockResolvedValue({
+      (prisma.class.findUnique as vi.Mock).mockResolvedValue({
         code: "abcdef",
       });
       vi.spyOn(ClassService, "isTeacherOfClass").mockResolvedValue();
@@ -138,14 +138,14 @@ describe("ClassService", () => {
     });
 
     it("gooit NotFoundError bij onbekende klas", async () => {
-      (prisma.class.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.class.findUnique as vi.Mock).mockResolvedValue(null);
       await expect(ClassService.getJoinCode(99, 1)).rejects.toThrow(
         NotFoundError,
       );
     });
 
     it("gooit AccessDeniedError bij geen rechten", async () => {
-      (prisma.class.findUnique as jest.Mock).mockResolvedValue({
+      (prisma.class.findUnique as vi.Mock).mockResolvedValue({
         code: "abcdef",
       });
       vi.spyOn(ClassService, "isTeacherOfClass").mockRejectedValue(
@@ -159,7 +159,7 @@ describe("ClassService", () => {
 
   describe("generateUniqueCode", () => {
     it("genereert unieke code", async () => {
-      (prisma.class.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.class.findUnique as vi.Mock).mockResolvedValue(null);
       const code = await ClassService.generateUniqueCode();
       expect(code).toHaveLength(8);
     });
@@ -173,7 +173,7 @@ describe("ClassService", () => {
     });
 
     it("geeft klas terug als join code geldig is", async () => {
-      (prisma.class.findUnique as jest.Mock).mockResolvedValue({
+      (prisma.class.findUnique as vi.Mock).mockResolvedValue({
         ...mockClass,
         classLinks: [],
       });
@@ -208,12 +208,10 @@ describe("ClassService", () => {
         studentId: 1,
         classId: 1,
       };
-      (prisma.classStudent.findUnique as jest.Mock).mockResolvedValue(
+      (prisma.classStudent.findUnique as vi.Mock).mockResolvedValue(
         deletionResult,
       );
-      (prisma.classStudent.delete as jest.Mock).mockResolvedValue(
-        deletionResult,
-      );
+      (prisma.classStudent.delete as vi.Mock).mockResolvedValue(deletionResult);
 
       // call the existing leaveClassAsStudent
       const res = await ClassService.leaveClassAsStudent(1, 1);
