@@ -4,43 +4,52 @@ import {
   getLearningPathByIdOrHruid as getDwengoPathByIdOrHruid,
   LearningPathDto,
 } from "./learningPathService";
-
 import localLearningPathService from "./localLearningPathService";
 
+interface CombinedLearningPathFilters {
+  language?: string;
+  hruid?: string;
+  title?: string;
+  description?: string;
+  all?: string;
+}
+
+/**
+ * Zoekt leerpaden (Dwengo + lokaal).
+ */
 export async function searchAllLearningPaths(
-  filters: {
-    language?: string;
-    hruid?: string;
-    title?: string;
-    description?: string;
-    all?: string;
-  } = {}
+  filters: CombinedLearningPathFilters = {},
 ): Promise<LearningPathDto[]> {
   // A) Dwengo
-  const dwengoResults = await dwengoSearchPaths(filters); // => isExternal=true
+  const dwengoResults = await dwengoSearchPaths(filters); // isExternal = true
 
   // B) Lokaal
-  const localResults = await localLearningPathService.searchLocalPaths(filters); // => isExternal=false
+  const localResults = await localLearningPathService.searchLocalPaths(filters); // isExternal = false
 
   // C) Combineer en return
   return [...dwengoResults, ...localResults];
 }
 
 /**
- * Haal 1 leerpad op (via ID/hruid) => Dwengo => zoniet => Lokaal
+ * Haalt 1 leerpad op (via ID/hruid).
+ * Probeer eerst in Dwengo; als niet gevonden, haal lokaal op,
+ * eventueel inclusief voortgang voor een specifieke student.
  */
 export async function getCombinedLearningPathByIdOrHruid(
-  idOrHruid: string
+  idOrHruid: string,
+  includeProgress: boolean = false,
+  studentId?: number,
 ): Promise<LearningPathDto> {
   try {
-    // 1) Dwengo
+    // 1) Probeer in Dwengo (Dwengo ondersteunt geen progress)
     return await getDwengoPathByIdOrHruid(idOrHruid);
   } catch (error) {
     if (error instanceof NotFoundError) {
-      // Dwengo leerpad niet gevonden in de Dwengo API
-      // Ga verder met lokaal
+      // Dwengo path niet gevonden → haalt lokaal op, met of zonder progress
       return await localLearningPathService.getLearningPathAsDtoByIdOrHruid(
-        idOrHruid
+        idOrHruid,
+        includeProgress,
+        studentId,
       );
     }
     throw error;
