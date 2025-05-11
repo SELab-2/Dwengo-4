@@ -54,7 +54,7 @@ export async function fetchLearningPath(
 ): Promise<LearningPath> {
   return (await apiRequest({
     method: 'GET',
-    endpoint: `/learningpath/${learningPathId}`,
+    endpoint: `/learningpath/${learningPathId}?includeProgress=true`,
     getToken: getAuthToken,
   })) as { learningPath: LearningPath };
 }

@@ -4,6 +4,7 @@ import { LearningPath } from '../../types/type';
 import { useParams } from 'react-router-dom';
 import { LearningObject } from '@prisma/client';
 import { fetchLearningObjectsByLearningPath, fetchLearningPath } from '@/util/shared/learningPath';
+import { updateLearningObjectProgress, upsertLearningObjectProgress } from '@/util/student/progress';
 
 /**
  * LearningPaths component displays all available learning paths.
@@ -25,7 +26,7 @@ const LearningPath: React.FC = () => {
 
     const [
         { data: learningPathData, isLoading, isError, error },
-        { data: learningObjectsData, isLoading: isLoadingLearningObjects, isError: isErrorLearningObjects, error: errorLearningObjects }
+        { data: learningObjectsData, isLoading: isLoadingLearningObjects, isError: isErrorLearningObjects, error: errorLearningObjects },
     ] = useQueries({
         queries: [
             {
@@ -39,9 +40,11 @@ const LearningPath: React.FC = () => {
                 queryFn: () => fetchLearningObjectsByLearningPath(pathId!),
                 staleTime: 5 * 60 * 1000,
                 gcTime: 30 * 60 * 1000,
-            }
+            },
         ]
     });
+
+    console.log('Learning path data:', learningPathData);
 
     const nextObject = useMemo(() => {
         if (!selectedLearningObject || !learningObjectsData) return null;
@@ -55,6 +58,13 @@ const LearningPath: React.FC = () => {
             setLearningPath(learningPathData);
         }
     }, [learningPathData]);
+
+    useEffect(() => {
+        if (selectedLearningObject?.id) {
+            upsertLearningObjectProgress(selectedLearningObject.id, true)
+        }
+    }, [selectedLearningObject?.id, pathId, learningObjectsData]);
+
 
     return (
         <div className="flex min-h-[calc(100vh-80px)]">
@@ -88,12 +98,13 @@ const LearningPath: React.FC = () => {
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
                                             >
-                                                {true ? (
+                                                {learningPathData?.nodes.find(node => node.localLearningObjectId === learningObject.id && node.done) ? (
                                                     <path
                                                         strokeLinecap="round"
                                                         strokeLinejoin="round"
                                                         strokeWidth={2}
                                                         d="M5 13l4 4L19 7"
+                                                        color='green'
                                                     />
                                                 ) : (
                                                     <circle
@@ -101,6 +112,7 @@ const LearningPath: React.FC = () => {
                                                         cy="12"
                                                         r="8"
                                                         strokeWidth={2}
+                                                        color='gray'
                                                     />
                                                 )}
                                             </svg>
