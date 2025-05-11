@@ -187,7 +187,7 @@ const EditClassTeacher: React.FC = () => {
       case 'questions':
         return <QuestionsSection />;
       case 'manage':
-        return <ManageSection classId={classId!} />;
+        return <ManageSection classId={classId!} className={classData.name} />;
       default:
         return null;
     }

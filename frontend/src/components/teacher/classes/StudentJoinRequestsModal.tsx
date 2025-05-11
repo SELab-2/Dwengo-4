@@ -1,10 +1,15 @@
 import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchJoinRequests, approveJoinRequest, denyJoinRequest } from "../../../util/teacher/httpTeacher";
+import {
+  fetchJoinRequests,
+  approveJoinRequest,
+  denyJoinRequest,
+} from "../../../util/teacher/httpTeacher";
 import PrimaryButton from "../../shared/PrimaryButton";
 
 interface StudentJoinRequestsModalProps {
   classId: string;
+  className: string;
 }
 
 interface Student {
@@ -25,8 +30,7 @@ interface JoinRequestResponse {
   joinRequests: JoinRequest[];
 }
 
-
-const StudentJoinRequestsModal: React.FC<StudentJoinRequestsModalProps> = ({ classId }) => {
+const StudentJoinRequestsModal: React.FC<StudentJoinRequestsModalProps> = ({ classId, className }) => {
   const queryClient = useQueryClient();
 
   const {
@@ -67,7 +71,7 @@ const StudentJoinRequestsModal: React.FC<StudentJoinRequestsModalProps> = ({ cla
       <h2 className="text-2xl font-bold mb-4">Leerling Join Requests</h2>
       <p className="mb-4">
         Hier beheer je de join requests van leerlingen voor klas:{" "}
-        <span className="font-medium">{classId}</span>.
+        <span className="font-medium">{className}</span>.
       </p>
 
       {isLoading && <p>Loading...</p>}

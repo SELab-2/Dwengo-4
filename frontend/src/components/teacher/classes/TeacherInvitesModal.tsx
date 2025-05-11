@@ -1,18 +1,20 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getPendingInvitesForClass, createInvite, Invite } from "../../../util/teacher/httpTeacher";
+import {
+  getPendingInvitesForClass,
+  createInvite,
+  Invite,
+} from "../../../util/teacher/httpTeacher";
 import PrimaryButton from "../../shared/PrimaryButton";
 
 interface TeacherInvitesModalProps {
   classId: string;
+  className: string;
 }
 
 export type InviteStatus = "PENDING" | "ACCEPTED" | "DECLINED";
 
-
-
-
-const TeacherInvitesModal: React.FC<TeacherInvitesModalProps> = ({ classId }) => {
+const TeacherInvitesModal: React.FC<TeacherInvitesModalProps> = ({ classId, className }) => {
   const queryClient = useQueryClient();
   const [inviteEmail, setInviteEmail] = useState("");
 
@@ -47,7 +49,7 @@ const TeacherInvitesModal: React.FC<TeacherInvitesModalProps> = ({ classId }) =>
       <h2 className="text-2xl font-bold mb-4">Leerkracht Uitnodigingen</h2>
       <p className="mb-4">
         Hier kun je de uitnodigingen voor leerkrachten beheren voor klas:{" "}
-        <span className="font-medium">{classId}</span>.
+        <span className="font-medium">{className}</span>.
       </p>
 
       <form onSubmit={handleInviteSubmit} className="mb-6 flex flex-col gap-2">
@@ -65,7 +67,7 @@ const TeacherInvitesModal: React.FC<TeacherInvitesModalProps> = ({ classId }) =>
         <p className="text-red-500">
           {createInviteMutation.error instanceof Error
             ? createInviteMutation.error.message
-            : "Er is iets misgegaan bij het versturen van de invite."}
+            : "Er is iets misgegaan bij het versturen van de uitnodiging."}
         </p>
       )}
 
@@ -74,7 +76,7 @@ const TeacherInvitesModal: React.FC<TeacherInvitesModalProps> = ({ classId }) =>
         <p className="text-red-500">
           {error instanceof Error
             ? error.message
-            : "Er is iets misgegaan bij het ophalen van de invites."}
+            : "Er is iets misgegaan bij het ophalen van de uitnodigingen."}
         </p>
       )}
 
