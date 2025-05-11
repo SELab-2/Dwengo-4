@@ -131,10 +131,10 @@ export async function createNewQuestion(
   assignmentId: string,
   title: string,
   text: string,
-  isExternal: boolean,
-  isPrivate: boolean,
+  dwengoLanguage: string,
 ) {
   // First fetch: Get the student's team for this assignment
+
   const response = await fetch(
     `${BACKEND}/team/student/assignment/${assignmentId}/studentTeam`,
     {
@@ -156,10 +156,7 @@ export async function createNewQuestion(
   }
 
   const resp = await response.json();
-  console.log(resp);
   const teamId = resp.teamAssignment.teamId;
-  console.log('teamId', teamId);
-  const pathRef = 'todo';
 
   // Now create the question with team information
   const response2 = await fetch(
@@ -174,9 +171,9 @@ export async function createNewQuestion(
         teamId,
         title,
         text,
-        isExternal,
-        isPrivate,
-        pathRef,
+        isExternal: resp.teamAssignment.assignment.isExternal,
+        pathRef: resp.teamAssignment.assignment.pathRef,
+        dwengoLanguage: dwengoLanguage,
       }),
     },
   );

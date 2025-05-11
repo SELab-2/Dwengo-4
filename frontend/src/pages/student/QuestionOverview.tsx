@@ -89,11 +89,10 @@ const QuestionOverview: React.FC = () => {
   return (
     <div className="pt-10 w-full flex flex-col items-center">
       <h1 className="text-5xl mb-14">
-        Vragen voor Assignment{' '}
-        <span className="text-dwengo-green font-bold">Test</span>
+        Vraag:{' '}
+        <span className="text-dwengo-green font-bold">{question?.title}</span>
       </h1>
       <div className="flex flex-col w-[40rem]">
-        {/* New Question Form */}
         <form onSubmit={handleSubmitMessage} className="mb-8">
           <div className="flex flex-row items-center gap-x-2">
             <div className="flex flex-row justify-center items-center bg-dwengo-green w-12 h-12 aspect-square rounded-full">
@@ -153,10 +152,8 @@ const QuestionOverview: React.FC = () => {
             // );
             const student = 'hobbes';
 
-            // Determine if this is the current user's message
             const isCurrentUser = message.userId === currentUserId;
 
-            // Determine the name to display
             let displayName = message.userId.toString();
             let firstInitial = '?';
 
