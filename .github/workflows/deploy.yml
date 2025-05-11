@@ -57,7 +57,7 @@ jobs:
           cd /home/selab2/Dwengo-4/frontend
           npm i
           npm run build
-          cd /home/selab2/Dwengo-4/Dwengo-4/dwengo_backend
+          cd /home/selab2/Dwengo-4/dwengo_backend
           npm i
           PORT=4000 npx nodemon server.ts > /dev/null 2>&1 &
           sleep 3
