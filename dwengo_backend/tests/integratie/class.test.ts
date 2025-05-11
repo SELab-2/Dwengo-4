@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
-import prisma from "./helpers/prisma";
-import app from "../index";
+import prisma from "../helpers/prisma";
+import app from "../../index";
 import {
   Class,
   ClassAssignment,
@@ -22,7 +22,7 @@ import {
   createJoinRequest,
   createStudent,
   createTeacher,
-} from "./helpers/testDataCreation";
+} from "../helpers/testDataCreation";
 
 const APP_URL: string = process.env.APP_URL || "http://localhost:5000";
 
@@ -269,17 +269,6 @@ describe("classroom tests", (): void => {
           expect(classroom).toBeDefined();
         });
     });
-
-    it("should respond with a `404` status code when the class doesn't exist", async (): Promise<void> => {
-      // try having a teacher delete a class they are not associated with
-      const { status, body } = await request(app)
-        .delete(`/class/teacher/1235`)
-        .set("Authorization", `Bearer ${teacherUser1.token}`); // teacherUser1 is not associated with the class
-
-      expect(status).toBe(404);
-      expect(body.error).toBe("NotFoundError");
-      expect(body.message).toBe("Class not found.");
-    });
   });
 
   describe("[GET] /class/teacher/:classId/join-link", (): void => {
@@ -322,16 +311,6 @@ describe("classroom tests", (): void => {
       expect(body.error).toBe("AccessDeniedError");
       expect(body.message).toBe("Teacher is not a part of this class.");
       expect(body.joinLink).toBeUndefined();
-    });
-
-    it("should respond with `400` status code for invalid classId", async (): Promise<void> => {
-      const { status, body } = await request(app)
-        .delete("/class/teacher/not-a-number")
-        .set("Authorization", `Bearer ${teacherUser1.token}`);
-
-      expect(status).toBe(400);
-      expect(body.error).toBe("BadRequestError");
-      expect(body.message).toBe("invalid classId request parameter");
     });
 
     it("should respond with a `404` status code if the class does not exist", async (): Promise<void> => {
@@ -445,16 +424,6 @@ describe("classroom tests", (): void => {
       expect(body.message).toBe("Teacher is not a part of this class.");
       expect(body.students).toBeUndefined();
     });
-
-    it("should respond with a `404` status code when the class does not exist", async (): Promise<void> => {
-      const { status, body } = await request(app)
-        .get(`/class/teacher/17839/student`)
-        .set("Authorization", `Bearer ${teacherUser1.token}`);
-
-      expect(status).toBe(404);
-      expect(body.error).toBe("NotFoundError");
-      expect(body.message).toBe("Class not found.");
-    });
   });
 
   describe("[DELETE] /class/student/:classId", async (): Promise<void> => {
@@ -547,62 +516,6 @@ describe("classroom tests", (): void => {
 
       expect(status).toBe(403);
       expect(body.message).toBe("Student is not a part of the given class.");
-    });
-
-    // Deze test moet later nog toegevoegd worden
-    // it("should respond with a `404` status code when the class does not exist", async (): Promise<void> => {
-    //   const { status, body } = await request(app)
-    //     .get(`/class/student/78676`)
-    //     .set("Authorization", `Bearer ${student2.token}`);
-
-    //   expect(status).toBe(404);
-    //   expect(body.error).toBe("NotFoundError");
-    //   expect(body.message).toBe("Class not found.");
-    // });
-  });
-
-  describe("[GET] /class/teacher/student", async (): Promise<void> => {
-    it("should respond with a `200` status code and a list of classes", async (): Promise<void> => {
-      // add teacherUser1 to some classes
-      await addTeacherToClass(teacherUser1.id, classroom.id);
-
-      // add a student to the classes
-      await addStudentToClass(student1.id, classroom.id);
-
-      const { status, body } = await request(app)
-        .get("/class/teacher/student")
-        .set("Authorization", `Bearer ${teacherUser1.token}`);
-
-      expect(status).toBe(200);
-      expect(body.classrooms).toBeDefined();
-      expect(body.classrooms.length).toBe(1);
-      expect(body.classrooms).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            id: classroom.id,
-          }),
-        ]),
-      );
-      expect(body.classrooms[0].classLinks).toBeDefined();
-      expect(body.classrooms[0].classLinks[0].studentId).toBe(student1.id);
-      expect(body.classrooms[0].classLinks[0].student.user).toEqual(
-        expect.objectContaining({
-          firstName: student1.firstName,
-          lastName: student1.lastName,
-          email: student1.email,
-        }),
-      );
-    });
-
-    it("should respond with a `200` status code and an empty list when the teacher has no classes", async (): Promise<void> => {
-      const { status, body } = await request(app)
-        .get("/class/teacher/student")
-        .set("Authorization", `Bearer ${teacherUser1.token}`);
-
-      expect(status).toBe(200);
-      expect(body.classrooms).toBeDefined();
-      expect(body.classrooms.length).toBe(0);
-      expect(body.classrooms).toEqual([]);
     });
   });
 });

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
-import app from "../index";
+import app from "../../index";
 import {
   Assignment,
   LearningPath,
@@ -13,9 +13,9 @@ import {
   createAssignment,
   createSubmission,
   giveAssignmentToTeam,
-} from "./helpers/testDataCreation";
-import { setupTestData } from "./helpers/setupTestDataSubmissionsAndFeedback";
-import prisma from "./helpers/prisma";
+} from "../helpers/testDataCreation";
+import { setupTestData } from "../helpers/setupTestDataSubmissionsAndFeedback";
+import prisma from "../helpers/prisma";
 
 describe("Submission tests", (): void => {
   let teacher: User & { teacher: Teacher; token: string };
@@ -112,6 +112,18 @@ describe("Submission tests", (): void => {
         .set("Authorization", `Bearer ${student.token}`);
 
       expectSuccessfulSubmissionRetrieval(status, body);
+    });
+  });
+
+  describe("[GET] /submission/student/:studentId", (): void => {
+    it("Should respond with a `401` status code because a teacher is unauthorized", async (): Promise<void> => {
+      const { status, body } = await request(app)
+        .get(`/submission/student/${studentId}`)
+        .set("Authorization", `Bearer ${teacher.token}`);
+
+      expect(status).toBe(401);
+      expect(body.error).toBe("UnauthorizedError");
+      expect(body.message).toBe("Not a valid student.");
     });
   });
 

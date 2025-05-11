@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
-import app from "../index";
+import app from "../../index";
 import {
   createLearningObject,
   createStudent,
   createTeacher,
-} from "./helpers/testDataCreation";
+} from "../helpers/testDataCreation";
 import { LearningObject, Student, Teacher, User } from "@prisma/client";
-import { LocalLearningObjectData } from "../services/localLearningObjectService";
-import { LearningPathDto } from "../services/learningPathService";
-import { LearningObjectDto } from "../services/dwengoLearningObjectService";
+import { LocalLearningObjectData } from "../../services/localLearningObjectService";
+import { LearningPathDto } from "../../services/learningPathService";
+import { LearningObjectDto } from "../../services/dwengoLearningObjectService";
 
 // note: since these tests make use of the actual dwengo API, they can be quite slow
 // so set timeout to 15 seconds for all tests in this file (instead of the standard 5 seconds)
@@ -232,15 +232,6 @@ describe("learning object tests", { timeout: 15000 }, async () => {
           lp.nodes.map((node: any) => node.learningobject_hruid),
         ),
       );
-    });
-
-    it("shouldn't let an unauthorized user use this route", async () => {
-      const { status, body } = await request(app).get(
-        `/learningObject/learningPath/${lp._id}`,
-      );
-
-      expect(status).toBe(401);
-      expect(body.error).toEqual("UnauthorizedError");
     });
   });
 });

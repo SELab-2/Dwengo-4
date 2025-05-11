@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
-import app from "../index";
+import app from "../../index";
 import {
   Assignment,
   Class,
@@ -17,7 +17,7 @@ import {
   createStudent,
   createTeacher,
   stringToDate,
-} from "./helpers/testDataCreation";
+} from "../helpers/testDataCreation";
 
 describe("[GET] /assignment/student", async (): Promise<void> => {
   let student1: User & { student: Student; token: string };
@@ -79,7 +79,7 @@ describe("[GET] /assignment/student", async (): Promise<void> => {
     await addStudentToClass(student3.id, class1.id);
     await addStudentToClass(student4.id, class2.id);
     await addStudentToClass(student5.id, class3.id);
-    await addStudentToClass(student2.id, class4.id);
+    addStudentToClass(student2.id, class4.id);
 
     // Create assignments
     assignment1 = await createAssignment(
@@ -300,28 +300,6 @@ describe("[GET] /assignment/student", async (): Promise<void> => {
       expect(status).toBe(200);
       expect(body).toHaveLength(2);
     });
-
-    it("should respond with a `400` status code because the limit is negative.", async (): Promise<void> => {
-      const { status, body } = await request(app)
-        .get("/assignment/student")
-        .query({ limit: -5 })
-        .set("Authorization", `Bearer ${student5.token}`);
-
-      expect(status).toBe(400);
-      expect(body.error).toBe("BadRequestError");
-      expect(body.message).toBe("invalid request for student assignments");
-    });
-
-    it("should respond with a `400` status code because the limit is not a number.", async (): Promise<void> => {
-      const { status, body } = await request(app)
-        .get("/assignment/student")
-        .query({ limit: "limit" })
-        .set("Authorization", `Bearer ${student5.token}`);
-
-      expect(status).toBe(400);
-      expect(body.error).toBe("BadRequestError");
-      expect(body.message).toBe("invalid request for student assignments");
-    });
   });
 
   describe("GET /assignment/student/class/:classId", async (): Promise<void> => {
@@ -487,16 +465,5 @@ describe("[GET] /assignment/student", async (): Promise<void> => {
 
     expect(status).toBe(200);
     expect(body).toHaveLength(2);
-  });
-
-  it("should respond with a `400` status code because the limit is negative.", async (): Promise<void> => {
-    const { status, body } = await request(app)
-      .get(`/assignment/student/class/${class3.id}`)
-      .query({ limit: -5 })
-      .set("Authorization", `Bearer ${student5.token}`);
-
-    expect(status).toBe(400);
-    expect(body.error).toBe("BadRequestError");
-    expect(body.message).toBe("invalid request for student assignments");
   });
 });

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { LearningPath } from '../../types/type';
 import { AssignmentPayload } from '../../types/type';
 import { deleteAssignment, fetchAssignment } from '@/util/teacher/assignment';
@@ -22,6 +22,7 @@ import { fetchLearningPath } from '@/util/shared/learningPath';
  */
 const Assignment: React.FC = () => {
   const { assignmentId } = useParams<{ assignmentId: string }>();
+  const navigate = useNavigate();
 
   /**
    * Query hook to fetch assignment data
@@ -62,7 +63,7 @@ const Assignment: React.FC = () => {
   const deleteAssignmentMutation = useMutation({
     mutationFn: (id: string) => deleteAssignment(Number(id)),
     onSuccess: () => {
-      window.location.href = '/teacher/classes';
+      navigate('/teacher/classes');
     },
   });
 
@@ -72,6 +73,7 @@ const Assignment: React.FC = () => {
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to delete this assignment?')) {
       deleteAssignmentMutation.mutate(assignmentId!);
+      navigate('/teacher');
     }
   };
 
