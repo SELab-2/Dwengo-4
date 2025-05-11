@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { LearningPath } from '../../types/type';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -16,6 +16,8 @@ import {
 } from '@/components/teacher/editLearningPath/LearningPathDetails';
 
 const EditLearningPath: React.FC = () => {
+  // error message to ensure at least one node is added before saving
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const pathDetailsRef = useRef<LearningPathDetailsRef | null>(null);
   const {
@@ -25,6 +27,8 @@ const EditLearningPath: React.FC = () => {
     savePath,
     isSavingPath,
     isCreateMode,
+    language,
+    setLanguage,
   } = useLPEditContext();
 
   const { learningPathId } = useParams<{ learningPathId: string }>();
@@ -52,7 +56,7 @@ const EditLearningPath: React.FC = () => {
   } = useQuery<LearningPath>({
     queryKey: ['learningPaths', learningPathId],
     queryFn: () => fetchLocalLearningPath(learningPathId!),
-    enabled: !isCreateMode && !!learningPathId, // only fetch path if in create mode
+    enabled: !isCreateMode && !!learningPathId, // only fetch path if not in create mode
   });
 
   const {
@@ -73,18 +77,43 @@ const EditLearningPath: React.FC = () => {
     }
   }, [nodesData]);
 
-  const handleSavePath = () => {
-    // make sure all required fields are filled before trying to save the path
-    if (pathDetailsRef.current && pathDetailsRef.current.validateInput()) {
-      savePath({
-        newTitle: pathDetailsRef.current.title,
-        newDescription: pathDetailsRef.current.description,
-        newLanguage: pathDetailsRef.current.language,
-        newImage: pathDetailsRef.current.image,
-        newNodes: orderedNodes,
-        learningPathId,
-      });
+  useEffect(() => {
+    if (learningPathData) {
+      setLanguage(learningPathData.language);
     }
+  }, [learningPathData]);
+
+  // dismiss error message after 5 seconds
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => {
+        setErrorMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
+
+  const handleSavePath = () => {
+    // check if title is valid
+    if (!pathDetailsRef.current || !pathDetailsRef.current.validateInput()) {
+      return;
+    }
+
+    // check if at least one node was added
+    if (orderedNodes.length === 0) {
+      setErrorMessage('Add at least one learning object to your path');
+      return;
+    }
+
+    setErrorMessage(null); // reset error message
+    savePath({
+      newTitle: pathDetailsRef.current.title,
+      newDescription: pathDetailsRef.current.description,
+      newLanguage: language,
+      newImage: pathDetailsRef.current.image,
+      newNodes: orderedNodes,
+      learningPathId,
+    });
   };
 
   return (
@@ -103,10 +132,40 @@ const EditLearningPath: React.FC = () => {
             pathDetailsRef={pathDetailsRef}
             initialTitle={learningPathData?.title}
             initialDescription={learningPathData?.description}
-            initialLanguage={learningPathData?.language}
             initialImage={learningPathData?.image}
           />
         )}
+
+        {errorMessage && (
+          <div
+            className="bg-red-100 border border-dwengo-red-dark text-dwengo-red-darker px-3 py-2 rounded relative mb-4"
+            role="alert"
+          >
+            <span className="block sm:inline text-sm cursor-default">
+              {errorMessage}
+            </span>
+            <span
+              className="absolute top-0 bottom-0 right-0 px-4 py-3 hover:cursor-pointer"
+              onClick={() => setErrorMessage(null)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 20 20"
+                strokeWidth="2"
+                stroke="currentColor"
+                className="size-4"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18 18 6M6 6l12 12"
+                />
+              </svg>
+            </span>
+          </div>
+        )}
+
         <div className="rounded-lg border border-gray-200 p-2.5 bg-white">
           {isLoadingNodes ? (
             <p>Loading learning objects...</p>

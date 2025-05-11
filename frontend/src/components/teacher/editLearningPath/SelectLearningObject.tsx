@@ -3,15 +3,16 @@ import { LearningPath } from '../../../types/type';
 import { useQuery } from '@tanstack/react-query';
 import { fetchLearningPaths } from '@/util/teacher/learningPath';
 import { LPObjectSelector } from '@/components/teacher/editLearningPath/LPObjectSelector';
+import { useLPEditContext } from '@/context/LearningPathEditContext';
 
 const SelectLearningObject: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredLearningPaths, setFilteredLearningPaths] = useState<
     LearningPath[]
   >([]);
-
   // use a combination of path id and object id as the selected component id (since paths can contain the same objects)
   const [selectedComponentId, setSelectedComponentId] = useState<string>('');
+  const { language } = useLPEditContext();
 
   // fetch all learning paths, so that user can select learning objects from them
   const {
@@ -27,12 +28,20 @@ const SelectLearningObject: React.FC = () => {
 
   useEffect(() => {
     if (allLearningPaths) {
-      const results = allLearningPaths.filter((path) =>
-        path.title.toLowerCase().includes(searchTerm.toLowerCase()),
-      );
+      const results = allLearningPaths.filter((path) => {
+        // filter by title search term
+        const matchesTitle = path.title
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+
+        // only filter by language if language is not empty
+        const matchesLanguage = !language || path.language === language;
+
+        return matchesTitle && matchesLanguage;
+      });
       setFilteredLearningPaths(results);
     }
-  }, [searchTerm, allLearningPaths]);
+  }, [searchTerm, allLearningPaths, language]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value); // Update the search term
