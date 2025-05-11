@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect, use } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import { LearningPath } from '../../types/type';
 import { useParams } from 'react-router-dom';
 import { LearningObject } from '@prisma/client';
-import { fetchLearningObjectsByLearningPath, fetchLearningPath } from '@/util/teacher/learningPath';
+import { fetchLearningObjectsByLearningPath, fetchLearningPath } from '@/util/shared/learningPath';
 
 /**
  * LearningPaths component displays all available learning paths.
@@ -23,30 +23,24 @@ const LearningPath: React.FC = () => {
 
     const { pathId } = useParams<{ pathId: string }>();
 
-    const {
-        data: learningPathData,
-        isLoading,
-        isError,
-        error,
-    } = useQuery<LearningPath>({
-        queryKey: ['learningPaths', pathId],
-        queryFn: () => fetchLearningPath(pathId!, true),
-        staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
-        gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
-    });
-
-    console.log('LearningPathData', learningPathData);
-
-    const {
-        data: learningObjectsData,
-        isLoading: isLoadingLearningObjects,
-        isError: isErrorLearningObjects,
-        error: errorLearningObjects,
-    } = useQuery<LearningObject[]>({
-        queryKey: ['learningObjects', pathId],
-        queryFn: () => fetchLearningObjectsByLearningPath(pathId!),
-        staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
-        gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
+    const [
+        { data: learningPathData, isLoading, isError, error },
+        { data: learningObjectsData, isLoading: isLoadingLearningObjects, isError: isErrorLearningObjects, error: errorLearningObjects }
+    ] = useQueries({
+        queries: [
+            {
+                queryKey: ['learningPaths', pathId],
+                queryFn: () => fetchLearningPath(pathId!, true),
+                staleTime: 5 * 60 * 1000,
+                gcTime: 30 * 60 * 1000,
+            },
+            {
+                queryKey: ['learningObjects', pathId],
+                queryFn: () => fetchLearningObjectsByLearningPath(pathId!),
+                staleTime: 5 * 60 * 1000,
+                gcTime: 30 * 60 * 1000,
+            }
+        ]
     });
 
     const nextObject = useMemo(() => {
@@ -86,7 +80,31 @@ const LearningPath: React.FC = () => {
                                         key={learningObject.id}
                                         onClick={() => setSelectedLearningObject(learningObject)}
                                     >
-                                        {learningObject.title}
+                                        <div className="flex items-center justify-between">
+                                            <span>{learningObject.title}</span>
+                                            <svg
+                                                className={`w-5 h-5 ${learningObject.done ? 'text-green-500' : 'text-gray-300'}`}
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                {true ? (
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M5 13l4 4L19 7"
+                                                    />
+                                                ) : (
+                                                    <circle
+                                                        cx="12"
+                                                        cy="12"
+                                                        r="8"
+                                                        strokeWidth={2}
+                                                    />
+                                                )}
+                                            </svg>
+                                        </div>
                                     </button>
                                 ))}
                             </div>

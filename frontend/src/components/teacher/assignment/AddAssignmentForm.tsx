@@ -13,7 +13,7 @@ import {
   StudentItem,
   Team,
 } from '../../../types/type';
-import { fetchLearningPaths } from '@/util/teacher/learningPath';
+import { fetchLearningPaths } from '@/util/shared/learningPath';
 import { postAssignment, updateAssignment } from '@/util/teacher/assignment';
 import { useTranslation } from 'react-i18next';
 
@@ -332,7 +332,7 @@ const AddAssignmentForm = ({
       );
       setSubmitError(
         error.message ||
-          `Failed to ${isEditing ? 'update' : 'create'} assignment`,
+        `Failed to ${isEditing ? 'update' : 'create'} assignment`,
       );
       setIsSubmitting(false);
     }

@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { LearningPath } from '../../types/type';
 import { AssignmentPayload } from '../../types/type';
 import { deleteAssignment, fetchAssignment } from '@/util/teacher/assignment';
-import { fetchLearningPath } from '@/util/teacher/learningPath';
+import { fetchLearningPath } from '@/util/shared/learningPath';
 
 /**
  * Assignment component for teachers to view and manage individual assignments.

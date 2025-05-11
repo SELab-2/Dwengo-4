@@ -1,7 +1,7 @@
 import { APIError } from '@/types/api.types';
 import { LearningPath } from '../../types/type';
-import { getAuthToken } from './authTeacher';
-import { BACKEND } from './config';
+import { getAuthToken } from '../teacher/authTeacher';
+import { BACKEND } from '../teacher/config';
 
 /**
  * Fetches all learning paths for the authenticated teacher
@@ -88,7 +88,6 @@ export async function fetchLearningObjectsByLearningPath(pathId: string): Promis
       Authorization: `Bearer ${getAuthToken()}`,
     },
   });
-  console.log("fet  ")
 
   if (!response.ok) {
     const error: APIError = new Error(
