@@ -13,6 +13,7 @@ import {
   searchLocalLearningObjects,
   // [NIEUW] importeer de functie om lokaal LO op te halen via hruid/lang/version
   getLocalLearningObjectByHruidLangVersion,
+  getLocalObjectsForPath,
 } from "./localDBLearningObjectService";
 
 /**
@@ -74,11 +75,24 @@ export async function getLearningObjectById(
  * Haalt alle leerobjecten op die bij een leerpad (Dwengo) horen.
  * Wil je later ook lokale leerpaden toevoegen, pas deze functie aan.
  */
+/**
+ * Haalt alle leerobjecten op die bij een leerpad horen (Dwengo + lokaal).
+ */
 export async function getLearningObjectsForPath(
   pathId: string,
   isTeacher: boolean,
 ): Promise<LearningObjectDto[]> {
-  return await getDwengoObjectsForPath(pathId, isTeacher);
+  try {
+    // Try to get Dwengo objects first
+    return await getDwengoObjectsForPath(pathId, isTeacher);
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      // If Dwengo fails, return only local objects
+      // Get local objects
+      return await getLocalObjectsForPath(pathId, isTeacher);
+    }
+    throw error;
+  }
 }
 
 // [NIEUW] Haal 1 leerobject op via hruid-language-version

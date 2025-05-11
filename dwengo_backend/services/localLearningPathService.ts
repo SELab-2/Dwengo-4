@@ -227,7 +227,7 @@ export class LocalLearningPathService {
           isExternal: node.isExternal,
           localLearningObjectId: node.localLearningObjectId ?? undefined,
           dwengoHruid: node.dwengoHruid ?? undefined,
-          done,
+          done: done,
         };
       }),
     );

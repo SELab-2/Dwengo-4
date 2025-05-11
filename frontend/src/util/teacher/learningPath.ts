@@ -9,7 +9,7 @@ import { BACKEND } from './config';
  * @throws {APIError} When fetching fails
  */
 export async function fetchLearningPaths(): Promise<LearningPath[]> {
-  const response = await fetch(`${BACKEND}/learningPath`, {
+  const response = await fetch(`${BACKEND}/learningPath?all`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ export async function fetchLearningPath(
   isExternal: boolean = false,
 ): Promise<LearningPath> {
   const response = await fetch(
-    `${BACKEND}/learningPath/${learningPathId}`,
+    `${BACKEND}/learningPath/${learningPathId}?includeProgress=true`,
     {
       method: 'GET',
       headers: {
