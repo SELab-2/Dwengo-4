@@ -35,6 +35,7 @@ export async function fetchLearningPath(
   learningPathId: string,
   isExternal: boolean = false,
 ): Promise<LearningPath> {
+
   return (await apiRequest({
     method: 'GET',
     endpoint: `/pathByTeacher/all/${learningPathId}?isExternal=${isExternal}`,
