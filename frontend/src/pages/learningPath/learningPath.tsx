@@ -21,9 +21,8 @@ import { updateLearningObjectProgress, upsertLearningObjectProgress } from '@/ut
 const LearningPath: React.FC = () => {
     const [learningPath, setLearningPath] = useState<LearningPath | null>(null);
     const [selectedLearningObject, setSelectedLearningObject] = useState<LearningObject | null>(null);
-
     const { pathId } = useParams<{ pathId: string }>();
-
+    const [progress, setProgress] = useState<number>(0);
     const [
         { data: learningPathData, isLoading, isError, error },
         { data: learningObjectsData, isLoading: isLoadingLearningObjects, isError: isErrorLearningObjects, error: errorLearningObjects },
@@ -44,7 +43,6 @@ const LearningPath: React.FC = () => {
         ]
     });
 
-    console.log('Learning path data:', learningPathData);
 
     const nextObject = useMemo(() => {
         if (!selectedLearningObject || !learningObjectsData) return null;
@@ -56,14 +54,33 @@ const LearningPath: React.FC = () => {
     useEffect(() => {
         if (learningPathData) {
             setLearningPath(learningPathData);
+            calculateProgress();
         }
     }, [learningPathData]);
 
-    useEffect(() => {
-        if (selectedLearningObject?.id) {
-            upsertLearningObjectProgress(selectedLearningObject.id, true)
+    const calculateProgress = () => {
+        if (!learningPath) return 0;
+        const totalNodes = learningPath.nodes.length;
+        const completedNodes = learningPath.nodes.filter(node => node.done).length;
+
+        setProgress((completedNodes / totalNodes) * 100);
+    }
+
+
+
+
+    // Handle click on learning object
+    const handleClickLearningObject = async (learningObject: LearningObject) => {
+        if (selectedLearningObject) {
+            await upsertLearningObjectProgress(selectedLearningObject!.id, true);
+            learningPath!.nodes.find(obj => obj.localLearningObjectId === selectedLearningObject!.id)!.done = true;
+            calculateProgress();
         }
-    }, [selectedLearningObject?.id, pathId, learningObjectsData]);
+        if (!learningObject) return;
+        setSelectedLearningObject(learningObject);
+    };
+
+    console.log('progress', progress);
 
 
     return (
@@ -79,6 +96,15 @@ const LearningPath: React.FC = () => {
                         <>
                             <div className="flex gap-2.5 -m-2.5 p-2.5 border-b border-gray-200">
                                 <h2 className="text-xl font-bold">{learningPath?.title}</h2>
+                                <div className="flex items-center gap-2 ml-auto">
+                                    <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div 
+                                            className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                                            style={{ width: `${progress}%` }}
+                                        />
+                                    </div>
+                                    <span className="text-sm text-gray-600">{Math.round(progress)}%</span>
+                                </div>
                             </div>
                             <div className="flex flex-col overflow-y-auto">
                                 {learningObjectsData?.map((learningObject) => (
@@ -88,7 +114,7 @@ const LearningPath: React.FC = () => {
                                             : ''
                                             }`}
                                         key={learningObject.id}
-                                        onClick={() => setSelectedLearningObject(learningObject)}
+                                        onClick={() => handleClickLearningObject(learningObject)}
                                     >
                                         <div className="flex items-center justify-between">
                                             <span>{learningObject.title}</span>
@@ -132,6 +158,7 @@ const LearningPath: React.FC = () => {
                         <>
                             <h3 className="w-fit mx-auto font-bold text-2xl">{learningPath?.title}</h3>
                             <p className="py-2 pb-6 w-fit mx-auto">{learningPath?.description}</p>
+                            
                         </>
                     ) : (
                         <div className="w-full max-w-3xl">
@@ -146,12 +173,17 @@ const LearningPath: React.FC = () => {
                 <div className="fixed bottom-0 right-0 flex p-4 justify-end border-t border-gray-200 bg-white w-[calc(100%-416px)] z-10">
                     <button
                         className="px-4 py-2 text-base font-normal rounded bg-blue-600 text-white border-none cursor-pointer transition-opacity duration-200 disabled:opacity-50"
-                        onClick={() => nextObject && setSelectedLearningObject(nextObject)}
-                        disabled={!nextObject}
+                        onClick={() => {
+                            handleClickLearningObject(nextObject)
+                            if (nextObject == null) {
+                                //TODO
+                            }
+                        }}
+                        disabled={progress === 100}
                     >
                         {nextObject
                             ? `Up Next: ${nextObject.title}`
-                            : 'End of Path'}
+                            : 'Complete Learning Path'}
                     </button>
                 </div>
             </div>
