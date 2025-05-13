@@ -5,7 +5,7 @@ import { LearningPathFilter } from '../../components/learningPath/learningPathFi
 import { Filter, FilterType } from '../../components/ui/filters';
 import { Link } from 'react-router-dom';
 import { filterLearningPaths } from '@/util/filter';
-import { fetchLearningPaths } from '@/util/teacher/learningPath';
+import { fetchLearningPaths } from '@/util/shared/learningPath';
 
 /**
  * Generates a background color based on the given ID.

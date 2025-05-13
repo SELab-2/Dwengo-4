@@ -6,6 +6,7 @@ import {
   getStudentProgress,
   getTeamProgressStudent,
   updateProgress,
+  upsertProgress,
 } from "../../controllers/progressController";
 import { protectStudent } from "../../middleware/authMiddleware/studentAuthMiddleware";
 import { validateRequest } from "../../middleware/validateRequest";
@@ -123,6 +124,23 @@ router.get(
     paramsSchema: learningPathIdParamSchema,
   }),
   getStudentLearningPathProgress,
+);
+
+/**
+ * @route   PUT /progress/student/learningObject/:learningObjectId
+ * @desc    Create or update progress for a student's learning object (upsert).
+ *          If progress doesn't exist, it will be created.
+ *          If it exists, it will be updated.
+ * @param   learningObjectId: string
+ * @access  Student
+ */
+router.put(
+  "/learningObject/:learningObjectId",
+  validateRequest({
+    customErrorMessage: "invalid learningObjectId request parameter",
+    paramsSchema: learningObjectIdParamSchema,
+  }),
+  upsertProgress,
 );
 
 export default router;
