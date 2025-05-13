@@ -164,9 +164,43 @@ export class LocalLearningPathService {
     const results = await prisma.learningPath.findMany({
       where: whereClause,
       orderBy: { createdAt: "desc" },
+      include: {
+        nodes: true, // Include nodes to calculate progress
+      },
     });
-    // map => isExternal=false
-    return results.map(mapLocalPathToDto);
+
+    // Map results to DTOs with progress information
+    return await Promise.all(results.map(async (lp) => {
+      const baseDto = mapLocalPathToDto(lp);
+
+      // Calculate progress for each learning path
+      const nodes = await prisma.learningPathNode.findMany({
+        where: { learningPathId: lp.id },
+      });
+
+      const totalNodes = nodes.length;
+      let completedNodes = 0;
+
+      for (const node of nodes) {
+        if (node.localLearningObjectId) {
+          const progress = await prisma.learningObjectProgress.findFirst({
+            where: { learningObjectId: node.localLearningObjectId },
+          });
+          if (progress && progress.done) {
+            completedNodes++;
+          }
+        }
+      }
+
+      const progressPercent = totalNodes === 0 ? 0 : Math.round((completedNodes / totalNodes) * 100);
+
+      return {
+        ...baseDto,
+        totalNodes,
+        completedNodes,
+        progressPercent,
+      };
+    }));
   }
 
   /**
