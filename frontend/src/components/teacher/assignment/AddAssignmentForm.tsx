@@ -146,6 +146,8 @@ const AddAssignmentForm = ({
   } = useQuery<LearningPath[], Error>({
     queryKey: ['learningPaths'],
     queryFn: fetchLearningPaths,
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   /**

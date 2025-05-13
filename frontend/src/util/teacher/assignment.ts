@@ -155,6 +155,17 @@ export async function updateAssignment({
   classTeams,
   teamSize,
 }: AssignmentPayload): Promise<void> {
+  console.log('updateAssignment', {
+    id,
+    title,
+    description,
+    pathLanguage,
+    isExternal,
+    deadline,
+    pathRef,
+    classTeams,
+    teamSize,
+  });
   await apiRequest({
     method: 'PATCH',
     endpoint: `/assignment/teacher/team/${id}`,

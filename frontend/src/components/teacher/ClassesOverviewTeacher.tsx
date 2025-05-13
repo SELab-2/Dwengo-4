@@ -36,7 +36,7 @@ export default function ClassesOverviewTeacher() {
               >
                 <div className="flex flex-col">
                   <div className="flex flex-row w-full justify-between mb-1">
-                    <h3 className="text-2xl font-bold">{classItem.name}</h3>
+                    <h3 className="text-2xl font-bold truncate">{classItem.name}</h3>
                   </div>
 
                   <p>
