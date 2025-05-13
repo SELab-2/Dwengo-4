@@ -239,7 +239,6 @@ export class LocalLearningPathService {
     return {
       ...baseDto,
       nodes: nodesWithProgress,
-      totalNodes,
       completedNodes,
       progressPercent,
     };
