@@ -15,14 +15,22 @@ const corsMiddleware = (
   if (origin && allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
+
   res.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, DELETE, OPTIONS, PATCH",
   );
+
   res.setHeader(
     "Access-Control-Allow-Headers",
     "X-Requested-With, Content-Type, Authorization",
   );
+
+  if (req.method === "OPTIONS") {
+    res.sendStatus(204);
+    return;
+  }
+
   next();
 };
 

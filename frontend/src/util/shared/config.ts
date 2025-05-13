@@ -12,7 +12,7 @@ export const queryClient = new QueryClient({
 });
 
 export interface RequestConfig {
-  method: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method: 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT';
   endpoint: string;
   body?: any;
   getToken: () => string | null;

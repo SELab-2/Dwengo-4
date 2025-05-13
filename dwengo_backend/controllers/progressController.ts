@@ -266,3 +266,37 @@ export const getAssignmentAverageProgress = asyncHandler(
     res.status(200).json({ averageProgress });
   },
 );
+
+
+
+/**
+ * Creates or updates progress for a student's learning object.
+ * If progress doesn't exist, creates it. If it exists, updates it.
+ */
+export const upsertProgress = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const studentId: number = getUserFromAuthRequest(req).id;
+    const { learningObjectId } = req.params;
+
+    try {
+      const existingProgress = await progressService.getStudentProgress(
+        studentId,
+        learningObjectId
+      );
+      const progress = await progressService.updateProgressToDone(existingProgress.id);
+
+      res.status(200).json({
+        message: "Progress successfully updated",
+        progress: progress,
+      });
+
+    } catch {
+      const progress = await progressService.createProgress(studentId, learningObjectId);
+
+      res.status(201).json({
+        message: "Progress successfully created",
+        progress: progress,
+      });
+    }
+  }
+);

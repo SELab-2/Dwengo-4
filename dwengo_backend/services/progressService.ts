@@ -31,7 +31,7 @@ class ProgressService {
       const progress = await transactionPrisma.learningObjectProgress.create({
         data: {
           learningObjectId,
-          done: false,
+          done: true,
         },
       });
 
