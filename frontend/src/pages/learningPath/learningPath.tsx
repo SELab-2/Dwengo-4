@@ -4,7 +4,7 @@ import { LearningPath } from '../../types/type';
 import { useParams } from 'react-router-dom';
 import { LearningObject } from '@prisma/client';
 import { fetchLearningObjectsByLearningPath, fetchLearningPath } from '@/util/shared/learningPath';
-import { updateLearningObjectProgress, upsertLearningObjectProgress } from '@/util/student/progress';
+import { upsertLearningObjectProgress } from '@/util/student/progress';
 
 /**
  * LearningPaths component displays all available learning paths.
@@ -23,6 +23,7 @@ const LearningPath: React.FC = () => {
     const [selectedLearningObject, setSelectedLearningObject] = useState<LearningObject | null>(null);
     const { pathId } = useParams<{ pathId: string }>();
     const [progress, setProgress] = useState<number>(0);
+    const [isStudent, setIsStudent] = useState<boolean>(localStorage.getItem('role') === 'student');
     const [
         { data: learningPathData, isLoading, isError, error },
         { data: learningObjectsData, isLoading: isLoadingLearningObjects, isError: isErrorLearningObjects, error: errorLearningObjects },
@@ -43,20 +44,23 @@ const LearningPath: React.FC = () => {
         ]
     });
 
-
     const nextObject = useMemo(() => {
         if (!selectedLearningObject || !learningObjectsData) return null;
         const idx = learningObjectsData.findIndex(o => o.id === selectedLearningObject.id);
         return learningObjectsData[idx + 1] || null;
     }, [selectedLearningObject, learningObjectsData]);
 
-
     useEffect(() => {
         if (learningPathData) {
             setLearningPath(learningPathData);
-            calculateProgress();
         }
     }, [learningPathData]);
+
+    useEffect(() => {
+        if (isStudent && learningPath) {
+            calculateProgress();
+        }
+    }, [learningPath]);
 
     const calculateProgress = () => {
         if (!learningPath) return 0;
@@ -66,12 +70,9 @@ const LearningPath: React.FC = () => {
         setProgress((completedNodes / totalNodes) * 100);
     }
 
-
-
-
     // Handle click on learning object
     const handleClickLearningObject = async (learningObject: LearningObject) => {
-        if (selectedLearningObject) {
+        if (selectedLearningObject && isStudent) {
             await upsertLearningObjectProgress(selectedLearningObject!.id, true);
             learningPath!.nodes.find(obj => obj.localLearningObjectId === selectedLearningObject!.id)!.done = true;
             calculateProgress();
@@ -81,7 +82,6 @@ const LearningPath: React.FC = () => {
     };
 
     console.log('progress', progress);
-
 
     return (
         <div className="flex min-h-[calc(100vh-80px)]">
@@ -96,15 +96,17 @@ const LearningPath: React.FC = () => {
                         <>
                             <div className="flex gap-2.5 -m-2.5 p-2.5 border-b border-gray-200">
                                 <h2 className="text-xl font-bold">{learningPath?.title}</h2>
-                                <div className="flex items-center gap-2 ml-auto">
-                                    <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                        <div 
-                                            className="h-full bg-blue-600 rounded-full transition-all duration-300"
-                                            style={{ width: `${progress}%` }}
-                                        />
+                                {isStudent && (
+                                    <div className="flex items-center gap-2 ml-auto">
+                                        <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                                                style={{ width: `${progress}%` }}
+                                            />
+                                        </div>
+                                        <span className="text-sm text-gray-600">{Math.round(progress)}%</span>
                                     </div>
-                                    <span className="text-sm text-gray-600">{Math.round(progress)}%</span>
-                                </div>
+                                )}
                             </div>
                             <div className="flex flex-col overflow-y-auto">
                                 {learningObjectsData?.map((learningObject) => (
@@ -158,7 +160,7 @@ const LearningPath: React.FC = () => {
                         <>
                             <h3 className="w-fit mx-auto font-bold text-2xl">{learningPath?.title}</h3>
                             <p className="py-2 pb-6 w-fit mx-auto">{learningPath?.description}</p>
-                            
+
                         </>
                     ) : (
                         <div className="w-full max-w-3xl">
@@ -171,20 +173,22 @@ const LearningPath: React.FC = () => {
                     )}
                 </div>
                 <div className="fixed bottom-0 right-0 flex p-4 justify-end border-t border-gray-200 bg-white w-[calc(100%-416px)] z-10">
-                    <button
-                        className="px-4 py-2 text-base font-normal rounded bg-blue-600 text-white border-none cursor-pointer transition-opacity duration-200 disabled:opacity-50"
-                        onClick={() => {
-                            handleClickLearningObject(nextObject)
-                            if (nextObject == null) {
-                                //TODO
-                            }
-                        }}
-                        disabled={progress === 100}
-                    >
-                        {nextObject
-                            ? `Up Next: ${nextObject.title}`
-                            : 'Complete Learning Path'}
-                    </button>
+                    {isStudent && (
+                        <button
+                            className="px-4 py-2 text-base font-normal rounded bg-blue-600 text-white border-none cursor-pointer transition-opacity duration-200 disabled:opacity-50"
+                            onClick={() => {
+                                handleClickLearningObject(nextObject)
+                                if (nextObject == null) {
+                                    //TODO
+                                }
+                            }}
+                            disabled={progress === 100}
+                        >
+                            {nextObject
+                                ? `Up Next: ${nextObject.title}`
+                                : 'Complete Learning Path'}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
