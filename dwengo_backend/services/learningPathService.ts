@@ -6,7 +6,7 @@ import {
 import { NotFoundError } from "../errors/errors";
 
 export interface LearningPathDto {
-  _id: string; // Dwengo gebruikt _id of in onze DB is het id
+  _id: string;
   hruid: string;
   language: string;
   title: string;
@@ -14,7 +14,7 @@ export interface LearningPathDto {
   image?: string;
   num_nodes?: number;
   num_nodes_left: number;
-  // properderr dan die any
+
   nodes: Array<{
     nodeId: string;
     isExternal: boolean;
@@ -23,11 +23,14 @@ export interface LearningPathDto {
     done: boolean;
   }>;
 
+  /** NIEUW voor deprogress per leerpaden */
+  totalNodes?: number; // aantal nodes in dit leerpad
+  completedNodes?: number; // hoeveel daarvan done = true
+  progressPercent?: number; // afgerond percentage 0-100
+
   createdAt?: string;
   updatedAt?: string;
 
-  // ===== BELANGRIJK =====
-  // Zodat we Dwengo vs. lokaal kunnen onderscheiden in 1 type:
   isExternal: boolean;
 }
 
