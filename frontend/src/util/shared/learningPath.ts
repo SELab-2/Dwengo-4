@@ -1,6 +1,23 @@
 import { LearningPath } from '@/types/type';
-import { getAuthToken } from './authTeacher';
-import { apiRequest } from '../shared/config';
+import { getTokenDuration } from '../teacher/authTeacher';
+import { apiRequest } from './config';
+
+export function getAuthToken(): string | null {
+  const token = localStorage.getItem('token');
+
+  if (!token) {
+    return null;
+  }
+
+  const tokenDuration = getTokenDuration();
+
+  if (tokenDuration < 0) {
+    return 'EXPIRED';
+  }
+
+  return token;
+}
+
 
 /**
  * Fetches all learning paths for the authenticated teacher
@@ -10,7 +27,7 @@ import { apiRequest } from '../shared/config';
 export async function fetchLearningPaths(): Promise<LearningPath[]> {
   const response = (await apiRequest({
     method: 'GET',
-    endpoint: '/pathByTeacher/all',
+    endpoint: '/learningpath?all',
     getToken: getAuthToken,
   })) as { learningPaths: LearningPath[] };
 
@@ -38,7 +55,7 @@ export async function fetchLearningPath(
 
   return (await apiRequest({
     method: 'GET',
-    endpoint: `/pathByTeacher/all/${learningPathId}?isExternal=${isExternal}`,
+    endpoint: `/learningpath/${learningPathId}?includeProgress=true`,
     getToken: getAuthToken,
   })) as { learningPath: LearningPath };
 }
