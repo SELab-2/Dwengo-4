@@ -323,7 +323,7 @@ const AddAssignmentForm = ({
 
       navigate(
         isEditing
-          ? `/teacher/assignments/${assignmentData?.id}`
+          ? `/teacher/assignment/${assignmentData?.id}`
           : `/teacher/classes/${classId}`,
       );
     } catch (error: any) {

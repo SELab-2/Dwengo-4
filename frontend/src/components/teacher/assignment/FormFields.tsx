@@ -47,8 +47,22 @@ const FormFields: React.FC<FormFieldsProps> = ({
           {t('assignments_form.class.choose')}
         </label>
         <CustomDropdownMultiselect
-          options={classesData || []}
-          selectedOptions={selectedClasses}
+          options={classesData.map(c => ({
+            ...c,
+            name: (
+              <div className="max-w-[200px] truncate" title={c.name}>
+                {c.name}
+              </div>
+            )
+          })) || []}
+          selectedOptions={selectedClasses.map(c => ({
+            ...c,
+            name: (
+              <div className="max-w-[200px] truncate" title={c.name}>
+                {c.name}
+              </div>
+            )
+          }))}
           onChange={setSelectedClasses}
         />
         {formErrors.classes && (
@@ -64,8 +78,10 @@ const FormFields: React.FC<FormFieldsProps> = ({
           name="title"
           value={title}
           required
+          maxLength={100}
           onChange={(e) => setTitle(e.target.value)}
         />
+        <small>{100 - title.length}</small>
       </div>
 
       <div>
@@ -87,12 +103,13 @@ const FormFields: React.FC<FormFieldsProps> = ({
             name="learningPath"
             onChange={handleLearningPathChange}
             value={selectedLearningPath?.id || ''}
+            className="w-full"
           >
-            <option value="">
+            <option value="" className="truncate">
               {t('assignments_form.learning_path.select')}
             </option>
             {learningPaths.map((path) => (
-              <option key={path.id} value={path.id}>
+              <option key={path.id} value={path.id} className="truncate" title={path.title}>
                 {path.title}
               </option>
             ))}
@@ -110,7 +127,9 @@ const FormFields: React.FC<FormFieldsProps> = ({
           value={description}
           rows={5}
           cols={50}
+          maxLength={500}
         ></textarea>
+        <small>{500 - description.length}</small>
       </div>
     </>
   );
