@@ -35,6 +35,8 @@ const LearningPath: React.FC = () => {
         gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
     });
 
+    console.log('LearningPathData', learningPathData);
+
     const {
         data: learningObjectsData,
         isLoading: isLoadingLearningObjects,

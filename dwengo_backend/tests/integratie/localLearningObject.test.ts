@@ -1,14 +1,14 @@
 import { LearningObject, Student, Teacher, User } from "@prisma/client";
 import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
-import prisma from "./helpers/prisma";
-import app from "../index";
+import prisma from "../helpers/prisma";
+import app from "../../index";
 import {
   createLearningObject,
   createStudent,
   createTeacher,
-} from "./helpers/testDataCreation";
-import { LocalLearningObjectData } from "../services/localLearningObjectService";
+} from "../helpers/testDataCreation";
+import { LocalLearningObjectData } from "../../services/localLearningObjectService";
 
 // TODO: once zod validation and error handling is added, add tests for those things aswell
 // or existing tests might need to be updated
@@ -110,9 +110,11 @@ describe("local learning object tests", async () => {
       expect(body.error).toEqual("UnauthorizedError");
 
       // verify that learning object was not created in the database
-      await prisma.learningObject.findMany().then((los: LearningObject[]): void => {
-        expect(los.length).toBe(0);
-      });
+      await prisma.learningObject
+        .findMany()
+        .then((los: LearningObject[]): void => {
+          expect(los.length).toBe(0);
+        });
     });
     it("should return an error if request is incomplete/incorrect", async () => {
       // TODO: add once zod validation is added
