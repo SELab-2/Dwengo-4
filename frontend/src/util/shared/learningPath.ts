@@ -27,7 +27,7 @@ export function getAuthToken(): string | null {
 export async function fetchLearningPaths(): Promise<LearningPath[]> {
   const response = (await apiRequest({
     method: 'GET',
-    endpoint: '/learningpath?all',
+    endpoint: '/learningpath?all&includeProgress=true',
     getToken: getAuthToken,
   })) as { learningPaths: LearningPath[] };
 

@@ -107,6 +107,9 @@ const LearningPaths: React.FC = () => {
             .sort((a, b) => a.name.localeCompare(b.name));
     }, [learningPaths]);
 
+    console.log(learningPaths ? learningPaths[0] : null);
+
+
     const uniqueLanguages = useMemo(() => {
         if (!learningPaths) return [];
         const languages = new Set(learningPaths
