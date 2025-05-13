@@ -12,6 +12,7 @@ interface CombinedLearningPathFilters {
   title?: string;
   description?: string;
   all?: string;
+  includeProgress?: string;
 }
 
 /**

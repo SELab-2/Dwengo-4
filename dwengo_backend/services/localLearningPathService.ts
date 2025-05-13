@@ -164,9 +164,43 @@ export class LocalLearningPathService {
     const results = await prisma.learningPath.findMany({
       where: whereClause,
       orderBy: { createdAt: "desc" },
+      include: {
+        nodes: true, // Include nodes to calculate progress
+      },
     });
-    // map => isExternal=false
-    return results.map(mapLocalPathToDto);
+
+    // Map results to DTOs with progress information
+    return await Promise.all(results.map(async (lp) => {
+      const baseDto = mapLocalPathToDto(lp);
+
+      // Calculate progress for each learning path
+      const nodes = await prisma.learningPathNode.findMany({
+        where: { learningPathId: lp.id },
+      });
+
+      const totalNodes = nodes.length;
+      let completedNodes = 0;
+
+      for (const node of nodes) {
+        if (node.localLearningObjectId) {
+          const progress = await prisma.learningObjectProgress.findFirst({
+            where: { learningObjectId: node.localLearningObjectId },
+          });
+          if (progress && progress.done) {
+            completedNodes++;
+          }
+        }
+      }
+
+      const progressPercent = totalNodes === 0 ? 0 : Math.round((completedNodes / totalNodes) * 100);
+
+      return {
+        ...baseDto,
+        totalNodes,
+        completedNodes,
+        progressPercent,
+      };
+    }));
   }
 
   /**
@@ -178,63 +212,69 @@ export class LocalLearningPathService {
     includeProgress: boolean = false,
     studentId?: number,
   ): Promise<LearningPathDto> {
-    // 1) Probeer op id
-    const byId = await handlePrismaQuery(() =>
-      prisma.learningPath.findUnique({ where: { id: idOrHruid } }),
-    );
-
-    // 2) Probeer op hruid als niet op id gevonden
+    /* 1.  Zoek leerpad-record (op id of hruid) */
     const lp =
-      byId ??
+      (await handlePrismaQuery(() =>
+        prisma.learningPath.findUnique({ where: { id: idOrHruid } }),
+      )) ??
       (await handlePrismaQuery(() =>
         prisma.learningPath.findUnique({ where: { hruid: idOrHruid } }),
       ));
 
     if (!lp) throw new NotFoundError("Learning path not found.");
 
-    // Basis DTO zonder nodes
+    /* 2.  Basis-DTO (zonder nodes) */
     const baseDto = mapLocalPathToDto(lp);
 
-    // Als geen progressie nodig is of geen studentId, geef alleen basis terug
+    /* 3.  Als progress niet gevraagd of geen studentId → klaar */
     if (!includeProgress || studentId === undefined) {
       return baseDto;
     }
 
-    // Haal alle nodes van dit leerpad
+    /* 4.  Nodes ophalen */
     const nodes = await prisma.learningPathNode.findMany({
       where: { learningPathId: lp.id },
     });
 
-    // Voor elke node: bepaal done-status
+    /* 5.  Voor elke node bepalen of de student klaar is */
     const nodesWithProgress = await Promise.all(
       nodes.map(async (node) => {
         let done = false;
-        const localObjId = node.localLearningObjectId;
-        if (localObjId) {
-          // Zoek studentProgress met relation filter op LearningObjectProgress
+
+        if (node.localLearningObjectId) {
           const sp = await prisma.studentProgress.findFirst({
             where: {
               studentId,
               progress: {
-                is: { learningObjectId: localObjId },
+                is: { learningObjectId: node.localLearningObjectId },
               },
             },
           });
           done = sp !== null;
         }
+
         return {
           nodeId: node.nodeId,
           isExternal: node.isExternal,
           localLearningObjectId: node.localLearningObjectId ?? undefined,
           dwengoHruid: node.dwengoHruid ?? undefined,
-          done: done,
+          done,
         };
       }),
     );
 
+    /* 6.  Leerpad-aggregatie */
+    const totalNodes = nodesWithProgress.length;
+    const completedNodes = nodesWithProgress.filter((n) => n.done).length;
+    const progressPercent =
+      totalNodes === 0 ? 0 : Math.round((completedNodes / totalNodes) * 100);
+
+    /* 7.  Eind-DTO met voortgang */
     return {
       ...baseDto,
       nodes: nodesWithProgress,
+      completedNodes,
+      progressPercent,
     };
   }
 }

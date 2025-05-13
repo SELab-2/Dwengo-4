@@ -25,3 +25,7 @@ export async function fetchLeaveClass({ classId }: { classId: string }) {
     getToken: getAuthToken,
   });
 }
+
+export interface AssignmentItem {
+  progress?: number;
+}

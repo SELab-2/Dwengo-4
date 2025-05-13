@@ -57,12 +57,27 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ path }) => {
                 )}
             </div>
             <div className="p-6 flex-grow h-40 border-t-2 border-gray-200">
-                <Link
-                    to={linkPath}
-                    className="text-blue-600 hover:text-blue-800"
-                >
-                    <h2 className="text-xl font-semibold mb-2">{path.title}</h2>
-                </Link>
+                <div className="flex justify-between items-center mb-2">
+                    <Link
+                        to={linkPath}
+                        className="text-blue-600 hover:text-blue-800"
+                    >
+                        <h2 className="text-xl font-semibold">{path.title}</h2>
+                    </Link>
+                    {!isTeacherView && (
+                        <div className="flex items-center gap-2">
+                            <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                                    style={{ width: `${path.progressPercent || 0}%` }}
+                                />
+                            </div>
+                            <span className="text-sm text-gray-600">
+                                {Math.round(path.progressPercent || 0)}%
+                            </span>
+                        </div>
+                    )}
+                </div>
                 <p className="text-gray-700 h-[77px] overflow-hidden line-clamp-3">{path.description}</p>
             </div>
         </div>
@@ -97,6 +112,8 @@ const LearningPaths: React.FC = () => {
         gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
     });
 
+    console.log('Learning Paths:', learningPaths ? learningPaths.find(path => path.title === 'test') : null);
+
     const uniqueCreators = useMemo(() => {
         if (!learningPaths) return [];
         return Array.from(new Set(learningPaths
@@ -106,6 +123,9 @@ const LearningPaths: React.FC = () => {
             }))))
             .sort((a, b) => a.name.localeCompare(b.name));
     }, [learningPaths]);
+
+    console.log(learningPaths ? learningPaths[0] : null);
+
 
     const uniqueLanguages = useMemo(() => {
         if (!learningPaths) return [];

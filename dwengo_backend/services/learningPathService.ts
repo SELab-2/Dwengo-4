@@ -6,7 +6,7 @@ import {
 import { NotFoundError } from "../errors/errors";
 
 export interface LearningPathDto {
-  _id: string; // Dwengo gebruikt _id of in onze DB is het id
+  _id: string;
   hruid: string;
   language: string;
   title: string;
@@ -14,7 +14,7 @@ export interface LearningPathDto {
   image?: string;
   num_nodes?: number;
   num_nodes_left: number;
-  // properderr dan die any
+
   nodes: Array<{
     nodeId: string;
     isExternal: boolean;
@@ -23,16 +23,22 @@ export interface LearningPathDto {
     done: boolean;
   }>;
 
+  /** NIEUW voor de progress per leerpaden */
+  completedNodes?: number; // hoeveel daarvan done = true
+  progressPercent?: number; // afgerond percentage 0-100
+
   createdAt?: string;
   updatedAt?: string;
 
-  // ===== BELANGRIJK =====
-  // Zodat we Dwengo vs. lokaal kunnen onderscheiden in 1 type:
   isExternal: boolean;
 }
 
 // Dwengo -> Local mapping
 function mapDwengoPathToLocal(dwengoPath: any): LearningPathDto {
+  const nodes = dwengoPath.nodes ?? [];
+  const completedNodes = nodes.filter((node: any) => node.done).length;
+  const progressPercent = Math.round((completedNodes / (dwengoPath.num_nodes ?? 0)) * 100) || 0;
+
   return {
     _id: dwengoPath._id ?? "",
     hruid: dwengoPath.hruid ?? "",
@@ -42,10 +48,11 @@ function mapDwengoPathToLocal(dwengoPath: any): LearningPathDto {
     image: dwengoPath.image ?? "",
     num_nodes: dwengoPath.num_nodes ?? 0,
     num_nodes_left: dwengoPath.num_nodes_left ?? 0,
-    nodes: dwengoPath.nodes ?? [],
+    nodes: nodes,
+    completedNodes,
+    progressPercent,
     createdAt: dwengoPath.created_at ?? "",
     updatedAt: dwengoPath.updatedAt ?? "",
-    // Nieuw: Dwengo => altijd true
     isExternal: true,
   };
 }
