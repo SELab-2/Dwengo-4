@@ -19,6 +19,8 @@ export default function AssignmentOverview() {
     queryFn: fetchAssignments,
   });
 
+  console.log('Assignments:', assignments);
+
   return (
     <>
       <div className="flex flex-row gap-x-5 h-[12.5rem]  ">
@@ -56,7 +58,17 @@ export default function AssignmentOverview() {
                       <Link to={`/student/assignment/${assignmentItem.id}`}>
                         <PrimaryButton>{t('assignments.view')}</PrimaryButton>
                       </Link>
-                      {/*<p>12/50 completed</p> Replace with actual progress*/}
+                      <div className="flex items-center gap-2">
+                        <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                            style={{ width: `${assignmentItem.progress || 0}%` }}
+                          />
+                        </div>
+                        <span className="text-sm text-gray-600">
+                          {Math.round(assignmentItem.progress || 0)}%
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>

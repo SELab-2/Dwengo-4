@@ -174,6 +174,28 @@ class ProgressService {
       }),
     );
   }
+
+  /**
+   * Get the progress percentage for a student on a specific assignment.
+   * Returns 0 for external assignments.
+   */
+  async getAssignmentProgressForStudent(
+    assignmentId: number,
+    studentId: number,
+  ): Promise<number> {
+    console.log("getAssignmentProgressForStudent", studentId, assignmentId);
+    const assignment = await this.getAssignment(assignmentId);
+
+    if (assignment.isExternal) {
+      return 0;
+    }
+
+    const totalNodes = await this.countNodesInPath(assignment.pathRef);
+    const objectIds = await this.getLocalObjectIdsInPath(assignment.pathRef);
+    const doneCount = await this.countDoneProgressForStudent(studentId, objectIds);
+
+    return totalNodes === 0 ? 0 : Math.round((doneCount / totalNodes) * 100);
+  }
 }
 
 export default new ProgressService();

@@ -4,6 +4,7 @@ import {
   getAssignmentsForStudentInClass,
   isStudentInClass,
 } from "../../services/studentAssignmentService";
+import ProgressService from "../../services/progressService";
 import { Assignment } from "@prisma/client";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
@@ -42,7 +43,19 @@ export const getStudentAssignments = asyncHandler(
       order,
       limit,
     );
-    res.status(200).json(assignments);
+    console.log(assignments);
+    const assignmentsWithProgress = await Promise.all(
+      assignments.map(async (assignment) => {
+        console.log("assignment", assignment);
+        const progress = await ProgressService.getAssignmentProgressForStudent(assignment.id, studentId);
+        return {
+          ...assignment,
+          progress
+        };
+      })
+    );
+    res.status(200).json(assignmentsWithProgress);
+
   },
 );
 
