@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "server.ts",
   "scripts": {
-    "dev": "nodemon --watch '**/*.ts' --exec ts-node index.ts",
-    "start": "cross-env NODE_ENV=production ts-node index.ts",
+    "dev": "nodemon --watch '**/*.ts' --exec ts-node server.ts",
+    "start": "cross-env NODE_ENV=production ts-node server.ts",
 
     "test:unit": "vitest run -c ./vitest.config.unit.ts",
     "test:unit:ui": "vitest -c ./vitest.config.unit.ts --ui",
