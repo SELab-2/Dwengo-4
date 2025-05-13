@@ -23,8 +23,7 @@ export interface LearningPathDto {
     done: boolean;
   }>;
 
-  /** NIEUW voor deprogress per leerpaden */
-  totalNodes?: number; // aantal nodes in dit leerpad
+  /** NIEUW voor de progress per leerpaden */
   completedNodes?: number; // hoeveel daarvan done = true
   progressPercent?: number; // afgerond percentage 0-100
 
@@ -36,6 +35,10 @@ export interface LearningPathDto {
 
 // Dwengo -> Local mapping
 function mapDwengoPathToLocal(dwengoPath: any): LearningPathDto {
+  const nodes = dwengoPath.nodes ?? [];
+  const completedNodes = nodes.filter((node: any) => node.done).length;
+  const progressPercent = Math.round((completedNodes / (dwengoPath.num_nodes ?? 0)) * 100) || 0;
+
   return {
     _id: dwengoPath._id ?? "",
     hruid: dwengoPath.hruid ?? "",
@@ -45,10 +48,11 @@ function mapDwengoPathToLocal(dwengoPath: any): LearningPathDto {
     image: dwengoPath.image ?? "",
     num_nodes: dwengoPath.num_nodes ?? 0,
     num_nodes_left: dwengoPath.num_nodes_left ?? 0,
-    nodes: dwengoPath.nodes ?? [],
+    nodes: nodes,
+    completedNodes,
+    progressPercent,
     createdAt: dwengoPath.created_at ?? "",
     updatedAt: dwengoPath.updatedAt ?? "",
-    // Nieuw: Dwengo => altijd true
     isExternal: true,
   };
 }
