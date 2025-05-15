@@ -386,7 +386,28 @@ export default class QuestionService {
         orderBy: { createdAt: "desc" },
       }),
     );
-    return allQs.filter((q) => canUserSeeQuestionInList(q, user));
+
+    // Filter questions that user can see
+    const filteredQuestions = allQs.filter((q) =>
+      canUserSeeQuestionInList(q, user),
+    );
+
+    // Fetch creator details for all filtered questions
+    const questionsWithCreatorInfo = await Promise.all(
+      filteredQuestions.map(async (q) => {
+        const creator = await prisma.user.findUnique({
+          where: { id: q.createdBy },
+          select: { firstName: true, lastName: true },
+        });
+
+        return {
+          ...q,
+          creatorName: creator ? creator.firstName : "Unknown",
+        };
+      }),
+    );
+
+    return questionsWithCreatorInfo;
   }
 
   /**

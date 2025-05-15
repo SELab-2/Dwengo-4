@@ -62,17 +62,22 @@ const QuestionsForAssignment: React.FC = () => {
                       })}
                     </div>
                   </div>
-                  <p className="text-gray-600 mb-2 line-clamp-3">
-                    Vraag gesteld door (todo, want user wordt niet gepassed)
-                  </p>
                 </div>
-                <div className="bg-gray-50 pl-3 pb-3">
-                  <Link
-                    to={`/student/question/${question.id}`}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                  >
-                    <PrimaryButton>Bekijk</PrimaryButton>
-                  </Link>
+                <div className="flex flex-row w-full justify-between">
+                  <div className="bg-gray-50 pl-3 pb-3">
+                    <Link
+                      to={`/student/question/${question.id}`}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    >
+                      <PrimaryButton>Bekijk</PrimaryButton>
+                    </Link>
+                  </div>
+                  <p className="text-gray-600 mr-2 translate-y-3">
+                    Vraag gesteld door{' '}
+                    <span className="text-dwengo-green font-bold">
+                      {question.creatorName}
+                    </span>
+                  </p>
                 </div>
               </div>
             ))}
