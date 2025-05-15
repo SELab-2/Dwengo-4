@@ -28,11 +28,16 @@ import {
 import { action as studentLogoutAction } from '../pages/student/LogoutStudent';
 import StudentIndex from '../pages/student';
 import JoinClass from '../components/student/classes/JoinRequestForm';
+import AssignmentStudent from '../pages/student/AssignmentStudent';
+import AssignmentsStudent from '../pages/student/AssignmentsStudent';
+import QuestionOverview from '../pages/student/QuestionOverview';
+import QuestionsForAssignment from '@/pages/student/QuestionsForAssignment';
 import StudentClassIndex from '../pages/student/StudentClassIndex';
 
 // ==== LEARNING PATHS ==== //
 import LearningPaths from '../pages/learningPath/learningPaths';
 import LearningPath from '../pages/learningPath/learningPath';
+import NewQuestion from '@/pages/student/NewQuestion';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
@@ -41,7 +46,8 @@ const HomePage: React.FC = () => {
       <div className="absolute top-4 right-4">
         <LanguageChooser />
       </div>
-      <div className="flex flex-col justify-center items-center h-screen">
+      # TODO: zoek een image zodat de achtergrond niet saai wit is
+      <div className="flex flex-col justify-center items-center h-screen bg-[url('/path-to-your-image.jpg')] bg-cover bg-center">
         <div className="-translate-y-20">
           <h2 className="justify-center flex flex-row font-bold text-5xl mb-8">
             {t('role.choose')}
@@ -114,11 +120,11 @@ export const router = createBrowserRouter([
         element: <AssignmentAdd></AssignmentAdd>,
       },
       {
-        path: 'assignments/:assignmentId',
+        path: 'assignment/:assignmentId',
         element: <Assignment></Assignment>,
       },
       {
-        path: 'assignments/:assignmentId/edit',
+        path: 'assignment/:assignmentId/edit',
         element: <AssignmentEdit></AssignmentEdit>,
       },
       {
@@ -159,6 +165,30 @@ export const router = createBrowserRouter([
       {
         path: 'logout',
         action: studentLogoutAction,
+      },
+      {
+        path: 'assignment/:assignmentId',
+        element: <AssignmentStudent></AssignmentStudent>,
+      },
+      {
+        path: 'assignments',
+        element: <AssignmentsStudent></AssignmentsStudent>,
+      },
+      {
+        path: 'questions/:assignmentId',
+        element: <QuestionsForAssignment></QuestionsForAssignment>,
+      },
+      {
+        path: 'question/:questionId',
+        element: <QuestionOverview></QuestionOverview>,
+      },
+      {
+        path: 'question/new/:assignmentId',
+        element: <NewQuestion></NewQuestion>,
+      },
+      {
+        path: 'learning-paths',
+        element: <LearningPaths />,
       },
       {
         path: 'learning-path/:pathId',

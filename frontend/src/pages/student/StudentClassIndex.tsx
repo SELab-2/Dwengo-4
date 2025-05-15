@@ -2,9 +2,9 @@ import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AssignmentsForClassOverview from '../../components/student/AssignmentClassOverview';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchClass, fetchLeaveClass } from '../../util/student/httpStudent';
 import { ClassItem } from '../../types/type';
 import { useTranslation } from 'react-i18next';
+import { fetchClass, fetchLeaveClass } from '@/util/student/class';
 
 const StudentClassIndex: React.FC = () => {
   const navigate = useNavigate();

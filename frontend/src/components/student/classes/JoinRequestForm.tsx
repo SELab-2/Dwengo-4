@@ -8,11 +8,11 @@ import {
 import Container from '../../shared/Container';
 import PrimaryButton from '../../shared/PrimaryButton';
 import BoxBorder from '../../shared/BoxBorder';
-import { joinClass } from '../../../util/student/httpStudent'; // Nieuwe API-functie voor studenten
 import LoadingIndicatorButton from '../../shared/LoadingIndicatorButton';
 import Modal from '../../shared/Modal';
 import SuccessMessage from '../../shared/SuccessMessage';
 import { useTranslation } from 'react-i18next';
+import { joinClass } from '@/util/student/classJoin';
 
 interface InputWithChecksRef {
   validateInput: () => boolean;

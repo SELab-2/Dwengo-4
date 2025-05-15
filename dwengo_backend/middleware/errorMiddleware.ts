@@ -13,6 +13,7 @@ const errorHandler = (
     res.status(err.statusCode).json({
       error: err.name,
       message: err.message,
+      details: err.details,
     });
   } else {
     const statusCode = res.statusCode === 200 ? 500 : res.statusCode;

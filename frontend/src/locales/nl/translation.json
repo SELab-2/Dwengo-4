@@ -65,6 +65,48 @@
     "view": "Opdracht bekijken",
     "not_found": "Geen opdrachten gevonden"
   },
+  "assignments_form": {
+    "edit": "Opdracht bewerken",
+    "assign": "Opdracht toewijzen",
+    "class": {
+      "choose": "Kies klas",
+      "select": "Selecteer een klas"
+    },
+    "title": "Titel",
+    "learning_path": {
+      "choose": "Kies leerpad",
+      "loading": "Leerpaden inladen...",
+      "error": "Er is iets fout gelopen tijdens het ophalen van de leerpaden",
+      "select": "- Selecteer een leerpad -"
+    },
+    "description": "Beschrijving",
+    "type": {
+      "label": "Opdrachttype",
+      "select": "Selecteer een type",
+      "group": "Groepsopdracht",
+      "individual": "Individuele opdracht"
+    },
+    "teamsize": "Groepsgrootte:",
+    "assign_team": {
+      "teams": "Groepen",
+      "students": "Leerlingen",
+      "class": "Klas",
+      "edit": "Bewerken",
+      "selected": "Geselecteerd",
+      "select_student": "Studenten selecteren",
+      "select_team": "Groepen aanmaken",
+      "student_help": "Selecteer de leerlingen die je wilt toevoegen aan deze opdracht",
+      "team_help": "Maak groepen van {{size}} of genereer willekeurige groepen",
+      "available_students": "Beschikbare leerlingen",
+      "generate_random_teams": "Genereer willekeurige groepen",
+      "create_team": "Maak groep",
+      "incomplete_team_warning": "Onvolledige groep maken?"
+    },
+    "deadline": "Deadline",
+    "cancel": "Annuleer",
+    "submit": "Opslaan",
+    "submitting": "Opslaan..."
+  },
   "classes": {
     "label": "Klasgroepen",
     "error": "Er is iets fout gelopen tijdens het ophalen van de klasgroepen",
@@ -87,5 +129,20 @@
     "submit": "Toegang aanvragen",
     "success": "Je hebt een aanvraag verzonden om lid te worden van deze klas. Wacht op goedkeuring van de lesgever."
   },
-  "code": "Klascode"
+  "code": "Klascode",
+  "close": "Sluiten",
+  "learning_paths": {
+    "label": "Leerpaden",
+    "search_name": "Zoek op naam",
+    "not_found_filter": "Geen leerpaden gevonden met deze filter",
+    "filter": {
+      "clear": "Wis filter",
+      "not_found": "Geen resultaten gevonden"
+    }
+  },
+  "learning_objects": {
+    "loading": "Leerpaden laden...",
+    "next": "Volgende",
+    "end": "Einde van leerpad"
+  }
 }

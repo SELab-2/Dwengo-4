@@ -1,7 +1,10 @@
 import express, { Router } from "express";
-import { registerTeacher, loginTeacher } from "../../controllers/userAuthController";
+import {
+  registerTeacher,
+  loginTeacher,
+} from "../../controllers/userAuthController";
 import { validateRequest } from "../../middleware/validateRequest";
-import { loginBodySchema, registerBodySchema } from "../../zodSchemas/authSchemas";
+import { loginBodySchema, registerBodySchema } from "../../zodSchemas";
 
 const router: Router = express.Router();
 
@@ -16,7 +19,7 @@ router.post(
     customErrorMessage: "invalid request for teacher registration",
     bodySchema: registerBodySchema,
   }),
-  registerTeacher
+  registerTeacher,
 );
 
 /**
@@ -30,7 +33,7 @@ router.post(
     customErrorMessage: "invalid request for teacher login",
     bodySchema: loginBodySchema,
   }),
-  loginTeacher
+  loginTeacher,
 );
 
 export default router;

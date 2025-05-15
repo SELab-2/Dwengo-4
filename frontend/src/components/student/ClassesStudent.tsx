@@ -1,9 +1,10 @@
 import PrimaryButton from '../shared/PrimaryButton';
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ClassItem, fetchClasses } from '../../util/student/httpStudent';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { ClassItem } from '@/types/type';
+import { fetchClasses } from '@/util/student/class';
 
 export default function ClassesStudent() {
   // Query: Haal alle klassen op
@@ -24,7 +25,7 @@ export default function ClassesStudent() {
       <div className="w-full flex flex-row gap-5 flex-wrap">
         {isLoading && <p>{t('loading.loading')}</p>}
         {isError && (
-          <p className="c-r">{error?.info?.message || t('classes.error')}</p>
+          <p className="c-r">{error.message || t('classes.error')}</p>
         )}
 
         {!isLoading && !isError && classes && classes.length > 0 ? (
@@ -32,7 +33,7 @@ export default function ClassesStudent() {
             {classes.map((classItem) => (
               <div
                 key={classItem.id}
-                className="flex items-center flex-row w-[20rem] p-4 justify-between bg-gray-100 rounded-lg shrink-0"
+                className="flex items-center flex-row w-[20rem] p-4 justify-between rounded-lg shrink-0"
               >
                 <div className="flex flex-col">
                   <div className="flex flex-row w-full justify-between">
@@ -43,7 +44,7 @@ export default function ClassesStudent() {
                     <PrimaryButton
                       onClick={() => navigate(`/student/class/${classItem.id}`)}
                     >
-                      <span className="">{t('classes.view')}</span>
+                      {t('classes.view')}
                     </PrimaryButton>
                   </div>
                 </div>
