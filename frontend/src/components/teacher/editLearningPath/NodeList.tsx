@@ -3,8 +3,10 @@ import NodeComponent from './NodeComponent';
 import React from 'react';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useLPEditContext } from '../../../context/LearningPathEditContext';
+import { useTranslation } from 'react-i18next';
 
 const NodeList: React.FC = () => {
+  const { t } = useTranslation();
   const { orderedNodes, setOrderedNodes } = useLPEditContext();
 
   const moveNode = (dragIndex: number, hoverIndex: number) => {
@@ -33,7 +35,7 @@ const NodeList: React.FC = () => {
           />
         </svg>
         <span className="text-xs cursor-default">
-          Hover over a node to add/delete. Use the handle to drag and reorder.
+          {t('edit_learning_path.node_list_instructions')}
         </span>
       </div>
       <DndProvider backend={HTML5Backend}>

@@ -154,6 +154,7 @@
     "confirm": "Confirm",
     "saving": "Saving ...",
     "no_nodes_error": "Add at least one learning object to your path",
+    "node_list_instructions": "Hover over a node to add/delete. Use the handle to drag and reorder.",
     "add_node_button": {
       "adding_node": "Adding node ...",
       "cancel": "Cancel"
@@ -188,6 +189,23 @@
       "hide_objects": "Hide Objects",
       "show_objects": "View Objects",
       "loading_objects": "Loading learning objects ..."
+    },
+    "select_lo": {
+      "title": "Select a learning object",
+      "from_lps": "from learning paths",
+      "from_my_los": "from my learning objects",
+      "paths": {
+        "search": "Search learning paths ...",
+        "loading": "Loading learning paths ...",
+        "error": "Something went wrong while loading the learning paths."
+      },
+      "objects": {
+        "search": "Search learning objects ...",
+        "loading": "Loading learning objects ...",
+        "error": "Something went wrong while loading the learning objects."
+      },
+      "no_results": "No results found for '{{searchTerm}}'.",
+      "no_results_generic": "No results."
     }
   }
 }

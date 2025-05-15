@@ -154,6 +154,7 @@
     "confirm": "Opslaan",
     "saving": "Opslaan ...",
     "no_nodes_error": "Voeg minstens één leerobject toe aan je pad",
+    "node_list_instructions": "Beweeg de muis over een node om toe te voegen of te verwijderen. Gebruik de hendel om nodes te verslepen.",
     "add_node_button": {
       "adding_node": "Node toevoegen ...",
       "cancel": "Annuleer"
@@ -188,6 +189,23 @@
       "hide_objects": "Verberg objecten",
       "show_objects": "Toon objecten",
       "loading_objects": "Leerobjecten laden ..."
+    },
+    "select_lo": {
+      "title": "Selecteer een leerobject",
+      "from_lps": "uit leerpaden",
+      "from_my_los": "uit mijn leerobjecten",
+      "paths": {
+        "search": "Doorzoek leerpaden ...",
+        "loading": "Leerpaden laden ...",
+        "error": "Er ging iets mis bij het ophalen van de leerpaden."
+      },
+      "objects": {
+        "search": "Doozoek leerobjecten ...",
+        "loading": "Leerobjecten laden ...",
+        "error": "Er ging iets mis bij het ophalen van de leerobjecten."
+      },
+      "no_results": "Geen resultaten gevonden voor '{{searchTerm}}'.",
+      "no_results_generic": "Geen resultaten."
     }
   }
 }
