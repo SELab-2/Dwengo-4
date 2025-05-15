@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { LearningPath } from '../../types/type';
 import { LearningPathFilter } from '../../components/learningPath/learningPathFilter';
@@ -6,6 +6,7 @@ import { Filter } from '../../components/ui/filters';
 import { Link, useNavigate } from 'react-router-dom';
 import { filterLearningPaths } from '@/util/filter';
 import { fetchLearningPaths } from '@/util/shared/learningPath';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Generates a background color based on the given ID.
@@ -131,19 +132,21 @@ const LearningPaths: React.FC = () => {
     () => filterLearningPaths(learningPaths || [], filters, searchQuery),
     [learningPaths, filters, searchQuery],
   );
+                
+  const { t } = useTranslation();
 
   const isTeacherView = window.location.pathname.includes('/teacher');
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Learning Paths</h1>
+      <h1 className="text-3xl font-bold mb-6">{t('learning_paths.label')}</h1>
 
       <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-6">
         {/* search bar and filter*/}
         <div className="flex flex-col w-full md:w-1/3 gap-2">
           <input
             type="text"
-            placeholder="Search by name..."
+            placeholder={t('learning_paths.search_name')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="p-2 border rounded-lg w-full"
@@ -174,14 +177,14 @@ const LearningPaths: React.FC = () => {
         )}
       </div>
 
-      {isLoading && <p className="text-gray-600">Loading...</p>}
+      {isLoading && <p className="text-gray-600">{t('loading.loading')}</p>}
       {isError && <p className="text-red-500">Error: {error.message}</p>}
 
       {!isLoading &&
         !isError &&
         (filteredResults.length === 0 ? (
           <p className="text-gray-600">
-            No learning paths found matching your filters.
+            {t('learning_paths.not_found_filter')}
           </p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-10/12 mx-auto">

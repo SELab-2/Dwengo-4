@@ -105,9 +105,7 @@ const LoginStudent: React.FC = () => {
               placeholder={t('login.password.placeholder')}
             />
             {isError && (
-              <div className="c-r">
-                {(error as any)?.info?.message || t('login.error')}
-              </div>
+              <div className="c-r">{error.message || t('login.error')}</div>
             )}
             <div>
               <PrimaryButton type="submit" disabled={isPending}>
