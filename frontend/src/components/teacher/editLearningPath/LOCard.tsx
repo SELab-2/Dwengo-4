@@ -1,6 +1,7 @@
 import { useLPEditContext } from '@/context/LearningPathEditContext';
 import { LearningObject } from '@/types/type';
 import React, { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface LOCardProps {
   object: LearningObject;
@@ -10,6 +11,7 @@ interface LOCardProps {
 
 export const LOCard: React.FC<LOCardProps> = memo(
   ({ object, isSelectedObject, setSelectedComponentId }) => {
+    const { t } = useTranslation();
     const { addNode, currentNodeIndex } = useLPEditContext();
     return (
       <div
@@ -21,22 +23,25 @@ export const LOCard: React.FC<LOCardProps> = memo(
         <h2 className="font-bold text-2xl">{object.title}</h2>
         <p className="text-m">{object.description}</p>
         <p className="text-sm">
-          <strong>Language:</strong> {object.language}
+          <strong>{t('edit_learning_path.lo_card.language')}</strong>{' '}
+          {object.language}
         </p>
         <p className="text-sm">
-          <strong>Difficulty:</strong> {object.difficulty}
+          <strong>{t('edit_learning_path.lo_card.difficulty')}</strong>{' '}
+          {object.difficulty}
         </p>
         {object.keywords.length > 0 && (
           <p className="text-sm">
-            <strong>Keywords:</strong> {object.keywords.join(', ')}
+            <strong>{t('edit_learning_path.lo_card.keywords')}</strong>{' '}
+            {object.keywords.join(', ')}
           </p>
         )}
         <p className="text-sm">
-          <strong>Created:</strong>{' '}
+          <strong>{t('edit_learning_path.lo_card.created')}</strong>{' '}
           {new Date(object.createdAt).toLocaleDateString()}
         </p>
         <p className="text-sm">
-          <strong>Last Updated:</strong>{' '}
+          <strong>{t('edit_learning_path.lo_card.updated')}</strong>{' '}
           {new Date(object.updatedAt).toLocaleDateString()}
         </p>
         <p>todo: give option to view lo content</p>
@@ -55,7 +60,7 @@ export const LOCard: React.FC<LOCardProps> = memo(
               )
             }
           >
-            Add learning object to path
+            {t('edit_learning_path.lo_card.add_to_path')}
           </button>
         )}
       </div>
