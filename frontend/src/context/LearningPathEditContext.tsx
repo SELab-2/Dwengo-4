@@ -7,7 +7,7 @@ import {
   updateOrCreateLearningPathPayload,
 } from '@/util/teacher/httpLearningPaths';
 import { useNavigate } from 'react-router-dom';
-import { queryClient } from '@/util/teacher/config';
+import { useQueryClient } from '@tanstack/react-query';
 
 // not yet added to the path, will be added once the user confirms entire learning path edit
 export interface DraftNode {
@@ -54,6 +54,8 @@ export const LPEditProvider: React.FC<{
   children: React.ReactNode;
   isCreateMode: boolean;
 }> = ({ children, isCreateMode }) => {
+  const queryClient = useQueryClient();
+
   const [isAddingNode, setIsAddingNode] = useState(false);
   const [currentNodeIndex, setCurrentNodeIndex] = useState<number>(0);
   const [orderedNodes, setOrderedNodes] = useState<
