@@ -53,6 +53,7 @@ const LocalLearningObjectsPage: React.FC = () => {
   };
 
   const handleFormSuccess = () => {
+    console.log("HANDLESUCESSS")
     setShowForm(false);
     queryClient.invalidateQueries({ queryKey: ['localLearningObjects'] });
   };

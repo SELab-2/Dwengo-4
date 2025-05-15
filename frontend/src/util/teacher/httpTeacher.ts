@@ -828,6 +828,9 @@ export enum ContentType {
   EVAL_OPEN_QUESTION = "EVAL_OPEN_QUESTION",
 }
 
+
+export type LearningObjectQuestion = 'open' | 'multipleChoice';
+
 /**
  * Representatie van een leerobject zoals teruggegeven door de API
  */
@@ -860,6 +863,7 @@ export interface LearningObject {
 export async function createLocalLearningObject(
   data: LocalLearningObjectData
 ): Promise<LearningObject> {
+  console.log("CREATING LOCAL LEARNING OBJECT");
   const response = await fetch(`${BACKEND}/learningObjectByTeacher`, {
     method: 'POST',
     headers: {
@@ -868,13 +872,13 @@ export async function createLocalLearningObject(
     },
     body: JSON.stringify(data),
   });
-
+  
   if (!response.ok) {
     const error: APIError = new Error('Failed to create learning object.');
     error.code = response.status;
     error.info = await response.json();
+    console.log(error);
 
-    console.log(error.info);
     throw error;
   }
 

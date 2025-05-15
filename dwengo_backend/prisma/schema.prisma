@@ -243,6 +243,7 @@ enum ContentType {
   EVAL_OPEN_QUESTION
 }
 
+
 model LearningObject {
   // _id bij Dwengo APi
   id               String      @id @default(uuid())
@@ -280,6 +281,13 @@ model LearningObject {
   progress              LearningObjectProgress[]
   // QuestionSpecifics QuestionSpecific[]
   LearningObjectRawHtml LearningObjectRawHtml?
+
+    // Vraag-instellingen
+  includesQuestion     Boolean                  @default(false)
+  questionType         QuestionType?
+  questionPrompt       String?                  // De vraagtekst
+  questionOptions      String[]                 @default([]) // Enkel bij multipleChoice
+  correctAnswer        String?                  // Juiste antwoord (tekst of optie) 
 }
 
 model LearningObjectRawHtml {
