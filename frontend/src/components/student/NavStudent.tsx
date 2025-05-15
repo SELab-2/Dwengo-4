@@ -8,15 +8,15 @@ import { useTranslation } from 'react-i18next';
 
 const Navstudent: React.FC = () => {
   const { t } = useTranslation();
-  const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const [menuOpen] = useState<boolean>(false);
   const [firstName] = useState<string | null>(
     localStorage.getItem('firstName'),
   );
   const submit = useSubmit();
 
-  const toggleMenu = (): void => {
+  /*const toggleMenu = (): void => {
     setMenuOpen(!menuOpen);
-  };
+  };*/
 
   const handleLogout = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -33,14 +33,17 @@ const Navstudent: React.FC = () => {
       label: t('nav.classes'),
     },
     {
+      to: '/student/assignments',
+      label: 'Assignments',
+    },
+    {
       to: '/student/learning-paths',
       label: t('nav.learning_paths'),
     },
-
   ];
 
   return (
-    <nav className="bg-gray-200 py-2">
+    <nav className=" py-2">
       <Container>
         <div className="flex text-sm lg:text-lg justify-between items-center">
           <div className="flex flex-row items-center justify-center">
@@ -58,8 +61,9 @@ const Navstudent: React.FC = () => {
               </div>
             ) : (
               <div
-                className={`flex flex-row justify-end w-full ${styles.navLinks
-                  } ${menuOpen ? styles.open : ''}`}
+                className={`flex flex-row justify-end w-full ${
+                  styles.navLinks
+                } ${menuOpen ? styles.open : ''}`}
               >
                 <NavButton to="/student/inloggen" label={t('nav.login')} />
                 <NavButton
@@ -74,7 +78,6 @@ const Navstudent: React.FC = () => {
           {firstName && (
             <div className="flex items-center space-x-4">
               <span>{t('nav.logged_in_as', { name: firstName })}</span>
-              <LanguageChooser />
               <button
                 className="text-gray-700 hover:cursor-pointer hover:text-gray-600"
                 aria-label="Notifications"
@@ -139,6 +142,8 @@ const Navstudent: React.FC = () => {
                   />
                 </svg>
               </button>
+
+              <LanguageChooser />
             </div>
           )}
         </div>
