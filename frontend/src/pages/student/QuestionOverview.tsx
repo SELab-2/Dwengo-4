@@ -135,86 +135,90 @@ const QuestionOverview: React.FC = () => {
           </>
         )}
 
-      <div className="flex flex-col w-[40rem]">
-        <h2 className="self-center text-3xl mt-8">Comments:</h2>
-        <div className="flex flex-col space-y-1 mt-2">
-          {question.questionConversation?.length <= 1 && (
-            <div className="flex flex-row justify-center mb-8">
-              <p>
-                Nog niemand heeft een comment achtergelaten voor deze vraag...
-              </p>
-            </div>
-          )}
-
-          {question.questionConversation.length > 1 &&
-            question.questionConversation?.slice(1).map((message: Message) => {
-              return (
-                <div key={message.id} className="p-4 rounded-lg">
-                  <div className="flex flex-row items-center gap-x-2">
-                    <div className="flex flex-row justify-center items-center bg-dwengo-green w-12 h-12 aspect-square rounded-full">
-                      <p className="text-2xl bg-dwengo-green">
-                        {message.user?.firstName?.charAt(0).toUpperCase() ||
-                          '?'}
-                      </p>
-                    </div>
-                    <p className="text-2xl">
-                      <span className="text-dwengo-green-dark font-bold">
-                        {message.user?.firstName || 'Onbekend'}
-                      </span>{' '}
-                      zegt:
-                    </p>
-                  </div>
-                  <p className="ml-14">{message.text}</p>
-                  <div className="border-b-1 border-gray-400 mt-2"></div>
-                </div>
-              );
-            })}
-        </div>
-        <form onSubmit={handleSubmitMessage} className="mb-8 ml-4">
-          <div className="flex flex-row items-center gap-x-2">
-            <div className="flex flex-row justify-center items-center bg-dwengo-green w-12 h-12 aspect-square rounded-full">
-              <p className="text-2xl bg-dwengo-green">
-                {localName?.charAt(0).toUpperCase() || '?'}
-              </p>
-            </div>
-            <p className="text-2xl">
-              <span className="text-dwengo-green-dark font-bold">
-                {localName || 'Gebruiker'}
-              </span>{' '}
-              zegt:
-            </p>
-          </div>
-
-          <div className="flex flex-col ml-12">
-            <textarea
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Stel hier je vraag:"
-              className="w-96 rounded-2xl p-2 border border-gray-300"
-              rows={4}
-            ></textarea>
-
-            <div className="mt-2">
-              <button
-                type="submit"
-                disabled={addMessageMutation.isPending}
-                className="bg-dwengo-green hover:bg-dwengo-green-dark text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-              >
-                {addMessageMutation.isPending
-                  ? 'Versturen...'
-                  : 'Verstuur bericht'}
-              </button>
-
-              {addMessageMutation.isError && (
-                <p className="text-red-500 mt-2">
-                  Er ging iets mis bij het versturen:{' '}
-                  {addMessageMutation.error?.message}
+      {question.questionConversation && (
+        <div className="flex flex-col w-[40rem]">
+          <h2 className="self-center text-3xl mt-8">Comments:</h2>
+          <div className="flex flex-col space-y-1 mt-2">
+            {question.questionConversation?.length <= 1 && (
+              <div className="flex flex-row justify-center mb-8">
+                <p>
+                  Nog niemand heeft een comment achtergelaten voor deze vraag...
                 </p>
-              )}
-            </div>
+              </div>
+            )}
+
+            {question.questionConversation.length > 1 &&
+              question.questionConversation
+                ?.slice(1)
+                .map((message: Message) => {
+                  return (
+                    <div key={message.id} className="p-4 rounded-lg">
+                      <div className="flex flex-row items-center gap-x-2">
+                        <div className="flex flex-row justify-center items-center bg-dwengo-green w-12 h-12 aspect-square rounded-full">
+                          <p className="text-2xl bg-dwengo-green">
+                            {message.user?.firstName?.charAt(0).toUpperCase() ||
+                              '?'}
+                          </p>
+                        </div>
+                        <p className="text-2xl">
+                          <span className="text-dwengo-green-dark font-bold">
+                            {message.user?.firstName || 'Onbekend'}
+                          </span>{' '}
+                          zegt:
+                        </p>
+                      </div>
+                      <p className="ml-14">{message.text}</p>
+                      <div className="border-b-1 border-gray-400 mt-2"></div>
+                    </div>
+                  );
+                })}
           </div>
-        </form>
-      </div>
+          <form onSubmit={handleSubmitMessage} className="mb-8 ml-4">
+            <div className="flex flex-row items-center gap-x-2">
+              <div className="flex flex-row justify-center items-center bg-dwengo-green w-12 h-12 aspect-square rounded-full">
+                <p className="text-2xl bg-dwengo-green">
+                  {localName?.charAt(0).toUpperCase() || '?'}
+                </p>
+              </div>
+              <p className="text-2xl">
+                <span className="text-dwengo-green-dark font-bold">
+                  {localName || 'Gebruiker'}
+                </span>{' '}
+                zegt:
+              </p>
+            </div>
+
+            <div className="flex flex-col ml-12">
+              <textarea
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Stel hier je vraag:"
+                className="w-96 rounded-2xl p-2 border border-gray-300"
+                rows={4}
+              ></textarea>
+
+              <div className="mt-2">
+                <button
+                  type="submit"
+                  disabled={addMessageMutation.isPending}
+                  className="bg-dwengo-green hover:bg-dwengo-green-dark text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+                >
+                  {addMessageMutation.isPending
+                    ? 'Versturen...'
+                    : 'Verstuur bericht'}
+                </button>
+
+                {addMessageMutation.isError && (
+                  <p className="text-red-500 mt-2">
+                    Er ging iets mis bij het versturen:{' '}
+                    {addMessageMutation.error?.message}
+                  </p>
+                )}
+              </div>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };

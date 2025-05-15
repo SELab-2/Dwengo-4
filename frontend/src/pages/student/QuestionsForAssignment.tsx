@@ -38,50 +38,75 @@ const QuestionsForAssignment: React.FC = () => {
             Vragen voor Assignment{' '}
             <span className="text-dwengo-green font-bold">
               {' '}
-              {questions?.teams.teamAssignment.assignment.title}
+              {questions?.teams?.teamAssignment?.assignment?.title ||
+                'Laden...'}
             </span>
           </p>
           <Link to={`/student/question/new/${assignmentId}`}>
             <PrimaryButton>Stel nieuwe vraag</PrimaryButton>
           </Link>
-          <div className="flex flex-col mt-8 w-[40rem] gap-y-8 bg-dwengo">
-            {questions?.questions.map((question) => (
-              <div
-                key={question.id}
-                className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300`}
-              >
-                <div className="p-5">
-                  <div className="flex flex-row justify-between w-full">
-                    <h2 className="text-2xl font-semibold mb-2 ">
-                      {question.title}
-                    </h2>
-                    <div className="text-sm text-red-500">
-                      {new Date(question.createdAt).toLocaleString('nl-BE', {
-                        dateStyle: 'medium',
-                        timeStyle: 'short',
-                      })}
+
+          {isLoading && (
+            <div className="mt-8 text-center">
+              <p>Vragen worden geladen...</p>
+            </div>
+          )}
+
+          {isError && (
+            <div className="mt-8 text-center text-red-500">
+              <p>Er is een fout opgetreden bij het laden van de vragen.</p>
+            </div>
+          )}
+
+          {!isLoading && !isError && (
+            <div className="flex flex-col mt-8 w-[40rem] gap-y-8 bg-dwengo">
+              {questions?.questions?.length ? (
+                questions.questions.map((question) => (
+                  <div
+                    key={question.id}
+                    className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300`}
+                  >
+                    <div className="p-5">
+                      <div className="flex flex-row justify-between w-full">
+                        <h2 className="text-2xl font-semibold mb-2 ">
+                          {question.title}
+                        </h2>
+                        <div className="text-sm text-red-500">
+                          {new Date(question.createdAt).toLocaleString(
+                            'nl-BE',
+                            {
+                              dateStyle: 'medium',
+                              timeStyle: 'short',
+                            },
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-row w-full justify-between">
+                      <div className="bg-gray-50 pl-3 pb-3">
+                        <Link
+                          to={`/student/question/${question.id}`}
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        >
+                          <PrimaryButton>Bekijk</PrimaryButton>
+                        </Link>
+                      </div>
+                      <p className="text-gray-600 mr-2 translate-y-3">
+                        Vraag gesteld door{' '}
+                        <span className="text-dwengo-green font-bold">
+                          {question.creatorName}
+                        </span>
+                      </p>
                     </div>
                   </div>
-                </div>
-                <div className="flex flex-row w-full justify-between">
-                  <div className="bg-gray-50 pl-3 pb-3">
-                    <Link
-                      to={`/student/question/${question.id}`}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                    >
-                      <PrimaryButton>Bekijk</PrimaryButton>
-                    </Link>
-                  </div>
-                  <p className="text-gray-600 mr-2 translate-y-3">
-                    Vraag gesteld door{' '}
-                    <span className="text-dwengo-green font-bold">
-                      {question.creatorName}
-                    </span>
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+                ))
+              ) : (
+                <p className="text-center py-4">
+                  Geen vragen gevonden voor deze opdracht.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </>
