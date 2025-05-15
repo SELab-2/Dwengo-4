@@ -161,6 +161,12 @@
     "node_component": {
       "add_node_here": "Voeg hier node toe",
       "untitled_node": "Naamloze node"
+    },
+    "delete_node_button": {
+      "title": "Verwijder node",
+      "confirmation": "Ben je zeker?",
+      "yes": "ja",
+      "no": "nee"
     }
   }
 }

@@ -161,6 +161,12 @@
     "node_component": {
       "add_node_here": "Add node here",
       "untitled_node": "Untitled node"
+    },
+    "delete_node_button": {
+      "title": "Delete node",
+      "confirmation": "Are you sure?",
+      "yes": "yes",
+      "no": "no"
     }
   }
 }
