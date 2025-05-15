@@ -12,7 +12,10 @@ import {
   getLearningPathById,
 } from "../../controllers/teacher/teacherLearningPathController";
 import { validateRequest } from "../../middleware/validateRequest";
-import { titleAndLanguageBodySchema } from "../../zodSchemas";
+import {
+  createLocalLearningPathSchema,
+  updateLocalLearningPathSchema,
+} from "../../zodSchemas/body/localLearningPathSchemas";
 
 const router: Router = Router();
 
@@ -29,7 +32,7 @@ router.post(
   "/",
   validateRequest({
     customErrorMessage: "invalid request for creating a learning path",
-    bodySchema: titleAndLanguageBodySchema,
+    bodySchema: createLocalLearningPathSchema,
   }),
   createLocalLearningPath,
 );
@@ -73,7 +76,14 @@ router.get("/:pathId", getLocalLearningPathById);
  * @body LocalLearningPathData
  * @access Teacher
  */
-router.patch("/:pathId", updateLocalLearningPath);
+router.patch(
+  "/:pathId",
+  validateRequest({
+    customErrorMessage: "invalid request for updating a learning path",
+    bodySchema: updateLocalLearningPathSchema,
+  }),
+  updateLocalLearningPath,
+);
 
 /**
  * @route DELETE /pathByTeacher/:pathId

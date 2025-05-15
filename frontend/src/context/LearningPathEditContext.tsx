@@ -61,7 +61,7 @@ export const LPEditProvider: React.FC<{
   const [orderedNodes, setOrderedNodes] = useState<
     (LearningPathNodeWithObject | DraftNode)[]
   >([]);
-  const [draftIdCounter, setDraftIdCounter] = useState(0);
+  const [draftIdCounter, setDraftIdCounter] = useState(1);
   const [language, setLanguage] = useState<string>('');
 
   const startAddingNode = (nodeIndex: number) => {
