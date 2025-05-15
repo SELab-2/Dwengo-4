@@ -36,6 +36,9 @@ const Navstudent: React.FC = () => {
       to: '/student/assignments',
       label: 'Assignments',
     },
+      to: '/student/learning-paths',
+      label: t('nav.learning_paths'),
+    },
   ];
 
   return (
@@ -57,9 +60,8 @@ const Navstudent: React.FC = () => {
               </div>
             ) : (
               <div
-                className={`flex flex-row justify-end w-full ${
-                  styles.navLinks
-                } ${menuOpen ? styles.open : ''}`}
+                className={`flex flex-row justify-end w-full ${styles.navLinks
+                  } ${menuOpen ? styles.open : ''}`}
               >
                 <NavButton to="/student/inloggen" label={t('nav.login')} />
                 <NavButton

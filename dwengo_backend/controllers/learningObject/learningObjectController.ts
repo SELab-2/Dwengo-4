@@ -10,7 +10,6 @@ import asyncHandler from "express-async-handler";
 import { LearningObjectDto } from "../../services/dwengoLearningObjectService";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
-import { BadRequestError } from "../../errors/errors";
 
 function userIsTeacherOrAdmin(req: AuthenticatedRequest): boolean {
   const role: string | undefined = getUserFromAuthRequest(req).role;
@@ -23,20 +22,20 @@ export const getAllLearningObjectsController = asyncHandler(
     const isTeacher: boolean = userIsTeacherOrAdmin(req);
     const objects: LearningObjectDto[] = await getAllLearningObjects(isTeacher);
     res.json(objects);
-  }
+  },
 );
 
-// Haal één leerobject op (via :id)
+// Haal één leerobject op (via: id)
 export const getLearningObjectController = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { learningObjectId } = req.params;
     const isTeacher: boolean = userIsTeacherOrAdmin(req);
     const lo: LearningObjectDto = await getLearningObjectById(
       learningObjectId,
-      isTeacher
+      isTeacher,
     );
     res.json(lo);
-  }
+  },
 );
 
 // Zoeken naar leerobjecten (Dwengo + lokaal)
@@ -46,10 +45,10 @@ export const searchLearningObjectsController = asyncHandler(
     const isTeacher: boolean = userIsTeacherOrAdmin(req);
     const results: LearningObjectDto[] = await searchLearningObjects(
       isTeacher,
-      searchTerm
+      searchTerm,
     );
     res.json(results);
-  }
+  },
 );
 
 // Haal alle leerobjecten op die horen bij een specifiek leerpad (op basis van pathId)
@@ -59,35 +58,28 @@ export const getLearningObjectsForPathController = asyncHandler(
     const isTeacher: boolean = userIsTeacherOrAdmin(req);
     const objects: LearningObjectDto[] = await getLearningObjectsForPath(
       learningPathId,
-      isTeacher
+      isTeacher,
     );
     res.json(objects);
-  }
+  },
 );
 
 // [NIEUW] Haal één leerobject op basis van hruid + language + version
-export const getLearningObjectByHruidLangVersionController = async (
-  req: AuthenticatedRequest,
-  res: Response
-): Promise<void> => {
-  const { hruid, language, version } = req.params;
-  if (!hruid || !language || !version) {
-    throw new BadRequestError("Hruid, language and version are required.");
-  }
+export const getLearningObjectByHruidLangVersionController = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { hruid, language, version } = req.params;
 
-  const isTeacher: boolean = userIsTeacherOrAdmin(req);
-  const verNum = parseInt(version.toString(), 10);
-  if (isNaN(verNum)) {
-    throw new BadRequestError("Version must be a number.");
-  }
+    const isTeacher: boolean = userIsTeacherOrAdmin(req);
+    const verNum: number = Number(version);
 
-  // Servicecall
-  const lo = await getLearningObjectByHruidLangVersion(
-    hruid.toString(),
-    language.toString(),
-    verNum,
-    isTeacher
-  );
+    // Servicecall
+    const lo: LearningObjectDto = await getLearningObjectByHruidLangVersion(
+      hruid.toString(),
+      language.toString(),
+      verNum,
+      isTeacher,
+    );
 
-  res.json(lo);
-};
+    res.json(lo);
+  },
+);

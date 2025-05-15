@@ -2,7 +2,6 @@ import { Response } from "express";
 import asyncHandler from "express-async-handler";
 import { AuthenticatedRequest } from "../../interfaces/extendedTypeInterfaces";
 import LocalLearningPathService from "../../services/localLearningPathService";
-import { BadRequestError } from "../../errors/errors";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
 import { checkIfTeacherIsCreator, Property } from "./teacherChecks";
 
@@ -22,12 +21,7 @@ interface PathMetadata {
 export const createLocalLearningPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     // Door protectTeacher in de routes weten we: role=TEACHER
-    const teacherId = getUserFromAuthRequest(req).id;
-
-    if (!req.body.title || !req.body.language) {
-      res.status(400);
-      throw new BadRequestError("Title and language are required fields.");
-    }
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
     const { title, language, description, image } = req.body as PathMetadata;
 
@@ -54,7 +48,7 @@ export const createLocalLearningPath = asyncHandler(
  */
 export const getLocalLearningPaths = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = getUserFromAuthRequest(req).id;
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
     const paths =
       await LocalLearningPathService.getAllLearningPathsByTeacher(teacherId);
@@ -68,7 +62,7 @@ export const getLocalLearningPaths = asyncHandler(
  */
 export const getLocalLearningPathById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = getUserFromAuthRequest(req).id;
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
     const { pathId } = req.params;
     const path = await LocalLearningPathService.getLearningPathById(pathId);

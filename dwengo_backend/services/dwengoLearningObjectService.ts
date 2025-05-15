@@ -24,7 +24,7 @@ enum ContentType {
 }
 
 /**
- * Mapping van Dwengo string => onze enum
+ * Mapping van Dwengo string → onze enum
  */
 
 const permittedContentTypes = {
@@ -136,11 +136,6 @@ export async function fetchAllDwengoObjects(
     const response = await dwengoAPI.get("/api/learningObject/search", {
       params,
     });
-    checkAll(
-      response.data,
-      "Something went wrong while searching for learning objects.",
-      isTeacher,
-    );
     const dwengoData: DwengoLearningObject[] = response.data;
     return dwengoData.map(mapDwengoToLocal);
   } catch (error) {
@@ -154,6 +149,7 @@ export async function fetchAllDwengoObjects(
 }
 
 // Eén Dwengo-object op basis van _id
+// the dwengo API doesn't implement this correctly, so don't use this function until it's fixed
 export async function fetchDwengoObjectById(
   id: string,
   isTeacher: boolean,
@@ -171,9 +167,7 @@ export async function fetchDwengoObjectById(
     );
 
     const dwengoObj: DwengoLearningObject = response.data;
-    const mapped = mapDwengoToLocal(dwengoObj);
-
-    return mapped;
+    return mapDwengoToLocal(dwengoObj);
   } catch (error) {
     throwCorrectNetworkError(
       error as Error,
@@ -184,7 +178,7 @@ export async function fetchDwengoObjectById(
 }
 
 // Eén Dwengo-object op basis van _id
-export async function fetchDwengoObjectByIdRaw(
+/*export async function fetchDwengoObjectByIdRaw(
   id: string,
   isTeacher: boolean,
 ): Promise<LearningObjectDto> {
@@ -204,7 +198,7 @@ export async function fetchDwengoObjectByIdRaw(
   }
   // Dit mag nooit gebeuren
   return {} as LearningObjectDto;
-}
+}*/
 
 // [NIEUW] Dwengo-object op basis van hruid, language, version
 export async function fetchDwengoObjectByHruidLangVersion(
@@ -213,19 +207,26 @@ export async function fetchDwengoObjectByHruidLangVersion(
   version: number,
   isTeacher: boolean,
 ): Promise<LearningObjectDto> {
+  if (!hruid || !language || !version) {
+    throw new BadRequestError(
+      "Missing required parameters: hruid, language, and version.",
+    );
+  }
+
   try {
     // Dwengo-API: /api/learningObject/getMetadata?hruid=...&language=...&version=...
     const params = { hruid, language, version };
 
-    if (!hruid || !language || !version) {
-      throw new BadRequestError(
-        "Missing required parameters: hruid, language, and version.",
-      );
-    }
-
     const response = await dwengoAPI.get("/api/learningObject/getMetadata", {
       params,
     });
+
+    if (typeof response.data !== "object") {
+      // dwengo API returns error string if object not found
+      throw new NotFoundError(
+        `Dwengo learning object with hruid=${hruid}, language=${language}, version=${version} not found.`,
+      );
+    }
 
     checkAll(
       response.data,
@@ -262,11 +263,6 @@ export async function searchDwengoObjects(
     const response = await dwengoAPI.get("/api/learningObject/search", {
       params,
     });
-    checkAll(
-      response.data,
-      `The search term: ${searchTerm} didn't correspond with any learning object.`,
-      isTeacher,
-    );
 
     const dwengoData: DwengoLearningObject[] = response.data;
     return dwengoData.map(mapDwengoToLocal);
@@ -382,7 +378,7 @@ function checkAll(
 }
 
 // Dwengo-object op basis van hruid (raw)
-export async function fetchDwengoObjectRawByHruid(
+/*export async function fetchDwengoObjectRawByHruid(
   hruid: string,
 ): Promise<DwengoLearningObject | null> {
   try {
@@ -398,4 +394,4 @@ export async function fetchDwengoObjectRawByHruid(
     console.error("Fout bij fetchDwengoObjectRawByHruid:", error);
     return null;
   }
-}
+}*/

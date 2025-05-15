@@ -1,50 +1,7 @@
-import { AssignmentPayload, Team, TeamAssignment } from '../../types/type';
-import { APIError, StudentItem } from '../../types/api.types';
-import { BACKEND } from './config';
+import { AssignmentPayload, Team, TeamAssignment } from '@/types/type';
+import { APIError } from '@/types/api.types';
+import { apiRequest, BACKEND } from '../shared/config';
 import { getAuthToken } from './authTeacher';
-
-/**
- * Creates a new assignment
- * @param {Object} payload - The assignment details
- * @throws {APIError} When creation fails
- */
-export async function createAssignment({
-  name,
-  learningPathId,
-  students,
-  dueDate,
-  description,
-}: {
-  name: string;
-  learningPathId: string;
-  students: StudentItem[];
-  dueDate: string;
-  description: string;
-}): Promise<void> {
-  const response = await fetch(`${BACKEND}/assignment/teacher`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
-    body: JSON.stringify({
-      name,
-      learningPathId,
-      students: students.map((student) => student.id),
-      dueDate,
-      description,
-    }),
-  });
-
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het aanmaken van de opdracht.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
-}
 
 /**
  * Fetches all assignments for a class
@@ -53,28 +10,11 @@ export async function createAssignment({
  * @throws {APIError} When fetching fails
  */
 export async function fetchAssignments(classId: string): Promise<any> {
-  const response = await fetch(
-    `${BACKEND}/assignment/teacher/class/${classId}`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
-    },
-  );
-
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het ophalen van de opdrachten.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
-
-  const assignments = await response.json();
-  return assignments;
+  return await apiRequest({
+    method: 'GET',
+    endpoint: `/assignment/teacher/class/${classId}`,
+    getToken: getAuthToken,
+  });
 }
 
 /**
@@ -84,25 +24,11 @@ export async function fetchAssignments(classId: string): Promise<any> {
  * @throws {APIError} When fetching fails
  */
 export async function fetchAllAssignments(): Promise<any> {
-  const response = await fetch(`${BACKEND}/assignment/teacher?limit=5`, {
+  return await apiRequest({
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
+    endpoint: `/assignment/teacher?limit=5`,
+    getToken: getAuthToken,
   });
-
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het ophalen van de opdrachten.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
-
-  const assignments = await response.json();
-  return assignments;
 }
 
 /**
@@ -138,7 +64,11 @@ export async function fetchAssignment(
     throw error;
   }
 
-  const assignment = await response.json();
+  const assignment: any = await apiRequest({
+    method: 'GET',
+    endpoint: `/assignment/${assignmentId}?includeClass=${includeClass}&includeTeams=${includeTeams}`,
+    getToken: getAuthToken,
+  });
 
   if (includeTeams && assignment.teamAssignments) {
     // Group teams by classId
@@ -170,25 +100,11 @@ export async function fetchAssignment(
  * @throws {APIError} When deletion fails
  */
 export async function deleteAssignment(assignmentId: number): Promise<void> {
-  const response = await fetch(
-    `${BACKEND}/assignment/teacher/${assignmentId}`,
-    {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
-    },
-  );
-
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het verwijderen van de opdracht.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
+  return await apiRequest({
+    method: 'DELETE',
+    endpoint: `/assignment/teacher/${assignmentId}`,
+    getToken: getAuthToken,
+  });
 }
 
 /**
@@ -206,33 +122,21 @@ export async function postAssignment({
   classTeams,
   teamSize,
 }: AssignmentPayload): Promise<void> {
-  // Create group assignment with teams
-  const response = await fetch(`${BACKEND}/assignment/teacher/team`, {
+  await apiRequest({
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
-    body: JSON.stringify({
+    endpoint: '/assignment/teacher/team',
+    body: {
       title,
       description,
       deadline,
-      pathRef: pathRef,
-      pathLanguage: pathLanguage, // default language
-      isExternal: isExternal,
-      classTeams: classTeams,
+      pathRef,
+      pathLanguage, // default language
+      isExternal,
+      classTeams,
       teamSize,
-    }),
+    },
+    getToken: getAuthToken,
   });
-
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het aanmaken van de groepsopdracht.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
 }
 
 /**
@@ -251,31 +155,19 @@ export async function updateAssignment({
   classTeams,
   teamSize,
 }: AssignmentPayload): Promise<void> {
-  // Create group assignment with teams
-  const response = await fetch(`${BACKEND}/assignment/teacher/team/${id}`, {
+  await apiRequest({
     method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
-    body: JSON.stringify({
+    endpoint: `/assignment/teacher/team/${id}`,
+    body: {
       title,
       description,
       deadline,
-      pathRef: pathRef,
-      pathLanguage: pathLanguage, // default language
-      isExternal: isExternal,
-      classTeams: classTeams,
+      pathRef,
+      pathLanguage, // default language
+      isExternal,
+      classTeams,
       teamSize,
-    }),
+    },
+    getToken: getAuthToken,
   });
-
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het aanmaken van de groepsopdracht.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
 }

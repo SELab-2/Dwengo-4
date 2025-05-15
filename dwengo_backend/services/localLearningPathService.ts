@@ -114,19 +114,18 @@ export class LocalLearningPathService {
     );
   }
 
-  async updateNumNodes(pathId: string): Promise<void> {
-    const count = await handlePrismaQuery(() =>
-      prisma.learningPathNode.count({
-        where: { learningPathId: pathId },
-      }),
-    );
-    await handlePrismaQuery(() =>
-      prisma.learningPath.update({
-        where: { id: pathId },
-        data: { num_nodes: count },
-      }),
-    );
-  }
+  /*async updateNumNodes(pathId: string): Promise<void> {
+    // Count the number of nodes within the transaction
+    const count: number = await prisma.learningPathNode.count({
+      where: { learningPathId: pathId },
+    });
+
+    // Update the learning path's num_nodes within the same transaction
+    await prisma.learningPath.update({
+      where: { id: pathId },
+      data: { num_nodes: count },
+    });
+  }*/
 
   /**
    * [NIEUW] Zoeken naar lokale leerpaden op basis van filters
@@ -171,30 +170,72 @@ export class LocalLearningPathService {
   }
 
   /**
-   * [NIEUW] Haal 1 leerpad (in Dto) op via id of hruid
+   * [AANGEPAST] Haal 1 leerpad (in DTO) op via id of hruid,
+   * met optionele voortgang voor de gegeven student.
    */
   async getLearningPathAsDtoByIdOrHruid(
     idOrHruid: string,
+    includeProgress: boolean = false,
+    studentId?: number,
   ): Promise<LearningPathDto> {
     // 1) Probeer op id
     const byId = await handlePrismaQuery(() =>
-      prisma.learningPath.findUnique({
-        where: { id: idOrHruid },
+      prisma.learningPath.findUnique({ where: { id: idOrHruid } }),
+    );
+
+    // 2) Probeer op hruid als niet op id gevonden
+    const lp =
+      byId ??
+      (await handlePrismaQuery(() =>
+        prisma.learningPath.findUnique({ where: { hruid: idOrHruid } }),
+      ));
+
+    if (!lp) throw new NotFoundError("Learning path not found.");
+
+    // Basis DTO zonder nodes
+    const baseDto = mapLocalPathToDto(lp);
+
+    // Als geen progressie nodig is of geen studentId, geef alleen basis terug
+    if (!includeProgress || studentId === undefined) {
+      return baseDto;
+    }
+
+    // Haal alle nodes van dit leerpad
+    const nodes = await prisma.learningPathNode.findMany({
+      where: { learningPathId: lp.id },
+    });
+
+    // Voor elke node: bepaal done-status
+    const nodesWithProgress = await Promise.all(
+      nodes.map(async (node) => {
+        let done = false;
+        const localObjId = node.localLearningObjectId;
+        if (localObjId) {
+          // Zoek studentProgress met relation filter op LearningObjectProgress
+          const sp = await prisma.studentProgress.findFirst({
+            where: {
+              studentId,
+              progress: {
+                is: { learningObjectId: localObjId },
+              },
+            },
+          });
+          done = sp !== null;
+        }
+        return {
+          nodeId: node.nodeId,
+          isExternal: node.isExternal,
+          localLearningObjectId: node.localLearningObjectId ?? undefined,
+          dwengoHruid: node.dwengoHruid ?? undefined,
+          done: done,
+        };
       }),
     );
-    if (byId) {
-      return mapLocalPathToDto(byId);
-    }
-    // 2) Probeer op hruid
-    const byHruid = await handlePrismaQuery(() =>
-      prisma.learningPath.findUnique({
-        where: { hruid: idOrHruid },
-      }),
-    );
-    if (byHruid) {
-      return mapLocalPathToDto(byHruid);
-    }
-    throw new NotFoundError("Learning path not found.");
+
+    return {
+      ...baseDto,
+      nodes: nodesWithProgress,
+    };
   }
 }
 
