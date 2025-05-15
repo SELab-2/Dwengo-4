@@ -28,16 +28,19 @@ const TeamsDisplay: React.FC<TeamsDisplayProps> = ({
             <div key={classId}>
               <h6>
                 {t('assignments_form.assign_team.class')}:{' '}
-                {selectedClasses.find((c) => c.id == classId)?.name}
+                <span className="max-w-[200px] truncate inline-block align-bottom" title={selectedClasses.find((c) => c.id == classId)?.name}>
+                  {selectedClasses.find((c) => c.id == classId)?.name}
+                </span>
               </h6>
               {classTeams.map((team) => (
                 <div key={team.id} className={styles.teamPreview}>
-                  <p>
-                    {team.id}:{' '}
-                    {team.students
-                      .map((member) => `${member.firstName} ${member.lastName}`)
-                      .join(', ')}
-                  </p>
+                  <div className="flex items-center gap-2 w-full">
+                    <span className="font-medium min-w-[80px]">{team.id}:</span>
+                    <span className="truncate"
+                      title={team.students.map((member) => `${member.firstName} ${member.lastName}`).join(', ')}>
+                      {team.students.map((member) => `${member.firstName} ${member.lastName}`).join(', ')}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -61,7 +64,10 @@ const TeamsDisplay: React.FC<TeamsDisplayProps> = ({
         {selectedClasses.map((classItem) => (
           <div key={classItem.id}>
             <h6>
-              {t('assignments_form.assign_team.class')}: {classItem.name}
+              {t('assignments_form.assign_team.class')}:
+              <span className="max-w-[200px] truncate inline-block align-bottom" title={classItem.name}>
+                {classItem.name}
+              </span>
             </h6>
             <div className={styles.selectedCount}>
               {t('assignments_form.assign_team.selected')}:{' '}
@@ -70,7 +76,12 @@ const TeamsDisplay: React.FC<TeamsDisplayProps> = ({
             </div>
             {individualStudents[classItem.id]?.map((student) => (
               <div key={student.id} className={styles.teamPreview}>
-                <p>{`${student.firstName} ${student.lastName}`}</p>
+                <div className="flex items-center gap-2 w-full">
+                  <span className="truncate"
+                    title={`${student.firstName} ${student.lastName}`}>
+                    {`${student.firstName} ${student.lastName}`}
+                  </span>
+                </div>
               </div>
             ))}
           </div>

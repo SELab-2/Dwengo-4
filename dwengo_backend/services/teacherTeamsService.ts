@@ -65,7 +65,7 @@ async function createTeam(
 ): Promise<Team> {
   return (tx ?? prisma).team.create({
     data: {
-      teamname: teamName,
+      teamname: String(teamName),
       classId: classId,
     },
   });

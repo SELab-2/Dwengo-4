@@ -146,6 +146,8 @@ const AddAssignmentForm = ({
   } = useQuery<LearningPath[], Error>({
     queryKey: ['learningPaths'],
     queryFn: fetchLearningPaths,
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   /**
@@ -323,7 +325,7 @@ const AddAssignmentForm = ({
 
       navigate(
         isEditing
-          ? `/teacher/assignments/${assignmentData?.id}`
+          ? `/teacher/assignment/${assignmentData?.id}`
           : `/teacher/classes/${classId}`,
       );
     } catch (error: any) {
