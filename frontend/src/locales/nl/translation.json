@@ -139,5 +139,10 @@
       "clear": "Wis filter",
       "not_found": "Geen resultaten gevonden"
     }
+  },
+  "learning_objects": {
+    "loading": "Leerpaden laden...",
+    "next": "Volgende",
+    "end": "Einde van leerpad"
   }
 }

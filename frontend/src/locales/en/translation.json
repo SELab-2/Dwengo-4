@@ -139,5 +139,10 @@
       "clear": "Clear filter",
       "not_found": "No results found"
     }
+  },
+  "learning_objects": {
+    "loading": "Loading learning paths ...",
+    "next": "Up next",
+    "end": "End of learning path"
   }
 }
