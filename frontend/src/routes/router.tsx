@@ -41,7 +41,8 @@ const HomePage: React.FC = () => {
       <div className="absolute top-4 right-4">
         <LanguageChooser />
       </div>
-      <div className="flex flex-col justify-center items-center h-screen">
+      # TODO: zoek een image zodat de achtergrond niet saai wit is
+      <div className="flex flex-col justify-center items-center h-screen bg-[url('/path-to-your-image.jpg')] bg-cover bg-center">
         <div className="-translate-y-20">
           <h2 className="justify-center flex flex-row font-bold text-5xl mb-8">
             {t('role.choose')}
@@ -114,11 +115,11 @@ export const router = createBrowserRouter([
         element: <AssignmentAdd></AssignmentAdd>,
       },
       {
-        path: 'assignments/:assignmentId',
+        path: 'assignment/:assignmentId',
         element: <Assignment></Assignment>,
       },
       {
-        path: 'assignments/:assignmentId/edit',
+        path: 'assignment/:assignmentId/edit',
         element: <AssignmentEdit></AssignmentEdit>,
       },
       {
@@ -159,6 +160,10 @@ export const router = createBrowserRouter([
       {
         path: 'logout',
         action: studentLogoutAction,
+      },
+      {
+        path: 'learning-paths',
+        element: <LearningPaths />,
       },
       {
         path: 'learning-path/:pathId',

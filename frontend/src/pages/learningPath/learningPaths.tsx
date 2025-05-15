@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchLearningPaths } from '../../util/teacher/httpTeacher';
 import { LearningPath } from '../../types/type';
 import { LearningPathFilter } from '../../components/learningPath/learningPathFilter';
 import { Filter, FilterType } from '../../components/ui/filters';
 import { Link } from 'react-router-dom';
 import { filterLearningPaths } from '@/util/filter';
+import { fetchLearningPaths } from '@/util/shared/learningPath';
 
 /**
  * Generates a background color based on the given ID.

@@ -9,10 +9,10 @@ import {
   validateRequired,
 } from '../../util/shared/validation';
 import BoxBorder from '../../components/shared/BoxBorder';
-import { loginStudent } from '../../util/student/httpStudent';
 import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButton';
 import PrimaryButton from '../../components/shared/PrimaryButton';
 import { useTranslation } from 'react-i18next';
+import { loginStudent } from '@/util/student/auth';
 
 interface LoginFormData {
   email: string;
@@ -50,8 +50,9 @@ const LoginStudent: React.FC = () => {
       localStorage.setItem('firstName', data.firstName);
       localStorage.setItem('lastName', data.lastName);
       localStorage.setItem('expiration', expires.toISOString());
+      localStorage.setItem('role', 'student')
 
-      navigate('/student/dashboard');
+      navigate('/student');
     },
   });
 

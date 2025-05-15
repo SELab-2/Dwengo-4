@@ -1,13 +1,21 @@
 import express, { Router } from "express";
 import {
   createProgress,
-  getStudentProgress,
-  updateProgress,
-  getTeamProgressStudent,
   getStudentAssignmentProgress,
   getStudentLearningPathProgress,
+  getStudentProgress,
+  getTeamProgressStudent,
+  updateProgress,
+  upsertProgress,
 } from "../../controllers/progressController";
 import { protectStudent } from "../../middleware/authMiddleware/studentAuthMiddleware";
+import { validateRequest } from "../../middleware/validateRequest";
+import {
+  learningObjectIdParamSchema,
+  learningPathIdParamSchema,
+  assignmentIdParamsSchema,
+  teamIdParamsSchema,
+} from "../../zodSchemas";
 
 const router: Router = express.Router();
 router.use(protectStudent);
@@ -25,7 +33,14 @@ router.use(protectStudent);
  * @param  learningObjectId: string
  * @access  Student
  */
-router.post("/learningObject/:learningObjectId", createProgress);
+router.post(
+  "/learningObject/:learningObjectId",
+  validateRequest({
+    customErrorMessage: "invalid learningObjectId request parameter",
+    paramsSchema: learningObjectIdParamSchema,
+  }),
+  createProgress,
+);
 
 /**
  * @route   GET /progress/student/learningObject/:learningObjectId
@@ -34,7 +49,14 @@ router.post("/learningObject/:learningObjectId", createProgress);
  * @param  learningObjectId: string
  * @access  Student
  */
-router.get("/learningObject/:learningObjectId", getStudentProgress);
+router.get(
+  "/learningObject/:learningObjectId",
+  validateRequest({
+    customErrorMessage: "invalid learningObjectId request parameter",
+    paramsSchema: learningObjectIdParamSchema,
+  }),
+  getStudentProgress,
+);
 
 /**
  * @route   PATCH /progress/student/learningObject/:learningObjectId
@@ -43,7 +65,14 @@ router.get("/learningObject/:learningObjectId", getStudentProgress);
  * @param  learningObjectId: string
  * @access  Student
  */
-router.patch("/learningObject/:learningObjectId", updateProgress);
+router.patch(
+  "/learningObject/:learningObjectId",
+  validateRequest({
+    customErrorMessage: "invalid learningObjectId request parameter",
+    paramsSchema: learningObjectIdParamSchema,
+  }),
+  updateProgress,
+);
 
 /**
  * @route   GET /progress/student/team/:teamid
@@ -55,7 +84,14 @@ router.patch("/learningObject/:learningObjectId", updateProgress);
  * @param  teamid: number
  * @access  Student
  */
-router.get("/team/:teamid", getTeamProgressStudent);
+router.get(
+  "/team/:teamId",
+  validateRequest({
+    customErrorMessage: "invalid teamId request parameter",
+    paramsSchema: teamIdParamsSchema,
+  }),
+  getTeamProgressStudent,
+);
 
 /**
  * @route   GET /progress/student/assignment/:assignmentId
@@ -65,7 +101,14 @@ router.get("/team/:teamid", getTeamProgressStudent);
  * @param  assignmentId: number
  * @access  Student
  */
-router.get("/assignment/:assignmentId", getStudentAssignmentProgress);
+router.get(
+  "/assignment/:assignmentId",
+  validateRequest({
+    customErrorMessage: "invalid assignmentId request parameter",
+    paramsSchema: assignmentIdParamsSchema,
+  }),
+  getStudentAssignmentProgress,
+);
 
 /**
  * @route   GET /progress/student/learningPath/:learningPathId
@@ -75,6 +118,29 @@ router.get("/assignment/:assignmentId", getStudentAssignmentProgress);
  * @param  learningPathId: string
  * @access  Student
  */
-router.get("/learningPath/:learningPathId/", getStudentLearningPathProgress);
+router.get(
+  "/learningPath/:learningPathId/",
+  validateRequest({
+    paramsSchema: learningPathIdParamSchema,
+  }),
+  getStudentLearningPathProgress,
+);
+
+/**
+ * @route   PUT /progress/student/learningObject/:learningObjectId
+ * @desc    Create or update progress for a student's learning object (upsert).
+ *          If progress doesn't exist, it will be created.
+ *          If it exists, it will be updated.
+ * @param   learningObjectId: string
+ * @access  Student
+ */
+router.put(
+  "/learningObject/:learningObjectId",
+  validateRequest({
+    customErrorMessage: "invalid learningObjectId request parameter",
+    paramsSchema: learningObjectIdParamSchema,
+  }),
+  upsertProgress,
+);
 
 export default router;

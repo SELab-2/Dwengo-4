@@ -7,7 +7,7 @@ export class AssignmentController {
   getAssignmentsById = asyncHandler(
     async (req: Request, res: Response): Promise<void> => {
       // 1) Validatie param
-      const assignmentId: number = parseInt(req.params.assignmentId);
+      const assignmentId: number = req.params.assignmentId as unknown as number;
 
       const includeClass = req.query.includeClass === "true";
       const includeTeams = req.query.includeTeams === "true";
@@ -16,11 +16,11 @@ export class AssignmentController {
       const assignment: Assignment = await assignmentService.getAssignmentById(
         assignmentId,
         includeClass,
-        includeTeams
+        includeTeams,
       );
 
       // 3) OK → 200 + assignment
       res.status(200).json(assignment);
-    }
+    },
   );
 }

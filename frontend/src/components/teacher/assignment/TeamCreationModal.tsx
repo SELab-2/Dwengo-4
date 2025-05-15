@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './TeamCreationModal.module.css';
-import { FaTrash, FaMinus } from 'react-icons/fa';
+import { FaMinus, FaTrash } from 'react-icons/fa';
 import { ClassItem, StudentItem, Team } from '../../../types/type';
-import { c } from 'vite/dist/node/moduleRunnerTransport.d-CXw_Ws6P';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   classes: ClassItem[];
@@ -32,12 +32,13 @@ const TeamCreationModal = ({
   const [selectedClass, setSelectedClass] = useState<ClassItem | null>(
     classes[0] || null,
   );
+  const { t } = useTranslation();
 
   useEffect(() => {
     const studentsInTeams = selectedClass
       ? (teams[selectedClass.id]?.flatMap((team) =>
-        team.students.map((member) => member.id),
-      ) ?? [])
+          team.students.map((member) => member.id),
+        ) ?? [])
       : [];
 
     const availableStuds =
@@ -79,9 +80,9 @@ const TeamCreationModal = ({
     const classId = selectedClass.id;
     setIndividualStudents({
       ...individualStudents,
-      [classId]: individualStudents[classId]?.some(s => s.id === student.id)
-        ? individualStudents[classId].filter(s => s.id !== student.id)
-        : [...(individualStudents[classId] || []), student]
+      [classId]: individualStudents[classId]?.some((s) => s.id === student.id)
+        ? individualStudents[classId].filter((s) => s.id !== student.id)
+        : [...(individualStudents[classId] || []), student],
     });
   };
 
@@ -90,7 +91,12 @@ const TeamCreationModal = ({
     if (selectedStudents.length > teamSize) return;
 
     if (selectedStudents.length < teamSize) {
-      if (!window.confirm('Create an incomplete team?')) return;
+      if (
+        !window.confirm(
+          t('assignments_form.assign_team.incomplete_team_warning'),
+        )
+      )
+        return;
     }
 
     const classTeams = teams[selectedClass.id] || [];
@@ -167,11 +173,17 @@ const TeamCreationModal = ({
   return (
     <div className={styles.modal}>
       <div className={styles.content}>
-        <h2>{isIndividual ? 'Student Selection' : 'Team Creation'}</h2>
+        <h2>
+          {isIndividual
+            ? t('assignments_form.assign_team.select_student')
+            : t('assignments_form.assign_team.select_team')}
+        </h2>
         {isIndividual ? (
-          <p>Select students for individual assignment</p>
+          <p>{t('assignments_form.assign_team.student_help')}</p>
         ) : (
-          <p>Create teams of {teamSize} students or generate random teams</p>
+          <p>
+            {t('assignments_form.assign_team.team_help', { size: teamSize })}
+          </p>
         )}
 
         <select onChange={handleChangeClass}>
@@ -185,18 +197,23 @@ const TeamCreationModal = ({
         <div className={styles.teamBuilder}>
           {isIndividual ? (
             <div className={styles.studentsList}>
-              <h3>Students</h3>
+              <h3>{t('assignments_form.assign_team.students')}</h3>
               <div className={styles.selectedCount}>
-                Selected: {individualStudents[selectedClass?.id || '']?.length || 0} / {selectedClass?.students.length || 0}
+                {t('assignments_form.assign_team.selected')}:{' '}
+                {individualStudents[selectedClass?.id || '']?.length || 0} /{' '}
+                {selectedClass?.students.length || 0}
               </div>
               <div className={styles.students}>
-                {selectedClass?.students.map(student => (
+                {selectedClass?.students.map((student) => (
                   <div
                     key={student.id}
-                    className={`${styles.student} ${individualStudents[selectedClass.id]?.some(s => s.id === student.id)
-                      ? styles.selected
-                      : ''
-                      }`}
+                    className={`${styles.student} ${
+                      individualStudents[selectedClass.id]?.some(
+                        (s) => s.id === student.id,
+                      )
+                        ? styles.selected
+                        : ''
+                    }`}
                     onClick={() => handleIndividualStudentSelect(student)}
                   >
                     {student.firstName} {student.lastName}
@@ -207,14 +224,15 @@ const TeamCreationModal = ({
           ) : (
             <>
               <div className={styles.studentsList}>
-                <h3>Available Students</h3>
+                <h3>{t('assignments_form.assign_team.available_students')}</h3>
                 {availableStudents.map((student) => (
                   <div
                     key={student.id}
-                    className={`${styles.student} ${selectedStudents.find((s) => s.id === student.id)
-                      ? styles.selected
-                      : ''
-                      }`}
+                    className={`${styles.student} ${
+                      selectedStudents.find((s) => s.id === student.id)
+                        ? styles.selected
+                        : ''
+                    }`}
                     onClick={() => handleStudentSelect(student)}
                   >
                     {student.firstName} {student.lastName}
@@ -223,7 +241,7 @@ const TeamCreationModal = ({
               </div>
 
               <div className={styles.teams}>
-                <h3>Teams</h3>
+                <h3>{t('assignments_form.assign_team.teams')}</h3>
                 {selectedClass &&
                   teams[selectedClass.id]?.map((team) => (
                     <div key={team.id} className={styles.team}>
@@ -258,17 +276,18 @@ const TeamCreationModal = ({
           {!isIndividual && (
             <>
               <button onClick={generateRandomTeams} disabled={!selectedClass}>
-                Generate Random Teams
+                {t('assignments_form.assign_team.generate_random_teams')}
               </button>
               <button
                 onClick={createTeam}
                 disabled={!selectedClass || selectedStudents.length === 0}
               >
-                Create Team ({selectedStudents.length}/{teamSize})
+                {t('assignments_form.assign_team.create_team')} (
+                {selectedStudents.length}/{teamSize})
               </button>
             </>
           )}
-          <button onClick={onClose}>Close</button>
+          <button onClick={onClose}>{t('close')}</button>
         </div>
       </div>
     </div>

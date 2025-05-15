@@ -1,14 +1,10 @@
 import React from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import {
-  fetchLearningPath,
-  fetchAssignment,
-  deleteAssignment,
-} from '../../util/teacher/httpTeacher';
-
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { LearningPath } from '../../types/type';
 import { AssignmentPayload } from '../../types/type';
+import { deleteAssignment, fetchAssignment } from '@/util/teacher/assignment';
+import { fetchLearningPath } from '@/util/shared/learningPath';
 
 /**
  * Assignment component for teachers to view and manage individual assignments.
@@ -26,6 +22,7 @@ import { AssignmentPayload } from '../../types/type';
  */
 const Assignment: React.FC = () => {
   const { assignmentId } = useParams<{ assignmentId: string }>();
+  const navigate = useNavigate();
 
   /**
    * Query hook to fetch assignment data
@@ -66,7 +63,7 @@ const Assignment: React.FC = () => {
   const deleteAssignmentMutation = useMutation({
     mutationFn: (id: string) => deleteAssignment(Number(id)),
     onSuccess: () => {
-      window.location.href = '/teacher/classes';
+      navigate('/teacher/classes');
     },
   });
 
@@ -76,6 +73,7 @@ const Assignment: React.FC = () => {
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to delete this assignment?')) {
       deleteAssignmentMutation.mutate(assignmentId!);
+      navigate('/teacher');
     }
   };
 
@@ -90,7 +88,7 @@ const Assignment: React.FC = () => {
             <h2 className="text-2xl font-semibold">{assignmentData.title}</h2>
             <div className="space-x-2">
               <a
-                href={`/teacher/assignments/${assignmentId}/edit`}
+                href={`/teacher/assignment/${assignmentId}/edit`}
                 className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
               >
                 Edit

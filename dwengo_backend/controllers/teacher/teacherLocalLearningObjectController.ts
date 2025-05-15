@@ -13,10 +13,9 @@ import { Property, checkIfTeacherIsCreator } from "./teacherChecks";
  */
 export const createLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = getUserFromAuthRequest(req).id;
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
     const data: LocalLearningObjectData = req.body;
-    // Eventuele extra validatie (bv. velden checken) kan hier
 
     const createdLO = await LocalLearningObjectService.createLearningObject(
       teacherId,
@@ -31,47 +30,43 @@ export const createLocalLearningObject = asyncHandler(
 
 /**
  * Haal alle leerobjecten op van deze teacher.
+ * GET /learningObjectByTeacher
  */
 export const getLocalLearningObjects = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = getUserFromAuthRequest(req).id;
+    const teacherId: number = getUserFromAuthRequest(req).id;
     const objects =
-      await LocalLearningObjectService.getAllLearningObjectsByTeacher(
-        teacherId,
-      );
-    res.json(objects);
+      await LocalLearningObjectService.getAllLearningObjectsByTeacher(teacherId);
+    res.status(200).json(objects);
   },
 );
 
 /**
  * Haal één leerobject op.
+ * GET /learningObjectByTeacher/:createdLearningObjectId
  */
 export const getLocalLearningObjectById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = getUserFromAuthRequest(req).id;
+    const teacherId: number = getUserFromAuthRequest(req).id;
     const { createdLearningObjectId } = req.params;
-    const found: LearningObject =
-      await LocalLearningObjectService.getLearningObjectById(
-        createdLearningObjectId,
-      );
-
-    // Check of deze teacher de eigenaar is
-    checkIfTeacherIsCreator(
-      teacherId,
-      found.creatorId,
-      Property.LearningObject,
+    const found: LearningObject = await LocalLearningObjectService.getLearningObjectById(
+      createdLearningObjectId,
     );
 
-    res.json(found);
+    // Check of deze teacher de eigenaar is
+    checkIfTeacherIsCreator(teacherId, found.creatorId, Property.LearningObject);
+
+    res.status(200).json(found);
   },
 );
 
 /**
  * Update een leerobject.
+ * PATCH /learningObjectByTeacher/:createdLearningObjectId
  */
 export const updateLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = getUserFromAuthRequest(req).id;
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
     const { createdLearningObjectId } = req.params;
     const data: Partial<LocalLearningObjectData> = req.body;
@@ -81,11 +76,7 @@ export const updateLocalLearningObject = asyncHandler(
       createdLearningObjectId,
     );
 
-    checkIfTeacherIsCreator(
-      teacherId,
-      existing.creatorId,
-      Property.LearningObject,
-    );
+    checkIfTeacherIsCreator(teacherId, existing.creatorId, Property.LearningObject);
 
     const updated = await LocalLearningObjectService.updateLearningObject(
       createdLearningObjectId,
@@ -100,24 +91,19 @@ export const updateLocalLearningObject = asyncHandler(
 
 /**
  * Verwijder een leerobject.
+ * DELETE /learningObjectByTeacher/:createdLearningObjectId
  */
 export const deleteLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = getUserFromAuthRequest(req).id;
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
     const { createdLearningObjectId } = req.params;
     const existing = await LocalLearningObjectService.getLearningObjectById(
       createdLearningObjectId,
     );
 
-    checkIfTeacherIsCreator(
-      teacherId,
-      existing.creatorId,
-      Property.LearningObject,
-    );
-    await LocalLearningObjectService.deleteLearningObject(
-      createdLearningObjectId,
-    );
+    checkIfTeacherIsCreator(teacherId, existing.creatorId, Property.LearningObject);
+    await LocalLearningObjectService.deleteLearningObject(createdLearningObjectId);
     res.status(204).end();
   },
 );

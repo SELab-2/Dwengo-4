@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { fetchAssignments, fetchClass, updateClass } from '../../util/teacher/httpTeacher'; // Adjust the import path as needed
-
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Container from '../../components/shared/Container';
@@ -8,9 +6,10 @@ import BoxBorder from '../../components/shared/BoxBorder';
 import InputWithChecks from '../../components/shared/InputWithChecks';
 import PrimaryButton from '../../components/shared/PrimaryButton';
 import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButton';
-import { validateRequired, validateForm } from '../../util/shared/validation';
-import NavButton from '../../components/shared/NavButton';
-import { ClassItem } from '../../types/type';
+import { validateForm, validateRequired } from '@/util/shared/validation';
+import { ClassItem } from '@/types/type';
+import { fetchAssignments } from '@/util/teacher/assignment';
+import { fetchClass, updateClass } from '@/util/teacher/class';
 
 interface InputWithChecksRef {
   validateInput: () => boolean;
@@ -22,6 +21,7 @@ type SidebarSection = 'overview' | 'assignments' | 'questions' | 'manage';
 
 const EditClassTeacher: React.FC = () => {
   const { classId } = useParams<{ classId: string }>();
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [className, setClassName] = useState<string>('');
@@ -29,7 +29,7 @@ const EditClassTeacher: React.FC = () => {
 
   const classNameRef = React.useRef<InputWithChecksRef | null>(null);
 
-  // Add state for active sidebar section
+  // Add state for an active sidebar section
   const [activeSection, setActiveSection] =
     useState<SidebarSection>('overview');
 
@@ -66,8 +66,8 @@ const EditClassTeacher: React.FC = () => {
       return updateClass({ classId: Number(classId), name: newName });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['classes'] });
-      queryClient.invalidateQueries({ queryKey: ['class', classId] });
+      queryClient.invalidateQueries({ queryKey: ['classes'] }).then();
+      queryClient.invalidateQueries({ queryKey: ['class', classId] }).then();
       navigate(`/teacher/classes/${classId}`);
     },
   });
@@ -94,6 +94,10 @@ const EditClassTeacher: React.FC = () => {
       )
     ) {
       try {
+        console.log(import.meta);
+        console.log(import.meta.env);
+        console.log(import.meta.env.VITE_API_URL);
+
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/class/teacher/${classId}`,
           {
@@ -105,15 +109,21 @@ const EditClassTeacher: React.FC = () => {
           },
         );
 
+        console.log(response);
+
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.message ||
-            'Er is iets misgegaan bij het verwijderen van de klas.',
-          );
+          let errorMessage =
+            'Er is iets misgegaan bij het verwijderen van de klas.';
+          if (
+            response.headers.get('Content-Type')?.includes('application/json')
+          ) {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          }
+          throw new Error(errorMessage);
         }
 
-        queryClient.invalidateQueries({ queryKey: ['classes'] });
+        await queryClient.invalidateQueries({ queryKey: ['classes'] });
         navigate('/teacher/classes');
       } catch (error) {
         console.error('Fout bij het verwijderen van de klas:', error);
@@ -138,10 +148,11 @@ const EditClassTeacher: React.FC = () => {
     return (
       <button
         onClick={() => onClick(section)}
-        className={`px-7 h-10 font-bold rounded-md ${isActive
-          ? 'bg-dwengo-green-darker pt-1 text-white border-gray-600 border-3'
-          : 'pt-1.5 bg-dwengo-green hover:bg-dwengo-green-dark text-white '
-          }`}
+        className={`px-7 h-10 font-bold rounded-md ${
+          isActive
+            ? 'bg-dwengo-green-darker pt-1 text-white border-gray-600 border-3'
+            : 'pt-1.5 bg-dwengo-green hover:bg-dwengo-green-dark text-white '
+        }`}
       >
         {label}
       </button>
@@ -211,7 +222,8 @@ const EditClassTeacher: React.FC = () => {
                   onClick={async () => {
                     try {
                       const response = await fetch(
-                        `${import.meta.env.VITE_API_URL
+                        `${
+                          import.meta.env.VITE_API_URL
                         }/class/teacher/${classId}/join-link`,
                         {
                           method: 'PATCH',
@@ -228,7 +240,7 @@ const EditClassTeacher: React.FC = () => {
                         throw new Error('Kon de klascode niet vernieuwen');
                       }
 
-                      queryClient.invalidateQueries({
+                      await queryClient.invalidateQueries({
                         queryKey: ['class', classId],
                       });
                     } catch (error) {
@@ -286,7 +298,7 @@ const EditClassTeacher: React.FC = () => {
                       <div
                         key={assignment.id}
                         onClick={() =>
-                          navigate(`/teacher/assignments/${assignment.id}`)
+                          navigate(`/teacher/assignment/${assignment.id}`)
                         }
                         className="p-4 border rounded hover:bg-gray-50 cursor-pointer transition-colors"
                       >
@@ -312,7 +324,7 @@ const EditClassTeacher: React.FC = () => {
             <BoxBorder extraClasses="mxw-700 m-a g-20">
               <h2>Vragen</h2>
               <p>Hier komen de vragen van leerlingen.</p>
-              {/* Placeholder for questions list */}
+              {/* Placeholder for a question list */}
               <div className="bg-gray-100 p-4 rounded mt-4">
                 <p className="text-gray-500">Nog geen vragen beschikbaar.</p>
               </div>

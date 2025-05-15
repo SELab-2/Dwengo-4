@@ -9,7 +9,7 @@ export default function TeacherIndex() {
   const { t } = useTranslation();
   return (
     <>
-      <div className="px-10 bg-gray-300">
+      <div className="px-10 bg-gray-300 rounded-xl">
         <div className="text-6xl pt-12 font-bold">{t('home')}</div>
 
         <h2 className="mt-8 text-2xl font-bold">{t('assignments.label')}</h2>
