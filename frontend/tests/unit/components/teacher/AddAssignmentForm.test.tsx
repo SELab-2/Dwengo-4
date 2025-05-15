@@ -1,37 +1,14 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
+import { vi, beforeEach, describe, expect, it } from 'vitest';
 
 import AddAssignmentForm from '@/components/teacher/assignment/AddAssignmentForm';
-import * as httpTeacher from '@/util/teacher/httpTeacher';
+import * as learningPathModule from '@/util/shared/learningPath';
+import * as assignmentModule from '@/util/teacher/assignment';
 
-type ClassItemT = {
-  id: string;
-  name: string;
-  code: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type LearningPathT = { id: string; title: string; isExternal: boolean };
-
-type AssignmentT = {
-  id: number;
-  title: string;
-  description: string;
-  deadline: string;
-  pathRef: string;
-  teamSize: number;
-  isExternal: boolean;
-  classAssignments: { class: ClassItemT }[];
-  classTeams: Record<
-    string,
-    { id: string; teamName: string; studentIds: number[]; students: [] }[]
-  >;
-};
-
+// Mock navigation
 vi.mock('react-router-dom', async () => {
   const actual =
     await vi.importActual<typeof import('react-router-dom')>(
@@ -40,11 +17,10 @@ vi.mock('react-router-dom', async () => {
   return { ...actual, useNavigate: () => vi.fn() };
 });
 
+// Mock translation
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (k: string) => k }),
+  useTranslation: () => ({ t: (key: string) => key }),
 }));
-
-vi.mock('@/util/teacher/httpTeacher');
 
 const renderWithProviders = (ui: React.ReactElement) => {
   const client = new QueryClient({
@@ -57,59 +33,57 @@ const renderWithProviders = (ui: React.ReactElement) => {
   );
 };
 
-const classesData: ClassItemT[] = [
-  {
-    id: '10',
-    name: '1A',
-    code: '',
-    createdAt: '',
-    updatedAt: '',
-  },
+const classesData = [
+  { id: '10', name: '1A', code: '', createdAt: '', updatedAt: '' },
 ];
+const learningPaths = [{ id: 'lp1', title: 'LP-1', isExternal: false }];
 
-const learningPaths: LearningPathT[] = [
-  { id: 'lp1', title: 'LP-1', isExternal: false },
-];
-
-describe('AddAssignmentForm', () => {
+describe('AddAssignmentForm – teacher', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(httpTeacher, 'fetchLearningPaths').mockResolvedValue(
+    vi.spyOn(learningPathModule, 'fetchLearningPaths').mockResolvedValue(
       learningPaths,
     );
+    // Return undefined instead of any
+    vi.spyOn(assignmentModule, 'postAssignment').mockResolvedValue(undefined);
+    vi.spyOn(assignmentModule, 'updateAssignment').mockResolvedValue(undefined);
   });
 
-  it('roept géén API-call wanneer geen klas is geselecteerd', async () => {
+  it('voert géén API-call uit wanneer er geen klas is geselecteerd', async () => {
     renderWithProviders(<AddAssignmentForm classesData={classesData} />);
 
-    /* wachten tot learning paths zichtbaar zijn */
+    // wacht tot learning paths geladen zijn
     await screen.findByText('LP-1');
 
-    /* verplichte velden invullen (behalve klas) */
-    fireEvent.change(screen.getByLabelText(/add title/i), {
+    // velden invullen behalve klas
+    fireEvent.change(screen.getByLabelText(/assignments_form\.title/i), {
       target: { value: 'Opdracht' },
     });
-    fireEvent.change(screen.getByLabelText(/add description/i), {
+    fireEvent.change(screen.getByLabelText(/assignments_form\.description/i), {
       target: { value: 'Beschrijving' },
     });
-    fireEvent.change(screen.getByLabelText(/choose learning path/i), {
-      target: { value: 'lp1' },
-    });
+    fireEvent.change(
+      screen.getByLabelText(/assignments_form\.learning_path\.choose/i),
+      { target: { value: 'lp1' } },
+    );
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    fireEvent.change(screen.getByLabelText(/choose deadline/i), {
+    fireEvent.change(screen.getByLabelText(/assignments_form\.deadline/i), {
       target: { value: tomorrow.toISOString().slice(0, 10) },
     });
 
-    fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
+    // submit
+    fireEvent.click(
+      screen.getByRole('button', { name: /assignments_form\.submit/i }),
+    );
 
     await waitFor(() =>
-      expect(httpTeacher.postAssignment).not.toHaveBeenCalled(),
+      expect(assignmentModule.postAssignment).not.toHaveBeenCalled(),
     );
   });
 
   it('roept updateAssignment met correct payload in edit-modus', async () => {
-    const assignmentData: AssignmentT = {
+    const assignmentData = {
       id: 1,
       title: 'Bestaande opdracht',
       description: 'Bestaande beschrijving',
@@ -129,18 +103,9 @@ describe('AddAssignmentForm', () => {
         },
       ],
       classTeams: {
-        10: [
-          {
-            id: 'T-1',
-            teamName: 'T-1',
-            studentIds: [1, 2],
-            students: [],
-          },
-        ],
+        10: [{ id: 'T-1', teamName: 'T-1', studentIds: [1, 2], students: [] }],
       },
     };
-
-    vi.spyOn(httpTeacher, 'updateAssignment').mockResolvedValue({});
 
     renderWithProviders(
       <AddAssignmentForm
@@ -150,14 +115,17 @@ describe('AddAssignmentForm', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
-
-    await waitFor(() =>
-      expect(httpTeacher.updateAssignment).toHaveBeenCalledTimes(1),
+    // submit
+    fireEvent.click(
+      screen.getByRole('button', { name: /assignments_form\.submit/i }),
     );
 
-    const [payload] = vi.mocked(httpTeacher.updateAssignment).mock.calls[0];
+    await waitFor(() =>
+      expect(assignmentModule.updateAssignment).toHaveBeenCalledTimes(1),
+    );
 
+    const [payload] = vi.mocked(assignmentModule.updateAssignment).mock
+      .calls[0];
     expect(payload).toMatchObject({
       id: 1,
       title: 'Bestaande opdracht',

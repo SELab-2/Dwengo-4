@@ -3,48 +3,51 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ClassesOverviewTeacher from '@/components/teacher/ClassesOverviewTeacher';
-import * as httpTeacher from '@/util/teacher/httpTeacher';
+import * as classModule from '@/util/teacher/class';
 import { BrowserRouter } from 'react-router-dom';
 
 // Mock vertaling
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => {
-      if (key === 'classes.error') return 'Er is een fout opgetreden';
-      if (key === 'classes.not_found') return 'Geen klassen gevonden';
-      if (key === 'classes.view') return 'Bekijk klas';
-      if (key === 'code') return 'Code';
-      if (key === 'loading.loading') return 'Laden...';
-      return key;
+      switch (key) {
+        case 'classes.error':
+          return 'Er is een fout opgetreden';
+        case 'classes.not_found':
+          return 'Geen klassen gevonden';
+        case 'classes.view':
+          return 'Bekijk klas';
+        case 'code':
+          return 'Code';
+        case 'loading.loading':
+          return 'Laden...';
+        default:
+          return key;
+      }
     },
   }),
 }));
 
 const createTestClient = () =>
   new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
+    defaultOptions: { queries: { retry: false } },
   });
 
-const renderComponent = (client: QueryClient) => {
-  return render(
+const renderComponent = (client: QueryClient) =>
+  render(
     <QueryClientProvider client={client}>
       <BrowserRouter>
         <ClassesOverviewTeacher />
       </BrowserRouter>
     </QueryClientProvider>,
   );
-};
 
 describe('ClassesOverviewTeacher', () => {
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
+  afterEach(() => vi.clearAllMocks());
 
   it('shows loading state initially', async () => {
-    vi.spyOn(httpTeacher, 'fetchClasses').mockReturnValue(
-      new Promise(() => {}), // blijft hangen
+    vi.spyOn(classModule, 'fetchClasses').mockReturnValue(
+      new Promise(() => {}),
     );
 
     const client = createTestClient();
@@ -54,7 +57,7 @@ describe('ClassesOverviewTeacher', () => {
   });
 
   it('shows error state when fetch fails with error message', async () => {
-    vi.spyOn(httpTeacher, 'fetchClasses').mockRejectedValue({
+    vi.spyOn(classModule, 'fetchClasses').mockRejectedValue({
       info: { message: 'Fout bij het laden van klassen' },
     });
 
@@ -69,7 +72,7 @@ describe('ClassesOverviewTeacher', () => {
   });
 
   it('shows default error message when no message in error', async () => {
-    vi.spyOn(httpTeacher, 'fetchClasses').mockRejectedValue({});
+    vi.spyOn(classModule, 'fetchClasses').mockRejectedValue({});
 
     const client = createTestClient();
     renderComponent(client);
@@ -81,19 +84,11 @@ describe('ClassesOverviewTeacher', () => {
 
   it('shows list of classes when data is available', async () => {
     const mockClasses = [
-      {
-        id: 1,
-        name: 'Klas A',
-        code: 'ABC123',
-      },
-      {
-        id: 2,
-        name: 'Klas B',
-        code: 'DEF456',
-      },
+      { id: 1, name: 'Klas A', code: 'ABC123' },
+      { id: 2, name: 'Klas B', code: 'DEF456' },
     ];
 
-    vi.spyOn(httpTeacher, 'fetchClasses').mockResolvedValue(mockClasses);
+    vi.spyOn(classModule, 'fetchClasses').mockResolvedValue(mockClasses);
 
     const client = createTestClient();
     renderComponent(client);
@@ -105,12 +100,10 @@ describe('ClassesOverviewTeacher', () => {
     expect(classB).toBeInTheDocument();
     expect(screen.getAllByText('Bekijk klas')).toHaveLength(2);
 
-    // ✅ Vind de paragrafen die de code bevatten en controleer hun textContent
-    const allParagraphs = screen.getAllByText((_, element) => {
-      return element?.tagName.toLowerCase() === 'p';
-    });
+    const allParagraphs = screen.getAllByText(
+      (_, element) => element?.tagName.toLowerCase() === 'p',
+    );
 
-    // Controleer dat we een paragraaf hebben met ABC123 en een met DEF456
     expect(allParagraphs.some((p) => p.textContent?.includes('ABC123'))).toBe(
       true,
     );
@@ -120,7 +113,7 @@ describe('ClassesOverviewTeacher', () => {
   });
 
   it('shows not_found message when no classes available', async () => {
-    vi.spyOn(httpTeacher, 'fetchClasses').mockResolvedValue([]);
+    vi.spyOn(classModule, 'fetchClasses').mockResolvedValue([]);
 
     const client = createTestClient();
     renderComponent(client);

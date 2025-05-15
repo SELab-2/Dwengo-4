@@ -1,132 +1,139 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import ClassesOverviewTeacher from '@/components/teacher/ClassesOverviewTeacher';
-import * as httpTeacher from '@/util/teacher/httpTeacher';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, LinkProps } from 'react-router-dom';
+import { render, screen, waitFor } from '@testing-library/react';
 
-// Mock vertaling
+import AssignmentsForClassOverview from '@/components/student/AssignmentClassOverview';
+import * as assignmentModule from '@/util/student/assignment';
+import type { AssignmentItem } from '@/util/student/assignment';
+
+// Mock translation to return the key or formatted strings
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => {
-      if (key === 'classes.error') return 'Er is een fout opgetreden';
-      if (key === 'classes.not_found') return 'Geen klassen gevonden';
-      if (key === 'classes.view') return 'Bekijk klas';
-      if (key === 'code') return 'Code';
-      if (key === 'loading.loading') return 'Laden...';
-      return key;
+    t: (key: string, opts?: Record<string, unknown>) => {
+      switch (key) {
+        case 'deadline':
+          return `Deadline: ${opts?.date}`;
+        case 'loading.loading':
+          return 'Laden...';
+        case 'assignments.error':
+          return 'Er is een fout opgetreden';
+        case 'assignments.not_found':
+          return 'Geen opdrachten gevonden';
+        case 'assignments.view':
+          return 'Bekijk opdracht';
+        default:
+          return key;
+      }
     },
   }),
 }));
 
-const createTestClient = () =>
-  new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
-  });
+// Mock react-router-dom Link with proper typing
+vi.mock('react-router-dom', async () => {
+  const actual =
+    await vi.importActual<typeof import('react-router-dom')>(
+      'react-router-dom',
+    );
+  const StubLink: React.FC<LinkProps> = ({ children, to, ...rest }) => (
+    <a href={typeof to === 'string' ? to : ''} {...rest}>
+      {children}
+    </a>
+  );
+  return { ...actual, Link: StubLink };
+});
 
-const renderComponent = (client: QueryClient) => {
-  return render(
-    <QueryClientProvider client={client}>
+// Helper to disable retries
+const createQueryClient = () =>
+  new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+// Render component within providers
+const renderComponent = (classId = '42') =>
+  render(
+    <QueryClientProvider client={createQueryClient()}>
       <BrowserRouter>
-        <ClassesOverviewTeacher />
+        <AssignmentsForClassOverview classId={classId} />
       </BrowserRouter>
     </QueryClientProvider>,
   );
-};
 
-describe('ClassesOverviewTeacher', () => {
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
+afterEach(() => {
+  vi.clearAllMocks();
+});
 
-  it('shows loading state initially', async () => {
-    vi.spyOn(httpTeacher, 'fetchClasses').mockReturnValue(
-      new Promise(() => {}), // blijft hangen
+describe('AssignmentClassOverview – student', () => {
+  it('toont laadstatus', async () => {
+    vi.spyOn(assignmentModule, 'fetchAssignmentsForClass').mockReturnValue(
+      new Promise<AssignmentItem[]>(() => {}),
     );
 
-    const client = createTestClient();
-    renderComponent(client);
-
+    renderComponent();
     expect(await screen.findByText('Laden...')).toBeInTheDocument();
   });
 
-  it('shows error state when fetch fails with error message', async () => {
-    vi.spyOn(httpTeacher, 'fetchClasses').mockRejectedValue({
-      info: { message: 'Fout bij het laden van klassen' },
+  it('toont foutmelding met eigen message', async () => {
+    vi.spyOn(assignmentModule, 'fetchAssignmentsForClass').mockRejectedValue({
+      info: { message: 'Er ging iets mis' },
     });
 
-    const client = createTestClient();
-    renderComponent(client);
-
-    await waitFor(() => {
-      expect(
-        screen.getByText(/Fout bij het laden van klassen/),
-      ).toBeInTheDocument();
-    });
+    renderComponent();
+    await waitFor(() =>
+      expect(screen.getByText(/Er ging iets mis/)).toBeInTheDocument(),
+    );
   });
 
-  it('shows default error message when no message in error', async () => {
-    vi.spyOn(httpTeacher, 'fetchClasses').mockRejectedValue({});
+  it('toont standaard foutmelding zonder message', async () => {
+    vi.spyOn(assignmentModule, 'fetchAssignmentsForClass').mockRejectedValue(
+      {},
+    );
 
-    const client = createTestClient();
-    renderComponent(client);
-
-    await waitFor(() => {
-      expect(screen.getByText('Er is een fout opgetreden')).toBeInTheDocument();
-    });
+    renderComponent();
+    await waitFor(() =>
+      expect(screen.getByText('Er is een fout opgetreden')).toBeInTheDocument(),
+    );
   });
 
-  it('shows list of classes when data is available', async () => {
-    const mockClasses = [
+  it('rendert een lijst van assignments met deadlines en view-knoppen', async () => {
+    const mockAssignments: AssignmentItem[] = [
       {
         id: 1,
-        name: 'Klas A',
-        code: 'ABC123',
+        title: 'Opdracht 1',
+        description: 'Beschrijving 1',
+        deadline: '2025-05-20T12:00:00Z',
       },
       {
         id: 2,
-        name: 'Klas B',
-        code: 'DEF456',
+        title: 'Opdracht 2',
+        description: 'Beschrijving 2',
+        deadline: '2025-06-10T12:00:00Z',
       },
     ];
 
-    vi.spyOn(httpTeacher, 'fetchClasses').mockResolvedValue(mockClasses);
-
-    const client = createTestClient();
-    renderComponent(client);
-
-    const classA = await screen.findByText('Klas A');
-    const classB = screen.getByText('Klas B');
-
-    expect(classA).toBeInTheDocument();
-    expect(classB).toBeInTheDocument();
-    expect(screen.getAllByText('Bekijk klas')).toHaveLength(2);
-
-    // ✅ Vind de juiste paragrafen en check textContent
-    const allParagraphs = screen.getAllByText((content, element) => {
-      return element?.tagName.toLowerCase() === 'p';
-    });
-
-    // Controleer dat we een paragraaf hebben met ABC123 en een met DEF456
-    expect(allParagraphs.some((p) => p.textContent?.includes('ABC123'))).toBe(
-      true,
+    vi.spyOn(assignmentModule, 'fetchAssignmentsForClass').mockResolvedValue(
+      mockAssignments,
     );
-    expect(allParagraphs.some((p) => p.textContent?.includes('DEF456'))).toBe(
-      true,
-    );
+
+    renderComponent('42');
+
+    expect(await screen.findByText('Opdracht 1')).toBeInTheDocument();
+    expect(screen.getByText('Opdracht 2')).toBeInTheDocument();
+
+    // beide deadlines aanwezig
+    expect(screen.getAllByText(/Deadline:/)).toHaveLength(2);
+
+    // twee “Bekijk opdracht” knoppen
+    expect(screen.getAllByText('Bekijk opdracht')).toHaveLength(2);
   });
 
-  it('shows not_found message when no classes available', async () => {
-    vi.spyOn(httpTeacher, 'fetchClasses').mockResolvedValue([]);
+  it('toont “Geen opdrachten gevonden” bij lege lijst', async () => {
+    vi.spyOn(assignmentModule, 'fetchAssignmentsForClass').mockResolvedValue(
+      [],
+    );
 
-    const client = createTestClient();
-    renderComponent(client);
-
+    renderComponent();
     expect(
-      await screen.findByText('Geen klassen gevonden'),
+      await screen.findByText('Geen opdrachten gevonden'),
     ).toBeInTheDocument();
   });
 });

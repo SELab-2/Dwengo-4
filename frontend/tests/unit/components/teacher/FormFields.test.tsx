@@ -5,6 +5,14 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import FormFields from '@/components/teacher/assignment/FormFields';
 import { ClassItem, LearningPath } from '@/types/type';
 
+// Mock translation to return the key itself
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+  }),
+}));
+
+// Stub dropdown component
 vi.mock('@/components/teacher/assignment/CustomDropdownMultiselect', () => ({
   default: ({
     selectedOptions,
@@ -26,7 +34,6 @@ vi.mock('@/components/teacher/assignment/CustomDropdownMultiselect', () => ({
 }));
 
 const classesData: ClassItem[] = [{ id: '1', name: '1A' } as ClassItem];
-
 const learningPaths: LearningPath[] = [
   { id: 'lp1', title: 'LP-1' } as LearningPath,
   { id: 'lp2', title: 'LP-2' } as LearningPath,
@@ -56,12 +63,16 @@ describe('FormFields', () => {
   it('rendert basisvelden en placeholder-optie in select', () => {
     render(<FormFields {...baseProps()} />);
 
-    // label-tekst aanwezig
-    expect(screen.getByText(/choose class/i)).toBeInTheDocument();
+    // label-tekst aanwezig (translation key)
+    expect(
+      screen.getByText(/assignments_form\.class\.choose/i),
+    ).toBeInTheDocument();
 
     // placeholder optie in de learning-path-select
     expect(
-      screen.getByRole('option', { name: /-select a path-/i }),
+      screen.getByRole('option', {
+        name: /assignments_form\.learning_path\.select/i,
+      }),
     ).toBeInTheDocument();
   });
 
@@ -74,7 +85,9 @@ describe('FormFields', () => {
     render(
       <FormFields {...baseProps()} isLearningPathsLoading learningPaths={[]} />,
     );
-    expect(screen.getByText(/loading learning paths/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/assignments_form\.learning_path\.loading/i),
+    ).toBeInTheDocument();
   });
 
   it('toont foutmelding bij error-state van learning paths', () => {
@@ -93,19 +106,23 @@ describe('FormFields', () => {
     const props = baseProps();
     render(<FormFields {...props} />);
 
-    fireEvent.change(screen.getByLabelText(/add title/i), {
+    // wijzig titel
+    fireEvent.change(screen.getByLabelText(/assignments_form\.title/i), {
       target: { value: 'Nieuw' },
     });
     expect(props.setTitle).toHaveBeenCalledWith('Nieuw');
 
-    fireEvent.change(screen.getByLabelText(/add description/i), {
+    // wijzig description
+    fireEvent.change(screen.getByLabelText(/assignments_form\.description/i), {
       target: { value: 'Desc' },
     });
     expect(props.setDescription).toHaveBeenCalledWith('Desc');
 
-    fireEvent.change(screen.getByLabelText(/choose learning path/i), {
-      target: { value: 'lp2' },
-    });
+    // wijzig learning path
+    fireEvent.change(
+      screen.getByLabelText(/assignments_form\.learning_path\.choose/i),
+      { target: { value: 'lp2' } },
+    );
     expect(props.handleLearningPathChange).toHaveBeenCalled();
   });
 
