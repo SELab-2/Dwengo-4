@@ -149,11 +149,18 @@
   "edit_learning_path": {
     "loading_path_details": "Leerpad details laden ...",
     "loading_objects": "Leerobjecten laden ...",
+    "add_node": "Node toevoegen",
     "cancel": "Annuleer",
-    "confirm_button": {
-      "confirm": "Opslaan",
-      "saving": "Opslaan ..."
+    "confirm": "Opslaan",
+    "saving": "Opslaan ...",
+    "no_nodes_error": "Voeg minstens één leerobject toe aan je pad",
+    "add_node_button": {
+      "adding_node": "Node toevoegen ...",
+      "cancel": "Annuleer"
     },
-    "no_nodes_error": "Voeg minstens één leerobject toe aan je pad"
+    "node_component": {
+      "add_node_here": "Voeg hier node toe",
+      "untitled_node": "Naamloze node"
+    }
   }
 }

@@ -149,11 +149,18 @@
   "edit_learning_path": {
     "loading_path_details": "Loading learning path details ...",
     "loading_objects": "Loading learning objects ...",
+    "add_node": "Add node",
     "cancel": "Cancel",
-    "confirm_button": {
-      "confirm": "Confirm",
-      "saving": "Saving ..."
+    "confirm": "Confirm",
+    "saving": "Saving ...",
+    "no_nodes_error": "Add at least one learning object to your path",
+    "add_node_button": {
+      "adding_node": "Adding node ...",
+      "cancel": "Cancel"
     },
-    "no_nodes_error": "Add at least one learning object to your path" 
+    "node_component": {
+      "add_node_here": "Add node here",
+      "untitled_node": "Untitled node"
+    }
   }
 }

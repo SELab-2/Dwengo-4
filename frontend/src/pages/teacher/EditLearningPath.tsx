@@ -160,7 +160,10 @@ const EditLearningPath: React.FC = () => {
           ) : isErrorNodes ? (
             <p>Error: {errorNodes?.message}</p>
           ) : orderedNodes.length == 0 ? (
-            <AddNodeButton nodeIndex={0} label="Add Node" />
+            <AddNodeButton
+              nodeIndex={0}
+              label={t('edit_learning_path.add_node')}
+            />
           ) : (
             <NodeList />
           )}
@@ -180,8 +183,8 @@ const EditLearningPath: React.FC = () => {
           disabled={isSavingPath}
         >
           {isSavingPath
-            ? t('edit_learning_path.confirm_button.saving')
-            : t('edit_learning_path.confirm_button.confirm')}
+            ? t('edit_learning_path.saving')
+            : t('edit_learning_path.confirm')}
         </button>
         <button
           className={`px-6 h-10 font-bold rounded-md bg-dwengo-red-200 text-white hover:bg-dwengo-red-dark hover:cursor-pointer`}
