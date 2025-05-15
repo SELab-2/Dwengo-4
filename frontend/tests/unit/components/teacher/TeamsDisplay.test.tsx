@@ -84,7 +84,7 @@ describe('TeamsDisplay', () => {
     expect(screen.getByText(/bob jones/i)).toBeInTheDocument();
 
     // edit-knop
-    const btn = screen.getByRole('button', { name: /edit teams/i });
+    const btn = screen.getByRole('button', { name: /edit/i });
     fireEvent.click(btn);
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
@@ -101,7 +101,7 @@ describe('TeamsDisplay', () => {
     expect(screen.getByText(/alice smith/i)).toBeInTheDocument();
 
     // edit-knop
-    const btn = screen.getByRole('button', { name: /edit students/i });
+    const btn = screen.getByRole('button', { name: /edit/i });
     fireEvent.click(btn);
     expect(onEdit).toHaveBeenCalledTimes(1);
   });

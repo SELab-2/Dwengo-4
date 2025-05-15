@@ -5,6 +5,11 @@ import { render, screen, fireEvent, within } from '@testing-library/react';
 import CustomDropdownMultiselect from '@/components/teacher/assignment/CustomDropdownMultiselect';
 import { ClassItem } from '@/types/type';
 
+// Mock translation to return the key
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
+
 const classes: ClassItem[] = [
   { id: '1', name: '1A' } as ClassItem,
   { id: '2', name: '2B' } as ClassItem,
@@ -28,13 +33,15 @@ describe('CustomDropdownMultiselect', () => {
 
   it('toont placeholder als er geen klassen geselecteerd zijn', () => {
     setup();
-    expect(screen.getByText(/select classes/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/assignments_form\.class\.select/i),
+    ).toBeInTheDocument();
   });
 
   it('opent het dropdown-menu en toont alle opties', () => {
     setup();
     // Toggle gebeurt door op de placeholder te klikken
-    fireEvent.click(screen.getByText(/select classes/i));
+    fireEvent.click(screen.getByText(/assignments_form\.class\.select/i));
     classes.forEach(({ name }) =>
       expect(screen.getByLabelText(name)).toBeInTheDocument(),
     );
@@ -42,7 +49,7 @@ describe('CustomDropdownMultiselect', () => {
 
   it('roept onChange met juiste payload als een optie wordt aangevinkt', () => {
     const { onChange } = setup();
-    fireEvent.click(screen.getByText(/select classes/i)); // open
+    fireEvent.click(screen.getByText(/assignments_form\.class\.select/i)); // open
     fireEvent.click(screen.getByLabelText('1A')); // vink aan
     expect(onChange).toHaveBeenCalledWith([classes[0]]);
   });
@@ -64,7 +71,8 @@ describe('CustomDropdownMultiselect', () => {
 
   it('vinkt checkbox correct aan/uit op basis van selectie', () => {
     const { onChange } = setup([classes[2]]);
-    fireEvent.click(screen.getByText(/3C/)); // chip-tekst opent ook dropdown
+    // Klik op chip om dropdown te openen
+    fireEvent.click(screen.getByText('3C'));
     const checkbox = screen.getByLabelText('3C') as HTMLInputElement;
     expect(checkbox.checked).toBe(true);
 

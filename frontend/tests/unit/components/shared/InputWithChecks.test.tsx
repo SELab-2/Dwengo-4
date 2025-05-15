@@ -1,132 +1,108 @@
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import ClassesOverviewTeacher from '@/components/teacher/ClassesOverviewTeacher';
-import * as httpTeacher from '@/util/teacher/httpTeacher';
-import { BrowserRouter } from 'react-router-dom';
+import React, { createRef } from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import InputWithChecks from '@/components/shared/InputWithChecks';
 
-// Mock vertaling
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      if (key === 'classes.error') return 'Er is een fout opgetreden';
-      if (key === 'classes.not_found') return 'Geen klassen gevonden';
-      if (key === 'classes.view') return 'Bekijk klas';
-      if (key === 'code') return 'Code';
-      if (key === 'loading.loading') return 'Laden...';
-      return key;
-    },
-  }),
-}));
+describe('InputWithChecks component', () => {
+  // Define handle interface matching component's imperative handle
+  interface Handle {
+    validateInput: () => boolean;
+    getValue: () => string;
+  }
 
-const createTestClient = () =>
-  new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
-  });
-
-const renderComponent = (client: QueryClient) => {
-  return render(
-    <QueryClientProvider client={client}>
-      <BrowserRouter>
-        <ClassesOverviewTeacher />
-      </BrowserRouter>
-    </QueryClientProvider>,
-  );
-};
-
-describe('ClassesOverviewTeacher', () => {
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('shows loading state initially', async () => {
-    vi.spyOn(httpTeacher, 'fetchClasses').mockReturnValue(
-      new Promise(() => {}), // blijft hangen
+  const setup = (
+    props: {
+      label?: string;
+      inputType?: string;
+      validate?: (value: string) => string | null;
+      info?: string;
+      value?: string;
+      placeholder?: string;
+    } = {},
+  ) => {
+    const ref = createRef<Handle>();
+    render(
+      <InputWithChecks
+        ref={ref}
+        label={props.label}
+        inputType={props.inputType}
+        validate={props.validate}
+        info={props.info}
+        value={props.value}
+        placeholder={props.placeholder}
+      />,
     );
+    const input = screen.getByRole('textbox') as HTMLInputElement;
+    return { ref, input };
+  };
 
-    const client = createTestClient();
-    renderComponent(client);
-
-    expect(await screen.findByText('Laden...')).toBeInTheDocument();
+  it('renders label when provided', () => {
+    setup({ label: 'My Label' });
+    expect(screen.getByText('My Label')).toBeInTheDocument();
   });
 
-  it('shows error state when fetch fails with error message', async () => {
-    vi.spyOn(httpTeacher, 'fetchClasses').mockRejectedValue({
-      info: { message: 'Fout bij het laden van klassen' },
-    });
+  it('renders info text when provided', () => {
+    setup({ info: 'Helpful info' });
+    expect(screen.getByText('Helpful info')).toBeInTheDocument();
+  });
 
-    const client = createTestClient();
-    renderComponent(client);
+  it('sets placeholder attribute on input', () => {
+    setup({ placeholder: 'Enter text' });
+    const input = screen.getByPlaceholderText('Enter text');
+    expect(input).toBeInTheDocument();
+  });
 
+  it('calls validate on blur and shows error message', () => {
+    const validateFn = (v: string) => (v.length < 5 ? 'Too short' : null);
+    const { input } = setup({ validate: validateFn });
+
+    fireEvent.change(input, { target: { value: '123' } });
+    fireEvent.blur(input);
+
+    expect(screen.getByText('Too short')).toBeInTheDocument();
+    expect(input).toHaveClass('border-red');
+  });
+
+  it('clears error message when input becomes valid', () => {
+    const validateFn = (v: string) => (v !== 'ok' ? 'Invalid' : null);
+    const { input } = setup({ validate: validateFn });
+
+    // initial invalid
+    fireEvent.change(input, { target: { value: 'nope' } });
+    expect(screen.getByText('Invalid')).toBeInTheDocument();
+
+    // now valid
+    fireEvent.change(input, { target: { value: 'ok' } });
+    expect(screen.queryByText('Invalid')).toBeNull();
+    expect(input).not.toHaveClass('border-red');
+  });
+
+  it('validateInput handle returns false and sets error when invalid', async () => {
+    const validateFn = (v: string) => (v.length === 0 ? 'Required' : null);
+    const { ref } = setup({ validate: validateFn });
+
+    // no change, default value is empty => invalid
+    const valid = ref.current?.validateInput();
+    expect(valid).toBe(false);
     await waitFor(() => {
-      expect(
-        screen.getByText(/Fout bij het laden van klassen/),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Required')).toBeInTheDocument();
     });
   });
 
-  it('shows default error message when no message in error', async () => {
-    vi.spyOn(httpTeacher, 'fetchClasses').mockRejectedValue({});
+  it('validateInput handle returns true when valid', async () => {
+    const validateFn = (v: string) => (v === 'good' ? null : 'Bad');
+    const { ref, input } = setup({ validate: validateFn });
 
-    const client = createTestClient();
-    renderComponent(client);
-
+    fireEvent.change(input, { target: { value: 'good' } });
+    const valid = ref.current?.validateInput();
+    expect(valid).toBe(true);
     await waitFor(() => {
-      expect(screen.getByText('Er is een fout opgetreden')).toBeInTheDocument();
+      expect(screen.queryByText('Bad')).toBeNull();
     });
   });
 
-  it('shows list of classes when data is available', async () => {
-    const mockClasses = [
-      {
-        id: 1,
-        name: 'Klas A',
-        code: 'ABC123',
-      },
-      {
-        id: 2,
-        name: 'Klas B',
-        code: 'DEF456',
-      },
-    ];
-
-    vi.spyOn(httpTeacher, 'fetchClasses').mockResolvedValue(mockClasses);
-
-    const client = createTestClient();
-    renderComponent(client);
-
-    const classA = await screen.findByText('Klas A');
-    const classB = screen.getByText('Klas B');
-
-    expect(classA).toBeInTheDocument();
-    expect(classB).toBeInTheDocument();
-    expect(screen.getAllByText('Bekijk klas')).toHaveLength(2);
-
-    // ✅ Vind de juiste paragrafen en check textContent
-    const allParagraphs = screen.getAllByText((content, element) => {
-      return element?.tagName.toLowerCase() === 'p';
-    });
-
-    // Controleer dat we een paragraaf hebben met ABC123 en een met DEF456
-    expect(allParagraphs.some((p) => p.textContent?.includes('ABC123'))).toBe(
-      true,
-    );
-    expect(allParagraphs.some((p) => p.textContent?.includes('DEF456'))).toBe(
-      true,
-    );
-  });
-
-  it('shows not_found message when no classes available', async () => {
-    vi.spyOn(httpTeacher, 'fetchClasses').mockResolvedValue([]);
-
-    const client = createTestClient();
-    renderComponent(client);
-
-    expect(
-      await screen.findByText('Geen klassen gevonden'),
-    ).toBeInTheDocument();
+  it('getValue handle returns current input value', () => {
+    const { ref, input } = setup();
+    fireEvent.change(input, { target: { value: 'Hello' } });
+    expect(ref.current?.getValue()).toBe('Hello');
   });
 });
