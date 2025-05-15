@@ -144,5 +144,15 @@
     "loading": "Loading learning paths ...",
     "next": "Up next",
     "end": "End of learning path"
+  },
+  "edit_learning_path": {
+    "loading_path_details": "Loading learning path details ...",
+    "loading_objects": "Loading learning objects ...",
+    "cancel": "Cancel",
+    "confirm_button": {
+      "confirm": "Confirm",
+      "saving": "Saving ..."
+    },
+    "no_nodes_error": "Add at least one learning object to your path" 
   }
 }

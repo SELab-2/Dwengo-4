@@ -144,5 +144,15 @@
     "loading": "Leerpaden laden...",
     "next": "Volgende",
     "end": "Einde van leerpad"
+  },
+  "edit_learning_path": {
+    "loading_path_details": "Leerpad details laden ...",
+    "loading_objects": "Leerobjecten laden ...",
+    "cancel": "Annuleer",
+    "confirm_button": {
+      "confirm": "Opslaan",
+      "saving": "Opslaan ..."
+    },
+    "no_nodes_error": "Voeg minstens één leerobject toe aan je pad"
   }
 }

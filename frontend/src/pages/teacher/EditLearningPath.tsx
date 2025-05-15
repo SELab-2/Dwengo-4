@@ -14,8 +14,10 @@ import {
   LearningPathDetails,
   LearningPathDetailsRef,
 } from '@/components/teacher/editLearningPath/LearningPathDetails';
+import { useTranslation } from 'react-i18next';
 
 const EditLearningPath: React.FC = () => {
+  const { t } = useTranslation();
   // error message to ensure at least one node is added before saving
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -101,7 +103,7 @@ const EditLearningPath: React.FC = () => {
 
     // check if at least one node was added
     if (orderedNodes.length === 0) {
-      setErrorMessage('Add at least one learning object to your path');
+      setErrorMessage(t('edit_learning_path.no_nodes_error'));
       return;
     }
 
@@ -124,7 +126,9 @@ const EditLearningPath: React.FC = () => {
       >
         {/* path details */}
         {isLoadingPath && !isCreateMode ? (
-          <p className="text-gray-500">Loading learning path details...</p>
+          <p className="text-gray-500">
+            {t('edit_learning_path.loading_path_details')}
+          </p>
         ) : isErrorPath ? (
           <p>Error: {errorPath?.message}</p>
         ) : (
@@ -168,7 +172,7 @@ const EditLearningPath: React.FC = () => {
 
         <div className="rounded-lg border border-gray-200 p-2.5 bg-white">
           {isLoadingNodes ? (
-            <p>Loading learning objects...</p>
+            <p>{t('edit_learning_path.loading_objects')}</p>
           ) : isErrorNodes ? (
             <p>Error: {errorNodes?.message}</p>
           ) : orderedNodes.length == 0 ? (
@@ -191,14 +195,16 @@ const EditLearningPath: React.FC = () => {
           onClick={handleSavePath}
           disabled={isSavingPath}
         >
-          {isSavingPath ? 'Saving...' : 'Confirm'}
+          {isSavingPath
+            ? t('edit_learning_path.confirm_button.saving')
+            : t('edit_learning_path.confirm_button.confirm')}
         </button>
         <button
           className={`px-6 h-10 font-bold rounded-md bg-dwengo-red-200 text-white hover:bg-dwengo-red-dark hover:cursor-pointer`}
           disabled={isSavingPath}
           onClick={() => navigate(-1)}
         >
-          Cancel
+          {t('edit_learning_path.cancel')}
         </button>
       </div>
     </div>
