@@ -13,7 +13,7 @@ import {
   StudentItem,
   Team,
 } from '../../../types/type';
-import { fetchLearningPaths } from '@/util/teacher/learningPath';
+import { fetchLearningPaths } from '@/util/shared/learningPath';
 import { postAssignment, updateAssignment } from '@/util/teacher/assignment';
 import { useTranslation } from 'react-i18next';
 
@@ -152,7 +152,10 @@ const AddAssignmentForm = ({
    * Populates form with existing assignment data when in edit mode
    */
   useEffect(() => {
+    console.log('Assignment Datagfdsfg:', assignmentData);
+
     if (isEditing && assignmentData) {
+      console.log('Assignment Datagfdsfg:', assignmentData);
       setTitle(assignmentData.title);
       setDescription(assignmentData.description);
       setDate(new Date(assignmentData.deadline).toISOString().split('T')[0]);
@@ -186,7 +189,7 @@ const AddAssignmentForm = ({
         setIndividualStudents(studentsPerClass);
       }
     }
-  }, [isEditing, classesData]);
+  }, [isEditing, classesData, assignmentData]);
 
   // Add this useEffect to handle the selection after classesData is loaded
   useEffect(() => {
@@ -317,9 +320,7 @@ const AddAssignmentForm = ({
 
     try {
       await action(payload);
-      console.log(
-        `Assignment ${isEditing ? 'updated' : 'created'} successfully`,
-      );
+
       navigate(
         isEditing
           ? `/teacher/assignments/${assignmentData?.id}`

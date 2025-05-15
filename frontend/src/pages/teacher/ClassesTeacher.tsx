@@ -6,13 +6,13 @@ import {
   denyJoinRequest,
   fetchJoinRequests,
   getPendingInvitesForClass,
-} from '../../util/teacher/classInvites';
+} from '@/util/teacher/classInvites';
 import PrimaryButton from '../../components/shared/PrimaryButton';
 import CreateClass from '../../components/teacher/classes/CreateClassForm';
 import Modal from '../../components/shared/Modal';
 import SuccessMessage from '../../components/shared/SuccessMessage';
 import { Link } from 'react-router-dom';
-import { ClassItem } from '../../types/type';
+import { ClassItem } from '@/types/type';
 import { useTranslation } from 'react-i18next';
 import { fetchClasses } from '@/util/teacher/class';
 
@@ -205,19 +205,21 @@ const ClassesPageTeacher: React.FC = () => {
               <tbody className="">
                 {classes.map((classItem) => (
                   <tr key={classItem.id}>
-                    <Link to={`/teacher/classes/${classItem.id}`}>
-                      <PrimaryButton>Beheer</PrimaryButton>
-                    </Link>
-                    <td className="px-4 py-2">{classItem.name}</td>
-                    <td className="px-4 py-2">{classItem.code}</td>
-                    <td>
+                    <td className="text-center">
+                      <Link to={`/teacher/classes/${classItem.id}`}>
+                        <PrimaryButton>Beheer</PrimaryButton>
+                      </Link>
+                    </td>
+                    <td className="text-center">{classItem.name}</td>
+                    <td className="text-center">{classItem.code}</td>
+                    <td className="text-center">
                       <PrimaryButton
                         onClick={() => handleManageTeacherInvites(classItem.id)}
                       >
                         <span className="f-s">Beheer</span>
                       </PrimaryButton>
                     </td>
-                    <td>
+                    <td className="text-center">
                       <PrimaryButton
                         onClick={() =>
                           handleManageStudentJoinRequests(classItem.id)

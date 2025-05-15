@@ -32,6 +32,10 @@ const Navstudent: React.FC = () => {
       to: '/student/klassen',
       label: t('nav.classes'),
     },
+    {
+      to: '/student/learning-paths',
+      label: t('nav.learning_paths'),
+    },
   ];
 
   return (

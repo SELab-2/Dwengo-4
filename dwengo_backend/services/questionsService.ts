@@ -1,10 +1,11 @@
 import {
+  Prisma,
   Question,
   QuestionGeneral,
   QuestionMessage,
   QuestionSpecific,
   QuestionType,
-  Role,
+  Role
 } from "@prisma/client";
 
 import referenceValidationService from "./referenceValidationService";
@@ -12,11 +13,7 @@ import { BadRequestError } from "../errors/errors";
 import { AuthenticatedUser } from "../interfaces/extendedTypeInterfaces";
 
 import prisma from "../config/prisma";
-import {
-  handlePrismaQuery,
-  handlePrismaTransaction,
-  handleQueryWithExistenceCheck,
-} from "../errors/errorFunctions";
+import { handlePrismaQuery, handlePrismaTransaction, handleQueryWithExistenceCheck } from "../errors/errorFunctions";
 
 /**
  * Helper: bepaal of een gegeven user deze vraag mag *zien* in een overzicht.
@@ -44,21 +41,21 @@ function canUserSeeQuestionInList(
   },
   user: AuthenticatedUser,
 ): boolean {
-  const isAdmin = user.role === Role.ADMIN;
+  const isAdmin: boolean = user.role === Role.ADMIN;
 
   // Teacher in class?
-  const isTeacherInClass = question.team.class.ClassTeacher.some(
-    (ct) => ct.teacherId === user.id,
+  const isTeacherInClass: boolean = question.team.class.ClassTeacher.some(
+    (ct): boolean => ct.teacherId === user.id,
   );
 
-  // Student in team?
-  const isStudentInTeam = question.team.students.some(
-    (s) => s.userId === user.id,
+  // Student in a team?
+  const isStudentInTeam: boolean = question.team.students.some(
+    (s): boolean => s.userId === user.i,
   );
 
   if (question.isPrivate) {
     // Private => alleen creator, teacher in class, admin
-    const isCreator = question.createdBy === user.id;
+    const isCreator: boolean = question.createdBy === user.id;
     return isCreator || isTeacherInClass || isAdmin;
   } else {
     // Niet private => hele team, teacher, admin
@@ -73,6 +70,7 @@ export default class QuestionService {
    * ------------------------------------------
    */
   private static async createQuestionAndMessage(
+    tx: Prisma.TransactionClient,
     assignmentId: number,
     teamId: number,
     creatorId: number,
@@ -82,10 +80,11 @@ export default class QuestionService {
     isTeacher: boolean,
     isPrivate: boolean,
   ): Promise<Question> {
+    const prismaClient = tx;
     // 1) Check assignment
     await handleQueryWithExistenceCheck(
       () =>
-        prisma.assignment.findUnique({
+        prismaClient.assignment.findUnique({
           where: { id: assignmentId },
         }),
       "Assignment not found.",
@@ -94,7 +93,7 @@ export default class QuestionService {
     // 2) Check team
     const team = await handleQueryWithExistenceCheck(
       () =>
-        prisma.team.findUnique({
+        prismaClient.team.findUnique({
           where: { id: teamId },
           include: {
             teamAssignment: true,
@@ -123,26 +122,27 @@ export default class QuestionService {
     }
 
     // 3) Transactie: Question + eerste message
-    return await handlePrismaTransaction(prisma, async (tx) => {
-      const q = await tx.question.create({
-        data: {
-          title,
-          type,
-          assignmentId,
-          teamId,
-          createdBy: creatorId,
-          isPrivate,
-        },
-      });
-      await tx.questionMessage.create({
-        data: {
-          questionId: q.id,
-          userId: creatorId,
-          text: initialMessage,
-        },
-      });
-      return q;
+    // 3) Insert Question + Message using the passed-in transaction
+    const q = await tx.question.create({
+      data: {
+        title,
+        type,
+        assignmentId,
+        teamId,
+        createdBy: creatorId,
+        isPrivate,
+      },
     });
+
+    await tx.questionMessage.create({
+      data: {
+        questionId: q.id,
+        userId: creatorId,
+        text: initialMessage,
+      },
+    });
+
+    return q;
   }
 
   /**
@@ -162,42 +162,43 @@ export default class QuestionService {
     dwengoLanguage?: string,
     dwengoVersion?: number,
   ): Promise<QuestionSpecific> {
-    const baseQuestion = await this.createQuestionAndMessage(
-      assignmentId,
-      teamId,
-      creatorId,
-      title,
-      text,
-      QuestionType.SPECIFIC,
-      creatorRole === Role.TEACHER,
-      isPrivate,
-    );
+    return handlePrismaTransaction(prisma, async (tx) => {
+      const baseQuestion = await this.createQuestionAndMessage(
+        tx,
+        assignmentId,
+        teamId,
+        creatorId,
+        title,
+        text,
+        QuestionType.SPECIFIC,
+        creatorRole === Role.TEACHER,
+        isPriate,
+      );
 
-    // Validatie object
-    if (isExternal) {
-      if (!dwengoHruid || !dwengoLanguage || dwengoVersion == null) {
-        throw new BadRequestError(
-          "Dwengo mandatory fields missing: hruid, language, version.",
+      // Validatie object
+      if (isExternal) {
+        if (!dwengoHruid || !dwengoLanguage || dwengoVersion == null) {
+          throw new BadRequestError(
+            "Dwengo mandatory fields missing: hruid, language, version.",
+          );
+        }
+        await referenceValidationService.validateDwengoLearningObject(
+          dwengoHruid,
+          dwengoLanguage,
+          dwengoVersion,
+        );
+      } else {
+        if (!localLearningObjectId) {
+          throw new BadRequestError(
+            "LocalLearningObjectId is missing for local question.",
+          );
+        }
+        await referenceValidationService.validateLocalLearningObject(
+          localLearningObjectId,
         );
       }
-      await referenceValidationService.validateDwengoLearningObject(
-        dwengoHruid,
-        dwengoLanguage,
-        dwengoVersion,
-      );
-    } else {
-      if (!localLearningObjectId) {
-        throw new BadRequestError(
-          "LocalLearningObjectId is missing for local question.",
-        );
-      }
-      await referenceValidationService.validateLocalLearningObject(
-        localLearningObjectId,
-      );
-    }
 
-    return await handlePrismaQuery(() =>
-      prisma.questionSpecific.create({
+      return tx.questionSpecific.create({
         data: {
           questionId: baseQuestion.id,
           isExternal,
@@ -206,8 +207,8 @@ export default class QuestionService {
           dwengoLanguage: isExternal ? dwengoLanguage : undefined,
           dwengoVersion: isExternal ? dwengoVersion : undefined,
         },
-      }),
-    );
+      });
+    });
   }
 
   /**
@@ -225,41 +226,42 @@ export default class QuestionService {
     pathRef: string,
     dwengoLanguage?: string,
   ): Promise<QuestionGeneral> {
-    const baseQuestion = await this.createQuestionAndMessage(
-      assignmentId,
-      teamId,
-      creatorId,
-      title,
-      text,
-      QuestionType.GENERAL,
-      creatorRole === "TEACHER",
-      isPrivate,
-    );
-
-    // Validatie path
-    if (isExternal) {
-      if (!dwengoLanguage) {
-        throw new BadRequestError(
-          "Dwengo language is missing for external path question.",
-        );
-      }
-      await referenceValidationService.validateDwengoLearningPath(
-        pathRef,
-        dwengoLanguage,
+    return await handlePrismaTransaction(prisma, async (tx) => {
+      const baseQuestion = await this.createQuestionAndMessage(
+        tx,
+        assignmentId,
+        teamId,
+        creatorId,
+        title,
+        text,
+        QuestionType.GENERAL,
+        creatorRole === "TEACHER",
+        isPrivate,
       );
-    } else {
-      await referenceValidationService.validateLocalLearningPath(pathRef);
-    }
 
-    return await handlePrismaQuery(() =>
-      prisma.questionGeneral.create({
+      // Validatie path
+      if (isExternal) {
+        if (!dwengoLanguage) {
+          throw new BadRequestError(
+            "Dwengo language is missing for external path question.,
+          );
+        }
+        await referenceValidationService.validateDwengoLearningPath(
+          pathRef,
+          dwengoLanguag,
+        );
+      } else {
+        await referenceValidationService.validateLocalLearningPath(pathRef);
+      }
+
+      return tx.questionGeneral.create({
         data: {
           questionId: baseQuestion.id,
           pathRef,
           isExternal,
         },
-      }),
-    );
+      });
+    });
   }
 
   /**

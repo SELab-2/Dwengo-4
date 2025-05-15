@@ -1,6 +1,8 @@
 import express, { Router } from "express";
 import { protectStudent } from "../../middleware/authMiddleware/studentAuthMiddleware";
 import StudentSubmissionController from "../../controllers/student/studentSubmissionController";
+import { validateRequest } from "../../middleware/validateRequest";
+import { assignmentAndEvaluationIdParamSchema } from "../../zodSchemas";
 
 const router: Router = express.Router();
 const controller = new StudentSubmissionController();
@@ -15,8 +17,11 @@ router.use(protectStudent);
  */
 router.get(
   "/assignment/:assignmentId/",
+  validateRequest({
+    customErrorMessage: "invalid assignmentId request parameter",
+    paramsSchema: assignmentIdParamsSchem,
+  }),
   controller.getSubmissionsForAssignment,
-  // controller.getSubmissionsForAssignment,
 );
 
 /**
@@ -28,6 +33,11 @@ router.get(
  */
 router.post(
   "/assignment/:assignmentId/evaluation/:evaluationId",
+  validateRequest({
+    customErrorMessage:
+      "invalid assignmentId or evaluationId request parameter",
+    paramsSchema: assignmentAndEvaluationIdParamSchema,
+  }),
   controller.createSubmission,
 );
 
@@ -40,6 +50,11 @@ router.post(
  */
 router.get(
   "/assignment/:assignmentId/evaluation/:evaluationId",
+  validateRequest({
+    customErrorMessage:
+      "invalid assignmentId or evaluationId request parameter",
+    paramsSchema: assignmentAndEvaluationIdParamSchem,
+  }),
   controller.getSubmissionsForEvaluation,
 );
 

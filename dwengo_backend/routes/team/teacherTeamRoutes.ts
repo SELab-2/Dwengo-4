@@ -2,19 +2,21 @@ import { Router } from "express";
 
 import {
   createTeamInAssignment,
+  deleteTeamInAssignment,
   getTeamsInAssignment,
   updateTeamsInAssignment,
-  deleteTeamInAssignment,
 } from "../../controllers/teacher/teacherTeamsController";
-import {
-  makeAssignmentIdParamValid,
-  makeTeamIdParamValid,
-  ensureTeamsParamValidTeamDivision,
-  ensureTeamParamValidIdentifiableTeamDivision,
-} from "../../middleware/teamValidationMiddleware";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
+import { validateRequest } from "../../middleware/validateRequest";
+import {
+  assignmentIdParamsSchema,
+  teamIdParamsSchema,
+  identifiableTeamsBodySchema,
+  teamsBodySchema,
+  classAndAssignmentIdParamsSchema,
+} from "../../zodSchemas";
 
-const router = Router();
+const router: Router = Router();
 router.use(protectTeacher);
 
 //////////////////////
@@ -30,8 +32,11 @@ router.use(protectTeacher);
  */
 router.post(
   "/class/:classId/assignment/:assignmentId",
-  makeAssignmentIdParamValid,
-  ensureTeamsParamValidTeamDivision,
+  validateRequest({
+    customErrorMessage: "invalid request for creating teams",
+    paramsSchema: classAndAssignmentIdParamsSchema,
+    bodySchema: teamsBodySchema,
+  }),
   createTeamInAssignment,
 );
 
@@ -43,7 +48,10 @@ router.post(
  */
 router.get(
   "/assignment/:assignmentId/all",
-  makeAssignmentIdParamValid,
+  validateRequest({
+    customErrorMessage: "invalid request for getting teams",
+    paramsSchema: assignmentIdParamsSchem,
+  }),
   getTeamsInAssignment,
 );
 
@@ -56,8 +64,10 @@ router.get(
  */
 router.patch(
   "/assignment/:assignmentId",
-  makeAssignmentIdParamValid,
-  ensureTeamParamValidIdentifiableTeamDivision,
+  validateRequest({
+    paramsSchema: assignmentIdParamsSchema,
+    bodySchema: identifiableTeamsBodySchema,
+  }),
   updateTeamsInAssignment,
 );
 
@@ -68,9 +78,13 @@ router.patch(
  * @param assignmentId: number
  * @access Teacher
  */
+// TODO: Deze route heeft geen /assignment/:assignmentId nodig?
 router.delete(
   "/:teamId/assignment/:assignmentId",
-  makeTeamIdParamValid,
+  validateRequest({
+    customErrorMessage: "invalid request for deleting a team",
+    paramsSchema: teamIdParamsSchema,
+  }),
   deleteTeamInAssignment,
 );
 

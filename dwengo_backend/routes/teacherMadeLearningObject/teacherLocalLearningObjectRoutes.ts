@@ -1,14 +1,19 @@
-import express from "express";
+import express, { Router } from "express";
 import {
   createLocalLearningObject,
-  getLocalLearningObjects,
-  getLocalLearningObjectById,
-  updateLocalLearningObject,
   deleteLocalLearningObject,
+  getLocalLearningObjectById,
+  getLocalLearningObjects,
+  updateLocalLearningObject,
 } from "../../controllers/teacher/teacherLocalLearningObjectController";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
+import {
+  localLearningObjectBodySchema,
+  partialLocalLearningObjectBodySchema,
+} from "../../zodSchemas";
+import { validateRequest } from "../../middleware/validateRequest";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // Alle routes hier alleen toegankelijk voor geauthenticeerde teachers
 router.use(protectTeacher);
@@ -22,7 +27,17 @@ router.use(protectTeacher);
  * @description Alle leerobjecten van deze teacher ophalen
  * @access Teacher
  */
-router.route("/").post(createLocalLearningObject).get(getLocalLearningObjects);
+router
+  .route("/")
+  .post(
+    validateRequest({
+      customErrorMessage:
+        "invalid request for creating a local learning object",
+      bodySchema: localLearningObjectBodySchema,
+    }),
+    createLocalLearningObject,
+  )
+  .get(getLocalLearningObjects);
 
 /**
  * @route GET    /learningObjectByTeacher/:createdLearningObjectId
@@ -44,7 +59,14 @@ router.route("/").post(createLocalLearningObject).get(getLocalLearningObjects);
 router
   .route("/:createdLearningObjectId")
   .get(getLocalLearningObjectById)
-  .patch(updateLocalLearningObject)
+  .patch(
+    validateRequest({
+      customErrorMessage:
+        "invalid request for updating a local learning object",
+      bodySchema: partialLocalLearningObjectBodySchea,
+    }),
+    updateLocalLearningObjet,
+  )
   .delete(deleteLocalLearningObject);
 
 export default router;

@@ -5,12 +5,12 @@ import { LearningPathFilter } from '../../components/learningPath/learningPathFi
 import { Filter } from '../../components/ui/filters';
 import { Link } from 'react-router-dom';
 import { filterLearningPaths } from '@/util/filter';
-import { fetchLearningPaths } from '@/util/teacher/learningPath';
+import { fetchLearningPaths } from '@/util/shared/learningPath';
 import { useTranslation } from 'react-i18next';
 
 /**
  * Generates a background color based on the given ID.
- *
+ * 
  * @param {string} id - The ID to generate the background color for.
  * @returns {string} The generated background color in HSL format.
  */
@@ -26,7 +26,7 @@ interface LearningPathCardProps {
 
 /**
  * LearningPathCard component displays a single learning path card.
- *
+ * 
  * @param {LearningPathCardProps} props - The props for the component.
  * @returns {JSX.Element} The rendered LearningPathCard component.
  */
@@ -74,13 +74,13 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ path }) => {
 
 /**
  * LearningPaths component displays all available learning paths.
- *
+ * 
  * Features:
  * - Fetches and displays all learning paths
  * - Shows title and description for each path
  * - Provides links to individual learning paths
  * - Handles loading and error states
- *
+ * 
  * @component
  * @returns {JSX.Element} The rendered LearningPaths component
  */
@@ -115,14 +115,12 @@ const LearningPaths: React.FC = () => {
 
   const uniqueLanguages = useMemo(() => {
     if (!learningPaths) return [];
-    const languages = new Set(
-      learningPaths
-        .filter((path) => path.language !== null && path.language !== undefined)
-        .map((path) => path.language),
-    );
+    const languages = new Set(learningPaths
+      .filter(path => path.language !== null && path.language !== undefined)
+      .map(path => path.language));
     return Array.from(languages)
-      .map((language) => ({
-        name: language,
+     , .map(language => ({
+        name: language
       }))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [learningPaths]);
@@ -131,7 +129,6 @@ const LearningPaths: React.FC = () => {
     () => filterLearningPaths(learningPaths || [], filters, searchQuery),
     [learningPaths, filters, searchQuery],
   );
-
   const { t } = useTranslation();
 
   return (
@@ -157,19 +154,17 @@ const LearningPaths: React.FC = () => {
       {isLoading && <p className="text-gray-600">{t('loading.loading')}</p>}
       {isError && <p className="text-red-500">Error: {error.message}</p>}
 
-      {!isLoading &&
-        !isError &&
-        (filteredResults.length === 0 ? (
-          <p className="text-gray-600">
-            {t('learning_paths.not_found_filter')}
-          </p>
+      {!isLoading && !isError && (
+        filteredResults.length === 0 ? (
+          <p className="text-gray-600">{t('learning_paths.not_found_filter')}</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-10/12 mx-auto">
             {filteredResults.map((path) => (
               <LearningPathCard key={path.id} path={path} />
             ))}
           </div>
-        ))}
+        )
+      )}
     </div>
   );
 };

@@ -13,10 +13,9 @@ import { Property, checkIfTeacherIsCreator } from "./teacherChecks";
  */
 export const createLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = getUserFromAuthRequest(req).id;
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
     const data: LocalLearningObjectData = req.body;
-    // Eventuele extra validatie (bv. velden checken) kan hier
 
     const createdLO = await LocalLearningObjectService.createLearningObject(
       teacherId,
@@ -31,24 +30,26 @@ export const createLocalLearningObject = asyncHandler(
 
 /**
  * Haal alle leerobjecten op van deze teacher.
+ * GET /learningObjectByTeacher
  */
 export const getLocalLearningObjects = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = getUserFromAuthRequest(req).id;
+    const teacherId: number = getUserFromAuthRequest(req).id;
     const objects =
       await LocalLearningObjectService.getAllLearningObjectsByTeacher(
         teacherId,
       );
-    res.json(objects);
+    res.status(200).json(objects);
   },
 );
 
 /**
  * Haal één leerobject op.
+ * GET /learningObjectByTeacher/:createdLearningObjectId
  */
 export const getLocalLearningObjectById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = getUserFromAuthRequest(req).id;
+    const teacherId: number = getUserFromAuthRequest(req).id;
     const { createdLearningObjectId } = req.params;
     const found: LearningObject =
       await LocalLearningObjectService.getLearningObjectById(
@@ -62,16 +63,17 @@ export const getLocalLearningObjectById = asyncHandler(
       Property.LearningObject,
     );
 
-    res.json(found);
+    res.status(200).json(found);
   },
 );
 
 /**
  * Update een leerobject.
+ * PATCH /learningObjectByTeacher/:createdLearningObjectId
  */
 export const updateLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = getUserFromAuthRequest(req).id;
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
     const { createdLearningObjectId } = req.params;
     const data: Partial<LocalLearningObjectData> = req.body;
@@ -100,10 +102,11 @@ export const updateLocalLearningObject = asyncHandler(
 
 /**
  * Verwijder een leerobject.
+ * DELETE /learningObjectByTeacher/:createdLearningObjectId
  */
 export const deleteLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const teacherId = getUserFromAuthRequest(req).id;
+    const teacherId: number = getUserFromAuthRequest(req).id;
 
     const { createdLearningObjectId } = req.params;
     const existing = await LocalLearningObjectService.getLearningObjectById(

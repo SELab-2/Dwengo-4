@@ -1,22 +1,21 @@
 import express, { Router } from "express";
 import {
   createInvite,
+  deleteInvite,
   getPendingInvitesForClass,
   getPendingInvitesForTeacher,
   updateInviteStatus,
-  deleteInvite,
 } from "../../controllers/teacher/inviteController";
 
 import { validateRequest } from "../../middleware/validateRequest";
-import {
-  createInviteBodySchema,
-  createInviteParamsSchema,
-  deleteInviteParamsSchema,
-  getClassInvitesParamsSchema,
-  updateInviteBodySchema,
-  updateInviteParamsSchema,
-} from "../../zodSchemas/inviteSchemas";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
+import {
+  classAndInviteIdParamsSchema,
+  classIdParamsSchema,
+  inviteActionBodySchema,
+  inviteIdParamsSchema,
+  otherTeacherEmailBodySchema,
+} from "../../zodSchemas";
 
 const router: Router = express.Router();
 
@@ -40,8 +39,8 @@ router.post(
   "/class/:classId",
   validateRequest({
     customErrorMessage: "invalid request for invite creation",
-    bodySchema: createInviteBodySchema,
-    paramsSchema: createInviteParamsSchema,
+    bodySchema: otherTeacherEmailBodySchema,
+    paramsSchema: classIdParamsSchem,
   }),
   createInvite,
 );
@@ -55,7 +54,7 @@ router.get(
   "/class/:classId",
   validateRequest({
     customErrorMessage: "invalid request params",
-    paramsSchema: getClassInvitesParamsSchema,
+    paramsSchema: classIdParamsSchema,
   }),
   getPendingInvitesForClass,
 );
@@ -70,8 +69,8 @@ router.patch(
   "/:inviteId",
   validateRequest({
     customErrorMessage: "invalid request for invite update",
-    bodySchema: updateInviteBodySchema,
-    paramsSchema: updateInviteParamsSchema,
+    bodySchema: inviteActionBodySchema,
+    paramsSchema: inviteIdParamsSchem,
   }),
   updateInviteStatus,
 );
@@ -86,7 +85,7 @@ router.delete(
   "/:inviteId/class/:classId",
   validateRequest({
     customErrorMessage: "invalid request params",
-    paramsSchema: deleteInviteParamsSchema,
+    paramsSchema: classAndInviteIdParamsSchema,
   }),
   deleteInvite,
 );

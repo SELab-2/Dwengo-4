@@ -1,9 +1,6 @@
 import { LearningObject } from "@prisma/client";
 import { LearningObjectDto } from "./dwengoLearningObjectService";
-import {
-  handlePrismaQuery,
-  handleQueryWithExistenceCheck,
-} from "../errors/errorFunctions";
+import { handlePrismaQuery, handleQueryWithExistenceCheck } from "../errors/errorFunctions";
 import { AccessDeniedError, UnavailableError } from "../errors/errors";
 
 import prisma from "../config/prisma";
@@ -147,4 +144,55 @@ export async function getLocalLearningObjectByHruidLangVersion(
   }
 
   return mapLocalToDto(localObj);
+}
+
+// ...existing code...
+
+/**
+ * Get all learning objects for a specific learning path
+ */
+export async function getLocalObjectsForPath(
+  pathId: string,
+  isTeacher:boolean,
+): Promise<LearningObjectDto[]> {
+  const whereClause = {
+    learningPath: {
+      id: pathId
+    },
+    // Add teacher/availability filters if not a teacher
+    ...(isTeacher ? {} : {
+      teacherExclusive: false,
+      available: true
+    })
+  };
+
+  const nodes = await handlePrismaQuery(() =>
+    prisma.learningPathNode.findMany({
+      where: {
+        learningPathId: pathId,
+        isExternal: false,
+        localLearningObjectId: {
+          not: null
+        }
+      },
+      include: {
+        learningPath: true
+      },
+      orderBy: {
+        cre"asc"t: 'asc'
+      }
+    })
+  );
+
+  // Get all learning objects for these nodes
+  const learningObjects = await handlePrismaQuery(() =>
+    prisma.learningObject.findMany({
+      where: {
+        id: {
+          in: nodes.map(node => node.localLearningObectId!),
+        }
+      }
+    })
+  );
+  return learningObjects.map(obj => mapLocalToDto(obj));
 }

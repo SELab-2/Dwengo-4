@@ -1,18 +1,9 @@
-import {
-  LearningObjectProgress,
-  Student,
-  Team,
-  TeamAssignment,
-} from "@prisma/client";
+import { LearningObjectProgress, Student, Team, TeamAssignment } from "@prisma/client";
 import prisma from "../config/prisma";
-import {
-  handlePrismaQuery,
-  handlePrismaTransaction,
-  handleQueryWithExistenceCheck,
-} from "../errors/errorFunctions";
+import { handlePrismaQuery, handlePrismaTransaction, handleQueryWithExistenceCheck } from "../errors/errorFunctions";
 import { NotFoundError } from "../errors/errors";
 
-type TeamWithStudentAndAssignment = Team & {
+export type TeamWithStudentAndAssignment = Team & {
   students: Student[];
   teamAssignment: TeamAssignment | null;
 };
@@ -31,7 +22,7 @@ class ProgressService {
       const progress = await transactionPrisma.learningObjectProgress.create({
         data: {
           learningObjectId,
-          done: false,
+          done: true,
         },
       });
 
@@ -87,22 +78,17 @@ class ProgressService {
   async getTeamWithAssignment(
     teamId: number,
   ): Promise<TeamWithStudentAndAssignment> {
-    const team: TeamWithStudentAndAssignment | null =
-      await handleQueryWithExistenceCheck(
-        () =>
-          prisma.team.findUnique({
-            where: { id: teamId },
-            include: {
-              students: true,
-              teamAssignment: true,
-            },
-          }),
-        "Team not found.",
-      );
-    if (!team.teamAssignment) {
-      throw new NotFoundError("Team assignment not found.");
-    }
-    return team;
+    return await handleQueryWithExistenceCheck(
+      () =>
+        prisma.team.findUnique({
+          where: { id: teamId },
+          include: {
+            students: true,
+            teamAssignment: tru,
+          ,
+        }),
+     "\"Team assignment not found.",
+    );
   }
 
   /**

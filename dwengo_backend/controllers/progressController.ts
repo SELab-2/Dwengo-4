@@ -1,9 +1,9 @@
 import { Response } from "express";
 import { AuthenticatedRequest } from "../interfaces/extendedTypeInterfaces";
 import { getUserFromAuthRequest } from "../helpers/getUserFromAuthRequest";
-import progressService from "../services/progressService";
+import progressService, { TeamWithStudentAndAssignment } from "../services/progressService";
 import asyncHandler from "express-async-handler";
-import { LearningObjectProgress } from "@prisma/client";
+import { Assignment, LearningObjectProgress } from "@prisma/client";
 
 /**
  * Creëert een nieuw progressie-record voor een student bij een (lokaal) leerobject.
@@ -12,12 +12,10 @@ import { LearningObjectProgress } from "@prisma/client";
 export const createProgress = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const studentId: number = getUserFromAuthRequest(req).id;
-    const learningObjectId: string = req.params.learningObjectId;
+    const { learningObjectId } = req.params;
 
-    const progress = await progressService.createProgress(
-      studentId,
-      learningObjectId,
-    );
+    const progress: LearningObjectProgress =
+      await progressService.createProgress(studentId, learningObjectId);
 
     res.status(201).json({
       message: "Progressie aangemaakt.",
@@ -69,21 +67,16 @@ export const updateProgress = asyncHandler(
  */
 export const getTeamProgressStudent = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    if (!req.user) {
-      res.status(401).json({ error: "Niet ingelogd." });
-      return;
-    }
+    // Used for validation, the return value isn't used
+    getUserFromAuthRequest(req);
 
-    const teamId: number = parseInt(req.params.teamid, 10);
-    if (isNaN(teamId)) {
-      res.status(400).json({ error: "Ongeldig team ID." });
-      return;
-    }
+    const teamId: number = req.params.teamId as unknown as number;
 
     // Haal team + assignment
-    const team = await progressService.getTeamWithAssignment(teamId);
+    const team: TeamWithStudentAndAssignment =
+      await progressService.getTeamWithAssignment(teamId);
 
-    const assignment = await progressService.getAssignment(
+    const assignment: Assignment = await progressService.getAssignment(
       team.teamAssignment!.assignmentId,
     );
 
@@ -93,23 +86,15 @@ export const getTeamProgressStudent = asyncHandler(
       return;
     }
 
-    // tel alle nodes in local learning path
-    const totalNodes = await progressService.countNodesInPath(
+    const { totalNodes, objectIds } = await getNodesAndObjectIds(
       assignment.pathRef,
     );
 
-    // haal local object ids
-    const objectIds = await progressService.getLocalObjectIdsInPath(
-      assignment.pathRef,
-    );
-
-    let maxPercentage = 0;
+    let maxPercentage: number = 0;
     for (const s of team.students) {
-      const doneCount = await progressService.countDoneProgressForStudent(
-        s.userId,
-        objectIds,
-      );
-      const percentage = (doneCount / totalNodes) * 100;
+      const doneCount: number =
+        await progressService.countDoneProgressForStudent(s.userId, objectIds);
+      const percentage: number = (doneCount / totalNodes) * 100;
       if (percentage > maxPercentage) {
         maxPercentage = percentage;
       }
@@ -119,38 +104,45 @@ export const getTeamProgressStudent = asyncHandler(
   },
 );
 
+const getNodesAndObjectIds = async (
+  pathRef: string,
+): Promise<{ totalNodes: number; objectIds: string[] }> => {
+  // tel alle nodes in a local learning path
+  const totalNodes: number = await progressService.countNodesInPath(pathRef);
+
+  // haal local object ids
+  const objectIds: string[] =
+    await progressService.getLocalObjectIdsInPath(pathRef);
+
+  return { totalNodes, objectIds };
+};
+
 /**
  * (Voor STUDENT) Hoe ver staat de student met deze assignment?
  */
 export const getStudentAssignmentProgress = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const studentId: number = getUserFromAuthRequest(req).id;
-    const assignmentId: number = parseInt(req.params.assignmentId, 10);
-    if (isNaN(assignmentId)) {
-      res.status(400).json({ error: "Ongeldig assignment ID." });
-      return;
-    }
+    const assignmentId: number = req.params.assignmentId as unknown as number;
 
-    const assignment = await progressService.getAssignment(assignmentId);
+    const assignment: Assignment =
+      await progressService.getAssignment(assignmentId);
 
     if (assignment.isExternal) {
       res.json({ assignmentProgress: 0 });
       return;
     }
 
-    const totalNodes = await progressService.countNodesInPath(
+    const { totalNodes, objectIds } = await getNodesAndObjectIds(
       assignment.pathRef,
     );
 
-    const objectIds = await progressService.getLocalObjectIdsInPath(
-      assignment.pathRef,
-    );
-    const doneCount = await progressService.countDoneProgressForStudent(
+    const doneCount: number = await progressService.countDoneProgressForStudent(
       studentId,
       objectIds,
     );
 
-    const percentage = (doneCount / totalNodes) * 100;
+    const percentage: number = (doneCount / totalNodes) * 100;
     res.status(200).json({ assignmentProgress: percentage });
   },
 );
@@ -163,22 +155,16 @@ export const getStudentLearningPathProgress = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const studentId: number = getUserFromAuthRequest(req).id;
     const { learningPathId } = req.params;
-    if (!learningPathId) {
-      res.status(400).json({ error: "Ongeldig leerpad ID." });
-      return;
-    }
 
-    // tel local nodes
-    const totalNodes = await progressService.countNodesInPath(learningPathId);
+    const { totalNodes, objectIds } =
+      await getNodesAndObjectIds(learningPathId);
 
-    const objectIds =
-      await progressService.getLocalObjectIdsInPath(learningPathId);
-    const doneCount = await progressService.countDoneProgressForStudent(
+    const doneCount: number = await progressService.countDoneProgressForStudent(
       studentId,
       objectIds,
     );
 
-    const percentage = (doneCount / totalNodes) * 100;
+    const percentage: number = (doneCount / totalNodes) * 100;
     res.status(200).json({ learningPathProgress: percentage });
   },
 );
@@ -188,17 +174,12 @@ export const getStudentLearningPathProgress = asyncHandler(
  */
 export const getTeamProgressTeacher = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    if (!req.user) {
-      res.status(401).json({ error: "Niet ingelogd." });
-      return;
-    }
-    const teamId: number = parseInt(req.params.teamid, 10);
-    if (isNaN(teamId)) {
-      res.status(400).json({ error: "Ongeldig team ID." });
-      return;
-    }
+    getUserFromAuthRequest(req);
 
-    const team = await progressService.getTeamWithAssignment(teamId);
+    const teamId: number = req.params.teamId as unknown as number;
+
+    const team: TeamWithStudentAndAssignment =
+      await progressService.getTeamWithAssignment(teamId);
     const assignment = await progressService.getAssignment(
       team.teamAssignment!.assignmentId,
     );
@@ -208,83 +189,111 @@ export const getTeamProgressTeacher = asyncHandler(
       return;
     }
 
-    const totalNodes = await progressService.countNodesInPath(
+    const { totalNodes, objectIds } = await getNodesAndObjectIds(
       assignment.pathRef,
     );
 
-    const objectIds = await progressService.getLocalObjectIdsInPath(
-      assignment.pathRef,
+    const maxPercentage: number = await calcMaxProgressForStudents(
+      team,
+      totalNodes,
+      objectIds,
     );
-
-    let maxPercentage = 0;
-    for (const student of team.students) {
-      const doneCount = await progressService.countDoneProgressForStudent(
-        student.userId,
-        objectIds,
-      );
-      const perc = (doneCount / totalNodes) * 100;
-      if (perc > maxPercentage) {
-        maxPercentage = perc;
-      }
-    }
 
     res.status(200).json({ teamProgress: maxPercentage });
   },
 );
+
+const calcMaxProgressForStudents = async (
+  team: any,
+  totalNodes: number,
+  objectIds: string[,
+): Promise<number> => {
+  let maxPercentage: number = 0;
+  for (const student of team.students) {
+    const doneCount: number = await progressService.countDoneProgressForStudent(
+      student.userId,
+      objectId,
+    );
+    const perc: number = (doneCount / totalNodes) * 100;
+    if (perc > maxPercentage) {
+      maxPercentage = perc;
+    }
+  }
+  return maxPercentage;
+};
 
 /**
  * (Voor TEACHER) Gemiddelde voortgang van een klas (alle teams).
  */
 export const getAssignmentAverageProgress = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    if (!req.user) {
-      res.status(401).json({ error: "Niet ingelogd." });
-      return;
-    }
-    const assignmentId = parseInt(req.params.assignmentId, 10);
-    if (isNaN(assignmentId)) {
-      res.status(400).json({ error: "Ongeldig assignment ID." });
-      return;
-    }
+    getUserFromAuthRequest(req);
+    const assignmentId = req.params.assignmentId as unknown as number;
 
-    const assignment = await progressService.getAssignment(assignmentId);
+    const assignment: Assignment =
+      await progressService.getAssignment(assignmentId);
 
     if (assignment.isExternal) {
       res.json({ averageProgress: 0 });
       return;
     }
 
-    const totalNodes = await progressService.countNodesInPath(
+    const { totalNodes, objectIds } = await getNodesAndObjectIds(
       assignment.pathRef,
     );
 
-    const objectIds = await progressService.getLocalObjectIdsInPath(
-      assignment.pathRef,
-    );
     const teamAssignments =
       await progressService.getTeamsForAssignment(assignmentId);
 
-    let totalProgress = 0;
-    let teamCount = 0;
+    let totalProgress: number = 0;
+    let teamCount: number = 0;
 
     for (const ta of teamAssignments) {
       const team = ta.team;
-      let teamMax = 0;
-      for (const student of team.students) {
-        const doneCount = await progressService.countDoneProgressForStudent(
-          student.userId,
-          objectIds,
-        );
-        const percentage = (doneCount / totalNodes) * 100;
-        if (percentage > teamMax) {
-          teamMax = percentage;
-        }
-      }
+      const teamMax: number = await calcMaxProgressForStudents(
+        team,
+        totalNodes,
+        objectIds
+      );
       totalProgress += teamMax;
       teamCount++;
     }
 
-    const averageProgress = teamCount > 0 ? totalProgress / teamCount : 0;
+    const averageProgress: number =
+      teamCount > 0 ? totalProgress / teamCount : 0;
     res.status(200).json({ averageProgress });
   },
+);
+
+
+/**
+ * Creates or updates progress for a student's learning object.
+ * If progress doesn't exist, creates it. If it exists, updates it.
+ */
+export const upsertProgress = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const studentId: number = getUserFromAuthRequest(req).id;
+    const { learningObjectId } = req.params;
+
+    try {
+      const existingProgress = await progressService.getStudentProgress(
+        studentId,
+        learningObjectId
+      );
+      const progress = await progressService.updateProgressToDone(existingProgress.id);
+
+      res.status(200).json({
+        message: "Progress successfully updated",
+        progress: progress
+      });
+
+    } catch {
+      const progress = await progressService.createProgress(studentId, learningObjectId);
+
+      res.status(201).json({
+        message: "Progress successfully created",
+        progress: progress
+      });
+    }
+  }
 );
