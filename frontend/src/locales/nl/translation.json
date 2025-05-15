@@ -134,6 +134,10 @@
   "learning_paths": {
     "label": "Leerpaden",
     "search_name": "Zoek op naam",
-    "not_found_filter": "Geen leerpaden gevonden met deze filter"
+    "not_found_filter": "Geen leerpaden gevonden met deze filter",
+    "filter": {
+      "clear": "Wis filter",
+      "not_found": "Geen resultaten gevonden"
+    }
   }
 }

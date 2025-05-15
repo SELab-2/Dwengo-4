@@ -134,6 +134,10 @@
   "learning_paths": {
     "label": "Learning paths",
     "search_name": "Search by name",
-    "not_found_filter": "No learning paths found with this filter"
+    "not_found_filter": "No learning paths found with this filter",
+    "filter": {
+      "clear": "Clear filter",
+      "not_found": "No results found"
+    }
   }
 }
