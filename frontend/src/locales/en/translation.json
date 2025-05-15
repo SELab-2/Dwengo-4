@@ -130,5 +130,19 @@
     "success": "You have successfully requested access to the class. The teacher will approve your request soon."
   },
   "code": "Class code",
-  "close": "Close"
+  "close": "Close",
+  "learning_paths": {
+    "label": "Learning paths",
+    "search_name": "Search by name",
+    "not_found_filter": "No learning paths found with this filter",
+    "filter": {
+      "clear": "Clear filter",
+      "not_found": "No results found"
+    }
+  },
+  "learning_objects": {
+    "loading": "Loading learning paths ...",
+    "next": "Up next",
+    "end": "End of learning path"
+  }
 }
