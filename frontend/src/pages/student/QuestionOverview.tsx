@@ -136,10 +136,10 @@ const QuestionOverview: React.FC = () => {
         )}
 
       <div className="flex flex-col w-[40rem]">
-        <h2 className="self-center text-2xl mt-8">Comments:</h2>
+        <h2 className="self-center text-3xl mt-8">Comments:</h2>
         <div className="flex flex-col space-y-1 mt-2">
           {question.questionConversation?.length <= 1 && (
-            <div className="flex flex-row justify-center">
+            <div className="flex flex-row justify-center mb-8">
               <p>
                 Nog niemand heeft een comment achtergelaten voor deze vraag...
               </p>

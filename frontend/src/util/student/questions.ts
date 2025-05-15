@@ -173,6 +173,7 @@ export async function createNewQuestion(
         text,
         isExternal: resp.teamAssignment.assignment.isExternal,
         pathRef: resp.teamAssignment.assignment.pathRef,
+        isPrivate: false,
         dwengoLanguage: dwengoLanguage,
       }),
     },
