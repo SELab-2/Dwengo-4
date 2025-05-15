@@ -1,60 +1,68 @@
 import React from 'react';
-import { describe, it, afterEach, expect, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import { BrowserRouter, LinkProps } from 'react-router-dom';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter } from 'react-router-dom';
+import { render, screen, waitFor } from '@testing-library/react';
 
-import AssignmentOverview from '@/components/student/AssignmentOverview';
+import AssignmentsForClassOverview from '@/components/student/AssignmentClassOverview';
 import * as assignmentModule from '@/util/student/assignment';
 import type { AssignmentItem } from '@/util/student/assignment';
 
-// Mock translation
+// Mock translation to return the key or formatted strings
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, opts?: Record<string, unknown>) => {
-      if (key === 'deadline') return `Deadline: ${opts?.date}`;
-      if (key === 'loading.loading') return 'Laden...';
-      if (key === 'assignments.error') return 'Er is een fout opgetreden';
-      if (key === 'assignments.not_found') return 'Geen opdrachten gevonden';
-      if (key === 'assignments.view') return 'Bekijk opdracht';
-      return key;
+      switch (key) {
+        case 'deadline':
+          return `Deadline: ${opts?.date}`;
+        case 'loading.loading':
+          return 'Laden...';
+        case 'assignments.error':
+          return 'Er is een fout opgetreden';
+        case 'assignments.not_found':
+          return 'Geen opdrachten gevonden';
+        case 'assignments.view':
+          return 'Bekijk opdracht';
+        default:
+          return key;
+      }
     },
   }),
 }));
 
-// Mock Link component with proper typing
+// Mock react-router-dom Link
 vi.mock('react-router-dom', async () => {
   const actual =
     await vi.importActual<typeof import('react-router-dom')>(
       'react-router-dom',
     );
-  const StubLink: React.FC<LinkProps> = ({ children, to, ...rest }) => (
-    <a href={typeof to === 'string' ? to : ''} {...rest}>
-      {children}
-    </a>
-  );
-  return { ...actual, Link: StubLink };
+  return {
+    ...actual,
+    Link: ({ children, to }) => <a href={to}>{children}</a>,
+  };
 });
 
-// Disable query retries
-const createClient = () =>
+// Helper to disable retries
+const createQueryClient = () =>
   new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-// Render component helper
-const renderComponent = () =>
+// Render component within providers
+const renderComponent = (classId = '42') =>
   render(
-    <QueryClientProvider client={createClient()}>
+    <QueryClientProvider client={createQueryClient()}>
       <BrowserRouter>
-        <AssignmentOverview />
+        <AssignmentsForClassOverview classId={classId} />
       </BrowserRouter>
     </QueryClientProvider>,
   );
 
-afterEach(() => vi.clearAllMocks());
+afterEach(() => {
+  vi.clearAllMocks();
+});
 
-describe('AssignmentOverview – student', () => {
+describe('AssignmentClassOverview – student', () => {
   it('toont laadstatus', async () => {
-    vi.spyOn(assignmentModule, 'fetchAssignments').mockReturnValue(
+    vi.spyOn(assignmentModule, 'fetchAssignmentsForClass').mockReturnValue(
       new Promise<AssignmentItem[]>(() => {}),
     );
 
@@ -62,8 +70,8 @@ describe('AssignmentOverview – student', () => {
     expect(await screen.findByText('Laden...')).toBeInTheDocument();
   });
 
-  it('toont foutmelding met custom message', async () => {
-    vi.spyOn(assignmentModule, 'fetchAssignments').mockRejectedValue({
+  it('toont foutmelding met eigen message', async () => {
+    vi.spyOn(assignmentModule, 'fetchAssignmentsForClass').mockRejectedValue({
       info: { message: 'Er ging iets mis' },
     });
 
@@ -74,7 +82,9 @@ describe('AssignmentOverview – student', () => {
   });
 
   it('toont standaard foutmelding zonder message', async () => {
-    vi.spyOn(assignmentModule, 'fetchAssignments').mockRejectedValue({});
+    vi.spyOn(assignmentModule, 'fetchAssignmentsForClass').mockRejectedValue(
+      {},
+    );
 
     renderComponent();
     await waitFor(() =>
@@ -82,8 +92,8 @@ describe('AssignmentOverview – student', () => {
     );
   });
 
-  it('toont lijst van assignments', async () => {
-    const data: AssignmentItem[] = [
+  it('rendert een lijst van assignments met deadlines en view-knoppen', async () => {
+    const mockAssignments: AssignmentItem[] = [
       {
         id: 1,
         title: 'Opdracht 1',
@@ -94,22 +104,30 @@ describe('AssignmentOverview – student', () => {
         id: 2,
         title: 'Opdracht 2',
         description: 'Beschrijving 2',
-        deadline: '2025-06-01T12:00:00Z',
+        deadline: '2025-06-10T12:00:00Z',
       },
     ];
-    vi.spyOn(assignmentModule, 'fetchAssignments').mockResolvedValue(data);
 
-    renderComponent();
+    vi.spyOn(assignmentModule, 'fetchAssignmentsForClass').mockResolvedValue(
+      mockAssignments,
+    );
+
+    renderComponent('42');
+
     expect(await screen.findByText('Opdracht 1')).toBeInTheDocument();
     expect(screen.getByText('Opdracht 2')).toBeInTheDocument();
-    // beide deadlines zichtbaar
+
+    // beide deadlines aanwezig
     expect(screen.getAllByText(/Deadline:/)).toHaveLength(2);
-    // beide “Bekijk opdracht” knoppen
+
+    // twee “Bekijk opdracht” knoppen
     expect(screen.getAllByText('Bekijk opdracht')).toHaveLength(2);
   });
 
-  it('toont not-found boodschap bij lege lijst', async () => {
-    vi.spyOn(assignmentModule, 'fetchAssignments').mockResolvedValue([]);
+  it('toont “Geen opdrachten gevonden” bij lege lijst', async () => {
+    vi.spyOn(assignmentModule, 'fetchAssignmentsForClass').mockResolvedValue(
+      [],
+    );
 
     renderComponent();
     expect(

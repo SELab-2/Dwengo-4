@@ -1,139 +1,108 @@
-import React from 'react';
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, LinkProps } from 'react-router-dom';
-import { render, screen, waitFor } from '@testing-library/react';
+import React, { createRef } from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import InputWithChecks from '@/components/shared/InputWithChecks';
 
-import AssignmentsForClassOverview from '@/components/student/AssignmentClassOverview';
-import * as assignmentModule from '@/util/student/assignment';
-import type { AssignmentItem } from '@/util/student/assignment';
+describe('InputWithChecks component', () => {
+  // Define handle interface matching component's imperative handle
+  interface Handle {
+    validateInput: () => boolean;
+    getValue: () => string;
+  }
 
-// Mock translation to return the key or formatted strings
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, opts?: Record<string, unknown>) => {
-      switch (key) {
-        case 'deadline':
-          return `Deadline: ${opts?.date}`;
-        case 'loading.loading':
-          return 'Laden...';
-        case 'assignments.error':
-          return 'Er is een fout opgetreden';
-        case 'assignments.not_found':
-          return 'Geen opdrachten gevonden';
-        case 'assignments.view':
-          return 'Bekijk opdracht';
-        default:
-          return key;
-      }
-    },
-  }),
-}));
-
-// Mock react-router-dom Link with proper typing
-vi.mock('react-router-dom', async () => {
-  const actual =
-    await vi.importActual<typeof import('react-router-dom')>(
-      'react-router-dom',
+  const setup = (
+    props: {
+      label?: string;
+      inputType?: string;
+      validate?: (value: string) => string | null;
+      info?: string;
+      value?: string;
+      placeholder?: string;
+    } = {},
+  ) => {
+    const ref = createRef<Handle>();
+    render(
+      <InputWithChecks
+        ref={ref}
+        label={props.label}
+        inputType={props.inputType}
+        validate={props.validate}
+        info={props.info}
+        value={props.value}
+        placeholder={props.placeholder}
+      />,
     );
-  const StubLink: React.FC<LinkProps> = ({ children, to, ...rest }) => (
-    <a href={typeof to === 'string' ? to : ''} {...rest}>
-      {children}
-    </a>
-  );
-  return { ...actual, Link: StubLink };
-});
+    const input = screen.getByRole('textbox') as HTMLInputElement;
+    return { ref, input };
+  };
 
-// Helper to disable retries
-const createQueryClient = () =>
-  new QueryClient({ defaultOptions: { queries: { retry: false } } });
-
-// Render component within providers
-const renderComponent = (classId = '42') =>
-  render(
-    <QueryClientProvider client={createQueryClient()}>
-      <BrowserRouter>
-        <AssignmentsForClassOverview classId={classId} />
-      </BrowserRouter>
-    </QueryClientProvider>,
-  );
-
-afterEach(() => {
-  vi.clearAllMocks();
-});
-
-describe('AssignmentClassOverview – student', () => {
-  it('toont laadstatus', async () => {
-    vi.spyOn(assignmentModule, 'fetchAssignmentsForClass').mockReturnValue(
-      new Promise<AssignmentItem[]>(() => {}),
-    );
-
-    renderComponent();
-    expect(await screen.findByText('Laden...')).toBeInTheDocument();
+  it('renders label when provided', () => {
+    setup({ label: 'My Label' });
+    expect(screen.getByText('My Label')).toBeInTheDocument();
   });
 
-  it('toont foutmelding met eigen message', async () => {
-    vi.spyOn(assignmentModule, 'fetchAssignmentsForClass').mockRejectedValue({
-      info: { message: 'Er ging iets mis' },
+  it('renders info text when provided', () => {
+    setup({ info: 'Helpful info' });
+    expect(screen.getByText('Helpful info')).toBeInTheDocument();
+  });
+
+  it('sets placeholder attribute on input', () => {
+    setup({ placeholder: 'Enter text' });
+    const input = screen.getByPlaceholderText('Enter text');
+    expect(input).toBeInTheDocument();
+  });
+
+  it('calls validate on blur and shows error message', () => {
+    const validateFn = (v: string) => (v.length < 5 ? 'Too short' : null);
+    const { input } = setup({ validate: validateFn });
+
+    fireEvent.change(input, { target: { value: '123' } });
+    fireEvent.blur(input);
+
+    expect(screen.getByText('Too short')).toBeInTheDocument();
+    expect(input).toHaveClass('border-red');
+  });
+
+  it('clears error message when input becomes valid', () => {
+    const validateFn = (v: string) => (v !== 'ok' ? 'Invalid' : null);
+    const { input } = setup({ validate: validateFn });
+
+    // initial invalid
+    fireEvent.change(input, { target: { value: 'nope' } });
+    expect(screen.getByText('Invalid')).toBeInTheDocument();
+
+    // now valid
+    fireEvent.change(input, { target: { value: 'ok' } });
+    expect(screen.queryByText('Invalid')).toBeNull();
+    expect(input).not.toHaveClass('border-red');
+  });
+
+  it('validateInput handle returns false and sets error when invalid', async () => {
+    const validateFn = (v: string) => (v.length === 0 ? 'Required' : null);
+    const { ref } = setup({ validate: validateFn });
+
+    // no change, default value is empty => invalid
+    const valid = ref.current?.validateInput();
+    expect(valid).toBe(false);
+    await waitFor(() => {
+      expect(screen.getByText('Required')).toBeInTheDocument();
     });
-
-    renderComponent();
-    await waitFor(() =>
-      expect(screen.getByText(/Er ging iets mis/)).toBeInTheDocument(),
-    );
   });
 
-  it('toont standaard foutmelding zonder message', async () => {
-    vi.spyOn(assignmentModule, 'fetchAssignmentsForClass').mockRejectedValue(
-      {},
-    );
+  it('validateInput handle returns true when valid', async () => {
+    const validateFn = (v: string) => (v === 'good' ? null : 'Bad');
+    const { ref, input } = setup({ validate: validateFn });
 
-    renderComponent();
-    await waitFor(() =>
-      expect(screen.getByText('Er is een fout opgetreden')).toBeInTheDocument(),
-    );
+    fireEvent.change(input, { target: { value: 'good' } });
+    const valid = ref.current?.validateInput();
+    expect(valid).toBe(true);
+    await waitFor(() => {
+      expect(screen.queryByText('Bad')).toBeNull();
+    });
   });
 
-  it('rendert een lijst van assignments met deadlines en view-knoppen', async () => {
-    const mockAssignments: AssignmentItem[] = [
-      {
-        id: 1,
-        title: 'Opdracht 1',
-        description: 'Beschrijving 1',
-        deadline: '2025-05-20T12:00:00Z',
-      },
-      {
-        id: 2,
-        title: 'Opdracht 2',
-        description: 'Beschrijving 2',
-        deadline: '2025-06-10T12:00:00Z',
-      },
-    ];
-
-    vi.spyOn(assignmentModule, 'fetchAssignmentsForClass').mockResolvedValue(
-      mockAssignments,
-    );
-
-    renderComponent('42');
-
-    expect(await screen.findByText('Opdracht 1')).toBeInTheDocument();
-    expect(screen.getByText('Opdracht 2')).toBeInTheDocument();
-
-    // beide deadlines aanwezig
-    expect(screen.getAllByText(/Deadline:/)).toHaveLength(2);
-
-    // twee “Bekijk opdracht” knoppen
-    expect(screen.getAllByText('Bekijk opdracht')).toHaveLength(2);
-  });
-
-  it('toont “Geen opdrachten gevonden” bij lege lijst', async () => {
-    vi.spyOn(assignmentModule, 'fetchAssignmentsForClass').mockResolvedValue(
-      [],
-    );
-
-    renderComponent();
-    expect(
-      await screen.findByText('Geen opdrachten gevonden'),
-    ).toBeInTheDocument();
+  it('getValue handle returns current input value', () => {
+    const { ref, input } = setup();
+    fireEvent.change(input, { target: { value: 'Hello' } });
+    expect(ref.current?.getValue()).toBe('Hello');
   });
 });

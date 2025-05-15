@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -14,27 +14,34 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
-// Stub shared components
-vi.mock('@/components/shared/InputWithChecks', () => {
-  type Props = { label: string; placeholder?: string };
-  return {
-    __esModule: true,
-    default: React.forwardRef<
-      { validateInput: () => boolean; getValue: () => string },
-      Props
-    >((props, ref) => {
-      React.useImperativeHandle(ref, () => ({
-        validateInput: () => true,
-        getValue: () => 'input',
-      }));
-      return <input aria-label={props.label} placeholder={props.placeholder} />;
-    }),
-  };
-});
+// Stub shared components with stateful input
+vi.mock('@/components/shared/InputWithChecks', () => ({
+  __esModule: true,
+  default: forwardRef<
+    { validateInput: () => boolean; getValue: () => string },
+    { label: string; placeholder?: string }
+  >(({ label, placeholder }, ref) => {
+    const [val, setVal] = useState('');
+    useImperativeHandle(ref, () => ({
+      validateInput: () => val.trim().length > 0,
+      getValue: () => val,
+    }));
+    return (
+      <input
+        aria-label={label}
+        placeholder={placeholder}
+        value={val}
+        onChange={(e) => setVal(e.target.value)}
+      />
+    );
+  }),
+}));
+
+// Stub Modal and SuccessMessage
 vi.mock('@/components/shared/Modal', () => ({
   __esModule: true,
-  default: React.forwardRef((_, ref) => {
-    React.useImperativeHandle(ref, () => ({ open: vi.fn(), close: vi.fn() }));
+  default: forwardRef((_, ref) => {
+    useImperativeHandle(ref, () => ({ open: vi.fn(), close: vi.fn() }));
     return <div role="dialog" data-testid="modal" />;
   }),
 }));
