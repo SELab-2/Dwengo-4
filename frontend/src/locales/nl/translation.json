@@ -167,6 +167,13 @@
       "confirmation": "Ben je zeker?",
       "yes": "ja",
       "no": "nee"
+    },
+    "lp_details": {
+      "add_title": "Voeg leerpad titel toe",
+      "add_description": "Voeg een beschrijving toe (optioneel)",
+      "language": "Taal:",
+      "language_not_set": "Niet ingesteld",
+      "language_info": "De taal wordt automatisch ingesteld wanneer je een eerste leerobject toevoegt. Alle leerobjecten moeten dezelfde taal gebruiken."
     }
   }
 }

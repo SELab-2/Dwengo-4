@@ -167,6 +167,13 @@
       "confirmation": "Are you sure?",
       "yes": "yes",
       "no": "no"
+    },
+    "lp_details": {
+      "add_title": "Add learning path title",
+      "add_description": "Add a description (optional)",
+      "language": "Language:",
+      "language_not_set": "Not set",
+      "language_info": "The language will be automatically set when you add your first learning object. All learning objects must use the same language."
     }
   }
 }
