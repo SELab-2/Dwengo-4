@@ -32,23 +32,7 @@ const EditLearningPath: React.FC = () => {
     language,
     setLanguage,
   } = useLPEditContext();
-
   const { learningPathId } = useParams<{ learningPathId: string }>();
-  // can only happen if `isCreateMode` is set incorrectly, adding a check just in case
-  if (!isCreateMode && !learningPathId) {
-    return (
-      <div className="p-6">
-        <h2 className="text-xl font-bold text-dwengo-red">Error</h2>
-        <p>Cannot edit learning path: missing learning path ID parameter</p>
-        <button
-          className="mt-4 px-4 py-2 bg-gray-200 rounded hover:cursor-pointer"
-          onClick={() => navigate('/teacher/learning-paths')}
-        >
-          Back to Learning Paths
-        </button>
-      </div>
-    );
-  }
 
   const {
     data: learningPathData,
