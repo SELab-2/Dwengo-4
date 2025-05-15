@@ -5,7 +5,7 @@ import { APIError } from '@/types/api.types';
 import {
   updateOrCreateLearningPath,
   updateOrCreateLearningPathPayload,
-} from '@/util/teacher/httpLearningPaths';
+} from '@/util/teacher/localLearningPaths';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 

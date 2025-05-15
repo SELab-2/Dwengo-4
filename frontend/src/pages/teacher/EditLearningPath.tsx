@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   fetchLocalLearningPath,
   fetchLocalLearningPathNodes,
-} from '../../util/teacher/httpLearningPaths';
+} from '../../util/teacher/localLearningPaths';
 import AddNodeButton from '../../components/teacher/editLearningPath/AddNodeButton';
 import SelectLearningObject from '../../components/teacher/editLearningPath/SelectLearningObject';
 import { useLPEditContext } from '../../context/LearningPathEditContext';
