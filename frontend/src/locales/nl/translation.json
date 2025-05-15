@@ -138,7 +138,8 @@
     "filter": {
       "clear": "Wis filter",
       "not_found": "Geen resultaten gevonden"
-    }
+    },
+    "create_lp": "Leerpad Aanmaken"
   },
   "learning_objects": {
     "loading": "Leerpaden laden...",

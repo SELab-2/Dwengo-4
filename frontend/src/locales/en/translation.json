@@ -138,7 +138,8 @@
     "filter": {
       "clear": "Clear filter",
       "not_found": "No results found"
-    }
+    },
+    "create_lp": "Create Learning Path"
   },
   "learning_objects": {
     "loading": "Loading learning paths ...",
