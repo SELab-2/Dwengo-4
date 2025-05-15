@@ -1,6 +1,6 @@
 import { APIError } from '@/types/api.types';
 import { getAuthToken } from './authStudent';
-import { BACKEND } from './config';
+import { BACKEND } from '../shared/config';
 import { ClassItem } from '@/types/type';
 
 export async function fetchQuestionsForTeam(assignmentId: string) {

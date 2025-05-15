@@ -42,7 +42,7 @@ const AssignmentsStudent: React.FC = () => {
           {assignments.map((assignment) => (
             <div
               key={assignment.id}
-              className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300`}
+              className={`bg-white rounded-lg my-4 shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300`}
             >
               <div className="p-5">
                 <div className="flex flex-row justify-between w-full">
