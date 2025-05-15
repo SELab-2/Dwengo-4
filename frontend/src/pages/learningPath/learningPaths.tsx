@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { LearningPath } from '../../types/type';
 import { LearningPathFilter } from '../../components/learningPath/learningPathFilter';
 import { Filter } from '../../components/ui/filters';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { filterLearningPaths } from '@/util/filter';
 import { fetchLearningPaths } from '@/util/shared/learningPath';
 import { useTranslation } from 'react-i18next';
@@ -37,8 +37,8 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ path }) => {
   );
   const isTeacherView = window.location.pathname.includes('/teacher');
   const linkPath = isTeacherView
-    ? `/teacher/learning-path/${path.id}`
-    : `/student/learning-path/${path.id}`;
+    ? `/teacher/learning-paths/${path.id}`
+    : `/student/learning-paths/${path.id}`;
 
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-128">
@@ -87,6 +87,7 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ path }) => {
 const LearningPaths: React.FC = () => {
   const [filters, setFilters] = useState<Filter[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
 
   const {
     data: learningPaths,
@@ -131,26 +132,49 @@ const LearningPaths: React.FC = () => {
     () => filterLearningPaths(learningPaths || [], filters, searchQuery),
     [learningPaths, filters, searchQuery],
   );
+                
   const { t } = useTranslation();
+
+  const isTeacherView = window.location.pathname.includes('/teacher');
 
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">{t('learning_paths.label')}</h1>
 
-      <div className="mb-6">
-        <input
-          type="text"
-          placeholder={t('learning_paths.search_name')}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="p-2 border rounded-lg mb-4 w-full md:w-1/3"
-        />
-        <LearningPathFilter
-          filters={filters}
-          setFilters={setFilters}
-          creators={uniqueCreators}
-          languages={uniqueLanguages}
-        />
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-6">
+        {/* search bar and filter*/}
+        <div className="flex flex-col w-full md:w-1/3 gap-2">
+          <input
+            type="text"
+            placeholder={t('learning_paths.search_name')}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="p-2 border rounded-lg w-full"
+          />
+
+          <LearningPathFilter
+            filters={filters}
+            setFilters={setFilters}
+            creators={uniqueCreators}
+            languages={uniqueLanguages}
+          />
+        </div>
+
+        {/* create learning path button */}
+        {isTeacherView && (
+          <button
+            className={`
+            px-4 py-2 whitespace-nowrap font-bold rounded-md hover:cursor-pointer
+            text-white bg-dwengo-green hover:bg-dwengo-green-dark 
+            w-full sm:w-auto
+          `}
+            onClick={() => {
+              navigate('/teacher/learning-paths/create');
+            }}
+          >
+            Create Learning Path
+          </button>
+        )}
       </div>
 
       {isLoading && <p className="text-gray-600">{t('loading.loading')}</p>}

@@ -1,0 +1,208 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { LearningPath } from '../../types/type';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import {
+  fetchLocalLearningPath,
+  fetchLocalLearningPathNodes,
+} from '../../util/teacher/localLearningPaths';
+import AddNodeButton from '../../components/teacher/editLearningPath/AddNodeButton';
+import SelectLearningObject from '../../components/teacher/editLearningPath/SelectLearningObject';
+import { useLPEditContext } from '../../context/LearningPathEditContext';
+import NodeList from '../../components/teacher/editLearningPath/NodeList';
+import {
+  LearningPathDetails,
+  LearningPathDetailsRef,
+} from '@/components/teacher/editLearningPath/LearningPathDetails';
+
+const EditLearningPath: React.FC = () => {
+  // error message to ensure at least one node is added before saving
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const pathDetailsRef = useRef<LearningPathDetailsRef | null>(null);
+  const {
+    isAddingNode,
+    setOrderedNodes,
+    orderedNodes,
+    savePath,
+    isSavingPath,
+    isCreateMode,
+    language,
+    setLanguage,
+  } = useLPEditContext();
+
+  const { learningPathId } = useParams<{ learningPathId: string }>();
+  // can only happen if `isCreateMode` is set incorrectly, adding a check just in case
+  if (!isCreateMode && !learningPathId) {
+    return (
+      <div className="p-6">
+        <h2 className="text-xl font-bold text-dwengo-red">Error</h2>
+        <p>Cannot edit learning path: missing learning path ID parameter</p>
+        <button
+          className="mt-4 px-4 py-2 bg-gray-200 rounded hover:cursor-pointer"
+          onClick={() => navigate('/teacher/learning-paths')}
+        >
+          Back to Learning Paths
+        </button>
+      </div>
+    );
+  }
+
+  const {
+    data: learningPathData,
+    isLoading: isLoadingPath,
+    isError: isErrorPath,
+    error: errorPath,
+  } = useQuery<LearningPath>({
+    queryKey: ['learningPaths', learningPathId],
+    queryFn: () => fetchLocalLearningPath(learningPathId!),
+    enabled: !isCreateMode && !!learningPathId, // only fetch path if not in create mode
+  });
+
+  const {
+    data: nodesData,
+    isLoading: isLoadingNodes,
+    isError: isErrorNodes,
+    error: errorNodes,
+  } = useQuery({
+    queryKey: ['learningPathNodes', learningPathId],
+    queryFn: () => fetchLocalLearningPathNodes(learningPathId!),
+    enabled: !isCreateMode && !!learningPathId, // only fetch nodes if not in create mode
+  });
+
+  // initialize orderedNodes when nodesData is fetched
+  useEffect(() => {
+    if (nodesData) {
+      setOrderedNodes(nodesData);
+    }
+  }, [nodesData]);
+
+  useEffect(() => {
+    if (learningPathData) {
+      setLanguage(learningPathData.language);
+    }
+  }, [learningPathData]);
+
+  // dismiss error message after 5 seconds
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => {
+        setErrorMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
+
+  const handleSavePath = () => {
+    // check if title is valid
+    if (!pathDetailsRef.current || !pathDetailsRef.current.validateInput()) {
+      return;
+    }
+
+    // check if at least one node was added
+    if (orderedNodes.length === 0) {
+      setErrorMessage('Add at least one learning object to your path');
+      return;
+    }
+
+    setErrorMessage(null); // reset error message
+    savePath({
+      newTitle: pathDetailsRef.current.title,
+      newDescription: pathDetailsRef.current.description,
+      newLanguage: language,
+      newImage: pathDetailsRef.current.image,
+      newNodes: orderedNodes,
+      learningPathId,
+    });
+  };
+
+  return (
+    <div className="flex h-screen">
+      {/* Sidebar */}
+      <div
+        className={`p-4 space-y-3 max-w-[405px] w-full bg-gray-50 overflow-y-scroll`}
+      >
+        {/* path details */}
+        {isLoadingPath && !isCreateMode ? (
+          <p className="text-gray-500">Loading learning path details...</p>
+        ) : isErrorPath ? (
+          <p>Error: {errorPath?.message}</p>
+        ) : (
+          <LearningPathDetails
+            pathDetailsRef={pathDetailsRef}
+            initialTitle={learningPathData?.title}
+            initialDescription={learningPathData?.description}
+            initialImage={learningPathData?.image}
+          />
+        )}
+
+        {errorMessage && (
+          <div
+            className="bg-red-100 border border-dwengo-red-dark text-dwengo-red-darker px-3 py-2 rounded relative mb-4"
+            role="alert"
+          >
+            <span className="block sm:inline text-sm cursor-default">
+              {errorMessage}
+            </span>
+            <span
+              className="absolute top-0 bottom-0 right-0 px-4 py-3 hover:cursor-pointer"
+              onClick={() => setErrorMessage(null)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 20 20"
+                strokeWidth="2"
+                stroke="currentColor"
+                className="size-4"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18 18 6M6 6l12 12"
+                />
+              </svg>
+            </span>
+          </div>
+        )}
+
+        <div className="rounded-lg border border-gray-200 p-2.5 bg-white">
+          {isLoadingNodes ? (
+            <p>Loading learning objects...</p>
+          ) : isErrorNodes ? (
+            <p>Error: {errorNodes?.message}</p>
+          ) : orderedNodes.length == 0 ? (
+            <AddNodeButton nodeIndex={0} label="Add Node" />
+          ) : (
+            <NodeList />
+          )}
+        </div>
+      </div>
+
+      {/* LO selection screen */}
+      {isAddingNode && <SelectLearningObject />}
+
+      {/* Confirm / Cancel edit */}
+      <div
+        className={`fixed bottom-0 right-0 flex gap-2.5 p-2.5 justify-end border-t border-gray-200 bg-white w-full`}
+      >
+        <button
+          className={`px-6 h-10 font-bold rounded-md text-white bg-dwengo-green hover:bg-dwengo-green-dark hover:cursor-pointer`}
+          onClick={handleSavePath}
+          disabled={isSavingPath}
+        >
+          {isSavingPath ? 'Saving...' : 'Confirm'}
+        </button>
+        <button
+          className={`px-6 h-10 font-bold rounded-md bg-dwengo-red-200 text-white hover:bg-dwengo-red-dark hover:cursor-pointer`}
+          disabled={isSavingPath}
+          onClick={() => navigate(-1)}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default EditLearningPath;

@@ -82,6 +82,7 @@ export interface LearningObjectDto {
   contentLocation?: string;
   createdAt: string;
   updatedAt: string;
+  creatorId?: number; // only for local learning objects
   origin: "dwengo" | "local";
 }
 
@@ -282,23 +283,13 @@ export async function getDwengoObjectsForPath(
   isTeacher: boolean,
 ): Promise<LearningObjectDtoWithRaw[]> {
   try {
-    const pathResp = await dwengoAPI.get("/api/learningPath/search", {
-      params: { all: "" },
-    });
-    const allPaths: any[] = pathResp.data;
-    const learningPath = allPaths.find((lp) => lp._id === pathId);
-    checkFetchedObject(
-      learningPath,
-      "Learning path with id=${pathId} not found.",
-    );
+    const pathResp = await dwengoAPI.get(`/api/learningPath/${pathId}`);
+    const learningPath = pathResp.data;
+    checkFetchedObject(learningPath, `Learning path with id=${pathId} not found.`);
     const nodes = learningPath.nodes || [];
     const results = await Promise.all(
       nodes.map(
-        async (node: {
-          learningobject_hruid: any;
-          version: any;
-          language: any;
-        }) => {
+        async (node: { learningobject_hruid: any; version: any; language: any }) => {
           try {
             const params = {
               hruid: node.learningobject_hruid,
@@ -344,10 +335,7 @@ export async function getDwengoObjectsForPath(
 // Helper functies voor error handling //
 /////////////////////////////////////////
 
-function checkFetchedObject<T>(
-  fetchedObject: T | null,
-  notFoundMessage: string,
-) {
+function checkFetchedObject<T>(fetchedObject: T | null, notFoundMessage: string) {
   if (!fetchedObject) {
     throw new NotFoundError(notFoundMessage);
   }
@@ -362,9 +350,7 @@ function checkAvailabilityAndTeacherExclusive(
   }
 
   if (!dwengoObj.available) {
-    throw new UnavailableError(
-      "This learning object is temporarily not available.",
-    );
+    throw new UnavailableError("This learning object is temporarily not available.");
   }
 }
 
@@ -395,3 +381,26 @@ function checkAll(
     return null;
   }
 }*/
+
+// check if dwengo object exists
+export async function validateDwengoObject(
+  hruid: string,
+  language: string,
+  version: number,
+): Promise<void> {
+  try {
+    const resp = await dwengoAPI.get(
+      `/api/learningObject/getMetadata?hruid=${hruid}&language=${language}&version=${version}`,
+    );
+    if (!resp.data) {
+      throw new NotFoundError(
+        `Dwengo-object (hruid=${hruid}, lang=${language}, ver=${version}) not found.`,
+      );
+    }
+  } catch (err: any) {
+    throwCorrectNetworkError(
+      err as Error,
+      "Could not fetch the requested learning object from the Dwengo API.",
+    );
+  }
+}

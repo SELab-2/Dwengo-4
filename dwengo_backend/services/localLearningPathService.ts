@@ -1,20 +1,24 @@
-import {
-  LearningPath,
-  LearningPath as PrismaLearningPath,
-} from "@prisma/client";
+import { LearningPath, LearningPath as PrismaLearningPath } from "@prisma/client";
 import { LearningPathDto } from "./learningPathService"; // <-- We hergebruiken het type
 import prisma from "../config/prisma";
 import {
   handlePrismaQuery,
+  handlePrismaTransaction,
   handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
-import { NotFoundError } from "../errors/errors";
+import { BadRequestError, NotFoundError } from "../errors/errors";
+import { NodeMetadata } from "../controllers/teacher/teacherLocalLearningPathNodesController";
+import { validateDwengoObject } from "./dwengoLearningObjectService";
+import LocalLearningObjectService from "./localLearningObjectService";
 
+// this is the data we get from a request body
 export interface LocalLearningPathData {
-  title?: string;
-  language?: string;
+  title: string;
+  language: string;
   description?: string;
   image?: string | null;
+  // can contain existing (re-ordered) nodes and new nodes, nodes not present in the list will be deleted
+  nodes?: NodeMetadata[];
 }
 
 /**
@@ -44,26 +48,83 @@ export class LocalLearningPathService {
     teacherId: number,
     data: Required<LocalLearningPathData>,
   ): Promise<LearningPath> {
-    return await handlePrismaQuery(() =>
-      prisma.learningPath.create({
+    return await handlePrismaTransaction(prisma, async (tx) => {
+      // create learning path with the provided title, description, image and language
+      const createdPath: LearningPath = await tx.learningPath.create({
         data: {
           title: data.title,
           language: data.language,
           description: data.description || "",
           image: data.image ?? null,
-          num_nodes: 0,
+          num_nodes: data.nodes?.length || 0,
           num_nodes_left: 0,
           creatorId: teacherId,
           // unieke hruid
           hruid: `lp-${Date.now()}-${Math.floor(Math.random() * 100000)}`,
         },
-      }),
-    );
+      });
+
+      // create the nodes
+      const createdNodeIds: string[] = [];
+      for (let position = 0; position < data.nodes.length; position++) {
+        const nodeData = data.nodes[position];
+
+        // first validate that the learning object exists
+        if (nodeData.isExternal) {
+          await validateDwengoObject(
+            nodeData.dwengoHruid!,
+            nodeData.dwengoLanguage!,
+            nodeData.dwengoVersion!,
+          );
+        } else {
+          if (!nodeData.localLearningObjectId) {
+            throw new BadRequestError(
+              "Missing localLearningObjectId for local node.",
+            );
+          }
+          await LocalLearningObjectService.getLearningObjectById(
+            nodeData.localLearningObjectId,
+          );
+        }
+
+        // now create the new node
+        const node = await tx.learningPathNode.create({
+          data: {
+            learningPathId: createdPath.id, // use the hruid of the learning path we just created
+            isExternal: nodeData.isExternal,
+            localLearningObjectId: nodeData.isExternal
+              ? null
+              : (nodeData.localLearningObjectId ?? null),
+            dwengoHruid: nodeData.isExternal ? nodeData.dwengoHruid : null,
+            dwengoLanguage: nodeData.isExternal ? nodeData.dwengoLanguage : null,
+            dwengoVersion: nodeData.isExternal ? nodeData.dwengoVersion : null,
+            start_node: position === 0, // first node is always start node
+            position,
+          },
+        });
+
+        createdNodeIds.push(node.nodeId);
+      }
+
+      // create default transitions for the nodes
+      for (let i = 0; i < createdNodeIds.length - 1; i++) {
+        const currentNodeId = createdNodeIds[i];
+        const nextNodeId = createdNodeIds[i + 1];
+
+        await tx.learningPathTransition.create({
+          data: {
+            nodeId: currentNodeId,
+            nextNodeId,
+            default: true,
+          },
+        });
+      }
+
+      return createdPath;
+    });
   }
 
-  async getAllLearningPathsByTeacher(
-    teacherId: number,
-  ): Promise<LearningPath[]> {
+  async getAllLearningPathsByTeacher(teacherId: number): Promise<LearningPath[]> {
     return await handlePrismaQuery(() =>
       prisma.learningPath.findMany({
         where: { creatorId: teacherId },
@@ -93,17 +154,160 @@ export class LocalLearningPathService {
     pathId: string,
     data: LocalLearningPathData,
   ): Promise<LearningPath> {
-    return handlePrismaQuery(() =>
-      prisma.learningPath.update({
+    // get existing nodes, so we can figure out which nodes to delete, update or create
+    const existingNodeIds: string[] = await handlePrismaQuery(() =>
+      prisma.learningPathNode
+        .findMany({
+          where: { learningPathId: pathId },
+          select: { nodeId: true, position: true },
+          orderBy: { position: "asc" },
+        })
+        .then((nodes) => nodes.map((node) => node.nodeId)),
+    );
+
+    // start transaction
+    return await handlePrismaTransaction(prisma, async (tx) => {
+      // update learning path title, description and language
+      await tx.learningPath.update({
         where: { id: pathId },
         data: {
           title: data.title,
-          language: data.language,
           description: data.description,
+          language: data.language,
           image: data.image,
         },
-      }),
-    );
+      });
+
+      // track updated/created node id's (in order!)
+      const processedNodeIds: string[] = [];
+
+      // update existing nodes / add new nodes
+      const nodes = data.nodes || [];
+      for (let newPosition = 0; newPosition < nodes.length; newPosition++) {
+        const nodeData = nodes[newPosition];
+
+        if (nodeData.nodeId) {
+          // if nodeId is provided, this is an existing node that we need to update
+          // only needs an upadate if the position is different
+          if (
+            newPosition >= existingNodeIds.length ||
+            existingNodeIds[newPosition] !== nodeData.nodeId
+          ) {
+            await tx.learningPathNode.update({
+              where: { nodeId: nodeData.nodeId },
+              data: {
+                position: newPosition, // update position in the list
+                start_node: newPosition === 0, // first node is always start node
+              },
+            });
+          }
+
+          processedNodeIds.push(nodeData.nodeId);
+        } else {
+          // if nodeId is not provided, this is a new node that we need to create
+
+          // first validate that the learning object exists
+          if (nodeData.isExternal) {
+            await validateDwengoObject(
+              nodeData.dwengoHruid!,
+              nodeData.dwengoLanguage!,
+              nodeData.dwengoVersion!,
+            );
+          } else {
+            if (!nodeData.localLearningObjectId) {
+              throw new BadRequestError(
+                "Missing localLearningObjectId for local node.",
+              );
+            }
+            await LocalLearningObjectService.getLearningObjectById(
+              nodeData.localLearningObjectId,
+            );
+          }
+
+          // now create the new node
+          const node = await tx.learningPathNode.create({
+            data: {
+              learningPathId: pathId,
+              isExternal: nodeData.isExternal,
+              localLearningObjectId: nodeData.isExternal
+                ? null
+                : (nodeData.localLearningObjectId ?? null),
+              dwengoHruid: nodeData.isExternal ? nodeData.dwengoHruid : null,
+              dwengoLanguage: nodeData.isExternal ? nodeData.dwengoLanguage : null,
+              dwengoVersion: nodeData.isExternal ? nodeData.dwengoVersion : null,
+              start_node: newPosition === 0,
+              position: newPosition,
+            },
+          });
+
+          processedNodeIds.push(node.nodeId);
+        }
+      }
+
+      // update/create default transitions
+      for (let i = 0; i < processedNodeIds.length - 1; i++) {
+        const currentNodeId = processedNodeIds[i];
+        const nextNodeId = processedNodeIds[i + 1];
+
+        // find current node's original position if it existed
+        const currentOriginalIndex: number = existingNodeIds.indexOf(currentNodeId);
+
+        if (
+          currentOriginalIndex >= 0 && // current node is a node that already existed
+          currentOriginalIndex < existingNodeIds.length - 1 // and it isn't the last node (so there's already an existing default transition)
+        ) {
+          if (existingNodeIds[currentOriginalIndex + 1] === nextNodeId) {
+            // relative position is the same and both nodes already existed, so don't update transition
+            continue;
+          } else {
+            // update existing default transition
+            // there should only be one default transition, but we have to use updateMany since i don't have the transitionId
+            tx.learningPathTransition.updateMany({
+              where: { nodeId: currentNodeId, default: true },
+              data: { nextNodeId },
+            });
+          }
+        } else {
+          // create new default transition
+          await tx.learningPathTransition.create({
+            data: {
+              nodeId: currentNodeId,
+              nextNodeId,
+              default: true,
+            },
+          });
+        }
+      }
+      // delete default transition for last node (if it had one) (indicates end of path)
+      const lastNodeId = processedNodeIds[processedNodeIds.length - 1];
+      await tx.learningPathTransition.deleteMany({
+        where: {
+          nodeId: lastNodeId,
+          default: true,
+        },
+      });
+
+      // delete nodes that were not in list of nodes passed in the argument
+      const nodesToDelete: string[] = existingNodeIds.filter(
+        (id) => !processedNodeIds.includes(id),
+      );
+      // since prisma schema has ON DELETE CASCADE, the transistions involving these nodes will be deleted aswell
+      if (nodesToDelete.length > 0) {
+        await tx.learningPathNode.deleteMany({
+          where: {
+            nodeId: {
+              in: nodesToDelete,
+            },
+          },
+        });
+      }
+
+      // update the number of nodes in the learning path
+      return await tx.learningPath.update({
+        where: { id: pathId },
+        data: { num_nodes: processedNodeIds.length },
+      });
+    });
   }
 
   async deleteLearningPath(pathId: string): Promise<void> {

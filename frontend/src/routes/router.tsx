@@ -2,6 +2,7 @@ import React from 'react';
 import { createBrowserRouter, Link, RouteObject } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageChooser from '../components/shared/LanguageChooser';
+import { LPEditProvider } from '../context/LearningPathEditContext';
 
 // ==== TEACHER ROUTES ==== //
 import Assignment from '../pages/teacher/Assignment';
@@ -15,6 +16,7 @@ import SignupTeacher from '../pages/teacher/SignupTeacher';
 import { action as teacherLogoutAction } from '../pages/teacher/LogoutTeacher';
 import EditClassTeacher from '../pages/teacher/EditClassTeacher';
 import TeacherIndex from '../pages/teacher/TeacherIndex';
+import EditLearningPath from '../pages/teacher/EditLearningPath';
 
 // ==== STUDENT ROUTES ==== //
 import RootLayoutStudent from '../components/student/RootLayoutStudent';
@@ -80,7 +82,7 @@ export const router = createBrowserRouter([
     element: <HomePage />,
   },
   {
-    path: '/learning-path/:pathId',
+    path: '/learning-paths/:pathId',
     element: <LearningPath />,
   },
   {
@@ -128,11 +130,27 @@ export const router = createBrowserRouter([
         element: <AssignmentEdit></AssignmentEdit>,
       },
       {
+        path: 'learning-paths/create',
+        element: (
+          <LPEditProvider isCreateMode={true}>
+            <EditLearningPath />
+          </LPEditProvider>
+        ),
+      },
+      {
+        path: 'learning-paths/:learningPathId/edit',
+        element: (
+          <LPEditProvider isCreateMode={false}>
+            <EditLearningPath />
+          </LPEditProvider>
+        ),
+      },
+      {
         path: 'learning-paths',
         element: <LearningPaths />,
       },
       {
-        path: 'learning-path/:pathId',
+        path: 'learning-paths/:pathId',
         element: <LearningPath />,
       },
     ],
@@ -191,7 +209,7 @@ export const router = createBrowserRouter([
         element: <LearningPaths />,
       },
       {
-        path: 'learning-path/:pathId',
+        path: 'learning-paths/:pathId',
         element: <LearningPath />,
       },
       {
