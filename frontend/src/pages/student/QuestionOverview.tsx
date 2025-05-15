@@ -7,15 +7,16 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 // Updated interfaces to match the actual data structure
-interface Author {
-  firstName?: string;
+interface User {
+  firstName: string;
+  id: number;
 }
 
 interface Message {
   id: string;
   text: string;
-  author?: Author;
-  userId: number; // Added userId field
+  user: User;
+  userId: number;
   createdAt: string;
   updatedAt: string;
   questionId: number;
@@ -40,9 +41,10 @@ const QuestionOverview: React.FC = () => {
     enabled: !!questionId,
   });
 
-  // Set the first question as selected as soon as data loads
   useEffect(() => {
-    console.log('Questions data:', question);
+    if (question) {
+      console.log('Questions data:', question);
+    }
   }, [question]);
 
   const addMessageMutation = useMutation({
@@ -84,25 +86,100 @@ const QuestionOverview: React.FC = () => {
   }, [question, isLoading, isError, error]);
 
   const localName = localStorage.getItem('firstName');
-  const currentUserId = parseInt(localStorage.getItem('userId') || '0', 10);
+
+  if (isLoading) {
+    return (
+      <div className="pt-10 w-full flex flex-col items-center">
+        <p className="text-xl">Laden...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="pt-10 w-full flex flex-col items-center">
+        <p className="text-xl text-red-500">
+          Er is een fout opgetreden: {error?.message || 'Onbekende fout'}
+        </p>
+      </div>
+    );
+  }
+
+  if (!question) {
+    return (
+      <div className="pt-10 w-full flex flex-col items-center">
+        <p className="text-xl">Geen vraag gevonden</p>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-10 w-full flex flex-col items-center">
-      <h1 className="text-5xl mb-14">
-        Vraag:{' '}
-        <span className="text-dwengo-green font-bold">{question?.title}</span>
+      <h1 className="text-5xl">
+        <span className="text-dwengo-green font-bold">{question.title}</span>
       </h1>
+
+      {question.questionConversation &&
+        question.questionConversation.length > 0 && (
+          <>
+            <h2 className="text-lg mt-2">
+              Vraag gesteld door:{' '}
+              <span className="text-dwengo-green font-bold">
+                {question.questionConversation[0].user?.firstName || 'Onbekend'}
+              </span>
+            </h2>
+
+            <div className="my-8 max-w-[35rem]">
+              {question.questionConversation[0].text}
+            </div>
+          </>
+        )}
+
       <div className="flex flex-col w-[40rem]">
-        <form onSubmit={handleSubmitMessage} className="mb-8">
+        <h2 className="self-center text-2xl mt-8">Comments:</h2>
+        <div className="flex flex-col space-y-1 mt-2">
+          {question.questionConversation?.length <= 1 && (
+            <div className="flex flex-row justify-center">
+              <p>
+                Nog niemand heeft een comment achtergelaten voor deze vraag...
+              </p>
+            </div>
+          )}
+
+          {question.questionConversation.length > 1 &&
+            question.questionConversation?.slice(1).map((message: Message) => {
+              return (
+                <div key={message.id} className="p-4 rounded-lg">
+                  <div className="flex flex-row items-center gap-x-2">
+                    <div className="flex flex-row justify-center items-center bg-dwengo-green w-12 h-12 aspect-square rounded-full">
+                      <p className="text-2xl bg-dwengo-green">
+                        {message.user?.firstName?.charAt(0).toUpperCase() ||
+                          '?'}
+                      </p>
+                    </div>
+                    <p className="text-2xl">
+                      <span className="text-dwengo-green-dark font-bold">
+                        {message.user?.firstName || 'Onbekend'}
+                      </span>{' '}
+                      zegt:
+                    </p>
+                  </div>
+                  <p className="ml-14">{message.text}</p>
+                  <div className="border-b-1 border-gray-400 mt-2"></div>
+                </div>
+              );
+            })}
+        </div>
+        <form onSubmit={handleSubmitMessage} className="mb-8 ml-4">
           <div className="flex flex-row items-center gap-x-2">
             <div className="flex flex-row justify-center items-center bg-dwengo-green w-12 h-12 aspect-square rounded-full">
               <p className="text-2xl bg-dwengo-green">
-                {localName?.charAt(0).toUpperCase()}
+                {localName?.charAt(0).toUpperCase() || '?'}
               </p>
             </div>
             <p className="text-2xl">
               <span className="text-dwengo-green-dark font-bold">
-                {localName}
+                {localName || 'Gebruiker'}
               </span>{' '}
               zegt:
             </p>
@@ -137,53 +214,6 @@ const QuestionOverview: React.FC = () => {
             </div>
           </div>
         </form>
-
-        <div className="flex flex-col space-y-10 mt-10">
-          {isLoading && <p>Laden...</p>}
-          {isError && <p>Fout bij laden van vragen: {error?.message}</p>}
-
-          {question?.questionConversation?.map((message: Message) => {
-            // Try to find the student that matches the message's userId
-
-            console.log('question', question);
-
-            // const student = question.teams.students?.find(
-            //   (student) => student.userId === message.userId,
-            // );
-            const student = 'hobbes';
-
-            const isCurrentUser = message.userId === currentUserId;
-
-            let displayName = message.userId.toString();
-            let firstInitial = '?';
-
-            if (isCurrentUser && localName) {
-              displayName = localName;
-              firstInitial = localName.charAt(0).toUpperCase();
-            } else if (student?.user?.firstName) {
-              displayName = student.user.firstName;
-              firstInitial = student.user.firstName.charAt(0).toUpperCase();
-            }
-
-            return (
-              <div key={message.id} className={`p-4 rounded-lg `}>
-                <div className="flex flex-row items-center gap-x-2">
-                  <div className="flex flex-row justify-center items-center bg-dwengo-green w-12 h-12 aspect-square rounded-full">
-                    <p className="text-2xl bg-dwengo-green">{firstInitial}</p>
-                  </div>
-                  <p className="text-2xl">
-                    <span className="text-dwengo-green-dark font-bold">
-                      {displayName}
-                    </span>{' '}
-                    zegt:
-                  </p>
-                </div>
-                <p className="ml-14">{message.text}</p>
-                <div className="border-b-1 border-gray-400 mt-2"></div>
-              </div>
-            );
-          })}
-        </div>
       </div>
     </div>
   );

@@ -44,7 +44,7 @@ const QuestionsForAssignment: React.FC = () => {
           <Link to={`/student/question/new/${assignmentId}`}>
             <PrimaryButton>Stel nieuwe vraag</PrimaryButton>
           </Link>
-          <div className="flex flex-col mt-8 w-[40rem] bg-dwengo">
+          <div className="flex flex-col mt-8 w-[40rem] gap-y-8 bg-dwengo">
             {questions?.questions.map((question) => (
               <div
                 key={question.id}

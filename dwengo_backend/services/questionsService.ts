@@ -360,7 +360,17 @@ export default class QuestionService {
           include: {
             specific: true,
             general: true,
-            questionConversation: true,
+            questionConversation: {
+              include: {
+                user: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                    role: true,
+                  },
+                },
+              },
+            },
           },
         }),
       "Question not found.",
