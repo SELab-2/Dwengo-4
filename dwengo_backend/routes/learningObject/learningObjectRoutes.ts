@@ -1,16 +1,21 @@
-import express from "express";
+import express, { Router } from "express";
 import {
   getAllLearningObjectsController,
-  getLearningObjectController,
-  searchLearningObjectsController,
-  // [NIEUW] importeer de extra controller-functie:
   getLearningObjectByHruidLangVersionController,
+  getLearningObjectController,
   getLearningObjectsForPathController,
+  searchLearningObjectsController,
 } from "../../controllers/learningObject/learningObjectController";
 import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
+import {
+  learningObjectIdSchema,
+  learningObjectParamsSchema,
+  learningPathIdSchema,
+} from "../../zodSchemas";
+import { validateRequest } from "../../middleware/validateRequest";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 /**
  * @route GET /learningObject/teacher
@@ -38,6 +43,10 @@ router.get("/teacher/search", protectTeacher, searchLearningObjectsController);
 router.get(
   "/teacher/lookup/:hruid/:language/:version",
   protectTeacher,
+  validateRequest({
+    customErrorMessage: "Invalid parameters for getting learning object.",
+    paramsSchema: learningObjectParamsSchema,
+  }),
   getLearningObjectByHruidLangVersionController,
 );
 
@@ -49,7 +58,15 @@ router.get(
  * DON'T USE THIS ROUTE: SINCE THE DWENGO API DOESN'T IMPLEMENT SEARCHING BY ID CORRECTLY,
  * THIS ROUTE ONLY CHECKS LOCAL LEARNING OBJECTS. (it's kept in in case the Dwengo API is fixed in the future)
  */
-router.get("/:learningObjectId", protectAnyUser, getLearningObjectController);
+router.get(
+  "/:learningObjectId",
+  protectAnyUser,
+  validateRequest({
+    customErrorMessage: "invalid learningObjectId request parameter",
+    paramsSchema: learningObjectIdSchema,
+  }),
+  getLearningObjectController,
+);
 
 /**
  * @route GET /learningObject/learningPath/:learningPathId
@@ -60,6 +77,10 @@ router.get("/:learningObjectId", protectAnyUser, getLearningObjectController);
 router.get(
   "/learningPath/:learningPathId",
   protectAnyUser,
+  validateRequest({
+    customErrorMessage: "invalid learningPathId request parameter",
+    paramsSchema: learningPathIdSchema,
+  }),
   getLearningObjectsForPathController,
 );
 

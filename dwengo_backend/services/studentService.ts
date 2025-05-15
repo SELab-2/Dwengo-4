@@ -1,4 +1,4 @@
-import { Student, User } from "@prisma/client";
+/*import { Student, User } from "@prisma/client";
 
 import prisma from "../config/prisma";
 
@@ -49,4 +49,4 @@ export default class StudentService {
       },
     });
   }
-}
+}*/

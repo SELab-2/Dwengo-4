@@ -1,5 +1,6 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import {
+  AppError,
   DatabaseError,
   NetworkError,
   NotFoundError,
@@ -40,7 +41,7 @@ export async function assertExists<T>(
   errorMessage: string = "The entity you were trying to fetch/update/delete did not exist.",
 ): Promise<T> {
   const entity = await fetcher();
-  if (entity === null) {
+  if (entity == null) {
     throw new NotFoundError(errorMessage);
   }
   return entity;
@@ -66,12 +67,20 @@ export function handleQueryWithExistenceCheck<T>(
  * If the transaction does not have a clear error message, a generic DatabaseError will be thrown.
  */
 export async function handlePrismaTransaction<T>(
-  prisma: Prisma.TransactionClient,
+  prisma: PrismaClient,
   transactionFunction: (_: Prisma.TransactionClient) => Promise<T>,
 ): Promise<T> {
   try {
-    return await transactionFunction(prisma);
+    return await prisma.$transaction(transactionFunction);
   } catch (error) {
+    console.error("Prisma transaction error:", error);
+
+    // Re-throw if it's already a known AppError (like NotFoundError)
+    if (error instanceof AppError) {
+      throw error;
+    }
+
+    // Otherwise wrap it in a DatabaseError
     logger.error(`Prisma transaction error: ${error}`);
     throw new DatabaseError("Something went wrong.");
   }
@@ -97,4 +106,23 @@ export function throwCorrectNetworkError(
   } else {
     throw new NetworkError(networkErrorMessage);
   }
+}
+
+/**
+ * Asserts that the result of the given fetcher function is a valid array.
+ * If the result is not an array, null, or undefined, the method throws a NotFoundError with the provided error message.
+ *
+ * @param {() => Promise<T[] | null | undefined>} fetcher - A function returning a Promise that resolves to an array, null, or undefined.
+ * @param {string} errorMessage - The message to be included in the NotFoundError if the assertion fails.
+ * @return {Promise<T[]>} A promise that resolves to the result of the fetcher if it is a valid array.
+ */
+export async function assertArrayDwengoLearningPath<T>(
+  fetcher: () => Promise<T[] | null | undefined>,
+  errorMessage: string,
+): Promise<T[]> {
+  const result = await fetcher();
+  if (!Array.isArray(result) || result === null || result === undefined) {
+    throw new NotFoundError(errorMessage);
+  }
+  return result;
 }

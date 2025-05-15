@@ -1,6 +1,8 @@
 import { dwengoAPI } from "../config/dwengoAPI";
-import { BadRequestError, NotFoundError } from "../errors/errors";
+import { BadRequestError } from "../errors/errors";
 import {
+  assertExists,
+  assertArrayDwengoLearningPath,
   handleQueryWithExistenceCheck,
   throwCorrectNetworkError,
 } from "../errors/errorFunctions";
@@ -35,14 +37,12 @@ export default class ReferenceValidationService {
   ): Promise<void> {
     // Dwengo: GET /api/learningObject/getMetadata?hruid=xxx&language=xxx&version=xxx
     try {
-      const resp = await dwengoAPI.get(
-        `/api/learningObject/getMetadata?hruid=${hruid}&language=${language}&version=${version}`,
-      );
-      if (!resp.data) {
-        throw new NotFoundError(
-          `Dwengo learning object hruid=${hruid},language=${language},version=${version} not found.`,
+      await assertExists(async () => {
+        const resp = await dwengoAPI.get(
+          `/api/learningObject/getMetadata?hruid=${hruid}&language=${language}&version=${version}`,
         );
-      }
+        return resp.data;
+      }, `Dwengo learning object hruid=${hruid},language=${language},version=${version} not found.`);
     } catch (error) {
       throwCorrectNetworkError(
         error as Error,
@@ -55,7 +55,7 @@ export default class ReferenceValidationService {
    * Als je maar één functie wilt om "either local or external object" te checken,
    * kun je deze wrapper schrijven:
    */
-  static async validateLearningObject(
+  /*static async validateLearningObject(
     isExternal: boolean,
     localId?: string,
     hruid?: string,
@@ -77,7 +77,7 @@ export default class ReferenceValidationService {
       }
       await this.validateLocalLearningObject(localId);
     }
-  }
+  }*/
 
   /**
    *  ===========================
@@ -101,16 +101,12 @@ export default class ReferenceValidationService {
     // Dwengo: /api/learningPath/search?hruid=...&language=...
     // (versie voor paden is meestal niet gedefinieerd in Dwengo)
     try {
-      const resp = await dwengoAPI.get(
-        `/api/learningPath/search?hruid=${hruid}&language=${language}`,
-      );
-      // Dwengo API geeft een array terug, met 0 of meer items
-      // Lege lijsten worden teruggegeven, zoals afgesproken in de Discord
-      if (!Array.isArray(resp.data)) {
-        throw new NotFoundError(
-          `Dwengo learning path (hruid=${hruid}, language=${language}) not found.`,
+      await assertArrayDwengoLearningPath(async () => {
+        const resp = await dwengoAPI.get(
+          `/api/learningPath/search?hruid=${hruid}&language=${language}`,
         );
-      }
+        return resp.data;
+      }, `Dwengo learning path (hruid=${hruid}, language=${language}) not found.`);
       // Eventueel checken of we exact 1 match hebben
     } catch (error) {
       throwCorrectNetworkError(

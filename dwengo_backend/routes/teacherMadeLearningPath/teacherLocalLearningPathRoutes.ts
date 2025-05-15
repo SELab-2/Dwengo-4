@@ -2,17 +2,19 @@ import { Router } from "express";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 import {
   createLocalLearningPath,
-  getLocalLearningPaths,
-  getLocalLearningPathById,
-  updateLocalLearningPath,
   deleteLocalLearningPath,
+  getLocalLearningPathById,
+  getLocalLearningPaths,
+  updateLocalLearningPath,
 } from "../../controllers/teacher/teacherLocalLearningPathController";
 import {
   getAllLearningPaths,
   getLearningPathById,
 } from "../../controllers/teacher/teacherLearningPathController";
+import { validateRequest } from "../../middleware/validateRequest";
+import { titleAndLanguageBodySchema } from "../../zodSchemas";
 
-const router = Router();
+const router: Router = Router();
 
 // Zorg dat alleen ingelogde gebruikers (teachers/admin) toegang hebben
 router.use(protectTeacher);
@@ -23,7 +25,14 @@ router.use(protectTeacher);
  * @body LocalLearningPathData
  * @access Teacher
  */
-router.post("/", createLocalLearningPath);
+router.post(
+  "/",
+  validateRequest({
+    customErrorMessage: "invalid request for creating a learning path",
+    bodySchema: titleAndLanguageBodySchema,
+  }),
+  createLocalLearningPath,
+);
 
 /**
  * @route GET /pathByTeacher

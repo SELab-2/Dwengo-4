@@ -2,6 +2,7 @@ import {
   Class,
   ClassStudent,
   ClassTeacher,
+  Prisma,
   Student,
   User,
 } from "@prisma/client";
@@ -13,6 +14,7 @@ import {
 } from "../errors/errors";
 import {
   handlePrismaQuery,
+  handlePrismaTransaction,
   handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
 
@@ -23,28 +25,25 @@ export type ClassWithLinks = Class & { classLinks: ClassStudent[] };
 export default class ClassService {
   static async createClass(name: string, teacherId: number): Promise<Class> {
     // Generate a unique join code (e.g., an 8-digit hex string)
-    const joinCode = await this.generateUniqueCode();
+    const joinCode: string = await this.generateUniqueCode();
 
-    const classroom = await handlePrismaQuery(() =>
-      prisma.class.create({
+    return handlePrismaTransaction(prisma, async (prismaTx) => {
+      const createdClass = await prismaTx.class.create({
         data: {
-          name: name, // name field matches the Class schema
-          code: joinCode, // code field matches the Class schema
+          name: name,
+          code: joinCode,
         },
-      }),
-    );
+      });
 
-    // Now that you have the class id, create the ClassTeacher record
-    await handlePrismaQuery(() =>
-      prisma.classTeacher.create({
+      await prismaTx.classTeacher.create({
         data: {
-          teacherId: teacherId, // teacherId links to the teacher record
-          classId: classroom.id, // Use the id of the newly created class
+          teacherId: teacherId,
+          classId: createdClass.id,
         },
-      }),
-    );
+      });
 
-    return classroom;
+      return createdClass;
+    });
   }
 
   // this function checks if the class exists and if the teacher is associated with the class
@@ -217,9 +216,10 @@ export default class ClassService {
   static async addStudentToClass(
     studentId: number,
     classId: number,
+    tx: Prisma.TransactionClient,
   ): Promise<ClassStudent> {
     return await handlePrismaQuery(() =>
-      prisma.classStudent.create({
+      tx.classStudent.create({
         data: {
           studentId,
           classId,
@@ -228,7 +228,7 @@ export default class ClassService {
     );
   }
 
-  // Check if student is already in the class
+  // Check if a student is already in the class
   static isStudentInClass(classroom: ClassWithLinks, studentId: number): void {
     const inClass: boolean = classroom.classLinks.some(
       (link: ClassStudent) => link.studentId === studentId,

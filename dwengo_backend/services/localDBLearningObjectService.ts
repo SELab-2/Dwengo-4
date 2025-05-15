@@ -147,3 +147,54 @@ export async function getLocalLearningObjectByHruidLangVersion(
 
   return mapLocalToDto(localObj);
 }
+
+// ...existing code...
+
+/**
+ * Get all learning objects for a specific learning path
+ */
+export async function getLocalObjectsForPath(
+  pathId: string,
+  isTeacher: boolean,
+): Promise<LearningObjectDto[]> {
+  const whereClause = {
+    learningPath: {
+      id: pathId
+    },
+    // Add teacher/availability filters if not a teacher
+    ...(isTeacher ? {} : {
+      teacherExclusive: false,
+      available: true
+    })
+  };
+
+  const nodes = await handlePrismaQuery(() =>
+    prisma.learningPathNode.findMany({
+      where: {
+        learningPathId: pathId,
+        isExternal: false,
+        localLearningObjectId: {
+          not: null
+        }
+      },
+      include: {
+        learningPath: true
+      },
+      orderBy: {
+        createdAt: 'asc'
+      }
+    })
+  );
+
+  // Get all learning objects for these nodes
+  const learningObjects = await handlePrismaQuery(() =>
+    prisma.learningObject.findMany({
+      where: {
+        id: {
+          in: nodes.map(node => node.localLearningObjectId!),
+        }
+      }
+    })
+  );
+  return learningObjects.map(obj => mapLocalToDto(obj));
+}

@@ -6,7 +6,6 @@ import {
   Invite,
   JoinRequest,
   JoinRequestStatus,
-  LearningObject,
   LearningPath,
   Student,
   Submission,
@@ -14,14 +13,31 @@ import {
   Team,
   TeamAssignment,
   User,
+  LearningObject,
 } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { LocalLearningObjectData } from "../../services/localLearningObjectService";
 
 dotenv.config();
 
-// helper functions to create test data in the database for tests to avoid code duplication in the tests themselves
+// (Nieuwe interface voor de createLearningObject helper)
+export interface LocalLearningObjectData {
+  title: string;
+  description: string;
+  contentType: string;
+  keywords?: string[];
+  targetAges?: number[];
+  teacherExclusive?: boolean;
+  skosConcepts?: string[];
+  copyright?: string;
+  licence?: string;
+  difficulty?: number;
+  estimatedTime?: number;
+  available?: boolean;
+  contentLocation?: string;
+}
+
+// === Helper functions to create test data ===
 
 export async function createTeacher(
   firstName: string,
@@ -126,10 +142,8 @@ export async function createLearningPath(
 ): Promise<LearningPath> {
   return prisma.learningPath.create({
     data: {
-      // Random string generator that generates a string of numbers and lowercase letters
-      hruid: Math.random()
-        .toString(36)
-        .substring(2, 2 + 12),
+      // Random string generator die letters en cijfers geeft
+      hruid: Math.random().toString(36).substring(2, 14),
       title,
       description,
       language: "nl",
@@ -138,32 +152,6 @@ export async function createLearningPath(
           userId: creatorId,
         },
       },
-    },
-  });
-}
-
-export async function createLearningObject(
-  teacherId: number,
-  data: LocalLearningObjectData,
-): Promise<LearningObject> {
-  return prisma.learningObject.create({
-    data: {
-      hruid: `${data.title.toLowerCase()}-${Date.now()}`,
-      language: "nl",
-      title: data.title,
-      description: data.description,
-      contentType: data.contentType,
-      keywords: data.keywords ?? [],
-      targetAges: data.targetAges ?? [],
-      teacherExclusive: data.teacherExclusive ?? false,
-      skosConcepts: data.skosConcepts ?? [],
-      copyright: data.copyright ?? "",
-      licence: data.licence ?? "CC BY Dwengo",
-      difficulty: data.difficulty ?? 1,
-      estimatedTime: data.estimatedTime ?? 0,
-      available: data.available ?? true,
-      contentLocation: data.contentLocation ?? "",
-      creatorId: teacherId,
     },
   });
 }
@@ -203,12 +191,12 @@ export async function createAssignment(
   return prisma.assignment.create({
     data: {
       pathRef: learningPathId,
-      title: title,
-      description: description,
+      title,
+      description,
       deadline,
       classAssignments: {
         create: {
-          classId, // This will automatically link to the created Assignment
+          classId,
         },
       },
       teamSize: 2,
@@ -237,9 +225,9 @@ export async function giveFeedbackToSubmission(
 ) {
   return prisma.feedback.create({
     data: {
-      submissionId: submissionId,
-      teacherId: teacherId,
-      description: description,
+      submissionId,
+      teacherId,
+      description,
     },
   });
 }
@@ -250,25 +238,22 @@ export async function giveAssignmentToTeam(
 ): Promise<TeamAssignment> {
   return prisma.teamAssignment.create({
     data: {
-      teamId: teamId,
-      assignmentId: assignmentId,
+      teamId,
+      assignmentId,
     },
   });
 }
 
-// In ons prisma schema gaan we er van uit dat er een team wordt aangemaakt voor elke assignment
-// en dus ook dat er maar 1 TeamAssignment kan zijn per team
-// Dit wil zeggen dat "giveAssignmentToTeam" dan ook maar 1 keer opgeroepen kan worden
 export async function updateAssignmentForTeam(
   assignmentId: number,
   teamId: number,
 ): Promise<TeamAssignment> {
   return prisma.teamAssignment.update({
     where: {
-      teamId: teamId,
+      teamId,
     },
     data: {
-      assignmentId: assignmentId,
+      assignmentId,
     },
   });
 }
@@ -298,18 +283,44 @@ export async function createTeamWithStudents(
       teamname: teamName,
       classId,
       students: {
-        connect: students.map((student: Student): { userId: number } => ({
-          userId: student.userId,
-        })),
+        connect: students.map((s) => ({ userId: s.userId })),
       },
     },
   });
 }
 
 export function stringToDate(body: any, length: number): void {
-  for (let i: number = 0; i < length; i += 1) {
+  for (let i = 0; i < length; i += 1) {
     body[i].createdAt = new Date(body[i].createdAt);
     body[i].updatedAt = new Date(body[i].updatedAt);
     body[i].deadline = new Date(body[i].deadline);
   }
+}
+
+// === DE TOEGEVOEGDE createLearningObject helper ===
+
+export async function createLearningObject(
+  teacherId: number,
+  data: LocalLearningObjectData,
+): Promise<LearningObject> {
+  return prisma.learningObject.create({
+    data: {
+      hruid: `${data.title.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
+      language: "nl",
+      title: data.title,
+      description: data.description,
+      contentType: data.contentType,
+      keywords: data.keywords ?? [],
+      targetAges: data.targetAges ?? [],
+      teacherExclusive: data.teacherExclusive ?? false,
+      skosConcepts: data.skosConcepts ?? [],
+      copyright: data.copyright ?? "",
+      licence: data.licence ?? "CC BY Dwengo",
+      difficulty: data.difficulty ?? 1,
+      estimatedTime: data.estimatedTime ?? 0,
+      available: data.available ?? true,
+      contentLocation: data.contentLocation ?? "",
+      creatorId: teacherId,
+    },
+  });
 }
