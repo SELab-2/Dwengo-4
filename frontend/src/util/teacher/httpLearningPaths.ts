@@ -118,7 +118,7 @@ export async function fetchLocalLearningPathNodes(
  * @returns {Promise<LearningObject[]>} The learning objects
  * @throws {APIError} When fetching fails
  */
-export async function fetchLocalLearningObjects(): Promise<LearningObject[]> {
+export async function fetchOwnedLearningObjects(): Promise<LearningObject[]> {
   const response = await fetch(`${BACKEND}/learningObjectByTeacher`, {
     method: 'GET',
     headers: {

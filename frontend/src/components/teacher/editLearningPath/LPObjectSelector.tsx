@@ -44,6 +44,7 @@ export const LPObjectSelector: React.FC<LPObjectSelectorProps> = memo(
     // to avoid unnecessarily re-rendering LOCards
     const handleSelectObject = useCallback(
       (objectId: string) => {
+        // use a combination of path id and object id as the selected component id (since paths can contain the same objects)
         setSelectedComponentId(`${path.id}-${objectId}`);
       },
       [path.id], // only depends on path.id
