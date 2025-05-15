@@ -1,5 +1,5 @@
 import { LearningObject, LearningPath } from '@/types/type';
-import { fetchLearningObjectsByLearningPath } from '@/util/teacher/learningPath';
+import { fetchLearningObjectsByLearningPath } from '@/util/shared/learningPath';
 import { useQuery } from '@tanstack/react-query';
 import React, { memo, useCallback, useState } from 'react';
 import { LOCard } from './LOCard';

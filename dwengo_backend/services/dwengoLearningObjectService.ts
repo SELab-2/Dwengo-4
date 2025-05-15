@@ -6,7 +6,6 @@ import {
   UnauthorizedError,
   UnavailableError,
 } from "../errors/errors";
-import { LearningPathDto } from "./learningPathService";
 
 /**
  * De mogelijke content types (zie je enum in de oorspronkelijke code).
@@ -285,16 +284,12 @@ export async function getDwengoObjectsForPath(
 ): Promise<LearningObjectDtoWithRaw[]> {
   try {
     const pathResp = await dwengoAPI.get(`/api/learningPath/${pathId}`);
-    const learningPath: LearningPathDto = pathResp.data;
+    const learningPath = pathResp.data;
     checkFetchedObject(learningPath, `Learning path with id=${pathId} not found.`);
     const nodes = learningPath.nodes || [];
     const results = await Promise.all(
       nodes.map(
-        async (node: {
-          learningobject_hruid: any;
-          version: any;
-          language: any;
-        }) => {
+        async (node: { learningobject_hruid: any; version: any; language: any }) => {
           try {
             const params = {
               hruid: node.learningobject_hruid,
@@ -340,10 +335,7 @@ export async function getDwengoObjectsForPath(
 // Helper functies voor error handling //
 /////////////////////////////////////////
 
-function checkFetchedObject<T>(
-  fetchedObject: T | null,
-  notFoundMessage: string,
-) {
+function checkFetchedObject<T>(fetchedObject: T | null, notFoundMessage: string) {
   if (!fetchedObject) {
     throw new NotFoundError(notFoundMessage);
   }
@@ -358,9 +350,7 @@ function checkAvailabilityAndTeacherExclusive(
   }
 
   if (!dwengoObj.available) {
-    throw new UnavailableError(
-      "This learning object is temporarily not available.",
-    );
+    throw new UnavailableError("This learning object is temporarily not available.");
   }
 }
 

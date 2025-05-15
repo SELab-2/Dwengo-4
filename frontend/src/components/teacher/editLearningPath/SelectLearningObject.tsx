@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { LearningObject, LearningPath } from '../../../types/type';
 import { useQuery } from '@tanstack/react-query';
-import { fetchLearningPaths } from '@/util/teacher/learningPath';
+import { fetchLearningPaths } from '@/util/shared/learningPath';
 import { fetchOwnedLearningObjects } from '@/util/teacher/httpLearningPaths';
 import { LPObjectSelector } from '@/components/teacher/editLearningPath/LPObjectSelector';
 import { useLPEditContext } from '@/context/LearningPathEditContext';

@@ -5,50 +5,7 @@ import {
   LearningPathNodeWithObject,
 } from '../../types/type';
 import { getAuthToken } from './authTeacher';
-import { BACKEND } from './config';
-import { APIError } from '@/types/api.types';
-
-export interface CreateLearningPathPayload {
-  title: string;
-  language: string;
-  description?: string;
-  // not sure how to upload images yet, but this could also be a param here
-}
-
-/**
- * Creates a new learning path
- * @param {CreateLearningPathPayload} payload - The payload containing the learning path details
- * @returns {Promise<LearningPath>} - The response from the API
- * @throws {APIError} - If path creation fails
- */
-export async function createLearningPath({
-  title,
-  language,
-  description,
-}: CreateLearningPathPayload): Promise<LearningPath> {
-  const response = await fetch(`${BACKEND}/pathByTeacher`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
-    body: JSON.stringify({
-      title,
-      language,
-      description,
-    }),
-  });
-
-  if (!response.ok) {
-    const error: APIError = new Error('Failed to create learning path');
-    error.code = response.status;
-    error.info = response.json();
-    throw error;
-  }
-
-  const data = await response.json();
-  return data.learningPath;
-}
+import { apiRequest } from '../shared/config';
 
 /**
  * Fetches a specific local learning path
@@ -59,25 +16,11 @@ export async function createLearningPath({
 export async function fetchLocalLearningPath(
   learningPathId: string,
 ): Promise<LearningPath> {
-  const response = await fetch(`${BACKEND}/pathByTeacher/${learningPathId}`, {
+  return await apiRequest({
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
+    endpoint: `/pathByTeacher/${learningPathId}`,
+    getToken: getAuthToken,
   });
-
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het ophalen van het leerpad.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
-
-  const learningPath = await response.json();
-  return learningPath;
 }
 
 /**
@@ -90,27 +33,11 @@ export async function fetchLocalLearningPath(
 export async function fetchLocalLearningPathNodes(
   learningPathId: string,
 ): Promise<LearningPathNodeWithObject[]> {
-  const response = await fetch(
-    `${BACKEND}/learningPath/${learningPathId}/node`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
-    },
-  );
-
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het ophalen van de nodes van het leerpad.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
-
-  return response.json();
+  return await apiRequest({
+    method: 'GET',
+    endpoint: `/learningPath/${learningPathId}/node`,
+    getToken: getAuthToken,
+  });
 }
 
 /**
@@ -119,24 +46,11 @@ export async function fetchLocalLearningPathNodes(
  * @throws {APIError} When fetching fails
  */
 export async function fetchOwnedLearningObjects(): Promise<LearningObject[]> {
-  const response = await fetch(`${BACKEND}/learningObjectByTeacher`, {
+  return await apiRequest({
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getAuthToken()}`,
-    },
+    endpoint: '/learningObjectByTeacher',
+    getToken: getAuthToken,
   });
-
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het ophalen van de leerobjecten.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
-
-  return response.json();
 }
 
 export interface updateOrCreateLearningPathPayload {
@@ -163,58 +77,36 @@ export async function updateOrCreateLearningPath({
   newNodes,
   learningPathId,
 }: updateOrCreateLearningPathPayload): Promise<LearningPath> {
-  let response: Response;
+  let response: { learningPath: LearningPath };
   if (learningPathId) {
     // if a learning path id is provided, we update the existing learning path
-    response = await fetch(`${BACKEND}/pathByTeacher/${learningPathId}`, {
+    response = await apiRequest({
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
-      body: JSON.stringify({
+      endpoint: `/pathByTeacher/${learningPathId}`,
+      body: {
         title: newTitle,
         description: newDescription,
         language: newLanguage,
         image: newImage,
         nodes: newNodes,
-      }),
+      },
+      getToken: getAuthToken,
     });
-
-    if (!response.ok) {
-      const error: APIError = new Error(
-        'Something went wrong when updating the learning path.',
-      );
-      error.code = response.status;
-      error.info = await response.json();
-      throw error;
-    }
   } else {
     // create new learning path
-    response = await fetch(`${BACKEND}/pathByTeacher`, {
+    response = await apiRequest({
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getAuthToken()}`,
-      },
-      body: JSON.stringify({
+      endpoint: `/pathByTeacher`,
+      body: {
         title: newTitle,
         description: newDescription,
         language: newLanguage,
         image: newImage,
         nodes: newNodes,
-      }),
+      },
+      getToken: getAuthToken,
     });
   }
 
-  if (!response.ok) {
-    const error: APIError = new Error(
-      'Er is iets misgegaan bij het ophalen van de leerobjecten.',
-    );
-    error.code = response.status;
-    error.info = await response.json();
-    throw error;
-  }
-
-  return response.json().then((data) => data.learningPath);
+  return response.learningPath;
 }
