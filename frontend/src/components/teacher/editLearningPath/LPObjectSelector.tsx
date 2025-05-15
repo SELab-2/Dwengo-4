@@ -3,6 +3,7 @@ import { fetchLearningObjectsByLearningPath } from '@/util/shared/learningPath';
 import { useQuery } from '@tanstack/react-query';
 import React, { memo, useCallback, useState } from 'react';
 import { LOCard } from './LOCard';
+import { useTranslation } from 'react-i18next';
 
 interface LPObjectSelectorProps {
   path: LearningPath;
@@ -12,6 +13,7 @@ interface LPObjectSelectorProps {
 
 export const LPObjectSelector: React.FC<LPObjectSelectorProps> = memo(
   ({ path, selectedComponentId, setSelectedComponentId }) => {
+    const { t } = useTranslation();
     // don't refetch objects on click if they've already been fetched
     const [fetched, setFetched] = useState(false);
     // only show objects if the button is clicked
@@ -57,7 +59,10 @@ export const LPObjectSelector: React.FC<LPObjectSelectorProps> = memo(
             <h2 className="font-bold text-xl">{path.title}</h2>
             <p className="text-sm">{path.description}</p>
             <p className="text-sm">
-              <span className="font-medium">Language:</span> {path.language}
+              <span className="font-medium">
+                {t('edit_learning_path.lp_object_selector.language')}
+              </span>
+              <span className="ml-1">{path.language}</span>
             </p>
           </div>
           <button
@@ -67,14 +72,20 @@ export const LPObjectSelector: React.FC<LPObjectSelectorProps> = memo(
         `}
             onClick={handleViewObjects}
           >
-            {viewingObjects ? 'Hide Objects' : 'View Objects'}
+            {viewingObjects
+              ? t('edit_learning_path.lp_object_selector.hide_objects')
+              : t('edit_learning_path.lp_object_selector.show_objects')}
           </button>
         </div>
 
         {/* conditionally render learning objects */}
         {viewingObjects && (
           <div className="mt-4">
-            {isLoadingLearningObjects && <p>Loading learning objects...</p>}
+            {isLoadingLearningObjects && (
+              <p>
+                {t('edit_learning_path.lp_object_selector.loading_objects')}
+              </p>
+            )}
             {isErrorLearningObjects && (
               <p>Error: {errorLearningObjects?.message}</p>
             )}

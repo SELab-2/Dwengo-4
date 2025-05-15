@@ -23,26 +23,30 @@ export const LOCard: React.FC<LOCardProps> = memo(
         <h2 className="font-bold text-2xl">{object.title}</h2>
         <p className="text-m">{object.description}</p>
         <p className="text-sm">
-          <strong>{t('edit_learning_path.lo_card.language')}</strong>{' '}
-          {object.language}
+          <strong>{t('edit_learning_path.lo_card.language')}</strong>
+          <span className="ml-1">{object.language}</span>
         </p>
         <p className="text-sm">
-          <strong>{t('edit_learning_path.lo_card.difficulty')}</strong>{' '}
-          {object.difficulty}
+          <strong>{t('edit_learning_path.lo_card.difficulty')}</strong>
+          <span className="ml-1">{object.difficulty}</span>
         </p>
         {object.keywords.length > 0 && (
           <p className="text-sm">
-            <strong>{t('edit_learning_path.lo_card.keywords')}</strong>{' '}
-            {object.keywords.join(', ')}
+            <strong>{t('edit_learning_path.lo_card.keywords')}</strong>
+            <span className="ml-1">{object.keywords.join(', ')}</span>
           </p>
         )}
         <p className="text-sm">
-          <strong>{t('edit_learning_path.lo_card.created')}</strong>{' '}
-          {new Date(object.createdAt).toLocaleDateString()}
+          <strong>{t('edit_learning_path.lo_card.created')}</strong>
+          <span className="ml-1">
+            {new Date(object.createdAt).toLocaleDateString()}
+          </span>
         </p>
         <p className="text-sm">
-          <strong>{t('edit_learning_path.lo_card.updated')}</strong>{' '}
-          {new Date(object.updatedAt).toLocaleDateString()}
+          <strong>{t('edit_learning_path.lo_card.updated')}</strong>
+          <span className="ml-1">
+            {new Date(object.updatedAt).toLocaleDateString()}
+          </span>
         </p>
         <p>todo: give option to view lo content</p>
 

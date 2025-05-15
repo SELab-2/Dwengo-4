@@ -182,6 +182,12 @@
       "created": "Created:",
       "updated": "Updated:",
       "add_to_path": "Add learning object to path"
+    },
+    "lp_object_selector": {
+      "language": "Language:",
+      "hide_objects": "Hide Objects",
+      "show_objects": "View Objects",
+      "loading_objects": "Loading learning objects ..."
     }
   }
 }

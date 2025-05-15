@@ -182,6 +182,12 @@
       "created": "Aangemaakt:",
       "updated": "Bijgewerkt:",
       "add_to_path": "Leerobject aan pad toevoegen"
+    },
+    "lp_object_selector": {
+      "language": "Taal:",
+      "hide_objects": "Verberg objecten",
+      "show_objects": "Toon objecten",
+      "loading_objects": "Leerobjecten laden ..."
     }
   }
 }
