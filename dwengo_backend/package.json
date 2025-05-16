@@ -13,7 +13,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@prisma/client": "^6.6.0",
+    "@prisma/client": "^6.5.0",
     "@tanstack/react-query": "^5.74.0",
     "@types/lodash": "^4.17.16",
     "@types/uuid": "^10.0.0",
@@ -45,7 +45,7 @@
     "@vitest/ui": "^3.0.7",
     "cross-env": "^7.0.3",
     "nodemon": "^3.1.9",
-    "prisma": "^6.6.0",
+    "prisma": "^6.5.0",
     "supertest": "^7.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",

@@ -157,21 +157,20 @@ const LearningObjectForm: React.FC<Props> = ({ initialData, onSuccess, onCancel 
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    console.log("SUBMITTING");
     e.preventDefault();
 
     // Voor vraag-types: zorg dat rawHtml de JSON-string van questionState is
     if (isQuestionType(step1Data.contentType)) {
-      setRawHtml(JSON.stringify(questionState, null, 2));
+      const fullData: LocalLearningObjectData = { ...step1Data, rawHtml: JSON.stringify(questionState, null, 2) };
+      mutate({ id: initialData?.id, data: fullData });
+    } else {
+      if (!rawHtml.trim()) {
+        setRawHtmlError('HTML content is required');
+        return;
+      }
+      const fullData: LocalLearningObjectData = { ...step1Data, rawHtml };
+      mutate({ id: initialData?.id, data: fullData });
     }
-
-    if (!rawHtml.trim()) {
-      setRawHtmlError('HTML content is required');
-      return;
-    }
-
-    const fullData: LocalLearningObjectData = { ...step1Data, rawHtml };
-    mutate({ id: initialData?.id, data: fullData });
   };
 
 

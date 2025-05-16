@@ -864,6 +864,7 @@ export async function createLocalLearningObject(
   data: LocalLearningObjectData
 ): Promise<LearningObject> {
   console.log("CREATING LOCAL LEARNING OBJECT");
+  console.log(getAuthToken())
   const response = await fetch(`${BACKEND}/learningObjectByTeacher`, {
     method: 'POST',
     headers: {
