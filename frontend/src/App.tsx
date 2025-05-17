@@ -1,12 +1,14 @@
-import React from "react";
-import { RouterProvider } from "react-router-dom";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { router } from "./routes/router";
-import { queryClient } from "./util/shared/config";
+import React, { Suspense } from 'react';
+import { RouterProvider } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { router } from './routes/router';
+import { queryClient } from './util/shared/config';
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <RouterProvider router={router} />
+    <Suspense>
+      <RouterProvider router={router} />
+    </Suspense>
   </QueryClientProvider>
 );
 
