@@ -65,7 +65,7 @@ const HomePage: React.FC = () => {
       <div className="absolute top-4 right-4">
         <LanguageChooser />
       </div>
-      <div className="flex flex-col justify-center items-center h-screen bg-[url('/path-to-your-image.jpg')] bg-cover bg-center">
+      <div className="flex flex-col justify-center items-center h-screen bg-cover bg-center">
         <div className="-translate-y-20">
           <h2 className="justify-center flex flex-row font-bold text-5xl mb-8">
             {t('role.choose')}
