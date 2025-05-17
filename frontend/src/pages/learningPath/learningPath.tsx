@@ -197,7 +197,7 @@ const LearningPath: React.FC = () => {
               <h4 className="text-2xl mb-4">{selectedLearningObject.title}</h4>
               <MathJax>
                 <div
-                  className="prose max-w-none [&_img]:max-w-[200px] [&_img]:max-h-[400px] [&_img]:object-contain"
+                  className="prose max-w-none prose-img:max-w-full prose-img:w-auto"
                   dangerouslySetInnerHTML={{
                     __html: selectedLearningObject.raw || '',
                   }}
