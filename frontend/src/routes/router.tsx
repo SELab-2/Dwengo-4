@@ -7,7 +7,6 @@ import { action as teacherLogoutAction } from '../pages/teacher/LogoutTeacher';
 import { action as studentLogoutAction } from '../pages/student/LogoutStudent';
 
 // ==== TEACHER ROUTES ==== //
-// import Assignment from '../pages/teacher/Assignment';
 const Assignment = lazy(() => import('../pages/teacher/Assignment'));
 const AssignmentAdd = lazy(() => import('../pages/teacher/AssignmentAdd'));
 const AssignmentEdit = lazy(() => import('../pages/teacher/AssignmentEdit'));
