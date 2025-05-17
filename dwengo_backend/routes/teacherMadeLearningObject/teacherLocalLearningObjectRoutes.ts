@@ -5,6 +5,7 @@ import {
   getLocalLearningObjectById,
   getLocalLearningObjects,
   updateLocalLearningObject,
+  getLocalLearningObjectHtml,
 } from "../../controllers/teacher/teacherLocalLearningObjectController";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
 import {
@@ -27,17 +28,7 @@ router.use(protectTeacher);
  * @description Alle leerobjecten van deze teacher ophalen
  * @access Teacher
  */
-router
-  .route("/")
-  .post(
-    validateRequest({
-      customErrorMessage:
-        "invalid request for creating a local learning object",
-      bodySchema: localLearningObjectBodySchema,
-    }),
-    createLocalLearningObject,
-  )
-  .get(getLocalLearningObjects);
+
 
 /**
  * @route GET    /learningObjectByTeacher/:createdLearningObjectId
@@ -56,17 +47,17 @@ router
  * @param createdLearningObjectId: string
  * @access Teacher
  */
+
+
+router
+  .route("/")
+  .post(protectTeacher, createLocalLearningObject)
+  .get(protectTeacher, getLocalLearningObjects);
 router
   .route("/:createdLearningObjectId")
-  .get(getLocalLearningObjectById)
-  .patch(
-    validateRequest({
-      customErrorMessage:
-        "invalid request for updating a local learning object",
-      bodySchema: partialLocalLearningObjectBodySchema,
-    }),
-    updateLocalLearningObject,
-  )
-  .delete(deleteLocalLearningObject);
+  .get(protectTeacher, getLocalLearningObjectById)
+  .patch(protectTeacher, updateLocalLearningObject)
+  .delete(protectTeacher, deleteLocalLearningObject);
 
+router.get('/:createdLearningObjectId/html', protectTeacher, getLocalLearningObjectHtml);
 export default router;

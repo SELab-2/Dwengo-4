@@ -5,21 +5,18 @@
   "scripts": {
     "dev": "nodemon --watch '**/*.ts' --exec ts-node server.ts",
     "start": "cross-env NODE_ENV=production ts-node server.ts",
-
     "test:unit": "vitest run -c ./vitest.config.unit.ts",
     "test:unit:ui": "vitest -c ./vitest.config.unit.ts --ui",
     "coverage:unit": "vitest run -c ./vitest.config.unit.ts --coverage",
-
     "test:int": "vitest run -c ./vitest.config.integration.ts",
     "test:int:ui": "vitest -c ./vitest.config.integration.ts --ui",
     "coverage:int": "vitest run -c ./vitest.config.integration.ts --coverage"
-
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@prisma/client": "^6.6.0",
+    "@prisma/client": "^6.5.0",
     "@tanstack/react-query": "^5.74.0",
     "@types/lodash": "^4.17.16",
     "@types/uuid": "^10.0.0",
@@ -53,7 +50,7 @@
     "@vitest/ui": "^3.0.7",
     "cross-env": "^7.0.3",
     "nodemon": "^3.1.9",
-    "prisma": "^6.6.0",
+    "prisma": "^6.5.0",
     "supertest": "^7.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",

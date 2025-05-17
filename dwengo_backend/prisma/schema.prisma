@@ -238,6 +238,9 @@ enum ContentType {
   IMAGE_IMAGE
   AUDIO_MPEG
   // Eigen toevoegingen
+  APPLICATION_PDF
+  EXTERN
+  BLOCKLY
   VIDEO
   EVAL_MULTIPLE_CHOICE
   EVAL_OPEN_QUESTION
@@ -279,6 +282,18 @@ model LearningObject {
   returnValue      ReturnValue?
   progress         LearningObjectProgress[]
   // QuestionSpecifics QuestionSpecific[]
+
+  LearningObjectRawHtml LearningObjectRawHtml?
+}
+
+model LearningObjectRawHtml {
+  id               Int      @id @default(autoincrement())
+  learningObjectId String   @unique
+  rawHtml          String // hier komt de HTML-inhoud
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  learningObject LearningObject @relation(fields: [learningObjectId], references: [id], onDelete: Cascade)
 }
 
 model EducationalGoal {

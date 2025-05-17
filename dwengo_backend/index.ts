@@ -16,7 +16,11 @@ const app: Express = express();
 app.use(corsMiddleware);
 app.use(httpLogger);
 app.use(express.json());
+// Vergroot de maximale JSON-body naar 70 MB zodat grote payloads (bijv. Base64-afbeeldingen) geaccepteerd worden
+app.use(express.json({ limit: '70mb' }));
 
+// Vergroot de maximale URL-encoded body naar 70 MB (voor form submissions e.d.) en sta rich data toe (geneste objecten)
+app.use(express.urlencoded({ limit: '70mb', extended: true }));
 app.options("*", (_, res): void => {
   res.sendStatus(200);
 });
