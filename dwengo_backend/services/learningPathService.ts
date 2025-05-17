@@ -25,6 +25,11 @@ export interface LearningPathDto {
 
   createdAt?: string;
   updatedAt?: string;
+  creator?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+  }; // for local paths
 
   // ===== BELANGRIJK =====
   // Zodat we Dwengo vs. lokaal kunnen onderscheiden in 1 type:
@@ -45,6 +50,7 @@ function mapDwengoPathToLocal(dwengoPath: any): LearningPathDto {
     nodes: dwengoPath.nodes ?? [],
     createdAt: dwengoPath.created_at ?? "",
     updatedAt: dwengoPath.updatedAt ?? "",
+    creator: undefined, // dwengo paths don't have a specific creator
     // Nieuw: Dwengo => altijd true
     isExternal: true,
   };

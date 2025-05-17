@@ -18,7 +18,6 @@ export function getAuthToken(): string | null {
   return token;
 }
 
-
 /**
  * Fetches all learning paths for the authenticated teacher
  * @returns {Promise<LearningPath[]>} List of learning paths
@@ -29,16 +28,14 @@ export async function fetchLearningPaths(): Promise<LearningPath[]> {
     method: 'GET',
     endpoint: '/learningpath?all',
     getToken: getAuthToken,
-  })) as { learningPaths: LearningPath[] };
+  })) as LearningPath[];
 
   return response
     .map((path: any) => ({
       ...path,
       id: path._id || path.id,
     }))
-    .sort((a: LearningPath, b: LearningPath) =>
-      a.title.localeCompare(b.title),
-    ) as LearningPath[];
+    .sort((a: LearningPath, b: LearningPath) => a.title.localeCompare(b.title));
 }
 
 /**
@@ -52,7 +49,6 @@ export async function fetchLearningPath(
   learningPathId: string,
   isExternal: boolean = false,
 ): Promise<LearningPath> {
-
   return (await apiRequest({
     method: 'GET',
     endpoint: `/learningpath/${learningPathId}?includeProgress=true`,
