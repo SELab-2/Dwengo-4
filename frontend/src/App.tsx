@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { router } from './routes/router';
@@ -7,9 +7,11 @@ import { MathJaxContext } from 'better-react-mathjax';
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <MathJaxContext>
-      <RouterProvider router={router} />
-    </MathJaxContext>
+    <Suspense>
+      <MathJaxContext>
+        <RouterProvider router={router} />
+      </MathJaxContext>
+    </Suspense>
   </QueryClientProvider>
 );
 
