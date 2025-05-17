@@ -40,6 +40,7 @@ import StudentClassIndex from '../pages/student/StudentClassIndex';
 import LearningPaths from '../pages/learningPath/learningPaths';
 import LearningPath from '../pages/learningPath/learningPath';
 import NewQuestion from '@/pages/student/NewQuestion';
+import LocalLearningObjectsPage from '../pages/teacher/LocalLearningObject';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
@@ -109,6 +110,7 @@ export const router = createBrowserRouter([
         path: 'classes',
         element: <ClassesPage></ClassesPage>,
       },
+
       {
         path: 'classes/:classId',
         element: <EditClassTeacher />,
@@ -128,6 +130,10 @@ export const router = createBrowserRouter([
       {
         path: 'assignment/:assignmentId/edit',
         element: <AssignmentEdit></AssignmentEdit>,
+      },
+      {
+        path: 'local-learning-objects',
+        element: <LocalLearningObjectsPage></LocalLearningObjectsPage>,
       },
       {
         path: 'learning-paths/create',

@@ -38,6 +38,10 @@ const NavTeacher: React.FC = () => {
                   to="/teacher/learning-paths"
                   label={t('nav.learning_paths')}
                 />
+                <NavButton
+                  to="/teacher/local-learning-objects"
+                  label="Local Learning Objects"
+                />
               </div>
             ) : (
               <div
