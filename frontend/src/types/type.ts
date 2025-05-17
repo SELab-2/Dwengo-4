@@ -12,11 +12,8 @@ interface LearningPath {
   description: string;
   creator?: {
     id: string;
-    user: {
-      id: string;
-      firstName: string;
-      lastName: string;
-    };
+    firstName: string;
+    lastName: string;
   };
   createdAt: string;
   updatedAt: string;
