@@ -138,11 +138,74 @@
     "filter": {
       "clear": "Clear filter",
       "not_found": "No results found"
-    }
+    },
+    "create_lp": "Create Learning Path"
   },
   "learning_objects": {
     "loading": "Loading learning paths ...",
     "next": "Up next",
     "end": "End of learning path"
+  },
+  "edit_learning_path": {
+    "loading_path_details": "Loading learning path details ...",
+    "loading_objects": "Loading learning objects ...",
+    "add_node": "Add node",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "saving": "Saving ...",
+    "no_nodes_error": "Add at least one learning object to your path",
+    "node_list_instructions": "Hover over a node to add/delete. Use the handle to drag and reorder.",
+    "add_node_button": {
+      "adding_node": "Adding node ...",
+      "cancel": "Cancel"
+    },
+    "node_component": {
+      "add_node_here": "Add node here",
+      "untitled_node": "Untitled node"
+    },
+    "delete_node_button": {
+      "title": "Delete node",
+      "confirmation": "Are you sure?",
+      "yes": "yes",
+      "no": "no"
+    },
+    "lp_details": {
+      "add_title": "Add learning path title",
+      "add_description": "Add a description (optional)",
+      "language": "Language:",
+      "language_not_set": "Not set",
+      "language_info": "The language will be automatically set when you add your first learning object. All learning objects must use the same language."
+    },
+    "lo_card": {
+      "language": "Language:",
+      "difficulty": "Difficulty:",
+      "keywords": "Keywords:",
+      "created": "Created:",
+      "updated": "Updated:",
+      "add_to_path": "Add learning object to path"
+    },
+    "lp_object_selector": {
+      "language": "Language:",
+      "hide_objects": "Hide Objects",
+      "show_objects": "View Objects",
+      "loading_objects": "Loading learning objects ..."
+    },
+    "select_lo": {
+      "title": "Select a learning object",
+      "from_lps": "from learning paths",
+      "from_my_los": "from my learning objects",
+      "paths": {
+        "search": "Search learning paths ...",
+        "loading": "Loading learning paths ...",
+        "error": "Something went wrong while loading the learning paths."
+      },
+      "objects": {
+        "search": "Search learning objects ...",
+        "loading": "Loading learning objects ...",
+        "error": "Something went wrong while loading the learning objects."
+      },
+      "no_results": "No results found for '{{searchTerm}}'.",
+      "no_results_generic": "No results."
+    }
   }
 }

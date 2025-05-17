@@ -14,8 +14,10 @@ import {
   LearningPathDetails,
   LearningPathDetailsRef,
 } from '@/components/teacher/editLearningPath/LearningPathDetails';
+import { useTranslation } from 'react-i18next';
 
 const EditLearningPath: React.FC = () => {
+  const { t } = useTranslation();
   // error message to ensure at least one node is added before saving
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -30,23 +32,7 @@ const EditLearningPath: React.FC = () => {
     language,
     setLanguage,
   } = useLPEditContext();
-
   const { learningPathId } = useParams<{ learningPathId: string }>();
-  // can only happen if `isCreateMode` is set incorrectly, adding a check just in case
-  if (!isCreateMode && !learningPathId) {
-    return (
-      <div className="p-6">
-        <h2 className="text-xl font-bold text-dwengo-red">Error</h2>
-        <p>Cannot edit learning path: missing learning path ID parameter</p>
-        <button
-          className="mt-4 px-4 py-2 bg-gray-200 rounded hover:cursor-pointer"
-          onClick={() => navigate('/teacher/learning-paths')}
-        >
-          Back to Learning Paths
-        </button>
-      </div>
-    );
-  }
 
   const {
     data: learningPathData,
@@ -101,7 +87,7 @@ const EditLearningPath: React.FC = () => {
 
     // check if at least one node was added
     if (orderedNodes.length === 0) {
-      setErrorMessage('Add at least one learning object to your path');
+      setErrorMessage(t('edit_learning_path.no_nodes_error'));
       return;
     }
 
@@ -124,7 +110,9 @@ const EditLearningPath: React.FC = () => {
       >
         {/* path details */}
         {isLoadingPath && !isCreateMode ? (
-          <p className="text-gray-500">Loading learning path details...</p>
+          <p className="text-gray-500">
+            {t('edit_learning_path.loading_path_details')}
+          </p>
         ) : isErrorPath ? (
           <p>Error: {errorPath?.message}</p>
         ) : (
@@ -168,11 +156,14 @@ const EditLearningPath: React.FC = () => {
 
         <div className="rounded-lg border border-gray-200 p-2.5 bg-white">
           {isLoadingNodes ? (
-            <p>Loading learning objects...</p>
+            <p>{t('edit_learning_path.loading_objects')}</p>
           ) : isErrorNodes ? (
             <p>Error: {errorNodes?.message}</p>
           ) : orderedNodes.length == 0 ? (
-            <AddNodeButton nodeIndex={0} label="Add Node" />
+            <AddNodeButton
+              nodeIndex={0}
+              label={t('edit_learning_path.add_node')}
+            />
           ) : (
             <NodeList />
           )}
@@ -191,14 +182,16 @@ const EditLearningPath: React.FC = () => {
           onClick={handleSavePath}
           disabled={isSavingPath}
         >
-          {isSavingPath ? 'Saving...' : 'Confirm'}
+          {isSavingPath
+            ? t('edit_learning_path.saving')
+            : t('edit_learning_path.confirm')}
         </button>
         <button
           className={`px-6 h-10 font-bold rounded-md bg-dwengo-red-200 text-white hover:bg-dwengo-red-dark hover:cursor-pointer`}
           disabled={isSavingPath}
           onClick={() => navigate(-1)}
         >
-          Cancel
+          {t('edit_learning_path.cancel')}
         </button>
       </div>
     </div>

@@ -132,7 +132,7 @@ const LearningPaths: React.FC = () => {
     () => filterLearningPaths(learningPaths || [], filters, searchQuery),
     [learningPaths, filters, searchQuery],
   );
-                
+
   const { t } = useTranslation();
 
   const isTeacherView = window.location.pathname.includes('/teacher');
@@ -172,7 +172,7 @@ const LearningPaths: React.FC = () => {
               navigate('/teacher/learning-paths/create');
             }}
           >
-            Create Learning Path
+            {t('learning_paths.create_lp')}
           </button>
         )}
       </div>

@@ -7,6 +7,7 @@ import {
 import { LearningPathNodeWithObject } from '../../../types/type';
 import { useDrag, useDrop } from 'react-dnd';
 import DeleteNodeButton from './DeleteNodeButton';
+import { useTranslation } from 'react-i18next';
 
 const DRAG_N_DROP_TYPE = 'NODE';
 interface DragItem {
@@ -22,6 +23,7 @@ interface NodeComponentProps {
 
 const NodeComponent: React.FC<NodeComponentProps> = memo(
   ({ node, index, moveNode, onOpenLearningObject }) => {
+    const { t } = useTranslation();
     const { isAddingNode, currentNodeIndex, deleteNode } = useLPEditContext();
     const nodeRef = useRef<HTMLDivElement | null>(null);
     const dragHandleRef = useRef<HTMLDivElement | null>(null);
@@ -108,7 +110,8 @@ const NodeComponent: React.FC<NodeComponentProps> = memo(
               onClick={() => onOpenLearningObject()}
               className="text-left"
             >
-              {node.learningObject?.title || 'Untitled Node'}
+              {node.learningObject?.title ||
+                t('edit_learning_path.node_component.untitled_node')}
             </button>
 
             {/* delete button */}
@@ -125,7 +128,10 @@ const NodeComponent: React.FC<NodeComponentProps> = memo(
           <div
             className={`mt-2 ${!isAddingNode ? 'hidden group-hover:block' : ''}`}
           >
-            <AddNodeButton nodeIndex={index} label="Add node here" />
+            <AddNodeButton
+              nodeIndex={index}
+              label={t('edit_learning_path.node_component.add_node_here')}
+            />
           </div>
         )}
       </div>
