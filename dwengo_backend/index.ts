@@ -25,7 +25,7 @@ if (process.env.NODE_ENV !== "production") {
   app.use(logResponseBody());
 }
 // Routes
-app.use(routes);
+app.use("/api", routes);
 
 // Swagger
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
