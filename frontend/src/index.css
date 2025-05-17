@@ -262,10 +262,6 @@
     gap: 0.5rem;
   }
 
-  /*ul {*/
-  /*  list-style: none !important;*/
-  /*}*/
-
   ul.bullet li {
     padding-left: 15px;
     position: relative;
