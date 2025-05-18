@@ -3,74 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { LearningPath } from '../../types/type';
 import { LearningPathFilter } from '../../components/learningPath/learningPathFilter';
 import { Filter } from '../../components/ui/filters';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { filterLearningPaths } from '@/util/filter';
 import { fetchLearningPaths } from '@/util/shared/learningPath';
 import { useTranslation } from 'react-i18next';
-
-/**
- * Generates a background color based on the given ID.
- *
- * @param {string} id - The ID to generate the background color for.
- * @returns {string} The generated background color in HSL format.
- */
-const generateBackgroundColor = (id: string) => {
-  const hash = [...id].reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  const hue = hash % 360;
-  return `hsl(${hue}, 70%, 80%)`;
-};
-
-interface LearningPathCardProps {
-  path: LearningPath;
-}
-
-/**
- * LearningPathCard component displays a single learning path card.
- *
- * @param {LearningPathCardProps} props - The props for the component.
- * @returns {JSX.Element} The rendered LearningPathCard component.
- */
-const LearningPathCard: React.FC<LearningPathCardProps> = ({ path }) => {
-  const backgroundColor = useMemo(
-    () => generateBackgroundColor(path.id),
-    [path.id],
-  );
-  const isTeacherView = window.location.pathname.includes('/teacher');
-  const linkPath = isTeacherView
-    ? `/teacher/learning-paths/${path.id}`
-    : `/student/learning-paths/${path.id}`;
-
-  return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-128">
-      <div className="w-full h-80 flex items-center justify-center">
-        {path.image ? (
-          <img
-            src={`data:image/png;base64,${path.image}`}
-            alt={`${path.title} thumbnail`}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div
-            className="w-full h-full flex items-center justify-center object-fit-cover"
-            style={{ backgroundColor }}
-          >
-            <span className="text-gray-700 text-xl font-semibold">
-              {path.title}
-            </span>
-          </div>
-        )}
-      </div>
-      <div className="p-6 flex-grow h-40 border-t-2 border-gray-200">
-        <Link to={linkPath} className="text-blue-600 hover:text-blue-800">
-          <h2 className="text-xl font-semibold mb-2">{path.title}</h2>
-        </Link>
-        <p className="text-gray-700 h-[77px] overflow-hidden line-clamp-3">
-          {path.description}
-        </p>
-      </div>
-    </div>
-  );
-};
+import { LearningPathCard } from '@/components/learningPath/LearningPathCard';
 
 /**
  * LearningPaths component displays all available learning paths.
