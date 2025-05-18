@@ -12,6 +12,11 @@
 }
 
 .content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  min-height: 50vh;
   background: white;
   padding: 32px;
   border-radius: 8px;
@@ -31,9 +36,11 @@
 }
 
 .teamBuilder {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 60px;
   display: flex;
   gap: 32px;
-  margin-bottom: 24px;
 }
 
 .studentsList,
@@ -88,9 +95,16 @@
 }
 
 .actions {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background: white;
+  border-top: 1px solid #ddd;
   display: flex;
-  gap: 16px;
   justify-content: flex-end;
+  gap: 0.5rem;
 }
 
 .actions button {

@@ -47,6 +47,7 @@ const TeamsDisplay: React.FC<TeamsDisplayProps> = ({
           className={styles.editButton}
           type="button"
           onClick={onEditClick}
+          disabled={selectedClasses.length === 0}
         >
           {t('assignments_form.assign_team.edit')}
         </button>
@@ -76,7 +77,12 @@ const TeamsDisplay: React.FC<TeamsDisplayProps> = ({
           </div>
         ))}
       </div>
-      <button className={styles.editButton} type="button" onClick={onEditClick}>
+      <button
+        className={styles.editButton}
+        type="button"
+        onClick={onEditClick}
+        disabled={selectedClasses.length === 0}
+      >
         {t('assignments_form.assign_team.edit')}
       </button>
     </div>

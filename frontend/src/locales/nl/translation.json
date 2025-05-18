@@ -77,7 +77,8 @@
       "choose": "Kies leerpad",
       "loading": "Leerpaden inladen...",
       "error": "Er is iets fout gelopen tijdens het ophalen van de leerpaden",
-      "select": "- Selecteer een leerpad -"
+      "select": "- Selecteer een leerpad -",
+      "required": "Selecteer een leerpad"
     },
     "description": "Beschrijving",
     "type": {
@@ -100,7 +101,9 @@
       "available_students": "Beschikbare leerlingen",
       "generate_random_teams": "Genereer willekeurige groepen",
       "create_team": "Maak groep",
-      "incomplete_team_warning": "Onvolledige groep maken?"
+      "incomplete_team_warning": "Onvolledige groep maken?",
+      "deselect_all": "Deselecteer alles",
+      "select_all": "Selecteer alles"
     },
     "deadline": "Deadline",
     "cancel": "Annuleer",

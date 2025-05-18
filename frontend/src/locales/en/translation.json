@@ -100,7 +100,9 @@
       "available_students": "Available students",
       "generate_random_teams": "Generate random teams",
       "create_team": "Create team",
-      "incomplete_team_warning": "Create incomplete team?"
+      "incomplete_team_warning": "Create incomplete team?",
+      "deselect_all": "Deselect all",
+      "select_all": "Select all"
     },
     "deadline": "Deadline",
     "cancel": "Cancel",

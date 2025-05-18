@@ -124,6 +124,7 @@ const AddAssignmentForm = ({
   const [formErrors, setFormErrors] = useState<{
     classes?: string;
     teams?: string;
+    learningPath?: string;
   }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -219,6 +220,18 @@ const AddAssignmentForm = ({
     }
   }, [assignmentType, selectedClasses, isEditing]);
 
+  // Add this useEffect before the return statement
+  useEffect(() => {
+    // Remove teams for classes that are no longer selected
+    const updatedTeams = { ...teams };
+    Object.keys(updatedTeams).forEach((classId) => {
+      if (!selectedClasses.some((c) => c.id.toString() === classId)) {
+        delete updatedTeams[classId];
+      }
+    });
+    setTeams(updatedTeams);
+  }, [selectedClasses]);
+
   const handleTeamClicks = () => {
     setIsTeamOpen(true);
   };
@@ -260,10 +273,14 @@ const AddAssignmentForm = ({
    * @returns boolean indicating if form is valid
    */
   const validateForm = () => {
-    const errors: { classes?: string; teams?: string } = {};
+    const errors: { classes?: string; teams?: string; learningPath?: string } = {};
 
     if (selectedClasses.length === 0) {
       errors.classes = 'Please select at least one class';
+    }
+
+    if (!selectedLearningPath) {
+      errors.learningPath = t('assignments_form.learning_path.required');
     }
 
     if (assignmentType === 'group') {
@@ -323,7 +340,7 @@ const AddAssignmentForm = ({
 
       navigate(
         isEditing
-          ? `/teacher/assignments/${assignmentData?.id}`
+          ? `/teacher/assignment/${assignmentData?.id}`
           : `/teacher/classes/${classId}`,
       );
     } catch (error: any) {
@@ -385,6 +402,9 @@ const AddAssignmentForm = ({
           {formErrors.teams && (
             <div className={styles.error}>{formErrors.teams}</div>
           )}
+          {formErrors.learningPath && (
+            <div className={styles.error}>{formErrors.learningPath}</div>
+          )}
 
           <div>
             <label htmlFor="deadline">{t('assignments_form.deadline')}</label>
@@ -411,7 +431,7 @@ const AddAssignmentForm = ({
             <button
               className={styles.submitButton}
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isLearningPathsLoading}
             >
               {isSubmitting
                 ? t('assignments_form.submitting')

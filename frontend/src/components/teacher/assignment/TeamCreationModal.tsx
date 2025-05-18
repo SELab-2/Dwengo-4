@@ -37,8 +37,8 @@ const TeamCreationModal = ({
   useEffect(() => {
     const studentsInTeams = selectedClass
       ? (teams[selectedClass.id]?.flatMap((team) =>
-          team.students.map((member) => member.id),
-        ) ?? [])
+        team.students.map((member) => member.id),
+      ) ?? [])
       : [];
 
     const availableStuds =
@@ -83,6 +83,17 @@ const TeamCreationModal = ({
       [classId]: individualStudents[classId]?.some((s) => s.id === student.id)
         ? individualStudents[classId].filter((s) => s.id !== student.id)
         : [...(individualStudents[classId] || []), student],
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (!selectedClass || !setIndividualStudents) return;
+    const classId = selectedClass.id;
+    const allSelected = individualStudents[classId]?.length === selectedClass.students.length;
+
+    setIndividualStudents({
+      ...individualStudents,
+      [classId]: allSelected ? [] : [...selectedClass.students],
     });
   };
 
@@ -207,13 +218,12 @@ const TeamCreationModal = ({
                 {selectedClass?.students.map((student) => (
                   <div
                     key={student.id}
-                    className={`${styles.student} ${
-                      individualStudents[selectedClass.id]?.some(
-                        (s) => s.id === student.id,
-                      )
-                        ? styles.selected
-                        : ''
-                    }`}
+                    className={`${styles.student} ${individualStudents[selectedClass.id]?.some(
+                      (s) => s.id === student.id,
+                    )
+                      ? styles.selected
+                      : ''
+                      }`}
                     onClick={() => handleIndividualStudentSelect(student)}
                   >
                     {student.firstName} {student.lastName}
@@ -228,11 +238,10 @@ const TeamCreationModal = ({
                 {availableStudents.map((student) => (
                   <div
                     key={student.id}
-                    className={`${styles.student} ${
-                      selectedStudents.find((s) => s.id === student.id)
-                        ? styles.selected
-                        : ''
-                    }`}
+                    className={`${styles.student} ${selectedStudents.find((s) => s.id === student.id)
+                      ? styles.selected
+                      : ''
+                      }`}
                     onClick={() => handleStudentSelect(student)}
                   >
                     {student.firstName} {student.lastName}
@@ -273,7 +282,7 @@ const TeamCreationModal = ({
         </div>
 
         <div className={styles.actions}>
-          {!isIndividual && (
+          {!isIndividual ? (
             <>
               <button onClick={generateRandomTeams} disabled={!selectedClass}>
                 {t('assignments_form.assign_team.generate_random_teams')}
@@ -286,6 +295,12 @@ const TeamCreationModal = ({
                 {selectedStudents.length}/{teamSize})
               </button>
             </>
+          ) : (
+            <button onClick={handleSelectAll}>
+              {individualStudents[selectedClass?.id || '']?.length === selectedClass?.students.length
+                ? t('assignments_form.assign_team.deselect_all')
+                : t('assignments_form.assign_team.select_all')}
+            </button>
           )}
           <button onClick={onClose}>{t('close')}</button>
         </div>
