@@ -5,5 +5,6 @@ export function action(): Response {
   localStorage.removeItem("expiration");
   localStorage.removeItem("firstName");
   localStorage.removeItem("lastName");
+  localStorage.removeItem("role");
   return redirect("/");
 }
