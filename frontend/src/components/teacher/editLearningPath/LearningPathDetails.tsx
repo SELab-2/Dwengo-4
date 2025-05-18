@@ -1,5 +1,6 @@
 import React, { useImperativeHandle, useState } from 'react';
 import { useLPEditContext } from '../../../context/LearningPathEditContext';
+import { useTranslation } from 'react-i18next';
 
 // note how language isn't in here, this is because it gets automatically deduced from the learning objects
 // LearningPathEditContext.tsx contains the logic to set the language
@@ -23,6 +24,7 @@ export const LearningPathDetails: React.FC<LearningPathDetailsProps> = ({
   initialDescription,
   initialImage,
 }) => {
+  const { t } = useTranslation();
   const [title, setTitle] = useState<string>(initialTitle || '');
   const [description, setDescription] = useState<string>(
     initialDescription || '',
@@ -50,7 +52,7 @@ export const LearningPathDetails: React.FC<LearningPathDetailsProps> = ({
     <div className="pl-1 space-y-1">
       {/* LP title*/}
       <input
-        placeholder="Add learning path title"
+        placeholder={t('edit_learning_path.lp_details.add_title')}
         value={title}
         onChange={(e) => setTitle(e.target.value.trimStart())}
         className={`
@@ -70,7 +72,7 @@ export const LearningPathDetails: React.FC<LearningPathDetailsProps> = ({
         name="description"
         onChange={(e) => setDescription(e.target.value.trimStart())}
         value={description}
-        placeholder="Add a description (optional)"
+        placeholder={t('edit_learning_path.lp_details.add_description')}
         spellCheck="false"
         className={`
             w-full bg-gray-50 hover:bg-gray-50 focus:bg-white transition-all
@@ -96,22 +98,23 @@ export const LearningPathDetails: React.FC<LearningPathDetailsProps> = ({
               d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
             />
           </svg>
-          <span className="font-medium">Language:</span>
+          <span className="font-medium">
+            {t('edit_learning_path.lp_details.language')}
+          </span>
           {language ? (
             <span className="ml-1 bg-blue-50 text-dwengo-blue-dark px-1.5 py-0.5 rounded text-xs font-medium">
               {language}
             </span>
           ) : (
             <span className="ml-1 bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded text-xs">
-              Not set
+              {t('edit_learning_path.lp_details.language_not_set')}
             </span>
           )}
         </div>
 
         {!language && (
           <p className="text-xs text-gray-400 mt-1 italic">
-            The language will be automatically set when you select your first
-            learning object. All learning objects must use the same language.
+            {t('edit_learning_path.lp_details.language_info')}
           </p>
         )}
       </div>

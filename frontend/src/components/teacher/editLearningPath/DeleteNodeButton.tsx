@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface DeleteNodeButtonProps {
   onDelete: () => void;
 }
 
 const DeleteNodeButton: React.FC<DeleteNodeButtonProps> = ({ onDelete }) => {
+  const { t } = useTranslation();
   // use to conditionally render the inline delete confirmation dialog
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -15,8 +17,8 @@ const DeleteNodeButton: React.FC<DeleteNodeButtonProps> = ({ onDelete }) => {
         onClick={() => setShowDeleteConfirm(true)}
         className={`${
           showDeleteConfirm ? 'bg-dwengo-red-dark' : 'bg-dwengo-red-200'
-        } hover:bg-dwengo-red-dark text-white rounded p-1 flex-shrink-0`}
-        title="Delete node"
+        } hover:bg-dwengo-red-dark text-white rounded p-1 flex-shrink-0 hover:cursor-pointer`}
+        title={t('edit_learning_path.delete_node_button.title')}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -47,7 +49,7 @@ const DeleteNodeButton: React.FC<DeleteNodeButtonProps> = ({ onDelete }) => {
           {/* confirmation dialog */}
           <div className="flex flex-col border border-gray-300 rounded shadow-md bg-white overflow-hidden">
             <span className="px-1 py-1.5 text-sm text-center border-b border-gray-200">
-              Are you sure?
+              {t('edit_learning_path.delete_node_button.confirmation')}
             </span>
             <div className="flex flex-col sm:flex-row">
               <button
@@ -57,13 +59,13 @@ const DeleteNodeButton: React.FC<DeleteNodeButtonProps> = ({ onDelete }) => {
                 }}
                 className="w-full sm:flex-1 bg-dwengo-red-200 hover:bg-dwengo-red-dark text-white p-1.5 text-xs border-b sm:border-b-0 sm:border-r border-gray-200"
               >
-                Yes
+                {t('edit_learning_path.delete_node_button.yes')}
               </button>
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 className="w-full sm:flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 p-1.5 text-xs"
               >
-                No
+                {t('edit_learning_path.delete_node_button.no')}
               </button>
             </div>
           </div>

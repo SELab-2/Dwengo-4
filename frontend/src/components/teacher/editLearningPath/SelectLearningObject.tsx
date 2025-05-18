@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LearningObject, LearningPath } from '../../../types/type';
 import { useQuery } from '@tanstack/react-query';
 import { fetchLearningPaths } from '@/util/shared/learningPath';
@@ -8,10 +9,12 @@ import { useLPEditContext } from '@/context/LearningPathEditContext';
 import { LOCard } from './LOCard';
 
 const SelectLearningObject: React.FC = () => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredLearningPaths, setFilteredLearningPaths] = useState<
     LearningPath[]
   >([]);
+  const [filteredObjects, setFilteredObjects] = useState<LearningObject[]>([]);
   const [selectedComponentId, setSelectedComponentId] = useState<string>('');
   // user can select from learning paths or directly from their own learning objects
   const [viewMode, setViewMode] = useState<'paths' | 'objects'>('paths');
@@ -43,76 +46,112 @@ const SelectLearningObject: React.FC = () => {
   useEffect(() => {
     if (allLearningPaths) {
       const results = allLearningPaths.filter((path) => {
-        // filter by title search term
         const matchesTitle = path.title
           .toLowerCase()
           .includes(searchTerm.toLowerCase());
-
-        // only filter by language if language is not empty
         const matchesLanguage = !language || path.language === language;
-
         return matchesTitle && matchesLanguage;
       });
       setFilteredLearningPaths(results);
     }
   }, [searchTerm, allLearningPaths, language]);
 
+  useEffect(() => {
+    if (ownedLearningObjects) {
+      const results = ownedLearningObjects.filter((object) => {
+        const matchesTitle = object.title
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+        const matchesLanguage = !language || object.language === language;
+        return matchesTitle && matchesLanguage;
+      });
+      setFilteredObjects(results);
+    }
+  }, [searchTerm, ownedLearningObjects, language]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value); // update the search term
   };
 
+  // show correct message based on view mode, loading state, and error states
+  const renderStateMessage = () => {
+    const isLoading =
+      (viewMode === 'paths' && isLoadingPaths) ||
+      (viewMode === 'objects' && isLoadingOwnedObjects);
+    const isError =
+      (viewMode === 'paths' && isErrorPaths) ||
+      (viewMode === 'objects' && isErrorOwnedObjects);
+    const noResults =
+      (viewMode === 'paths' && filteredLearningPaths.length === 0) ||
+      (viewMode === 'objects' && filteredObjects.length === 0);
+
+    if (isLoading) {
+      return <p>{t(`edit_learning_path.select_lo.${viewMode}.loading`)}</p>;
+    }
+    if (isError) {
+      return (
+        <p className="text-red-500">
+          {t(`edit_learning_path.select_lo.${viewMode}.error`)}
+        </p>
+      );
+    }
+    if (noResults) {
+      return (
+        <p className="text-gray-500">
+          {searchTerm
+            ? t('edit_learning_path.select_lo.no_results', { searchTerm })
+            : t('edit_learning_path.select_lo.no_results_generic')}
+        </p>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Select a learning object</h1>
+      <h1 className="text-2xl font-bold mb-2">
+        {t('edit_learning_path.select_lo.title')}
+      </h1>
 
       {/* toggle between learning paths and learning objects */}
-      <div className="flex items-center gap-4 mb-4">
+      <div className="flex items-center gap-4 mb-3">
         <button
           onClick={() => setViewMode('paths')}
-          className={`px-4 py-2 rounded hover:cursor-pointer ${
+          className={`px-4 py-1.5 rounded hover:cursor-pointer ${
             viewMode === 'paths'
               ? 'bg-dwengo-green text-white'
               : 'bg-gray-200 text-gray-700'
           }`}
         >
-          From Learning Paths
+          {t('edit_learning_path.select_lo.from_lps')}
         </button>
         <button
           onClick={() => setViewMode('objects')}
-          className={`px-4 py-2 rounded hover:cursor-pointer ${
+          className={`px-4 py-1.5 rounded hover:cursor-pointer ${
             viewMode === 'objects'
               ? 'bg-dwengo-green text-white'
               : 'bg-gray-200 text-gray-700'
           }`}
         >
-          From My Learning Objects
+          {t('edit_learning_path.select_lo.from_my_los')}
         </button>
       </div>
 
       {/* search input */}
       <input
         type="text"
-        placeholder={`Search ${viewMode === 'paths' ? 'learning paths' : 'learning objects'}...`}
+        placeholder={`${
+          viewMode === 'paths'
+            ? t('edit_learning_path.select_lo.paths.search')
+            : t('edit_learning_path.select_lo.objects.search')
+        }`}
         value={searchTerm}
         onChange={handleInputChange}
         className="w-full p-2 border border-gray-300 rounded mb-4"
       />
 
-      {/* loading state */}
-      {viewMode === 'paths' && isLoadingPaths && (
-        <p>Loading learning paths...</p>
-      )}
-      {viewMode === 'objects' && isLoadingOwnedObjects && (
-        <p>Loading learning objects...</p>
-      )}
-
-      {/* error state */}
-      {viewMode === 'paths' && isErrorPaths && (
-        <p className="text-red-500">Failed to load learning paths.</p>
-      )}
-      {viewMode === 'objects' && isErrorOwnedObjects && (
-        <p className="text-red-500">Failed to load learning objects.</p>
-      )}
+      {/* show message if loading, error, or no results*/}
+      {renderStateMessage()}
 
       {/* results */}
       <ul>
@@ -128,7 +167,7 @@ const SelectLearningObject: React.FC = () => {
           ))}
 
         {viewMode === 'objects' &&
-          ownedLearningObjects?.map((object) => (
+          filteredObjects.map((object) => (
             <li key={object.id} className="text-sm mb-4">
               <LOCard
                 object={object}
@@ -138,21 +177,6 @@ const SelectLearningObject: React.FC = () => {
             </li>
           ))}
       </ul>
-
-      {/* no results message */}
-      {!isLoadingPaths &&
-        !isErrorPaths &&
-        viewMode === 'paths' &&
-        filteredLearningPaths.length === 0 && (
-          <p className="text-gray-500">No results found for "{searchTerm}".</p>
-        )}
-
-      {!isLoadingOwnedObjects &&
-        !isErrorOwnedObjects &&
-        viewMode === 'objects' &&
-        ownedLearningObjects?.length === 0 && (
-          <p className="text-gray-500">No learning objects found.</p>
-        )}
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLPEditContext } from '../../../context/LearningPathEditContext';
+import { useTranslation } from 'react-i18next';
 
 interface AddNodeButtonProps {
   label: string;
@@ -7,13 +8,14 @@ interface AddNodeButtonProps {
 }
 
 const AddNodeButton: React.FC<AddNodeButtonProps> = ({ label, nodeIndex }) => {
+  const { t } = useTranslation();
   const { isAddingNode, startAddingNode, cancelAddingNode } =
     useLPEditContext();
 
   return isAddingNode ? (
     <div className="w-full p-3 bg-gray-100 flex justify-between items-center">
       <span className="text-gray-500 italic cursor-default">
-        Adding node...
+        {t('edit_learning_path.add_node_button.adding_node')}
       </span>
       <button
         className={`
@@ -38,7 +40,9 @@ const AddNodeButton: React.FC<AddNodeButtonProps> = ({ label, nodeIndex }) => {
             d="M6 18 18 6M6 6l12 12"
           />
         </svg>
-        <span className="text-sm font-medium">Cancel</span>
+        <span className="text-sm font-medium">
+          {t('edit_learning_path.add_node_button.cancel')}
+        </span>
       </button>
     </div>
   ) : (

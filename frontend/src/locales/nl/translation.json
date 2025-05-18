@@ -138,11 +138,74 @@
     "filter": {
       "clear": "Wis filter",
       "not_found": "Geen resultaten gevonden"
-    }
+    },
+    "create_lp": "Leerpad Aanmaken"
   },
   "learning_objects": {
     "loading": "Leerpaden laden...",
     "next": "Volgende",
     "end": "Einde van leerpad"
+  },
+  "edit_learning_path": {
+    "loading_path_details": "Leerpad details laden ...",
+    "loading_objects": "Leerobjecten laden ...",
+    "add_node": "Node toevoegen",
+    "cancel": "Annuleer",
+    "confirm": "Opslaan",
+    "saving": "Opslaan ...",
+    "no_nodes_error": "Voeg minstens één leerobject toe aan je pad",
+    "node_list_instructions": "Beweeg de muis over een node om toe te voegen of te verwijderen. Gebruik de hendel om nodes te verslepen.",
+    "add_node_button": {
+      "adding_node": "Node toevoegen ...",
+      "cancel": "Annuleer"
+    },
+    "node_component": {
+      "add_node_here": "Voeg hier node toe",
+      "untitled_node": "Naamloze node"
+    },
+    "delete_node_button": {
+      "title": "Verwijder node",
+      "confirmation": "Ben je zeker?",
+      "yes": "ja",
+      "no": "nee"
+    },
+    "lp_details": {
+      "add_title": "Voeg leerpad titel toe",
+      "add_description": "Voeg een beschrijving toe (optioneel)",
+      "language": "Taal:",
+      "language_not_set": "Niet ingesteld",
+      "language_info": "De taal wordt automatisch ingesteld wanneer je een eerste leerobject toevoegt. Alle leerobjecten moeten dezelfde taal gebruiken."
+    },
+    "lo_card": {
+      "language": "Taal:",
+      "difficulty": "Moeilijkheidsgraad:",
+      "keywords": "Trefwoorden:",
+      "created": "Aangemaakt:",
+      "updated": "Bijgewerkt:",
+      "add_to_path": "Leerobject aan pad toevoegen"
+    },
+    "lp_object_selector": {
+      "language": "Taal:",
+      "hide_objects": "Verberg objecten",
+      "show_objects": "Toon objecten",
+      "loading_objects": "Leerobjecten laden ..."
+    },
+    "select_lo": {
+      "title": "Selecteer een leerobject",
+      "from_lps": "uit leerpaden",
+      "from_my_los": "uit mijn leerobjecten",
+      "paths": {
+        "search": "Doorzoek leerpaden ...",
+        "loading": "Leerpaden laden ...",
+        "error": "Er ging iets mis bij het ophalen van de leerpaden."
+      },
+      "objects": {
+        "search": "Doozoek leerobjecten ...",
+        "loading": "Leerobjecten laden ...",
+        "error": "Er ging iets mis bij het ophalen van de leerobjecten."
+      },
+      "no_results": "Geen resultaten gevonden voor '{{searchTerm}}'.",
+      "no_results_generic": "Geen resultaten."
+    }
   }
 }

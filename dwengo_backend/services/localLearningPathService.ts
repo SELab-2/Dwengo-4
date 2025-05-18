@@ -25,7 +25,11 @@ export interface LocalLearningPathData {
  * DB record => Dto (maar we matchen 'LearningPathDto')
  * Let op: we zetten isExternal = false
  */
-function mapLocalPathToDto(lp: PrismaLearningPath): LearningPathDto {
+function mapLocalPathToDto(
+  lp: PrismaLearningPath & {
+    creator?: { userId: number; user: { firstName: string; lastName: string } };
+  },
+): LearningPathDto {
   return {
     _id: lp.id,
     hruid: lp.hruid,
@@ -38,6 +42,11 @@ function mapLocalPathToDto(lp: PrismaLearningPath): LearningPathDto {
     nodes: [], // we laten 'nodes' leeg of je zou ze hier kunnen mappen
     createdAt: lp.createdAt.toISOString(),
     updatedAt: lp.updatedAt.toISOString(),
+    creator: {
+      id: lp.creatorId,
+      firstName: lp.creator?.user.firstName ?? "",
+      lastName: lp.creator?.user.lastName ?? "",
+    },
     // cruciaal!
     isExternal: false,
   };
@@ -368,6 +377,13 @@ export class LocalLearningPathService {
     const results = await prisma.learningPath.findMany({
       where: whereClause,
       orderBy: { createdAt: "desc" },
+      include: {
+        creator: {
+          include: {
+            user: true,
+          },
+        },
+      },
     });
     // map => isExternal=false
     return results.map(mapLocalPathToDto);
@@ -391,7 +407,16 @@ export class LocalLearningPathService {
     const lp =
       byId ??
       (await handlePrismaQuery(() =>
-        prisma.learningPath.findUnique({ where: { hruid: idOrHruid } }),
+        prisma.learningPath.findUnique({
+          where: { hruid: idOrHruid },
+          include: {
+            creator: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        }),
       ));
 
     if (!lp) throw new NotFoundError("Learning path not found.");

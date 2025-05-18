@@ -1,6 +1,7 @@
 import { useLPEditContext } from '@/context/LearningPathEditContext';
 import { LearningObject } from '@/types/type';
 import React, { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface LOCardProps {
   object: LearningObject;
@@ -10,6 +11,7 @@ interface LOCardProps {
 
 export const LOCard: React.FC<LOCardProps> = memo(
   ({ object, isSelectedObject, setSelectedComponentId }) => {
+    const { t } = useTranslation();
     const { addNode, currentNodeIndex } = useLPEditContext();
     return (
       <div
@@ -21,23 +23,30 @@ export const LOCard: React.FC<LOCardProps> = memo(
         <h2 className="font-bold text-2xl">{object.title}</h2>
         <p className="text-m">{object.description}</p>
         <p className="text-sm">
-          <strong>Language:</strong> {object.language}
+          <strong>{t('edit_learning_path.lo_card.language')}</strong>
+          <span className="ml-1">{object.language}</span>
         </p>
         <p className="text-sm">
-          <strong>Difficulty:</strong> {object.difficulty}
+          <strong>{t('edit_learning_path.lo_card.difficulty')}</strong>
+          <span className="ml-1">{object.difficulty}</span>
         </p>
         {object.keywords.length > 0 && (
           <p className="text-sm">
-            <strong>Keywords:</strong> {object.keywords.join(', ')}
+            <strong>{t('edit_learning_path.lo_card.keywords')}</strong>
+            <span className="ml-1">{object.keywords.join(', ')}</span>
           </p>
         )}
         <p className="text-sm">
-          <strong>Created:</strong>{' '}
-          {new Date(object.createdAt).toLocaleDateString()}
+          <strong>{t('edit_learning_path.lo_card.created')}</strong>
+          <span className="ml-1">
+            {new Date(object.createdAt).toLocaleDateString()}
+          </span>
         </p>
         <p className="text-sm">
-          <strong>Last Updated:</strong>{' '}
-          {new Date(object.updatedAt).toLocaleDateString()}
+          <strong>{t('edit_learning_path.lo_card.updated')}</strong>
+          <span className="ml-1">
+            {new Date(object.updatedAt).toLocaleDateString()}
+          </span>
         </p>
         <p>todo: give option to view lo content</p>
 
@@ -55,7 +64,7 @@ export const LOCard: React.FC<LOCardProps> = memo(
               )
             }
           >
-            Add learning object to path
+            {t('edit_learning_path.lo_card.add_to_path')}
           </button>
         )}
       </div>

@@ -103,15 +103,16 @@ const LearningPaths: React.FC = () => {
 
   const uniqueCreators = useMemo(() => {
     if (!learningPaths) return [];
-    return Array.from(
-      new Set(
-        learningPaths
-          .filter((path) => path.creator?.user !== undefined)
-          .map((path) => ({
-            name: `${path.creator?.user.firstName} ${path.creator?.user.lastName}`,
-          })),
-      ),
-    ).sort((a, b) => a.name.localeCompare(b.name));
+    const creators = new Set(
+      learningPaths
+        .filter((path) => path.creator !== undefined)
+        .map((path) => `${path.creator?.firstName} ${path.creator?.lastName}`),
+    );
+    return Array.from(creators)
+      .map((creator) => ({
+        name: creator,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
   }, [learningPaths]);
 
   const uniqueLanguages = useMemo(() => {
@@ -132,7 +133,7 @@ const LearningPaths: React.FC = () => {
     () => filterLearningPaths(learningPaths || [], filters, searchQuery),
     [learningPaths, filters, searchQuery],
   );
-                
+
   const { t } = useTranslation();
 
   const isTeacherView = window.location.pathname.includes('/teacher');
@@ -172,7 +173,7 @@ const LearningPaths: React.FC = () => {
               navigate('/teacher/learning-paths/create');
             }}
           >
-            Create Learning Path
+            {t('learning_paths.create_lp')}
           </button>
         )}
       </div>
