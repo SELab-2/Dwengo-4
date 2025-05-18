@@ -11,9 +11,9 @@ const ContentDetailsStep: React.FC<FormStepProps> = ({
   step1Data,
 }) => (
   <>
-    <h3 className="text-xl font-medium">Content Details</h3>
+    <h3 className="text-xl font-medium mb-4">Content Details</h3>
 
-    <div>
+    <div className="mb-4">
       <label className="block mb-1">Content Type</label>
       <select
         ref={contentTypeRef}
@@ -30,20 +30,35 @@ const ContentDetailsStep: React.FC<FormStepProps> = ({
 
     <InputWithChecks
       ref={keywordsRef}
-      label="Keywords (comma-separated)"
-      value={step1Data.keywords.join(',')}
+      label="Keywords (comma-separated, e.g. math, science, history)"
+      placeholder="math, science, history"
+      value={
+        Array.isArray(step1Data.keywords)
+          ? step1Data.keywords.join(',')
+          : ''
+      }
     />
 
     <InputWithChecks
       ref={targetAgesRef}
-      label="Target Ages (comma-separated)"
-      value={step1Data.targetAges.join(',')}
+      label="Target Ages (comma-separated, e.g. 12, 13, 14)"
+      placeholder="12, 13, 14"
+      value={
+        Array.isArray(step1Data.targetAges)
+          ? step1Data.targetAges.join(',')
+          : ''
+      }
     />
 
     <InputWithChecks
       ref={skosRef}
-      label="SKOS Concepts (comma-separated)"
-      value={step1Data.skosConcepts.join(',')}
+      label="SKOS Concepts (comma-separated, e.g. biology, physics)"
+      placeholder="biology, physics"
+      value={
+        Array.isArray(step1Data.skosConcepts)
+          ? step1Data.skosConcepts.join(',')
+          : ''
+      }
     />
   </>
 );

@@ -22,14 +22,6 @@ export interface LocalLearningObjectData {
 
 export enum ContentType {
   TEXT_PLAIN = "text/plain",
-  TEXT_MARKDOWN = "text/markdown",
-  IMAGE_BLOCK = "image/image-block",
-  IMAGE = "image/image",
-  AUDIO = "audio/mpeg",
-  APPLICATION_PDF = "application/pdf",
-  EXTERN = "extern",
-  BLOCKLY = "BLOCKLY",
-  VIDEO = "video",
   EVAL_MULTIPLE_CHOICE = "EVAL_MULTIPLE_CHOICE",
   EVAL_OPEN_QUESTION = "EVAL_OPEN_QUESTION",
 }

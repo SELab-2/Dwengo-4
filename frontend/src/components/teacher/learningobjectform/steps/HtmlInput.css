@@ -1,0 +1,4 @@
+/* Zorgt dat de Quill editor altijd minstens 200px hoog is */
+.ql-container.ql-snow {
+  min-height: 200px;
+}

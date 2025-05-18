@@ -1,6 +1,7 @@
 import React from 'react';
-import ReactQuill, { Quill } from 'react-quill-new';
+import ReactQuill from 'react-quill-new';
 import 'quill/dist/quill.snow.css';
+import './HtmlInput.css'; // <-- nieuw
 
 interface HtmlInputProps {
   value: string;
@@ -110,6 +111,18 @@ const HtmlInput: React.FC<HtmlInputProps> = ({
   return (
     <div className="mb-6">
       <label className="block mb-2 font-medium">{label}</label>
+
+      {/* Uitleg voor gebruikers hoe de editor te gebruiken */}
+      <p className="text-sm text-gray-600 mb-2">
+        Gebruik de toolbar bovenin om je tekst op te maken: selecteer <strong>Heading 1</strong> of <strong>Heading 2</strong> voor koppen,
+        maak woorden <strong>vet</strong>, <em>schuin</em> of <u>onderstreept</u>, en maak ordered of bullet-lijsten.
+        Met de link-knop voeg je eenvoudig URL’s toe, en de <em>Clean</em>-knop verwijdert alle opmaak in één keer.
+      </p>
+      <p className="text-sm text-gray-600 mb-4">
+        Klik op de afbeelding-knop om een bestand te kiezen. De editor comprimeert en schaalt je afbeelding automatisch
+        naar maximaal 400px breedte en voegt het plaatje direct in als base64-URL. Zo maak je snel visueel rijke content!
+      </p>
+
       <div className="border rounded">
         <ReactQuill
           theme="snow"
