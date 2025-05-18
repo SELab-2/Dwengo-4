@@ -34,7 +34,9 @@ jobs:
       - name: Run integration tests
         run: |
           cd /home/selab2/Dwengo-4/dwengo_backend
+          git stash
           git checkout develop
+          git stash
           git pull
           npm ci
           npm run test:int
@@ -53,7 +55,9 @@ jobs:
         run: |
           cd /home/selab2/Dwengo-4/
           git checkout develop
+          git stash
           git pull
+          git stash
           cd /home/selab2/Dwengo-4/frontend
           npm i
           npm run build
