@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - yolo
       - develop
   workflow_dispatch:
 
@@ -44,17 +43,15 @@ jobs:
   deploy:
     runs-on: self-hosted
     needs: [test-automated]
-    if: success() && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/yolo')
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Kill existing Node processes
         run: pkill -f "node.*server.ts" || true
 
-      # Your existing deployment steps...
       - name: Deploy branch
-        if: github.ref == 'refs/heads/develop'
         run: |
           cd /home/selab2/Dwengo-4/
-          git checkout develop
+          git checkout main
           git stash
           git pull
           git stash
