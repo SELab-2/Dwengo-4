@@ -22,6 +22,7 @@ interface FormFieldsProps {
   learningPathsError?: Error;
 }
 
+
 const FormFields: React.FC<FormFieldsProps> = ({
   title,
   setTitle,
@@ -81,7 +82,7 @@ const FormFields: React.FC<FormFieldsProps> = ({
           maxLength={100}
           onChange={(e) => setTitle(e.target.value)}
         />
-        <small>{100 - title.length}</small>
+        <small>{100 - title.length} {t('characters')}</small>
       </div>
 
       <div>
@@ -129,7 +130,7 @@ const FormFields: React.FC<FormFieldsProps> = ({
           cols={50}
           maxLength={500}
         ></textarea>
-        <small>{500 - description.length}</small>
+        <small>{500 - description.length} {t('characters')}</small>
       </div>
     </>
   );

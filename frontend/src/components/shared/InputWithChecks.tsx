@@ -5,6 +5,7 @@ import React, {
   ChangeEventHandler,
   FocusEventHandler,
 } from "react";
+import { useTranslation } from "react-i18next";
 import "./InputWithChecks.css";
 
 interface InputWithChecksProps {
@@ -21,6 +22,8 @@ interface InputWithChecksHandle {
   validateInput: () => boolean;
   getValue: () => string;
 }
+
+
 
 const InputWithChecks = forwardRef<InputWithChecksHandle, InputWithChecksProps>(
   ({ label, inputType = "text", validate, info, value = "", ...props }, ref) => {
@@ -50,6 +53,8 @@ const InputWithChecks = forwardRef<InputWithChecksHandle, InputWithChecksProps>(
       getValue: () => inputValue,
     }));
 
+    const { t } = useTranslation();
+
     return (
       <div className="input-container">
         {label && <label>{label}</label>}
@@ -64,7 +69,7 @@ const InputWithChecks = forwardRef<InputWithChecksHandle, InputWithChecksProps>(
         />
         {props.maxLength && (
           <div className="input-length">
-            {props.maxLength - inputValue.length}
+            {props.maxLength - inputValue.length} {t("characters")}
           </div>
         )}
         {info && <div className="input-info">{info}</div>}
