@@ -41,7 +41,8 @@
     "settings": "Settings",
     "classes": "Classes",
     "learning_paths": "Learning paths",
-    "logged_in_as": "Logged in as {{name}}"
+    "logged_in_as": "Logged in as {{name}}",
+    "assignments": "Assignments"
   },
   "class": {
     "create": "Create new class",
@@ -63,7 +64,11 @@
     "view_all": "View all assignments",
     "error": "Something went wrong while loading the assignments",
     "view": "View assignment",
-    "not_found": "No assignments found"
+    "not_found": "No assignments found",
+    "view_assignment": "View assignment",
+    "my_assignments": "My assignments",
+    "deadline": "Deadline",
+    "team": "Your Team"
   },
   "assignments_form": {
     "edit": "Edit assignment",

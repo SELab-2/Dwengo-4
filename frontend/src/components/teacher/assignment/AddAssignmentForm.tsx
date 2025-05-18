@@ -241,9 +241,11 @@ const AddAssignmentForm = ({
   ) => {
     setAssignmentType(e.target.value);
     if (e.target.value === 'group') {
-      setTeamSize(2); // Set default team size to 2 when switching to group
+      setTeamSize(2);
+      setTeams({}); // Reset teams when switching to group
     } else {
-      setTeamSize(1); // Set team size to 1 for individual assignments
+      setTeamSize(1);
+      setIndividualStudents({}); // Reset individual students when switching to individual
     }
   };
 

@@ -120,6 +120,12 @@
   background: #0056b3;
 }
 
+.actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #ccc;
+}
+
 .teamHeader button {
   background: #dc3545;
   color: white;

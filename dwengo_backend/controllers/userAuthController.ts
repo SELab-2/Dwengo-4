@@ -91,6 +91,7 @@ const loginUser = async (
     message: "Successfully logged in.",
     firstName: user.firstName,
     lastName: user.lastName,
+    id: user.id,
     token: generateToken(studentOrTeacherRecord.userId),
   });
 };

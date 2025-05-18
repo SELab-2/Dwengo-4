@@ -10,6 +10,7 @@ import { action as studentLogoutAction } from '../pages/student/LogoutStudent';
 const Assignment = lazy(() => import('../pages/teacher/Assignment'));
 const AssignmentAdd = lazy(() => import('../pages/teacher/AssignmentAdd'));
 const AssignmentEdit = lazy(() => import('../pages/teacher/AssignmentEdit'));
+const Assignments = lazy(() => import('../pages/teacher/Assignments'));
 
 const RootLayoutTeacher = lazy(
   () => import('../components/teacher/RootLayoutTeacher'),
@@ -144,6 +145,10 @@ export const router = createBrowserRouter([
       {
         path: 'assignment/:assignmentId/edit',
         element: <AssignmentEdit></AssignmentEdit>,
+      },
+      {
+        path: 'assignments',
+        element: <Assignments></Assignments>,
       },
       {
         path: 'learning-paths/create',

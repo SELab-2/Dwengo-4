@@ -97,6 +97,14 @@ const TeamCreationModal = ({
     });
   };
 
+  const handleDeselectAll = () => {
+    if (!selectedClass) return;
+    setTeams({
+      ...teams,
+      [selectedClass.id]: []
+    });
+  };
+
   const createTeam = () => {
     if (!selectedClass || selectedStudents.length === 0) return;
     if (selectedStudents.length > teamSize) return;
@@ -160,24 +168,21 @@ const TeamCreationModal = ({
     const shuffledStudents = [...availableStudents].sort(
       () => Math.random() - 0.5,
     );
+    const existingTeams = teams[selectedClass.id] || [];
     const newTeams: Team[] = [];
 
     for (let i = 0; i < shuffledStudents.length; i += teamSize) {
       const teamMembers = shuffledStudents.slice(i, i + teamSize);
-      if (teamMembers.length === teamSize) {
-        const teamNumber =
-          getNextTeamNumber(teams[selectedClass.id] || []) +
-          Math.floor(i / teamSize);
-        newTeams.push({
-          id: `team-${teamNumber}`,
-          students: teamMembers,
-        });
-      }
+      const teamNumber = getNextTeamNumber(existingTeams) + Math.floor(i / teamSize);
+      newTeams.push({
+        id: `team-${teamNumber}`,
+        students: teamMembers,
+      });
     }
 
     setTeams({
       ...teams,
-      [selectedClass.id]: newTeams,
+      [selectedClass.id]: [...existingTeams, ...newTeams],
     });
   };
 
@@ -284,12 +289,18 @@ const TeamCreationModal = ({
         <div className={styles.actions}>
           {!isIndividual ? (
             <>
-              <button onClick={generateRandomTeams} disabled={!selectedClass}>
+              <button onClick={handleDeselectAll} disabled={!selectedClass}>
+                {t('assignments_form.assign_team.deselect_all')}
+              </button>
+              <button onClick={
+                generateRandomTeams} disabled={!selectedClass || availableStudents.length === 0}>
                 {t('assignments_form.assign_team.generate_random_teams')}
               </button>
               <button
                 onClick={createTeam}
-                disabled={!selectedClass || selectedStudents.length === 0}
+                disabled={
+                  !selectedClass ||
+                  selectedStudents.length === 0}
               >
                 {t('assignments_form.assign_team.create_team')} (
                 {selectedStudents.length}/{teamSize})
@@ -305,7 +316,7 @@ const TeamCreationModal = ({
           <button onClick={onClose}>{t('close')}</button>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 
