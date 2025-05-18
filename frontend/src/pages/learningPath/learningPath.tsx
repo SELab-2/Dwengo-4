@@ -9,6 +9,7 @@ import {
 } from '@/util/shared/learningPath';
 import { upsertLearningObjectProgress } from '@/util/student/progress';
 import { useTranslation } from 'react-i18next';
+import { MathJax } from 'better-react-mathjax';
 
 /**
  * LearningPaths component displays all available learning paths.
@@ -194,12 +195,14 @@ const LearningPath: React.FC = () => {
           ) : (
             <div className="w-full max-w-3xl">
               <h4 className="text-2xl mb-4">{selectedLearningObject.title}</h4>
-              <div
-                className="prose max-w-none [&_img]:max-w-[200px] [&_img]:max-h-[400px] [&_img]:object-contain"
-                dangerouslySetInnerHTML={{
-                  __html: selectedLearningObject.raw || '',
-                }}
-              />
+              <MathJax>
+                <div
+                  className="prose max-w-none prose-img:max-w-full prose-img:w-auto"
+                  dangerouslySetInnerHTML={{
+                    __html: selectedLearningObject.raw || '',
+                  }}
+                />
+              </MathJax>
             </div>
           )}
         </div>
