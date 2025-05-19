@@ -41,7 +41,8 @@
     "settings": "Instellingen",
     "classes": "Klassen",
     "learning_paths": "Leerpaden",
-    "logged_in_as": "Ingelogd als {{name}}"
+    "logged_in_as": "Ingelogd als {{name}}",
+    "assignments": "Opdrachten"
   },
   "class": {
     "create": "Nieuwe klas aanmaken",
@@ -63,7 +64,9 @@
     "view_all": "Bekijk alle opdrachten",
     "error": "Er is iets fout gelopen tijdens het ophalen van de opdrachten",
     "view": "Opdracht bekijken",
-    "not_found": "Geen opdrachten gevonden"
+    "not_found": "Geen opdrachten gevonden",
+    "view_assignment": "Bekijk opdracht",
+    "my_assignments": "Mijn opdrachten"
   },
   "assignments_form": {
     "edit": "Opdracht bewerken",
