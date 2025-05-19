@@ -6,18 +6,6 @@ import { fetchAssignment } from '@/util/teacher/assignment';
 import { fetchLearningPath } from '@/util/shared/learningPath';
 import { useTranslation } from 'react-i18next';
 
-
-
-
-
-
-
-
-
-
-
-
-
 const AssignmentStudent: React.FC = () => {
   const { assignmentId } = useParams<{ assignmentId: string }>();
   const { t } = useTranslation();
@@ -63,8 +51,8 @@ const AssignmentStudent: React.FC = () => {
     // Look through each class's teams
     for (const classTeams of Object.values(assignment.classTeams)) {
       // Find the team that contains the student
-      const team = classTeams.find(team =>
-        team.students.some(s => s.id.toString() === studentId)
+      const team = classTeams.find((team) =>
+        team.students.some((s) => s.id.toString() === studentId),
       );
       if (team) return team;
     }
@@ -93,10 +81,11 @@ const AssignmentStudent: React.FC = () => {
           <p className="text-gray-700 mb-4">{assignment.description}</p>
           <div className="grid grid-cols-2 gap-4 mb-6">
             <p className="text-gray-600">
-              Language: {assignment.pathLanguage}
+              {t('assignment.language')}: {assignment.pathLanguage}
             </p>
             <p className="text-gray-600">
-              Deadline: {new Date(assignment.deadline).toLocaleDateString()}
+              {t('assignment.deadline')}:{' '}
+              {new Date(assignment.deadline).toLocaleDateString()}
             </p>
           </div>
 
@@ -108,9 +97,7 @@ const AssignmentStudent: React.FC = () => {
               </h3>
               {studentTeam ? (
                 <div className="bg-gray-50 rounded-md p-4">
-                  <h4 className="text-lg font-medium mb-2">
-                    {studentTeam.id}
-                  </h4>
+                  <h4 className="text-lg font-medium mb-2">{studentTeam.id}</h4>
                   <div className="space-y-2">
                     {studentTeam.students.map((member) => (
                       <div
@@ -123,16 +110,19 @@ const AssignmentStudent: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <p className="text-gray-600">
-                  {t('assignments.no_team')}
-                </p>
+                <p className="text-gray-600">{t('assignments.no_team')}</p>
               )}
             </div>
           )}
 
-          <h3 className="text-xl font-semibold mb-4">Learning Path</h3>
+          <h3 className="text-xl font-semibold mb-4">
+            {t('assignment.learning_path_details')}
+          </h3>
           {isLearningPathLoading && (
-            <p className="text-gray-600">Loading learning path...</p>
+            <p className="text-gray-600">
+              {' '}
+              {t('assignment.loading_learning_path')}
+            </p>
           )}
           {isLearningPathError && (
             <p className="text-red-500">Error: {learningPathError.message}</p>
@@ -150,10 +140,6 @@ const AssignmentStudent: React.FC = () => {
               <p className="text-gray-700">{learningPathData.description}</p>
             </div>
           )}
-
-
-
-
         </div>
       )}
     </div>

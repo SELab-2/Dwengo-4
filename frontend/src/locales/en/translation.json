@@ -65,9 +65,11 @@
     "error": "Something went wrong while loading the assignments",
     "view": "View assignment",
     "not_found": "No assignments found",
+    "not_yet": "No assignments assigned yet",
     "view_assignment": "View assignment",
     "my_assignments": "My assignments",
-    "deadline": "Deadline"
+    "deadline": "Deadline",
+    "no_team": "No team assigned"
   },
   "assignment": {
     "title": "Assignment",
