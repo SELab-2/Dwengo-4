@@ -18,8 +18,9 @@ export function getTokenDuration(): number {
 
 export function getAuthToken(): string | null {
   const token = localStorage.getItem("token");
+  const role = localStorage.getItem('role');
 
-  if (!token) {
+  if (!token || role !== 'teacher') {
     return null;
   }
 
