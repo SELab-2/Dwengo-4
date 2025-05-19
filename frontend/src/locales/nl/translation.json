@@ -225,6 +225,19 @@
     "no_questions": "Geen vragen gevonden voor deze opdracht",
     "view_button": "Bekijk",
     "asked_by": "Gevraagd door",
-    "ask_question": "Stel een vraag"
+    "ask_question": "Stel een vraag",
+    "form": {
+      "succes": "Vraag succesvol toegevoegd!",
+      "title": "Titel",
+      "question": "Vraag",
+      "languages": {
+        "label": "Taal",
+        "en": "Engels",
+        "nl": "Nederlands",
+        "fr": "Frans"
+      },
+      "back": "Terug",
+      "submit": "Stel vraag"
+    }
   }
 }

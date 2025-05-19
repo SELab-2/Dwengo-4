@@ -40,14 +40,14 @@ const NewQuestion = () => {
 
       {success && (
         <div className="bg-green-50 text-green-700 p-3 rounded-md mb-4">
-          Question created successfully!
+          {t('questions.form.success')}
         </div>
       )}
 
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label htmlFor="title" className="block mb-1 font-medium">
-            Titel
+            {t('questions.form.title')}
           </label>
           <input
             id="title"
@@ -61,7 +61,7 @@ const NewQuestion = () => {
 
         <div className="mb-4">
           <label htmlFor="text" className="block mb-1 font-medium">
-            Vraag
+            {t('questions.form.question')}
           </label>
           <textarea
             id="text"
@@ -75,7 +75,7 @@ const NewQuestion = () => {
         <div className="mb-6 space-y-2">
           <div className="mt-4">
             <label htmlFor="language" className="block mb-1 font-medium">
-              Taal
+              {t('questions.form.languages.label')}
             </label>
             <select
               id="language"
@@ -85,9 +85,9 @@ const NewQuestion = () => {
                 setDwengoLanguage(e.target.value);
               }}
             >
-              <option value="nl">Nederlands</option>
-              <option value="en">Engels</option>
-              <option value="fr">Frans</option>
+              <option value="nl">{t('questions.form.languages.nl')}</option>
+              <option value="en">{t('questions.form.languages.en')}</option>
+              <option value="fr">{t('questions.form.languages.fr')}</option>
             </select>
           </div>
         </div>
@@ -98,9 +98,9 @@ const NewQuestion = () => {
             onClick={() => navigate(-1)}
             className="px-4 py-2 border text-gray-700 hover:cursor-pointer rounded-md"
           >
-            Ga terug
+            {t('questions.form.back')}
           </button>
-          <PrimaryButton>Stel Vraag</PrimaryButton>
+          <PrimaryButton>{t('questions.form.submit')}</PrimaryButton>
         </div>
       </form>
     </div>

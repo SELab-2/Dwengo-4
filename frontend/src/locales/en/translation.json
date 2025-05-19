@@ -225,6 +225,19 @@
     "no_questions": "No questions found for this assignment",
     "view_button": "View",
     "asked_by": "Asked by",
-    "ask_question": "Ask a question"
+    "ask_question": "Ask a question",
+    "form": {
+      "succes": "Question successfully created!",
+      "title": "Title",
+      "question": "Question",
+      "languages": {
+        "label": "Language",
+        "en": "English",
+        "nl": "Dutch",
+        "fr": "French"
+      },
+      "back": "Back",
+      "submit": "Ask question"
+    }
   }
 }
