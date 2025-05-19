@@ -90,7 +90,7 @@ export const LPObjectSelector: React.FC<LPObjectSelectorProps> = memo(
               <p>Error: {errorLearningObjects?.message}</p>
             )}
             {learningObjects && (
-              <ul className="list-disc pl-6">
+              <ul className="list-none pl-6">
                 {learningObjects.map((object) => (
                   <li key={object.id} className="text-sm mb-4">
                     <LOCard

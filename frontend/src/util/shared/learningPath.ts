@@ -1,4 +1,4 @@
-import { LearningPath } from '@/types/type';
+import { LearningObject, LearningPath } from '@/types/type';
 import { getTokenDuration } from '../teacher/authTeacher';
 import { apiRequest } from './config';
 
@@ -41,33 +41,31 @@ export async function fetchLearningPaths(): Promise<LearningPath[]> {
 /**
  * Fetches a specific learning path
  * @param {string} learningPathId - The ID of the learning path
- * @param {boolean} isExternal - Whether the path is external
  * @returns {Promise<LearningPath>} The learning path details
  * @throws {APIError} When fetching fails
  */
 export async function fetchLearningPath(
   learningPathId: string,
-  isExternal: boolean = false,
 ): Promise<LearningPath> {
   return (await apiRequest({
     method: 'GET',
     endpoint: `/learningpath/${learningPathId}?includeProgress=true`,
     getToken: getAuthToken,
-  })) as { learningPath: LearningPath };
+  })) as LearningPath;
 }
 
 /**
  * Fetches all learning objects for a specific learning path
  * @param {string} pathId - The ID of the learning path
- * @returns {Promise<any>} List of learning objects
+ * @returns {Promise<LearningObject[]>} List of learning objects
  * @throws {APIError} When fetching fails
  */
 export async function fetchLearningObjectsByLearningPath(
   pathId: string,
-): Promise<any> {
+): Promise<LearningObject[]> {
   return (await apiRequest({
     method: 'GET',
     endpoint: `/learningObject/learningPath/${pathId}`,
     getToken: getAuthToken,
-  })) as { learningObjects: any[] };
+  })) as LearningObject[];
 }

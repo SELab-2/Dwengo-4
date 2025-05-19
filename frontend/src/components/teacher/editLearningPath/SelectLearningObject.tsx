@@ -154,7 +154,7 @@ const SelectLearningObject: React.FC = () => {
       {renderStateMessage()}
 
       {/* results */}
-      <ul>
+      <ul className="list-none">
         {viewMode === 'paths' &&
           filteredLearningPaths.map((path) => (
             <li key={path.id} className="mb-2">

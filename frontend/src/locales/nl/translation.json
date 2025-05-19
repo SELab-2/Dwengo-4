@@ -157,9 +157,16 @@
     "create_lp": "Leerpad Aanmaken"
   },
   "learning_objects": {
-    "loading": "Leerpaden laden...",
+    "loading": "Leerobjecten laden...",
     "next": "Volgende",
     "end": "Einde van leerpad"
+  },
+  "lp_view": {
+    "loading_path_details": "Leerpad details laden ...",
+    "legend": {
+      "teacher_exclusive": "Extra info voor de leerkracht",
+      "student_content": "Inhoud voor de leerling"
+    }
   },
   "edit_learning_path": {
     "loading_path_details": "Leerpad details laden ...",
