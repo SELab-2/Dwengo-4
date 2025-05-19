@@ -142,9 +142,10 @@
     "create_lp": "Create Learning Path"
   },
   "learning_objects": {
-    "loading": "Loading learning paths ...",
+    "loading": "Loading learning objects ...",
     "next": "Up next",
-    "end": "End of learning path"
+    "end": "End of learning path",
+    "loading_path_details": "Loading learning path details ..."
   },
   "edit_learning_path": {
     "loading_path_details": "Loading learning path details ...",

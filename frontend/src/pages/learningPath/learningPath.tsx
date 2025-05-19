@@ -31,7 +31,12 @@ const LearningPath: React.FC = () => {
   const isStudent = localStorage.getItem('role') === 'student';
 
   const [
-    { data: learningPathData, isLoading, isError, error },
+    {
+      data: learningPathData,
+      isLoading: isLoadingPath,
+      isError: isErrorPath,
+      error: errorPath,
+    },
     {
       data: learningObjectsData,
       isLoading: isLoadingLearningObjects,
@@ -110,29 +115,35 @@ const LearningPath: React.FC = () => {
       {/* Sidebar */}
       <div className="p-4 space-y-3 max-w-[405px] w-full overflow-y-scroll bg-white">
         {/* path details */}
-        <div className="flex gap-2.5 p-2.5 bg-transparent">
-          <h2 className="text-xl font-bold">{learningPath?.title}</h2>
-          {isStudent && (
-            <div className="flex items-center gap-2 ml-auto bg-transparent">
-              <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-600 rounded-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                />
+        {isLoadingPath ? (
+          <p>{t('learning_objects.loading_path_details')}</p>
+        ) : isErrorPath ? (
+          <p>Error: {errorPath.message}</p>
+        ) : (
+          <div className="flex gap-2.5 p-2.5 bg-transparent">
+            <h2 className="text-xl font-bold">{learningPath?.title}</h2>
+            {isStudent && (
+              <div className="flex items-center gap-2 ml-auto bg-transparent">
+                <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <span className="text-sm text-gray-600">
+                  {Math.round(progress)}%
+                </span>
               </div>
-              <span className="text-sm text-gray-600">
-                {Math.round(progress)}%
-              </span>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* learning objects list */}
         <div className="rounded-md border border-gray-200 overflow-hidden">
           {isLoadingLearningObjects ? (
-            <p>{t('learning_objects.loading')}</p>
+            <p className="p-4">{t('learning_objects.loading')}</p>
           ) : isErrorLearningObjects ? (
-            <p>Error: {errorLearningObjects.message}</p>
+            <p className="p-4">Error: {errorLearningObjects.message}</p>
           ) : (
             <div className="flex flex-col overflow-y-auto">
               {learningObjectsData?.map((learningObject) => (
