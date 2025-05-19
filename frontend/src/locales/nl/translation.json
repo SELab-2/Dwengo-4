@@ -41,7 +41,6 @@
     "settings": "Instellingen",
     "classes": "Klassen",
     "learning_paths": "Leerpaden",
-    "assignments": "Opdrachten",
     "logged_in_as": "Ingelogd als {{name}}"
   },
   "class": {
@@ -64,11 +63,7 @@
     "view_all": "Bekijk alle opdrachten",
     "error": "Er is iets fout gelopen tijdens het ophalen van de opdrachten",
     "view": "Opdracht bekijken",
-    "not_found": "Geen opdrachten gevonden",
-    "view_assignment": "Bekijk opdracht",
-    "my_assignments": "Mijn opdrachten",
-    "deadline": "Deadline",
-    "team": "Jouw Team"
+    "not_found": "Geen opdrachten gevonden"
   },
   "assignments_form": {
     "edit": "Opdracht bewerken",
@@ -82,8 +77,7 @@
       "choose": "Kies leerpad",
       "loading": "Leerpaden inladen...",
       "error": "Er is iets fout gelopen tijdens het ophalen van de leerpaden",
-      "select": "- Selecteer een leerpad -",
-      "required": "Selecteer een leerpad"
+      "select": "- Selecteer een leerpad -"
     },
     "description": "Beschrijving",
     "type": {

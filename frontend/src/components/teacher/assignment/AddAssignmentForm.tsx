@@ -47,15 +47,19 @@ const buildAssignmentPayload = ({
   const teamsWithNumberKeys: Record<number, Team[]> = {};
 
   if (assignmentType === 'group') {
+    console.log('Teams:', teams);
+    // Convert teams object keys from string to number
     Object.entries(teams).forEach(([key, team]) => {
       teamsWithNumberKeys[Number(key)] = team.map((team) => ({
         ...team,
-        teamName: team.id,
-        studentIds: team.students.map(
-          (member) => member.id as unknown as number,
+        teamName: team.team.id,
+        id: team.team.id,
+        studentIds: team.team.students.map(
+          (member) => member.user.id as unknown as number,
         ),
       }));
     });
+    console.log('Teams with number keys:', teamsWithNumberKeys);
   } else {
     selectedClasses.forEach((classItem) => {
       const selectedStudents = individualStudents[classItem.id] || [];
@@ -124,7 +128,6 @@ const AddAssignmentForm = ({
   const [formErrors, setFormErrors] = useState<{
     classes?: string;
     teams?: string;
-    learningPath?: string;
   }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -173,7 +176,16 @@ const AddAssignmentForm = ({
       } else {
         setAssignmentType('individual');
       }
-      setTeams(assignmentData.classTeams!);
+      // Group teams by classId for editing
+      const teamsByClass: Record<string, Team[]> = {};
+      if (assignmentData.classTeams) {
+        Object.entries(assignmentData.classTeams).forEach(([classId, teams]) => {
+          teamsByClass[classId] = assignmentData.teamAssignments.filter(
+            (assignment) => assignment.team.classId === Number(classId)
+          );
+        });
+      }
+      setTeams(teamsByClass);
 
       // Only set selected students from existing teams for individual assignments
       if (assignmentData.teamSize === 1) {
@@ -220,18 +232,6 @@ const AddAssignmentForm = ({
     }
   }, [assignmentType, selectedClasses, isEditing]);
 
-  // Add this useEffect before the return statement
-  useEffect(() => {
-    // Remove teams for classes that are no longer selected
-    const updatedTeams = { ...teams };
-    Object.keys(updatedTeams).forEach((classId) => {
-      if (!selectedClasses.some((c) => c.id.toString() === classId)) {
-        delete updatedTeams[classId];
-      }
-    });
-    setTeams(updatedTeams);
-  }, [selectedClasses]);
-
   const handleTeamClicks = () => {
     setIsTeamOpen(true);
   };
@@ -241,11 +241,9 @@ const AddAssignmentForm = ({
   ) => {
     setAssignmentType(e.target.value);
     if (e.target.value === 'group') {
-      setTeamSize(2);
-      setTeams({}); // Reset teams when switching to group
+      setTeamSize(2); // Set default team size to 2 when switching to group
     } else {
-      setTeamSize(1);
-      setIndividualStudents({}); // Reset individual students when switching to individual
+      setTeamSize(1); // Set team size to 1 for individual assignments
     }
   };
 
@@ -275,14 +273,10 @@ const AddAssignmentForm = ({
    * @returns boolean indicating if form is valid
    */
   const validateForm = () => {
-    const errors: { classes?: string; teams?: string; learningPath?: string } = {};
+    const errors: { classes?: string; teams?: string } = {};
 
     if (selectedClasses.length === 0) {
       errors.classes = 'Please select at least one class';
-    }
-
-    if (!selectedLearningPath) {
-      errors.learningPath = t('assignments_form.learning_path.required');
     }
 
     if (assignmentType === 'group') {
@@ -404,9 +398,6 @@ const AddAssignmentForm = ({
           {formErrors.teams && (
             <div className={styles.error}>{formErrors.teams}</div>
           )}
-          {formErrors.learningPath && (
-            <div className={styles.error}>{formErrors.learningPath}</div>
-          )}
 
           <div>
             <label htmlFor="deadline">{t('assignments_form.deadline')}</label>
@@ -433,7 +424,7 @@ const AddAssignmentForm = ({
             <button
               className={styles.submitButton}
               type="submit"
-              disabled={isSubmitting || isLearningPathsLoading}
+              disabled={isSubmitting}
             >
               {isSubmitting
                 ? t('assignments_form.submitting')

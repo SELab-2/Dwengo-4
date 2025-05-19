@@ -12,16 +12,13 @@
 }
 
 .content {
-  position: relative;
   display: flex;
   flex-direction: column;
-  max-height: 90vh;
-  min-height: 50vh;
+  height: 90vh;
   background: white;
   padding: 32px;
   border-radius: 8px;
   width: 800px;
-  height: 80vh;
   overflow-y: auto;
 }
 
@@ -36,21 +33,32 @@
 }
 
 .teamBuilder {
-  flex: 1;
-  overflow-y: auto;
-  margin-bottom: 60px;
   display: flex;
-  gap: 32px;
+  flex: 1;
+  gap: 1rem;
+  min-height: 0;
+  /* Important for nested scrolling */
+  margin-bottom: 24px;
 }
 
-.studentsList,
-.teams {
+.studentsList {
   flex: 1;
+  overflow-y: auto;
+  padding-right: 1rem;
+  height: 100%;
   background: #f5f5f5;
   padding: 16px;
   border-radius: 8px;
-  overflow-y: scroll;
-  height: 57vh;
+}
+
+.teams {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 1rem;
+  height: 100%;
+  background: #f5f5f5;
+  padding: 16px;
+  border-radius: 8px;
 }
 
 .student {
@@ -95,16 +103,15 @@
 }
 
 .actions {
-  position: absolute;
+  position: sticky;
   bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1rem;
   background: white;
-  border-top: 1px solid #ddd;
+  padding: 1rem;
+  border-top: 1px solid #eee;
   display: flex;
-  justify-content: flex-end;
   gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
 }
 
 .actions button {
@@ -187,4 +194,13 @@
   margin: 10px 0;
   font-weight: bold;
   color: #666;
+}
+
+.clickableTeam {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.clickableTeam:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }

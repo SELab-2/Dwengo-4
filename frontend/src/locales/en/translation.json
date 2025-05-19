@@ -40,9 +40,9 @@
     "profile": "Profile",
     "settings": "Settings",
     "classes": "Classes",
+    "assignments": "Assignments",
     "learning_paths": "Learning paths",
-    "logged_in_as": "Logged in as {{name}}",
-    "assignments": "Assignments"
+    "logged_in_as": "Logged in as {{name}}"
   },
   "class": {
     "create": "Create new class",
@@ -67,8 +67,7 @@
     "not_found": "No assignments found",
     "view_assignment": "View assignment",
     "my_assignments": "My assignments",
-    "deadline": "Deadline",
-    "team": "Your Team"
+    "deadline": "Deadline"
   },
   "assignments_form": {
     "edit": "Edit assignment",
