@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import { AssignmentPayload } from '../../types/type';
 import { fetchAssignment } from '@/util/teacher/assignment';
+import { useTranslation } from 'react-i18next';
 
 /**
  * AssignmentStudent component for students to view assignment details.
@@ -32,6 +33,7 @@ const AssignmentStudent: React.FC = () => {
     queryFn: () => fetchAssignment(assignmentId ?? ''),
     enabled: !!assignmentId,
   });
+  const { t } = useTranslation();
 
   /**
    * Query hook to fetch associated learning path data
@@ -55,8 +57,8 @@ const AssignmentStudent: React.FC = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Assignment</h1>
-      {isLoading && <p className="text-gray-600">Loading...</p>}
+      <h1 className="text-3xl font-bold mb-6">{t('assignment.title')}</h1>
+      {isLoading && <p className="text-gray-600">{t('loading.loading')}</p>}
       {isError && <p className="text-red-500">Error: {error.message}</p>}
       {assignment && (
         <div>

@@ -65,6 +65,15 @@
     "view": "View assignment",
     "not_found": "No assignments found"
   },
+  "assignment": {
+    "title": "Assignment",
+    "language": "Language",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deadline": "Deadline",
+    "loading_learning_path": "Loading learning path ...",
+    "learning_path_details": "Learning path details"
+  },
   "assignments_form": {
     "edit": "Edit assignment",
     "assign": "Assign assignment",
@@ -206,6 +215,36 @@
       },
       "no_results": "No results found for '{{searchTerm}}'.",
       "no_results_generic": "No results."
+    }
+  },
+  "questions": {
+    "assignment_questions": "Questions for assignment ",
+    "new_question_button": "Ask a new question",
+    "loading": "Loading questions...",
+    "error": "Something went wrong while loading the questions",
+    "no_questions": "No questions found",
+    "no_reactions": "No reactions yet",
+    "reactions": "Reactions",
+    "view_button": "View",
+    "asked_by": "Asked by",
+    "says": "says",
+    "ask_question": "Ask a question",
+    "write_message": "Write a message",
+    "submit": "Submit",
+    "submitting": "Submitting...",
+    "error_submitting": "Something went wrong while submitting the question",
+    "form": {
+      "succes": "Question successfully created!",
+      "title": "Title",
+      "question": "Question",
+      "languages": {
+        "label": "Language",
+        "en": "English",
+        "nl": "Dutch",
+        "fr": "French"
+      },
+      "back": "Back",
+      "submit": "Ask question"
     }
   }
 }
