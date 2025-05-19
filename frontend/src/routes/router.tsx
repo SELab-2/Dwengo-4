@@ -31,13 +31,13 @@ const AssignmentEdit = lazy(() => import('../pages/teacher/AssignmentEdit'));
 const RootLayoutTeacher = lazy(
   () => import('../components/teacher/RootLayoutTeacher'),
 );
-const LoginTeacher   = lazy(() => import('../pages/teacher/LoginTeacher'));
-const SignupTeacher  = lazy(() => import('../pages/teacher/SignupTeacher'));
-const ClassesPage    = lazy(() => import('../pages/teacher/ClassesTeacher'));
+const LoginTeacher = lazy(() => import('../pages/teacher/LoginTeacher'));
+const SignupTeacher = lazy(() => import('../pages/teacher/SignupTeacher'));
+const ClassesPage = lazy(() => import('../pages/teacher/ClassesTeacher'));
 const EditClassTeacher = lazy(
   () => import('../pages/teacher/EditClassTeacher'),
 );
-const TeacherIndex     = lazy(() => import('../pages/teacher/TeacherIndex'));
+const TeacherIndex = lazy(() => import('../pages/teacher/TeacherIndex'));
 const EditLearningPath = lazy(
   () => import('../pages/teacher/EditLearningPath'),
 );
@@ -46,20 +46,20 @@ const EditLearningPath = lazy(
 const RootLayoutStudent = lazy(
   () => import('../components/student/RootLayoutStudent'),
 );
-const LoginStudent    = lazy(() => import('../pages/student/LoginStudent'));
-const SignupStudent   = lazy(() => import('../pages/student/SignupStudent'));
+const LoginStudent = lazy(() => import('../pages/student/LoginStudent'));
+const SignupStudent = lazy(() => import('../pages/student/SignupStudent'));
 
-const StudentIndex       = lazy(() => import('../pages/student'));
-const JoinClass          = lazy(
+const StudentIndex = lazy(() => import('../pages/student'));
+const JoinClass = lazy(
   () => import('../components/student/classes/JoinRequestForm'),
 );
-const AssignmentStudent  = lazy(
+const AssignmentStudent = lazy(
   () => import('../pages/student/AssignmentStudent'),
 );
 const AssignmentsStudent = lazy(
   () => import('../pages/student/AssignmentsStudent'),
 );
-const QuestionOverview   = lazy(
+const QuestionOverview = lazy(
   () => import('../pages/student/QuestionOverview'),
 );
 const QuestionsForAssignment = lazy(
@@ -69,10 +69,13 @@ const StudentClassIndex = lazy(
   () => import('../pages/student/StudentClassIndex'),
 );
 
+const LocalLearningObjectsPage = lazy(() => import('@/pages/teacher/LocalLearningObject'));
+
 // ==== LEARNING PATHS ==== //
+
 const LearningPaths = lazy(() => import('../pages/learningPath/learningPaths'));
-const LearningPath  = lazy(() => import('../pages/learningPath/learningPath'));
-const NewQuestion   = lazy(() => import('@/pages/student/NewQuestion'));
+const LearningPath = lazy(() => import('../pages/learningPath/learningPath'));
+const NewQuestion = lazy(() => import('@/pages/student/NewQuestion'));
 
 /* -------------------------------------------------------------------------- */
 /*                                   PAGES                                    */
@@ -139,6 +142,10 @@ export const router = createBrowserRouter([
           { path: 'add-assignment', element: <AssignmentAdd /> },
           { path: 'assignment/:assignmentId', element: <Assignment /> },
           { path: 'assignment/:assignmentId/edit', element: <AssignmentEdit /> },
+          {
+            path: 'local-learning-objects',
+            element: <LocalLearningObjectsPage></LocalLearningObjectsPage>,
+          },
           {
             path: 'learning-paths/create',
             element: (
