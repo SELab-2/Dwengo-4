@@ -65,6 +65,15 @@
     "view": "View assignment",
     "not_found": "No assignments found"
   },
+  "assignment": {
+    "title": "Assignment",
+    "language": "Language",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deadline": "Deadline",
+    "loading_learning_path": "Loading learning path ...",
+    "learning_path_details": "Learning path details"
+  },
   "assignments_form": {
     "edit": "Edit assignment",
     "assign": "Assign assignment",

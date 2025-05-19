@@ -65,6 +65,15 @@
     "view": "Opdracht bekijken",
     "not_found": "Geen opdrachten gevonden"
   },
+  "assignment": {
+    "title": "Opdracht",
+    "language": "Taal",
+    "edit": "Bewerken",
+    "delete": "Verwijderen",
+    "deadline": "Deadline",
+    "loading_learning_path": "Leerpaden laden...",
+    "learning_path_details": "Leerpaddetails"
+  },
   "assignments_form": {
     "edit": "Opdracht bewerken",
     "assign": "Opdracht toewijzen",
