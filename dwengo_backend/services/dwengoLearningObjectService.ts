@@ -83,18 +83,13 @@ export interface LearningObjectDto {
   updatedAt: string;
   creatorId?: number; // only for local learning objects
   origin: "dwengo" | "local";
-}
-
-export interface LearningObjectDtoWithRaw extends LearningObjectDto {
   raw?: string;
 }
 
 /**
  * Converteer Dwengo-object naar onze LearningObjectDto
  */
-function mapDwengoToLocal(
-  dwengoObj: DwengoLearningObject,
-): LearningObjectDtoWithRaw {
+function mapDwengoToLocal(dwengoObj: DwengoLearningObject): LearningObjectDto {
   return {
     id: dwengoObj._id ?? "",
     uuid: dwengoObj.uuid ?? "",
@@ -262,11 +257,61 @@ export async function searchDwengoObjects(
   return [];
 }
 
+export async function getDwengoObjectForPath(
+  hruid: string,
+  language: string,
+  version: number,
+  isTeacher: boolean,
+): Promise<LearningObjectDto | null> {
+  try {
+    const params = {
+      hruid: hruid,
+      version: version,
+      language: language,
+    };
+
+    const metaRes = await dwengoAPI.get("/api/learningObject/getMetadata", {
+      params,
+    });
+
+    // throw error if path contains invalid learning object
+    checkFetchedObject(
+      metaRes.data,
+      `Dwengo learning object (hruid: ${params.hruid}) not found.`,
+    );
+
+    // skip this object if it's teacher exclusive and user is not a teacher
+    // or if it's not available (but don't throw an error)
+    if ((!isTeacher && metaRes.data.teacher_exclusive) || !metaRes.data.available) {
+      return null;
+    }
+
+    // fetch the raw content
+    const rawRes = await dwengoAPI.get("/api/learningObject/getRaw", {
+      params,
+    });
+
+    // throw error if learning object content not found
+    if (!rawRes.data) {
+      throw new NotFoundError("Learning object not found.");
+    }
+    const dto = mapDwengoToLocal(metaRes.data as DwengoLearningObject);
+    dto.raw = rawRes.data;
+    return dto;
+  } catch (error) {
+    throwCorrectNetworkError(
+      error as Error,
+      "Could not fetch learning object related to node.",
+    );
+    return null;
+  }
+}
+
 // Haal leerobjecten op voor een leerpad (Dwengo)
-export async function getDwengoObjectsForPath(
+export async function getLearningObjectsForDwengoPath(
   pathId: string,
   isTeacher: boolean,
-): Promise<LearningObjectDtoWithRaw[]> {
+): Promise<LearningObjectDto[]> {
   try {
     const pathResp = await dwengoAPI.get(`/api/learningPath/${pathId}`);
     const learningPath = pathResp.data;
@@ -275,61 +320,23 @@ export async function getDwengoObjectsForPath(
     const results = await Promise.all(
       nodes.map(
         async (node: { learningobject_hruid: any; version: any; language: any }) => {
-          try {
-            const params = {
-              hruid: node.learningobject_hruid,
-              version: node.version,
-              language: node.language,
-            };
-
-            const metaRes = await dwengoAPI.get("/api/learningObject/getMetadata", {
-              params,
-            });
-
-            // throw error if path contains invalid learning object
-            checkFetchedObject(
-              metaRes.data,
-              `Dwengo learning object (hruid: ${params.hruid}) not found.`,
-            );
-
-            // skip this object if it's teacher exclusive and user is not a teacher
-            // or if it's not available (but don't throw an error)
-            if (
-              (!isTeacher && metaRes.data.teacher_exclusive) ||
-              !metaRes.data.available
-            ) {
-              return null;
-            }
-
-            // fetch the raw content
-            const rawRes = await dwengoAPI.get("/api/learningObject/getRaw", {
-              params,
-            });
-
-            // throw error if learning object content not found
-            if (!rawRes.data) {
-              throw new NotFoundError("Learning object not found.");
-            }
-            const dto = mapDwengoToLocal(metaRes.data as DwengoLearningObject);
-            dto.raw = rawRes.data;
-            return dto;
-          } catch (error) {
-            throwCorrectNetworkError(
-              error as Error,
-              "Could not fetch learning object related to node.",
-            );
-          }
+          return await getDwengoObjectForPath(
+            node.learningobject_hruid,
+            node.language,
+            node.version,
+            isTeacher,
+          );
         },
       ),
     );
-    return results.filter((x): x is LearningObjectDtoWithRaw => x !== null);
+    return results.filter((x): x is LearningObjectDto => x !== null);
   } catch (error) {
     throwCorrectNetworkError(
       error as Error,
       "Could not fetch the desired learning path.",
     );
-    return [];
   }
+  return [];
 }
 
 /////////////////////////////////////////
