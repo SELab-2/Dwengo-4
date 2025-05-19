@@ -83,6 +83,8 @@ const HtmlOrQuestionStep: React.FC<FormStepProps> = ({
           {/* Multiple choice opties */}
           {step1Data.contentType === ContentType.EVAL_MULTIPLE_CHOICE && (
             <div className="space-y-2">
+            <label className="block mb-1 font-medium">Question Answers</label>
+
               {questionState.options.map((opt, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <input
