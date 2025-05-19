@@ -259,5 +259,10 @@
       "back": "Terug",
       "submit": "Stel vraag"
     }
+  },
+  "custom_content": {
+    "title": "Mijn Leerinhoud",
+    "los": "Leerobjecten",
+    "lps": "Leerpaden"
   }
 }

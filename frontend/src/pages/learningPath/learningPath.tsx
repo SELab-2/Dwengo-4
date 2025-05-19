@@ -156,20 +156,22 @@ const LearningPath: React.FC = () => {
         )}
 
         {/* Legend */}
-        <div className="flex flex-col items-start bg-transparent">
-          <div className="flex gap-3 bg-transparent">
-            <div className="w-5 h-5 bg-dwengo-green-transparent-light border-1 border-gray-400"></div>
-            <span className="text-sm italic text-gray-600">
-              {t('lp_view.legend.teacher_exclusive')}
-            </span>
+        {!isStudent && (
+          <div className="flex flex-col items-start bg-transparent">
+            <div className="flex gap-3 bg-transparent">
+              <div className="w-5 h-5 bg-dwengo-green-transparent-light border-1 border-gray-400"></div>
+              <span className="text-sm italic text-gray-600">
+                {t('lp_view.legend.teacher_exclusive')}
+              </span>
+            </div>
+            <div className="flex gap-3 bg-transparent">
+              <div className="w-5 h-5 border-b-1 border-x-1 border-gray-400"></div>
+              <span className="text-sm italic text-gray-600">
+                {t('lp_view.legend.student_content')}
+              </span>
+            </div>
           </div>
-          <div className="flex gap-3 bg-transparent">
-            <div className="w-5 h-5 border-b-1 border-x-1 border-gray-400"></div>
-            <span className="text-sm italic text-gray-600">
-              {t('lp_view.legend.student_content')}
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* learning objects list */}
         <div className="rounded-md border border-gray-200 overflow-hidden">

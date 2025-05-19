@@ -260,5 +260,10 @@
       "back": "Back",
       "submit": "Ask question"
     }
+  },
+  "custom_content": {
+    "title": "My Content",
+    "los": "Learning objects",
+    "lps": "Learning paths"
   }
 }
