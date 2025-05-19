@@ -1,7 +1,6 @@
 import { dwengoAPI } from "../config/dwengoAPI";
 import { throwCorrectNetworkError } from "../errors/errorFunctions";
 import {
-  BadRequestError,
   NotFoundError,
   UnauthorizedError,
   UnavailableError,
@@ -208,26 +207,12 @@ export async function fetchDwengoObjectByHruidLangVersion(
   version: number,
   isTeacher: boolean,
 ): Promise<LearningObjectDto> {
-  if (!hruid || !language || !version) {
-    throw new BadRequestError(
-      "Missing required parameters: hruid, language, and version.",
-    );
-  }
-
   try {
     // Dwengo-API: /api/learningObject/getMetadata?hruid=...&language=...&version=...
     const params = { hruid, language, version };
-
     const response = await dwengoAPI.get("/api/learningObject/getMetadata", {
       params,
     });
-
-    if (typeof response.data !== "object") {
-      // dwengo API returns error string if object not found
-      throw new NotFoundError(
-        `Dwengo learning object with hruid=${hruid}, language=${language}, version=${version} not found.`,
-      );
-    }
 
     checkAll(
       response.data,
@@ -296,20 +281,37 @@ export async function getDwengoObjectsForPath(
               version: node.version,
               language: node.language,
             };
-            const [metaRes, rawRes] = await Promise.all([
-              dwengoAPI.get("/api/learningObject/getMetadata", { params }),
-              dwengoAPI.get("/api/learningObject/getRaw", { params }),
-            ]);
 
-            checkAll(
+            const metaRes = await dwengoAPI.get("/api/learningObject/getMetadata", {
+              params,
+            });
+
+            // throw error if path contains invalid learning object
+            checkFetchedObject(
               metaRes.data,
               `Dwengo learning object (hruid: ${params.hruid}) not found.`,
-              isTeacher,
             );
-            checkFetchedObject(rawRes.data, "Learning object not found.");
+
+            // skip this object if it's teacher exclusive and user is not a teacher
+            // or if it's not available (but don't throw an error)
+            if (
+              (!isTeacher && metaRes.data.teacher_exclusive) ||
+              !metaRes.data.available
+            ) {
+              return null;
+            }
+
+            // fetch the raw content
+            const rawRes = await dwengoAPI.get("/api/learningObject/getRaw", {
+              params,
+            });
+
+            // throw error if learning object content not found
+            if (!rawRes.data) {
+              throw new NotFoundError("Learning object not found.");
+            }
             const dto = mapDwengoToLocal(metaRes.data as DwengoLearningObject);
             dto.raw = rawRes.data;
-
             return dto;
           } catch (error) {
             throwCorrectNetworkError(
@@ -326,9 +328,8 @@ export async function getDwengoObjectsForPath(
       error as Error,
       "Could not fetch the desired learning path.",
     );
+    return [];
   }
-  // Dit mag nooit gebeuren
-  return [];
 }
 
 /////////////////////////////////////////
@@ -336,19 +337,19 @@ export async function getDwengoObjectsForPath(
 /////////////////////////////////////////
 
 function checkFetchedObject<T>(fetchedObject: T | null, notFoundMessage: string) {
-  if (!fetchedObject) {
+  if (!fetchedObject || typeof fetchedObject !== "object") {
+    // dwengo API returns error string if object not found (so check type aswell)
     throw new NotFoundError(notFoundMessage);
   }
 }
 
-function checkAvailabilityAndTeacherExclusive(
-  dwengoObj: DwengoLearningObject,
-  isTeacher: boolean,
-) {
+function checkTeacherExclusive(dwengoObj: DwengoLearningObject, isTeacher: boolean) {
   if (!isTeacher && dwengoObj.teacher_exclusive) {
     throw new UnauthorizedError("This learning object is only for teachers.");
   }
+}
 
+function checkAvailability(dwengoObj: DwengoLearningObject) {
   if (!dwengoObj.available) {
     throw new UnavailableError("This learning object is temporarily not available.");
   }
@@ -360,7 +361,8 @@ function checkAll(
   isTeacher: boolean,
 ) {
   checkFetchedObject(dwengoObj, notFoundMessage);
-  checkAvailabilityAndTeacherExclusive(dwengoObj!, isTeacher);
+  checkAvailability(dwengoObj!);
+  checkTeacherExclusive(dwengoObj!, isTeacher);
 }
 
 // Dwengo-object op basis van hruid (raw)

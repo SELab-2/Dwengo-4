@@ -22,6 +22,7 @@
   --color-dwengo-yellow-dark: #fab63c; /* amber */
 
   /* Green family */
+  --color-dwengo-green-transparent: rgba(136, 189, 40, 0.5); /* transparant lime (light green) */
   --color-dwengo-green: #88bd28; /* lime (light green) */
   --color-dwengo-green-dark: #4a9234; /* forest */
   --color-dwengo-green-darker: #0e6942; /* pine */
