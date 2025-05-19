@@ -73,7 +73,7 @@ describe("join request tests", async (): Promise<void> => {
     it("should respond with a `404` status code when the class does not exist", async (): Promise<void> => {
       // try to send a join request for a class with a non-existent class code
       const { status, body } = await request(app)
-        .post("/join-request/student")
+        .post("/api/join-request/student")
         .set("Authorization", `Bearer ${studentUser1.token}`)
         .send({
           joinCode: "BLABLA", // non-existent class code
@@ -95,7 +95,7 @@ describe("join request tests", async (): Promise<void> => {
     it("should respond with a `409` status code when student is already a member of the class", async (): Promise<void> => {
       await addStudentToClass(studentUser1.id, classroom.id);
       const { status, body } = await request(app)
-        .post("/join-request/student")
+        .post("/api/join-request/student")
         .set("Authorization", `Bearer ${studentUser1.token}`)
         .send({
           joinCode: classroom.code,
@@ -108,7 +108,7 @@ describe("join request tests", async (): Promise<void> => {
     it("should respond with a `409` status code when there is already a pending join request for the student and class", async (): Promise<void> => {
       // send a first join request
       await request(app)
-        .post("/join-request/student")
+        .post("/api/join-request/student")
         .set("Authorization", `Bearer ${studentUser1.token}`)
         .send({
           joinCode: classroom.code,
@@ -121,7 +121,7 @@ describe("join request tests", async (): Promise<void> => {
         });
       // send a second join request
       const { status, body } = await request(app)
-        .post("/join-request/student")
+        .post("/api/join-request/student")
         .set("Authorization", `Bearer ${studentUser1.token}`)
         .send({
           joinCode: classroom.code,
@@ -150,7 +150,7 @@ describe("join request tests", async (): Promise<void> => {
       // test approving the join request
       const { status, body } = await request(app)
         .patch(
-          `/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
+          `/api/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`) // teacherUser1 is a teacher of the class
         .send({
@@ -174,7 +174,7 @@ describe("join request tests", async (): Promise<void> => {
       // test denying the join request
       const { status, body } = await request(app)
         .patch(
-          `/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
+          `/api/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`) // teacherUser1 is a teacher of the class
         .send({
@@ -200,7 +200,7 @@ describe("join request tests", async (): Promise<void> => {
       // test sending an invalid action
       const { status, body } = await request(app)
         .patch(
-          `/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
+          `/api/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`) // teacherUser1 is a teacher of the class
         .send({
@@ -244,7 +244,7 @@ describe("join request tests", async (): Promise<void> => {
     async function approveAndVerifyJoinRequest(): Promise<void> {
       const { status, body } = await request(app)
         .patch(
-          `/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
+          `/api/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`) // teacherUser1 is a teacher of the class
         .send({
@@ -265,7 +265,7 @@ describe("join request tests", async (): Promise<void> => {
       // try having teacherUser2 approve the join request
       const { status, body } = await request(app)
         .patch(
-          `/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
+          `/api/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
         )
         .set("Authorization", `Bearer ${teacherUser2.token}`) // teacherUser2 is not a teacher of the class
         .send({
@@ -310,7 +310,7 @@ describe("join request tests", async (): Promise<void> => {
     async function denyAndVerifyJoinRequest(): Promise<void> {
       const { status, body } = await request(app)
         .patch(
-          `/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
+          `/api/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`) // teacherUser1 is a teacher of the class
         .send({
@@ -331,7 +331,7 @@ describe("join request tests", async (): Promise<void> => {
       // try having teacherUser2 approve the join request
       const { status, body } = await request(app)
         .patch(
-          `/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
+          `/api/join-request/teacher/${joinRequest.requestId}/class/${classroom.id}`,
         )
         .set("Authorization", `Bearer ${teacherUser2.token}`) // teacherUser2 is not a teacher of the class
         .send({
@@ -361,7 +361,7 @@ describe("join request tests", async (): Promise<void> => {
     it("should respond with a `200` status code and a list of join requests", async (): Promise<void> => {
       // test getting the join requests
       const { status, body } = await request(app)
-        .get(`/join-request/teacher/class/${classroom.id}`)
+        .get(`/api/join-request/teacher/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`); // teacherUser1 is a teacher of the class
 
       expect(status).toBe(200);
@@ -374,7 +374,7 @@ describe("join request tests", async (): Promise<void> => {
         await createTeacher("Hi", "Ho", "hiho@gmail.com");
       // try having teacherUser2 view the join requests
       const { status, body } = await request(app)
-        .get(`/join-request/teacher/class/${classroom.id}`)
+        .get(`/api/join-request/teacher/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser2.token}`); // teacherUser2 is not a teacher of the class
 
       expect(status).toBe(403);
@@ -390,7 +390,7 @@ async function createJoinCodeAndCheckExistence(
   classroom: Class,
 ): Promise<JoinRequest | null> {
   const { status, body } = await request(app)
-    .post("/join-request/student")
+    .post("/api/join-request/student")
     .set("Authorization", `Bearer ${user.token}`)
     .send({
       joinCode: classroom.code,

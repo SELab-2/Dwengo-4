@@ -107,3 +107,34 @@ export const deleteLocalLearningObject = asyncHandler(
     res.status(204).end();
   },
 );
+
+/**
+ * Haal alleen de rawHtml op.
+ * GET /learningObjectByTeacher/:createdLearningObjectId/html
+ */
+export const getLocalLearningObjectHtml = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const teacherId: number = getUserFromAuthRequest(req).id;
+    const { createdLearningObjectId } = req.params;
+
+    // Controleer of leerobject bestaat en van deze teacher is
+    const existing = await LocalLearningObjectService.getLearningObjectById(
+      createdLearningObjectId,
+    );
+    checkIfTeacherIsCreator(
+      teacherId,
+      existing.creatorId,
+      Property.LearningObject,
+    );
+
+    // Haal de rawHtml op
+    const rawHtml = await LocalLearningObjectService.getRawHtmlById(
+      createdLearningObjectId,
+    );
+
+
+
+    // Stuur de HTML als text/html
+    res.type("text/html").send(rawHtml);
+  },
+);
