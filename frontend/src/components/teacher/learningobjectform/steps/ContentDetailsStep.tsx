@@ -30,8 +30,8 @@ const ContentDetailsStep: React.FC<FormStepProps> = ({
 
     <InputWithChecks
       ref={keywordsRef}
-      label="Keywords (comma-separated, e.g. math, science, history)"
-      placeholder="math, science, history"
+      label="Keywords (comma-separated, e.g. math,science,history)"
+      placeholder="math,science,history"
       value={
         Array.isArray(step1Data.keywords)
           ? step1Data.keywords.join(',')
@@ -41,19 +41,34 @@ const ContentDetailsStep: React.FC<FormStepProps> = ({
 
     <InputWithChecks
       ref={targetAgesRef}
-      label="Target Ages (comma-separated, e.g. 12, 13, 14)"
-      placeholder="12, 13, 14"
+      label="Target Ages (comma-separated, e.g. 12,13,14)"
+      placeholder="12,13,14"
+      onKeyPress={(e) => {
+        const input = e.currentTarget;
+        const { selectionStart: start, selectionEnd: end, value } = input;
+        // Simuleer de nieuwe waarde na intoetsen
+        const proposed =
+          value.slice(0, start ?? 0) + e.key + value.slice(end ?? 0);
+        // Cijfers, groepen „,<opt. spatie><cijfers>“, en een optionele trailing komma of spatie
+        const pattern = /^\d+(?:,\s?\d+)*(?:[,\s])?$/;
+        if (!pattern.test(proposed)) {
+          e.preventDefault();
+        }
+      }}
+
+
       value={
-        Array.isArray(step1Data.targetAges)
+        step1Data.targetAges?.[0]
           ? step1Data.targetAges.join(',')
           : ''
       }
     />
 
+
     <InputWithChecks
       ref={skosRef}
-      label="SKOS Concepts (comma-separated, e.g. biology, physics)"
-      placeholder="biology, physics"
+      label="SKOS Concepts (comma-separated, e.g. biology,physics)"
+      placeholder="biology,physics"
       value={
         Array.isArray(step1Data.skosConcepts)
           ? step1Data.skosConcepts.join(',')
