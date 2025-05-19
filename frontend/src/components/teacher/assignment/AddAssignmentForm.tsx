@@ -116,7 +116,7 @@ const AddAssignmentForm = ({
   // State declarations for form management
   const [isTeamOpen, setIsTeamOpen] = useState<boolean>(false);
   const [assignmentType, setAssignmentType] = useState<string>('');
-  const [teams, setTeams] = useState<Record<string, Team[]>>({});
+  const [teams, setTeams] = useState<Record<string, Team>>({});
   const [teamSize, setTeamSize] = useState<number>(2);
   const [date, setDate] = useState<string>('');
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
@@ -134,6 +134,8 @@ const AddAssignmentForm = ({
   const [individualStudents, setIndividualStudents] = useState<
     Record<string, StudentItem[]>
   >({});
+  const [removedTeams, setRemovedTeams] = useState<Record<string, Team[]>>({});
+  const [removedStudents, setRemovedStudents] = useState<Record<string, StudentItem[]>>({});
 
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -366,7 +368,50 @@ const AddAssignmentForm = ({
             description={description}
             setDescription={setDescription}
             selectedClasses={selectedClasses}
-            setSelectedClasses={setSelectedClasses}
+            setSelectedClasses={(newClasses) => {
+              const removedClasses = selectedClasses.filter(
+                (c) => !newClasses.some((nc) => nc.id === c.id)
+              );
+              const addedClasses = newClasses.filter(
+                (c) => !selectedClasses.some((sc) => sc.id === c.id)
+              );
+
+              // Store removed teams and students
+              const updatedTeams = { ...teams };
+              const updatedIndividualStudents = { ...individualStudents };
+              const updatedRemovedTeams = { ...removedTeams };
+              const updatedRemovedStudents = { ...removedStudents };
+
+              // Handle removed classes
+              removedClasses.forEach((removedClass) => {
+                if (teams[removedClass.id]) {
+                  updatedRemovedTeams[removedClass.id] = teams[removedClass.id];
+                }
+                if (individualStudents[removedClass.id]) {
+                  updatedRemovedStudents[removedClass.id] = individualStudents[removedClass.id];
+                }
+                delete updatedTeams[removedClass.id];
+                delete updatedIndividualStudents[removedClass.id];
+              });
+
+              // Restore previously removed teams and students for re-added classes
+              addedClasses.forEach((addedClass) => {
+                if (removedTeams[addedClass.id]) {
+                  updatedTeams[addedClass.id] = removedTeams[addedClass.id];
+                  delete updatedRemovedTeams[addedClass.id];
+                }
+                if (removedStudents[addedClass.id]) {
+                  updatedIndividualStudents[addedClass.id] = removedStudents[addedClass.id];
+                  delete updatedRemovedStudents[addedClass.id];
+                }
+              });
+
+              setTeams(updatedTeams);
+              setIndividualStudents(updatedIndividualStudents);
+              setRemovedTeams(updatedRemovedTeams);
+              setRemovedStudents(updatedRemovedStudents);
+              setSelectedClasses(newClasses);
+            }}
             classesData={classesData}
             isEditing={isEditing}
             formErrors={formErrors}

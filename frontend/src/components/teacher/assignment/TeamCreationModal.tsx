@@ -195,33 +195,30 @@ const TeamCreationModal = ({
       (student) => !studentsInTeams.includes(student.id),
     );
 
-
     const shuffledStudents = [...availableStudents].sort(() => Math.random() - 0.5);
     const newTeams: TeamHead[] = [];
 
     for (let i = 0; i < shuffledStudents.length; i += teamSize) {
       const teamMembers = shuffledStudents.slice(i, i + teamSize);
-      if (teamMembers.length === teamSize) {
-        const teamNumber = getNextTeamNumber(classTeams) + Math.floor(i / teamSize);
+      const teamNumber = getNextTeamNumber(classTeams) + Math.floor(i / teamSize);
 
-        const newTeamDetail: TeamDetail = {
-          id: `team-${teamNumber}`,
-          teamname: `team-${teamNumber}`,
-          classId: selectedClass.id,
-          students: teamMembers.map((student) => ({ user: student })),
-        };
+      const newTeamDetail: TeamDetail = {
+        id: `team-${teamNumber}`,
+        teamname: `team-${teamNumber}`,
+        classId: selectedClass.id,
+        students: teamMembers.map((student) => ({ user: student })),
+      };
 
-        newTeams.push({
-          assignmentId: 0, // pas aan indien nodig
-          teamId: newTeamDetail.id,
-          team: newTeamDetail,
-        });
-      }
+      newTeams.push({
+        assignmentId: 0, // pas aan indien nodig
+        teamId: newTeamDetail.id,
+        team: newTeamDetail,
+      });
     }
 
     setTeams({
       ...teams,
-      [selectedClass.id]: newTeams,
+      [selectedClass.id]: [...classTeams, ...newTeams], // Keep existing teams by spreading them first
     });
   };
 
