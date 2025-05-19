@@ -75,6 +75,13 @@ const LearningPath: React.FC = () => {
     }
   }, [learningPathData]);
 
+  // select first learning object by default after loading
+  useEffect(() => {
+    if (learningObjectsData) {
+      setSelectedLearningObject(learningObjectsData[0]);
+    }
+  }, [learningObjectsData]);
+
   /*
   useEffect(() => {
     if (isStudent && learningPath) {
@@ -113,14 +120,14 @@ const LearningPath: React.FC = () => {
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
-      <div className="p-4 space-y-3 max-w-[405px] w-full overflow-y-scroll bg-white">
+      <div className="p-4 space-y-5 max-w-[405px] w-full overflow-y-scroll bg-white">
         {/* path details */}
         {isLoadingPath ? (
-          <p>{t('learning_objects.loading_path_details')}</p>
+          <p>{t('lp_view.loading_path_details')}</p>
         ) : isErrorPath ? (
           <p>Error: {errorPath.message}</p>
         ) : (
-          <div className="flex gap-2.5 p-2.5 bg-transparent">
+          <div className="flex gap-2.5 bg-transparent">
             <h2 className="text-xl font-bold">{learningPath?.title}</h2>
             {isStudent && (
               <div className="flex items-center gap-2 ml-auto bg-transparent">
@@ -137,6 +144,22 @@ const LearningPath: React.FC = () => {
             )}
           </div>
         )}
+
+        {/* Legend */}
+        <div className="flex flex-col items-start bg-transparent">
+          <div className="flex gap-3 bg-transparent">
+            <div className="w-5 h-5 bg-dwengo-green-transparent-light border-1 border-gray-400"></div>
+            <span className="text-sm italic text-gray-600">
+              {t('lp_view.legend.teacher_exclusive')}
+            </span>
+          </div>
+          <div className="flex gap-3 bg-transparent">
+            <div className="w-5 h-5 border-b-1 border-x-1 border-gray-400"></div>
+            <span className="text-sm italic text-gray-600">
+              {t('lp_view.legend.student_content')}
+            </span>
+          </div>
+        </div>
 
         {/* learning objects list */}
         <div className="rounded-md border border-gray-200 overflow-hidden">
@@ -168,35 +191,35 @@ const LearningPath: React.FC = () => {
                   <div className="flex items-center justify-between bg-transparent">
                     <span>{learningObject.title}</span>
                     {/* Doesn't work yet
-                    <svg
-                      className={`w-5 h-5 ${learningObject.done ? 'text-green-500' : 'text-gray-300'}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      {learningPathData?.nodes.find(
-                        (node) =>
-                          node.localLearningObjectId === learningObject.id &&
-                          node.done,
-                      ) ? (
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                          color="green"
-                        />
-                      ) : (
-                        <circle
-                          cx="12"
-                          cy="12"
-                          r="8"
-                          strokeWidth={2}
-                          color="gray"
-                        />
-                      )}
-                    </svg>
-                    */}
+                        <svg
+                          className={`w-5 h-5 ${learningObject.done ? 'text-green-500' : 'text-gray-300'}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          {learningPathData?.nodes.find(
+                            (node) =>
+                              node.localLearningObjectId === learningObject.id &&
+                              node.done,
+                          ) ? (
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                              color="green"
+                            />
+                          ) : (
+                            <circle
+                              cx="12"
+                              cy="12"
+                              r="8"
+                              strokeWidth={2}
+                              color="gray"
+                            />
+                          )}
+                        </svg>
+                      */}
                   </div>
                 </button>
               ))}

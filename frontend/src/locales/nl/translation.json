@@ -144,8 +144,14 @@
   "learning_objects": {
     "loading": "Leerobjecten laden...",
     "next": "Volgende",
-    "end": "Einde van leerpad",
-    "loading_path_details": "Leerpad details laden ..."
+    "end": "Einde van leerpad"
+  },
+  "lp_view": {
+    "loading_path_details": "Leerpad details laden ...",
+    "legend": {
+      "teacher_exclusive": "Extra info voor de leerkracht",
+      "student_content": "Inhoud voor de leerling"
+    }
   },
   "edit_learning_path": {
     "loading_path_details": "Leerpad details laden ...",

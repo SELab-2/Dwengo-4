@@ -144,8 +144,14 @@
   "learning_objects": {
     "loading": "Loading learning objects ...",
     "next": "Up next",
-    "end": "End of learning path",
-    "loading_path_details": "Loading learning path details ..."
+    "end": "End of learning path"
+  },
+  "lp_view": {
+    "loading_path_details": "Loading learning path details ...",
+    "legend": {
+      "teacher_exclusive": "Additional information for the teacher",
+      "student_content": "Content for the student"
+    }
   },
   "edit_learning_path": {
     "loading_path_details": "Loading learning path details ...",
