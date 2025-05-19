@@ -2,6 +2,7 @@ import PrimaryButton from '@/components/shared/PrimaryButton';
 import { fetchQuestionsForTeam } from '@/util/student/questions';
 import { useQuery } from '@tanstack/react-query';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 
 const QuestionsForAssignment: React.FC = () => {
@@ -20,6 +21,8 @@ const QuestionsForAssignment: React.FC = () => {
     enabled: !!assignmentId,
   });
 
+  const { t } = useTranslation();
+
   // Log whenever the query results change
   React.useEffect(() => {
     console.log('Current query state:', {
@@ -35,26 +38,26 @@ const QuestionsForAssignment: React.FC = () => {
       <div>
         <div className="w-full flex flex-col items-center justify-center mt-8">
           <p className="text-3xl mb-2">
-            Vragen voor Assignment{' '}
+            {t('questions.assignment_questions')}
             <span className="text-dwengo-green font-bold">
               {' '}
               {questions?.teams?.teamAssignment?.assignment?.title ||
-                'Laden...'}
+                t('loading.loading')}
             </span>
           </p>
           <Link to={`/student/question/new/${assignmentId}`}>
-            <PrimaryButton>Stel nieuwe vraag</PrimaryButton>
+            <PrimaryButton>{t('questions.new_question_button')}</PrimaryButton>
           </Link>
 
           {isLoading && (
             <div className="mt-8 text-center">
-              <p>Vragen worden geladen...</p>
+              <p>{t('questions.loading')}</p>
             </div>
           )}
 
           {isError && (
             <div className="mt-8 text-center text-red-500">
-              <p>Er is een fout opgetreden bij het laden van de vragen.</p>
+              <p>{t('questions.error')}</p>
             </div>
           )}
 
@@ -88,11 +91,13 @@ const QuestionsForAssignment: React.FC = () => {
                           to={`/student/question/${question.id}`}
                           className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                         >
-                          <PrimaryButton>Bekijk</PrimaryButton>
+                          <PrimaryButton>
+                            {t('questions.view_button')}
+                          </PrimaryButton>
                         </Link>
                       </div>
                       <p className="text-gray-600 mr-2 translate-y-3">
-                        Vraag gesteld door{' '}
+                        {t('questions.asked_by')}{' '}
                         <span className="text-dwengo-green font-bold">
                           {question.creatorName}
                         </span>
@@ -102,7 +107,7 @@ const QuestionsForAssignment: React.FC = () => {
                 ))
               ) : (
                 <p className="text-center py-4">
-                  Geen vragen gevonden voor deze opdracht.
+                  {t('questions.no_questions')}
                 </p>
               )}
             </div>

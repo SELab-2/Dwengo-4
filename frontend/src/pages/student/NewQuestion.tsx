@@ -1,8 +1,8 @@
 import PrimaryButton from '@/components/shared/PrimaryButton';
 import { createNewQuestion } from '@/util/student/questions';
-import React from 'react';
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const NewQuestion = () => {
   const { assignmentId } = useParams();
@@ -26,10 +26,11 @@ const NewQuestion = () => {
     console.log('frontendresp', await frontendresp);
     navigate(`/student/question/${frontendresp.questionGen.questionId}`);
   };
+  const { t } = useTranslation();
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <p className="text-3xl mb-2">Stel een vraag</p>
+      <p className="text-3xl mb-2">{t('questions.ask_question')}</p>
 
       {error && (
         <div className="bg-red-50 text-red-700 p-3 rounded-md mb-4">

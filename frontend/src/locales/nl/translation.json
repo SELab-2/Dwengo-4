@@ -216,5 +216,15 @@
       "no_results": "Geen resultaten gevonden voor '{{searchTerm}}'.",
       "no_results_generic": "Geen resultaten."
     }
+  },
+  "questions": {
+    "assignment_questions": "Vragen voor opdracht ",
+    "new_question_button": "Stel een nieuwe vraag",
+    "loading": "Vragen laden...",
+    "error": "Er is iets fout gelopen tijdens het ophalen van de vragen",
+    "no_questions": "Geen vragen gevonden voor deze opdracht",
+    "view_button": "Bekijk",
+    "asked_by": "Gevraagd door",
+    "ask_question": "Stel een vraag"
   }
 }

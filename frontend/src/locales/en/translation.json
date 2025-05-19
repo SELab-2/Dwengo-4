@@ -216,5 +216,15 @@
       "no_results": "No results found for '{{searchTerm}}'.",
       "no_results_generic": "No results."
     }
+  },
+  "questions": {
+    "assignment_questions": "Questions for assignment ",
+    "new_question_button": "Ask a new question",
+    "loading": "Loading questions...",
+    "error": "Something went wrong while loading the questions",
+    "no_questions": "No questions found for this assignment",
+    "view_button": "View",
+    "asked_by": "Asked by",
+    "ask_question": "Ask a question"
   }
 }
