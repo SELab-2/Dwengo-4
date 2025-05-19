@@ -139,11 +139,15 @@ const LearningPath: React.FC = () => {
                 <button
                   className={`
                         p-4 text-base border-b border-gray-200 text-left
-                        transition-colors duration-200 hover:bg-gray-50 hover:cursor-pointer
-                        ${learningObject.teacherExclusive ? 'bg-dwengo-green-transparent' : ''}
+                        transition-colors duration-200 hover:cursor-pointer
+                        ${
+                          learningObject.teacherExclusive
+                            ? 'bg-dwengo-green-transparent-light hover:bg-dwengo-green-transparent-dark'
+                            : 'hover:bg-gray-100'
+                        }
                         ${
                           selectedLearningObject?.id === learningObject.id
-                            ? 'font-extrabold font-medium border-l-[3px] border-l-black'
+                            ? 'inset-shadow-sm font-extrabold font-medium border-l-[4px] border-l-black'
                             : ''
                         }
                       `}
@@ -191,7 +195,7 @@ const LearningPath: React.FC = () => {
       </div>
 
       {/* Main content */}
-      <div className="border-l border-gray-200 w-full p-6 pb-[74px] max-h-[calc(100vh-80px)] overflow-y-auto">
+      <div className="border-l border-gray-200 w-full p-6 pb-[74px] max-h-[calc(100vh-80px)] overflow-y-auto relative">
         <div className="header">
           {!selectedLearningObject ? (
             <>
@@ -203,32 +207,39 @@ const LearningPath: React.FC = () => {
               </p>
             </>
           ) : (
-            <div className="w-full max-w-3xl">
-              <h4 className="text-2xl mb-4">{selectedLearningObject.title}</h4>
-              <MathJax>
-                <div
-                  className="prose max-w-none prose-img:max-w-full prose-img:w-auto"
-                  dangerouslySetInnerHTML={{
-                    __html: selectedLearningObject.raw || '',
-                  }}
-                />
-              </MathJax>
-            </div>
-          )}
-        </div>
-        <div className="fixed bottom-0 right-0 flex p-4 justify-end border-t border-gray-200 bg-white w-[calc(100%-416px)] z-10">
-          {isStudent && (
-            <button
-              className="px-4 py-2 text-base font-normal rounded bg-blue-600 text-white border-none cursor-pointer transition-opacity duration-200 disabled:opacity-50"
-              onClick={() => {
-                handleClickLearningObject(nextObject);
-              }}
-              disabled={progress === 100}
-            >
-              {nextObject
-                ? `${t('learning_objects.next')}: ${nextObject.title}`
-                : t('learning_objects.end')}
-            </button>
+            <>
+              <div className="w-full max-w-3xl">
+                <h4 className="text-2xl mb-4">
+                  {selectedLearningObject.title}
+                </h4>
+                <MathJax>
+                  <div
+                    className="prose max-w-none prose-img:max-w-full prose-img:w-auto"
+                    dangerouslySetInnerHTML={{
+                      __html: selectedLearningObject.raw || '',
+                    }}
+                  />
+                </MathJax>
+
+                <div className="mt-8 flex justify-end">
+                  <button
+                    className={`
+                    px-4 py-2 text-base font-normal rounded bg-dwengo-blue text-white
+                    border-none cursor-pointer transition-opacity duration-200 disabled:opacity-50
+                    hover:bg-blue-600
+                  `}
+                    onClick={() => {
+                      handleClickLearningObject(nextObject);
+                    }}
+                    disabled={progress === 100 || !nextObject}
+                  >
+                    {nextObject
+                      ? `${t('learning_objects.next')}: ${nextObject.title}`
+                      : t('learning_objects.end')}
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>
