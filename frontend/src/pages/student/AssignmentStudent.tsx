@@ -104,7 +104,7 @@ const AssignmentStudent: React.FC = () => {
           {assignment && (
             <div className="mt-6 border-t pt-4">
               <h3 className="text-xl font-semibold mb-4">
-                {t('assignments.team')}
+                {t('assignment.team')}
               </h3>
               {studentTeam ? (
                 <div className="bg-gray-50 rounded-md p-4">

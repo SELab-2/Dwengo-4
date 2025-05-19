@@ -76,7 +76,8 @@
     "delete": "Delete",
     "deadline": "Deadline",
     "loading_learning_path": "Loading learning path ...",
-    "learning_path_details": "Learning path details"
+    "learning_path_details": "Learning path details",
+    "team": "Team"
   },
   "assignments_form": {
     "edit": "Edit assignment",

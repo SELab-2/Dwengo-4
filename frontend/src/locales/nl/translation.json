@@ -75,7 +75,8 @@
     "delete": "Verwijderen",
     "deadline": "Deadline",
     "loading_learning_path": "Leerpaden laden...",
-    "learning_path_details": "Leerpaddetails"
+    "learning_path_details": "Leerpaddetails",
+    "team": "Groep"
   },
   "assignments_form": {
     "edit": "Opdracht bewerken",
