@@ -181,45 +181,59 @@ const LearningPath: React.FC = () => {
                         }
                         ${
                           selectedLearningObject?.id === learningObject.id
-                            ? 'inset-shadow-sm font-extrabold font-medium border-l-[4px] border-l-black'
+                            ? 'inset-shadow-sm '
                             : ''
                         }
                       `}
                   key={learningObject.id}
                   onClick={() => handleClickLearningObject(learningObject)}
                 >
-                  <div className="flex items-center justify-between bg-transparent">
+                  <div
+                    className={`
+                    flex items-center justify-between bg-transparent
+                    ${
+                      selectedLearningObject?.id === learningObject.id
+                        ? 'font-extrabold font-medium border-l-[4px] border-l-black pl-4'
+                        : ''
+                    }
+                  `}
+                  >
                     <span>{learningObject.title}</span>
+                    {learningObject.estimatedTime && (
+                      <span className="text-base pr-2">
+                        {learningObject.estimatedTime}&apos;
+                      </span>
+                    )}
                     {/* Doesn't work yet
-                        <svg
-                          className={`w-5 h-5 ${learningObject.done ? 'text-green-500' : 'text-gray-300'}`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          {learningPathData?.nodes.find(
-                            (node) =>
-                              node.localLearningObjectId === learningObject.id &&
-                              node.done,
-                          ) ? (
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                              color="green"
-                            />
-                          ) : (
-                            <circle
-                              cx="12"
-                              cy="12"
-                              r="8"
-                              strokeWidth={2}
-                              color="gray"
-                            />
-                          )}
-                        </svg>
-                      */}
+                      <svg
+                        className={`w-5 h-5 ${learningObject.done ? 'text-green-500' : 'text-gray-300'}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        {learningPathData?.nodes.find(
+                          (node) =>
+                            node.localLearningObjectId === learningObject.id &&
+                            node.done,
+                        ) ? (
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                            color="green"
+                          />
+                        ) : (
+                          <circle
+                            cx="12"
+                            cy="12"
+                            r="8"
+                            strokeWidth={2}
+                            color="gray"
+                          />
+                        )}
+                      </svg>
+                    */}
                   </div>
                 </button>
               ))}
