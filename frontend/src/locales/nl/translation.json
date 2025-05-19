@@ -68,6 +68,15 @@
     "view_assignment": "Bekijk opdracht",
     "my_assignments": "Mijn opdrachten"
   },
+  "assignment": {
+    "title": "Opdracht",
+    "language": "Taal",
+    "edit": "Bewerken",
+    "delete": "Verwijderen",
+    "deadline": "Deadline",
+    "loading_learning_path": "Leerpaden laden...",
+    "learning_path_details": "Leerpaddetails"
+  },
   "assignments_form": {
     "edit": "Opdracht bewerken",
     "assign": "Opdracht toewijzen",
@@ -211,6 +220,36 @@
       },
       "no_results": "Geen resultaten gevonden voor '{{searchTerm}}'.",
       "no_results_generic": "Geen resultaten."
+    }
+  },
+  "questions": {
+    "assignment_questions": "Vragen voor opdracht ",
+    "new_question_button": "Stel een nieuwe vraag",
+    "loading": "Vragen laden...",
+    "error": "Er is iets fout gelopen tijdens het ophalen van de vragen",
+    "no_questions": "Geen vragen gevonden",
+    "no_reactions": "Nog geen reacties",
+    "reactions": "Reacties",
+    "view_button": "Bekijk",
+    "asked_by": "Vraag gesteld door",
+    "says": "zegt",
+    "ask_question": "Stel een vraag",
+    "write_message": "Schrijf een bericht",
+    "submit": "Verstuur",
+    "submitting": "Versturen...",
+    "error_submitting": "Er ging iets fout bij het versturen van het bericht",
+    "form": {
+      "succes": "Vraag succesvol toegevoegd!",
+      "title": "Titel",
+      "question": "Vraag",
+      "languages": {
+        "label": "Taal",
+        "en": "Engels",
+        "nl": "Nederlands",
+        "fr": "Frans"
+      },
+      "back": "Terug",
+      "submit": "Stel vraag"
     }
   }
 }
