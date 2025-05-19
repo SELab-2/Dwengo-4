@@ -132,6 +132,7 @@ export const LPEditProvider: React.FC<{
     onSuccess: (path) => {
       console.log('Learning path updated/created successfully');
       queryClient.invalidateQueries({ queryKey: ['learningPaths'] });
+      queryClient.invalidateQueries({ queryKey: ['learningObjects', path.id] });
       navigate(`/teacher/learning-paths/${path.id}`);
     },
   });
