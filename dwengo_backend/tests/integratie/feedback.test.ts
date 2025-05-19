@@ -111,7 +111,7 @@ describe("Feedback tests", (): void => {
       // In deze test wordt nagegaan dat je geen feedback kan geven op een submission van een assignment
       // waarvan de deadline nog niet verstreken is
       const { status, body } = await request(app)
-        .post(`/feedback/submission/${onGoingAssignmentSubmissionId}`)
+        .post(`/api/feedback/submission/${onGoingAssignmentSubmissionId}`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
       expect(status).toBe(403);
@@ -130,7 +130,7 @@ describe("Feedback tests", (): void => {
     it("Should respond with a `401` status (UnauthorizedError)", async (): Promise<void> => {
       // In deze test wordt nagegaan dat je geen feedback kunt geven als student
       const { status, body } = await request(app)
-        .post(`/feedback/submission/${passedAssignmentSubmissionId}`)
+        .post(`/api/feedback/submission/${passedAssignmentSubmissionId}`)
         .set("Authorization", `Bearer ${student.token}`);
 
       expect(status).toBe(401);
@@ -146,7 +146,7 @@ describe("Feedback tests", (): void => {
 
     it("Should respond with a `201` status and the created feedback", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .post(`/feedback/submission/${passedAssignmentSubmissionId}`)
+        .post(`/api/feedback/submission/${passedAssignmentSubmissionId}`)
         .set("Authorization", `Bearer ${teacher.token}`)
         .send({ description: "Mooie oplossing!" });
 
@@ -162,7 +162,7 @@ describe("Feedback tests", (): void => {
 
     it("Should respond with a `400` status when the submission id is not a valid number", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .post(`/feedback/submission/notANumber`)
+        .post(`/api/feedback/submission/notANumber`)
         .set("Authorization", `Bearer ${teacher.token}`)
         .send({ description: "Mooie oplossing!" });
 
@@ -177,7 +177,7 @@ describe("Feedback tests", (): void => {
       const newTeacher: User & { teacher: Teacher; token: string } =
         await createTeacher("new", "teacher", "newteacher@gmail.com");
       const { status, body } = await request(app)
-        .post(`/feedback/submission/${passedAssignmentSubmissionId}`)
+        .post(`/api/feedback/submission/${passedAssignmentSubmissionId}`)
         .set("Authorization", `Bearer ${newTeacher.token}`);
 
       expect(status).toBe(403);
@@ -198,7 +198,7 @@ describe("Feedback tests", (): void => {
       );
 
       const { status, body } = await request(app)
-        .get(`/feedback/submission/${passedAssignmentSubmissionId}`)
+        .get(`/api/feedback/submission/${passedAssignmentSubmissionId}`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
       expect(status).toBe(200);
@@ -208,7 +208,7 @@ describe("Feedback tests", (): void => {
     it("Should respond with a `404` status and saying it found no feedback", async (): Promise<void> => {
       // Check if this returns a 404 when searching for feedback that does not yet exist
       const { status, body } = await request(app)
-        .get(`/feedback/submission/${passedAssignmentSubmissionId}`)
+        .get(`/api/feedback/submission/${passedAssignmentSubmissionId}`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
       expect(status).toBe(404);
@@ -218,7 +218,7 @@ describe("Feedback tests", (): void => {
 
     it("Should respond with a `400` status when the ID is not a number", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(`/feedback/submission/notANumber`)
+        .get(`/api/feedback/submission/notANumber`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
       expect(status).toBe(400);
@@ -235,7 +235,7 @@ describe("Feedback tests", (): void => {
       );
 
       const { status, body } = await request(app)
-        .get(`/feedback/submission/${passedAssignmentSubmissionId}`)
+        .get(`/api/feedback/submission/${passedAssignmentSubmissionId}`)
         .set("Authorization", `Bearer ${student.token}`);
 
       expect(status).toBe(401);
@@ -255,7 +255,7 @@ describe("Feedback tests", (): void => {
         await createTeacher("new", "teacher", "newteacher@gmail.com");
 
       const { status, body } = await request(app)
-        .get(`/feedback/submission/${passedAssignmentSubmissionId}`)
+        .get(`/api/feedback/submission/${passedAssignmentSubmissionId}`)
         .set("Authorization", `Bearer ${newTeacher.token}`);
 
       expect(status).toBe(403);
@@ -271,7 +271,7 @@ describe("Feedback tests", (): void => {
       const assignmentIdFromOtherClass = 123;
       const { status, body } = await request(app)
         .get(
-          `/feedback/assignment/${assignmentIdFromOtherClass}/evaluation/${evalId}`,
+          `/api/feedback/assignment/${assignmentIdFromOtherClass}/evaluation/${evalId}`,
         )
         .set("Authorization", `Bearer ${teacher.token}`);
 
@@ -285,7 +285,7 @@ describe("Feedback tests", (): void => {
     it("Should respond with a `401` status when a student tries to access the information", async (): Promise<void> => {
       const { status, body } = await request(app)
         .get(
-          `/feedback/assignment/${passedAssignmentSubmissionId}/evaluation/${evalId}`,
+          `/api/feedback/assignment/${passedAssignmentSubmissionId}/evaluation/${evalId}`,
         )
         .set("Authorization", `Bearer ${student.token}`);
 
@@ -316,7 +316,7 @@ describe("Feedback tests", (): void => {
       );
 
       const { status, body } = await request(app)
-        .get(`/feedback/assignment/${passedAssignmentId}/evaluation/${evalId}`)
+        .get(`/api/feedback/assignment/${passedAssignmentId}/evaluation/${evalId}`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
       expect(status).toBe(200);
@@ -327,7 +327,7 @@ describe("Feedback tests", (): void => {
   describe("[PATCH] /feedback/submission/:submissionId", (): void => {
     it("Should respond with a `401` status code (Unauthorized user - student)", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .patch(`/feedback/submission/:submissionId`)
+        .patch(`/api/feedback/submission/:submissionId`)
         .set("Authorization", `Bearer ${student.token}`);
 
       expect(status).toBe(401);
@@ -337,7 +337,7 @@ describe("Feedback tests", (): void => {
 
     it("Should respond with a `400` status code when the submissionID is not valid", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .patch(`/feedback/submission/invalidSubmissionId`)
+        .patch(`/api/feedback/submission/invalidSubmissionId`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
       expect(status).toBe(400);
@@ -354,7 +354,7 @@ describe("Feedback tests", (): void => {
       );
 
       const { status, body } = await request(app)
-        .patch(`/feedback/submission/${passedAssignmentSubmissionId}`)
+        .patch(`/api/feedback/submission/${passedAssignmentSubmissionId}`)
         .set("Authorization", `Bearer ${teacher.token}`)
         .send({ description: "Zeer netjes!" });
 
@@ -365,7 +365,7 @@ describe("Feedback tests", (): void => {
 
     it("Should respond with a `404` status code when updating feedback that does not exist", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .patch(`/feedback/submission/${passedAssignmentSubmissionId}`)
+        .patch(`/api/feedback/submission/${passedAssignmentSubmissionId}`)
         .set("Authorization", `Bearer ${teacher.token}`)
         .send({ description: "Zeer netjes!" });
 
@@ -379,7 +379,7 @@ describe("Feedback tests", (): void => {
         await createTeacher("new", "teacher", "newteacher@gmail.com");
 
       const { status, body } = await request(app)
-        .patch(`/feedback/submission/176`)
+        .patch(`/api/feedback/submission/176`)
         .set("Authorization", `Bearer ${newTeacher.token}`);
 
       expect(status).toBe(403);
@@ -400,7 +400,7 @@ describe("Feedback tests", (): void => {
       );
 
       const { status, body } = await request(app)
-        .delete(`/feedback/submission/${onGoingAssignmentSubmissionId}`)
+        .delete(`/api/feedback/submission/${onGoingAssignmentSubmissionId}`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
       expect(status).toBe(204);
@@ -418,7 +418,7 @@ describe("Feedback tests", (): void => {
 
     it("Should respond with a `404` status code when trying to delete feedback that doesn't exist", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .delete(`/feedback/submission/${passedAssignmentSubmissionId}`)
+        .delete(`/api/feedback/submission/${passedAssignmentSubmissionId}`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
       expect(status).toBe(404);
@@ -428,7 +428,7 @@ describe("Feedback tests", (): void => {
 
     it("Should respond with a `400` status code when :submissionId is not valid", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .delete(`/feedback/submission/invalidId`)
+        .delete(`/api/feedback/submission/invalidId`)
         .set("Authorization", `Bearer ${teacher.token}`);
 
       expect(status).toBe(400);
@@ -438,7 +438,7 @@ describe("Feedback tests", (): void => {
 
     it("Should respond with a `401` status code when a student tries to delete something", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .delete(`/feedback/submission/${passedAssignmentSubmissionId}`)
+        .delete(`/api/feedback/submission/${passedAssignmentSubmissionId}`)
         .set("Authorization", `Bearer ${student.token}`);
 
       expect(status).toBe(401);
@@ -450,7 +450,7 @@ describe("Feedback tests", (): void => {
       const newTeacher: User & { teacher: Teacher; token: string } =
         await createTeacher("new", "teacher", "newteacher@gmail.com");
       const { status, body } = await request(app)
-        .delete(`/feedback/submission/${passedAssignmentSubmissionId}`)
+        .delete(`/api/feedback/submission/${passedAssignmentSubmissionId}`)
         .set("Authorization", `Bearer ${newTeacher.token}`);
 
       expect(status).toBe(403);
