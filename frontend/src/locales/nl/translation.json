@@ -41,7 +41,8 @@
     "settings": "Instellingen",
     "classes": "Klassen",
     "learning_paths": "Leerpaden",
-    "logged_in_as": "Ingelogd als {{name}}"
+    "logged_in_as": "Ingelogd als {{name}}",
+    "assignments": "Opdrachten"
   },
   "class": {
     "create": "Nieuwe klas aanmaken",
@@ -63,7 +64,9 @@
     "view_all": "Bekijk alle opdrachten",
     "error": "Er is iets fout gelopen tijdens het ophalen van de opdrachten",
     "view": "Opdracht bekijken",
-    "not_found": "Geen opdrachten gevonden"
+    "not_found": "Geen opdrachten gevonden",
+    "view_assignment": "Bekijk opdracht",
+    "my_assignments": "Mijn opdrachten"
   },
   "assignment": {
     "title": "Opdracht",
@@ -72,7 +75,8 @@
     "delete": "Verwijderen",
     "deadline": "Deadline",
     "loading_learning_path": "Leerpaden laden...",
-    "learning_path_details": "Leerpaddetails"
+    "learning_path_details": "Leerpaddetails",
+    "team": "Groep"
   },
   "assignments_form": {
     "edit": "Opdracht bewerken",
@@ -109,7 +113,9 @@
       "available_students": "Beschikbare leerlingen",
       "generate_random_teams": "Genereer willekeurige groepen",
       "create_team": "Maak groep",
-      "incomplete_team_warning": "Onvolledige groep maken?"
+      "incomplete_team_warning": "Onvolledige groep maken?",
+      "deselect_all": "Deselecteer alles",
+      "select_all": "Selecteer alles"
     },
     "deadline": "Deadline",
     "cancel": "Annuleer",

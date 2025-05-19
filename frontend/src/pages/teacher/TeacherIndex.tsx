@@ -19,7 +19,7 @@ export default function TeacherIndex() {
 
         <div className="flex flex-row justify-end w-full ">
           <Link
-            to="/assignment"
+            to="/teacher/assignments"
             className="font-bold hover:cursor-pointer hover:underline"
           >
             {t('assignments.view_all')}

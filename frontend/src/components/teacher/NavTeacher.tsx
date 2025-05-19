@@ -41,11 +41,13 @@ const NavTeacher: React.FC = () => {
               onClick={() => (window.location.href = '/teacher')}
             />
 
+
             {isTeacher ? (
               // teacher-navigatie
               <div className="flex space-x-4">
                 <NavButton to="/teacher" label={t('nav.home')} />
                 <NavButton to="/teacher/classes" label={t('nav.classes')} />
+                <NavButton to="/teacher/assignments" label={t('nav.assignments')} />
                 <NavButton
                   to="/teacher/learning-paths"
                   label={t('nav.learning_paths')}
@@ -93,6 +95,7 @@ const NavTeacher: React.FC = () => {
                 className="text-gray-700 hover:cursor-pointer hover:text-gray-600"
                 aria-label="Settings"
               >
+
                 {/* settings-icon */}
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none"
                   viewBox="0 0 24 24" stroke="currentColor">

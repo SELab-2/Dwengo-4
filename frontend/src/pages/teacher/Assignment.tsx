@@ -136,7 +136,8 @@ const Assignment: React.FC = () => {
           {learningPathData && (
             <div className="bg-gray-50 rounded-md p-4">
               <a
-                href={`/learning-paths/${assignmentData.pathRef}`}
+                href={`/teacher/learning-path/${assignmentData.pathRef}`}
+       
                 className="text-blue-600 hover:text-blue-800"
               >
                 <h4 className="text-lg font-medium mb-2">

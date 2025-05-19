@@ -40,6 +40,7 @@
     "profile": "Profile",
     "settings": "Settings",
     "classes": "Classes",
+    "assignments": "Assignments",
     "learning_paths": "Learning paths",
     "logged_in_as": "Logged in as {{name}}"
   },
@@ -63,7 +64,10 @@
     "view_all": "View all assignments",
     "error": "Something went wrong while loading the assignments",
     "view": "View assignment",
-    "not_found": "No assignments found"
+    "not_found": "No assignments found",
+    "view_assignment": "View assignment",
+    "my_assignments": "My assignments",
+    "deadline": "Deadline"
   },
   "assignment": {
     "title": "Assignment",
@@ -72,7 +76,8 @@
     "delete": "Delete",
     "deadline": "Deadline",
     "loading_learning_path": "Loading learning path ...",
-    "learning_path_details": "Learning path details"
+    "learning_path_details": "Learning path details",
+    "team": "Team"
   },
   "assignments_form": {
     "edit": "Edit assignment",
@@ -109,7 +114,9 @@
       "available_students": "Available students",
       "generate_random_teams": "Generate random teams",
       "create_team": "Create team",
-      "incomplete_team_warning": "Create incomplete team?"
+      "incomplete_team_warning": "Create incomplete team?",
+      "deselect_all": "Deselect all",
+      "select_all": "Select all"
     },
     "deadline": "Deadline",
     "cancel": "Cancel",

@@ -27,6 +27,7 @@ import {
 const Assignment = lazy(() => import('../pages/teacher/Assignment'));
 const AssignmentAdd = lazy(() => import('../pages/teacher/AssignmentAdd'));
 const AssignmentEdit = lazy(() => import('../pages/teacher/AssignmentEdit'));
+const Assignments = lazy(() => import('../pages/teacher/Assignments'));
 
 const RootLayoutTeacher = lazy(
   () => import('../components/teacher/RootLayoutTeacher'),
@@ -125,6 +126,7 @@ export const router = createBrowserRouter([
     path: 'teacher',
     element: <RootLayoutTeacher />,
     children: [
+
       /* --- Publiek --- */
       { path: 'inloggen', element: <LoginTeacher /> },
       { path: 'registreren', element: <SignupTeacher /> },
@@ -142,6 +144,10 @@ export const router = createBrowserRouter([
           { path: 'add-assignment', element: <AssignmentAdd /> },
           { path: 'assignment/:assignmentId', element: <Assignment /> },
           { path: 'assignment/:assignmentId/edit', element: <AssignmentEdit /> },
+          {
+        path: 'assignments',
+        element: <Assignments></Assignments>,
+      },
           {
             path: 'local-learning-objects',
             element: <LocalLearningObjectsPage></LocalLearningObjectsPage>,

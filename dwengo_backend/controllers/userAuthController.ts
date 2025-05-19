@@ -87,6 +87,7 @@ const loginUser = async (req: Request, res: Response, role: Role): Promise<void>
     message: "Successfully logged in.",
     firstName: user.firstName,
     lastName: user.lastName,
+    id: user.id,
     token: generateToken(
       studentOrTeacherRecord.userId,
       studentOrTeacherRecord.user.role,
