@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { LearningPath, LearningObject } from '../../types/type';
 import { useParams } from 'react-router-dom';
@@ -24,6 +24,7 @@ import LearningObjectContent from './learningObjectContent';
  */
 const LearningPath: React.FC = () => {
   const [learningPath, setLearningPath] = useState<LearningPath | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null); // ref for the learning object content container
   const [selectedLearningObject, setSelectedLearningObject] =
     useState<LearningObject | null>(null);
   const { pathId } = useParams<{ pathId: string }>();
@@ -112,7 +113,16 @@ const LearningPath: React.FC = () => {
     //   calculateProgress();
     // }
     if (!learningObject) return;
+
+    // scroll to top of content
     setSelectedLearningObject(learningObject);
+    if (contentRef.current) {
+      contentRef.current.scrollTop = 0;
+    }
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
   };
 
   console.log('progress', progress);
@@ -243,7 +253,10 @@ const LearningPath: React.FC = () => {
       </div>
 
       {/* Main content */}
-      <div className="border-l border-gray-200 w-full p-6 pb-[74px] max-h-[calc(100vh-80px)] overflow-y-auto relative">
+      <div
+        ref={contentRef}
+        className="border-l border-gray-200 w-full p-6 pb-[74px] max-h-[calc(100vh-80px)] overflow-y-auto relative"
+      >
         <div className="header">
           {!selectedLearningObject ? (
             <>
