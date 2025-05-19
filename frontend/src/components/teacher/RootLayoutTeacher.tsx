@@ -1,8 +1,33 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLoaderData, useSubmit } from 'react-router-dom';
 import Nav from './NavTeacher';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { getTokenDuration } from '@/util/teacher/authTeacher';
 
 function RootLayoutTeacher() {
+
+  const token = useLoaderData();
+  const submit = useSubmit();
+
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+
+    if (token === "EXPIRED") {
+      submit(null, { action: "/logout", method: "post" });
+      return;
+    }
+    if (token === "EXPIRED") {
+      submit(null, { action: "/logout", method: "post" });
+      return;
+    }
+
+    const tokenDuration = getTokenDuration();
+
+    setTimeout(() => {
+      submit(null, { action: "/logout", method: "post" });
+    }, tokenDuration);
+  }, [token, submit]);
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 text-gray-900">
       {/* Navigation */}
