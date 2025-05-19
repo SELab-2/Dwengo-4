@@ -1661,6 +1661,10 @@
     font-weight: normal;
   }
 
+  .prose pre code {
+    color: #ffffff !important;
+  }
+
   .prose code::before,
   .prose code::after {
     content: none !important; /* remove backticks around code */
@@ -1688,6 +1692,43 @@
     max-width: 100%;
     display: block;
     aspect-ratio: 16 / 9;
+  }
+
+  .prose table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #ddd;
+    margin: 1.5rem 0;
+    background-color: #fff;
+    table-layout: fixed;
+  }
+
+  .prose table th,
+  .prose table td {
+    padding: 8px 20px !important;
+    text-align: left;
+    border: 1px solid #ddd;
+    vertical-align: top !important;
+    word-wrap: break-word; 
+    word-break: break-word;
+    white-space: normal;
+  }
+
+  .prose table th {
+    background-color: #f7f7f7; 
+    font-weight: bold;
+    text-align: center; 
+  }
+
+  .prose table tr:nth-child(even) {
+    background-color: #f7f7f7; 
+  }
+
+  .prose table img {
+    max-width: 100%; 
+    height: auto;
+    display: block;
+    margin: 0 auto;
   }
 }
 
