@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import LocalLearningObjectsPage from './LocalLearningObject';
+import LearningPaths from '../learningPath/learningPaths';
 
 const CustomContent: React.FC = () => {
   const { t } = useTranslation();
@@ -44,12 +45,7 @@ const CustomContent: React.FC = () => {
             <LocalLearningObjectsPage />
           </div>
         )}
-        {activeTab === 'leerpaden' && (
-          <div>
-            {/* Content for "Leerpaden" */}
-            <p className="text-gray-700">Hier komt de inhoud voor leerpaden.</p>
-          </div>
-        )}
+        {activeTab === 'leerpaden' && <LearningPaths ownedPathsOnly={true} />}
       </div>
     </div>
   );

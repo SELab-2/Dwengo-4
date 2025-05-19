@@ -30,12 +30,9 @@ export async function fetchLearningPaths(): Promise<LearningPath[]> {
     getToken: getAuthToken,
   })) as LearningPath[];
 
-  return response
-    .map((path: any) => ({
-      ...path,
-      id: path._id || path.id,
-    }))
-    .sort((a: LearningPath, b: LearningPath) => a.title.localeCompare(b.title));
+  return response.sort((a: LearningPath, b: LearningPath) =>
+    a.title.localeCompare(b.title),
+  );
 }
 
 /**
