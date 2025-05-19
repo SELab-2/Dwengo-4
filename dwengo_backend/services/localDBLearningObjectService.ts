@@ -1,4 +1,4 @@
-import { LearningObject } from "@prisma/client";
+import { LearningObject, LearningObjectRawHtml } from "@prisma/client";
 import {
   getDwengoObjectForPath,
   LearningObjectDto,
@@ -14,8 +14,14 @@ import prisma from "../config/prisma";
 /**
  * Converteert een Prisma LearningObject record naar ons LearningObjectDto
  * (origin = "local")
+ *
+ * the local learning object can also optionally include the raw HTML content
  */
-function mapLocalToDto(localObj: LearningObject): LearningObjectDto {
+function mapLocalToDto(
+  localObj: LearningObject & {
+    LearningObjectRawHtml?: LearningObjectRawHtml | null;
+  },
+): LearningObjectDto {
   return {
     id: localObj.id,
     uuid: localObj.uuid,
@@ -39,6 +45,9 @@ function mapLocalToDto(localObj: LearningObject): LearningObjectDto {
     updatedAt: localObj.updatedAt.toISOString(),
     creatorId: localObj.creatorId ?? undefined,
     origin: "local",
+    raw: localObj.LearningObjectRawHtml
+      ? localObj.LearningObjectRawHtml.rawHtml
+      : undefined,
   };
 }
 
@@ -175,9 +184,10 @@ export async function getLearningObjectsForLocalPath(
   // get all learning objects for this path
   const objects: LearningObjectDto[] = [];
   for (const node of path.nodes) {
+    let obj: LearningObjectDto | null;
     if (node.isExternal) {
       // dwengo object, fetch from dwengo api
-      const obj = await getDwengoObjectForPath(
+      obj = await getDwengoObjectForPath(
         node.dwengoHruid!,
         node.dwengoLanguage!,
         node.dwengoVersion!,
@@ -185,12 +195,25 @@ export async function getLearningObjectsForLocalPath(
       );
 
       // add to objects if not null
-      if (obj) {
-        objects.push(obj);
-      }
     } else {
       // local object, fetch from local db
-      // TODO: local object creation needs to be merged first...
+      const localObj = await handlePrismaQuery(() =>
+        prisma.learningObject.findUnique({
+          where: {
+            id: node.localLearningObjectId!,
+            teacherExclusive: isTeacher ? undefined : false,
+            available: true,
+          },
+          include: {
+            LearningObjectRawHtml: true,
+          },
+        }),
+      );
+      obj = localObj ? mapLocalToDto(localObj) : null;
+    }
+
+    if (obj) {
+      objects.push(obj);
     }
   }
   return objects;
