@@ -10,6 +10,8 @@ import {
   handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
 import localLearningPathService from "./localLearningPathService";
+import { LearningObjectDto } from "./dwengoLearningObjectService";
+import { mapLocalToDto } from "./localDBLearningObjectService";
 
 export interface LocalLearningObjectData {
   // De data die een teacher kan opgeven bij het aanmaken of updaten
@@ -116,13 +118,16 @@ export default class LocalLearningObjectService {
    */
   static async getAllLearningObjectsByTeacher(
     teacherId: number,
-  ): Promise<LearningObject[]> {
+  ): Promise<LearningObjectDto[]> {
     return await handlePrismaQuery<LearningObject[]>(() =>
       prisma.learningObject.findMany({
         where: { creatorId: teacherId },
         orderBy: { createdAt: "desc" },
+        include: {
+          LearningObjectRawHtml: true,
+        },
       }),
-    );
+    ).then((objects) => objects.map((obj) => mapLocalToDto(obj)));
   }
 
   /**
