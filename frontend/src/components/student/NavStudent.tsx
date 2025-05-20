@@ -12,8 +12,7 @@ const Navstudent: React.FC = () => {
   const location = useLocation();
 
   // mobile menu toggle
-  const [menuOpen, setMenuOpen] = useState<boolean>(false);
-  const toggleMenu = () => setMenuOpen((prev) => !prev);
+  const [menuOpen] = useState<boolean>(false);
 
   // lokale state voor firstName én role
   const [firstName, setFirstName] = useState<string | null>(null);
@@ -38,6 +37,7 @@ const Navstudent: React.FC = () => {
     { to: '/student/klassen', label: t('nav.classes') },
     { to: '/student/assignments', label: t('nav.assignments') },
     { to: '/student/learning-paths', label: t('nav.learning_paths') },
+    { to: '/student/learning-paths', label: 'Leaderboard' },
   ];
 
   return (
