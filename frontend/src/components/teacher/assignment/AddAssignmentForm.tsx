@@ -324,7 +324,7 @@ const AddAssignmentForm = ({
       individualStudents,
       assignmentId: assignmentData?.id?.toString(),
     });
-    $
+
     const action = isEditing ? updateAssignment : postAssignment;
 
     try {
