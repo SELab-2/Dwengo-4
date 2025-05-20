@@ -1,4 +1,5 @@
 {
+  "characters": "characters",
   "role": {
     "choose": "Choose a role",
     "student": "Student",

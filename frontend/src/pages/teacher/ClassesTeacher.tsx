@@ -181,7 +181,6 @@ const ClassesPageTeacher: React.FC = () => {
     <div className="flex flex-row justify-center w-full">
       <div className="">
         <CreateClass />
-
         {isLoading && <p>{t('loading.loading')}</p>}
         {isError && (
           <p className="c-r">
@@ -192,46 +191,52 @@ const ClassesPageTeacher: React.FC = () => {
         {!isLoading && !isError && classes && classes.length > 0 ? (
           <div className="px-10 py-10">
             <h2>{t('class.my_classes')}</h2>
-            <table className="tableSimpleStyling">
-              <thead>
-                <tr>
-                  <th>Edit</th>
-                  <th>Naam</th>
-                  <th>Code</th>
-                  <th>Leerkracht Invites</th>
-                  <th>Leerling Join Requests</th>
-                </tr>
-              </thead>
-              <tbody className="">
-                {classes.map((classItem) => (
-                  <tr key={classItem.id}>
-                    <td className="text-center">
-                      <Link to={`/teacher/classes/${classItem.id}`}>
-                        <PrimaryButton>Beheer</PrimaryButton>
-                      </Link>
-                    </td>
-                    <td className="text-center">{classItem.name}</td>
-                    <td className="text-center">{classItem.code}</td>
-                    <td className='text-center'>
-                      <PrimaryButton
-                        onClick={() => handleManageTeacherInvites(classItem.id)}
-                      >
-                        <span className="f-s">Beheer</span>
-                      </PrimaryButton>
-                    </td>
-                    <td className='text-center'>
-                      <PrimaryButton
-                        onClick={() =>
-                          handleManageStudentJoinRequests(classItem.id)
-                        }
-                      >
-                        <span className="f-s">Beheer</span>
-                      </PrimaryButton>
-                    </td>
+            <div className="max-h-[500px] overflow-y-auto">
+              <table className="tableSimpleStyling">
+                <thead className="sticky top-0 bg-white" >
+                  <tr >
+                    <th className='text-center'>Edit</th>
+                    <th className="w-[200px] text-center">Naam</th>
+                    <th className='text-center'>Code</th>
+                    <th className='text-center'>Leerkracht Invites</th>
+                    <th className='text-center'>Leerling Join Requests</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {classes.map((classItem) => (
+                    <tr key={classItem.id}>
+                      <td className="text-center">
+                        <Link to={`/teacher/classes/${classItem.id}`}>
+                          <PrimaryButton>Beheer</PrimaryButton>
+                        </Link>
+                      </td>
+                      <td className="text-center">
+                        <div className="max-w-[200px] truncate" title={classItem.name}>
+                          {classItem.name}
+                        </div>
+                      </td>
+                      <td className="text-center">{classItem.code}</td>
+                      <td className='text-center'>
+                        <PrimaryButton
+                          onClick={() => handleManageTeacherInvites(classItem.id)}
+                        >
+                          <span className="f-s">Beheer</span>
+                        </PrimaryButton>
+                      </td>
+                      <td className='text-center'>
+                        <PrimaryButton
+                          onClick={() =>
+                            handleManageStudentJoinRequests(classItem.id)
+                          }
+                        >
+                          <span className="f-s">Beheer</span>
+                        </PrimaryButton>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : (
           !isLoading && isError && <p>Geen klassen gevonden.</p>
