@@ -125,7 +125,6 @@ const LearningPath: React.FC = () => {
     });
   };
 
-  console.log('progress', progress);
 
   return (
     <div className="flex h-screen">

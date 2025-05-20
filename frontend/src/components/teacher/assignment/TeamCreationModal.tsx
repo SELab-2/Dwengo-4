@@ -76,8 +76,7 @@ const TeamCreationModal = ({
   const handleChangeClass = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const classId = e.target.value;
     const classItem = classes.find((c) => Number(c.id) === Number(classId)) || null;
-    console.log('Selected class:', classItem);
-    console.log(classes)
+    
     setSelectedClass(classItem);
   };
 
