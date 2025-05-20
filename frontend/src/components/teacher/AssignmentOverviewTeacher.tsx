@@ -15,7 +15,7 @@ export default function AssignmentOverviewTeacher() {
     error,
   } = useQuery<AssignmentItem[]>({
     queryKey: ['assignments'],
-    queryFn: fetchAllAssignments,
+    queryFn: () => fetchAllAssignments(5),
   });
   const { t } = useTranslation();
 

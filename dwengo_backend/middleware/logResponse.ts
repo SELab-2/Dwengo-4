@@ -23,7 +23,7 @@ const FILE_PATH_REGEX = /(?:\/[\w.-]+)+|[A-Za-z]:\\(?:[\w.-]+\\)+[\w.-]+/g;
  */
 function sanitizeResponse(obj: any): any {
   if (Array.isArray(obj)) {
-    return obj.map(sanitizeResponse);
+    return `[(length: ${obj.length})]`;
   } else if (obj && typeof obj === "object") {
     const sanitized: Record<string, any> = {};
     for (const key of Object.keys(obj)) {

@@ -21,3 +21,5 @@ export async function fetchAssignmentsForClass({
     getToken: getAuthToken,
   })) as AssignmentItem[];
 }
+
+

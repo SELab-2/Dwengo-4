@@ -40,6 +40,7 @@
     "profile": "Profile",
     "settings": "Settings",
     "classes": "Classes",
+    "assignments": "Assignments",
     "learning_paths": "Learning paths",
     "logged_in_as": "Logged in as {{name}}"
   },
@@ -63,7 +64,22 @@
     "view_all": "View all assignments",
     "error": "Something went wrong while loading the assignments",
     "view": "View assignment",
-    "not_found": "No assignments found"
+    "not_found": "No assignments found",
+    "not_yet": "No assignments assigned yet",
+    "view_assignment": "View assignment",
+    "my_assignments": "My assignments",
+    "deadline": "Deadline",
+    "no_team": "No team assigned"
+  },
+  "assignment": {
+    "title": "Assignment",
+    "language": "Language",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deadline": "Deadline",
+    "loading_learning_path": "Loading learning path ...",
+    "learning_path_details": "Learning path details",
+    "team": "Team"
   },
   "assignments_form": {
     "edit": "Edit assignment",
@@ -100,7 +116,9 @@
       "available_students": "Available students",
       "generate_random_teams": "Generate random teams",
       "create_team": "Create team",
-      "incomplete_team_warning": "Create incomplete team?"
+      "incomplete_team_warning": "Create incomplete team?",
+      "deselect_all": "Deselect all",
+      "select_all": "Select all"
     },
     "deadline": "Deadline",
     "cancel": "Cancel",
@@ -142,9 +160,16 @@
     "create_lp": "Create Learning Path"
   },
   "learning_objects": {
-    "loading": "Loading learning paths ...",
+    "loading": "Loading learning objects ...",
     "next": "Up next",
     "end": "End of learning path"
+  },
+  "lp_view": {
+    "loading_path_details": "Loading learning path details ...",
+    "legend": {
+      "teacher_exclusive": "Additional information for the teacher",
+      "student_content": "Content for the student"
+    }
   },
   "edit_learning_path": {
     "loading_path_details": "Loading learning path details ...",
@@ -206,6 +231,36 @@
       },
       "no_results": "No results found for '{{searchTerm}}'.",
       "no_results_generic": "No results."
+    }
+  },
+  "questions": {
+    "assignment_questions": "Questions for assignment ",
+    "new_question_button": "Ask a new question",
+    "loading": "Loading questions...",
+    "error": "Something went wrong while loading the questions",
+    "no_questions": "No questions found",
+    "no_reactions": "No reactions yet",
+    "reactions": "Reactions",
+    "view_button": "View",
+    "asked_by": "Asked by",
+    "says": "says",
+    "ask_question": "Ask a question",
+    "write_message": "Write a message",
+    "submit": "Submit",
+    "submitting": "Submitting...",
+    "error_submitting": "Something went wrong while submitting the question",
+    "form": {
+      "succes": "Question successfully created!",
+      "title": "Title",
+      "question": "Question",
+      "languages": {
+        "label": "Language",
+        "en": "English",
+        "nl": "Dutch",
+        "fr": "French"
+      },
+      "back": "Back",
+      "submit": "Ask question"
     }
   }
 }

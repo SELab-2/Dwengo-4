@@ -2,9 +2,10 @@ import {
   addMessageToQuestion,
   fetchQuestionConversation,
 } from '@/util/student/questions';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import React, { useState, useEffect } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 // Updated interfaces to match the actual data structure
 interface User {
@@ -29,6 +30,7 @@ const QuestionOverview: React.FC = () => {
 
   const [newMessage, setNewMessage] = useState('');
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const {
     data: question,
@@ -90,7 +92,7 @@ const QuestionOverview: React.FC = () => {
   if (isLoading) {
     return (
       <div className="pt-10 w-full flex flex-col items-center">
-        <p className="text-xl">Laden...</p>
+        <p className="text-xl">{t('loading.loading')}</p>
       </div>
     );
   }
@@ -108,7 +110,7 @@ const QuestionOverview: React.FC = () => {
   if (!question) {
     return (
       <div className="pt-10 w-full flex flex-col items-center">
-        <p className="text-xl">Geen vraag gevonden</p>
+        <p className="text-xl">{t('questions.no_questions')}</p>
       </div>
     );
   }
@@ -123,7 +125,7 @@ const QuestionOverview: React.FC = () => {
         question.questionConversation.length > 0 && (
           <>
             <h2 className="text-lg mt-2">
-              Vraag gesteld door:{' '}
+              {t('questions.asked_by')}:{' '}
               <span className="text-dwengo-green font-bold">
                 {question.questionConversation[0].user?.firstName || 'Onbekend'}
               </span>
@@ -137,13 +139,13 @@ const QuestionOverview: React.FC = () => {
 
       {question.questionConversation && (
         <div className="flex flex-col w-[40rem]">
-          <h2 className="self-center text-3xl mt-8">Comments:</h2>
+          <h2 className="self-center text-3xl mt-8">
+            {t('questions.reactions')}
+          </h2>
           <div className="flex flex-col space-y-1 mt-2">
             {question.questionConversation?.length <= 1 && (
               <div className="flex flex-row justify-center mb-8">
-                <p>
-                  Nog niemand heeft een comment achtergelaten voor deze vraag...
-                </p>
+                <p>{t('questions.no_reactions')}</p>
               </div>
             )}
 
@@ -164,7 +166,7 @@ const QuestionOverview: React.FC = () => {
                           <span className="text-dwengo-green-dark font-bold">
                             {message.user?.firstName || 'Onbekend'}
                           </span>{' '}
-                          zegt:
+                          {t('questions.says')}:
                         </p>
                       </div>
                       <p className="ml-14">{message.text}</p>
@@ -184,7 +186,7 @@ const QuestionOverview: React.FC = () => {
                 <span className="text-dwengo-green-dark font-bold">
                   {localName || 'Gebruiker'}
                 </span>{' '}
-                zegt:
+                {t('questions.says')}:
               </p>
             </div>
 
@@ -192,7 +194,7 @@ const QuestionOverview: React.FC = () => {
               <textarea
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Stel hier je vraag:"
+                placeholder={t('questions.write_message')}
                 className="w-96 rounded-2xl p-2 border border-gray-300"
                 rows={4}
               ></textarea>
@@ -204,13 +206,13 @@ const QuestionOverview: React.FC = () => {
                   className="bg-dwengo-green hover:bg-dwengo-green-dark text-white font-bold py-2 px-4 rounded disabled:opacity-50"
                 >
                   {addMessageMutation.isPending
-                    ? 'Versturen...'
-                    : 'Verstuur bericht'}
+                    ? t('questions.submitting')
+                    : t('questions.submit')}
                 </button>
 
                 {addMessageMutation.isError && (
                   <p className="text-red-500 mt-2">
-                    Er ging iets mis bij het versturen:{' '}
+                    {t('questions.error_submitting')}:{' '}
                     {addMessageMutation.error?.message}
                   </p>
                 )}

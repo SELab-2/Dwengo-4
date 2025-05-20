@@ -244,26 +244,24 @@ export default class TeacherAssignmentService {
     classTeams: ClassTeams,
     teamSize: number,
   ): Promise<Assignment> {
-    // 1) Check authorization for all classes and assignment
+    // Authorization checks remain the same
     await canUpdateOrDelete(teacherId, assignmentId);
-
     await Promise.all(
       Object.keys(classTeams).map(async (classId) => {
         await isAuthorized(teacherId, Role.TEACHER, parseInt(classId));
       }),
     );
 
-    // 2) Validate pathRef
+    // PathRef validation remains the same
     await ReferenceValidationService.validateLearningPath(
       isExternal,
-      isExternal ? undefined : pathRef, // localId
-      isExternal ? pathRef : undefined, // hruid
-      isExternal ? pathLanguage : undefined, // language
+      isExternal ? undefined : pathRef,
+      isExternal ? pathRef : undefined,
+      isExternal ? pathLanguage : undefined,
     );
 
-    // 3) Update assignment and teams in transaction
     return await handlePrismaTransaction(prisma, async (tx) => {
-      // Update the assignment
+      // Update the assignment basic info
       const assignment = await tx.assignment.update({
         where: { id: assignmentId },
         data: {
@@ -276,46 +274,78 @@ export default class TeacherAssignmentService {
         },
       });
 
-      // Delete existing teams
-      await tx.team.deleteMany({
-        where: {
-          teamAssignment: {
-            assignmentId: assignmentId,
-          },
-        },
-      });
-
-      //*
-      // Deze for loops moet blijven staan. Je mag geen Promise.all() gebruiken in een transaction.
-      // Error: PrismaClientTransactionInvalidError: Transaction API error: cannot run multiple operations in parallel on the same transaction.
-      // *//
-      // Ensure all classAssignments exist for the provided classes
-      for (const classId of Object.keys(classTeams)) {
-        const existingClassAssignment = await tx.classAssignment.findFirst({
+      // Update teams for each class
+      for (const [classId, newTeams] of Object.entries(classTeams)) {
+        // Get existing teams for this class
+        const existingTeams = await tx.team.findMany({
           where: {
-            assignmentId: assignmentId,
-            classId: parseInt(classId),
+            teamAssignment: {
+              assignmentId,
+              team: {
+                classId: parseInt(classId),
+              },
+            },
+          },
+          include: {
+            students: true,
           },
         });
 
-        if (!existingClassAssignment) {
-          await tx.classAssignment.create({
-            data: {
-              assignmentId: assignment.id,
-              classId: parseInt(classId),
+        // Update existing teams and create new ones if needed
+        for (const [index, newTeam] of newTeams.entries()) {
+          const existingTeam = existingTeams[index];
+
+          if (existingTeam) {
+            // Update existing team
+            await tx.team.update({
+              where: { id: existingTeam.id },
+              data: {
+                teamname: newTeam.teamname,
+                students: {
+                  // First disconnect all existing students
+                  set: [],
+                  // Then connect the new students
+                  connect: newTeam.studentIds.map((studentId: number) => ({
+                    userId: studentId,
+                  })),
+                },
+              },
+            });
+          } else {
+            // Create new team
+            console.log(
+              `Creating new team for class ${classId} with teamname ${newTeam.teamName}`,
+            );
+            await tx.team.create({
+              data: {
+                teamname: newTeam.teamName,
+                classId: parseInt(classId),
+                teamAssignment: {
+                  create: {
+                    assignmentId,
+                  },
+                },
+                students: {
+                  connect: newTeam.studentIds.map((studentId: number) => ({
+                    userId: studentId,
+                  })),
+                },
+              },
+            });
+          }
+        }
+
+        // Remove any excess teams
+        if (existingTeams.length > newTeams.length) {
+          const teamsToRemove = existingTeams.slice(newTeams.length);
+          await tx.team.deleteMany({
+            where: {
+              id: {
+                in: teamsToRemove.map((team) => team.id),
+              },
             },
           });
         }
-      }
-
-      // Create new teams for each class
-      for (const [classId, teams] of Object.entries(classTeams)) {
-        await createTeamsInAssignment(
-          assignment.id,
-          parseInt(classId),
-          teams,
-          tx,
-        );
       }
 
       return assignment;

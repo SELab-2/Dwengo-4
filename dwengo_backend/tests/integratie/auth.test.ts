@@ -8,7 +8,7 @@ describe("Authentication API Tests", () => {
   describe("[POST] /auth/student/register", () => {
     it("should register a new student", async () => {
       const response = await request(app)
-        .post("/auth/student/register")
+        .post("/api/auth/student/register")
         .send({
           firstName: "Jan",
           lastName: "Jansen",
@@ -37,7 +37,7 @@ describe("Authentication API Tests", () => {
     });
     it("should respond with `400` when some fields are missing", async () => {
       const response = await request(app)
-        .post("/auth/student/register")
+        .post("/api/auth/student/register")
         .send({}); // empty body
 
       expect(response.status).toBe(400);
@@ -68,7 +68,7 @@ describe("Authentication API Tests", () => {
       });
     });
     it("should respond with `400` when email is invalid", async () => {
-      const response = await request(app).post("/auth/student/register").send({
+      const response = await request(app).post("/api/auth/student/register").send({
         firstName: "Jan",
         lastName: "Jansen",
         email: "invaidemail",
@@ -91,7 +91,7 @@ describe("Authentication API Tests", () => {
       });
     });
     it("should respond with `400` when password is too short", async () => {
-      const response = await request(app).post("/auth/student/register").send({
+      const response = await request(app).post("/api/auth/student/register").send({
         firstName: "Jan",
         lastName: "Jansen",
         email: "student1@example.com",
@@ -122,7 +122,7 @@ describe("Authentication API Tests", () => {
       );
 
       // test creating a new student with the same email
-      const response = await request(app).post("/auth/student/register").send({
+      const response = await request(app).post("/api/auth/student/register").send({
         firstName: "Bob",
         lastName: "Bobsen",
         email: studentUser.email,
@@ -149,7 +149,7 @@ describe("Authentication API Tests", () => {
       );
 
       // test creating a new student with the same email
-      const response = await request(app).post("/auth/student/register").send({
+      const response = await request(app).post("/api/auth/student/register").send({
         firstName: "Bob",
         lastName: "Bobsen",
         email: teacherUser.email,
@@ -169,7 +169,7 @@ describe("Authentication API Tests", () => {
     });
     it("should convert emails to lower case", async () => {
       // create a student with an uppercase email
-      const response = await request(app).post("/auth/student/register").send({
+      const response = await request(app).post("/api/auth/student/register").send({
         firstName: "Jan",
         lastName: "Jansen",
         email: "TEST@EXAMPLE.COM",
@@ -189,7 +189,7 @@ describe("Authentication API Tests", () => {
     beforeEach(async () => {
       // register a student
       await request(app)
-        .post("/auth/student/register")
+        .post("/api/auth/student/register")
         .send({
           firstName: "Jan",
           lastName: "Jansen",
@@ -201,7 +201,7 @@ describe("Authentication API Tests", () => {
     it("should login with registered student credentials", async () => {
       // test logging in
       const response = await request(app)
-        .post("/auth/student/login")
+        .post("/api/auth/student/login")
         .send({
           email: "student1@example.com",
           password: "password123",
@@ -213,7 +213,7 @@ describe("Authentication API Tests", () => {
     it("should log in, even if the email is in uppercase", async () => {
       // test logging in with email in uppercase
       const response = await request(app)
-        .post("/auth/student/login")
+        .post("/api/auth/student/login")
         .send({
           email: "StUdEnt1@eXAmpLe.COm",
           password: "password123",
@@ -224,7 +224,7 @@ describe("Authentication API Tests", () => {
     });
     it("should fail login with non-registered email", async () => {
       const response = await request(app)
-        .post("/auth/student/login")
+        .post("/api/auth/student/login")
         .send({
           email: "nietbestaande@student.com",
           password: "password123",
@@ -237,7 +237,7 @@ describe("Authentication API Tests", () => {
     });
     it("should fail login with correct email but wrong password", async () => {
       const response = await request(app)
-        .post("/auth/student/login")
+        .post("/api/auth/student/login")
         .send({
           email: "student1@example.com",
           password: "wrongpassword",
@@ -249,7 +249,7 @@ describe("Authentication API Tests", () => {
       expect(response.body.message).toBe("Incorrect password.");
     });
     it("should fail if request body is incorrect", async () => {
-      const response = await request(app).post("/auth/student/login").send({}); // empty body
+      const response = await request(app).post("/api/auth/student/login").send({}); // empty body
 
       expect(response.status).toBe(400);
       expect(response.body.details).toEqual(
@@ -271,7 +271,7 @@ describe("Authentication API Tests", () => {
   describe("[POST] /auth/teacher/register", () => {
     it("should register a new teacher", async () => {
       const response = await request(app)
-        .post("/auth/teacher/register")
+        .post("/api/auth/teacher/register")
         .send({
           firstName: "Piet",
           lastName: "Pietersen",
@@ -300,7 +300,7 @@ describe("Authentication API Tests", () => {
     });
     it("should respond with `400` when some fields are missing", async () => {
       const response = await request(app)
-        .post("/auth/teacher/register")
+        .post("/api/auth/teacher/register")
         .send({}); // empty body
 
       expect(response.status).toBe(400);
@@ -331,7 +331,7 @@ describe("Authentication API Tests", () => {
       });
     });
     it("should respond with `400` when email is invalid", async () => {
-      const response = await request(app).post("/auth/teacher/register").send({
+      const response = await request(app).post("/api/auth/teacher/register").send({
         firstName: "Jan",
         lastName: "Jansen",
         email: "invaidemail",
@@ -354,7 +354,7 @@ describe("Authentication API Tests", () => {
       });
     });
     it("should respond with `400` when password is too short", async () => {
-      const response = await request(app).post("/auth/teacher/register").send({
+      const response = await request(app).post("/api/auth/teacher/register").send({
         firstName: "Jan",
         lastName: "Jansen",
         email: "student1@example.com",
@@ -385,7 +385,7 @@ describe("Authentication API Tests", () => {
       );
 
       // test creating a new teacher with the same email
-      const response = await request(app).post("/auth/teacher/register").send({
+      const response = await request(app).post("/api/auth/teacher/register").send({
         firstName: "Bob",
         lastName: "Bobsen",
         email: studentUser.email,
@@ -412,7 +412,7 @@ describe("Authentication API Tests", () => {
       );
 
       // test creating a new teacher with the same email
-      const response = await request(app).post("/auth/teacher/register").send({
+      const response = await request(app).post("/api/auth/teacher/register").send({
         firstName: "Bob",
         lastName: "Bobsen",
         email: teacherUser.email,
@@ -432,7 +432,7 @@ describe("Authentication API Tests", () => {
     });
     it("should convert emails to lowercase", async () => {
       // create a teacher with an uppercase email
-      const response = await request(app).post("/auth/teacher/register").send({
+      const response = await request(app).post("/api/auth/teacher/register").send({
         firstName: "Jan",
         lastName: "Jansen",
         email: "TEST@EXAMPLE.COM",
@@ -451,7 +451,7 @@ describe("Authentication API Tests", () => {
   describe("[POST] /auth/teacher/login", () => {
     beforeEach(async () => {
       // register a teacher
-      await request(app).post("/auth/teacher/register").send({
+      await request(app).post("/api/auth/teacher/register").send({
         firstName: "Piet",
         lastName: "Pietersen",
         email: "teacher1@example.com",
@@ -460,7 +460,7 @@ describe("Authentication API Tests", () => {
     });
     it("should login with registered teacher credentials", async () => {
       const response = await request(app)
-        .post("/auth/teacher/login")
+        .post("/api/auth/teacher/login")
         .send({
           email: "teacher1@example.com",
           password: "password123",
@@ -472,7 +472,7 @@ describe("Authentication API Tests", () => {
     it("should log in, even if the email is in uppercase", async () => {
       // test logging in with email in uppercase
       const response = await request(app)
-        .post("/auth/teacher/login")
+        .post("/api/auth/teacher/login")
         .send({
           email: "teACHer1@eXAMple.cOm",
           password: "password123",
@@ -483,7 +483,7 @@ describe("Authentication API Tests", () => {
     });
     it("should fail login with non-registered email", async () => {
       const response = await request(app)
-        .post("/auth/teacher/login")
+        .post("/api/auth/teacher/login")
         .send({
           email: "nietbestaande@teacher.com",
           password: "password123",
@@ -496,7 +496,7 @@ describe("Authentication API Tests", () => {
     });
     it("should fail login with correct email but wrong password", async () => {
       const response = await request(app)
-        .post("/auth/teacher/login")
+        .post("/api/auth/teacher/login")
         .send({
           email: "teacher1@example.com",
           password: "wrongpassword",
@@ -508,7 +508,7 @@ describe("Authentication API Tests", () => {
       expect(response.body.message).toBe("Incorrect password.");
     });
     it("should fail if request body is incorrect", async () => {
-      const response = await request(app).post("/auth/teacher/login").send({}); // empty body
+      const response = await request(app).post("/api/auth/teacher/login").send({}); // empty body
 
       expect(response.status).toBe(400);
       expect(response.body.details).toEqual(

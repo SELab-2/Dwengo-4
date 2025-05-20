@@ -30,12 +30,12 @@ const TeamsDisplay: React.FC<TeamsDisplayProps> = ({
                 {t('assignments_form.assign_team.class')}:{' '}
                 {selectedClasses.find((c) => c.id == classId)?.name}
               </h6>
-              {classTeams.map((team) => (
-                <div key={team.id} className={styles.teamPreview}>
+              {classTeams.map((teamHead) => (
+                <div key={teamHead.id} className={styles.teamPreview}>
                   <p>
-                    {team.id}:{' '}
-                    {team.students
-                      .map((member) => `${member.firstName} ${member.lastName}`)
+                    {teamHead.team.teamname}:{' '}
+                    {teamHead.team.students
+                      .map((member) => `${member.user.firstName} ${member.user.lastName}`)
                       .join(', ')}
                   </p>
                 </div>
@@ -47,10 +47,11 @@ const TeamsDisplay: React.FC<TeamsDisplayProps> = ({
           className={styles.editButton}
           type="button"
           onClick={onEditClick}
+          disabled={selectedClasses.length === 0}
         >
           {t('assignments_form.assign_team.edit')}
         </button>
-      </div>
+      </div >
     );
   }
 
@@ -76,7 +77,12 @@ const TeamsDisplay: React.FC<TeamsDisplayProps> = ({
           </div>
         ))}
       </div>
-      <button className={styles.editButton} type="button" onClick={onEditClick}>
+      <button
+        className={styles.editButton}
+        type="button"
+        onClick={onEditClick}
+        disabled={selectedClasses.length === 0}
+      >
         {t('assignments_form.assign_team.edit')}
       </button>
     </div>
