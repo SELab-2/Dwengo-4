@@ -59,3 +59,6 @@ commando:
    ```bash
    npx prisma studio
    ```
+
+# Handleiding site
+Een handleiding voor het gebruik van onze site vindt u in de [hier](https://github.com/SELab-2/Dwengo-4/wiki).
