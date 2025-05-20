@@ -16,6 +16,7 @@ export const createLocalLearningPath = asyncHandler(
     // Door protectTeacher in de routes weten we: role=TEACHER
     const teacherId: number = getUserFromAuthRequest(req).id;
 
+
     const { title, language, description, image, nodes } =
       req.body as LocalLearningPathData;
 
@@ -119,4 +120,16 @@ export const deleteLocalLearningPath = asyncHandler(
     await LocalLearningPathService.deleteLearningPath(pathId);
     res.status(204).end();
   },
+);
+
+export const deleteAllLocalLearningPaths = asyncHandler(
+  async (req, res) => {
+    const teacherId = getUserFromAuthRequest(req).id;
+
+    await LocalLearningPathService.deleteAllLearningPathsForTeacher(
+      teacherId
+    );
+
+    res.status(204).end();
+  }
 );

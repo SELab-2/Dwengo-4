@@ -115,6 +115,14 @@ interface TeamAssignment {
   };
 }
 
+ interface Transition {
+  nodeId: string;
+  nextNodeId: string | null;
+  default: boolean;
+  condition?: string | null;
+}
+
+
 export type {
   StudentItem,
   LearningPath,
@@ -126,4 +134,5 @@ export type {
   ClassItem,
   AssignmentPayload,
   TeamAssignment,
+  Transition
 };

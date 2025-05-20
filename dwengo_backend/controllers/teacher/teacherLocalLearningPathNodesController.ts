@@ -7,13 +7,17 @@ import { LearningPathNode } from "@prisma/client";
 
 // Interface voor node-updates
 export interface NodeMetadata {
+  draftId: number;
+  parentNodeId: number | null;
+  learningObject: { contentType: string; /* eventueel titel, etc. */ };
+  viaOptionIndex: number | null;
   isExternal: boolean;
   localLearningObjectId?: string;
   dwengoHruid?: string;
   dwengoLanguage?: string;
   dwengoVersion?: number;
   start_node?: boolean;
-  nodeId?: string; // optional, only for existing nodes
+  nodeId?: string;
 }
 
 /**

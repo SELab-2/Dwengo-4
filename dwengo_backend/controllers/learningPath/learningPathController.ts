@@ -3,9 +3,10 @@ import {
   searchAllLearningPaths,
   getCombinedLearningPathByIdOrHruid,
 } from "../../services/combinedLearningPathService";
-import { LearningPathDto } from "../../services/learningPathService";
+import { LearningPathDto, LearningPathTransition } from "../../services/learningPathService";
 import asyncHandler from "express-async-handler";
 import { getUserFromAuthRequest } from "../../helpers/getUserFromAuthRequest";
+import LocalLearningPathService from "../../services/localLearningPathService";
 
 interface LearningPathFilters {
   language?: string;
@@ -56,5 +57,17 @@ export const getLearningPathByIdController = asyncHandler(
     );
 
     res.json(path);
+  },
+);
+
+
+export const getLearningPathTransitionsController = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { pathId } = req.params;
+    const transitions: LearningPathTransition[] =
+      await LocalLearningPathService.getTransitionsByPath(pathId);
+
+
+    res.json({ transitions });
   },
 );

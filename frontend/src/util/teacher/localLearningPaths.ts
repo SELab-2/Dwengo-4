@@ -78,6 +78,8 @@ export async function updateOrCreateLearningPath({
   learningPathId,
 }: updateOrCreateLearningPathPayload): Promise<LearningPath> {
   let response: { learningPath: LearningPath };
+
+  console.log(newNodes);
   if (learningPathId) {
     // if a learning path id is provided, we update the existing learning path
     response = await apiRequest({

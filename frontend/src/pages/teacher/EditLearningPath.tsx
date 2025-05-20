@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { LearningPath } from '../../types/type';
+import { LearningPath, LearningPathNodeWithObject } from '../../types/type';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -8,8 +8,9 @@ import {
 } from '../../util/teacher/localLearningPaths';
 import AddNodeButton from '../../components/teacher/editLearningPath/AddNodeButton';
 import SelectLearningObject from '../../components/teacher/editLearningPath/SelectLearningObject';
-import { useLPEditContext } from '../../context/LearningPathEditContext';
+import { DraftNode, useLPEditContext } from '../../context/LearningPathEditContext';
 import NodeList from '../../components/teacher/editLearningPath/NodeList';
+import BranchesDrawer from '../../components/teacher/editLearningPath/BranchesDrawer'; // TODO: implement this
 import {
   LearningPathDetails,
   LearningPathDetailsRef,
@@ -20,8 +21,13 @@ const EditLearningPath: React.FC = () => {
   const { t } = useTranslation();
   // error message to ensure at least one node is added before saving
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [branchNode, setBranchNode] = useState<
+    LearningPathNodeWithObject | DraftNode | null
+  >(null); // track which MC-node’s branches to edit
+
   const navigate = useNavigate();
   const pathDetailsRef = useRef<LearningPathDetailsRef | null>(null);
+  
   const {
     isAddingNode,
     setOrderedNodes,
@@ -42,7 +48,7 @@ const EditLearningPath: React.FC = () => {
   } = useQuery<LearningPath>({
     queryKey: ['learningPaths', learningPathId],
     queryFn: () => fetchLocalLearningPath(learningPathId!),
-    enabled: !isCreateMode && !!learningPathId, // only fetch path if not in create mode
+    enabled: !isCreateMode && !!learningPathId,
   });
 
   const {
@@ -53,7 +59,7 @@ const EditLearningPath: React.FC = () => {
   } = useQuery({
     queryKey: ['learningPathNodes', learningPathId],
     queryFn: () => fetchLocalLearningPathNodes(learningPathId!),
-    enabled: !isCreateMode && !!learningPathId, // only fetch nodes if not in create mode
+    enabled: !isCreateMode && !!learningPathId,
   });
 
   // initialize orderedNodes when nodesData is fetched
@@ -80,18 +86,14 @@ const EditLearningPath: React.FC = () => {
   }, [errorMessage]);
 
   const handleSavePath = () => {
-    // check if title is valid
     if (!pathDetailsRef.current || !pathDetailsRef.current.validateInput()) {
       return;
     }
-
-    // check if at least one node was added
     if (orderedNodes.length === 0) {
       setErrorMessage(t('edit_learning_path.no_nodes_error'));
       return;
     }
-
-    setErrorMessage(null); // reset error message
+    setErrorMessage(null);
     savePath({
       newTitle: pathDetailsRef.current.title,
       newDescription: pathDetailsRef.current.description,
@@ -105,9 +107,7 @@ const EditLearningPath: React.FC = () => {
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
-      <div
-        className={`p-4 space-y-3 max-w-[405px] w-full bg-gray-50 overflow-y-scroll`}
-      >
+      <div className="p-4 space-y-3 max-w-[405px] w-full bg-gray-50 overflow-y-scroll">
         {/* path details */}
         {isLoadingPath && !isCreateMode ? (
           <p className="text-gray-500">
@@ -159,13 +159,17 @@ const EditLearningPath: React.FC = () => {
             <p>{t('edit_learning_path.loading_objects')}</p>
           ) : isErrorNodes ? (
             <p>Error: {errorNodes?.message}</p>
-          ) : orderedNodes.length == 0 ? (
+          ) : orderedNodes.length === 0 ? (
             <AddNodeButton
               nodeIndex={0}
               label={t('edit_learning_path.add_node')}
             />
           ) : (
-            <NodeList />
+            <NodeList
+              parentNodeId={null}
+              viaOptionIndex={null}
+              openBranchesDrawer={setBranchNode}
+            />
           )}
         </div>
       </div>
@@ -173,12 +177,19 @@ const EditLearningPath: React.FC = () => {
       {/* LO selection screen */}
       {isAddingNode && <SelectLearningObject />}
 
+      {/* Branches drawer */}
+      {branchNode && (
+        <BranchesDrawer
+          mcNode={branchNode}
+          onClose={() => setBranchNode(null)}
+          openBranchesDrawer={setBranchNode}
+        />
+      )}
+
       {/* Confirm / Cancel edit */}
-      <div
-        className={`fixed bottom-0 right-0 flex gap-2.5 p-2.5 justify-end border-t border-gray-200 bg-white w-full`}
-      >
+      <div className="fixed bottom-0 right-0 flex gap-2.5 p-2.5 justify-end border-t border-gray-200 bg-white w-full">
         <button
-          className={`px-6 h-10 font-bold rounded-md text-white bg-dwengo-green hover:bg-dwengo-green-dark hover:cursor-pointer`}
+          className="px-6 h-10 font-bold rounded-md text-white bg-dwengo-green hover:bg-dwengo-green-dark hover:cursor-pointer"
           onClick={handleSavePath}
           disabled={isSavingPath}
         >
@@ -187,7 +198,7 @@ const EditLearningPath: React.FC = () => {
             : t('edit_learning_path.confirm')}
         </button>
         <button
-          className={`px-6 h-10 font-bold rounded-md bg-dwengo-red-200 text-white hover:bg-dwengo-red-dark hover:cursor-pointer`}
+          className="px-6 h-10 font-bold rounded-md bg-dwengo-red-200 text-white hover:bg-dwengo-red-dark hover:cursor-pointer"
           disabled={isSavingPath}
           onClick={() => navigate(-1)}
         >
