@@ -1,5 +1,9 @@
 # Dwengo - groep 4
 
+## Korte samenvatting *tech stack*
+Onze backend maakt gebruik van [Express](https://expressjs.com/), waarbij [Prisma](https://www.prisma.io/) als ORM dient.
+Onze frontend is een [React-app](https://react.dev/) die wordt gebouwd door middel van [Vite](https://vite.dev/). De routing wordt afgehandeld door [React Router](https://reactrouter.com/). [Tailwind CSS](https://tailwindcss.com/) wordt gebruikt voor de opmaak van onze pagina's.
+
 ## Instructies voor het opzetten van een ontwikkelomgeving
 
 1. **Installeer Docker Engine**  
