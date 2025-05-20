@@ -30,15 +30,6 @@ export interface StudentItem {
     email: string;
 }
 
-export interface Invite {
-    inviteId: number;
-    status: 'PENDING' | 'APPROVED' | 'DENIED';
-    otherTeacher: {
-        firstName: string;
-        lastName: string;
-        email: string;
-    };
-}
 
 
 export interface ClassItem {

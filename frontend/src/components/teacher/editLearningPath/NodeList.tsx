@@ -18,7 +18,7 @@ const NodeList: React.FC = () => {
 
   return (
     <>
-      <div className="flex items-center gap-1 mb-2 text-gray-400">
+      <div className="flex items-center gap-1 mb-2 text-gray-400 bg-white">
         {/* informational icon */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -34,7 +34,7 @@ const NodeList: React.FC = () => {
             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <span className="text-xs cursor-default">
+        <span className="text-xs cursor-default bg-white">
           {t('edit_learning_path.node_list_instructions')}
         </span>
       </div>

@@ -240,6 +240,5 @@ describe("TeacherAssignmentService", () => {
         ),
       ).resolves.toBeUndefined();
     });
-
   });
 });

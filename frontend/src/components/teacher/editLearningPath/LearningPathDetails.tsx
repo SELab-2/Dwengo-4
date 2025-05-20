@@ -56,7 +56,8 @@ export const LearningPathDetails: React.FC<LearningPathDetailsProps> = ({
         value={title}
         onChange={(e) => setTitle(e.target.value.trimStart())}
         className={`
-            w-full bg-gray-50 hover:bg-gray-50 focus:bg-white transition-all text-2xl p-1 focus:outline-none
+            w-full hover:bg-gray-50 focus:bg-white transition-all text-2xl p-1 focus:outline-none
+            ${!title ? 'bg-white' : 'bg-transparent'}
             ${
               !title && !isValid
                 ? 'border-red-500 border-2 placeholder-red-300'
@@ -75,9 +76,9 @@ export const LearningPathDetails: React.FC<LearningPathDetailsProps> = ({
         placeholder={t('edit_learning_path.lp_details.add_description')}
         spellCheck="false"
         className={`
-            w-full bg-gray-50 hover:bg-gray-50 focus:bg-white transition-all
+            w-full hover:bg-gray-50 focus:bg-white transition-all
             focus:outline-none focus:ring-1 focus:ring-gray-200 text-sm p-1 hover:border-gray-300
-            ${description ? 'border-transparent focus:hover:border-gray-300' : 'border-gray-300'}
+            ${description ? 'border-transparent focus:hover:border-gray-300 bg-transparent' : 'border-gray-300 bg-white'}
           `}
       ></textarea>
 

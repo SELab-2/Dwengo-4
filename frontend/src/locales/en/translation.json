@@ -215,9 +215,15 @@
       "language": "Language:",
       "difficulty": "Difficulty:",
       "keywords": "Keywords:",
+      "teacher_exclusive": {
+        "label": "Teacher Exclusive:",
+        "true": "yes",
+        "false": "no"
+      },
       "created": "Created:",
       "updated": "Updated:",
-      "add_to_path": "Add learning object to path"
+      "add_to_path": "Add learning object to path",
+      "toggle_content": "show/hide object content"
     },
     "lp_object_selector": {
       "language": "Language:",
