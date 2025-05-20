@@ -60,16 +60,7 @@ export const nodeSchema = z
       ],
     }
   )
-  // indien dit een open vraag is (contentType), dan viaOptionIndex moet null zijn
-  .refine(
-    (d) =>
-      d.learningObject.contentType !== "EVAL_MULTIPLE_CHOICE" ||
-      d.viaOptionIndex == null,
-    {
-      message: "viaOptionIndex alleen voor multiple-choice nodes",
-      path: ["viaOptionIndex"],
-    }
-  );
+
 
 /**
  * Schema voor create‐request. 

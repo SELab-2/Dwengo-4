@@ -61,6 +61,15 @@ export class LocalLearningPathService {
 
     return await handlePrismaTransaction(prisma, async (tx) => {
       // 1) Maak de LearningPath
+
+      console.log("LEERPAD MAKEN")
+      console.log("LEERPAD MAKEN")
+      console.log(data.nodes);
+      console.log("LEERPAD MAKEN")
+      console.log("LEERPAD MAKEN")
+      console.log("LEERPAD MAKEN")
+      
+
       const createdPath = await tx.learningPath.create({
         data: {
           title: data.title,
@@ -146,7 +155,6 @@ export class LocalLearningPathService {
           const children = data.nodes.filter(
             (c) => c.parentNodeId == nd.draftId
           );
-          console.log(children);
           for (const c of children) {
             const from = draftToNodeId.get(nd.draftId)!;
             const to = draftToNodeId.get(c.draftId)!;
@@ -368,10 +376,14 @@ export class LocalLearningPathService {
     idOrHruid: string,
     includeProgress: boolean = false,
     studentId?: number,
-  ): Promise<LearningPathDto> {
+  ): Promise<any> {
     // 1) Probeer op id
+
+    console.log("LEERPAD OPHALEN")
+    console.log("LEERPAD OPHALEN")
+    console.log("LEERPAD OPHALEN")
     const byId = await handlePrismaQuery(() =>
-      prisma.learningPath.findUnique({ where: { id: idOrHruid } }),
+      prisma.learningPath.findUnique({ where: { id: idOrHruid }, include: {nodes: true, transitions: true} }),
     );
 
     // 2) Probeer op hruid als niet op id gevonden
@@ -381,6 +393,8 @@ export class LocalLearningPathService {
         prisma.learningPath.findUnique({
           where: { hruid: idOrHruid },
           include: {
+            nodes: true,
+            transitions: true,
             creator: {
               include: {
                 user: true,
@@ -390,52 +404,56 @@ export class LocalLearningPathService {
         }),
       ));
 
+    
+
     if (!lp) throw new NotFoundError("Learning path not found.");
 
-    // Basis DTO zonder nodes
-    const baseDto = mapLocalPathToDto(lp);
+
+    return lp;
 
     // Als geen progressie nodig is of geen studentId, geef alleen basis terug
-    if (!includeProgress || studentId === undefined) {
-      return baseDto;
-    }
+    // if (!includeProgress) {
+    //   return baseDto;
+    // }
 
-    // Haal alle nodes van dit leerpad
-    const nodes = await prisma.learningPathNode.findMany({
-      where: { learningPathId: lp.id },
-    });
+    // // Haal alle nodes van dit leerpad
+    // const nodes = await prisma.learningPathNode.findMany({
+    //   where: { learningPathId: lp.id },
+    // });
 
-    // Voor elke node: bepaal done-status
-    const nodesWithProgress = await Promise.all(
-      nodes.map(async (node) => {
-        let done = false;
-        const localObjId = node.localLearningObjectId;
-        if (localObjId) {
-          // Zoek studentProgress met relation filter op LearningObjectProgress
-          const sp = await prisma.studentProgress.findFirst({
-            where: {
-              studentId,
-              progress: {
-                is: { learningObjectId: localObjId },
-              },
-            },
-          });
-          done = sp !== null;
-        }
-        return {
-          nodeId: node.nodeId,
-          isExternal: node.isExternal,
-          localLearningObjectId: node.localLearningObjectId ?? undefined,
-          dwengoHruid: node.dwengoHruid ?? undefined,
-          done: done,
-        };
-      }),
-    );
 
-    return {
-      ...baseDto,
-      nodes: nodesWithProgress,
-    };
+    // // Voor elke node: bepaal done-status
+    // const nodesWithProgress = await Promise.all(
+    //   nodes.map(async (node) => {
+    //     let done = false;
+    //     const localObjId = node.localLearningObjectId;
+    //     if (localObjId) {
+    //       // Zoek studentProgress met relation filter op LearningObjectProgress
+    //       const sp = await prisma.studentProgress.findFirst({
+    //         where: {
+    //           studentId,
+    //           progress: {
+    //             is: { learningObjectId: localObjId },
+    //           },
+    //         },
+    //       });
+    //       done = sp !== null;
+    //     }
+    //     return {
+    //       nodeId: node.nodeId,
+    //       isExternal: node.isExternal,
+    //       localLearningObjectId: node.localLearningObjectId ?? undefined,
+    //       dwengoHruid: node.dwengoHruid ?? undefined,
+    //       done: done,
+    //     };
+    //   }),
+    // );
+
+
+    // return {
+    //   ...baseDto,
+    //   nodes: nodesWithProgress,
+    // };
   }
 }
 
