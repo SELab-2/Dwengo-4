@@ -60,6 +60,7 @@ const AssignmentsStudent = lazy(
 const QuestionOverview = lazy(
   () => import('../pages/student/QuestionOverview'),
 );
+
 const QuestionsForAssignment = lazy(
   () => import('@/pages/student/QuestionsForAssignment'),
 );
@@ -67,6 +68,11 @@ const StudentClassIndex = lazy(
   () => import('../pages/student/StudentClassIndex'),
 );
 const LeaderBoard = lazy(() => import('../pages/student/LeaderBoard'));
+
+const QuestionOverviewTeacher = lazy(
+  () => import('../pages/teacher/QuestionOverview'),
+);
+
 const LocalLearningObjectsPage = lazy(
   () => import('@/pages/teacher/LocalLearningObject'),
 );
@@ -154,6 +160,13 @@ export const router = createBrowserRouter([
             element: <Assignments></Assignments>,
           },
           {
+            path: 'question/:questionId',
+            element: <QuestionOverviewTeacher />,
+          },
+          {
+            path: 'local-learning-objects',
+            element: <LocalLearningObjectsPage></LocalLearningObjectsPage>,
+          },
             path: 'my-content',
             element: <CustomContent></CustomContent>,
           },

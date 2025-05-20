@@ -10,6 +10,8 @@ import { validateForm, validateMaxLength, validateRequired } from '@/util/shared
 import { ClassItem } from '@/types/type';
 import { fetchAssignments } from '@/util/teacher/assignment';
 import { fetchClass, updateClass } from '@/util/teacher/class';
+import { fetchQuestionsByClass } from '@/util/teacher/questions';
+import { t } from 'i18next';
 
 interface InputWithChecksRef {
   validateInput: () => boolean;
@@ -58,6 +60,11 @@ const EditClassTeacher: React.FC = () => {
   } = useQuery<ClassItem>({
     queryKey: ['class', classId],
     queryFn: async () => fetchClass({ classId: Number(classId!) }),
+  });
+
+  const { data: questions } = useQuery({
+    queryKey: ['questions', classId],
+    queryFn: async () => fetchQuestionsByClass(classId),
   });
 
   // Update class name mutation
@@ -340,6 +347,44 @@ const EditClassTeacher: React.FC = () => {
             <BoxBorder extraClasses="mxw-700 m-a g-20">
               <h2>Vragen</h2>
               <p>Hier komen de vragen van leerlingen.</p>
+              {questions.map((question) => (
+                <div
+                  key={question.id}
+                  className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300`}
+                >
+                  <div className="p-5">
+                    <div className="flex flex-row justify-between w-full">
+                      <h2 className="text-2xl font-semibold mb-2 ">
+                        {question.title}
+                      </h2>
+                      <div className="text-sm text-red-500">
+                        {new Date(question.createdAt).toLocaleString('nl-BE', {
+                          dateStyle: 'medium',
+                          timeStyle: 'short',
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-row w-full justify-between">
+                    <div className="bg-gray-50 pl-3 pb-3">
+                      <Link
+                        to={`/teacher/question/${question.id}`}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
+                        <PrimaryButton>
+                          {t('questions.view_button')}
+                        </PrimaryButton>
+                      </Link>
+                    </div>
+                    <p className="text-gray-600 mr-2 translate-y-3">
+                      {t('questions.asked_by')}{' '}
+                      <span className="text-dwengo-green font-bold">
+                        {question.creatorName}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              ))}
               {/* Placeholder for a question list */}
               <div className="bg-gray-100 p-4 rounded mt-4">
                 <p className="text-gray-500">Nog geen vragen beschikbaar.</p>
