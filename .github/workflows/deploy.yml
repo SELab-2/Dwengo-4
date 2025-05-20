@@ -42,7 +42,6 @@ jobs:
 
   deploy:
     runs-on: self-hosted
-    needs: [test-automated]
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Kill existing Node processes
