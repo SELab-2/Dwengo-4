@@ -160,7 +160,15 @@
   "learning_objects": {
     "loading": "Leerobjecten laden...",
     "next": "Volgende",
-    "end": "Einde van leerpad"
+    "end": "Einde van leerpad",
+    "create": "Leerobject Aanmaken",
+    "deletion_confirm": "Ben je zeker dat je dit leerobject wilt verwijderen? Dit kan niet ongedaan gemaakt worden.",
+    "title": "Titel",
+    "type": "Type",
+    "available": "Beschikbaar",
+    "actions": "Acties",
+    "edit": "Bewerken",
+    "delete": "Verwijderen"
   },
   "lp_view": {
     "loading_path_details": "Leerpad details laden ...",

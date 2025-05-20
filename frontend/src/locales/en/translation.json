@@ -161,7 +161,15 @@
   "learning_objects": {
     "loading": "Loading learning objects ...",
     "next": "Up next",
-    "end": "End of learning path"
+    "end": "End of learning path",
+    "create": "Create Learning Object",
+    "deletion_confirm": "Are you sure you want to delete this learning object? This action cannot be undone.",
+    "title": "Title",
+    "type": "Type",
+    "available": "Available",
+    "actions": "Actions",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "lp_view": {
     "loading_path_details": "Loading learning path details ...",
