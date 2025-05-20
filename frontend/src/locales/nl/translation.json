@@ -215,9 +215,15 @@
       "language": "Taal:",
       "difficulty": "Moeilijkheidsgraad:",
       "keywords": "Trefwoorden:",
+      "teacher_exclusive": {
+        "label": "Enkel Voor Leerkrachten:",
+        "true": "ja",
+        "false": "nee"
+      },
       "created": "Aangemaakt:",
       "updated": "Bijgewerkt:",
-      "add_to_path": "Leerobject aan pad toevoegen"
+      "add_to_path": "Leerobject aan pad toevoegen",
+      "toggle_content": "toon/verberg object content"
     },
     "lp_object_selector": {
       "language": "Taal:",

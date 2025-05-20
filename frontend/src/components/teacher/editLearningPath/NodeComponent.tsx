@@ -81,7 +81,7 @@ const NodeComponent: React.FC<NodeComponentProps> = memo(
         ref={nodeRef}
         className="group border p-2 border-gray-200 bg-white hover:bg-gray-100 transition-colors duration-200"
       >
-        <div className="flex items-center">
+        <div className="flex items-center bg-white group-hover:bg-gray-100">
           {/* drag handle */}
           <div
             ref={dragHandleRef}
@@ -104,7 +104,7 @@ const NodeComponent: React.FC<NodeComponentProps> = memo(
           </div>
 
           {/* lo title and delete button */}
-          <div className="flex-1 flex justify-between items-center w-full py-2 pe-4">
+          <div className="flex-1 flex justify-between items-center w-full py-2 pe-4 bg-white group-hover:bg-gray-100">
             {/* learning object title*/}
             <button
               onClick={() => onOpenLearningObject()}
@@ -126,7 +126,7 @@ const NodeComponent: React.FC<NodeComponentProps> = memo(
         {/* button for adding a new node underneath current node */}
         {(isCurrentNode || !isAddingNode) && !isDragging && (
           <div
-            className={`mt-2 ${!isAddingNode ? 'hidden group-hover:block' : ''}`}
+            className={`mt-2 bg-white group-hover:bg-gray-100 ${!isAddingNode ? 'hidden group-hover:block' : ''}`}
           >
             <AddNodeButton
               nodeIndex={index}
