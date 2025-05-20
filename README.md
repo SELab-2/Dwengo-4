@@ -1,11 +1,5 @@
 # Dwengo - groep 4
 
-## Informatie project
-
-- Mock-up op [Figma](https://www.figma.com/design/A8yBKOe1BxgrV3vTWLLOms/Dwengo?node-id=0-1&t=Blc6awHrRmzETtLX-1)
-- [UML](docs/uml.md) + [use-cases](docs/use_cases.md)
-- [Groepsindeling](docs/groepsindeling.md)
-
 ## Instructies voor het opzetten van een ontwikkelomgeving
 
 1. **Installeer Docker Engine**  
@@ -26,19 +20,33 @@
    > De waarde van `DATABASE_URL` bepaalt of je de lokale of remote database gebruikt. De link voor de remote database
    is te vinden in de pinned messages op Discord.
 
-### Databank lokaal opzetten
-
-6. **Navigeer naar de backend-map**  
-   Ga naar de `dwengo_backend`-map:
+4. Voer vervolgens volgende stappen uit in zowel de frontend-folder, alsook in de backend-folder. Naar deze folders gaan via
+   de command line doe je als volgt:
+   ```bash
+   cd frontend
+   ```
+   of
    ```bash
    cd dwengo_backend
    ```
+   
+   **Commando's om in beide folders uit te voeren:**
+      - **Installeer de dependencies:**
+        ```bash
+        npm install
+        ```
 
-7. **Voer Prisma-migraties uit**  
-   Migreer de database met het volgende commando:
-   ```bash
-   npx prisma migrate dev
-   ```
+   **Commando's die enkel in de backend-folder moeten uitgevoerd worden:**
+      - Update de database indien een lokale databank wordt gebruikt.
+         ```bash
+         npx prisma migrate dev
+         ```
+
+   **Run vervolgens in beide folders nog volgend commando:**
+      - Start de development server
+         ```bash
+         npm run dev
+         ```
 
 **Prisma Studio**  
 Met Prisma Studio kun je de database bekijken en bewerken. Om Prisma Studio te starten, gebruik je het volgende
