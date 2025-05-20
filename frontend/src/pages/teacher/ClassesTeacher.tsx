@@ -1,20 +1,15 @@
-import React from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import React from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-
   fetchTeacherInvites,
   updateInviteStatus,
-} from "../../util/teacher/classInvites";
-
+} from '../../util/teacher/classInvites';
 import { Invite } from '@/types/api.types';
-
-import {
-  fetchClasses
-} from "../../util/teacher/class";
-import PrimaryButton from "../../components/shared/PrimaryButton";
-import CreateClass from "../../components/teacher/classes/CreateClassForm";
-import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { fetchClasses } from '../../util/teacher/class';
+import PrimaryButton from '../../components/shared/PrimaryButton';
+import CreateClass from '../../components/teacher/classes/CreateClassForm';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface ClassItem {
   id: string;
@@ -34,7 +29,7 @@ const ClassesPageTeacher: React.FC = () => {
     isError: isClassesError,
     error: classesError,
   } = useQuery<ClassItem[]>({
-    queryKey: ["classes"],
+    queryKey: ['classes'],
     queryFn: fetchClasses,
   });
 
@@ -45,26 +40,24 @@ const ClassesPageTeacher: React.FC = () => {
     isError: isInvitesError,
     error: invitesError,
   } = useQuery<Invite[]>({
-    queryKey: ["teacherInvites"],
+    queryKey: ['teacherInvites'],
     queryFn: fetchTeacherInvites,
   });
 
   // Accept-invite mutation
   const acceptMutation = useMutation({
-    mutationFn: (inviteId: number) =>
-      updateInviteStatus(inviteId, "accept"),
+    mutationFn: (inviteId: number) => updateInviteStatus(inviteId, 'accept'),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["teacherInvites"] });
-      queryClient.invalidateQueries({ queryKey: ["classes"] });
-    }
+      queryClient.invalidateQueries({ queryKey: ['teacherInvites'] });
+      queryClient.invalidateQueries({ queryKey: ['classes'] });
+    },
   });
 
   // Decline-invite mutation
   const declineMutation = useMutation({
-    mutationFn: (inviteId: number) =>
-      updateInviteStatus(inviteId, "decline"),
+    mutationFn: (inviteId: number) => updateInviteStatus(inviteId, 'decline'),
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["teacherInvites"] }),
+      queryClient.invalidateQueries({ queryKey: ['teacherInvites'] }),
   });
 
   const handleAccept = (inviteId: number) => {
@@ -84,17 +77,18 @@ const ClassesPageTeacher: React.FC = () => {
 
       {/* My Classes */}
       <div className="w-full px-10">
-        {isClassesLoading && <p>{t("loading.loading")}</p>}
+        {isClassesLoading && <p>{t('loading.loading')}</p>}
         {isClassesError && (
           <p className="text-red-500">
-            {(classesError as any)?.info?.message || t("loading.error")}
+            {classesError.message || t('loading.error')}
           </p>
         )}
-        {!isClassesLoading && !isClassesError && classes && classes.length > 0 ? (
+        {!isClassesLoading &&
+        !isClassesError &&
+        classes &&
+        classes.length > 0 ? (
           <div>
-            <h2 className="text-2xl font-bold mb-4">
-              {t("class.my_classes")}
-            </h2>
+            <h2 className="text-2xl font-bold mb-4">{t('class.my_classes')}</h2>
             <table className="w-full border-collapse">
               <thead>
                 <tr>
@@ -115,49 +109,12 @@ const ClassesPageTeacher: React.FC = () => {
                         Beheer
                       </PrimaryButton>
                     </td>
-                    <td className="border px-4 py-2">
-                      {classItem.name}
-                    </td>
-                    <td className="border px-4 py-2">
-                      {classItem.code}
-                    </td>
+                    <td className="border px-4 py-2">{classItem.name}</td>
+                    <td className="border px-4 py-2">{classItem.code}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {classes.map((classItem) => (
-                    <tr key={classItem.id}>
-                      <td className="text-center">
-                        <Link to={`/teacher/classes/${classItem.id}`}>
-                          <PrimaryButton>Beheer</PrimaryButton>
-                        </Link>
-                      </td>
-                      <td className="text-center">
-                        <div className="max-w-[200px] truncate" title={classItem.name}>
-                          {classItem.name}
-                        </div>
-                      </td>
-                      <td className="text-center">{classItem.code}</td>
-                      <td className='text-center'>
-                        <PrimaryButton
-                          onClick={() => handleManageTeacherInvites(classItem.id)}
-                        >
-                          <span className="f-s">Beheer</span>
-                        </PrimaryButton>
-                      </td>
-                      <td className='text-center'>
-                        <PrimaryButton
-                          onClick={() =>
-                            handleManageStudentJoinRequests(classItem.id)
-                          }
-                        >
-                          <span className="f-s">Beheer</span>
-                        </PrimaryButton>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : (
           !isClassesLoading && <p>Geen klassen gevonden.</p>
@@ -171,7 +128,7 @@ const ClassesPageTeacher: React.FC = () => {
           <p className="text-red-500">
             {invitesError instanceof Error
               ? invitesError.message
-              : "Er is iets misgegaan bij het ophalen van de invites."}
+              : 'Er is iets misgegaan bij het ophalen van de invites.'}
           </p>
         )}
         {!isInvitesLoading &&
@@ -179,9 +136,7 @@ const ClassesPageTeacher: React.FC = () => {
           invites &&
           invites.length > 0 && (
             <div>
-              <h2 className="text-2xl font-bold mb-4">
-                Jouw uitnodigingen
-              </h2>
+              <h2 className="text-2xl font-bold mb-4">Jouw uitnodigingen</h2>
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
@@ -194,29 +149,21 @@ const ClassesPageTeacher: React.FC = () => {
                 <tbody>
                   {invites.map((invite) => (
                     <tr key={invite.inviteId}>
-                      <td className="border px-2 py-1">
-                        {invite.class.name}
-                      </td>
+                      <td className="border px-2 py-1">{invite.class.name}</td>
                       <td className="border px-2 py-1">
                         {invite.classTeacher.teacher.user.email}
                       </td>
-                      <td className="border px-2 py-1">
-                        {invite.status}
-                      </td>
+                      <td className="border px-2 py-1">{invite.status}</td>
                       <td className="border px-2 py-1 flex gap-2">
-                        {invite.status === "PENDING" && (
+                        {invite.status === 'PENDING' && (
                           <>
                             <PrimaryButton
-                              onClick={() =>
-                                handleAccept(invite.inviteId)
-                              }
+                              onClick={() => handleAccept(invite.inviteId)}
                             >
                               Accepteer
                             </PrimaryButton>
                             <PrimaryButton
-                              onClick={() =>
-                                handleDecline(invite.inviteId)
-                              }
+                              onClick={() => handleDecline(invite.inviteId)}
                             >
                               Weiger
                             </PrimaryButton>
@@ -227,17 +174,16 @@ const ClassesPageTeacher: React.FC = () => {
                   ))}
                 </tbody>
               </table>
-              {(acceptMutation.isError ||
-                declineMutation.isError) && (
-                  <p className="text-red-500 mt-2">
-                    {acceptMutation.error instanceof Error
-                      ? acceptMutation.error.message
-                      : ""}
-                    {declineMutation.error instanceof Error
-                      ? declineMutation.error.message
-                      : ""}
-                  </p>
-                )}
+              {(acceptMutation.isError || declineMutation.isError) && (
+                <p className="text-red-500 mt-2">
+                  {acceptMutation.error instanceof Error
+                    ? acceptMutation.error.message
+                    : ''}
+                  {declineMutation.error instanceof Error
+                    ? declineMutation.error.message
+                    : ''}
+                </p>
+              )}
             </div>
           )}
       </div>
