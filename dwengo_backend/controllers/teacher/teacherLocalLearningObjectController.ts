@@ -13,13 +13,9 @@ import { Property, checkIfTeacherIsCreator } from "./teacherChecks";
  */
 export const createLocalLearningObject = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    console.log("createLocalLearningObject");
-    console.log("AAAAAAAAAAAAAAAAAAAAAAAAA");
     const teacherId: number = getUserFromAuthRequest(req).id;
-    console.log("teacherId", teacherId);
 
     const data: LocalLearningObjectData = req.body;
-    console.log("data", data);
 
     const createdLO = await LocalLearningObjectService.createLearningObject(
       teacherId,
