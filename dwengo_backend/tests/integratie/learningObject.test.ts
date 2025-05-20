@@ -36,7 +36,7 @@ describe("learning object tests", { timeout: 15000 }, async () => {
   describe("[GET] learningObject/teacher", async () => {
     it("should return all learning objects", async () => {
       const { status, body } = await request(app)
-        .get("/learningObject/teacher")
+        .get("/api/learningObject/teacher")
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
@@ -55,7 +55,7 @@ describe("learning object tests", { timeout: 15000 }, async () => {
 
     it("shouldn't let a student access this route", async () => {
       const { status, body } = await request(app)
-        .get("/learningObject/teacher")
+        .get("/api/learningObject/teacher")
         .set("Authorization", `Bearer ${studentUser1.token}`);
 
       expect(status).toBe(401);
@@ -67,7 +67,7 @@ describe("learning object tests", { timeout: 15000 }, async () => {
     it("should return all learning objects that match the search term", async () => {
       const searchTerm: string = "voorbeeld";
       const { status, body } = await request(app)
-        .get(`/learningObject/teacher/search?q=${searchTerm}`)
+        .get(`/api/learningObject/teacher/search?q=${searchTerm}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
@@ -98,12 +98,12 @@ describe("learning object tests", { timeout: 15000 }, async () => {
 
       // search for the term in lowercase
       const res1 = await request(app)
-        .get("/learningObject/teacher/search?q=voorbeeld")
+        .get("/api/learningObject/teacher/search?q=voorbeeld")
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       // search for the term in uppercase
       const res2 = await request(app)
-        .get("/learningObject/teacher/search?q=VOORBEELD")
+        .get("/api/learningObject/teacher/search?q=VOORBEELD")
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       // results should be the same
@@ -124,7 +124,7 @@ describe("learning object tests", { timeout: 15000 }, async () => {
 
     it("shouldn't let a student access this route", async () => {
       const { status, body } = await request(app)
-        .get("/learningObject/teacher/search?q=voorbeeld")
+        .get("/api/learningObject/teacher/search?q=voorbeeld")
         .set("Authorization", `Bearer ${studentUser1.token}`);
 
       expect(status).toBe(401);
@@ -136,7 +136,7 @@ describe("learning object tests", { timeout: 15000 }, async () => {
     it("should return the local learning object with the given hruid, language and version", async () => {
       const { status, body } = await request(app)
         .get(
-          `/learningObject/teacher/lookup/${lo.hruid}/${lo.language}/${lo.version}`,
+          `/api/learningObject/teacher/lookup/${lo.hruid}/${lo.language}/${lo.version}`,
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
@@ -149,13 +149,13 @@ describe("learning object tests", { timeout: 15000 }, async () => {
     it("should return the dwengo learning object with the given hruid, language and version", async () => {
       // get an existing dwengo learning object
       const res1 = await request(app)
-        .get("/learningObject/teacher")
+        .get("/api/learningObject/teacher")
         .set("Authorization", `Bearer ${teacherUser1.token}`);
       const dwengo_lo: LearningObject = res1.body[0]; // get first dwengo learning object
 
       const { status, body } = await request(app)
         .get(
-          `/learningObject/teacher/lookup/${dwengo_lo.hruid}/${dwengo_lo.language}/${dwengo_lo.version}`,
+          `/api/learningObject/teacher/lookup/${dwengo_lo.hruid}/${dwengo_lo.language}/${dwengo_lo.version}`,
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
@@ -168,7 +168,7 @@ describe("learning object tests", { timeout: 15000 }, async () => {
     it("should return 404 if the learning object doesn't exist", async () => {
       const { status, body } = await request(app)
         .get(
-          `/learningObject/teacher/lookup/invalidhruid/invalidlang/112423904`, // non-existing hruid, language and version
+          `/api/learningObject/teacher/lookup/invalidhruid/invalidlang/112423904`, // non-existing hruid, language and version
         )
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
@@ -179,7 +179,7 @@ describe("learning object tests", { timeout: 15000 }, async () => {
     it("shouldn't let a student access this route", async () => {
       const { status, body } = await request(app)
         .get(
-          `/learningObject/teacher/lookup/${lo.hruid}/${lo.language}/${lo.version}`,
+          `/api/learningObject/teacher/lookup/${lo.hruid}/${lo.language}/${lo.version}`,
         )
         .set("Authorization", `Bearer ${studentUser1.token}`);
 
@@ -194,7 +194,7 @@ describe("learning object tests", { timeout: 15000 }, async () => {
     // if this is fixed in the future, this test case should be added
     it("should return the local learning object with the given id", async () => {
       const { status, body } = await request(app)
-        .get(`/learningObject/${lo.id}`)
+        .get(`/api/learningObject/${lo.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
@@ -203,7 +203,7 @@ describe("learning object tests", { timeout: 15000 }, async () => {
 
     it("shouldn't let an unauthorized user use this route", async () => {
       const { status, body } = await request(app).get(
-        `/learningObject/${lo.id}`,
+        `/api/learningObject/${lo.id}`,
       ); // don't add auth header
 
       expect(status).toBe(401);
@@ -216,13 +216,13 @@ describe("learning object tests", { timeout: 15000 }, async () => {
     beforeEach(async () => {
       // get a dwengo learning path
       const res = await request(app)
-        .get("/learningPath?all=")
+        .get("/api/learningPath?all=")
         .set("Authorization", `Bearer ${teacherUser1.token}`);
       lp = res.body[0]; // get first dwengo learning path
     }, 20_000);
     it("should return all learning objects that belong to the given learning path", async () => {
       const { status, body } = await request(app)
-        .get(`/learningObject/learningPath/${lp._id}`)
+        .get(`/api/learningObject/learningPath/${lp._id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);

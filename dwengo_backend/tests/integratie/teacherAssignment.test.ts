@@ -108,7 +108,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
     it("should respond with a `201` status code and the newly created assignment", async (): Promise<void> => {
       // class3 has no assignments
       const { status, body } = await request(app)
-        .post("/assignment/teacher")
+        .post("/api/assignment/teacher")
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
@@ -129,7 +129,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
     it("should respond with a `401` status code because a student is not allowed to perform this action", async (): Promise<void> => {
       // class3 has no assignments
       const { status, body } = await request(app)
-        .post("/assignment/teacher")
+        .post("/api/assignment/teacher")
         .set("Authorization", `Bearer ${student.token}`)
         .send({
           classId: class3.id,
@@ -147,7 +147,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
     it("should respond with a `403` status code because the teacher is not a member of the class", async (): Promise<void> => {
       // class3 has no assignments
       const { status, body } = await request(app)
-        .post("/assignment/teacher")
+        .post("/api/assignment/teacher")
         .set("Authorization", `Bearer ${teacher2.token}`)
         .send({
           classId: class3.id,
@@ -165,7 +165,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
     it("should respond with a `400` status code because there is no language given", async (): Promise<void> => {
       // class3 has no assignments
       const { status, body } = await request(app)
-        .post("/assignment/teacher")
+        .post("/api/assignment/teacher")
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
@@ -186,7 +186,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
     it("should respond with a `400` status code because there is no pathRef given", async (): Promise<void> => {
       // class3 has no assignments
       const { status, body } = await request(app)
-        .post("/assignment/teacher")
+        .post("/api/assignment/teacher")
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
@@ -207,7 +207,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
     it("should respond with a `400` status code because there is no localId given", async (): Promise<void> => {
       // class3 has no assignments
       const { status, body } = await request(app)
-        .post("/assignment/teacher")
+        .post("/api/assignment/teacher")
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
@@ -227,7 +227,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
     it("should respond with a `404` status code because there is no existing localId given", async (): Promise<void> => {
       // class3 has no assignments
       const { status, body } = await request(app)
-        .post("/assignment/teacher")
+        .post("/api/assignment/teacher")
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
@@ -247,7 +247,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
   describe("[GET] /assignment/teacher/class/:classId", async (): Promise<void> => {
     it("should respond with a `200` status code and a list of assignments for that class", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(`/assignment/teacher/class/${class1.id}`)
+        .get(`/api/assignment/teacher/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher1.token}`);
 
       expect(status).toBe(200);
@@ -262,11 +262,11 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
 
     it("should respond with the same assignments for teachers that are members of the same class", async (): Promise<void> => {
       const req = await request(app)
-        .get(`/assignment/teacher/class/${class1.id}`)
+        .get(`/api/assignment/teacher/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher1.token}`);
 
       const req2 = await request(app)
-        .get(`/assignment/teacher/class/${class1.id}`)
+        .get(`/api/assignment/teacher/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`);
 
       expect(req.status).toBe(200);
@@ -280,7 +280,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
 
     it("should respond with an error because the teacher is not part of the class", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(`/assignment/teacher/class/${class1.id}`)
+        .get(`/api/assignment/teacher/class/${class1.id}`)
         .set("Authorization", `Bearer ${teacher3.token}`);
       expect(status).toBe(403);
       expect(body.error).toBe("AccessDeniedError");
@@ -292,7 +292,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
     it("should respond with a `201` status code and the updated assignment", async (): Promise<void> => {
       // First create assignment for class3
       const { status, body } = await request(app)
-        .post(`/assignment/teacher`)
+        .post(`/api/assignment/teacher`)
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
@@ -308,7 +308,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
       const assignmentId: number = body.assignment.id;
 
       const req = await request(app)
-        .patch(`/assignment/teacher/${assignmentId}`)
+        .patch(`/api/assignment/teacher/${assignmentId}`)
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           pathRef: lp2.id,
@@ -331,7 +331,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
         "david@gmail.com",
       );
       const { status, body } = await request(app)
-        .patch(`/assignment/teacher/${assignment1.id}`)
+        .patch(`/api/assignment/teacher/${assignment1.id}`)
         .set("Authorization", `Bearer ${newTeacher.token}`)
         .send({
           learningPathId: lp2.id,
@@ -345,7 +345,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
     it("should respond with a `404` status code because the teacher is not a member of the class", async (): Promise<void> => {
       // First create assignment for class3
       await request(app)
-        .post("/assignment/teacher")
+        .post("/api/assignment/teacher")
         .set("Authorization", `Bearer ${teacher1.token}`)
         .send({
           classId: class3.id,
@@ -354,7 +354,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
         });
 
       const { status, body } = await request(app)
-        .patch(`/assignment/teacher/${assignment1.id}`)
+        .patch(`/api/assignment/teacher/${assignment1.id}`)
         .set("Authorization", `Bearer ${teacher3.token}`)
         .send({
           learningPathId: lp2.id,
@@ -370,7 +370,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
     it("should respond with a `400` status code because there is no language given", async (): Promise<void> => {
       // class3 has no assignments
       const { status, body } = await request(app)
-        .patch(`/assignment/teacher/${assignment1.id}`)
+        .patch(`/api/assignment/teacher/${assignment1.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`)
         .send({
           classId: class3.id,
@@ -391,7 +391,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
     it("should respond with a `400` status code because there is no pathRef given", async (): Promise<void> => {
       // class3 has no assignments
       const { status, body } = await request(app)
-        .patch(`/assignment/teacher/${assignment1.id}`)
+        .patch(`/api/assignment/teacher/${assignment1.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`)
         .send({
           classId: class3.id,
@@ -413,7 +413,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
     it("should respond with a `400` status code because there is no localId given", async (): Promise<void> => {
       // class3 has no assignments
       const { status, body } = await request(app)
-        .patch(`/assignment/teacher/${assignment1.id}`)
+        .patch(`/api/assignment/teacher/${assignment1.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`)
         .send({
           classId: class3.id,
@@ -433,7 +433,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
     it("should respond with a `404` status code because there is no existing localId given", async (): Promise<void> => {
       // class3 has no assignments
       const { status, body } = await request(app)
-        .patch(`/assignment/teacher/${assignment1.id}`)
+        .patch(`/api/assignment/teacher/${assignment1.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`)
         .send({
           classId: class3.id,
@@ -453,7 +453,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
   describe("[DELETE] /assignment/teacher/:assignmentId", async (): Promise<void> => {
     it("should respond with a `204` status code and delete the assignment", async (): Promise<void> => {
       const { status } = await request(app)
-        .delete(`/assignment/teacher/${assignment3.id}`)
+        .delete(`/api/assignment/teacher/${assignment3.id}`)
         .set("Authorization", `Bearer ${teacher2.token}`);
       expect(status).toBe(204);
 
@@ -466,7 +466,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
 
     it("should respond with a `404` status code because the teacher is not a member of the class", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .delete(`/assignment/teacher/${assignment1.id}`)
+        .delete(`/api/assignment/teacher/${assignment1.id}`)
         .set("Authorization", `Bearer ${teacher3.token}`);
 
       expect(status).toBe(404);
@@ -479,7 +479,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
     it("should respond with a `401` status code because a student is not allowed to perform this action", async (): Promise<void> => {
       // class3 has no assignments
       const { status, body } = await request(app)
-        .delete(`/assignment/teacher/${assignment1.id}`)
+        .delete(`/api/assignment/teacher/${assignment1.id}`)
         .set("Authorization", `Bearer ${student.token}`)
         .send({
           classId: class3.id,
@@ -498,7 +498,7 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
   describe("[GET] /assignment/teacher", async (): Promise<void> => {
     it("should respond with a `200` status code and return all the assignments of the teacher", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(`/assignment/teacher`)
+        .get(`/api/assignment/teacher`)
         .set("Authorization", `Bearer ${teacher1.token}`);
 
       expect(status).toBe(200);

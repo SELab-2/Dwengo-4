@@ -1,26 +1,65 @@
-import { ContentType, LearningObject } from "@prisma/client";
+import {
+  ContentType as PrismaContentType,
+  LearningObject,
+  LearningPathNode,
+} from "@prisma/client";
 
 import prisma from "../config/prisma";
 import {
   handlePrismaQuery,
   handleQueryWithExistenceCheck,
 } from "../errors/errorFunctions";
+import localLearningPathService from "./localLearningPathService";
 
 export interface LocalLearningObjectData {
   // De data die een teacher kan opgeven bij het aanmaken of updaten
   title: string;
   description: string;
-  contentType: ContentType; // bv. "text/markdown", "interactive/quiz", ...
-  keywords?: Array<string>; // komma-gescheiden of JSON
-  targetAges?: Array<number>; // idem
+  contentType: string; // Raw string from request
+  keywords?: (string | null)[];
+  targetAges?: (number | null)[];
   teacherExclusive?: boolean;
-  skosConcepts?: Array<string>;
+  skosConcepts?: (string | null)[];
   copyright?: string;
   licence?: string;
   difficulty?: number;
   estimatedTime?: number;
   available?: boolean;
   contentLocation?: string;
+  rawHtml: string; // nieuw veld
+}
+
+// Mapping van raw string naar Prisma enum
+const contentTypeMap: Record<string, PrismaContentType> = {
+  "text/plain": PrismaContentType.TEXT_PLAIN,
+  "text/markdown": PrismaContentType.TEXT_MARKDOWN,
+  "image/image-block": PrismaContentType.IMAGE_IMAGE_BLOCK,
+  "image/image": PrismaContentType.IMAGE_IMAGE,
+  "audio/mpeg": PrismaContentType.AUDIO_MPEG,
+  "application/pdf": PrismaContentType.APPLICATION_PDF,
+  extern: PrismaContentType.EXTERN,
+  blockly: PrismaContentType.BLOCKLY,
+  video: PrismaContentType.VIDEO,
+  EVAL_MULTIPLE_CHOICE: PrismaContentType.EVAL_MULTIPLE_CHOICE,
+  EVAL_OPEN_QUESTION: PrismaContentType.EVAL_OPEN_QUESTION,
+};
+
+function parseContentType(raw: string): PrismaContentType {
+  const ct = contentTypeMap[raw];
+  if (!ct) {
+    throw new Error(`Invalid contentType "${raw}"`);
+  }
+  return ct;
+}
+
+function sanitizeStringArray(arr?: (string | null)[]): string[] {
+  return (
+    arr?.filter((s): s is string => typeof s === "string" && s.trim() !== "") ?? []
+  );
+}
+
+function sanitizeNumberArray(arr?: (number | null)[]): number[] {
+  return arr?.filter((n): n is number => typeof n === "number") ?? [];
 }
 
 export default class LocalLearningObjectService {
@@ -32,19 +71,19 @@ export default class LocalLearningObjectService {
     teacherId: number,
     data: LocalLearningObjectData,
   ): Promise<LearningObject> {
-    // Prisma create
-    return await handlePrismaQuery(() =>
+    // Prisma create (generic toegevoegd voor correcte typing)
+    const createdLO = await handlePrismaQuery<LearningObject>(() =>
       prisma.learningObject.create({
         data: {
-          hruid: `${data.title.toLowerCase()}-${Date.now()}`,
-          language: "nl", // Kan ook dynamisch
+          hruid: `${data.title.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
+          language: "nl",
           title: data.title,
           description: data.description,
-          contentType: data.contentType,
-          keywords: data.keywords ?? [],
-          targetAges: data.targetAges ?? [],
+          contentType: parseContentType(data.contentType),
+          keywords: sanitizeStringArray(data.keywords),
+          targetAges: sanitizeNumberArray(data.targetAges),
           teacherExclusive: data.teacherExclusive ?? false,
-          skosConcepts: data.skosConcepts ?? [],
+          skosConcepts: sanitizeStringArray(data.skosConcepts),
           copyright: data.copyright ?? "",
           licence: data.licence ?? "CC BY Dwengo",
           difficulty: data.difficulty ?? 1,
@@ -55,6 +94,20 @@ export default class LocalLearningObjectService {
         },
       }),
     );
+
+    // Added: sla de rawHtml op in LearningObjectRawHtml
+    if (data.rawHtml !== undefined) {
+      await handlePrismaQuery(() =>
+        prisma.learningObjectRawHtml.create({
+          data: {
+            learningObjectId: createdLO.id,
+            rawHtml: data.rawHtml,
+          },
+        }),
+      );
+    }
+
+    return createdLO;
   }
 
   /**
@@ -64,7 +117,7 @@ export default class LocalLearningObjectService {
   static async getAllLearningObjectsByTeacher(
     teacherId: number,
   ): Promise<LearningObject[]> {
-    return await handlePrismaQuery(() =>
+    return await handlePrismaQuery<LearningObject[]>(() =>
       prisma.learningObject.findMany({
         where: { creatorId: teacherId },
         orderBy: { createdAt: "desc" },
@@ -77,13 +130,27 @@ export default class LocalLearningObjectService {
    * wel de creator is, als je dat in de controller wilt enforce'n.
    */
   static async getLearningObjectById(id: string): Promise<LearningObject> {
-    return await handleQueryWithExistenceCheck(
+    return await handleQueryWithExistenceCheck<LearningObject>(
       () =>
         prisma.learningObject.findUnique({
-          where: { id },
+          where: { id: id || "" },
         }),
       "Learning object not found.",
     );
+  }
+
+  /**
+   * Haalt de rawHtml op voor een leerobject.
+   */
+  static async getRawHtmlById(id: string): Promise<string | null> {
+    // Added: nieuwe methode
+    const record = await handlePrismaQuery<{ rawHtml: string } | null>(() =>
+      prisma.learningObjectRawHtml.findUnique({
+        where: { learningObjectId: id },
+        select: { rawHtml: true },
+      }),
+    );
+    return record ? record.rawHtml : null;
   }
 
   /**
@@ -94,8 +161,8 @@ export default class LocalLearningObjectService {
     id: string,
     data: Partial<LocalLearningObjectData>,
   ): Promise<LearningObject> {
-    // Prisma update
-    return handlePrismaQuery(() =>
+    // Prisma update (generic toegevoegd voor correcte typing)
+    const updatedLO = await handlePrismaQuery<LearningObject>(() =>
       prisma.learningObject.update({
         where: { id },
         data: {
@@ -103,11 +170,17 @@ export default class LocalLearningObjectService {
 
           title: data.title,
           description: data.description,
-          contentType: data.contentType,
-          keywords: data.keywords,
-          targetAges: data.targetAges,
+          contentType: data.contentType
+            ? parseContentType(data.contentType)
+            : undefined,
+          keywords: data.keywords ? sanitizeStringArray(data.keywords) : undefined,
+          targetAges: data.targetAges
+            ? sanitizeNumberArray(data.targetAges)
+            : undefined,
           teacherExclusive: data.teacherExclusive,
-          skosConcepts: data.skosConcepts,
+          skosConcepts: data.skosConcepts
+            ? sanitizeStringArray(data.skosConcepts)
+            : undefined,
           copyright: data.copyright,
           licence: data.licence,
           difficulty: data.difficulty,
@@ -117,13 +190,91 @@ export default class LocalLearningObjectService {
         },
       }),
     );
+
+    // Added: upsert rawHtml in LearningObjectRawHtml
+    if (data.rawHtml !== undefined) {
+      await handlePrismaQuery(() =>
+        prisma.learningObjectRawHtml.upsert({
+          where: { learningObjectId: updatedLO.id },
+          create: {
+            learningObjectId: updatedLO.id,
+            rawHtml: data.rawHtml || "",
+          },
+          update: {
+            rawHtml: data.rawHtml,
+          },
+        }),
+      );
+    }
+
+    return updatedLO;
   }
 
   /**
    * Verwijdert een leerobject op basis van zijn id.
    */
   static async deleteLearningObject(id: string): Promise<LearningObject> {
-    return handlePrismaQuery(() =>
+    // check if part of a learning path, if so delete corresponding nodes
+    const learningPathNodes = await handlePrismaQuery(() =>
+      prisma.learningPathNode.findMany({
+        where: { localLearningObjectId: id },
+      }),
+    );
+
+    if (learningPathNodes.length > 0) {
+      const groupedNodes = learningPathNodes.reduce<
+        Record<string, LearningPathNode[]>
+      >((acc, node) => {
+        if (!node.learningPathId) return acc; // skip nodes without a learningPathId
+        if (!acc[node.learningPathId]) {
+          acc[node.learningPathId] = [];
+        }
+        acc[node.learningPathId].push(node);
+        return acc;
+      }, {});
+
+      for (const learningPathId of Object.keys(groupedNodes)) {
+        const path = await handlePrismaQuery(() =>
+          prisma.learningPath.findUnique({
+            where: { id: learningPathId },
+            include: {
+              nodes: {
+                orderBy: { position: "asc" },
+              },
+            },
+          }),
+        );
+
+        if (path) {
+          await localLearningPathService.updateLearningPath(learningPathId, {
+            title: path.title,
+            language: path.language,
+            nodes: path.nodes
+              .filter(
+                (node) =>
+                  !groupedNodes[learningPathId].some(
+                    (groupedNode) => groupedNode.nodeId === node.nodeId,
+                  ),
+              )
+              .map((node) => ({
+                ...node,
+                localLearningObjectId:
+                  node.localLearningObjectId === null
+                    ? undefined
+                    : node.localLearningObjectId,
+                dwengoHruid:
+                  node.dwengoHruid === null ? undefined : node.dwengoHruid,
+                dwengoLanguage:
+                  node.dwengoLanguage === null ? undefined : node.dwengoLanguage,
+                dwengoVersion:
+                  node.dwengoVersion === null ? undefined : node.dwengoVersion,
+              })),
+          });
+        }
+      }
+    }
+
+    return handlePrismaQuery<LearningObject>(() =>
       prisma.learningObject.delete({
         where: { id },
       }),

@@ -10,6 +10,17 @@ import ManageSection from '../../components/teacher/classes/ManageSection';
 import { fetchAssignments } from '@/util/teacher/assignment';
 import { fetchClass, updateClass } from '@/util/teacher/class';
 import { ClassItem } from '@/types/type';
+import Container from '../../components/shared/Container';
+import BoxBorder from '../../components/shared/BoxBorder';
+import InputWithChecks from '../../components/shared/InputWithChecks';
+import PrimaryButton from '../../components/shared/PrimaryButton';
+import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButton';
+import { validateForm, validateMaxLength, validateRequired } from '@/util/shared/validation';
+import { ClassItem } from '@/types/type';
+import { fetchAssignments } from '@/util/teacher/assignment';
+import { fetchClass, updateClass } from '@/util/teacher/class';
+import { fetchQuestionsByClass } from '@/util/teacher/questions';
+import { t } from 'i18next';
 
 interface InputWithChecksRef {
   validateInput: () => boolean;
@@ -20,6 +31,8 @@ const EditClassTeacher: React.FC = () => {
   const { classId } = useParams<{ classId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [className, setClassName] = useState<string>('');
+  const [filteredAssignments, setFilteredAssignments] = useState([]);
 
   const [className, setClassName] = useState('');
   const [filteredAssignments, setFilteredAssignments] = useState<any[]>([]);
@@ -52,7 +65,12 @@ const EditClassTeacher: React.FC = () => {
     queryFn: () => fetchClass({ classId: Number(classId!) }),
   });
 
-  // mutation
+  const { data: questions } = useQuery({
+    queryKey: ['questions', classId],
+    queryFn: async () => fetchQuestionsByClass(classId),
+  });
+
+  // Update class name mutation
   const { mutate, isPending } = useMutation({
     mutationFn: (newName: string) => updateClass({ classId: Number(classId), name: newName }),
     onSuccess: () => {
@@ -111,6 +129,44 @@ const EditClassTeacher: React.FC = () => {
     } catch (err) {
       console.error(err);
     }
+  // Function to handle sidebar navigation
+  const handleSectionChange = (section: SidebarSection) => {
+    setActiveSection(section);
+  };
+
+  // Add this function to your EditClassTeacher component
+  const SidebarButton: React.FC<{
+    section: SidebarSection;
+    label: string;
+    activeSection: SidebarSection;
+    onClick: (section: SidebarSection) => void;
+  }> = ({ section, label, activeSection, onClick }) => {
+    const isActive = section === activeSection;
+
+    return (
+      <button
+        onClick={() => onClick(section)}
+        className={`px-7 h-10 font-bold rounded-md ${isActive
+          ? 'bg-dwengo-green-darker pt-1 text-white border-gray-600 border-3'
+          : 'pt-1.5 bg-dwengo-green hover:bg-dwengo-green-dark text-white '
+          }`}
+      >
+        {label}
+      </button>
+    );
+  };
+
+
+  // Then replace the renderSidebarItem function with:
+  const renderSidebarItem = (section: SidebarSection, label: string) => {
+    return (
+      <SidebarButton
+        section={section}
+        label={label}
+        activeSection={activeSection}
+        onClick={handleSectionChange}
+      />
+    );
   };
 
   const renderContent = () => {
@@ -141,7 +197,56 @@ const EditClassTeacher: React.FC = () => {
           />
         );
       case 'questions':
-        return <QuestionsSection />;
+        return (
+          <Container>
+            <BoxBorder extraClasses="mxw-700 m-a g-20">
+              <h2>Vragen</h2>
+              <p>Hier komen de vragen van leerlingen.</p>
+              {questions.map((question) => (
+                <div
+                  key={question.id}
+                  className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300`}
+                >
+                  <div className="p-5">
+                    <div className="flex flex-row justify-between w-full">
+                      <h2 className="text-2xl font-semibold mb-2 ">
+                        {question.title}
+                      </h2>
+                      <div className="text-sm text-red-500">
+                        {new Date(question.createdAt).toLocaleString('nl-BE', {
+                          dateStyle: 'medium',
+                          timeStyle: 'short',
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-row w-full justify-between">
+                    <div className="bg-gray-50 pl-3 pb-3">
+                      <Link
+                        to={`/teacher/question/${question.id}`}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
+                        <PrimaryButton>
+                          {t('questions.view_button')}
+                        </PrimaryButton>
+                      </Link>
+                    </div>
+                    <p className="text-gray-600 mr-2 translate-y-3">
+                      {t('questions.asked_by')}{' '}
+                      <span className="text-dwengo-green font-bold">
+                        {question.creatorName}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              ))}
+              {/* Placeholder for a question list */}
+              <div className="bg-gray-100 p-4 rounded mt-4">
+                <p className="text-gray-500">Nog geen vragen beschikbaar.</p>
+              </div>
+            </BoxBorder>
+          </Container>
+        );
       case 'manage':
         return <ManageSection className={className} classId={classId!} />;
       default:

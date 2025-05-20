@@ -13,10 +13,10 @@
         (prisma-utils.lib.prisma-factory {
           inherit pkgs;
           # just copy these hashes for now, and then change them when nix complains about the mismatch
-          prisma-fmt-hash = "sha256-ggfTlnrRle8HorCCPHa23OO3YBQE1A3yPPAvkq4Ki8M="; 
-          query-engine-hash = "sha256-VuFWwhnNXlAPDrVM+BD9vj2tJdrSVLBofFLph5LBaR4=";
-          libquery-engine-hash = "sha256-PeZ1cfNzzlVGy8y6mqpeXWj7KCPQmaW+5EzsVcX+XG0=";
-          schema-engine-hash = "sha256-58Dw7bZGxQ9jeWU6yeBl+BZQagke1079cIAHvYL01Cg=";
+          prisma-fmt-hash = "sha256-aBRInT5la9jpDicaOWoOeFXhpobZ/7eX2+XjpwGq4jg="; 
+          query-engine-hash = "sha256-WYDR5B4+bTYGQcnCXt/G1yOKnkK5EvW1g5ssE31IdBc=";
+          libquery-engine-hash = "sha256-EynSJBeJgsz8ybap+6oKgaHQQfD7rQaZYf3FopvvsPY=";
+          schema-engine-hash = "sha256-wr0qnOOoi31PVIL6Ql/Qd+K0/MR1+loZ2kYOZjhqy1Y=";
         }).fromNpmLock
           ./dwengo_backend/package-lock.json; # <--- path to our package-lock.json file that contains the version of prisma-engines
     in

@@ -122,9 +122,42 @@ const ClassesPageTeacher: React.FC = () => {
                       {classItem.code}
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {classes.map((classItem) => (
+                    <tr key={classItem.id}>
+                      <td className="text-center">
+                        <Link to={`/teacher/classes/${classItem.id}`}>
+                          <PrimaryButton>Beheer</PrimaryButton>
+                        </Link>
+                      </td>
+                      <td className="text-center">
+                        <div className="max-w-[200px] truncate" title={classItem.name}>
+                          {classItem.name}
+                        </div>
+                      </td>
+                      <td className="text-center">{classItem.code}</td>
+                      <td className='text-center'>
+                        <PrimaryButton
+                          onClick={() => handleManageTeacherInvites(classItem.id)}
+                        >
+                          <span className="f-s">Beheer</span>
+                        </PrimaryButton>
+                      </td>
+                      <td className='text-center'>
+                        <PrimaryButton
+                          onClick={() =>
+                            handleManageStudentJoinRequests(classItem.id)
+                          }
+                        >
+                          <span className="f-s">Beheer</span>
+                        </PrimaryButton>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : (
           !isClassesLoading && <p>Geen klassen gevonden.</p>

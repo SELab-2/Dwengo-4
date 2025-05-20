@@ -185,7 +185,7 @@ model LearningPath {
 model LearningPathNode {
   nodeId         String       @id @default(uuid())
   learningPathId String
-  learningPath   LearningPath @relation(fields: [learningPathId], references: [id])
+  learningPath   LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
 
   // explitly track ordering of nodes in the learning path (should correspond with default transition order)
   position Int
@@ -238,6 +238,9 @@ enum ContentType {
   IMAGE_IMAGE
   AUDIO_MPEG
   // Eigen toevoegingen
+  APPLICATION_PDF
+  EXTERN
+  BLOCKLY
   VIDEO
   EVAL_MULTIPLE_CHOICE
   EVAL_OPEN_QUESTION
@@ -279,6 +282,18 @@ model LearningObject {
   returnValue      ReturnValue?
   progress         LearningObjectProgress[]
   // QuestionSpecifics QuestionSpecific[]
+
+  LearningObjectRawHtml LearningObjectRawHtml?
+}
+
+model LearningObjectRawHtml {
+  id               Int      @id @default(autoincrement())
+  learningObjectId String   @unique
+  rawHtml          String // hier komt de HTML-inhoud
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  learningObject LearningObject @relation(fields: [learningObjectId], references: [id], onDelete: Cascade)
 }
 
 model EducationalGoal {
@@ -356,7 +371,7 @@ model QuestionSpecific {
 
   isExternal Boolean @default(false)
 
-  question Question @relation(fields: [questionId], references: [id])
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@id([questionId])
 }
@@ -367,7 +382,7 @@ model QuestionGeneral {
   isExternal Boolean @default(false)
 
   // Een QuestionSpecific is een vraag
-  question Question @relation(fields: [questionId], references: [id])
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@id([questionId])
 }
@@ -392,7 +407,7 @@ model Question {
   general  QuestionGeneral?
 
   assignment           Assignment        @relation(fields: [assignmentId], references: [id])
-  team                 Team              @relation(fields: [teamId], references: [id])
+  team                 Team              @relation(fields: [teamId], references: [id], onDelete: Cascade)
   questionConversation QuestionMessage[]
 }
 

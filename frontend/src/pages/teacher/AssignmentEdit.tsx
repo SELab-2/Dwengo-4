@@ -29,7 +29,6 @@ const AddAssignment: React.FC = () => {
     queryFn: () => fetchAssignment(assignmentId!, true, true),
     enabled: !!assignmentId,
   });
-  console.log('Assignment Data:', assignmentData);
 
   /**
    * Query hook to fetch all available classes

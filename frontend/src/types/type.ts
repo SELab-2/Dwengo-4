@@ -56,12 +56,14 @@ interface LearningObject {
   copyright: string;
   licence: string;
   difficulty: number;
+  estimatedTime: number;
   available: boolean;
   contentLocation?: string;
   creatorId?: number; // for local objects
   createdAt: Date;
   updatedAt: Date;
   origin: string; // 'local' or 'dwengo'
+  raw?: string; // for dwengo objects
 }
 
 type LearningPathNodeWithObject = LearningPathNode & {

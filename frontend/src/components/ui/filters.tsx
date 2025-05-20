@@ -99,8 +99,6 @@ export enum FilterType {
 }
 
 export enum FilterOperator {
-  IS = "is",
-  IS_NOT = "is not",
   IS_ANY_OF = "is any of",
   INCLUDE = "include",
   DO_NOT_INCLUDE = "do not include",
@@ -294,11 +292,7 @@ const filterOperators = ({
   switch (filterType) {
     case FilterType.CREATOR:
     case FilterType.PRIORITY:
-      if (Array.isArray(filterValues) && filterValues.length > 1) {
-        return [FilterOperator.IS_ANY_OF, FilterOperator.IS_NOT];
-      } else {
-        return [FilterOperator.IS, FilterOperator.IS_NOT];
-      }
+      return [FilterOperator.IS_ANY_OF]
     case FilterType.LABELS:
       if (Array.isArray(filterValues) && filterValues.length > 1) {
         return [
@@ -337,9 +331,6 @@ const FilterOperatorDropdown = ({
   const operators = filterOperators({ filterType, filterValues });
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="bg-muted hover:bg-muted/50 px-1.5 py-1 text-muted-foreground hover:text-primary transition shrink-0">
-        {operator}
-      </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-fit min-w-fit">
         {operators.map((operator) => (
           <DropdownMenuItem
