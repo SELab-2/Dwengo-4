@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import PrimaryButton from '../../components/shared/PrimaryButton';
 import { AssignmentItem } from '@/types/api.types';
 import { fetchAssignments } from '@/util/student/assignment';
+import { useTranslation } from 'react-i18next';
 
 const AssignmentsStudent: React.FC = () => {
   /**
@@ -18,12 +19,15 @@ const AssignmentsStudent: React.FC = () => {
     queryKey: ['assignments'],
     queryFn: fetchAssignments,
   });
+  const { t } = useTranslation();
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">My Assignments</h1>
+      <h1 className="text-3xl font-bold mb-6">
+        {t('assignments.my_assignments')}
+      </h1>
 
-      {isLoading && <p className="text-gray-600">Loading assignments...</p>}
+      {isLoading && <p className="text-gray-600">{t('loading.loading')}</p>}
 
       {isError && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -33,7 +37,7 @@ const AssignmentsStudent: React.FC = () => {
 
       {assignments && assignments.length === 0 && (
         <div className="bg-blue-50 p-4 rounded-md">
-          <p className="text-blue-800">You don't have any assignments yet.</p>
+          <p className="text-blue-800">{t('assignments.not_yet')}</p>
         </div>
       )}
 
@@ -63,7 +67,9 @@ const AssignmentsStudent: React.FC = () => {
                   to={`/student/assignment/${assignment.id}`}
                   className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                 >
-                  <PrimaryButton>View Learning Path</PrimaryButton>
+                  <PrimaryButton>
+                    {t('assignments.view_assignment')}
+                  </PrimaryButton>
                 </Link>
               </div>
             </div>

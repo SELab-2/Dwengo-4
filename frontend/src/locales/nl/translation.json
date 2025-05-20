@@ -65,8 +65,11 @@
     "error": "Er is iets fout gelopen tijdens het ophalen van de opdrachten",
     "view": "Opdracht bekijken",
     "not_found": "Geen opdrachten gevonden",
+    "not_yet": "Nog geen opdrachten toegewezen",
     "view_assignment": "Bekijk opdracht",
-    "my_assignments": "Mijn opdrachten"
+    "my_assignments": "Mijn opdrachten",
+    "deadline": "Deadline",
+    "no_team": "Geen groep toegewezen"
   },
   "assignment": {
     "title": "Opdracht",

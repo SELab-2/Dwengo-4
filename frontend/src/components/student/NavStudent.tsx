@@ -13,7 +13,7 @@ const Navstudent: React.FC = () => {
 
   // mobile menu toggle
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
-  const toggleMenu = () => setMenuOpen(prev => !prev);
+  const toggleMenu = () => setMenuOpen((prev) => !prev);
 
   // lokale state voor firstName én role
   const [firstName, setFirstName] = useState<string | null>(null);
@@ -36,7 +36,7 @@ const Navstudent: React.FC = () => {
   const routes = [
     { to: '/student', label: t('nav.home') },
     { to: '/student/klassen', label: t('nav.classes') },
-    { to: '/student/assignments', label: 'Assignments' },
+    { to: '/student/assignments', label: t('nav.assignments') },
     { to: '/student/learning-paths', label: t('nav.learning_paths') },
   ];
 
@@ -65,7 +65,10 @@ const Navstudent: React.FC = () => {
                 }`}
               >
                 <NavButton to="/student/inloggen" label={t('nav.login')} />
-                <NavButton to="/student/registreren" label={t('nav.register')} />
+                <NavButton
+                  to="/student/registreren"
+                  label={t('nav.register')}
+                />
               </div>
             )}
           </div>
@@ -78,9 +81,17 @@ const Navstudent: React.FC = () => {
                 aria-label="Notifications"
               >
                 {/* bell-icon */}
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none"
-                  viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 
                        0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 
                        10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 
@@ -94,9 +105,17 @@ const Navstudent: React.FC = () => {
                 aria-label="Settings"
               >
                 {/* settings-icon */}
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none"
-                  viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
                     d="M10.325 4.317c.426-1.756 2.924-1.756 
                        3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 
                        3.31.826 2.37 2.37a1.724 1.724 0 001.065 
@@ -110,7 +129,10 @@ const Navstudent: React.FC = () => {
                        1.724 0 001.066-2.573c-.94-1.543.826-
                        3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
                   />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
@@ -121,9 +143,17 @@ const Navstudent: React.FC = () => {
                 aria-label="Logout"
               >
                 {/* logout-icon */}
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none"
-                  viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
                     d="M11 16l-4-4m0 0l4-4m-4 
                        4h14m-5 4v1a3 3 0 01-3 
                        3H6a3 3 0 01-3-3V7a3 
