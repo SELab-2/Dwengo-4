@@ -26,7 +26,7 @@ describe("learning object tests", { timeout: 15000 }, async () => {
     const data: LocalLearningObjectData = {
       title: "Mijn lokaal leerobject",
       description: "Korte beschrijving",
-      contentType: "TEXT_MARKDOWN",
+      contentType: "TEXT_PLAIN",
       teacherExclusive: false,
       keywords: ["nieuw", "test"],
     };
@@ -90,7 +90,7 @@ describe("learning object tests", { timeout: 15000 }, async () => {
       const data: LocalLearningObjectData = {
         title: "test lokaal leerobject",
         description: "VooRBeelD", // search term with mixed upper and lowercase
-        contentType: "TEXT_MARKDOWN",
+        contentType: "TEXT_PLAIN",
         teacherExclusive: false,
         keywords: ["nieuw", "voorbeeld"],
       };
@@ -222,7 +222,7 @@ describe("learning object tests", { timeout: 15000 }, async () => {
     }, 20_000);
     it("should return all learning objects that belong to the given learning path", async () => {
       const { status, body } = await request(app)
-        .get(`/api/learningObject/learningPath/${lp._id}`)
+        .get(`/api/learningObject/learningPath/${lp.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);

@@ -20,7 +20,7 @@ describe("local learning object tests", async () => {
   const data: LocalLearningObjectData = {
     title: "Mijn lokaal leerobject",
     description: "Korte beschrijving",
-    contentType: "TEXT_MARKDOWN",
+    contentType: "TEXT_PLAIN",
     teacherExclusive: false,
     keywords: ["nieuw", "voorbeeld"],
   };
@@ -79,6 +79,7 @@ describe("local learning object tests", async () => {
 
   describe("[POST] /learningObjectByTeacher", async () => {
     it("should create a new learning object", async () => {
+      data.contentType = "text/plain";
       const { status, body } = await request(app)
         .post("/api/learningObjectByTeacher")
         .set("Authorization", `Bearer ${teacherUser1.token}`)
@@ -87,6 +88,7 @@ describe("local learning object tests", async () => {
       expect(status).toBe(201);
       expect(body.learningObject).toBeDefined();
       expect(body.learningObject.creatorId).toBe(teacherUser1.id);
+      data.contentType = "TEXT_PLAIN";
       expect(body.learningObject).toMatchObject(data);
 
       // verify that learning object was created in the database
@@ -165,7 +167,7 @@ describe("local learning object tests", async () => {
     const updatedData = {
       title: "Bijgewerkt leerobject",
       description: "Bijgewerkt leerobject",
-      contentType: "TEXT_PLAIN",
+      contentType: "text/plain",
       keywords: ["bijgewerkt", "voorbeeld"],
     };
     it("should update the learning object", async () => {
@@ -179,6 +181,7 @@ describe("local learning object tests", async () => {
       expect(status).toBe(200);
       expect(body.learningObject).toBeDefined();
       expect(body.learningObject.id).toEqual(lo.id);
+      updatedData.contentType = "TEXT_PLAIN"; 
       expect(body.learningObject).toMatchObject(updatedData);
 
       // verify that learning object was updated in the database

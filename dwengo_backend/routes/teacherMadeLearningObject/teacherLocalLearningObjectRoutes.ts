@@ -8,11 +8,6 @@ import {
   getLocalLearningObjectHtml,
 } from "../../controllers/teacher/teacherLocalLearningObjectController";
 import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddleware";
-import {
-  localLearningObjectBodySchema,
-  partialLocalLearningObjectBodySchema,
-} from "../../zodSchemas";
-import { validateRequest } from "../../middleware/validateRequest";
 
 const router: Router = express.Router();
 

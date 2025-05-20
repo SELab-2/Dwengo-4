@@ -402,7 +402,6 @@ describe("Tests for teacherAssignment", async (): Promise<void> => {
           teamSize: 2,
           isExternal: true,
         });
-      console.log(body);
       expect(status).toBe(400);
       expect(body.error).toBe("BadRequestError");
       expect(body.message).toBe(
