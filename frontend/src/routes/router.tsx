@@ -38,6 +38,7 @@ const TeacherIndex = lazy(() => import('../pages/teacher/TeacherIndex'));
 const EditLearningPath = lazy(
   () => import('../pages/teacher/EditLearningPath'),
 );
+const CustomContent = lazy(() => import('../pages/teacher/CustomContent'));
 
 // ==== STUDENT ROUTES ==== //
 const RootLayoutStudent = lazy(
@@ -66,8 +67,8 @@ const QuestionsForAssignment = lazy(
 const StudentClassIndex = lazy(
   () => import('../pages/student/StudentClassIndex'),
 );
-
 const LeaderBoard = lazy(() => import('../pages/student/LeaderBoard'));
+
 const QuestionOverviewTeacher = lazy(
   () => import('../pages/teacher/QuestionOverview'),
 );
@@ -165,6 +166,9 @@ export const router = createBrowserRouter([
           {
             path: 'local-learning-objects',
             element: <LocalLearningObjectsPage></LocalLearningObjectsPage>,
+          },
+            path: 'my-content',
+            element: <CustomContent></CustomContent>,
           },
           {
             path: 'learning-paths/create',
