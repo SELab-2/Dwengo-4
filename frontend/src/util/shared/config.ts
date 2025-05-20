@@ -40,5 +40,9 @@ export async function apiRequest<T>({
     throw error;
   }
 
+  if (response.status === 204) {
+    return {} as T; // otherwise, an error is thrown when trying to parse the response
+  }
+
   return response.json();
 }

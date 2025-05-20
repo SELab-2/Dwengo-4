@@ -6,7 +6,7 @@ import {
 import { NotFoundError } from "../errors/errors";
 
 export interface LearningPathDto {
-  _id: string; // Dwengo gebruikt _id of in onze DB is het id
+  id: string; // Dwengo gebruikt _id of in onze DB is het id
   hruid: string;
   language: string;
   title: string;
@@ -39,7 +39,7 @@ export interface LearningPathDto {
 // Dwengo -> Local mapping
 function mapDwengoPathToLocal(dwengoPath: any): LearningPathDto {
   return {
-    _id: dwengoPath._id ?? "",
+    id: dwengoPath._id ?? "",
     hruid: dwengoPath.hruid ?? "",
     language: dwengoPath.language ?? "",
     title: dwengoPath.title ?? "",

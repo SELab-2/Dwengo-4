@@ -158,12 +158,21 @@
       "clear": "Wis filter",
       "not_found": "Geen resultaten gevonden"
     },
-    "create_lp": "Leerpad Aanmaken"
+    "create_lp": "Leerpad Aanmaken",
+    "loading": "Leerpaden laden ..."
   },
   "learning_objects": {
     "loading": "Leerobjecten laden...",
     "next": "Volgende",
-    "end": "Einde van leerpad"
+    "end": "Einde van leerpad",
+    "create": "Leerobject Aanmaken",
+    "deletion_confirm": "Ben je zeker dat je dit leerobject wilt verwijderen? Dit kan niet ongedaan gemaakt worden.",
+    "title": "Titel",
+    "type": "Type",
+    "available": "Beschikbaar",
+    "actions": "Acties",
+    "edit": "Bewerken",
+    "delete": "Verwijderen"
   },
   "lp_view": {
     "loading_path_details": "Leerpad details laden ...",
@@ -232,7 +241,8 @@
       },
       "no_results": "Geen resultaten gevonden voor '{{searchTerm}}'.",
       "no_results_generic": "Geen resultaten."
-    }
+    },
+    "deletion_confirm": "Ben je zeker dat je dit leerpad wil verwijderen? Dit kan niet ongedaan gemaakt worden."
   },
   "questions": {
     "assignment_questions": "Vragen voor opdracht ",
@@ -263,5 +273,10 @@
       "back": "Terug",
       "submit": "Stel vraag"
     }
+  },
+  "custom_content": {
+    "title": "Mijn Leerinhoud",
+    "los": "Leerobjecten",
+    "lps": "Leerpaden"
   }
 }
