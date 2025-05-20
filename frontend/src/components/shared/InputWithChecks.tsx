@@ -60,12 +60,13 @@ const InputWithChecks = forwardRef<InputWithChecksHandle, InputWithChecksProps>(
     };
 
     const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-      setInputValue(e.target.value);
+      const newValue = e.target.value;
+      setInputValue(newValue);
       if (props.onChange) {
         props.onChange(e);
       }
       if (validate) {
-        setErrorMessage(validate(e.target.value) || "");
+        setErrorMessage(validate(newValue) || "");
       }
     };
 
