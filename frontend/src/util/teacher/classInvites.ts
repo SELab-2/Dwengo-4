@@ -1,7 +1,7 @@
 import { getAuthToken } from './authTeacher';
-import { Invite } from '@/types/api.types';
+import { Invite } from '../../types/type';
 
-import { apiRequest } from '../shared/config';
+import { apiRequest, BACKEND } from '../shared/config';
 
 /**
  * Haal alle pending invites voor een klas op
@@ -92,4 +92,57 @@ export async function denyJoinRequest({
     body: { action: 'deny' },
     getToken: getAuthToken,
   })) as { joinRequest: any };
+}
+
+
+
+/**
+ * Haal alle pending invites voor de ingelogde teacher op
+ * @returns Een lijst met invites
+ */
+export async function fetchTeacherInvites(): Promise<Invite[]> {
+  const response = await fetch(`${BACKEND}/invite/`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error("Er is iets misgegaan bij het ophalen van de invites.");
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  const data = await response.json();
+  return data.invites;
+}
+
+/**
+ * Update de status van een invite (accepteer of weiger)
+ * @param inviteId - het id van de invite
+ * @param action - "accept" of "decline"
+ * @returns De bijgewerkte invite
+ */
+export async function updateInviteStatus(inviteId: number, action: "accept" | "decline"): Promise<Invite> {
+  const response = await fetch(`${BACKEND}/invite/${inviteId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+    body: JSON.stringify({ action }),
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error("Er is iets misgegaan bij het bijwerken van de invite.");
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  const data = await response.json();
+  return data.invite;
 }

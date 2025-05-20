@@ -115,6 +115,19 @@ export default class inviteService {
           classId,
           status: JoinRequestStatus.PENDING,
         },
+        include: {
+                    otherTeacher: {
+                        include: {
+                            user: {
+                                select: {
+                                    firstName: true,
+                                    lastName: true,
+                                    email: true,
+                                },
+                            }
+                        },
+                    },
+                },
       }),
     );
   }
@@ -128,6 +141,29 @@ export default class inviteService {
           otherTeacherId: teacherId,
           status: JoinRequestStatus.PENDING,
         },
+          include: {
+                    classTeacher: {
+                        select: {
+                            teacher: {
+                                select: {
+                                    user: {
+                                        select: {
+                                            email: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+
+                    // de klas
+                    class: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                },
       }),
     );
   }

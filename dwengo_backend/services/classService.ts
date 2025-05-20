@@ -193,6 +193,29 @@ export default class ClassService {
     }
   }
 
+  
+  static async ensureTeacherNotInClass(
+    classId: number,
+    teacherId: number
+  ): Promise<void> {
+    const existingLink: ClassTeacher | null = await handlePrismaQuery(() =>
+      prisma.classTeacher.findUnique({
+        where: {
+          teacherId_classId: {
+            teacherId: teacherId,
+            classId: classId,
+          },
+        },
+      })
+    );
+
+    if (existingLink) {
+      throw new BadRequestError("Teacher is already a part of this class.");
+    }
+  }
+
+
+
   // Get all students from a given class
   static async getStudentsByClass(
     classId: number,
