@@ -155,7 +155,8 @@
       "clear": "Clear filter",
       "not_found": "No results found"
     },
-    "create_lp": "Create Learning Path"
+    "create_lp": "Create Learning Path",
+    "loading": "Loading learning paths ..."
   },
   "learning_objects": {
     "loading": "Loading learning objects ...",
@@ -229,7 +230,8 @@
       },
       "no_results": "No results found for '{{searchTerm}}'.",
       "no_results_generic": "No results."
-    }
+    },
+    "deletion_confirm": "Are you sure you want to delete this learning path? This action cannot be undone."
   },
   "questions": {
     "assignment_questions": "Questions for assignment ",

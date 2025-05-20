@@ -5,6 +5,7 @@ import { deleteLearningPath } from '@/util/teacher/localLearningPaths';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import React from 'react';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 
 /**
@@ -32,6 +33,7 @@ interface LearningPathCardProps {
 export const LearningPathCard: React.FC<LearningPathCardProps> = ({ path }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const backgroundColor = useMemo(
     () => generateBackgroundColor(path.id),
     [path.id],
@@ -70,11 +72,7 @@ export const LearningPathCard: React.FC<LearningPathCardProps> = ({ path }) => {
   });
 
   const handleDelete = () => {
-    if (
-      window.confirm(
-        'Are you sure you want to delete this learning path? This action cannot be undone.',
-      )
-    ) {
+    if (window.confirm(t('edit_learning_path.deletion_confirm'))) {
       deleteMutation.mutate(path.id);
     }
   };

@@ -132,7 +132,6 @@ export async function updateOrCreateLearningPath({
 export async function deleteLearningPath(
   learningPathId: string,
 ): Promise<void> {
-  console.log('attempting to delete learning path with id', learningPathId);
   return await apiRequest<void>({
     method: 'DELETE',
     endpoint: `/pathByTeacher/${learningPathId}`,

@@ -154,7 +154,8 @@
       "clear": "Wis filter",
       "not_found": "Geen resultaten gevonden"
     },
-    "create_lp": "Leerpad Aanmaken"
+    "create_lp": "Leerpad Aanmaken",
+    "loading": "Leerpaden laden ..."
   },
   "learning_objects": {
     "loading": "Leerobjecten laden...",
@@ -228,7 +229,8 @@
       },
       "no_results": "Geen resultaten gevonden voor '{{searchTerm}}'.",
       "no_results_generic": "Geen resultaten."
-    }
+    },
+    "deletion_confirm": "Ben je zeker dat je dit leerpad wil verwijderen? Dit kan niet ongedaan gemaakt worden."
   },
   "questions": {
     "assignment_questions": "Vragen voor opdracht ",
