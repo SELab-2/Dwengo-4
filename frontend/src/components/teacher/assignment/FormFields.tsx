@@ -79,6 +79,9 @@ const FormFields: React.FC<FormFieldsProps> = ({
           max={100}
           onChange={e => {
             setTitle(e.target.value);
+            if (props.onChange) {
+              props.onChange(e);
+            }
           }}
         />
       </div>
