@@ -168,7 +168,7 @@ const NodeComponent: React.FC<NodeComponentProps> = memo(
                     onClick={() => openBranchesDrawer?.(node)}
                     className="text-xs px-2 py-1 bg-blue-50 hover:bg-blue-100 rounded"
                   >
-                    TODO: Branches
+                    Maak hier je Branches
                   </button>
                 )}
               </div>
@@ -182,7 +182,7 @@ const NodeComponent: React.FC<NodeComponentProps> = memo(
             {isAfterMC ? (
               <>
                 <div className="text-red-600 text-sm mb-1">
-                  {t('edit_learning_path.add_after_mc_error')}
+                  Je mag geen leerobjecten toevoegen na een meerkeuzevraag. Je moet dit in de branches doen.
                 </div>
                 <button
                   onClick={() => setAddError(t('edit_learning_path.add_after_mc_error'))}
