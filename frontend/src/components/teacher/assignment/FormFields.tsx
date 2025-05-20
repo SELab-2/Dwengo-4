@@ -2,6 +2,7 @@ import React from 'react';
 import { ClassItem, LearningPath } from '../../../types/type';
 import styles from './AddAssignmentForm.module.css';
 import CustomDropdownMultiselect from './CustomDropdownMultiselect';
+import InputWithChecks from '../../shared/InputWithChecks';
 import { useTranslation } from 'react-i18next';
 
 interface FormFieldsProps {
@@ -22,7 +23,6 @@ interface FormFieldsProps {
   learningPathsError?: Error;
 }
 
-
 const FormFields: React.FC<FormFieldsProps> = ({
   title,
   setTitle,
@@ -41,6 +41,7 @@ const FormFields: React.FC<FormFieldsProps> = ({
   learningPathsError,
 }) => {
   const { t } = useTranslation();
+  console.log("hey", title)
   return (
     <>
       <div className={styles.formGroup}>
@@ -72,17 +73,18 @@ const FormFields: React.FC<FormFieldsProps> = ({
       </div>
 
       <div>
-        <label htmlFor="title">{t('assignments_form.title')}</label>
-        <input
-          type="text"
-          id="title"
-          name="title"
+        <InputWithChecks
+          label={t('assignments_form.title')}
           value={title}
           required
-          maxLength={100}
-          onChange={(e) => setTitle(e.target.value)}
+          max={100}
+          onChange={e => {
+            setTitle(e.target.value);
+            if (props.onChange) {
+              props.onChange(e);
+            }
+          }}
         />
-        <small>{100 - title.length} {t('characters')}</small>
       </div>
 
       <div>
@@ -122,18 +124,14 @@ const FormFields: React.FC<FormFieldsProps> = ({
       </div>
 
       <div>
-        <label htmlFor="description">{t('assignments_form.description')}</label>
-        <textarea
-          id="description"
-          name="description"
-          required
-          onChange={(e) => setDescription(e.target.value)}
+        <InputWithChecks
+          label={t('assignments_form.description')}
           value={description}
-          rows={5}
-          cols={50}
-          maxLength={500}
-        ></textarea>
-        <small>{500 - description.length} {t('characters')}</small>
+          required
+          max={500}
+          inputType="textarea"
+          onChange={(e) => setDescription(e.target.value)}
+        />
       </div>
     </>
   );

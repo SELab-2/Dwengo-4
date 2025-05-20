@@ -41,6 +41,7 @@ const AddAssignment: React.FC = () => {
     queryFn: () => fetchClasses(true),
   });
 
+  console.log('Classes Data:', classesData);
   return (
     <div>
       {isLoading ? (

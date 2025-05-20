@@ -104,7 +104,7 @@ const Assignment: React.FC = () => {
     ));
   }, [selectedClassId]);
 
-
+  console.log(assignmentData)
   const { t } = useTranslation();
 
   return (
@@ -165,26 +165,31 @@ const Assignment: React.FC = () => {
                   {assignmentData.teamSize > 1 ? (
                     <div className="space-y-4">
                       <h5 className="text-lg font-semibold text-gray-800 border-b pb-2">
-                        Teams
+                        {t('assignment.team')}
                       </h5>
                       <div className="grid grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2">
-                        {assignmentData.classTeams?.[displayedClass.classId]?.map((team) => (
-                          <div key={team.id}
-                            className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                            <div className="font-semibold text-blue-600 mb-2 pb-2 border-b">
-                              {team.teamName}
+                        {assignmentData.classTeams?.[displayedClass.classId]?.map((team) => {
+                          const teamAssignment = assignmentData.teamAssignments?.find(
+                            ta => ta.teamId === team.id
+                          );
+                          return (
+                            <div key={team.id}
+                              className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                              <div className="font-semibold text-blue-600 mb-2 pb-2 border-b">
+                                {teamAssignment?.team?.teamname || team.teamName}
+                              </div>
+                              <div className="space-y-1">
+                                {team.students.map((student, idx) => (
+                                  <div key={student.id}
+                                    className="flex items-center text-sm text-gray-600 hover:bg-gray-50 p-1 rounded">
+                                    <span className="w-6 text-gray-400">{idx + 1}.</span>
+                                    {student.firstName} {student.lastName}
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                            <div className="space-y-1">
-                              {team.students.map((student, idx) => (
-                                <div key={student.id}
-                                  className="flex items-center text-sm text-gray-600 hover:bg-gray-50 p-1 rounded">
-                                  <span className="w-6 text-gray-400">{idx + 1}.</span>
-                                  {student.firstName} {student.lastName}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   ) : (
@@ -226,7 +231,7 @@ const Assignment: React.FC = () => {
             <div className="bg-gray-50 rounded-md p-4">
               <a
                 href={`/teacher/learning-path/${assignmentData.pathRef}`}
-       
+
                 className="text-blue-600 hover:text-blue-800"
               >
                 <h4 className="text-lg font-medium mb-2">

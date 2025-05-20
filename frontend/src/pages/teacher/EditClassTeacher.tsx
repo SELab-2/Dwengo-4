@@ -242,7 +242,7 @@ const EditClassTeacher: React.FC = () => {
                       validate={(value: string) => validateForm(value, [validateRequired, (value) => validateMaxLength(value, 50)])}
                       placeholder="Voer de naam van de klas in"
                       value={className}
-                      maxLength={50}
+                      max={50}
                     />
                   </div>
 

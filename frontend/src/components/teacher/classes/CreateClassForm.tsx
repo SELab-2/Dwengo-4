@@ -65,7 +65,7 @@ const CreateClass: React.FC = () => {
                 validateForm(value, [validateRequired, (value) => validateMaxLength(value, 50)])
               }
               placeholder={t('class.name.placeholder')}
-              maxLength={50}
+              max={50}
             />
             {isError && (
               <div className="c-r">
