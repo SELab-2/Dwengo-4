@@ -74,6 +74,9 @@ describe("LocalLearningObjectService", () => {
       expect(prisma.learningObject.findMany).toHaveBeenCalledWith({
         where: { creatorId: 42 },
         orderBy: { createdAt: "desc" },
+        include: {
+          LearningObjectRawHtml: true,
+        }
       });
     });
   });
