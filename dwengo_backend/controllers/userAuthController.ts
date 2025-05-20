@@ -13,7 +13,7 @@ import {
 } from "../errors/errors";
 
 // Functie om een JWT-token te genereren
-const generateToken = (id: number | string): string => {
+const generateToken = (id: number | string, role: string): string => {
   if (!process.env.JWT_SECRET) {
     if (process.env.NODE_ENV === "test") {
       return crypto.randomBytes(32).toString("hex");
@@ -23,7 +23,7 @@ const generateToken = (id: number | string): string => {
       );
     }
   }
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
 const registerUser = async (
@@ -52,11 +52,7 @@ const registerUser = async (
   });
 };
 
-const loginUser = async (
-  req: Request,
-  res: Response,
-  role: Role,
-): Promise<void> => {
+const loginUser = async (req: Request, res: Response, role: Role): Promise<void> => {
   let email = req.body.email;
   const password = req.body.password;
   email = email.toLowerCase();
@@ -91,7 +87,11 @@ const loginUser = async (
     message: "Successfully logged in.",
     firstName: user.firstName,
     lastName: user.lastName,
-    token: generateToken(studentOrTeacherRecord.userId),
+    id: user.id,
+    token: generateToken(
+      studentOrTeacherRecord.userId,
+      studentOrTeacherRecord.user.role,
+    ),
   });
 };
 

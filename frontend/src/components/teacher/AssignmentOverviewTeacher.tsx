@@ -15,7 +15,7 @@ export default function AssignmentOverviewTeacher() {
     error,
   } = useQuery<AssignmentItem[]>({
     queryKey: ['assignments'],
-    queryFn: fetchAllAssignments,
+    queryFn: () => fetchAllAssignments(5),
   });
   const { t } = useTranslation();
 
@@ -38,10 +38,10 @@ export default function AssignmentOverviewTeacher() {
               return (
                 <div
                   key={assignmentItem.id}
-                  className="flex items-center flex-row py-2 px-3.5 w-[30rem] h-[11.5rem] justify-between rounded-lg shrink-0"
+                  className="flex items-center shadow bg-white flex-row py-2 px-3.5 w-[30rem] h-[11.5rem] justify-between rounded-lg shrink-0"
                 >
-                  <div className="flex flex-col w-full">
-                    <div className="flex flex-row w-full justify-between">
+                  <div className="flex flex-col bg-white w-full">
+                    <div className="flex flex-row w-full bg-white justify-between">
                       <h3 className="text-2xl font-bold">
                         {assignmentItem.title}
                       </h3>
@@ -49,10 +49,10 @@ export default function AssignmentOverviewTeacher() {
                         {t('deadline', { date: formattedDate })}
                       </p>
                     </div>
-                    <div className="h-20 mt-1 text-gray-500 line-clamp-3">
+                    <div className="h-20 mt-1 text-gray-500 bg-white line-clamp-3">
                       {assignmentItem.description}
                     </div>
-                    <div className="flex mt-1 flex-row justify-between items-center text-sm">
+                    <div className="flex mt-1 flex-row bg-white justify-between items-center text-sm">
                       <Link to={`/teacher/assignment/${assignmentItem.id}`}>
                         <PrimaryButton>{t('assignments.view')}</PrimaryButton>
                       </Link>

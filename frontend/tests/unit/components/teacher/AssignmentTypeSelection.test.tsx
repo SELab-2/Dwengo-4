@@ -4,6 +4,11 @@ import { render, screen, fireEvent } from '@testing-library/react';
 
 import AssignmentTypeSelection from '@/components/teacher/assignment/AssignmentTypeSelection';
 
+// Mock translation to return key
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
+
 const defaultProps = (overrides = {}) => ({
   assignmentType: '',
   teamSize: 2,
@@ -16,7 +21,7 @@ describe('AssignmentTypeSelection', () => {
   it('render t een keuzelijst met standaardwaarde', () => {
     render(<AssignmentTypeSelection {...defaultProps()} />);
     const select = screen.getByLabelText(
-      /assignment type/i,
+      /assignments_form\.type\.label/i,
     ) as HTMLSelectElement;
     expect(select.value).toBe('');
     // team-size-veld hoort NIET zichtbaar te zijn
@@ -30,7 +35,7 @@ describe('AssignmentTypeSelection', () => {
         {...defaultProps({ onAssignmentTypeChange: onChange })}
       />,
     );
-    fireEvent.change(screen.getByLabelText(/assignment type/i), {
+    fireEvent.change(screen.getByLabelText(/assignments_form\.type\.label/i), {
       target: { value: 'group' },
     });
     expect(onChange).toHaveBeenCalled();

@@ -39,7 +39,8 @@ describe('TeamCreationModal', () => {
 
     fireEvent.click(screen.getByText(/alice smith/i));
     fireEvent.click(screen.getByText(/bob jones/i));
-    fireEvent.click(screen.getByRole('button', { name: /create team/i }));
+    // gebruik algemene create-knop
+    fireEvent.click(screen.getByRole('button', { name: /create/i }));
 
     expect(setTeams).toHaveBeenCalledTimes(1);
     expect(setTeams).toHaveBeenCalledWith({

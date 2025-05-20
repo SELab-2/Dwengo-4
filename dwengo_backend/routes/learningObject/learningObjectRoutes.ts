@@ -71,7 +71,7 @@ router.get(
 /**
  * @route GET /learningObject/learningPath/:learningPathId
  * @description Haal alle leerobjecten op die horen bij een specifiek leerpad
- * @param pathId: string
+ * @param learningPathId: string
  * @access Teacher/Student
  */
 router.get(

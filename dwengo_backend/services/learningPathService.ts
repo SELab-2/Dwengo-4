@@ -6,7 +6,7 @@ import {
 import { NotFoundError } from "../errors/errors";
 
 export interface LearningPathDto {
-  _id: string; // Dwengo gebruikt _id of in onze DB is het id
+  id: string; // Dwengo gebruikt _id of in onze DB is het id
   hruid: string;
   language: string;
   title: string;
@@ -25,6 +25,11 @@ export interface LearningPathDto {
 
   createdAt?: string;
   updatedAt?: string;
+  creator?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+  }; // for local paths
 
   // ===== BELANGRIJK =====
   // Zodat we Dwengo vs. lokaal kunnen onderscheiden in 1 type:
@@ -34,7 +39,7 @@ export interface LearningPathDto {
 // Dwengo -> Local mapping
 function mapDwengoPathToLocal(dwengoPath: any): LearningPathDto {
   return {
-    _id: dwengoPath._id ?? "",
+    id: dwengoPath._id ?? "",
     hruid: dwengoPath.hruid ?? "",
     language: dwengoPath.language ?? "",
     title: dwengoPath.title ?? "",
@@ -45,6 +50,7 @@ function mapDwengoPathToLocal(dwengoPath: any): LearningPathDto {
     nodes: dwengoPath.nodes ?? [],
     createdAt: dwengoPath.created_at ?? "",
     updatedAt: dwengoPath.updatedAt ?? "",
+    creator: undefined, // dwengo paths don't have a specific creator
     // Nieuw: Dwengo => altijd true
     isExternal: true,
   };

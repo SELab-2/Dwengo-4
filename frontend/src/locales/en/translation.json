@@ -1,4 +1,5 @@
 {
+  "characters": "characters",
   "role": {
     "choose": "Choose a role",
     "student": "Student",
@@ -40,6 +41,7 @@
     "profile": "Profile",
     "settings": "Settings",
     "classes": "Classes",
+    "assignments": "Assignments",
     "learning_paths": "Learning paths",
     "logged_in_as": "Logged in as {{name}}"
   },
@@ -63,7 +65,22 @@
     "view_all": "View all assignments",
     "error": "Something went wrong while loading the assignments",
     "view": "View assignment",
-    "not_found": "No assignments found"
+    "not_found": "No assignments found",
+    "not_yet": "No assignments assigned yet",
+    "view_assignment": "View assignment",
+    "my_assignments": "My assignments",
+    "deadline": "Deadline",
+    "no_team": "No team assigned"
+  },
+  "assignment": {
+    "title": "Assignment",
+    "language": "Language",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deadline": "Deadline",
+    "loading_learning_path": "Loading learning path ...",
+    "learning_path_details": "Learning path details",
+    "team": "Team"
   },
   "assignments_form": {
     "edit": "Edit assignment",
@@ -100,7 +117,9 @@
       "available_students": "Available students",
       "generate_random_teams": "Generate random teams",
       "create_team": "Create team",
-      "incomplete_team_warning": "Create incomplete team?"
+      "incomplete_team_warning": "Create incomplete team?",
+      "deselect_all": "Deselect all",
+      "select_all": "Select all"
     },
     "deadline": "Deadline",
     "cancel": "Cancel",
@@ -138,11 +157,126 @@
     "filter": {
       "clear": "Clear filter",
       "not_found": "No results found"
-    }
+    },
+    "create_lp": "Create Learning Path",
+    "loading": "Loading learning paths ..."
   },
   "learning_objects": {
-    "loading": "Loading learning paths ...",
+    "loading": "Loading learning objects ...",
     "next": "Up next",
-    "end": "End of learning path"
+    "end": "End of learning path",
+    "create": "Create Learning Object",
+    "deletion_confirm": "Are you sure you want to delete this learning object? This action cannot be undone.",
+    "title": "Title",
+    "type": "Type",
+    "available": "Available",
+    "actions": "Actions",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "lp_view": {
+    "loading_path_details": "Loading learning path details ...",
+    "legend": {
+      "teacher_exclusive": "Additional information for the teacher",
+      "student_content": "Content for the student"
+    }
+  },
+  "edit_learning_path": {
+    "loading_path_details": "Loading learning path details ...",
+    "loading_objects": "Loading learning objects ...",
+    "add_node": "Add node",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "saving": "Saving ...",
+    "no_nodes_error": "Add at least one learning object to your path",
+    "node_list_instructions": "Hover over a node to add/delete. Use the handle to drag and reorder.",
+    "add_node_button": {
+      "adding_node": "Adding node ...",
+      "cancel": "Cancel"
+    },
+    "node_component": {
+      "add_node_here": "Add node here",
+      "untitled_node": "Untitled node"
+    },
+    "delete_node_button": {
+      "title": "Delete node",
+      "confirmation": "Are you sure?",
+      "yes": "yes",
+      "no": "no"
+    },
+    "lp_details": {
+      "add_title": "Add learning path title",
+      "add_description": "Add a description (optional)",
+      "language": "Language:",
+      "language_not_set": "Not set",
+      "language_info": "The language will be automatically set when you add your first learning object. All learning objects must use the same language."
+    },
+    "lo_card": {
+      "language": "Language:",
+      "difficulty": "Difficulty:",
+      "keywords": "Keywords:",
+      "created": "Created:",
+      "updated": "Updated:",
+      "add_to_path": "Add learning object to path"
+    },
+    "lp_object_selector": {
+      "language": "Language:",
+      "hide_objects": "Hide Objects",
+      "show_objects": "View Objects",
+      "loading_objects": "Loading learning objects ..."
+    },
+    "select_lo": {
+      "title": "Select a learning object",
+      "from_lps": "from learning paths",
+      "from_my_los": "from my learning objects",
+      "paths": {
+        "search": "Search learning paths ...",
+        "loading": "Loading learning paths ...",
+        "error": "Something went wrong while loading the learning paths."
+      },
+      "objects": {
+        "search": "Search learning objects ...",
+        "loading": "Loading learning objects ...",
+        "error": "Something went wrong while loading the learning objects."
+      },
+      "no_results": "No results found for '{{searchTerm}}'.",
+      "no_results_generic": "No results."
+    },
+    "deletion_confirm": "Are you sure you want to delete this learning path? This action cannot be undone."
+  },
+  "questions": {
+    "assignment_questions": "Questions for assignment ",
+    "new_question_button": "Ask a new question",
+    "loading": "Loading questions...",
+    "error": "Something went wrong while loading the questions",
+    "no_questions": "No questions found",
+    "no_reactions": "No reactions yet",
+    "reactions": "Reactions",
+    "view_button": "View",
+    "asked_by": "Asked by",
+    "says": "says",
+    "ask_question": "Ask a question",
+    "write_message": "Write a message",
+    "submit": "Submit",
+    "submitting": "Submitting...",
+    "error_submitting": "Something went wrong while submitting the question",
+    "form": {
+      "succes": "Question successfully created!",
+      "title": "Title",
+      "question": "Question",
+      "languages": {
+        "label": "Language",
+        "en": "English",
+        "nl": "Dutch",
+        "fr": "French"
+      },
+      "back": "Back",
+      "submit": "Ask question"
+    }
+  },
+  "custom_content": {
+    "title": "My Content",
+    "los": "Learning objects",
+    "lps": "Learning paths"
   }
 }

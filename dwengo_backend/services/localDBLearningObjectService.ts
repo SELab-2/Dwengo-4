@@ -1,5 +1,8 @@
-import { LearningObject } from "@prisma/client";
-import { LearningObjectDto } from "./dwengoLearningObjectService";
+import { LearningObject, LearningObjectRawHtml } from "@prisma/client";
+import {
+  getDwengoObjectForPath,
+  LearningObjectDto,
+} from "./dwengoLearningObjectService";
 import {
   handlePrismaQuery,
   handleQueryWithExistenceCheck,
@@ -11,8 +14,14 @@ import prisma from "../config/prisma";
 /**
  * Converteert een Prisma LearningObject record naar ons LearningObjectDto
  * (origin = "local")
+ *
+ * the local learning object can also optionally include the raw HTML content
  */
-function mapLocalToDto(localObj: LearningObject): LearningObjectDto {
+function mapLocalToDto(
+  localObj: LearningObject & {
+    LearningObjectRawHtml?: LearningObjectRawHtml | null;
+  },
+): LearningObjectDto {
   return {
     id: localObj.id,
     uuid: localObj.uuid,
@@ -34,7 +43,11 @@ function mapLocalToDto(localObj: LearningObject): LearningObjectDto {
     contentLocation: localObj.contentLocation ?? "",
     createdAt: localObj.createdAt.toISOString(),
     updatedAt: localObj.updatedAt.toISOString(),
+    creatorId: localObj.creatorId ?? undefined,
     origin: "local",
+    raw: localObj.LearningObjectRawHtml
+      ? localObj.LearningObjectRawHtml.rawHtml
+      : undefined,
   };
 }
 
@@ -147,53 +160,61 @@ export async function getLocalLearningObjectByHruidLangVersion(
   return mapLocalToDto(localObj);
 }
 
-// ...existing code...
-
 /**
  * Get all learning objects for a specific learning path
  */
-export async function getLocalObjectsForPath(
+export async function getLearningObjectsForLocalPath(
   pathId: string,
   isTeacher: boolean,
 ): Promise<LearningObjectDto[]> {
-  const whereClause = {
-    learningPath: {
-      id: pathId
-    },
-    // Add teacher/availability filters if not a teacher
-    ...(isTeacher ? {} : {
-      teacherExclusive: false,
-      available: true
-    })
-  };
-
-  const nodes = await handlePrismaQuery(() =>
-    prisma.learningPathNode.findMany({
-      where: {
-        learningPathId: pathId,
-        isExternal: false,
-        localLearningObjectId: {
-          not: null
-        }
-      },
-      include: {
-        learningPath: true
-      },
-      orderBy: {
-        createdAt: 'asc'
-      }
-    })
+  // check if path exists
+  const path = await handleQueryWithExistenceCheck(
+    () =>
+      prisma.learningPath.findUnique({
+        where: { id: pathId },
+        include: {
+          nodes: {
+            orderBy: { position: "asc" },
+          },
+        },
+      }),
+    `Learning path with id=${pathId} not found.`,
   );
 
-  // Get all learning objects for these nodes
-  const learningObjects = await handlePrismaQuery(() =>
-    prisma.learningObject.findMany({
-      where: {
-        id: {
-          in: nodes.map(node => node.localLearningObjectId!),
-        }
-      }
-    })
-  );
-  return learningObjects.map(obj => mapLocalToDto(obj));
+  // get all learning objects for this path
+  const objects: LearningObjectDto[] = [];
+  for (const node of path.nodes) {
+    let obj: LearningObjectDto | null;
+    if (node.isExternal) {
+      // dwengo object, fetch from dwengo api
+      obj = await getDwengoObjectForPath(
+        node.dwengoHruid!,
+        node.dwengoLanguage!,
+        node.dwengoVersion!,
+        isTeacher,
+      );
+
+      // add to objects if not null
+    } else {
+      // local object, fetch from local db
+      const localObj = await handlePrismaQuery(() =>
+        prisma.learningObject.findUnique({
+          where: {
+            id: node.localLearningObjectId!,
+            teacherExclusive: isTeacher ? undefined : false,
+            available: true,
+          },
+          include: {
+            LearningObjectRawHtml: true,
+          },
+        }),
+      );
+      obj = localObj ? mapLocalToDto(localObj) : null;
+    }
+
+    if (obj) {
+      objects.push(obj);
+    }
+  }
+  return objects;
 }

@@ -65,7 +65,7 @@ describe("classroom tests", (): void => {
 
       // now test getting the classrooms
       const { status, body } = await request(app)
-        .get("/class/teacher")
+        .get("/api/class/teacher")
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
@@ -92,7 +92,7 @@ describe("classroom tests", (): void => {
       );
 
       const { status, body } = await request(app)
-        .get("/class/teacher")
+        .get("/api/class/teacher")
         .set("Authorization", `Bearer ${studentUser.token}`);
 
       expect(body.classrooms).not.toBeDefined();
@@ -118,7 +118,7 @@ describe("classroom tests", (): void => {
 
       // now test getting the classrooms
       const { status, body } = await request(app)
-        .get("/class/student")
+        .get("/api/class/student")
         .set("Authorization", `Bearer ${studentUser.token}`);
 
       expect(status).toBe(200);
@@ -127,7 +127,7 @@ describe("classroom tests", (): void => {
 
     it("shouldn't allow a teacher to get the classes via the student route", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get("/class/student")
+        .get("/api/class/student")
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(body.classrooms).not.toBeDefined();
@@ -140,7 +140,7 @@ describe("classroom tests", (): void => {
   describe("[POST] /class/teacher", (): void => {
     it("should respond with a `201` status code and a created class", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .post("/class/teacher")
+        .post("/api/class/teacher")
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({ name: "6A" });
 
@@ -163,7 +163,7 @@ describe("classroom tests", (): void => {
 
     it("should respond with a `400` status code and a message when no valid class name is provided", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .post("/class/teacher")
+        .post("/api/class/teacher")
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({ name: "" });
 
@@ -181,7 +181,7 @@ describe("classroom tests", (): void => {
         "aaaaa@gmail.com",
       );
       const { status, body } = await request(app)
-        .post("/class/teacher")
+        .post("/api/class/teacher")
         .set("Authorization", `Bearer ${studentUser.token}`)
         .send({ name: "6A" });
 
@@ -239,7 +239,7 @@ describe("classroom tests", (): void => {
 
       // now test deleting the class
       const { status } = await request(app)
-        .delete(`/class/teacher/${classroom.id}`)
+        .delete(`/api/class/teacher/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(204);
@@ -256,7 +256,7 @@ describe("classroom tests", (): void => {
     it("should respond with a `403` status code and a message when the teacher is not associated with the class", async (): Promise<void> => {
       // try having a teacher delete a class they are not associated with
       const { status, body } = await request(app)
-        .delete(`/class/teacher/${classroom.id}`)
+        .delete(`/api/class/teacher/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`); // teacherUser1 is not associated with the class
 
       expect(status).toBe(403);
@@ -276,7 +276,7 @@ describe("classroom tests", (): void => {
       // add teacherUser1 to class, so we can test getting the join link
       await addTeacherToClass(teacherUser1.id, classroom.id);
       let { status, body } = await request(app)
-        .get(`/class/teacher/${classroom.id}/join-link`)
+        .get(`/api/class/teacher/${classroom.id}/join-link`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
@@ -293,7 +293,7 @@ describe("classroom tests", (): void => {
         "aaaaa@gmail.com",
       );
       ({ status, body } = await request(app)
-        .post(`/join-request/student?joinCode=${classroom.code}`) // can't use body.joinLink here, because the APP_URL is different in the test environment
+        .post(`/api/join-request/student?joinCode=${classroom.code}`) // can't use body.joinLink here, because the APP_URL is different in the test environment
         .set("Authorization", `Bearer ${studentUser.token}`));
 
       expect(status).toBe(201);
@@ -304,7 +304,7 @@ describe("classroom tests", (): void => {
     it("should respond with a `403` status code and a message when the teacher is not associated with the class", async (): Promise<void> => {
       // try getting the join link for a class the teacher is not associated with
       const { status, body } = await request(app)
-        .get(`/class/teacher/${classroom.id}/join-link`)
+        .get(`/api/class/teacher/${classroom.id}/join-link`)
         .set("Authorization", `Bearer ${teacherUser1.token}`); // teacherUser1 is not associated with the class
 
       expect(status).toBe(403);
@@ -323,7 +323,7 @@ describe("classroom tests", (): void => {
       const invalidClassId: number = (maxClass?.id ?? 0) + 1;
 
       const { status, body } = await request(app)
-        .get(`/class/teacher/${invalidClassId}/join-link`)
+        .get(`/api/class/teacher/${invalidClassId}/join-link`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(404);
@@ -338,7 +338,7 @@ describe("classroom tests", (): void => {
       // add teacherUser1 to class, so we can test regenerating the join link
       await addTeacherToClass(teacherUser1.id, classroom.id);
       const { status, body } = await request(app)
-        .patch(`/class/teacher/${classroom.id}/join-link`)
+        .patch(`/api/class/teacher/${classroom.id}/join-link`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
@@ -355,7 +355,7 @@ describe("classroom tests", (): void => {
 
     it("should respond with a `403` status code and a message when the teacher is not associated with the class", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .patch(`/class/teacher/${classroom.id}/join-link`)
+        .patch(`/api/class/teacher/${classroom.id}/join-link`)
         .set("Authorization", `Bearer ${teacherUser1.token}`); // teacherUser1 is not associated with the class
 
       expect(status).toBe(403);
@@ -373,7 +373,7 @@ describe("classroom tests", (): void => {
       const invalidClassId: number = (maxClass?.id ?? 0) + 1;
 
       const { status, body } = await request(app)
-        .patch(`/class/teacher/${invalidClassId}/join-link`)
+        .patch(`/api/class/teacher/${invalidClassId}/join-link`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(404);
@@ -405,7 +405,7 @@ describe("classroom tests", (): void => {
 
       // now test getting the students
       const { status, body } = await request(app)
-        .get(`/class/teacher/${classroom.id}/student`)
+        .get(`/api/class/teacher/${classroom.id}/student`)
         .set("Authorization", `Bearer ${teacherUser1.token}`); // teacherUser1 is associated with the class
 
       // verify the response
@@ -416,7 +416,7 @@ describe("classroom tests", (): void => {
     it("should respond with a `403` status code when the teacher is not associated with the class", async (): Promise<void> => {
       // try getting the students for a class the teacher is not associated with
       const { status, body } = await request(app)
-        .get(`/class/teacher/${classroom.id}/student`)
+        .get(`/api/class/teacher/${classroom.id}/student`)
         .set("Authorization", `Bearer ${teacherUser1.token}`); // teacherUser1 is not associated with the class
 
       expect(status).toBe(403);
@@ -439,7 +439,7 @@ describe("classroom tests", (): void => {
 
       // now test leaving the class
       const { status, body } = await request(app)
-        .delete(`/class/student/${c.id}`)
+        .delete(`/api/class/student/${c.id}`)
         .set("Authorization", `Bearer ${s.token}`);
       expect(status).toBe(204);
       expect(body).toEqual({});
@@ -473,7 +473,7 @@ describe("classroom tests", (): void => {
       const c: Class = await createClass("LATA", "EFGH");
 
       const { status, body } = await request(app)
-        .delete(`/class/student/${c.id}`)
+        .delete(`/api/class/student/${c.id}`)
         .set("Authorization", `Bearer ${s.token}`);
 
       expect(status).toBe(400);
@@ -488,7 +488,7 @@ describe("classroom tests", (): void => {
 
     it("should respond with a `200` status code and the specified class", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(`/class/student/${classroom1.id}`)
+        .get(`/api/class/student/${classroom1.id}`)
         .set("Authorization", `Bearer ${student1.token}`);
       expect(status).toBe(200);
       expect(body.name).toBe(classroom1.name);
@@ -498,12 +498,12 @@ describe("classroom tests", (): void => {
 
     it("should return the same class for students that are in the same class", async (): Promise<void> => {
       const res = await request(app)
-        .get(`/class/student/${classroom1.id}`)
+        .get(`/api/class/student/${classroom1.id}`)
         .set("Authorization", `Bearer ${student1.token}`);
       expect(res.status).toBe(200);
 
       const res2 = await request(app)
-        .get(`/class/student/${classroom1.id}`)
+        .get(`/api/class/student/${classroom1.id}`)
         .set("Authorization", `Bearer ${student2.token}`);
       expect(res2.status).toBe(200);
       expect(res2.body).toEqual(res.body);
@@ -511,7 +511,7 @@ describe("classroom tests", (): void => {
 
     it("should respond with a `403` status code because the student is not a part of the class", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(`/class/student/${classroom2.id}`)
+        .get(`/api/class/student/${classroom2.id}`)
         .set("Authorization", `Bearer ${student2.token}`);
 
       expect(status).toBe(403);

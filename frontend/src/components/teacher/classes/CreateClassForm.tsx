@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import InputWithChecks from '../../shared/InputWithChecks';
 import {
   validateForm,
+  validateMaxLength,
   validateRequired,
 } from '../../../util/shared/validation';
 import Container from '../../shared/Container';
@@ -61,9 +62,10 @@ const CreateClass: React.FC = () => {
               label={t('class.name.label')}
               inputType="text"
               validate={(value: string) =>
-                validateForm(value, [validateRequired])
+                validateForm(value, [validateRequired, (value) => validateMaxLength(value, 50)])
               }
               placeholder={t('class.name.placeholder')}
+              max={50}
             />
             {isError && (
               <div className="c-r">

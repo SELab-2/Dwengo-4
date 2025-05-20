@@ -1,62 +1,50 @@
-import React, { useImperativeHandle, useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import JoinRequestForm from '@/components/student/classes/JoinRequestForm';
-import * as httpStudent from '@/util/student/httpStudent';
+import * as httpStudent from '@/util/student/classJoin';
 
+// Mock translation
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    // eenvoudige “vertaling”
-    t: (k: string, o?: Record<string, unknown>) =>
-      k === 'deadline' ? `Deadline: ${o?.date}` : k,
+    t: (k: string, opts?: Record<string, unknown>) =>
+      k === 'deadline' ? `Deadline: ${opts?.date}` : k,
   }),
 }));
 
-vi.mock('@/components/shared/InputWithChecks', () => {
-  type Props = { label: string; placeholder?: string };
-
-  const Stub = React.forwardRef<
+// Stub shared components with stateful input
+vi.mock('@/components/shared/InputWithChecks', () => ({
+  __esModule: true,
+  default: forwardRef<
     { validateInput: () => boolean; getValue: () => string },
-    Props
+    { label: string; placeholder?: string }
   >(({ label, placeholder }, ref) => {
-    const [value, setValue] = useState('');
+    const [val, setVal] = useState('');
     useImperativeHandle(ref, () => ({
-      validateInput: () => value.trim().length > 0,
-      getValue: () => value,
+      validateInput: () => val.trim().length > 0,
+      getValue: () => val,
     }));
     return (
       <input
         aria-label={label}
         placeholder={placeholder}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
+        value={val}
+        onChange={(e) => setVal(e.target.value)}
       />
     );
-  });
+  }),
+}));
 
-  return { default: Stub };
-});
-
-const openSpy = vi.fn();
-
-vi.mock('@/components/shared/Modal', () => {
-  type Handle = { open: () => void; close: () => void };
-  type Props = React.PropsWithChildren;
-
-  const Stub = React.forwardRef<Handle, Props>(({ children }, ref) => {
-    useImperativeHandle(ref, () => ({ open: openSpy, close: vi.fn() }));
-    return (
-      <div role="dialog" data-testid="modal">
-        {children}
-      </div>
-    );
-  });
-
-  return { default: Stub };
-});
-
+// Stub Modal and SuccessMessage
+vi.mock('@/components/shared/Modal', () => ({
+  __esModule: true,
+  default: forwardRef((_, ref) => {
+    useImperativeHandle(ref, () => ({ open: vi.fn(), close: vi.fn() }));
+    return <div role="dialog" data-testid="modal" />;
+  }),
+}));
 vi.mock('@/components/shared/SuccessMessage', () => ({
   default: ({ title, description }: { title: string; description: string }) => (
     <div data-testid="success">
@@ -64,42 +52,6 @@ vi.mock('@/components/shared/SuccessMessage', () => ({
       {description}
     </div>
   ),
-}));
-
-function createPassthrough<Tag extends keyof JSX.IntrinsicElements>(
-  tag: Tag,
-  tid?: string,
-) {
-  return ({
-    children,
-    ...rest
-  }: React.PropsWithChildren<Record<string, unknown>>) =>
-    React.createElement(
-      tag,
-      { ...(tid ? { 'data-testid': tid } : {}), ...rest },
-      children,
-    );
-}
-
-vi.mock('@/components/shared/BoxBorder', () => ({
-  default: createPassthrough('div'),
-}));
-
-vi.mock('@/components/shared/Container', () => ({
-  default: createPassthrough('div', 'container'),
-}));
-
-vi.mock('@/components/shared/PrimaryButton', () => ({
-  default: ({
-    children,
-    ...rest
-  }: React.PropsWithChildren<Record<string, unknown>>) => (
-    <button {...rest}>{children}</button>
-  ),
-}));
-
-vi.mock('@/components/shared/LoadingIndicatorButton', () => ({
-  default: () => <span data-testid="loading">⋯</span>,
 }));
 
 const renderForm = () => {
@@ -114,19 +66,18 @@ const renderForm = () => {
 };
 
 describe('JoinRequestForm – student', () => {
-  const joinClassSpy = vi
-    .spyOn(httpStudent, 'joinClass')
-    .mockResolvedValue(undefined); // standaard: succes
+  let joinClassSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    joinClassSpy = vi
+      .spyOn(httpStudent, 'joinClass')
+      .mockResolvedValue(undefined);
   });
 
   it('valideert invoer: lege code ⇒ geen API-call', () => {
     renderForm();
-
     fireEvent.click(screen.getByRole('button', { name: 'join_class.submit' }));
-
     expect(joinClassSpy).not.toHaveBeenCalled();
   });
 
@@ -139,10 +90,8 @@ describe('JoinRequestForm – student', () => {
     fireEvent.click(screen.getByRole('button', { name: 'join_class.submit' }));
 
     await waitFor(() => {
-      expect(joinClassSpy).toHaveBeenCalledWith({
-        joinCode: 'ABC123',
-      });
-      expect(openSpy).toHaveBeenCalled();
+      expect(joinClassSpy).toHaveBeenCalledWith({ joinCode: 'ABC123' });
+      expect(screen.getByTestId('modal')).toBeInTheDocument();
     });
   });
 

@@ -13,10 +13,11 @@ export interface NodeMetadata {
   dwengoLanguage?: string;
   dwengoVersion?: number;
   start_node?: boolean;
+  nodeId?: string; // optional, only for existing nodes
 }
 
 /**
- * GET /teacher/learningPath/:learningPathId/node
+ * GET /learningPath/:learningPathId/node
  */
 export const getNodesForPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
@@ -26,6 +27,7 @@ export const getNodesForPath = asyncHandler(
     const nodes = await localLearningPathNodeService.getAllNodesForPath(
       teacherId,
       learningPathId,
+      true, // include learning object info
     );
     res.json(nodes);
   },
@@ -62,7 +64,7 @@ export const createNodeForPath = asyncHandler(
 );
 
 /**
- * PATCH /teacher/learningPaths/:learningPathId/nodes/:nodeId
+ * PATCH /learningPaths/:learningPathId/nodes/:nodeId
  * -> partial update of node
  */
 export const updateNodeForPath = asyncHandler(
@@ -94,7 +96,7 @@ export const updateNodeForPath = asyncHandler(
 );
 
 /**
- * DELETE /teacher/learningPaths/:learningPathId/nodes/:nodeId
+ * DELETE /learningPaths/:learningPathId/nodes/:nodeId
  */
 export const deleteNodeFromPath = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {

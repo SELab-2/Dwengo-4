@@ -1,14 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import styles from './TeamCreationModal.module.css';
 import { FaMinus, FaTrash } from 'react-icons/fa';
-import { ClassItem, StudentItem, Team } from '../../../types/type';
+import { ClassItem, StudentItem } from '../../../types/type';
 import { useTranslation } from 'react-i18next';
+
+interface TeamUser {
+  user: StudentItem;
+}
+
+interface TeamDetail {
+  id: string;
+  teamname: string;
+  classId: string;
+  students: TeamUser[];
+}
+
+interface TeamHead {
+  assignmentId: number;
+  teamId: string;
+  team: TeamDetail;
+}
 
 interface Props {
   classes: ClassItem[];
   onClose: () => void;
-  teams: Record<string, Team[]>;
-  setTeams: (teams: Record<string, Team[]>) => void;
+  teams: Record<string, TeamHead[]>;
+  setTeams: (teams: Record<string, TeamHead[]>) => void;
   teamSize: number;
   selectedClasses: ClassItem[];
   isIndividual?: boolean;
@@ -35,32 +52,38 @@ const TeamCreationModal = ({
   const { t } = useTranslation();
 
   useEffect(() => {
-    const studentsInTeams = selectedClass
-      ? (teams[selectedClass.id]?.flatMap((team) =>
-          team.students.map((member) => member.id),
-        ) ?? [])
-      : [];
+    if (!selectedClass) {
+      setAvailableStudents([]);
+      setSelectedStudents([]);
+      return;
+    }
 
-    const availableStuds =
-      selectedClass?.students?.filter(
-        (student: StudentItem) => !studentsInTeams.includes(student.id),
-      ) ?? [];
+    const classTeams = teams[selectedClass.id] || [];
+
+    const studentsInTeams = classTeams.flatMap((teamHead) =>
+      teamHead.team.students.map((member) => member.user.id),
+    );
+
+    const availableStuds = selectedClass.students.filter(
+      (student) => !studentsInTeams.includes(student.id),
+    );
+
     setAvailableStudents(availableStuds);
-
-    // Clear selected students when switching classes
     setSelectedStudents([]);
   }, [teams, selectedClass]);
 
+
   const handleChangeClass = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const classId = Number(e.target.value);
-    const classItem = classes.find((c) => Number(c.id) === classId);
-    setSelectedClass(classItem || null);
+    const classId = e.target.value;
+    const classItem = classes.find((c) => Number(c.id) === Number(classId)) || null;
+    
+    setSelectedClass(classItem);
   };
 
-  const getNextTeamNumber = (classTeams: Team[]) => {
-    if (!classTeams || classTeams.length === 0) return 1;
-    const numbers = classTeams.map((team) => {
-      const match = team.id.match(/\d+$/);
+  const getNextTeamNumber = (classTeams: TeamHead[]) => {
+    if (classTeams.length === 0) return 1;
+    const numbers = classTeams.map((teamHead) => {
+      const match = teamHead.team.id.match(/\d+$/);
       return match ? parseInt(match[0]) : 0;
     });
     return Math.max(...numbers) + 1;
@@ -100,27 +123,35 @@ const TeamCreationModal = ({
     }
 
     const classTeams = teams[selectedClass.id] || [];
-    const newTeam: Team = {
-      id: `team-${getNextTeamNumber(classTeams)}`,
-      students: selectedStudents,
+    const nextTeamNumber = getNextTeamNumber(classTeams);
+
+    const newTeamDetail: TeamDetail = {
+      id: `team-${nextTeamNumber}`,
+      teamname: `team-${nextTeamNumber}`,
+      classId: selectedClass.id,
+      students: selectedStudents.map((student) => ({ user: student })),
+    };
+
+    const newTeamHead: TeamHead = {
+      assignmentId: 0, // pas aan indien nodig
+      teamId: newTeamDetail.id,
+      team: newTeamDetail,
     };
 
     setTeams({
       ...teams,
-      [selectedClass.id]: [...classTeams, newTeam],
+      [selectedClass.id]: [...classTeams, newTeamHead],
     });
+
     setSelectedStudents([]);
   };
 
   const deleteTeam = (classId: string, teamId: string) => {
     const classTeams = teams[classId] || [];
-    const team = classTeams.find((t) => t.id === teamId);
-    if (team) {
-      setTeams({
-        ...teams,
-        [classId]: classTeams.filter((t) => t.id !== teamId),
-      });
-    }
+    setTeams({
+      ...teams,
+      [classId]: classTeams.filter((teamHead) => teamHead.team.id !== teamId),
+    });
   };
 
   const removeFromTeam = (
@@ -129,37 +160,63 @@ const TeamCreationModal = ({
     student: StudentItem,
   ) => {
     const classTeams = teams[classId] || [];
-    setTeams({
-      ...teams,
-      [classId]: classTeams.map((team) => {
-        if (team.id === teamId) {
+    const updatedTeams = classTeams
+      .map((teamHead) => {
+        if (teamHead.team.id === teamId) {
+          const newStudents = teamHead.team.students.filter(
+            (member) => member.user.id !== student.id,
+          );
+          if (newStudents.length === 0) return null; // verwijder leeg team
           return {
-            ...team,
-            students: team.students.filter((m) => m.id !== student.id),
+            ...teamHead,
+            team: {
+              ...teamHead.team,
+              students: newStudents,
+            },
           };
         }
-        return team;
-      }),
+        return teamHead;
+      })
+      .filter((t): t is TeamHead => t !== null);
+
+    setTeams({
+      ...teams,
+      [classId]: updatedTeams,
     });
   };
 
   const generateRandomTeams = () => {
     if (!selectedClass) return;
 
-    const shuffledStudents = [...availableStudents].sort(
-      () => Math.random() - 0.5,
+    const classTeams = teams[selectedClass.id] || [];
+
+    const studentsInTeams = classTeams.flatMap((teamHead) =>
+      teamHead.team.students.map((member) => member.user.id),
     );
-    const newTeams: Team[] = [];
+
+    const availableStudents = selectedClass.students.filter(
+      (student) => !studentsInTeams.includes(student.id),
+    );
+
+    const shuffledStudents = [...availableStudents].sort(() => Math.random() - 0.5);
+    const newTeams: TeamHead[] = [];
 
     for (let i = 0; i < shuffledStudents.length; i += teamSize) {
       const teamMembers = shuffledStudents.slice(i, i + teamSize);
       if (teamMembers.length === teamSize) {
-        const teamNumber =
-          getNextTeamNumber(teams[selectedClass.id] || []) +
-          Math.floor(i / teamSize);
-        newTeams.push({
+        const teamNumber = getNextTeamNumber(classTeams) + Math.floor(i / teamSize);
+
+        const newTeamDetail: TeamDetail = {
           id: `team-${teamNumber}`,
-          students: teamMembers,
+          teamname: `team-${teamNumber}`,
+          classId: selectedClass.id,
+          students: teamMembers.map((student) => ({ user: student })),
+        };
+
+        newTeams.push({
+          assignmentId: 0, // pas aan indien nodig
+          teamId: newTeamDetail.id,
+          team: newTeamDetail,
         });
       }
     }
@@ -170,6 +227,33 @@ const TeamCreationModal = ({
     });
   };
 
+  const addToExistingTeam = (teamHead: TeamHead) => {
+    if (!selectedClass || selectedStudents.length === 0) return;
+
+    const classTeams = teams[selectedClass.id] || [];
+    const updatedTeams = classTeams.map(th => {
+      if (th.team.id === teamHead.team.id) {
+        return {
+          ...th,
+          team: {
+            ...th.team,
+            students: [
+              ...th.team.students,
+              ...selectedStudents.map(student => ({ user: student }))
+            ]
+          }
+        };
+      }
+      return th;
+    });
+
+    setTeams({
+      ...teams,
+      [selectedClass.id]: updatedTeams
+    });
+    setSelectedStudents([]);
+  };
+
   return (
     <div className={styles.modal}>
       <div className={styles.content}>
@@ -178,15 +262,14 @@ const TeamCreationModal = ({
             ? t('assignments_form.assign_team.select_student')
             : t('assignments_form.assign_team.select_team')}
         </h2>
+
         {isIndividual ? (
           <p>{t('assignments_form.assign_team.student_help')}</p>
         ) : (
-          <p>
-            {t('assignments_form.assign_team.team_help', { size: teamSize })}
-          </p>
+          <p>{t('assignments_form.assign_team.team_help', { size: teamSize })}</p>
         )}
 
-        <select onChange={handleChangeClass}>
+        <select onChange={handleChangeClass} value={selectedClass?.id || ''}>
           {selectedClasses.map((classItem) => (
             <option key={classItem.id} value={classItem.id}>
               {classItem.name}
@@ -207,13 +290,12 @@ const TeamCreationModal = ({
                 {selectedClass?.students.map((student) => (
                   <div
                     key={student.id}
-                    className={`${styles.student} ${
-                      individualStudents[selectedClass.id]?.some(
-                        (s) => s.id === student.id,
-                      )
-                        ? styles.selected
-                        : ''
-                    }`}
+                    className={`${styles.student} ${individualStudents[selectedClass.id]?.some(
+                      (s) => s.id === student.id,
+                    )
+                      ? styles.selected
+                      : ''
+                      }`}
                     onClick={() => handleIndividualStudentSelect(student)}
                   >
                     {student.firstName} {student.lastName}
@@ -228,11 +310,10 @@ const TeamCreationModal = ({
                 {availableStudents.map((student) => (
                   <div
                     key={student.id}
-                    className={`${styles.student} ${
-                      selectedStudents.find((s) => s.id === student.id)
-                        ? styles.selected
-                        : ''
-                    }`}
+                    className={`${styles.student} ${selectedStudents.find((s) => s.id === student.id)
+                      ? styles.selected
+                      : ''
+                      }`}
                     onClick={() => handleStudentSelect(student)}
                   >
                     {student.firstName} {student.lastName}
@@ -243,22 +324,29 @@ const TeamCreationModal = ({
               <div className={styles.teams}>
                 <h3>{t('assignments_form.assign_team.teams')}</h3>
                 {selectedClass &&
-                  teams[selectedClass.id]?.map((team) => (
-                    <div key={team.id} className={styles.team}>
+                  teams[selectedClass.id]?.map((teamHead) => (
+                    <div
+                      key={teamHead.team.id}
+                      className={`${styles.team} ${selectedStudents.length > 0 ? styles.clickableTeam : ''}`}
+                      onClick={() => selectedStudents.length > 0 && addToExistingTeam(teamHead)}
+                    >
                       <div className={styles.teamHeader}>
-                        <h4>{team.id}</h4>
+                        <h4>{teamHead.team.teamname}</h4>
                         <button
-                          onClick={() => deleteTeam(selectedClass.id, team.id)}
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent team click when deleting
+                            deleteTeam(selectedClass.id, teamHead.team.id);
+                          }}
                         >
                           <FaTrash />
                         </button>
                       </div>
-                      {team.students.map((member) => (
-                        <div key={member.id} className={styles.teamMember}>
-                          {member.firstName} {member.lastName}
+                      {teamHead.team.students.map((member) => (
+                        <div key={member.user.id} className={styles.teamMember}>
+                          {member.user.firstName} {member.user.lastName}
                           <button
                             onClick={() =>
-                              removeFromTeam(selectedClass.id, team.id, member)
+                              removeFromTeam(selectedClass.id, teamHead.team.id, member.user)
                             }
                           >
                             <FaMinus />
@@ -273,7 +361,7 @@ const TeamCreationModal = ({
         </div>
 
         <div className={styles.actions}>
-          {!isIndividual && (
+          {!isIndividual ? (
             <>
               <button onClick={generateRandomTeams} disabled={!selectedClass}>
                 {t('assignments_form.assign_team.generate_random_teams')}
@@ -286,6 +374,21 @@ const TeamCreationModal = ({
                 {selectedStudents.length}/{teamSize})
               </button>
             </>
+          ) : (
+            <button onClick={() => {
+              if (!selectedClass || !setIndividualStudents) return;
+              const classId = selectedClass.id;
+              const allSelected =
+                individualStudents[classId]?.length === selectedClass.students.length;
+              setIndividualStudents({
+                ...individualStudents,
+                [classId]: allSelected ? [] : [...selectedClass.students],
+              });
+            }}>
+              {individualStudents[selectedClass?.id || '']?.length === selectedClass?.students.length
+                ? t('assignments_form.assign_team.deselect_all')
+                : t('assignments_form.assign_team.select_all')}
+            </button>
           )}
           <button onClick={onClose}>{t('close')}</button>
         </div>

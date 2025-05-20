@@ -5,9 +5,10 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import ClassesStudent from '@/components/student/ClassesStudent';
-import * as httpStudent from '@/util/student/httpStudent';
-import type { ClassItem } from '@/util/student/httpStudent';
+import * as classModule from '@/util/student/class';
+import type { ClassItem } from '@/types/type';
 
+// Mock translation
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => {
@@ -22,13 +23,14 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+// Mock navigation
 const mockedNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
-  const act =
+  const actual =
     await vi.importActual<typeof import('react-router-dom')>(
       'react-router-dom',
     );
-  return { ...act, useNavigate: () => mockedNavigate };
+  return { ...actual, useNavigate: () => mockedNavigate };
 });
 
 const createClient = () =>
@@ -49,7 +51,7 @@ afterEach(() => {
 
 describe('ClassesStudent – student', () => {
   it('toont laadstatus', async () => {
-    vi.spyOn(httpStudent, 'fetchClasses').mockReturnValue(
+    vi.spyOn(classModule, 'fetchClasses').mockReturnValue(
       new Promise(() => {}), // blijft hangen
     );
 
@@ -59,7 +61,7 @@ describe('ClassesStudent – student', () => {
   });
 
   it('toont foutmelding met custom message', async () => {
-    vi.spyOn(httpStudent, 'fetchClasses').mockRejectedValue({
+    vi.spyOn(classModule, 'fetchClasses').mockRejectedValue({
       info: { message: 'Er ging iets mis' },
     });
 
@@ -71,7 +73,7 @@ describe('ClassesStudent – student', () => {
   });
 
   it('toont standaard foutmelding zonder message', async () => {
-    vi.spyOn(httpStudent, 'fetchClasses').mockRejectedValue({});
+    vi.spyOn(classModule, 'fetchClasses').mockRejectedValue({});
 
     renderComponent();
 
@@ -85,7 +87,7 @@ describe('ClassesStudent – student', () => {
       { id: 1, name: 'Klas A' },
       { id: 2, name: 'Klas B' },
     ];
-    vi.spyOn(httpStudent, 'fetchClasses').mockResolvedValue(data);
+    vi.spyOn(classModule, 'fetchClasses').mockResolvedValue(data);
 
     renderComponent();
 
@@ -99,7 +101,7 @@ describe('ClassesStudent – student', () => {
   });
 
   it('toont not-found boodschap bij lege lijst', async () => {
-    vi.spyOn(httpStudent, 'fetchClasses').mockResolvedValue([]);
+    vi.spyOn(classModule, 'fetchClasses').mockResolvedValue([]);
 
     renderComponent();
 

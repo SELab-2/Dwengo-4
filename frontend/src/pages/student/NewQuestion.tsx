@@ -1,8 +1,8 @@
 import PrimaryButton from '@/components/shared/PrimaryButton';
 import { createNewQuestion } from '@/util/student/questions';
-import React from 'react';
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const NewQuestion = () => {
   const { assignmentId } = useParams();
@@ -26,10 +26,11 @@ const NewQuestion = () => {
     console.log('frontendresp', await frontendresp);
     navigate(`/student/question/${frontendresp.questionGen.questionId}`);
   };
+  const { t } = useTranslation();
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <p className="text-3xl mb-2">Stel een vraag</p>
+      <p className="text-3xl mb-2">{t('questions.ask_question')}</p>
 
       {error && (
         <div className="bg-red-50 text-red-700 p-3 rounded-md mb-4">
@@ -39,14 +40,14 @@ const NewQuestion = () => {
 
       {success && (
         <div className="bg-green-50 text-green-700 p-3 rounded-md mb-4">
-          Question created successfully!
+          {t('questions.form.success')}
         </div>
       )}
 
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label htmlFor="title" className="block mb-1 font-medium">
-            Titel
+            {t('questions.form.title')}
           </label>
           <input
             id="title"
@@ -60,7 +61,7 @@ const NewQuestion = () => {
 
         <div className="mb-4">
           <label htmlFor="text" className="block mb-1 font-medium">
-            Vraag
+            {t('questions.form.question')}
           </label>
           <textarea
             id="text"
@@ -74,7 +75,7 @@ const NewQuestion = () => {
         <div className="mb-6 space-y-2">
           <div className="mt-4">
             <label htmlFor="language" className="block mb-1 font-medium">
-              Taal
+              {t('questions.form.languages.label')}
             </label>
             <select
               id="language"
@@ -84,9 +85,9 @@ const NewQuestion = () => {
                 setDwengoLanguage(e.target.value);
               }}
             >
-              <option value="nl">Nederlands</option>
-              <option value="en">Engels</option>
-              <option value="fr">Frans</option>
+              <option value="nl">{t('questions.form.languages.nl')}</option>
+              <option value="en">{t('questions.form.languages.en')}</option>
+              <option value="fr">{t('questions.form.languages.fr')}</option>
             </select>
           </div>
         </div>
@@ -97,9 +98,9 @@ const NewQuestion = () => {
             onClick={() => navigate(-1)}
             className="px-4 py-2 border text-gray-700 hover:cursor-pointer rounded-md"
           >
-            Ga terug
+            {t('questions.form.back')}
           </button>
-          <PrimaryButton>Stel Vraag</PrimaryButton>
+          <PrimaryButton>{t('questions.form.submit')}</PrimaryButton>
         </div>
       </form>
     </div>

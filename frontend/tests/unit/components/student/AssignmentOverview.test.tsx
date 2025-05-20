@@ -1,13 +1,14 @@
 import React from 'react';
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, afterEach, expect, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, LinkProps } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import AssignmentOverview from '@/components/student/AssignmentOverview';
-import * as httpStudent from '@/util/student/httpStudent';
-import type { AssignmentItem } from '@/util/student/httpStudent';
+import * as assignmentModule from '@/util/student/assignment';
+import type { AssignmentItem } from '@/util/student/assignment';
 
+// Mock translation
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, opts?: Record<string, unknown>) => {
@@ -21,14 +22,28 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
-const createQueryClient = () =>
-  new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
+// Mock Link component with proper typing
+vi.mock('react-router-dom', async () => {
+  const actual =
+    await vi.importActual<typeof import('react-router-dom')>(
+      'react-router-dom',
+    );
+  const StubLink: React.FC<LinkProps> = ({ children, to, ...rest }) => (
+    <a href={typeof to === 'string' ? to : ''} {...rest}>
+      {children}
+    </a>
+  );
+  return { ...actual, Link: StubLink };
+});
 
+// Disable query retries
+const createClient = () =>
+  new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+// Render component helper
 const renderComponent = () =>
   render(
-    <QueryClientProvider client={createQueryClient()}>
+    <QueryClientProvider client={createClient()}>
       <BrowserRouter>
         <AssignmentOverview />
       </BrowserRouter>
@@ -39,33 +54,29 @@ afterEach(() => vi.clearAllMocks());
 
 describe('AssignmentOverview – student', () => {
   it('toont laadstatus', async () => {
-    vi.spyOn(httpStudent, 'fetchAssignments').mockReturnValue(
-      // never resolves => blijft in loading-state
-      new Promise(() => {}),
+    vi.spyOn(assignmentModule, 'fetchAssignments').mockReturnValue(
+      new Promise<AssignmentItem[]>(() => {}),
     );
 
     renderComponent();
-
     expect(await screen.findByText('Laden...')).toBeInTheDocument();
   });
 
-  it('toont foutmelding (met custom message)', async () => {
-    vi.spyOn(httpStudent, 'fetchAssignments').mockRejectedValue({
+  it('toont foutmelding met custom message', async () => {
+    vi.spyOn(assignmentModule, 'fetchAssignments').mockRejectedValue({
       info: { message: 'Er ging iets mis' },
     });
 
     renderComponent();
-
     await waitFor(() =>
       expect(screen.getByText(/Er ging iets mis/)).toBeInTheDocument(),
     );
   });
 
   it('toont standaard foutmelding zonder message', async () => {
-    vi.spyOn(httpStudent, 'fetchAssignments').mockRejectedValue({});
+    vi.spyOn(assignmentModule, 'fetchAssignments').mockRejectedValue({});
 
     renderComponent();
-
     await waitFor(() =>
       expect(screen.getByText('Er is een fout opgetreden')).toBeInTheDocument(),
     );
@@ -86,10 +97,9 @@ describe('AssignmentOverview – student', () => {
         deadline: '2025-06-01T12:00:00Z',
       },
     ];
-    vi.spyOn(httpStudent, 'fetchAssignments').mockResolvedValue(data);
+    vi.spyOn(assignmentModule, 'fetchAssignments').mockResolvedValue(data);
 
     renderComponent();
-
     expect(await screen.findByText('Opdracht 1')).toBeInTheDocument();
     expect(screen.getByText('Opdracht 2')).toBeInTheDocument();
     // beide deadlines zichtbaar
@@ -99,10 +109,9 @@ describe('AssignmentOverview – student', () => {
   });
 
   it('toont not-found boodschap bij lege lijst', async () => {
-    vi.spyOn(httpStudent, 'fetchAssignments').mockResolvedValue([]);
+    vi.spyOn(assignmentModule, 'fetchAssignments').mockResolvedValue([]);
 
     renderComponent();
-
     expect(
       await screen.findByText('Geen opdrachten gevonden'),
     ).toBeInTheDocument();
