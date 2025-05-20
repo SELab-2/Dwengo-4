@@ -109,6 +109,7 @@ export async function updateOrCreateLearningPath({
       getToken: getAuthToken,
     });
   }
+  console.log()
 
   return response.learningPath;
 }

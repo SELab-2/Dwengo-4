@@ -1,16 +1,23 @@
-
 /* LearningObjectContent.tsx */
 import React from 'react';
 import { MathJax } from 'better-react-mathjax';
 import MultipleChoiceQuestion from './MultipleChoiceQuestion';
 import OpenPrompt from './OpenPrompt';
 
-const LearningObjectContent: React.FC<{ rawHtml: string }> = ({ rawHtml }) => {
-  // for blockly iframes, replace with simulator button
+interface Props {
+  rawHtml: string;
+  /** Wordt aangeroepen met de gekozen antwoord-index voor een MC-vraag */
+  onChooseTransition: (choiceIndex: number) => void;
+  /** Optioneel: eerder gemaakte keuze voor deze nodeId */
+  initialSelectedIdx?: number;
+}
+
+const LearningObjectContent: React.FC<Props> = ({ rawHtml, onChooseTransition, initialSelectedIdx }) => {
+  // Blockly-iframe-fix
   const modifiedHtml = rawHtml
-    .replace(/action="([^"]*\/)readonly([^\"]*)"/g, 'action="$1simulator$2"')
+    .replace(/action="([^\"]*\/)readonly([^\"]*)"/g, 'action="$1simulator$2"')
     .replace(
-      /<iframe[^>]*name="blockly_iframe_([^"]+)"[^>]*><\/iframe>/g,
+      /<iframe[^>]*name="blockly_iframe_([^\"]+)"[^>]*><\/iframe>/g,
       (_, id) => `
         <button type="button" onclick="document.getElementById('blockly_form_${id}').submit();" style="
           margin-top: 5px;
@@ -26,19 +33,26 @@ const LearningObjectContent: React.FC<{ rawHtml: string }> = ({ rawHtml }) => {
       `,
     );
 
-  // probeer JSON te parsen voor interactieve vragen
+  // Probeer JSON te parsen voor interactieve vragen
   try {
     const data = JSON.parse(rawHtml);
     if (data && typeof data.prompt === 'string') {
-      if (Array.isArray(data.options) && data.options[0]) {
-        return <MultipleChoiceQuestion prompt={data.prompt} options={data.options} />;
+      if (Array.isArray(data.options) && data.options.length) {
+        return (
+          <MultipleChoiceQuestion
+            prompt={data.prompt}
+            options={data.options}
+            onSubmit={onChooseTransition}
+            initialSelectedIdx={initialSelectedIdx}
+          />
+        );
       }
       if (typeof data.answer === 'string') {
         return <OpenPrompt prompt={data.prompt} answer={data.answer} />;
       }
     }
   } catch {
-    // ongeldig JSON: fallback
+    /* geen JSON, gewoon HTML tonen */
   }
 
   return (

@@ -1,14 +1,15 @@
-import React from 'react';
-import { LearningPath, LearningObject } from '../../types/type';
-import PathHeader from './PathHeader';
-import Legend from './Legend';
-import LearningObjectsList from './LearningObjectsList';
+/* Sidebar.tsx */
+import React from "react";
+import { LearningPath } from "../../types/type";
+import PathHeader from "./PathHeader";
+import Legend from "./Legend";
+import LearningObjectsList, { BranchItem } from "./LearningObjectsList";
 
 interface Props {
   t: (key: string) => string;
   learningPath: LearningPath | null;
-  learningObjects?: LearningObject[];
-  selectedLO: LearningObject | null;
+  items?: BranchItem[];
+  selectedNodeId: string | null;
   progress: number;
   isStudent: boolean;
   isLoadingPath: boolean;
@@ -17,14 +18,15 @@ interface Props {
   isLoadingLO: boolean;
   isErrorLO: boolean;
   errorLO: any;
-  onSelectLO: (lo: LearningObject | null) => void;
+  /** Klik‐handler met nodeId */
+  onSelectNode: (nodeId: string) => void;
 }
 
 const Sidebar: React.FC<Props> = ({
   t,
   learningPath,
-  learningObjects,
-  selectedLO,
+  items,
+  selectedNodeId,
   progress,
   isStudent,
   isLoadingPath,
@@ -33,7 +35,7 @@ const Sidebar: React.FC<Props> = ({
   isLoadingLO,
   isErrorLO,
   errorLO,
-  onSelectLO,
+  onSelectNode,
 }) => (
   <aside className="p-4 space-y-5 max-w-[405px] w-full overflow-y-scroll bg-white">
     <PathHeader
@@ -50,12 +52,12 @@ const Sidebar: React.FC<Props> = ({
 
     <LearningObjectsList
       t={t}
-      learningObjects={learningObjects}
-      selectedLO={selectedLO}
+      items={items}
+      selectedNodeId={selectedNodeId}
       isLoading={isLoadingLO}
       isError={isErrorLO}
       error={errorLO}
-      onSelectLO={onSelectLO}
+      onSelectNode={onSelectNode}
     />
   </aside>
 );

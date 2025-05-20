@@ -1,3 +1,4 @@
+/* MainContent.tsx */
 import React, { forwardRef } from 'react';
 import { LearningPath, LearningObject } from '../../types/type';
 import LearningObjectContent from './learningObjectContent';
@@ -7,12 +8,29 @@ interface Props {
   selectedLO: LearningObject | null;
   nextLO: LearningObject | null;
   onSelectLO: (lo: LearningObject | null) => void;
+  /** Komt uit MultipleChoiceQuestion → keuze-index voor transitions */
+  onChooseTransition: (choiceIndex: number) => void;
   progress: number;
+  /** Voor terugkeer: bewaar eerdere keuze */
+  initialSelectedIdx?: number;
+
   t: (key: string) => string;
 }
 
 const MainContent = forwardRef<HTMLDivElement, Props>(
-  ({ learningPath, selectedLO, nextLO, onSelectLO, progress, t }, ref) => (
+  (
+    {
+      learningPath,
+      selectedLO,
+      nextLO,
+      onSelectLO,
+      onChooseTransition,
+      progress,
+      initialSelectedIdx,
+      t,
+    },
+    ref,
+  ) => (
     <main
       ref={ref}
       className="border-l border-gray-200 w-full p-6 pb-[74px] max-h-[calc(100vh-80px)] overflow-y-auto relative"
@@ -24,7 +42,21 @@ const MainContent = forwardRef<HTMLDivElement, Props>(
         </>
       ) : (
         <div className="w-full max-w-3xl">
-          <LearningObjectContent rawHtml={selectedLO.raw || ''} />
+          {/* Key op nodeId forceren remount van de vraag */}
+          {(() => {
+            const node = learningPath?.nodes.find(
+              n => n.localLearningObjectId === selectedLO.id
+            );
+            const key = node?.nodeId ?? selectedLO.id;
+            return (
+              <LearningObjectContent
+                key={key}
+                rawHtml={selectedLO.raw || ''}
+                onChooseTransition={onChooseTransition}
+                initialSelectedIdx={initialSelectedIdx}
+              />
+            );
+          })()}
 
           <div className="mt-8 flex justify-end">
             <button
@@ -36,7 +68,9 @@ const MainContent = forwardRef<HTMLDivElement, Props>(
               disabled={progress === 100 || !nextLO}
               onClick={() => onSelectLO(nextLO)}
             >
-              {nextLO ? `${t('learning_objects.next')}: ${nextLO.title}` : t('learning_objects.end')}
+              {nextLO
+                ? `${t('learning_objects.next')}: ${nextLO.title}`
+                : t('learning_objects.end')}
             </button>
           </div>
         </div>

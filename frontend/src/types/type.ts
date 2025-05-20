@@ -19,7 +19,11 @@ interface LearningPath {
   updatedAt: string;
   language: string;
   image?: string;
+  nodes: LearningPathNode[];
+  transitions: LearningPathTransition[];
 }
+
+
 
 interface LearningPathTransition {
   id: string;
@@ -115,7 +119,7 @@ interface TeamAssignment {
   };
 }
 
- interface Transition {
+interface Transition {
   nodeId: string;
   nextNodeId: string | null;
   default: boolean;
