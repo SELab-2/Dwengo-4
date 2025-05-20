@@ -312,10 +312,7 @@ export default class TeacherAssignmentService {
               },
             });
           } else {
-            // Create new team
-            console.log(
-              `Creating new team for class ${classId} with teamname ${newTeam.teamName}`,
-            );
+            
             await tx.team.create({
               data: {
                 teamname: newTeam.teamName,

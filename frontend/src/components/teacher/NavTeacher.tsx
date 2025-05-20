@@ -80,6 +80,7 @@ const NavTeacher: React.FC = () => {
             <div className="flex items-center space-x-4">
               <span>{t('nav.logged_in_as', { name: firstName })}</span>
               <LanguageChooser />
+
               <button
                 className="text-gray-700 hover:cursor-pointer hover:text-gray-600"
                 aria-label="Notifications"

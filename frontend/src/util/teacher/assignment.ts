@@ -2,7 +2,7 @@ import { AssignmentPayload, Team, TeamAssignment } from '@/types/type';
 import { APIError } from '@/types/api.types';
 import { apiRequest, BACKEND } from '../shared/config';
 import { getAuthToken } from './authTeacher';
-
+import { Assignment } from '@prisma/client';
 /**
  * Fetches all assignments for a class
  * @param {string} classId - The ID of the class
@@ -43,7 +43,7 @@ export async function fetchAssignment(
   assignmentId: string,
   includeClass: boolean = false,
   includeTeams: boolean = false,
-): Promise<AssignmentPayload> {
+): Promise<Assignment> {
   const response = await fetch(
     `${BACKEND}/assignment/${assignmentId}?includeClass=${includeClass}&includeTeams=${includeTeams}`,
     {
@@ -155,6 +155,7 @@ export async function updateAssignment({
   classTeams,
   teamSize,
 }: AssignmentPayload): Promise<void> {
+
   await apiRequest({
     method: 'PATCH',
     endpoint: `/assignment/teacher/team/${id}`,

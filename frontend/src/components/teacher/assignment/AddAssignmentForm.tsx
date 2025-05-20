@@ -45,9 +45,7 @@ const buildAssignmentPayload = ({
 }) => {
   // Convert teams object keys from string to number
   const teamsWithNumberKeys: Record<number, Team[]> = {};
-
   if (assignmentType === 'group') {
-    console.log('Teams:', teams);
     // Convert teams object keys from string to number
     Object.entries(teams).forEach(([key, team]) => {
       teamsWithNumberKeys[Number(key)] = team.map((team) => ({
@@ -59,7 +57,6 @@ const buildAssignmentPayload = ({
         ),
       }));
     });
-    console.log('Teams with number keys:', teamsWithNumberKeys);
   } else {
     selectedClasses.forEach((classItem) => {
       const selectedStudents = individualStudents[classItem.id] || [];
@@ -152,17 +149,16 @@ const AddAssignmentForm = ({
   } = useQuery<LearningPath[], Error>({
     queryKey: ['learningPaths'],
     queryFn: fetchLearningPaths,
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
-
   /**
    * Populates form with existing assignment data when in edit mode
    */
   useEffect(() => {
-    console.log('Assignment Datagfdsfg:', assignmentData);
-
     if (isEditing && assignmentData) {
-      console.log('Assignment Datagfdsfg:', assignmentData);
       setTitle(assignmentData.title);
+
       setDescription(assignmentData.description);
       setDate(new Date(assignmentData.deadline).toISOString().split('T')[0]);
       setSelectedClasses(
@@ -213,7 +209,6 @@ const AddAssignmentForm = ({
       setSelectedClasses(filtered);
     }
   }, [classId, classesData]);
-
   useEffect(() => {
     setLearningPaths(learningPathsData || []);
     if (isEditing && assignmentData) {
@@ -317,7 +312,6 @@ const AddAssignmentForm = ({
 
     setIsSubmitting(true);
     setSubmitError(null);
-
     const payload = buildAssignmentPayload({
       title,
       description,
@@ -330,7 +324,7 @@ const AddAssignmentForm = ({
       individualStudents,
       assignmentId: assignmentData?.id?.toString(),
     });
-
+    $
     const action = isEditing ? updateAssignment : postAssignment;
 
     try {

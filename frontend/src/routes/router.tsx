@@ -66,6 +66,10 @@ const QuestionsForAssignment = lazy(
 const StudentClassIndex = lazy(
   () => import('../pages/student/StudentClassIndex'),
 );
+const LeaderBoard = lazy(() => import('../pages/student/LeaderBoard'));
+const LocalLearningObjectsPage = lazy(
+  () => import('@/pages/teacher/LocalLearningObject'),
+);
 
 // ==== LEARNING PATHS ==== //
 
@@ -124,6 +128,7 @@ export const router = createBrowserRouter([
       /* --- Publiek --- */
       { path: 'inloggen', element: <LoginTeacher /> },
       { path: 'registreren', element: <SignupTeacher /> },
+      { path: 'leaderboard', element: <LeaderBoard /> },
 
       /* --- Protected --- */
       {
@@ -183,6 +188,7 @@ export const router = createBrowserRouter([
       /* --- Publiek --- */
       { path: 'inloggen', element: <LoginStudent /> },
       { path: 'registreren', element: <SignupStudent /> },
+      { path: 'leaderboard', element: <LeaderBoard /> },
 
       /* --- Protected --- */
       {

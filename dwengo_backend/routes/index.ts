@@ -15,6 +15,7 @@ import teacherLocalLearningObjectRoutes from "./teacherMadeLearningObject/teache
 import teacherLocalLearningPathNodesRoutes from "./teacherMadeLearningPath/teacherLocalLearningPathNodesRoutes";
 import progressRoutes from "./progress/progressRoutes";
 import submissionRoutes from "./submission/submissionRoutes";
+import { getLeaderBoard } from "../controllers/leaderboard/leaderboardController";
 
 const router: Router = Router();
 
@@ -36,5 +37,6 @@ router.use(
 );
 router.use("/progress", progressRoutes);
 router.use("/submission", submissionRoutes);
+router.use("/leaderboard", getLeaderBoard);
 
 export default router;

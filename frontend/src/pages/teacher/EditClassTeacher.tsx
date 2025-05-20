@@ -6,7 +6,7 @@ import BoxBorder from '../../components/shared/BoxBorder';
 import InputWithChecks from '../../components/shared/InputWithChecks';
 import PrimaryButton from '../../components/shared/PrimaryButton';
 import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButton';
-import { validateForm, validateRequired } from '@/util/shared/validation';
+import { validateForm, validateMaxLength, validateRequired } from '@/util/shared/validation';
 import { ClassItem } from '@/types/type';
 import { fetchAssignments } from '@/util/teacher/assignment';
 import { fetchClass, updateClass } from '@/util/teacher/class';
@@ -25,7 +25,7 @@ const EditClassTeacher: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [className, setClassName] = useState<string>('');
-  const [filteredAssignments, setFilteredAssignments] = useState<any[]>([]);
+  const [filteredAssignments, setFilteredAssignments] = useState([]);
 
   const classNameRef = React.useRef<InputWithChecksRef | null>(null);
 
@@ -148,16 +148,16 @@ const EditClassTeacher: React.FC = () => {
     return (
       <button
         onClick={() => onClick(section)}
-        className={`px-7 h-10 font-bold rounded-md ${
-          isActive
-            ? 'bg-dwengo-green-darker pt-1 text-white border-gray-600 border-3'
-            : 'pt-1.5 bg-dwengo-green hover:bg-dwengo-green-dark text-white '
-        }`}
+        className={`px-7 h-10 font-bold rounded-md ${isActive
+          ? 'bg-dwengo-green-darker pt-1 text-white border-gray-600 border-3'
+          : 'pt-1.5 bg-dwengo-green hover:bg-dwengo-green-dark text-white '
+          }`}
       >
         {label}
       </button>
     );
   };
+
 
   // Then replace the renderSidebarItem function with:
   const renderSidebarItem = (section: SidebarSection, label: string) => {
@@ -175,87 +175,103 @@ const EditClassTeacher: React.FC = () => {
     switch (activeSection) {
       case 'overview':
         return (
-          <>
-            <Container>
-              <BoxBorder extraClasses="mxw-700 m-a g-20">
-                <h2>Huidige klasnaam: {className}</h2>
-              </BoxBorder>
-              <BoxBorder>
-                <h1>Klas Bewerken</h1>
-                <form className="g-20" onSubmit={handleFormSubmit}>
-                  <InputWithChecks
-                    ref={classNameRef}
-                    label="Klasnaam"
-                    inputType="text"
-                    validate={(value: string) =>
-                      validateForm(value, [validateRequired])
-                    }
-                    placeholder="Voer de naam van de klas in"
-                    value={className}
-                  />
-                  <div className="flex gap-4">
-                    <PrimaryButton type="submit" disabled={isPending}>
-                      Opslaan
-                      {isPending && <LoadingIndicatorButton />}
-                    </PrimaryButton>
-                    <button
-                      type="button"
-                      className={`px-7 h-10 font-bold rounded-md  bg-red-500 text-white hover:bg-red-700 hover:cursor-pointer`}
-                      onClick={handleDeleteClass}
-                    >
-                      Klas Verwijderen
-                    </button>
+          <div className="max-w-4xl mx-auto space-y-8">
+            {/* Class Info Section */}
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="flex justify-between items-start mb-8">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                    <span className="max-w-[400px] truncate inline-block align-bottom" title={className}>
+                      {className}
+                    </span>
+                  </h2>
+                  <p className="text-gray-500">Klas overzicht en instellingen</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-gray-500 mb-1">KLAS CODE</div>
+                  <div className="text-2xl font-mono bg-gray-50 px-4 py-2 rounded-md">
+                    {classData?.code}
                   </div>
-                </form>
-              </BoxBorder>
-            </Container>
+                </div>
+              </div>
 
-            <Container>
-              <BoxBorder extraClasses="">
-                <h2>Klas Code: {classData?.code}</h2>
-                <p>
-                  Deel deze code met leerlingen om ze uit te nodigen voor deze
-                  klas.
-                </p>
-                <PrimaryButton
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mt-2"
+              <div className="flex gap-4 mb-8">
+                <button
+                  onClick={() => navigator.clipboard.writeText(classData?.code || '')}
+                  className="flex-1 p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
+                  <div className="text-sm text-gray-500 mb-1">Deel code met leerlingen</div>
+                  <div className="font-medium">Kopieer klas code</div>
+                </button>
+                <button
                   onClick={async () => {
                     try {
                       const response = await fetch(
-                        `${
-                          import.meta.env.VITE_API_URL
-                        }/class/teacher/${classId}/join-link`,
+                        `${import.meta.env.VITE_API_URL}/class/teacher/${classId}/join-link`,
                         {
                           method: 'PATCH',
                           headers: {
                             'Content-Type': 'application/json',
-                            Authorization: `Bearer ${localStorage.getItem(
-                              'token',
-                            )}`,
+                            Authorization: `Bearer ${localStorage.getItem('token')}`,
                           },
                         },
                       );
-
-                      if (!response.ok) {
-                        throw new Error('Kon de klascode niet vernieuwen');
-                      }
-
-                      await queryClient.invalidateQueries({
-                        queryKey: ['class', classId],
-                      });
+                      if (!response.ok) throw new Error('Kon de klascode niet vernieuwen');
+                      await queryClient.invalidateQueries({ queryKey: ['class', classId] });
                     } catch (error) {
-                      console.error(
-                        'Fout bij het vernieuwen van de klascode:',
-                        error,
-                      );
+                      console.error('Fout bij het vernieuwen van de klascode:', error);
                     }
                   }}
+                  className="flex-1 p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                 >
-                  Genereer Nieuwe Code // TODO BORKED
-                </PrimaryButton>
-              </BoxBorder>
-            </Container>
-          </>
+                  <div className="text-sm text-gray-500 mb-1">Vernieuw klas code</div>
+                  <div className="font-medium">Genereer nieuwe code</div>
+                </button>
+              </div>
+
+              <div className="border-t pt-8">
+                <h3 className="text-lg font-semibold mb-4">Klas instellingen</h3>
+                <form className="space-y-6" onSubmit={handleFormSubmit}>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Klasnaam
+                    </label>
+                    <InputWithChecks
+                      ref={classNameRef}
+                      inputType="text"
+                      validate={(value: string) => validateForm(value, [validateRequired, (value) => validateMaxLength(value, 50)])}
+                      placeholder="Voer de naam van de klas in"
+                      value={className}
+                      max={50}
+                    />
+                  </div>
+
+                  <div className="flex justify-between pt-6">
+                    <button
+                      type="button"
+                      onClick={handleDeleteClass}
+                      className="text-red-600 hover:text-red-700 font-medium"
+                    >
+                      Verwijder klas
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isPending}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      {isPending ? (
+                        <span className="flex items-center gap-2">
+                          <LoadingIndicatorButton /> Opslaan...
+                        </span>
+                      ) : (
+                        'Wijzigingen opslaan'
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
         );
       case 'assignments':
         return (
@@ -275,7 +291,7 @@ const EditClassTeacher: React.FC = () => {
                   className="w-full p-2 mb-4 border rounded"
                   onChange={(e) => {
                     const searchQuery = e.target.value.toLowerCase();
-                    const filtered = assignments?.filter((assignment: any) =>
+                    const filtered = assignments?.filter((assignment) =>
                       assignment.title.toLowerCase().includes(searchQuery),
                     );
                     setFilteredAssignments(filtered || []);
@@ -294,7 +310,7 @@ const EditClassTeacher: React.FC = () => {
                   </div>
                 ) : (
                   <div className="grid gap-4">
-                    {filteredAssignments.map((assignment: any) => (
+                    {filteredAssignments.map((assignment) => (
                       <div
                         key={assignment.id}
                         onClick={() =>
@@ -374,16 +390,30 @@ const EditClassTeacher: React.FC = () => {
   return (
     <div className="flex">
       {/* Sidebar */}
-      <div className="w-64 bg-gray-100 min-h-screen p-4">
+      <div className="w-64  min-h-screen p-4">
         <h2 className="text-xl font-bold mb-4">
-          Dashboard voor {classData?.name}
+          Dashboard voor{' '}
+          <span className="max-w-[180px] truncate inline-block align-bottom" title={classData?.name}>
+            {classData?.name}
+          </span>
         </h2>
-        <div className="flex flex-col gap-2">
-          {renderSidebarItem('overview', 'Overview')}
-          {renderSidebarItem('assignments', 'Assignments')}
-          {renderSidebarItem('questions', 'Questions')}
-          {renderSidebarItem('manage', 'Manage')}
+        <div className="flex flex-col space-y-3 mb-2">
+          <div className="border-b pb-2 mb-2"></div>
+          <h3 className="text-gray-500 text-sm font-medium mb-2 pl-2">KLAS BEHEER</h3>
+          {renderSidebarItem('overview', 'Overzicht')}
         </div>
+
+        <div className="border-b pb-2 mb-2 flex flex-col space-y-3">
+          <h3 className="text-gray-500 text-sm font-medium mb-2 pl-2">OPDRACHTEN</h3>
+          {renderSidebarItem('assignments', 'Opdrachten')}
+          {renderSidebarItem('questions', 'Vragen')}
+        </div>
+
+        <div>
+          <h3 className="text-gray-500 text-sm font-medium mb-2 pl-2">ADMINISTRATIE</h3>
+          {renderSidebarItem('manage', 'Beheer')}
+        </div>
+
       </div>
 
       {/* Main content */}

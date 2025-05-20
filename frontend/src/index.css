@@ -11,15 +11,22 @@
 /* Define your custom dwengo palette using theme variables */
 @theme {
   /* Red family */
-  --color-dwengo-red-100: #f28e78; /* coral (lightest red) */
-  --color-dwengo-red-200: #ec606a; /* blush */
-  --color-dwengo-red: #e8385d; /* rose (base red) */
-  --color-dwengo-red-dark: #e22b41; /* ruby */
-  --color-dwengo-red-darker: #d02625; /* crimson (darkest red) */
+  --color-dwengo-red-100: #f28e78;
+  /* coral (lightest red) */
+  --color-dwengo-red-200: #ec606a;
+  /* blush */
+  --color-dwengo-red: #e8385d;
+  /* rose (base red) */
+  --color-dwengo-red-dark: #e22b41;
+  /* ruby */
+  --color-dwengo-red-darker: #d02625;
+  /* crimson (darkest red) */
 
   /* Yellow family */
-  --color-dwengo-yellow: #ffdd04; /* lemon (bright yellow) */
-  --color-dwengo-yellow-dark: #fab63c; /* amber */
+  --color-dwengo-yellow: #ffdd04;
+  /* lemon (bright yellow) */
+  --color-dwengo-yellow-dark: #fab63c;
+  /* amber */
 
   /* Green family */
   --color-dwengo-green-transparent-dark: rgba(136, 189, 40, 0.65);
@@ -29,8 +36,10 @@
   --color-dwengo-green-darker: #0e6942; /* pine */
 
   /* Blue family */
-  --color-dwengo-blue: #0b75bb; /* royal (base blue) */
-  --color-dwengo-blue-dark: #096f80; /* marine */
+  --color-dwengo-blue: #0b75bb;
+  /* royal (base blue) */
+  --color-dwengo-blue-dark: #096f80;
+  /* marine */
 
   /* Teal */
   --color-dwengo-teal: #0a6d61;
@@ -194,6 +203,7 @@
   }
 
   @media screen and (max-width: 768px) {
+
     .g-7-2,
     .g-3-2,
     .g-2-3,
@@ -1612,7 +1622,6 @@
     font-size: 14px;
     background-color: #fff;
     border-radius: 8px;
-    overflow: hidden;
   }
 
   .tableSimpleStyling th,
@@ -1843,6 +1852,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
