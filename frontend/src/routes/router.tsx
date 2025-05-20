@@ -167,6 +167,7 @@ export const router = createBrowserRouter([
             path: 'local-learning-objects',
             element: <LocalLearningObjectsPage></LocalLearningObjectsPage>,
           },
+          {
             path: 'my-content',
             element: <CustomContent></CustomContent>,
           },

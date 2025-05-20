@@ -115,6 +115,16 @@ interface TeamAssignment {
   };
 }
 
+ interface Invite {
+    inviteId: number;
+    status: 'PENDING' | 'APPROVED' | 'DENIED';
+    otherTeacher: {
+        firstName: string;
+        lastName: string;
+        email: string;
+    };
+}
+
 export type {
   StudentItem,
   LearningPath,
@@ -126,4 +136,5 @@ export type {
   ClassItem,
   AssignmentPayload,
   TeamAssignment,
+  Invite
 };
