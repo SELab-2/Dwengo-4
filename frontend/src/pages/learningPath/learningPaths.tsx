@@ -8,11 +8,6 @@ import { filterLearningPaths } from '@/util/filter';
 import { fetchLearningPaths } from '@/util/shared/learningPath';
 import { useTranslation } from 'react-i18next';
 import { LearningPathCard } from '@/components/learningPath/LearningPathCard';
-import { fetchOwnedLearningPaths } from '@/util/teacher/localLearningPaths';
-
-interface LearningPathsProps {
-  ownedPathsOnly?: boolean;
-}
 
 /**
  * LearningPaths component displays all available learning paths.
@@ -26,7 +21,7 @@ interface LearningPathsProps {
  * @component
  * @returns {JSX.Element} The rendered LearningPaths component
  */
-const LearningPaths: React.FC<LearningPathsProps> = ({ ownedPathsOnly }) => {
+const LearningPaths: React.FC = () => {
   const [filters, setFilters] = useState<Filter[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
@@ -37,8 +32,8 @@ const LearningPaths: React.FC<LearningPathsProps> = ({ ownedPathsOnly }) => {
     isError,
     error,
   } = useQuery<LearningPath[]>({
-    queryKey: ['learningPaths', ownedPathsOnly],
-    queryFn: ownedPathsOnly ? fetchOwnedLearningPaths : fetchLearningPaths,
+    queryKey: ['learningPaths'],
+    queryFn: fetchLearningPaths,
     staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
     gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
   });

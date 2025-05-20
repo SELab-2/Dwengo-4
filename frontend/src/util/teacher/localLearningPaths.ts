@@ -123,3 +123,19 @@ export async function updateOrCreateLearningPath({
 
   return response.learningPath;
 }
+
+/**
+ * Deletes a learning path with the given id.
+ * @param {string} learningPathId - The id of the learning path to delete
+ * @throws {APIError} When deleting fails
+ */
+export async function deleteLearningPath(
+  learningPathId: string,
+): Promise<void> {
+  console.log('attempting to delete learning path with id', learningPathId);
+  return await apiRequest<void>({
+    method: 'DELETE',
+    endpoint: `/pathByTeacher/${learningPathId}`,
+    getToken: getAuthToken,
+  });
+}

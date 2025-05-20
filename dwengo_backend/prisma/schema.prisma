@@ -185,7 +185,7 @@ model LearningPath {
 model LearningPathNode {
   nodeId         String       @id @default(uuid())
   learningPathId String
-  learningPath   LearningPath @relation(fields: [learningPathId], references: [id])
+  learningPath   LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
 
   // explitly track ordering of nodes in the learning path (should correspond with default transition order)
   position Int
@@ -407,7 +407,7 @@ model Question {
   general  QuestionGeneral?
 
   assignment           Assignment        @relation(fields: [assignmentId], references: [id])
-  team                 Team              @relation(fields: [teamId], references: [id],onDelete: Cascade )
+  team                 Team              @relation(fields: [teamId], references: [id], onDelete: Cascade)
   questionConversation QuestionMessage[]
 }
 
