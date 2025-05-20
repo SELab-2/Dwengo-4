@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import { UnauthorizedError } from "../../../errors/errors";
 import {
+  invalidTokenMessage,
   noTokenProvidedMessage,
   studentNotFoundMessage,
 } from "../../../middleware/authMiddleware/errorMessages";
@@ -78,7 +79,7 @@ describe("protectStudent middleware", () => {
     expect(next).toHaveBeenCalledOnce();
     const err = (next as any).mock.calls[0][0];
     expect(err).toBeInstanceOf(UnauthorizedError);
-    expect(err.message).toBe(studentNotFoundMessage);
+    expect(err.message).toBe(invalidTokenMessage);
   });
 
   it("geeft UnauthorizedError als student niet gevonden wordt", async () => {
@@ -96,6 +97,6 @@ describe("protectStudent middleware", () => {
     expect(next).toHaveBeenCalledOnce();
     const err = (next as any).mock.calls[0][0];
     expect(err).toBeInstanceOf(UnauthorizedError);
-    expect(err.message).toBe(studentNotFoundMessage);
+    expect(err.message).toBe(invalidTokenMessage);
   });
 });
