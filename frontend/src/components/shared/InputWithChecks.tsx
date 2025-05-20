@@ -80,8 +80,6 @@ const InputWithChecks = forwardRef<InputWithChecksHandle, InputWithChecksProps>(
 
     const { t } = useTranslation();
 
-    console.log(inputValue)
-
 
     return (
       <div className="input-container">

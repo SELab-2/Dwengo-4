@@ -57,7 +57,6 @@ const buildAssignmentPayload = ({
         ),
       }));
     });
-    console.log('Teams with number keys:', teamsWithNumberKeys);
   } else {
     selectedClasses.forEach((classItem) => {
       const selectedStudents = individualStudents[classItem.id] || [];
@@ -325,8 +324,7 @@ const AddAssignmentForm = ({
       individualStudents,
       assignmentId: assignmentData?.id?.toString(),
     });
-    console.log('Payload:', payload);
-
+    $
     const action = isEditing ? updateAssignment : postAssignment;
 
     try {

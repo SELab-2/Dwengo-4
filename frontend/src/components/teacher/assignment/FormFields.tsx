@@ -41,7 +41,6 @@ const FormFields: React.FC<FormFieldsProps> = ({
   learningPathsError,
 }) => {
   const { t } = useTranslation();
-  console.log("hey", title)
   return (
     <>
       <div className={styles.formGroup}>

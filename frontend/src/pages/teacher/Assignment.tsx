@@ -97,14 +97,12 @@ const Assignment: React.FC = () => {
   };
 
 
-  console.log('Displayed Class:', assignmentData?.classAssignments);
   useEffect(() => {
     setDisplayedClass(assignmentData?.classAssignments?.find(
       ca => ca.classId === Number(selectedClassId)
     ));
   }, [selectedClassId]);
 
-  console.log(assignmentData)
   const { t } = useTranslation();
 
   return (
