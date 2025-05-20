@@ -22,7 +22,7 @@ describe("Assignment test", (): void => {
     const nonExistentId = 123;
     it("should return 404 when the assignment isn't found", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(`/assignment/${nonExistentId}`)
+        .get(`/api/assignment/${nonExistentId}`)
         .set(getAuthHeaders(teacherUser1));
 
       expect(status).toBe(404);

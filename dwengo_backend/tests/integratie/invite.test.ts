@@ -33,7 +33,7 @@ describe("invite tests", async (): Promise<void> => {
 
   async function sendInvitationToTeacherAndCheckExistence(): Promise<void> {
     const { status, body } = await request(app)
-      .post(`/invite/class/${classroom.id}`)
+      .post(`/api/invite/class/${classroom.id}`)
       .set("Authorization", `Bearer ${teacherUser1.token}`)
       .send({
         otherTeacherEmail: teacherUser2.email,
@@ -92,7 +92,7 @@ describe("invite tests", async (): Promise<void> => {
       const invalidClassId: number = (maxClass?.id ?? 0) + 1;
       // try to create invite for non-existent class
       const { status, body } = await request(app)
-        .post(`/invite/class/${invalidClassId}`)
+        .post(`/api/invite/class/${invalidClassId}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
           otherTeacherEmail: teacherUser2.email,
@@ -111,7 +111,7 @@ describe("invite tests", async (): Promise<void> => {
       // we can use the existing scenario with two valid teachers and a class, but none of them are a teacher of the class
       // try to create invite for class where teacher1 is not a teacher
       const { status, body } = await request(app)
-        .post(`/invite/class/${classroom.id}`)
+        .post(`/api/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
           otherTeacherEmail: teacherUser2.email,
@@ -133,7 +133,7 @@ describe("invite tests", async (): Promise<void> => {
 
       // try to create the invite
       const { status, body } = await request(app)
-        .post(`/invite/class/${classroom.id}`)
+        .post(`/api/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
           otherTeacherEmail: teacherUser2.email,
@@ -153,7 +153,7 @@ describe("invite tests", async (): Promise<void> => {
       await addTeacherToClass(teacherUser1.id, classroom.id);
       // send a first invite
       await request(app)
-        .post(`/invite/class/${classroom.id}`)
+        .post(`/api/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
           otherTeacherEmail: teacherUser2.email,
@@ -166,7 +166,7 @@ describe("invite tests", async (): Promise<void> => {
 
       // try to create another invite for the same class and teacher
       const { status, body } = await request(app)
-        .post(`/invite/class/${classroom.id}`)
+        .post(`/api/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
           otherTeacherEmail: teacherUser2.email,
@@ -186,7 +186,7 @@ describe("invite tests", async (): Promise<void> => {
     it("should respond with a `400` status code when request body/params are incorrect", async (): Promise<void> => {
       // try to create an invitation with an invalid body and params
       const { status, body } = await request(app)
-        .post(`/invite/class/invalid_id`)
+        .post(`/api/invite/class/invalid_id`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
           otherTeacherEmail: "sldk",
@@ -215,7 +215,7 @@ describe("invite tests", async (): Promise<void> => {
     it("should respond with a `400` status code when the request body is missing", async (): Promise<void> => {
       await addTeacherToClass(teacherUser1.id, classroom.id);
       const { status: status, body: body } = await request(app)
-        .post(`/invite/class/${classroom.id}`)
+        .post(`/api/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({}); // empty body
 
@@ -240,7 +240,7 @@ describe("invite tests", async (): Promise<void> => {
     it("should respond with a `404` status code when the teacher does not exist", async (): Promise<void> => {
       await addTeacherToClass(teacherUser1.id, classroom.id);
       const { status, body } = await request(app)
-        .post(`/invite/class/${classroom.id}`)
+        .post(`/api/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
           otherTeacherEmail: "ikbestaniet@gmail.com",
@@ -263,7 +263,7 @@ describe("invite tests", async (): Promise<void> => {
       const student: User & { student: Student; token: string } =
         await createStudent("new", "student", "newstudent@gmail.com");
       const { status, body } = await request(app)
-        .post(`/invite/class/${classroom.id}`)
+        .post(`/api/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send({
           otherTeacherEmail: student.email,
@@ -299,7 +299,7 @@ describe("invite tests", async (): Promise<void> => {
       );
 
       const { status, body } = await request(app)
-        .get("/invite")
+        .get("/api/invite")
         .set("Authorization", `Bearer ${teacherUser2.token}`);
 
       expect(status).toBe(200);
@@ -322,7 +322,7 @@ describe("invite tests", async (): Promise<void> => {
     it("should respond with a `200` status code and an updated invite when the action is `accept`", async (): Promise<void> => {
       // we've got a scenario with a valid pending invite, test accepting it
       const { status, body } = await request(app)
-        .patch(`/invite/${invite.inviteId}`)
+        .patch(`/api/invite/${invite.inviteId}`)
         .set("Authorization", `Bearer ${teacherUser2.token}`)
         .send({
           action: "accept",
@@ -346,7 +346,7 @@ describe("invite tests", async (): Promise<void> => {
     it("should respond with a `200` status code and an updated invite when the action is `decline`", async (): Promise<void> => {
       // we've got a scenario with a valid pending invite, test declining it
       const { status, body } = await request(app)
-        .patch(`/invite/${invite.inviteId}`)
+        .patch(`/api/invite/${invite.inviteId}`)
         .set("Authorization", `Bearer ${teacherUser2.token}`)
         .send({
           action: "decline",
@@ -368,7 +368,7 @@ describe("invite tests", async (): Promise<void> => {
     it("should respond with a `400` status code when the action is neither `accept` nor `decline`", async (): Promise<void> => {
       // we've got a scenario with a valid pending invite, test invalid action
       const { status, body } = await request(app)
-        .patch(`/invite/${invite.inviteId}`)
+        .patch(`/api/invite/${invite.inviteId}`)
         .set("Authorization", `Bearer ${teacherUser2.token}`)
         .send({
           action: "invalid_action",
@@ -415,7 +415,7 @@ describe("invite tests", async (): Promise<void> => {
       });
       // now let's try to accept the non-existent invite
       const { status, body } = await request(app)
-        .patch(`/invite/${invite.inviteId}`)
+        .patch(`/api/invite/${invite.inviteId}`)
         .set("Authorization", `Bearer ${teacherUser2.token}`)
         .send({
           action: "accept",
@@ -446,7 +446,7 @@ describe("invite tests", async (): Promise<void> => {
       });
       // now let's try to accept the invite
       const { status, body } = await request(app)
-        .patch(`/invite/${invite.inviteId}`)
+        .patch(`/api/invite/${invite.inviteId}`)
         .set("Authorization", `Bearer ${teacherUser2.token}`)
         .send({
           action: "accept",
@@ -467,7 +467,7 @@ describe("invite tests", async (): Promise<void> => {
     it("should respond with a `400` status code when the inviteId param is not a positive integer", async (): Promise<void> => {
       // try to update an invitation with an invalid inviteId
       const { status, body } = await request(app)
-        .patch(`/invite/invalid_id`)
+        .patch(`/api/invite/invalid_id`)
         .set("Authorization", `Bearer ${teacherUser2.token}`)
         .send({
           action: "accept",
@@ -502,7 +502,7 @@ describe("invite tests", async (): Promise<void> => {
     it("should respond with a `204` status code", async (): Promise<void> => {
       // test deleting the invite
       const { status } = await request(app)
-        .delete(`/invite/${invite.inviteId}/class/${classroom.id}`)
+        .delete(`/api/invite/${invite.inviteId}/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(204);
@@ -513,7 +513,7 @@ describe("invite tests", async (): Promise<void> => {
       const teacherUser3: User & { teacher: Teacher; token: string } =
         await createTeacher("Jane", "Doe", "jane.doe@gmail.com");
       const { status, body } = await request(app)
-        .delete(`/invite/${invite.inviteId}/class/${classroom.id}`)
+        .delete(`/api/invite/${invite.inviteId}/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser3.token}`);
 
       expect(status).toBe(403);
@@ -533,7 +533,7 @@ describe("invite tests", async (): Promise<void> => {
         await createTeacher("Jane", "Doe", "jane.doe@gmail.com");
       await addTeacherToClass(teacherUser3.id, classroom.id);
       const { status } = await request(app)
-        .delete(`/invite/${invite.inviteId}/class/${classroom.id}`)
+        .delete(`/api/invite/${invite.inviteId}/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser3.token}`); // teacher3 didn't create the invite, but is part of the class
 
       expect(status).toBe(204);
@@ -549,7 +549,7 @@ describe("invite tests", async (): Promise<void> => {
       });
       // now let's try to delete the non-existent invite using the route
       const { status, body } = await request(app)
-        .delete(`/invite/${invite.inviteId}/class/${classroom.id}`)
+        .delete(`/api/invite/${invite.inviteId}/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(404);
@@ -559,7 +559,7 @@ describe("invite tests", async (): Promise<void> => {
 
     it("should respond with a `400` status code when the params are not correct", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .delete(`/invite/invalid_invite_id/class/invalid_class_id`)
+        .delete(`/api/invite/invalid_invite_id/class/invalid_class_id`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(400);
@@ -583,7 +583,7 @@ describe("invite tests", async (): Promise<void> => {
       const teacherUser3: User & { teacher: Teacher; token: string } =
         await createTeacher("Jane", "Doe", "jane.doe@gmail.com");
       const { status, body } = await request(app)
-        .delete(`/invite/${invite.inviteId}/class/${classroom.id}`)
+        .delete(`/api/invite/${invite.inviteId}/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser3.token}`); // not part of the class
 
       expect(status).toBe(403);
@@ -623,7 +623,7 @@ describe("invite tests", async (): Promise<void> => {
 
       // test getting the invites
       const { status, body } = await request(app)
-        .get(`/invite/class/${classroom.id}`)
+        .get(`/api/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
@@ -633,7 +633,7 @@ describe("invite tests", async (): Promise<void> => {
     it("should respond with a `403` status code when the teacher is not part of the class", async (): Promise<void> => {
       // try to get invites for a class where the teacher is part of the class
       const { status, body } = await request(app)
-        .get(`/invite/class/${classroom.id}`)
+        .get(`/api/invite/class/${classroom.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(403);
@@ -644,7 +644,7 @@ describe("invite tests", async (): Promise<void> => {
 
     it("should respond with a `400` status code when the params are not correct", async (): Promise<void> => {
       const { status, body } = await request(app)
-        .get(`/invite/class/invalid_class_id`)
+        .get(`/api/invite/class/invalid_class_id`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(400);

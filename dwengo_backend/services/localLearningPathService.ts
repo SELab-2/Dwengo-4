@@ -31,7 +31,7 @@ function mapLocalPathToDto(
   },
 ): LearningPathDto {
   return {
-    _id: lp.id,
+    id: lp.id,
     hruid: lp.hruid,
     language: lp.language,
     title: lp.title,
@@ -133,7 +133,7 @@ export class LocalLearningPathService {
     });
   }
 
-  async getAllLearningPathsByTeacher(teacherId: number): Promise<LearningPath[]> {
+  async getAllLearningPathsByTeacher(teacherId: number): Promise<LearningPathDto[]> {
     return await handlePrismaQuery(() =>
       prisma.learningPath.findMany({
         where: { creatorId: teacherId },
@@ -146,7 +146,7 @@ export class LocalLearningPathService {
           },
         },
       }),
-    );
+    ).then((paths) => paths.map(mapLocalPathToDto));
   }
 
   async getLearningPathById(pathId: string): Promise<LearningPath> {

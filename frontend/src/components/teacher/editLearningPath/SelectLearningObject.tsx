@@ -37,7 +37,7 @@ const SelectLearningObject: React.FC = () => {
     isLoading: isLoadingOwnedObjects,
     isError: isErrorOwnedObjects,
   } = useQuery<LearningObject[]>({
-    queryKey: ['learningObjects'],
+    queryKey: ['localLearningObjects'],
     queryFn: fetchOwnedLearningObjects,
     staleTime: 10 * 60 * 1000, // consider data fresh for 10 minutes
     gcTime: 30 * 60 * 1000, // keep unused data in cache for 30 minutes
@@ -154,7 +154,7 @@ const SelectLearningObject: React.FC = () => {
       {renderStateMessage()}
 
       {/* results */}
-      <ul>
+      <ul className="list-none">
         {viewMode === 'paths' &&
           filteredLearningPaths.map((path) => (
             <li key={path.id} className="mb-2">

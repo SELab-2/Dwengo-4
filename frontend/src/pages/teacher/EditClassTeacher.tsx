@@ -111,7 +111,6 @@ const EditClassTeacher: React.FC = () => {
     } catch (err) {
       console.error(err);
     }
-  };
 
   const renderContent = () => {
     switch (activeSection) {

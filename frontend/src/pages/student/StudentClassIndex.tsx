@@ -28,13 +28,6 @@ const StudentClassIndex: React.FC = () => {
       try {
         const response = await fetchLeaveClass({ classId: classId });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.message || t('classes.leave_classes.error'),
-          );
-        }
-
         queryClient.invalidateQueries({ queryKey: ['classes'] });
         navigate('/student');
       } catch (error) {

@@ -2,7 +2,7 @@ import { NotFoundError } from "../errors/errors";
 import {
   fetchAllDwengoObjects,
   searchDwengoObjects,
-  getDwengoObjectsForPath,
+  getLearningObjectsForDwengoPath,
   LearningObjectDto,
   // [NIEUW] importeer de functie om Dwengo-LO op te halen via hruid/lang/version
   fetchDwengoObjectByHruidLangVersion,
@@ -13,7 +13,7 @@ import {
   searchLocalLearningObjects,
   // [NIEUW] importeer de functie om lokaal LO op te halen via hruid/lang/version
   getLocalLearningObjectByHruidLangVersion,
-  getLocalObjectsForPath,
+  getLearningObjectsForLocalPath,
 } from "./localDBLearningObjectService";
 
 /**
@@ -72,10 +72,6 @@ export async function getLearningObjectById(
 }
 
 /**
- * Haalt alle leerobjecten op die bij een leerpad (Dwengo) horen.
- * Wil je later ook lokale leerpaden toevoegen, pas deze functie aan.
- */
-/**
  * Haalt alle leerobjecten op die bij een leerpad horen (Dwengo + lokaal).
  */
 export async function getLearningObjectsForPath(
@@ -83,13 +79,12 @@ export async function getLearningObjectsForPath(
   isTeacher: boolean,
 ): Promise<LearningObjectDto[]> {
   try {
-    // Try to get Dwengo objects first
-    return await getDwengoObjectsForPath(pathId, isTeacher);
+    // need to find out if path is local or dwengo path, try dwengo first
+    return await getLearningObjectsForDwengoPath(pathId, isTeacher);
   } catch (error) {
     if (error instanceof NotFoundError) {
-      // If Dwengo fails, return only local objects
-      // Get local objects
-      return await getLocalObjectsForPath(pathId, isTeacher);
+      // if dwengo path not found, see if id matches with a local path
+      return await getLearningObjectsForLocalPath(pathId, isTeacher);
     }
     throw error;
   }
