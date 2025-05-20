@@ -42,7 +42,8 @@
     "settings": "Instellingen",
     "classes": "Klassen",
     "learning_paths": "Leerpaden",
-    "logged_in_as": "Ingelogd als {{name}}"
+    "logged_in_as": "Ingelogd als {{name}}",
+    "assignments": "Opdrachten"
   },
   "class": {
     "create": "Nieuwe klas aanmaken",
@@ -64,7 +65,22 @@
     "view_all": "Bekijk alle opdrachten",
     "error": "Er is iets fout gelopen tijdens het ophalen van de opdrachten",
     "view": "Opdracht bekijken",
-    "not_found": "Geen opdrachten gevonden"
+    "not_found": "Geen opdrachten gevonden",
+    "not_yet": "Nog geen opdrachten toegewezen",
+    "view_assignment": "Bekijk opdracht",
+    "my_assignments": "Mijn opdrachten",
+    "deadline": "Deadline",
+    "no_team": "Geen groep toegewezen"
+  },
+  "assignment": {
+    "title": "Opdracht",
+    "language": "Taal",
+    "edit": "Bewerken",
+    "delete": "Verwijderen",
+    "deadline": "Deadline",
+    "loading_learning_path": "Leerpaden laden...",
+    "learning_path_details": "Leerpaddetails",
+    "team": "Groep"
   },
   "assignments_form": {
     "edit": "Opdracht bewerken",
@@ -101,7 +117,9 @@
       "available_students": "Beschikbare leerlingen",
       "generate_random_teams": "Genereer willekeurige groepen",
       "create_team": "Maak groep",
-      "incomplete_team_warning": "Onvolledige groep maken?"
+      "incomplete_team_warning": "Onvolledige groep maken?",
+      "deselect_all": "Deselecteer alles",
+      "select_all": "Selecteer alles"
     },
     "deadline": "Deadline",
     "cancel": "Annuleer",
@@ -131,5 +149,119 @@
     "success": "Je hebt een aanvraag verzonden om lid te worden van deze klas. Wacht op goedkeuring van de lesgever."
   },
   "code": "Klascode",
-  "close": "Sluiten"
+  "close": "Sluiten",
+  "learning_paths": {
+    "label": "Leerpaden",
+    "search_name": "Zoek op naam",
+    "not_found_filter": "Geen leerpaden gevonden met deze filter",
+    "filter": {
+      "clear": "Wis filter",
+      "not_found": "Geen resultaten gevonden"
+    },
+    "create_lp": "Leerpad Aanmaken"
+  },
+  "learning_objects": {
+    "loading": "Leerobjecten laden...",
+    "next": "Volgende",
+    "end": "Einde van leerpad"
+  },
+  "lp_view": {
+    "loading_path_details": "Leerpad details laden ...",
+    "legend": {
+      "teacher_exclusive": "Extra info voor de leerkracht",
+      "student_content": "Inhoud voor de leerling"
+    }
+  },
+  "edit_learning_path": {
+    "loading_path_details": "Leerpad details laden ...",
+    "loading_objects": "Leerobjecten laden ...",
+    "add_node": "Node toevoegen",
+    "cancel": "Annuleer",
+    "confirm": "Opslaan",
+    "saving": "Opslaan ...",
+    "no_nodes_error": "Voeg minstens één leerobject toe aan je pad",
+    "node_list_instructions": "Beweeg de muis over een node om toe te voegen of te verwijderen. Gebruik de hendel om nodes te verslepen.",
+    "add_node_button": {
+      "adding_node": "Node toevoegen ...",
+      "cancel": "Annuleer"
+    },
+    "node_component": {
+      "add_node_here": "Voeg hier node toe",
+      "untitled_node": "Naamloze node"
+    },
+    "delete_node_button": {
+      "title": "Verwijder node",
+      "confirmation": "Ben je zeker?",
+      "yes": "ja",
+      "no": "nee"
+    },
+    "lp_details": {
+      "add_title": "Voeg leerpad titel toe",
+      "add_description": "Voeg een beschrijving toe (optioneel)",
+      "language": "Taal:",
+      "language_not_set": "Niet ingesteld",
+      "language_info": "De taal wordt automatisch ingesteld wanneer je een eerste leerobject toevoegt. Alle leerobjecten moeten dezelfde taal gebruiken."
+    },
+    "lo_card": {
+      "language": "Taal:",
+      "difficulty": "Moeilijkheidsgraad:",
+      "keywords": "Trefwoorden:",
+      "created": "Aangemaakt:",
+      "updated": "Bijgewerkt:",
+      "add_to_path": "Leerobject aan pad toevoegen"
+    },
+    "lp_object_selector": {
+      "language": "Taal:",
+      "hide_objects": "Verberg objecten",
+      "show_objects": "Toon objecten",
+      "loading_objects": "Leerobjecten laden ..."
+    },
+    "select_lo": {
+      "title": "Selecteer een leerobject",
+      "from_lps": "uit leerpaden",
+      "from_my_los": "uit mijn leerobjecten",
+      "paths": {
+        "search": "Doorzoek leerpaden ...",
+        "loading": "Leerpaden laden ...",
+        "error": "Er ging iets mis bij het ophalen van de leerpaden."
+      },
+      "objects": {
+        "search": "Doozoek leerobjecten ...",
+        "loading": "Leerobjecten laden ...",
+        "error": "Er ging iets mis bij het ophalen van de leerobjecten."
+      },
+      "no_results": "Geen resultaten gevonden voor '{{searchTerm}}'.",
+      "no_results_generic": "Geen resultaten."
+    }
+  },
+  "questions": {
+    "assignment_questions": "Vragen voor opdracht ",
+    "new_question_button": "Stel een nieuwe vraag",
+    "loading": "Vragen laden...",
+    "error": "Er is iets fout gelopen tijdens het ophalen van de vragen",
+    "no_questions": "Geen vragen gevonden",
+    "no_reactions": "Nog geen reacties",
+    "reactions": "Reacties",
+    "view_button": "Bekijk",
+    "asked_by": "Vraag gesteld door",
+    "says": "zegt",
+    "ask_question": "Stel een vraag",
+    "write_message": "Schrijf een bericht",
+    "submit": "Verstuur",
+    "submitting": "Versturen...",
+    "error_submitting": "Er ging iets fout bij het versturen van het bericht",
+    "form": {
+      "succes": "Vraag succesvol toegevoegd!",
+      "title": "Titel",
+      "question": "Vraag",
+      "languages": {
+        "label": "Taal",
+        "en": "Engels",
+        "nl": "Nederlands",
+        "fr": "Frans"
+      },
+      "back": "Terug",
+      "submit": "Stel vraag"
+    }
+  }
 }

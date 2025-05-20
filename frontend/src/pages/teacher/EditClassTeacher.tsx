@@ -25,7 +25,7 @@ const EditClassTeacher: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [className, setClassName] = useState<string>('');
-  const [filteredAssignments, setFilteredAssignments] = useState<any[]>([]);
+  const [filteredAssignments, setFilteredAssignments] = useState([]);
 
   const classNameRef = React.useRef<InputWithChecksRef | null>(null);
 
@@ -291,7 +291,7 @@ const EditClassTeacher: React.FC = () => {
                   className="w-full p-2 mb-4 border rounded"
                   onChange={(e) => {
                     const searchQuery = e.target.value.toLowerCase();
-                    const filtered = assignments?.filter((assignment: any) =>
+                    const filtered = assignments?.filter((assignment) =>
                       assignment.title.toLowerCase().includes(searchQuery),
                     );
                     setFilteredAssignments(filtered || []);
@@ -310,7 +310,7 @@ const EditClassTeacher: React.FC = () => {
                   </div>
                 ) : (
                   <div className="grid gap-4">
-                    {filteredAssignments.map((assignment: any) => (
+                    {filteredAssignments.map((assignment) => (
                       <div
                         key={assignment.id}
                         onClick={() =>
@@ -390,7 +390,7 @@ const EditClassTeacher: React.FC = () => {
   return (
     <div className="flex">
       {/* Sidebar */}
-      <div className="w-64 bg-gray-100 min-h-screen p-4">
+      <div className="w-64  min-h-screen p-4">
         <h2 className="text-xl font-bold mb-4">
           Dashboard voor{' '}
           <span className="max-w-[180px] truncate inline-block align-bottom" title={classData?.name}>

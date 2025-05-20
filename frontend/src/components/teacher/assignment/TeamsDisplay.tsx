@@ -32,15 +32,14 @@ const TeamsDisplay: React.FC<TeamsDisplayProps> = ({
                   {selectedClasses.find((c) => c.id == classId)?.name}
                 </span>
               </h6>
-              {classTeams.map((team) => (
-                <div key={team.id} className={styles.teamPreview}>
-                  <div className="flex items-center gap-2 w-full">
-                    <span className="font-medium min-w-[80px]">{team.id}:</span>
-                    <span className="truncate"
-                      title={team.students.map((member) => `${member.firstName} ${member.lastName}`).join(', ')}>
-                      {team.students.map((member) => `${member.firstName} ${member.lastName}`).join(', ')}
-                    </span>
-                  </div>
+              {classTeams.map((teamHead) => (
+                <div key={teamHead.id} className={styles.teamPreview}>
+                  <p>
+                    {teamHead.team.teamname}:{' '}
+                    {teamHead.team.students
+                      .map((member) => `${member.user.firstName} ${member.user.lastName}`)
+                      .join(', ')}
+                  </p>
                 </div>
               ))}
             </div>
@@ -50,10 +49,11 @@ const TeamsDisplay: React.FC<TeamsDisplayProps> = ({
           className={styles.editButton}
           type="button"
           onClick={onEditClick}
+          disabled={selectedClasses.length === 0}
         >
           {t('assignments_form.assign_team.edit')}
         </button>
-      </div>
+      </div >
     );
   }
 
@@ -87,7 +87,12 @@ const TeamsDisplay: React.FC<TeamsDisplayProps> = ({
           </div>
         ))}
       </div>
-      <button className={styles.editButton} type="button" onClick={onEditClick}>
+      <button
+        className={styles.editButton}
+        type="button"
+        onClick={onEditClick}
+        disabled={selectedClasses.length === 0}
+      >
         {t('assignments_form.assign_team.edit')}
       </button>
     </div>

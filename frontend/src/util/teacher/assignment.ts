@@ -23,10 +23,10 @@ export async function fetchAssignments(classId: string): Promise<any> {
  * @returns {Promise<any>} List of assignments
  * @throws {APIError} When fetching fails
  */
-export async function fetchAllAssignments(): Promise<any> {
+export async function fetchAllAssignments(limit?: number): Promise<any> {
   return await apiRequest({
     method: 'GET',
-    endpoint: `/assignment/teacher?limit=5`,
+    endpoint: `/assignment/teacher${limit ? `?limit=${limit}` : ''}`,
     getToken: getAuthToken,
   });
 }

@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { useParams, useNavigate } from 'react-router-dom';
-import { LearningPath } from '../../types/type';
-import { AssignmentPayload } from '../../types/type';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useNavigate, useParams } from 'react-router-dom';
+import { AssignmentPayload, LearningPath } from '../../types/type';
 import { deleteAssignment, fetchAssignment } from '@/util/teacher/assignment';
 import { fetchLearningPath } from '@/util/shared/learningPath';
+import { useTranslation } from 'react-i18next';
 import { Assignment } from '@prisma/client';
 
 /**
  * Assignment component for teachers to view and manage individual assignments.
  * Displays assignment details, associated learning path information, and provides
  * options to edit or delete the assignment.
- * 
+ *
  * Features:
  * - Displays assignment title, description, language, and deadline
  * - Shows associated learning path details
  * - Provides edit and delete functionality
  * - Handles loading and error states
- * 
+ *
  * @component
  * @returns {JSX.Element} The rendered Assignment component
  */
@@ -61,9 +61,19 @@ const Assignment: React.FC = () => {
       assignmentData?.pathRef,
       assignmentData?.isExternal,
     ],
-    queryFn: () =>
-      fetchLearningPath(assignmentData?.pathRef!, assignmentData?.isExternal!),
-    enabled: !!assignmentData?.pathRef,
+    queryFn: () => {
+      // Only proceed if both values are defined
+      if (assignmentData?.pathRef && assignmentData?.isExternal !== undefined) {
+        return fetchLearningPath(
+          assignmentData.pathRef,
+          assignmentData.isExternal,
+        );
+      }
+      throw new Error('Missing learning path reference or external flag');
+    },
+    enabled: !!(
+      assignmentData?.pathRef && assignmentData?.isExternal !== undefined
+    ),
   });
 
   /**
@@ -95,11 +105,12 @@ const Assignment: React.FC = () => {
   }, [selectedClassId]);
 
 
+  const { t } = useTranslation();
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Assignment</h1>
-      {isLoading && <p className="text-gray-600">Loading...</p>}
+      <h1 className="text-3xl font-bold mb-6">{t('assignment.title')}</h1>
+      {isLoading && <p className="text-gray-600">{t('loading.loading')}</p>}
       {isError && <p className="text-red-500">Error: {error.message}</p>}
       {assignmentData && (
         <div >
@@ -110,23 +121,24 @@ const Assignment: React.FC = () => {
                 href={`/teacher/assignment/${assignmentId}/edit`}
                 className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
               >
-                Edit
+                {t('assignment.edit')}
               </a>
               <button
                 onClick={handleDelete}
                 className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
               >
-                Delete
+                {t('assignment.delete')}
               </button>
             </div>
           </div>
           <p className="text-gray-700 mb-4">{assignmentData.description}</p>
           <div className="grid grid-cols-2 gap-4 mb-6">
             <p className="text-gray-600">
-              Language: {assignmentData.pathLanguage}
+              {t('assignment.language')}: {assignmentData.pathLanguage}
             </p>
             <p className="text-gray-600">
-              Deadline: {new Date(assignmentData.deadline).toLocaleDateString()}
+              {t('assignment.deadline')}:{' '}
+              {new Date(assignmentData.deadline).toLocaleDateString()}
             </p>
           </div>
 
@@ -199,9 +211,13 @@ const Assignment: React.FC = () => {
           </div>
 
           {/* Learning Path Section */}
-          <h3 className="text-xl font-semibold mb-4">Learning Path Details</h3>
+          <h3 className="text-xl font-semibold mb-4">
+            {t('assignment.learning_path_details')}
+          </h3>
           {isLearningPathLoading && (
-            <p className="text-gray-600">Loading learning path...</p>
+            <p className="text-gray-600">
+              {t('assignment.loading_learning_path')}
+            </p>
           )}
           {isLearningPathError && (
             <p className="text-red-500">Error: {learningPathError.message}</p>
@@ -209,7 +225,8 @@ const Assignment: React.FC = () => {
           {learningPathData && (
             <div className="bg-gray-50 rounded-md p-4">
               <a
-                href={`/learning-path/${assignmentData.pathRef}`}
+                href={`/teacher/learning-path/${assignmentData.pathRef}`}
+       
                 className="text-blue-600 hover:text-blue-800"
               >
                 <h4 className="text-lg font-medium mb-2">

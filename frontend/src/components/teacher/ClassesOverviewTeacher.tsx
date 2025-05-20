@@ -34,16 +34,16 @@ export default function ClassesOverviewTeacher() {
                 key={classItem.id}
                 className="flex flex-col p-4 justify-between bg-white shadow-md rounded-lg mb-4 max-w-[20rem] w-full"
               >
-                <div className="flex flex-col">
-                  <div className="flex flex-row w-full justify-between mb-1">
-                    <h3 className="text-2xl font-bold truncate">{classItem.name}</h3>
+                <div className="flex flex-col bg-white">
+                  <div className="flex flex-row w-full bg-white justify-between mb-1">
+                    <h3 className="text-2xl font-bold">{classItem.name}</h3>
                   </div>
 
                   <p>
                     <b>{t('code')}:</b> {classItem.code}
                   </p>
 
-                  <div className="flex mt-4 flex-row justify-between items-center text-sm">
+                  <div className="flex bg-white mt-4 flex-row justify-between items-center text-sm">
                     <Link to={`/teacher/classes/${classItem.id}`}>
                       <PrimaryButton>
                         <span className="">{t('classes.view')}</span>

@@ -27,7 +27,7 @@ export async function fetchClass({
 export async function fetchLeaveClass({ classId }: { classId: string }) {
   return await apiRequest({
     method: 'DELETE',
-    endpoint: `/class/student/leave/${classId}`,
+    endpoint: `/class/student/${classId}`,
     getToken: getAuthToken,
   });
 }

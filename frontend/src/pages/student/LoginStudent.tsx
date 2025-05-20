@@ -23,6 +23,7 @@ interface LoginResponse {
   firstName: string;
   lastName: string;
   token: string;
+  id: string;
 }
 
 interface InputWithChecksHandle {
@@ -51,6 +52,7 @@ const LoginStudent: React.FC = () => {
       localStorage.setItem('lastName', data.lastName);
       localStorage.setItem('expiration', expires.toISOString());
       localStorage.setItem('role', 'student')
+      localStorage.setItem('id', data.id); // Replace with actual student ID
 
       navigate('/student');
     },
@@ -105,9 +107,7 @@ const LoginStudent: React.FC = () => {
               placeholder={t('login.password.placeholder')}
             />
             {isError && (
-              <div className="c-r">
-                {(error as any)?.info?.message || t('login.error')}
-              </div>
+              <div className="c-r">{error.message || t('login.error')}</div>
             )}
             <div>
               <PrimaryButton type="submit" disabled={isPending}>

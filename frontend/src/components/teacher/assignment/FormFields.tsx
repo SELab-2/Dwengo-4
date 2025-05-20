@@ -13,7 +13,7 @@ interface FormFieldsProps {
   setSelectedClasses: (classes: ClassItem[]) => void;
   classesData: ClassItem[];
   isEditing: boolean;
-  formErrors: { classes?: string };
+  formErrors: { classes?: string; learningPath?: string };
   learningPaths: LearningPath[];
   selectedLearningPath?: LearningPath;
   handleLearningPathChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
@@ -115,6 +115,9 @@ const FormFields: React.FC<FormFieldsProps> = ({
               </option>
             ))}
           </select>
+        )}
+        {formErrors.learningPath && (
+          <div className={styles.error}>{formErrors.learningPath}</div>
         )}
       </div>
 

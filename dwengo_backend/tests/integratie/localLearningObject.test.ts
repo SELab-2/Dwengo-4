@@ -41,7 +41,7 @@ describe("local learning object tests", async () => {
     });
     it("should return all learning objects of the teacher", async () => {
       const { status, body } = await request(app)
-        .get("/learningObjectByTeacher")
+        .get("/api/learningObjectByTeacher")
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
@@ -59,7 +59,7 @@ describe("local learning object tests", async () => {
     });
     it("shouldn't let a student access this route", async () => {
       const { status, body } = await request(app)
-        .get("/learningObjectByTeacher")
+        .get("/api/learningObjectByTeacher")
         .set("Authorization", `Bearer ${studentUser1.token}`);
 
       expect(status).toBe(401);
@@ -69,7 +69,7 @@ describe("local learning object tests", async () => {
       // there are some local learning objects created by another teacher
       // test that another teacher can't see them
       const { status, body } = await request(app)
-        .get("/learningObjectByTeacher")
+        .get("/api/learningObjectByTeacher")
         .set("Authorization", `Bearer ${teacherUser2.token}`);
 
       expect(status).toBe(200);
@@ -80,7 +80,7 @@ describe("local learning object tests", async () => {
   describe("[POST] /learningObjectByTeacher", async () => {
     it("should create a new learning object", async () => {
       const { status, body } = await request(app)
-        .post("/learningObjectByTeacher")
+        .post("/api/learningObjectByTeacher")
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send(data);
 
@@ -102,7 +102,7 @@ describe("local learning object tests", async () => {
     });
     it("shouldn't let a student create a learning object", async () => {
       const { status, body } = await request(app)
-        .post("/learningObjectByTeacher")
+        .post("/api/learningObjectByTeacher")
         .set("Authorization", `Bearer ${studentUser1.token}`)
         .send(data);
 
@@ -129,7 +129,7 @@ describe("local learning object tests", async () => {
     });
     it("should return the learning object with the given id", async () => {
       const { status, body } = await request(app)
-        .get(`/learningObjectByTeacher/${lo.id}`)
+        .get(`/api/learningObjectByTeacher/${lo.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
@@ -137,7 +137,7 @@ describe("local learning object tests", async () => {
     });
     it("should return an error if the learning object doesn't exist", async () => {
       const { status, body } = await request(app)
-        .get("/learningObjectByTeacher/123456789") // non-existing learning object id
+        .get("/api/learningObjectByTeacher/123456789") // non-existing learning object id
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(404);
@@ -145,7 +145,7 @@ describe("local learning object tests", async () => {
     });
     it("shouldn't let a student access this route", async () => {
       const { status, body } = await request(app)
-        .get(`/learningObjectByTeacher/${lo.id}`)
+        .get(`/api/learningObjectByTeacher/${lo.id}`)
         .set("Authorization", `Bearer ${studentUser1.token}`);
 
       expect(status).toBe(401);
@@ -153,7 +153,7 @@ describe("local learning object tests", async () => {
     });
     it("shouldn't let another teacher get the learning object", async () => {
       const { status, body } = await request(app)
-        .get(`/learningObjectByTeacher/${lo.id}`)
+        .get(`/api/learningObjectByTeacher/${lo.id}`)
         .set("Authorization", `Bearer ${teacherUser2.token}`);
 
       expect(status).toBe(403);
@@ -172,7 +172,7 @@ describe("local learning object tests", async () => {
       const lo = await createLearningObject(teacherUser1.id, data);
 
       const { status, body } = await request(app)
-        .patch(`/learningObjectByTeacher/${lo.id}`)
+        .patch(`/api/learningObjectByTeacher/${lo.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send(updatedData);
 
@@ -194,7 +194,7 @@ describe("local learning object tests", async () => {
     });
     it("should return an error if the learning object doesn't exist", async () => {
       const { status, body } = await request(app)
-        .patch("/learningObjectByTeacher/123456789") // non-existing learning object id
+        .patch("/api/learningObjectByTeacher/123456789") // non-existing learning object id
         .set("Authorization", `Bearer ${teacherUser1.token}`)
         .send(updatedData);
 
@@ -205,7 +205,7 @@ describe("local learning object tests", async () => {
     it("shouldn't let a student update a learning object", async () => {
       const lo = await createLearningObject(teacherUser1.id, data);
       const { status, body } = await request(app)
-        .patch(`/learningObjectByTeacher/${lo.id}`)
+        .patch(`/api/learningObjectByTeacher/${lo.id}`)
         .set("Authorization", `Bearer ${studentUser1.token}`)
         .send(updatedData);
 
@@ -227,7 +227,7 @@ describe("local learning object tests", async () => {
     it("shouldn't let another teacher update the learning object", async () => {
       const lo = await createLearningObject(teacherUser1.id, data);
       const { status, body } = await request(app)
-        .patch(`/learningObjectByTeacher/${lo.id}`)
+        .patch(`/api/learningObjectByTeacher/${lo.id}`)
         .set("Authorization", `Bearer ${teacherUser2.token}`) // another teacher tries to update the learning object
         .send(updatedData);
 
@@ -253,7 +253,7 @@ describe("local learning object tests", async () => {
       const lo = await createLearningObject(teacherUser1.id, data);
 
       const { status } = await request(app)
-        .delete(`/learningObjectByTeacher/${lo.id}`)
+        .delete(`/api/learningObjectByTeacher/${lo.id}`)
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(204);
@@ -271,7 +271,7 @@ describe("local learning object tests", async () => {
     });
     it("should return an error if the learning object doesn't exist", async () => {
       const { status, body } = await request(app)
-        .delete("/learningObjectByTeacher/123456789") // non-existing learning object id
+        .delete("/api/learningObjectByTeacher/123456789") // non-existing learning object id
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(404);
@@ -281,7 +281,7 @@ describe("local learning object tests", async () => {
     it("shouldn't let a student delete a learning object", async () => {
       const lo = await createLearningObject(teacherUser1.id, data);
       const response = await request(app)
-        .delete(`/learningObjectByTeacher/${lo.id}`)
+        .delete(`/api/learningObjectByTeacher/${lo.id}`)
         .set("Authorization", `Bearer ${studentUser1.token}`);
 
       expect(response.status).toBe(401);
@@ -301,7 +301,7 @@ describe("local learning object tests", async () => {
     it("shouldn't let another teacher delete the learning object", async () => {
       const lo = await createLearningObject(teacherUser1.id, data);
       const response = await request(app)
-        .delete(`/learningObjectByTeacher/${lo.id}`)
+        .delete(`/api/learningObjectByTeacher/${lo.id}`)
         .set("Authorization", `Bearer ${teacherUser2.token}`); // another teacher tries to delete the learning object
 
       expect(response.status).toBe(403);

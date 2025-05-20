@@ -2,7 +2,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Sen:wght@400..800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap');
 @import 'tailwindcss';
-@import "tw-animate-css";
+@import 'tw-animate-css';
+
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -27,12 +29,11 @@
   /* amber */
 
   /* Green family */
-  --color-dwengo-green: #88bd28;
-  /* lime (light green) */
-  --color-dwengo-green-dark: #4a9234;
-  /* forest */
-  --color-dwengo-green-darker: #0e6942;
-  /* pine */
+  --color-dwengo-green-transparent-dark: rgba(136, 189, 40, 0.65);
+  --color-dwengo-green-transparent-light: rgba(136, 189, 40, 0.5);
+  --color-dwengo-green: #88bd28; /* lime (light green) */
+  --color-dwengo-green-dark: #4a9234; /* forest */
+  --color-dwengo-green-darker: #0e6942; /* pine */
 
   /* Blue family */
   --color-dwengo-blue: #0b75bb;
@@ -61,7 +62,8 @@
 
   /* Reset and Base Styles */
 
-  * {
+  body div {
+    background-color: var(--color-dwengo-neutral-ivory);
     margin: 0;
     padding: 0;
     -webkit-box-sizing: border-box !important;
@@ -72,6 +74,7 @@
   /* Body and Typography */
 
   html {
+    background-color: var(--color-dwengo-neutral-ivory);
     font-family: 'Sen', sans-serif;
     scroll-behavior: smooth;
   }
@@ -269,10 +272,6 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 0.5rem;
-  }
-
-  ul {
-    list-style: none !important;
   }
 
   ul.bullet li {
@@ -1659,6 +1658,86 @@
 
   .c-r {
     color: red;
+  }
+
+  /* styles to try to match dwengo as much as possible for leaning object content */
+  .prose code {
+    color: #e83e8c !important;
+    background-color: #eef;
+    padding: 1px 5px;
+    border: 1px solid #e8e8e8;
+    border-radius: 3px;
+    font-weight: normal;
+  }
+
+  .prose pre code {
+    color: #ffffff !important;
+  }
+
+  .prose code::before,
+  .prose code::after {
+    content: none !important; /* remove backticks around code */
+  }
+
+  .prose .alert.alert-box.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: .75rem 1.25rem;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+
+  .prose .alert.alert-box.alert-success strong {
+    color: #155724 !important;
+    font-weight: bold;
+  }
+
+  .prose iframe,
+  .prose video {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    display: block;
+    aspect-ratio: 16 / 9;
+  }
+
+  .prose table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #ddd;
+    margin: 1.5rem 0;
+    background-color: #fff;
+    table-layout: fixed;
+  }
+
+  .prose table th,
+  .prose table td {
+    padding: 8px 20px !important;
+    text-align: left;
+    border: 1px solid #ddd;
+    vertical-align: top !important;
+    word-wrap: break-word; 
+    word-break: break-word;
+    white-space: normal;
+  }
+
+  .prose table th {
+    background-color: #f7f7f7; 
+    font-weight: bold;
+    text-align: center; 
+  }
+
+  .prose table tr:nth-child(even) {
+    background-color: #f7f7f7; 
+  }
+
+  .prose table img {
+    max-width: 100%; 
+    height: auto;
+    display: block;
+    margin: 0 auto;
   }
 }
 
