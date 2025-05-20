@@ -55,8 +55,6 @@ const LearningPath: React.FC = () => {
       {
         queryKey: ['learningObjects', pathId],
         queryFn: () => fetchLearningObjectsByLearningPath(pathId!),
-        staleTime: 5 * 60 * 1000,
-        gcTime: 30 * 60 * 1000,
       },
     ],
   });
@@ -124,8 +122,6 @@ const LearningPath: React.FC = () => {
       behavior: 'smooth',
     });
   };
-
-  console.log('progress', progress);
 
   return (
     <div className="flex h-screen">

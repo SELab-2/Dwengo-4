@@ -3,8 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import PrimaryButton from '../../components/shared/PrimaryButton';
 import LoadingIndicatorButton from '../../components/shared/LoadingIndicatorButton';
 import {
-  fetchLocalLearningObjects,
   deleteLocalLearningObject,
+  fetchLocalLearningObjects,
   LearningObject,
 } from '../../util/teacher/localLearningObjects';
 import LearningObjectForm from '../../components/teacher/learningobjectform/LearningObjectForm';
@@ -19,6 +19,8 @@ const LocalLearningObjectsPage: React.FC = () => {
   const { data, isLoading, isError, error } = useQuery<LearningObject[]>({
     queryKey: ['localLearningObjects'],
     queryFn: fetchLocalLearningObjects,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const deleteMutation = useMutation<void, Error, string>({
@@ -101,51 +103,52 @@ const LocalLearningObjectsPage: React.FC = () => {
         </button>
       </div>
 
-      {isLoading && <LoadingIndicatorButton />}
-      {isError && (
+      {isLoading ? (
+        <LoadingIndicatorButton />
+      ) : isError ? (
         <div className="text-red-600">{(error as Error).message}</div>
-      )}
-
-      {data && (
-        <div className="overflow-x-auto">
-          <table className="w-full table-auto border border-gray-300">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-4 py-2 text-left border-b">
-                  {t('learning_objects.title')}
-                </th>
-                <th className="px-4 py-2 text-left border-b">
-                  {t('learning_objects.type')}
-                </th>
-                <th className="px-4 py-2 text-left border-b">
-                  {t('learning_objects.available')}
-                </th>
-                <th className="px-4 py-2 text-left border-b">
-                  {t('learning_objects.actions')}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((obj) => (
-                <tr key={obj.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2 border-b">{obj.title}</td>
-                  <td className="px-4 py-2 border-b">{obj.contentType}</td>
-                  <td className="px-4 py-2 border-b">
-                    {obj.available ? 'Yes' : 'No'}
-                  </td>
-                  <td className="px-4 py-2 border-b flex gap-2">
-                    <PrimaryButton onClick={() => handleEdit(obj)}>
-                      {t('learning_objects.edit')}
-                    </PrimaryButton>
-                    <SecondaryButton onClick={() => handleDelete(obj.id)}>
-                      {t('learning_objects.delete')}
-                    </SecondaryButton>
-                  </td>
+      ) : (
+        data && (
+          <div className="overflow-x-auto">
+            <table className="w-full table-auto border border-gray-300">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-4 py-2 text-left border-b">
+                    {t('learning_objects.title')}
+                  </th>
+                  <th className="px-4 py-2 text-left border-b">
+                    {t('learning_objects.type')}
+                  </th>
+                  <th className="px-4 py-2 text-left border-b">
+                    {t('learning_objects.available')}
+                  </th>
+                  <th className="px-4 py-2 text-left border-b">
+                    {t('learning_objects.actions')}
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {data.map((obj) => (
+                  <tr key={obj.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-2 border-b">{obj.title}</td>
+                    <td className="px-4 py-2 border-b">{obj.contentType}</td>
+                    <td className="px-4 py-2 border-b">
+                      {obj.available ? 'Yes' : 'No'}
+                    </td>
+                    <td className="px-4 py-2 border-b flex gap-2">
+                      <PrimaryButton onClick={() => handleEdit(obj)}>
+                        {t('learning_objects.edit')}
+                      </PrimaryButton>
+                      <SecondaryButton onClick={() => handleDelete(obj.id)}>
+                        {t('learning_objects.delete')}
+                      </SecondaryButton>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
       )}
     </div>
   );
