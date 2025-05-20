@@ -3195,11 +3195,6 @@ components:
           description: The content type of the learning object.
           enum:
             - text/plain
-            - text/markdown
-            - image/image-block
-            - image/image
-            - audio/mpeg
-            - video
             - evaluation/multiple-choice
             - evaluation/open-question
         keywords:

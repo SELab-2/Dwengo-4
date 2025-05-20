@@ -13,11 +13,6 @@ import {
 enum ContentType {
   // Dit zijn momenteel "unused variables" dus eslint wil dat deze voorafgegaan worden door een "_"
   _TEXT_PLAIN = "text/plain",
-  _TEXT_MARKDOWN = "text/markdown",
-  _IMAGE_IMAGE_BLOCK = "image/image-block",
-  _IMAGE_IMAGE = "image/image",
-  _AUDIO_MPEG = "audio/mpeg",
-  _VIDEO = "video",
   _EVAL_MULTIPLE_CHOICE = "evaluation/multiple-choice",
   _EVAL_OPEN_QUESTION = "evaluation/open-question",
 }
@@ -28,11 +23,6 @@ enum ContentType {
 
 const permittedContentTypes = {
   "text/plain": ContentType._TEXT_PLAIN,
-  "text/markdown": ContentType._TEXT_MARKDOWN,
-  "image/image-block": ContentType._IMAGE_IMAGE_BLOCK,
-  "image/image": ContentType._IMAGE_IMAGE,
-  "audio/mpeg": ContentType._AUDIO_MPEG,
-  video: ContentType._VIDEO,
   "evaluation/multiple-choice": ContentType._EVAL_MULTIPLE_CHOICE,
   "evaluation/open-question": ContentType._EVAL_OPEN_QUESTION,
 };

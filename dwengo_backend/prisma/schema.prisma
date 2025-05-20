@@ -233,15 +233,6 @@ model LearningPathTransition {
 enum ContentType {
   // Dwengo API
   TEXT_PLAIN
-  TEXT_MARKDOWN
-  IMAGE_IMAGE_BLOCK
-  IMAGE_IMAGE
-  AUDIO_MPEG
-  // Eigen toevoegingen
-  APPLICATION_PDF
-  EXTERN
-  BLOCKLY
-  VIDEO
   EVAL_MULTIPLE_CHOICE
   EVAL_OPEN_QUESTION
 }
