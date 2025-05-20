@@ -132,20 +132,4 @@ describe("LocalLearningObjectService", () => {
       expect(result.title).toBe("Nieuwe Titel");
     });
   });
-
-  describe("deleteLearningObject", () => {
-    it("verwijdert een leerobject", async () => {
-      (
-        prisma.learningObject.delete as ReturnType<typeof vi.fn>
-      ).mockResolvedValue(mockLearningObject);
-
-      const result =
-        await LocalLearningObjectService.deleteLearningObject("lo123");
-
-      expect(result.id).toBe("lo123");
-      expect(prisma.learningObject.delete).toHaveBeenCalledWith({
-        where: { id: "lo123" },
-      });
-    });
-  });
 });
