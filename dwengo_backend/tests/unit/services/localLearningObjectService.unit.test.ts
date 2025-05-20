@@ -10,7 +10,7 @@ vi.mock("../../../config/prisma");
 const baseData: LocalLearningObjectData = {
   title: "Intro tot AI",
   description: "Leer wat AI is",
-  contentType: "text/markdown" as ContentType,
+  contentType: "text/plain" as ContentType,
   keywords: ["AI"],
   targetAges: [14],
 };
@@ -23,7 +23,7 @@ const mockLearningObject: LearningObject = {
   language: "nl",
   title: "Intro tot AI",
   description: "Leer wat AI is",
-  contentType: "text/markdown" as ContentType,
+  contentType: ContentType.TEXT_PLAIN,
   keywords: ["AI"],
   targetAges: [14],
   teacherExclusive: false,
@@ -74,6 +74,9 @@ describe("LocalLearningObjectService", () => {
       expect(prisma.learningObject.findMany).toHaveBeenCalledWith({
         where: { creatorId: 42 },
         orderBy: { createdAt: "desc" },
+        include: {
+          LearningObjectRawHtml: true,
+        }
       });
     });
   });

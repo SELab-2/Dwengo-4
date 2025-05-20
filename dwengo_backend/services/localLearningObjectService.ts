@@ -34,14 +34,6 @@ export interface LocalLearningObjectData {
 // Mapping van raw string naar Prisma enum
 const contentTypeMap: Record<string, PrismaContentType> = {
   "text/plain": PrismaContentType.TEXT_PLAIN,
-  "text/markdown": PrismaContentType.TEXT_MARKDOWN,
-  "image/image-block": PrismaContentType.IMAGE_IMAGE_BLOCK,
-  "image/image": PrismaContentType.IMAGE_IMAGE,
-  "audio/mpeg": PrismaContentType.AUDIO_MPEG,
-  "application/pdf": PrismaContentType.APPLICATION_PDF,
-  extern: PrismaContentType.EXTERN,
-  blockly: PrismaContentType.BLOCKLY,
-  video: PrismaContentType.VIDEO,
   EVAL_MULTIPLE_CHOICE: PrismaContentType.EVAL_MULTIPLE_CHOICE,
   EVAL_OPEN_QUESTION: PrismaContentType.EVAL_OPEN_QUESTION,
 };
@@ -225,6 +217,7 @@ export default class LocalLearningObjectService {
         where: { localLearningObjectId: id },
       }),
     );
+    console.log(learningPathNodes)
 
     if (learningPathNodes.length > 0) {
       const groupedNodes = learningPathNodes.reduce<

@@ -441,8 +441,8 @@ describe("classroom tests", (): void => {
       const { status, body } = await request(app)
         .delete(`/api/class/student/${c.id}`)
         .set("Authorization", `Bearer ${s.token}`);
-      expect(status).toBe(204);
-      expect(body).toEqual({});
+      expect(status).toBe(200);
+      expect(body).toEqual({message: "Successfully left class"});
 
       const temp: ClassStudent | null = await prisma.classStudent.findUnique({
         where: {
