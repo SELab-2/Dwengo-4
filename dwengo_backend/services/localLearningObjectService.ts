@@ -212,6 +212,7 @@ export default class LocalLearningObjectService {
         where: { localLearningObjectId: id },
       }),
     );
+    console.log(learningPathNodes)
 
     if (learningPathNodes.length > 0) {
       const groupedNodes = learningPathNodes.reduce<
