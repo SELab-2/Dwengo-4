@@ -74,6 +74,6 @@ describe("Middleware - protectTeacher", () => {
     expect(mockNext).toHaveBeenCalledOnce();
     const err = (mockNext as any).mock.calls[0][0];
     expect(err).toBeInstanceOf(UnauthorizedError);
-    expect(err.message).toBe(invalidTokenMessage);
+    expect(err.message).toBe(teacherNotFoundMessage);
   });
 });
