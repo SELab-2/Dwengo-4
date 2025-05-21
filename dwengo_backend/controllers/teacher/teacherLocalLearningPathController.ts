@@ -20,6 +20,13 @@ export const createLocalLearningPath = asyncHandler(
     const { title, language, description, image, nodes } =
       req.body as LocalLearningPathData;
 
+
+    console.log("LEERPAD MAKEN")
+    console.log("LEERPAD MAKEN")
+    console.log("LEERPAD MAKEN")
+    console.log("LEERPAD MAKEN")
+    console.log(nodes);
+
     const newPath = await LocalLearningPathService.createLearningPath(teacherId, {
       title: title,
       language: language,

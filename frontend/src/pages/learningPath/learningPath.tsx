@@ -35,8 +35,10 @@ function buildBranchPairs(
   }
 
   const nodeById = new Map(lp.nodes.map(n => [n.nodeId, n]));
-  const loById   = new Map(learningObjects.map(l => [l.id, l]));
-  const outMap   = new Map(lp.nodes.map(n => [n.nodeId, trans.filter(t => t.nodeId === n.nodeId)]));
+  const loById   = new Map(learningObjects.map(lo => [lo.id, lo]));
+  const outMap   = new Map(
+    lp.nodes.map(n => [n.nodeId, trans.filter(t => t.nodeId === n.nodeId)])
+  );
 
   const branch: BranchItem[] = [];
   let cur = findStartNodeId(lp);
@@ -50,8 +52,19 @@ function buildBranchPairs(
     // push eventueel het bijbehorende LO
     const node = nodeById.get(cur);
     if (node) {
-      const lo = loById.get(node.localLearningObjectId ?? '');
-      if (lo) branch.push({ nodeId: cur, lo });
+      let lo: LearningObject | undefined;
+
+      if (node.localLearningObjectId) {
+        // lokaal object
+        lo = loById.get(node.localLearningObjectId);
+      } else if (node.dwengoHruid) {
+        // extern object: match op hruid
+        lo = learningObjects.find(o => o.hruid === node.dwengoHruid);
+      }
+
+      if (lo) {
+        branch.push({ nodeId: cur, lo });
+      }
     }
 
     // haal alle uitgaande transitions
@@ -63,9 +76,10 @@ function buildBranchPairs(
     if (outs.length > 1) {
       const choice = choices[cur];
       if (choice === undefined) break;
-      // vind de transitie waarvan condition === choice
-      nextTrans = outs.find(t => t.condition === String(choice)) ?? null;
-      if (!nextTrans) break;
+      // match condition op choice
+      nextTrans = outs.find(t => t.condition === String(choice))
+        ?? outs.find(t => t.default)
+        ?? outs[0];
     }
 
     // ga naar de volgende node
@@ -75,6 +89,7 @@ function buildBranchPairs(
 
   return branch;
 }
+
 
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -87,12 +102,12 @@ const LearningPath: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const isStudent = localStorage.getItem('role') === 'student';
 
-  const [learningPath, setLearningPath]       = useState<LearningPathType | null>(null);
+  const [learningPath, setLearningPath] = useState<LearningPathType | null>(null);
   const [learningObjects, setLearningObjects] = useState<LearningObject[]>([]);
-  const [choices, setChoices]                 = useState<Record<string, number>>({});
-  const [branch, setBranch]                   = useState<BranchItem[]>([]);
-  const [selectedNodeId, setSelectedNodeId]   = useState<string | null>(null);
-  const [progress, setProgress]               = useState(0);
+  const [choices, setChoices] = useState<Record<string, number>>({});
+  const [branch, setBranch] = useState<BranchItem[]>([]);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
 
   /* Data fetch */
   const [
@@ -100,13 +115,13 @@ const LearningPath: React.FC = () => {
     { data: loData, isLoading: loLoading, isError: loError, error: loErr },
   ] = useQueries({
     queries: [
-      { queryKey: ['learningPath', pathId],    queryFn: () => fetchLearningPath(pathId!) },
+      { queryKey: ['learningPath', pathId], queryFn: () => fetchLearningPath(pathId!) },
       { queryKey: ['learningObjects', pathId], queryFn: () => fetchLearningObjectsByLearningPath(pathId!) },
     ],
   });
 
-  useEffect(() => { if (lpData) setLearningPath(lpData); }, [lpData]);
-  useEffect(() => { if (loData) setLearningObjects(loData); }, [loData]);
+  useEffect(() => { console.log("LEERPAD DATA"); console.log(lpData); if (lpData) setLearningPath(lpData); }, [lpData]);
+  useEffect(() => { console.log("LEEROBJECT DATA"); console.log(loData); if (loData) setLearningObjects(loData); }, [loData]);
 
   /* Rebuild branch when data or choices change */
   useEffect(() => {
