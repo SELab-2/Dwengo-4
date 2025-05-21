@@ -198,6 +198,11 @@ function buildOrderedNodes(
     learningObjects.map(lo => [lo.id, lo])
   );
 
+
+  const loByHruid = new Map<string, LearningObject>(
+    learningObjects.filter(lo => lo.hruid).map(lo => [lo.hruid, lo])
+  );
+
   // Prepare nodes
   const nodeById = new Map<string, any>();
   lp.nodes.forEach(n => {
@@ -209,7 +214,7 @@ function buildOrderedNodes(
       viaOptionIndex: null as string | null,
       learningObject: n.localLearningObjectId
         ? loById.get(n.localLearningObjectId)
-        : loById.get(n.dwengoHruid),
+        : loByHruid.get(n.dwengoHruid),
       dwengoHruid: n.dwengoHruid,
       _visited: false,
     });
