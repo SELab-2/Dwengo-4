@@ -7,9 +7,7 @@ import { ClassItem, LearningPath } from '@/types/type';
 
 // Mock translation to return the key itself
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => key,
-  }),
+  useTranslation: () => ({ t: (key: string) => key }),
 }));
 
 // Stub dropdown component
@@ -63,12 +61,10 @@ describe('FormFields', () => {
   it('rendert basisvelden en placeholder-optie in select', () => {
     render(<FormFields {...baseProps()} />);
 
-    // label-tekst aanwezig (translation key)
     expect(
       screen.getByText(/assignments_form\.class\.choose/i),
     ).toBeInTheDocument();
 
-    // placeholder optie in de learning-path-select
     expect(
       screen.getByRole('option', {
         name: /assignments_form\.learning_path\.select/i,
@@ -106,16 +102,14 @@ describe('FormFields', () => {
     const props = baseProps();
     render(<FormFields {...props} />);
 
-    // wijzig titel
-    fireEvent.change(screen.getByLabelText(/assignments_form\.title/i), {
-      target: { value: 'Nieuw' },
-    });
+    // wijzig titel via displayValue
+    const titleInput = screen.getByDisplayValue('Opdracht');
+    fireEvent.change(titleInput, { target: { value: 'Nieuw' } });
     expect(props.setTitle).toHaveBeenCalledWith('Nieuw');
 
-    // wijzig description
-    fireEvent.change(screen.getByLabelText(/assignments_form\.description/i), {
-      target: { value: 'Desc' },
-    });
+    // wijzig description via displayValue
+    const descInput = screen.getByDisplayValue('Beschrijving');
+    fireEvent.change(descInput, { target: { value: 'Desc' } });
     expect(props.setDescription).toHaveBeenCalledWith('Desc');
 
     // wijzig learning path

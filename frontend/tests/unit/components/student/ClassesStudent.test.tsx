@@ -52,7 +52,7 @@ afterEach(() => {
 describe('ClassesStudent – student', () => {
   it('toont laadstatus', async () => {
     vi.spyOn(classModule, 'fetchClasses').mockReturnValue(
-      new Promise(() => {}), // blijft hangen
+      new Promise<ClassItem[]>(() => {}), // blijft hangen
     );
 
     renderComponent();
@@ -61,19 +61,19 @@ describe('ClassesStudent – student', () => {
   });
 
   it('toont foutmelding met custom message', async () => {
-    vi.spyOn(classModule, 'fetchClasses').mockRejectedValue({
-      info: { message: 'Er ging iets mis' },
-    });
+    vi.spyOn(classModule, 'fetchClasses').mockRejectedValue(
+      new Error('Er ging iets mis'),
+    );
 
     renderComponent();
 
     await waitFor(() =>
-      expect(screen.getByText(/Er ging iets mis/)).toBeInTheDocument(),
+      expect(screen.getByText('Er ging iets mis')).toBeInTheDocument(),
     );
   });
 
   it('toont standaard foutmelding zonder message', async () => {
-    vi.spyOn(classModule, 'fetchClasses').mockRejectedValue({});
+    vi.spyOn(classModule, 'fetchClasses').mockRejectedValue(new Error());
 
     renderComponent();
 
