@@ -16,36 +16,32 @@ const HtmlOrQuestionStep: React.FC<FormStepProps> = ({
   setQuestionState,
 }) => {
   useEffect(() => {
-    // Probeer rawHtml te parsen
     try {
       const parsed = JSON.parse(rawHtml);
-      const isValid =
-        parsed &&
-        typeof parsed.prompt === 'string' &&
-        Array.isArray(parsed.options);
-
-      if (isValid) {
-        if (isQuestionType(step1Data.contentType)) {
-          // Zet de state voor vraag-type
+      if (parsed && typeof parsed.prompt === 'string') {
+        if (Array.isArray(parsed.options) && isQuestionType(step1Data.contentType)) {
+          // Multiple choice vraag
           setQuestionState({
             prompt: parsed.prompt,
             options: parsed.options,
+            answer: parsed.answer || ""
+          });
+        } else if (typeof parsed.answer === 'string' && isQuestionType(step1Data.contentType)) {
+          // Open prompt vraag
+          setQuestionState({
+            prompt: parsed.prompt,
+            answer: parsed.answer || "",
+            options: [],
           });
         } else {
-          // Reset rawHtml als het NIET meer een vraag-type is
+          // Niet langer een vraag-type
           setRawHtml('');
         }
       }
     } catch {
-      // parse-fout: negeren
+      // parse-fout negeren
     }
-  }, [
-    rawHtml,
-    step1Data.contentType,
-    isQuestionType,
-    setQuestionState,
-    setRawHtml,
-  ]);
+  }, [rawHtml, step1Data.contentType, isQuestionType, setQuestionState, setRawHtml]);
 
   return (
     <>
@@ -83,7 +79,7 @@ const HtmlOrQuestionStep: React.FC<FormStepProps> = ({
           {/* Multiple choice opties */}
           {step1Data.contentType === ContentType.EVAL_MULTIPLE_CHOICE && (
             <div className="space-y-2">
-            <label className="block mb-1 font-medium">Question Answers</label>
+              <label className="block mb-1 font-medium">Question Answers</label>
 
               {questionState.options.map((opt, i) => (
                 <div key={i} className="flex items-center gap-2">
@@ -126,10 +122,29 @@ const HtmlOrQuestionStep: React.FC<FormStepProps> = ({
 
               {(questionState.options.filter((o) => o.trim()).length < 2 ||
                 questionState.options.some((o) => !o.trim())) && (
-                <div className="text-red-600">
-                  Please provide at least two non-empty options.
-                </div>
-              )}
+                  <div className="text-red-600">
+                    Please provide at least two non-empty options.
+                  </div>
+                )}
+            </div>
+          )}
+
+          {/* Open prompt antwoord */}
+          {step1Data.contentType === ContentType.EVAL_OPEN_QUESTION && (
+            <div className="mt-4">
+              <label className="block mb-1 font-medium">Correct Answer</label>
+              <input
+                type="text"
+                className="w-full border rounded p-2"
+                value={questionState.answer || ''}
+                onChange={(e) =>
+                  setQuestionState((s) => ({
+                    ...s,
+                    answer: e.target.value,
+                  }))
+                }
+                placeholder="Enter the correct answer"
+              />
             </div>
           )}
         </>

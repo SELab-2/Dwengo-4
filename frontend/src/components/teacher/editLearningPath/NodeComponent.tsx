@@ -1,80 +1,129 @@
-import React, { memo, useRef } from 'react';
+import React, { memo, useRef, useState, useEffect } from 'react';
+import { useDrag, useDrop } from 'react-dnd';
+import { useTranslation } from 'react-i18next';
+
 import AddNodeButton from './AddNodeButton';
+import DeleteNodeButton from './DeleteNodeButton';
 import {
   DraftNode,
   useLPEditContext,
 } from '../../../context/LearningPathEditContext';
 import { LearningPathNodeWithObject } from '../../../types/type';
-import { useDrag, useDrop } from 'react-dnd';
-import DeleteNodeButton from './DeleteNodeButton';
-import { useTranslation } from 'react-i18next';
 
 const DRAG_N_DROP_TYPE = 'NODE';
+
 interface DragItem {
   index: number;
 }
 
 interface NodeComponentProps {
   node: LearningPathNodeWithObject | DraftNode;
-  index: number; // index of the node in the list (needed to keep track of node order while dragging)
-  moveNode: (dragIndex: number, hoverIndex: number) => void; // for dragging and dropping nodes
+  index: number;                                      // positie binnen deze branch
+  moveNode: (dragIndex: number, hoverIndex: number) => void;
   onOpenLearningObject: () => void;
+
+  parentNodeId: string | null;
+  viaOptionIndex: number | null;
+
+  openBranchesDrawer?: (
+    node: LearningPathNodeWithObject | DraftNode
+  ) => void;
+
+  /** of deze branch al een MC-node bevat */
+  branchHasMC?: boolean;
+  /** de index van de MC-node in deze branch */
+  branchMCIndex?: number;
 }
 
 const NodeComponent: React.FC<NodeComponentProps> = memo(
-  ({ node, index, moveNode, onOpenLearningObject }) => {
+  ({
+    node,
+    index,
+    moveNode,
+    onOpenLearningObject,
+    parentNodeId,
+    viaOptionIndex,
+    openBranchesDrawer,
+    branchHasMC = false,
+    branchMCIndex = -1,
+  }) => {
     const { t } = useTranslation();
     const { isAddingNode, currentNodeIndex, deleteNode } = useLPEditContext();
+
     const nodeRef = useRef<HTMLDivElement | null>(null);
     const dragHandleRef = useRef<HTMLDivElement | null>(null);
 
-    const [{ isDragging }, drop] = useDrop<
-      DragItem,
-      unknown,
-      { isDragging: boolean } // true if ANY node is being dragged (not just this one)
-    >({
+    // lokale foutmelding voor add-button
+    const [addError, setAddError] = useState<string | null>(null);
+    useEffect(() => {
+      if (addError) {
+        const timer = setTimeout(() => setAddError(null), 3000);
+        return () => clearTimeout(timer);
+      }
+    }, [addError]);
+
+    /* Drag & drop setup */
+    const [{ isDragging }, drop] = useDrop<DragItem, unknown, { isDragging: boolean }>({
       accept: DRAG_N_DROP_TYPE,
+      canDrop: (item) => {
+        // blokkeren van droppen als target of source achter de MC-node ligt
+        if (branchHasMC) {
+          const dragIdx = item.index;
+          const hoverIdx = index;
+          if (dragIdx > branchMCIndex || hoverIdx > branchMCIndex) {
+            return false;
+          }
+        }
+        return true;
+      },
       collect: (monitor) => ({
-        isDragging: monitor.getItemType() !== null,
+        isDragging: !!monitor.getItem(),
       }),
-      hover: (item: DragItem, monitor) => {
+      hover: (item, monitor) => {
         if (!nodeRef.current) return;
 
-        const dragIndex = item.index; // index of the node being dragged
-        const hoverIndex = index; // index of the node being hovered over
+        const dragIdx = item.index;
+        const hoverIdx = index;
 
-        // Don't replace items with themselves
-        if (dragIndex === hoverIndex) return;
+        // nogmaals blokkeren bij hover
+        if (branchHasMC && (dragIdx > branchMCIndex || hoverIdx > branchMCIndex)) {
+          return;
+        }
 
-        // Determine rectangle on screen
-        const hoverBoundingRect = nodeRef.current?.getBoundingClientRect();
-        const hoverMiddleY =
-          (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+        if (dragIdx === hoverIdx) return;
+
+        const hoverRect = nodeRef.current.getBoundingClientRect();
+        const hoverMiddleY = (hoverRect.bottom - hoverRect.top) / 2;
         const clientOffset = monitor.getClientOffset();
         if (!clientOffset) return;
-        const hoverClientY = clientOffset.y - hoverBoundingRect.top; // get the y position of the mouse relative to the hovered node
+        const hoverClientY = clientOffset.y - hoverRect.top;
+        if (dragIdx < hoverIdx && hoverClientY < hoverMiddleY) return;
+        if (dragIdx > hoverIdx && hoverClientY > hoverMiddleY) return;
 
-        // Only perform the move when the mouse has crossed half of the items height
-        if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
-        if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
-
-        // actually perform the action
-        moveNode(dragIndex, hoverIndex);
-        item.index = hoverIndex;
+        moveNode(dragIdx, hoverIdx);
+        item.index = hoverIdx;
       },
     });
 
     const [, drag, preview] = useDrag({
       type: DRAG_N_DROP_TYPE,
       item: { index },
-      canDrag: () => !isAddingNode, // disable dragging when isAddingNode is true
+      canDrag: () => {
+        // blokkeren van drag van nodes achter MC-node
+        if (isAddingNode) return false;
+        if (branchHasMC && index > branchMCIndex) return false;
+        return true;
+      },
     });
 
     drop(nodeRef);
-    drag(dragHandleRef); // attach drag to the dragHandleRef (so you can only drag the node by the drag handle)
-    preview(nodeRef); // attach preview to entire node, so you don't only see the drag handle icon when dragging
+    drag(dragHandleRef);
+    preview(nodeRef);
 
     const isCurrentNode = isAddingNode && currentNodeIndex === index;
+
+    // bepalen of toevoegen na MC is
+    const isAfterMC = branchHasMC && index >= branchMCIndex;
 
     return (
       <div
@@ -114,29 +163,51 @@ const NodeComponent: React.FC<NodeComponentProps> = memo(
                 t('edit_learning_path.node_component.untitled_node')}
             </button>
 
-            {/* delete button */}
             {!isDragging && !isAddingNode && (
-              <div className="hidden group-hover:block">
+              <div className="hidden group-hover:flex items-center gap-2">
                 <DeleteNodeButton onDelete={() => deleteNode(index)} />
+                {node.learningObject?.contentType === 'EVAL_MULTIPLE_CHOICE' && (
+                  <button
+                    onClick={() => openBranchesDrawer?.(node)}
+                    className="text-xs px-2 py-1 bg-blue-50 hover:bg-blue-100 rounded"
+                  >
+                    Maak hier je Branches
+                  </button>
+                )}
               </div>
             )}
           </div>
         </div>
 
-        {/* button for adding a new node underneath current node */}
+        {/* add-node onder huidige node */}
         {(isCurrentNode || !isAddingNode) && !isDragging && (
-          <div
-            className={`mt-2 bg-white group-hover:bg-gray-100 ${!isAddingNode ? 'hidden group-hover:block' : ''}`}
-          >
-            <AddNodeButton
-              nodeIndex={index}
-              label={t('edit_learning_path.node_component.add_node_here')}
-            />
+          <div className={`mt-2 ${!isAddingNode ? 'hidden group-hover:block' : ''}`}>
+            {isAfterMC ? (
+              <>
+                <div className="text-red-600 text-sm mb-1">
+                  Je mag geen leerobjecten toevoegen na een meerkeuzevraag. Je moet dit in de branches doen.
+                </div>
+                <button
+                  onClick={() => setAddError(t('edit_learning_path.add_after_mc_error'))}
+                  className="px-3 py-2 w-full text-sm text-white bg-gray-400 rounded cursor-not-allowed"
+                  disabled
+                >
+                  {t('edit_learning_path.node_component.add_node_here')}
+                </button>
+              </>
+            ) : (
+              <AddNodeButton
+                nodeIndex={index}
+                label={t('edit_learning_path.node_component.add_node_here')}
+                parentNodeId={parentNodeId}
+                viaOptionIndex={viaOptionIndex}
+              />
+            )}
           </div>
         )}
       </div>
     );
-  },
+  }
 );
 
 export default NodeComponent;

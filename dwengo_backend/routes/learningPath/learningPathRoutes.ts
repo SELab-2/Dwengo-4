@@ -2,6 +2,7 @@ import express, { Router } from "express";
 import { z } from "zod";
 import {
   getLearningPathByIdController,
+  getLearningPathTransitionsController,
   searchLearningPathsController,
 } from "../../controllers/learningPath/learningPathController";
 import { protectAnyUser } from "../../middleware/authMiddleware/authAnyUserMiddleware";
@@ -47,6 +48,16 @@ router.get(
     querySchema: z.object({ includeProgress: z.string().optional() }),
   }),
   getLearningPathByIdController,
+);
+
+
+/**
+ * @route GET /learningPath/:pathId/transitions
+ * @description Haal 1 leerpad op, Dwengo of lokaal
+ */
+router.get(
+  "/:pathId/transitions",
+  getLearningPathTransitionsController,
 );
 
 export default router;

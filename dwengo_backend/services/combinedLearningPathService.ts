@@ -1,8 +1,11 @@
+import prisma from "../config/prisma";
+import { handlePrismaQuery } from "../errors/errorFunctions";
 import { NotFoundError } from "../errors/errors";
 import {
   searchLearningPaths as dwengoSearchPaths,
   getLearningPathByIdOrHruid as getDwengoPathByIdOrHruid,
   LearningPathDto,
+  
 } from "./learningPathService";
 import localLearningPathService from "./localLearningPathService";
 
@@ -13,6 +16,9 @@ interface CombinedLearningPathFilters {
   description?: string;
   all?: string;
 }
+
+
+
 
 /**
  * Zoekt leerpaden (Dwengo + lokaal).

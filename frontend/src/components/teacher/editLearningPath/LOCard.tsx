@@ -1,8 +1,9 @@
-import { useLPEditContext } from '@/context/LearningPathEditContext';
-import LearningObjectContent from '@/pages/learningPath/learningObjectContent';
-import { LearningObject } from '@/types/type';
 import React, { memo, useState } from 'react';
+import LearningObjectContent from '@/pages/learningPath/learningObjectContent';
 import { useTranslation } from 'react-i18next';
+
+import { useLPEditContext } from '@/context/LearningPathEditContext';
+import { LearningObject } from '@/types/type';
 
 interface LOCardProps {
   object: LearningObject;
@@ -10,35 +11,49 @@ interface LOCardProps {
   setSelectedComponentId: (id: string) => void;
 }
 
+/**
+ * Kaartje dat één leerobject toont in de selector-dialoog.
+ * Wanneer de kaart geselecteerd is, verschijnt een knop om het object
+ * als node toe te voegen op de plek waar de gebruiker bezig is.
+ */
 export const LOCard: React.FC<LOCardProps> = memo(
   ({ object, isSelectedObject, setSelectedComponentId }) => {
     const { t } = useTranslation();
-    const { addNode, currentNodeIndex } = useLPEditContext();
+
+    const {
+      addNode,
+      currentNodeIndex,
+      currentParentNodeId,
+      currentOptionIndex,
+    } = useLPEditContext();
     const [isContentVisible, setIsContentVisible] = useState(false);
 
     return (
       <div
-        className={`p-4 border rounded cursor-pointer ${
-          isSelectedObject ? 'bg-blue-100' : 'hover:bg-gray-100'
-        }`}
-        onClick={() => setSelectedComponentId(object.id)} // Toggle selection
+        className={`p-4 border rounded cursor-pointer ${isSelectedObject ? 'bg-blue-100' : 'hover:bg-gray-100'
+          }`}
+        onClick={() => setSelectedComponentId(object.id)}
       >
         <h2 className="font-bold text-2xl">{object.title}</h2>
         <p className="text-m">{object.description}</p>
+
         <p className="text-sm">
           <strong>{t('edit_learning_path.lo_card.language')}</strong>
           <span className="ml-1">{object.language}</span>
         </p>
+
         <p className="text-sm">
           <strong>{t('edit_learning_path.lo_card.difficulty')}</strong>
           <span className="ml-1">{object.difficulty}</span>
         </p>
+
         {object.keywords.length > 0 && (
           <p className="text-sm">
             <strong>{t('edit_learning_path.lo_card.keywords')}</strong>
             <span className="ml-1">{object.keywords.join(', ')}</span>
           </p>
         )}
+
         <p className="text-sm">
           <strong>
             {t('edit_learning_path.lo_card.teacher_exclusive.label')}
@@ -55,6 +70,7 @@ export const LOCard: React.FC<LOCardProps> = memo(
             {new Date(object.createdAt).toLocaleDateString()}
           </span>
         </p>
+
         <p className="text-sm">
           <strong>{t('edit_learning_path.lo_card.updated')}</strong>
           <span className="ml-1">
@@ -65,7 +81,8 @@ export const LOCard: React.FC<LOCardProps> = memo(
         {isSelectedObject && (
           <button
             className={`px-5 h-9.5 mt-2 mb-1 font-bold rounded-md text-white bg-dwengo-blue-dark hover:bg-dwengo-blue hover:cursor-pointer`}
-            onClick={() =>
+            onClick={() => {
+
               addNode(
                 object.title,
                 currentNodeIndex,
@@ -73,7 +90,11 @@ export const LOCard: React.FC<LOCardProps> = memo(
                 object.language,
                 object.version,
                 object.origin === 'dwengo' ? undefined : object.id,
+                object.contentType,
+                currentParentNodeId,
+                currentOptionIndex,
               )
+            }
             }
           >
             {t('edit_learning_path.lo_card.add_to_path')}
@@ -95,9 +116,8 @@ export const LOCard: React.FC<LOCardProps> = memo(
             viewBox="0 0 24 24"
             strokeWidth="1.5"
             stroke="currentColor"
-            className={`w-5 h-5 text-gray-700 transition-transform duration-200 ${
-              isContentVisible ? 'rotate-180' : ''
-            }`}
+            className={`w-5 h-5 text-gray-700 transition-transform duration-200 ${isContentVisible ? 'rotate-180' : ''
+              }`}
           >
             <path
               strokeLinecap="round"
@@ -110,7 +130,9 @@ export const LOCard: React.FC<LOCardProps> = memo(
         {/* Conditionally render the LearningObjectContent component */}
         {isContentVisible && (
           <div className="mt-4 p-2 bg-gray-50 border rounded prose prose-xl">
-            <LearningObjectContent rawHtml={object.raw || ''} />
+            <LearningObjectContent rawHtml={object.raw || ''} onChooseTransition={function (choiceIndex: number): void {
+              console.log("Geen transitie nodig bij leerpaden aanmaken")
+            }} />
           </div>
         )}
       </div>

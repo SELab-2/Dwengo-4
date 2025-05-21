@@ -180,6 +180,7 @@ model LearningPath {
   creator   Teacher  @relation(fields: [creatorId], references: [userId], name: "LearningPathCreator", onDelete: Cascade)
   // assignments     Assignment[]
   // questionGeneral QuestionGeneral[]
+  transitions    LearningPathTransition[]
 }
 
 model LearningPathNode {
@@ -226,6 +227,8 @@ model LearningPathTransition {
   // Als next leeg is, betekent dit dat de laatste node van het leerpad bereikt is.
   nextNodeId String?
   nextNode   LearningPathNode? @relation(fields: [nextNodeId], references: [nodeId], name: "NextNode", onDelete: Cascade)
+  learningPathId String
+  learningPath   LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
 }
 
 ///

@@ -210,6 +210,7 @@ export default class LocalLearningObjectService {
   /**
    * Verwijdert een leerobject op basis van zijn id.
    */
+
   static async deleteLearningObject(id: string): Promise<LearningObject> {
     // check if part of a learning path, if so delete corresponding nodes
     const learningPathNodes = await handlePrismaQuery(() =>
@@ -217,7 +218,7 @@ export default class LocalLearningObjectService {
         where: { localLearningObjectId: id },
       }),
     );
-    console.log(learningPathNodes)
+    console.log(learningPathNodes);
 
     if (learningPathNodes.length > 0) {
       const groupedNodes = learningPathNodes.reduce<
@@ -237,38 +238,42 @@ export default class LocalLearningObjectService {
             where: { id: learningPathId },
             include: {
               nodes: {
-                orderBy: { position: "asc" },
+                orderBy: { position: 'asc' },
               },
             },
           }),
         );
 
-        if (path) {
-          await localLearningPathService.updateLearningPath(learningPathId, {
-            title: path.title,
-            language: path.language,
-            nodes: path.nodes
-              .filter(
-                (node) =>
-                  !groupedNodes[learningPathId].some(
-                    (groupedNode) => groupedNode.nodeId === node.nodeId,
-                  ),
-              )
-              .map((node) => ({
-                ...node,
-                localLearningObjectId:
-                  node.localLearningObjectId === null
-                    ? undefined
-                    : node.localLearningObjectId,
-                dwengoHruid:
-                  node.dwengoHruid === null ? undefined : node.dwengoHruid,
-                dwengoLanguage:
-                  node.dwengoLanguage === null ? undefined : node.dwengoLanguage,
-                dwengoVersion:
-                  node.dwengoVersion === null ? undefined : node.dwengoVersion,
-              })),
-          });
-        }
+        // if (path) {
+        //   // Build NodeMetadata array for updateLearningPath
+        //   const newNodes: NodeMetadata[] = path.nodes
+        //     .filter(
+        //       node =>
+        //         !groupedNodes[learningPathId].some(
+        //           groupedNode => groupedNode.nodeId === node.nodeId,
+        //         ),
+        //     )
+        //     .map(node => ({
+        //       nodeId: node.nodeId,
+        //       localLearningObjectId:
+        //         node.localLearningObjectId ?? undefined,
+        //       dwengoHruid: node.dwengoHruid ?? undefined,
+        //       dwengoLanguage: node.dwengoLanguage ?? undefined,
+        //       dwengoVersion: node.dwengoVersion ?? undefined,
+        //       position: node.position,
+        //       // required NodeMetadata fields:
+        //       draftId: undefined,
+        //       parentNodeId: undefined,
+        //       learningObject: undefined,
+        //       viaOptionIndex: 0,
+        //     }));
+
+        //   await localLearningPathService.updateLearningPath(learningPathId, {
+        //     title: path.title,
+        //     language: path.language,
+        //     nodes: newNodes,
+        //   });
+        // }
       }
     }
 
@@ -278,4 +283,5 @@ export default class LocalLearningObjectService {
       }),
     );
   }
+
 }

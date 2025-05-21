@@ -1,4 +1,4 @@
-import { LearningObject, LearningPath } from '@/types/type';
+import { LearningObject, LearningPath, Transition } from '@/types/type';
 import { getTokenDuration } from '../teacher/authTeacher';
 import { apiRequest } from './config';
 
@@ -65,4 +65,20 @@ export async function fetchLearningObjectsByLearningPath(
     endpoint: `/learningObject/learningPath/${pathId}`,
     getToken: getAuthToken,
   })) as LearningObject[];
+}
+
+/**
+ * Fetches all transitions for a specific learning path
+ * @param {string} pathId - The ID of the learning path
+ * @returns {Promise<Transition[]>} List of transitions
+ * @throws {APIError} When fetching fails
+ */
+export async function fetchLearningPathTransitions(
+  pathId: string,
+): Promise<Transition[]> {
+  return (await apiRequest({
+    method: 'GET',
+    endpoint: `/learningpath/${pathId}/transitions`,
+    getToken: getAuthToken,
+  })) as Transition[];
 }

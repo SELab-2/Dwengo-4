@@ -26,6 +26,7 @@ export interface Step1Data {
 export interface QuestionState {
   prompt: string;
   options: string[];
+  answer: string
 }
 
 export interface FormContext {

@@ -33,10 +33,16 @@ export async function apiRequest<T>({
     body: body ? JSON.stringify(body) : undefined,
   });
 
+
   if (!response.ok) {
     const error: APIError = new Error('Er is iets misgegaan bij de aanvraag.');
     error.code = response.status;
     error.info = await response.json();
+
+    console.log(response);
+    console.log(response);
+    console.log(response);
+    console.log(error.info);
     throw error;
   }
 

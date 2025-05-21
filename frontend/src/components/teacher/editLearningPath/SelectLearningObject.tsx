@@ -11,16 +11,12 @@ import { LOCard } from './LOCard';
 const SelectLearningObject: React.FC = () => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredLearningPaths, setFilteredLearningPaths] = useState<
-    LearningPath[]
-  >([]);
+  const [filteredLearningPaths, setFilteredLearningPaths] = useState<LearningPath[]>([]);
   const [filteredObjects, setFilteredObjects] = useState<LearningObject[]>([]);
   const [selectedComponentId, setSelectedComponentId] = useState<string>('');
-  // user can select from learning paths or directly from their own learning objects
   const [viewMode, setViewMode] = useState<'paths' | 'objects'>('paths');
   const { language } = useLPEditContext();
 
-  // fetch all learning paths, so that user can select learning objects from them
   const {
     data: allLearningPaths,
     isLoading: isLoadingPaths,
@@ -28,8 +24,8 @@ const SelectLearningObject: React.FC = () => {
   } = useQuery<LearningPath[]>({
     queryKey: ['learningPaths'],
     queryFn: fetchLearningPaths,
-    staleTime: 5 * 60 * 1000, // consider data fresh for 5 minutes
-    gcTime: 30 * 60 * 1000, // keep unused data in cache for 30 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const {
@@ -39,41 +35,43 @@ const SelectLearningObject: React.FC = () => {
   } = useQuery<LearningObject[]>({
     queryKey: ['localLearningObjects'],
     queryFn: fetchOwnedLearningObjects,
-    staleTime: 10 * 60 * 1000, // consider data fresh for 10 minutes
-    gcTime: 30 * 60 * 1000, // keep unused data in cache for 30 minutes
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   useEffect(() => {
     if (allLearningPaths) {
-      const results = allLearningPaths.filter((path) => {
-        const matchesTitle = path.title
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
-        const matchesLanguage = !language || path.language === language;
-        return matchesTitle && matchesLanguage;
-      });
-      setFilteredLearningPaths(results);
+      setFilteredLearningPaths(
+        allLearningPaths.filter((path) => {
+          const matchesTitle = path.title
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase());
+          const matchesLanguage = !language || path.language === language;
+          return matchesTitle && matchesLanguage;
+        })
+      );
     }
   }, [searchTerm, allLearningPaths, language]);
 
   useEffect(() => {
     if (ownedLearningObjects) {
-      const results = ownedLearningObjects.filter((object) => {
-        const matchesTitle = object.title
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
-        const matchesLanguage = !language || object.language === language;
-        return matchesTitle && matchesLanguage;
-      });
-      setFilteredObjects(results);
+      setFilteredObjects(
+        ownedLearningObjects.filter((object) => {
+          const matchesTitle = object.title
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase());
+          const matchesLanguage = !language || object.language === language;
+     
+          return matchesTitle && matchesLanguage;
+        })
+      );
     }
   }, [searchTerm, ownedLearningObjects, language]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value); // update the search term
+    setSearchTerm(e.target.value);
   };
 
-  // show correct message based on view mode, loading state, and error states
   const renderStateMessage = () => {
     const isLoading =
       (viewMode === 'paths' && isLoadingPaths) ||
@@ -96,6 +94,9 @@ const SelectLearningObject: React.FC = () => {
       );
     }
     if (noResults) {
+      {console.log(viewMode)}
+      {console.log(filteredLearningPaths)}
+      {console.log(filteredObjects)}
       return (
         <p className="text-gray-500">
           {searchTerm
@@ -108,12 +109,11 @@ const SelectLearningObject: React.FC = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 h-full overflow-y-auto">
       <h1 className="text-2xl font-bold mb-2">
         {t('edit_learning_path.select_lo.title')}
       </h1>
 
-      {/* toggle between learning paths and learning objects */}
       <div className="flex items-center gap-4 mb-3">
         <button
           onClick={() => setViewMode('paths')}
@@ -137,7 +137,6 @@ const SelectLearningObject: React.FC = () => {
         </button>
       </div>
 
-      {/* search input */}
       <input
         type="text"
         placeholder={`${
@@ -150,13 +149,11 @@ const SelectLearningObject: React.FC = () => {
         className="w-full p-2 border border-gray-300 rounded mb-4"
       />
 
-      {/* show message if loading, error, or no results*/}
       {renderStateMessage()}
 
-      {/* results */}
-      <ul className="list-none">
-        {viewMode === 'paths' &&
-          filteredLearningPaths.map((path) => (
+      {viewMode === 'paths' ? (
+        <ul className="list-none">
+          {filteredLearningPaths.map((path) => (
             <li key={path.id} className="mb-2">
               <LPObjectSelector
                 path={path}
@@ -165,18 +162,19 @@ const SelectLearningObject: React.FC = () => {
               />
             </li>
           ))}
-
-        {viewMode === 'objects' &&
-          filteredObjects.map((object) => (
-            <li key={object.id} className="text-sm mb-4">
-              <LOCard
-                object={object}
-                isSelectedObject={selectedComponentId === object.id}
-                setSelectedComponentId={setSelectedComponentId}
-              />
-            </li>
+        </ul>
+      ) : (
+        <div className="grid grid-cols-2 gap-4">
+          {filteredObjects.map((object) => (
+            <LOCard
+              key={object.id}
+              object={object}
+              isSelectedObject={selectedComponentId === object.id}
+              setSelectedComponentId={setSelectedComponentId}
+            />
           ))}
-      </ul>
+        </div>
+      )}
     </div>
   );
 };

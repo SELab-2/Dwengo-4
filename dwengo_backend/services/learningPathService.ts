@@ -5,6 +5,14 @@ import {
 } from "../errors/errorFunctions";
 import { NotFoundError } from "../errors/errors";
 
+
+export interface LearningPathTransition {
+  nodeId:     string;
+  nextNodeId: string | null;
+  default:    boolean;
+  condition?: string | null;
+}
+
 export interface LearningPathDto {
   id: string; // Dwengo gebruikt _id of in onze DB is het id
   hruid: string;

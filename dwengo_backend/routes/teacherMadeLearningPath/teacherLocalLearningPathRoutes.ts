@@ -3,6 +3,7 @@ import { protectTeacher } from "../../middleware/authMiddleware/teacherAuthMiddl
 import {
   createLocalLearningPath,
   deleteLocalLearningPath,
+  deleteAllLocalLearningPaths,
   getLocalLearningPathById,
   getLocalLearningPaths,
   updateLocalLearningPath,
@@ -92,5 +93,19 @@ router.patch(
  * @access Teacher
  */
 router.delete("/:pathId", deleteLocalLearningPath);
+
+
+
+
+/**
+ * @route DELETE /pathByTeacher/
+ * @description Verwijder een leerpad
+ * @param pathId: string
+ * @access Teacher
+ */
+router.delete("/", deleteAllLocalLearningPaths);
+
+
+
 
 export default router;
