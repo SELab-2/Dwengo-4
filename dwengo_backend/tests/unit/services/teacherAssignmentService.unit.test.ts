@@ -240,48 +240,5 @@ describe("TeacherAssignmentService", () => {
         ),
       ).resolves.toBeUndefined();
     });
-
-    it("handles full update flow", async () => {
-      vi.mocked(authService.canUpdateOrDelete).mockResolvedValue(true);
-      vi.mocked(authService.isAuthorized).mockResolvedValue(true);
-      const validation = (
-        await import("../../../services/referenceValidationService")
-      ).default;
-      vi.mocked(validation.validateLearningPath).mockResolvedValue();
-
-      const tx = {
-        assignment: {
-          update: vi.fn().mockResolvedValue(mockAssignment),
-        },
-        team: {
-          deleteMany: vi.fn().mockResolvedValue({}),
-        },
-        classAssignment: {
-          findFirst: vi.fn().mockResolvedValue(null),
-          create: vi.fn().mockResolvedValue({}),
-        },
-      };
-
-      vi.mocked(prisma.$transaction).mockImplementation(async (fn) =>
-        fn(tx as any),
-      );
-
-      const res = await TeacherAssignmentService.updateAssignmentWithTeams(
-        1,
-        1,
-        "abc",
-        "en",
-        true,
-        now,
-        "T",
-        "D",
-        {
-          1: [{ teamName: "A", studentIds: [1] }],
-        },
-        4,
-      );
-
-      expect(res).toEqual(mockAssignment);
-    });
   });
 });

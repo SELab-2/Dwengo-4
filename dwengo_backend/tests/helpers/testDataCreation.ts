@@ -14,9 +14,12 @@ import {
   TeamAssignment,
   User,
   LearningObject,
+  ContentType as PrismaContentType,
+  Prisma,
 } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { parse } from "path";
 
 dotenv.config();
 
@@ -309,7 +312,7 @@ export async function createLearningObject(
       language: "nl",
       title: data.title,
       description: data.description,
-      contentType: data.contentType,
+      contentType: parseContentType(data.contentType),
       keywords: data.keywords ?? [],
       targetAges: data.targetAges ?? [],
       teacherExclusive: data.teacherExclusive ?? false,
@@ -324,3 +327,19 @@ export async function createLearningObject(
     },
   });
 }
+
+// Mapping van raw string naar Prisma enum
+const contentTypeMap: Record<string, PrismaContentType> = {
+  "TEXT_PLAIN": PrismaContentType.TEXT_PLAIN,
+  EVAL_MULTIPLE_CHOICE: PrismaContentType.EVAL_MULTIPLE_CHOICE,
+  EVAL_OPEN_QUESTION: PrismaContentType.EVAL_OPEN_QUESTION,
+};
+
+function parseContentType(raw: string): PrismaContentType {
+  const ct = contentTypeMap[raw];
+  if (!ct) {
+    throw new Error(`Invalid contentType "${raw}"`);
+  }
+  return ct;
+}
+

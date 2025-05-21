@@ -3,11 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { LearningPath } from '../../types/type';
 import { LearningPathFilter } from '../../components/learningPath/learningPathFilter';
 import { Filter } from '../../components/ui/filters';
-import { useNavigate } from 'react-router-dom';
 import { filterLearningPaths } from '@/util/filter';
 import { fetchLearningPaths } from '@/util/shared/learningPath';
 import { useTranslation } from 'react-i18next';
 import { LearningPathCard } from '@/components/learningPath/LearningPathCard';
+import CreateLPButton from '@/components/teacher/editLearningPath/CreateLPButton';
 
 /**
  * LearningPaths component displays all available learning paths.
@@ -24,7 +24,6 @@ import { LearningPathCard } from '@/components/learningPath/LearningPathCard';
 const LearningPaths: React.FC = () => {
   const [filters, setFilters] = useState<Filter[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate();
 
   const {
     data: learningPaths,
@@ -98,21 +97,7 @@ const LearningPaths: React.FC = () => {
           />
         </div>
 
-        {/* create learning path button */}
-        {isTeacherView && (
-          <button
-            className={`
-            px-4 py-2 whitespace-nowrap font-bold rounded-md hover:cursor-pointer
-            text-white bg-dwengo-green hover:bg-dwengo-green-dark 
-            w-full sm:w-auto
-          `}
-            onClick={() => {
-              navigate('/teacher/learning-paths/create');
-            }}
-          >
-            {t('learning_paths.create_lp')}
-          </button>
-        )}
+        {isTeacherView && <CreateLPButton />}
       </div>
 
       {isLoading && <p className="text-gray-600">{t('loading.loading')}</p>}

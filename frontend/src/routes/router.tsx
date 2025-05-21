@@ -3,7 +3,7 @@ import {
   createBrowserRouter,
   Link,
   RouteObject,
-  Outlet,          // ➜ toegevoegd voor de path-less groepen
+  Outlet, // ➜ toegevoegd voor de path-less groepen
 } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageChooser from '../components/shared/LanguageChooser';
@@ -12,12 +12,8 @@ import { action as teacherLogoutAction } from '../pages/teacher/LogoutTeacher';
 import { action as studentLogoutAction } from '../pages/student/LogoutStudent';
 
 // ✅ AUTH-LOADERS (nieuw)
-import {
-  checkAuthLoader as teacherCheckAuthLoader,
-} from '../util/teacher/authTeacher';
-import {
-  checkAuthLoader as studentCheckAuthLoader,
-} from '../util/student/authStudent';
+import { checkAuthLoader as teacherCheckAuthLoader } from '../util/teacher/authTeacher';
+import { checkAuthLoader as studentCheckAuthLoader } from '../util/student/authStudent';
 
 /* -------------------------------------------------------------------------- */
 /*                              LAZY COMPONENTS                               */
@@ -42,6 +38,7 @@ const TeacherIndex = lazy(() => import('../pages/teacher/TeacherIndex'));
 const EditLearningPath = lazy(
   () => import('../pages/teacher/EditLearningPath'),
 );
+const CustomContent = lazy(() => import('../pages/teacher/CustomContent'));
 
 // ==== STUDENT ROUTES ==== //
 const RootLayoutStudent = lazy(
@@ -63,14 +60,22 @@ const AssignmentsStudent = lazy(
 const QuestionOverview = lazy(
   () => import('../pages/student/QuestionOverview'),
 );
+
 const QuestionsForAssignment = lazy(
   () => import('@/pages/student/QuestionsForAssignment'),
 );
 const StudentClassIndex = lazy(
   () => import('../pages/student/StudentClassIndex'),
 );
+const LeaderBoard = lazy(() => import('../pages/student/LeaderBoard'));
 
-const LocalLearningObjectsPage = lazy(() => import('@/pages/teacher/LocalLearningObject'));
+const QuestionOverviewTeacher = lazy(
+  () => import('../pages/teacher/QuestionOverview'),
+);
+
+const LocalLearningObjectsPage = lazy(
+  () => import('@/pages/teacher/LocalLearningObject'),
+);
 
 // ==== LEARNING PATHS ==== //
 
@@ -126,10 +131,10 @@ export const router = createBrowserRouter([
     path: 'teacher',
     element: <RootLayoutTeacher />,
     children: [
-
       /* --- Publiek --- */
       { path: 'inloggen', element: <LoginTeacher /> },
       { path: 'registreren', element: <SignupTeacher /> },
+      { path: 'leaderboard', element: <LeaderBoard /> },
 
       /* --- Protected --- */
       {
@@ -140,17 +145,31 @@ export const router = createBrowserRouter([
           { path: 'logout', action: teacherLogoutAction },
           { path: 'classes', element: <ClassesPage /> },
           { path: 'classes/:classId', element: <EditClassTeacher /> },
-          { path: 'classes/:classId/add-assignment', element: <AssignmentAdd /> },
+          {
+            path: 'classes/:classId/add-assignment',
+            element: <AssignmentAdd />,
+          },
           { path: 'add-assignment', element: <AssignmentAdd /> },
           { path: 'assignment/:assignmentId', element: <Assignment /> },
-          { path: 'assignment/:assignmentId/edit', element: <AssignmentEdit /> },
           {
-        path: 'assignments',
-        element: <Assignments></Assignments>,
-      },
+            path: 'assignment/:assignmentId/edit',
+            element: <AssignmentEdit />,
+          },
+          {
+            path: 'assignments',
+            element: <Assignments></Assignments>,
+          },
+          {
+            path: 'question/:questionId',
+            element: <QuestionOverviewTeacher />,
+          },
           {
             path: 'local-learning-objects',
             element: <LocalLearningObjectsPage></LocalLearningObjectsPage>,
+          },
+          {
+            path: 'my-content',
+            element: <CustomContent></CustomContent>,
           },
           {
             path: 'learning-paths/create',
@@ -183,6 +202,7 @@ export const router = createBrowserRouter([
       /* --- Publiek --- */
       { path: 'inloggen', element: <LoginStudent /> },
       { path: 'registreren', element: <SignupStudent /> },
+      { path: 'leaderboard', element: <LeaderBoard /> },
 
       /* --- Protected --- */
       {
@@ -195,7 +215,10 @@ export const router = createBrowserRouter([
           { path: 'class/:classId', element: <StudentClassIndex /> },
           { path: 'assignment/:assignmentId', element: <AssignmentStudent /> },
           { path: 'assignments', element: <AssignmentsStudent /> },
-          { path: 'questions/:assignmentId', element: <QuestionsForAssignment /> },
+          {
+            path: 'questions/:assignmentId',
+            element: <QuestionsForAssignment />,
+          },
           { path: 'question/:questionId', element: <QuestionOverview /> },
           { path: 'question/new/:assignmentId', element: <NewQuestion /> },
           { path: 'learning-paths', element: <LearningPaths /> },

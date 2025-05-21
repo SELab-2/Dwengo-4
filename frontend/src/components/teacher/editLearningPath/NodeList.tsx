@@ -85,7 +85,7 @@ const NodeList: React.FC<NodeListProps> = ({
             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <span className="text-xs cursor-default">
+        <span className="text-xs cursor-default bg-white">
           {t('edit_learning_path.node_list_instructions')}
         </span>
       </div>

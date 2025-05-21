@@ -2,6 +2,7 @@ import React from 'react';
 import { ClassItem, LearningPath } from '../../../types/type';
 import styles from './AddAssignmentForm.module.css';
 import CustomDropdownMultiselect from './CustomDropdownMultiselect';
+import InputWithChecks from '../../shared/InputWithChecks';
 import { useTranslation } from 'react-i18next';
 
 interface FormFieldsProps {
@@ -47,8 +48,22 @@ const FormFields: React.FC<FormFieldsProps> = ({
           {t('assignments_form.class.choose')}
         </label>
         <CustomDropdownMultiselect
-          options={classesData || []}
-          selectedOptions={selectedClasses}
+          options={classesData.map(c => ({
+            ...c,
+            name: (
+              <div className="max-w-[200px] truncate" title={c.name}>
+                {c.name}
+              </div>
+            )
+          })) || []}
+          selectedOptions={selectedClasses.map(c => ({
+            ...c,
+            name: (
+              <div className="max-w-[200px] truncate" title={c.name}>
+                {c.name}
+              </div>
+            )
+          }))}
           onChange={setSelectedClasses}
         />
         {formErrors.classes && (
@@ -57,14 +72,14 @@ const FormFields: React.FC<FormFieldsProps> = ({
       </div>
 
       <div>
-        <label htmlFor="title">{t('assignments_form.title')}</label>
-        <input
-          type="text"
-          id="title"
-          name="title"
+        <InputWithChecks
+          label={t('assignments_form.title')}
           value={title}
           required
-          onChange={(e) => setTitle(e.target.value)}
+          max={100}
+          onChange={e => {
+            setTitle(e.target.value);
+          }}
         />
       </div>
 
@@ -87,12 +102,13 @@ const FormFields: React.FC<FormFieldsProps> = ({
             name="learningPath"
             onChange={handleLearningPathChange}
             value={selectedLearningPath?.id || ''}
+            className="w-full"
           >
-            <option value="">
+            <option value="" className="truncate">
               {t('assignments_form.learning_path.select')}
             </option>
             {learningPaths.map((path) => (
-              <option key={path.id} value={path.id}>
+              <option key={path.id} value={path.id} className="truncate" title={path.title}>
                 {path.title}
               </option>
             ))}
@@ -104,16 +120,14 @@ const FormFields: React.FC<FormFieldsProps> = ({
       </div>
 
       <div>
-        <label htmlFor="description">{t('assignments_form.description')}</label>
-        <textarea
-          id="description"
-          name="description"
-          required
-          onChange={(e) => setDescription(e.target.value)}
+        <InputWithChecks
+          label={t('assignments_form.description')}
           value={description}
-          rows={5}
-          cols={50}
-        ></textarea>
+          required
+          max={500}
+          inputType="textarea"
+          onChange={(e) => setDescription(e.target.value)}
+        />
       </div>
     </>
   );

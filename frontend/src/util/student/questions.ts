@@ -190,3 +190,26 @@ export async function createNewQuestion(
 
   return await response2.json();
 }
+
+export async function getLeaderboard(): Promise<any> {
+  const response = await fetch(`${BACKEND}/leaderboard`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getAuthToken()}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error: APIError = new Error(
+      'Er is iets misgegaan bij het ophalen van het scorebord.',
+    );
+    error.code = response.status;
+    error.info = await response.json();
+    throw error;
+  }
+
+  const leaderboard = await response.json();
+  console.log('leaderboard', leaderboard);
+  return leaderboard;
+}

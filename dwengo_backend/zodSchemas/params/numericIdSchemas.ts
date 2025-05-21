@@ -15,3 +15,4 @@ export const questionIdParamsSchema = makeIdParamSchema("questionId");
 export const studentIdParamsSchema = makeIdParamSchema("studentId");
 export const questionMessageIdParamsSchema =
   makeIdParamSchema("questionMessageId");
+export const emptyParamsSchema = z.object({});

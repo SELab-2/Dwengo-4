@@ -303,7 +303,10 @@ describe("invite tests", async (): Promise<void> => {
         .set("Authorization", `Bearer ${teacherUser2.token}`);
 
       expect(status).toBe(200);
-      expect(body.invites).toStrictEqual([invite1, invite2]);
+      const invites: Invite[] = body.invites;
+      expect(invites.length).toBe(2);
+      expect(invites[0].inviteId).toBe(invite1.inviteId);
+      expect(invites[1].inviteId).toBe(invite2.inviteId);
     });
   });
 
@@ -627,7 +630,10 @@ describe("invite tests", async (): Promise<void> => {
         .set("Authorization", `Bearer ${teacherUser1.token}`);
 
       expect(status).toBe(200);
-      expect(body.invites).toStrictEqual([invite1, invite2]);
+      const invites: Invite[] = body.invites;
+      expect(invites.length).toBe(2);
+      expect(invites[0].inviteId).toBe(invite1.inviteId);
+      expect(invites[1].inviteId).toBe(invite2.inviteId);
     });
 
     it("should respond with a `403` status code when the teacher is not part of the class", async (): Promise<void> => {

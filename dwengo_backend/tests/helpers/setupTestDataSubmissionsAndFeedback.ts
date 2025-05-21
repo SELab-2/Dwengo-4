@@ -43,7 +43,7 @@ export async function setupTestData() {
     const data = {
         title: "Test LO",
         description: "Niet voor echt gebruik",
-        contentType: ContentType.TEXT_PLAIN,
+        contentType: "text/plain",
     };
 
     // Create a LocalLearningObject

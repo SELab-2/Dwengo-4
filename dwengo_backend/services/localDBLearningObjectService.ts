@@ -17,7 +17,7 @@ import prisma from "../config/prisma";
  *
  * the local learning object can also optionally include the raw HTML content
  */
-function mapLocalToDto(
+export function mapLocalToDto(
   localObj: LearningObject & {
     LearningObjectRawHtml?: LearningObjectRawHtml | null;
   },

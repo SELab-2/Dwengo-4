@@ -130,8 +130,7 @@ const NodeComponent: React.FC<NodeComponentProps> = memo(
         ref={nodeRef}
         className="group border p-2 border-gray-200 bg-white hover:bg-gray-100 transition-colors duration-200"
       >
-        {/* header */}
-        <div className="flex items-center">
+        <div className="flex items-center bg-white group-hover:bg-gray-100">
           {/* drag handle */}
           <div
             ref={dragHandleRef}
@@ -153,10 +152,14 @@ const NodeComponent: React.FC<NodeComponentProps> = memo(
             </svg>
           </div>
 
-          {/* title & delete */}
-          <div className="flex-1 flex justify-between items-center w-full py-2 pr-4">
-            <button onClick={onOpenLearningObject} className="text-left">
-              {node.learningObject?.title ??
+          {/* lo title and delete button */}
+          <div className="flex-1 flex justify-between items-center w-full py-2 pe-4 bg-white group-hover:bg-gray-100">
+            {/* learning object title*/}
+            <button
+              onClick={() => onOpenLearningObject()}
+              className="text-left"
+            >
+              {node.learningObject?.title ||
                 t('edit_learning_path.node_component.untitled_node')}
             </button>
 

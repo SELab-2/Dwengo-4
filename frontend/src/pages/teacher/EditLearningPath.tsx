@@ -107,7 +107,9 @@ const EditLearningPath: React.FC = () => {
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
-      <div className="p-4 space-y-3 max-w-[405px] w-full bg-gray-50 overflow-y-scroll">
+      <div
+        className={`p-4 space-y-3 max-w-[405px] w-full border rounded overflow-y-scroll`}
+      >
         {/* path details */}
         {isLoadingPath && !isCreateMode ? (
           <p className="text-gray-500">

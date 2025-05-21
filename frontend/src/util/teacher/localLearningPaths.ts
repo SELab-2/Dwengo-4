@@ -24,6 +24,19 @@ export async function fetchLocalLearningPath(
 }
 
 /**
+ * Fetches all paths created by the current teacher.
+ * @returns {Promise<LearningPath[]>} The learning paths
+ * @throws {APIError} When fetching fails
+ */
+export async function fetchOwnedLearningPaths(): Promise<LearningPath[]> {
+  return await apiRequest({
+    method: 'GET',
+    endpoint: '/pathByTeacher',
+    getToken: getAuthToken,
+  });
+}
+
+/**
  * Fetches all nodes within a specific local learning path
  * and also includes the learning object details for each node.
  * @param {string} learningPathId - The ID of the local learning path
@@ -112,4 +125,19 @@ export async function updateOrCreateLearningPath({
   console.log()
 
   return response.learningPath;
+}
+
+/**
+ * Deletes a learning path with the given id.
+ * @param {string} learningPathId - The id of the learning path to delete
+ * @throws {APIError} When deleting fails
+ */
+export async function deleteLearningPath(
+  learningPathId: string,
+): Promise<void> {
+  return await apiRequest<void>({
+    method: 'DELETE',
+    endpoint: `/pathByTeacher/${learningPathId}`,
+    getToken: getAuthToken,
+  });
 }

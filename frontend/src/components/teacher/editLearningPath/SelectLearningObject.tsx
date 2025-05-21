@@ -33,7 +33,7 @@ const SelectLearningObject: React.FC = () => {
     isLoading: isLoadingOwnedObjects,
     isError: isErrorOwnedObjects,
   } = useQuery<LearningObject[]>({
-    queryKey: ['learningObjects'],
+    queryKey: ['localLearningObjects'],
     queryFn: fetchOwnedLearningObjects,
     staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
