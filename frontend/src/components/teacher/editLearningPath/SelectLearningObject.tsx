@@ -61,6 +61,7 @@ const SelectLearningObject: React.FC = () => {
             .toLowerCase()
             .includes(searchTerm.toLowerCase());
           const matchesLanguage = !language || object.language === language;
+     
           return matchesTitle && matchesLanguage;
         })
       );
@@ -93,6 +94,9 @@ const SelectLearningObject: React.FC = () => {
       );
     }
     if (noResults) {
+      {console.log(viewMode)}
+      {console.log(filteredLearningPaths)}
+      {console.log(filteredObjects)}
       return (
         <p className="text-gray-500">
           {searchTerm

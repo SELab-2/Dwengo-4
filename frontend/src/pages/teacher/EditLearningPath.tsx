@@ -1,99 +1,96 @@
+// EditLearningPath.tsx
 import React, { useEffect, useRef, useState } from 'react';
-import { LearningPath, LearningPathNodeWithObject } from '../../types/type';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import {
-  fetchLocalLearningPath,
-  fetchLocalLearningPathNodes,
-} from '../../util/teacher/localLearningPaths';
-import AddNodeButton from '../../components/teacher/editLearningPath/AddNodeButton';
-import SelectLearningObject from '../../components/teacher/editLearningPath/SelectLearningObject';
-import { DraftNode, useLPEditContext } from '../../context/LearningPathEditContext';
-import NodeList from '../../components/teacher/editLearningPath/NodeList';
-import BranchesDrawer from '../../components/teacher/editLearningPath/BranchesDrawer'; // TODO: implement this
+import { useTranslation } from 'react-i18next';
+import { useQueries } from '@tanstack/react-query';           // NEW
+
+import AddNodeButton from '@/components/teacher/editLearningPath/AddNodeButton';
+import SelectLearningObject from '@/components/teacher/editLearningPath/SelectLearningObject';
+import NodeList from '@/components/teacher/editLearningPath/NodeList';
+import BranchesDrawer from '@/components/teacher/editLearningPath/BranchesDrawer';
 import {
   LearningPathDetails,
   LearningPathDetailsRef,
 } from '@/components/teacher/editLearningPath/LearningPathDetails';
-import { useTranslation } from 'react-i18next';
+
+import { DraftNode, useLPEditContext } from '@/context/LearningPathEditContext';
+import type {
+  LearningPath,
+  LearningPathNodeWithObject,
+  LearningObject,
+  Transition,
+} from '@/types/type';
+import { fetchLearningObjectsByLearningPath, fetchLearningPath } from '@/util/shared/learningPath';
 
 const EditLearningPath: React.FC = () => {
   const { t } = useTranslation();
-  // error message to ensure at least one node is added before saving
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [branchNode, setBranchNode] = useState<
-    LearningPathNodeWithObject | DraftNode | null
-  >(null); // track which MC-node’s branches to edit
-
   const navigate = useNavigate();
-  const pathDetailsRef = useRef<LearningPathDetailsRef | null>(null);
-  
+  const { learningPathId } = useParams<{ learningPathId: string }>();
+
+  /* ───── context state ───── */
   const {
     isAddingNode,
-    setOrderedNodes,
     orderedNodes,
+    setOrderedNodes,
     savePath,
     isSavingPath,
     isCreateMode,
     language,
     setLanguage,
   } = useLPEditContext();
-  const { learningPathId } = useParams<{ learningPathId: string }>();
 
-  const {
-    data: learningPathData,
-    isLoading: isLoadingPath,
-    isError: isErrorPath,
-    error: errorPath,
-  } = useQuery<LearningPath>({
-    queryKey: ['learningPaths', learningPathId],
-    queryFn: () => fetchLocalLearningPath(learningPathId!),
-    enabled: !isCreateMode && !!learningPathId,
+  /* ───── lokale UI state ───── */
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [branchNode, setBranchNode] = useState<LearningPathNodeWithObject | DraftNode | null>(null);
+  const pathDetailsRef = useRef<LearningPathDetailsRef | null>(null);
+
+  /* ───── data ophalen (alleen edit-mode) ───── */
+  const [
+    // 0 → learningPath      1 → learningObjects
+    { data: lpData, isLoading: lpLoading, isError: lpError, error: lpErr },
+    { data: loData, isLoading: loLoading, isError: loError, error: loErr },
+  ] = useQueries({
+    queries: [
+      {
+        queryKey: ['learningPath', learningPathId],
+        queryFn: () => fetchLearningPath(learningPathId!),
+        enabled: !isCreateMode && !!learningPathId,
+      },
+      {
+        queryKey: ['learningObjects', learningPathId],
+        queryFn: () => fetchLearningObjectsByLearningPath(learningPathId!),
+        enabled: !isCreateMode && !!learningPathId,
+      },
+    ],
   });
 
-  const {
-    data: nodesData,
-    isLoading: isLoadingNodes,
-    isError: isErrorNodes,
-    error: errorNodes,
-  } = useQuery({
-    queryKey: ['learningPathNodes', learningPathId],
-    queryFn: () => fetchLocalLearningPathNodes(learningPathId!),
-    enabled: !isCreateMode && !!learningPathId,
-  });
-
-  // initialize orderedNodes when nodesData is fetched
+  /* ───── omzetting learningPath → orderedNodes ───── */
   useEffect(() => {
-    if (nodesData) {
-      setOrderedNodes(nodesData);
-    }
-  }, [nodesData]);
+    if (!lpData || !loData) return;
 
-  useEffect(() => {
-    if (learningPathData) {
-      setLanguage(learningPathData.language);
-    }
-  }, [learningPathData]);
+    // taal van pad instellen
+    setLanguage(lpData.language);
 
-  // dismiss error message after 5 seconds
+    // nodes & transitions omzetten
+    const nodesArray = buildOrderedNodes(lpData, loData);
+    setOrderedNodes(nodesArray);
+  }, [lpData, loData]);
+
+
+  /* ───── foutmeldingen automatisch wegklikken ───── */
   useEffect(() => {
-    if (errorMessage) {
-      const timer = setTimeout(() => {
-        setErrorMessage(null);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
+    if (!errorMessage) return;
+    const id = setTimeout(() => setErrorMessage(null), 5000);
+    return () => clearTimeout(id);
   }, [errorMessage]);
 
+  /* ───── opslaan ───── */
   const handleSavePath = () => {
-    if (!pathDetailsRef.current || !pathDetailsRef.current.validateInput()) {
-      return;
-    }
+    if (!pathDetailsRef.current || !pathDetailsRef.current.validateInput()) return;
     if (orderedNodes.length === 0) {
       setErrorMessage(t('edit_learning_path.no_nodes_error'));
       return;
     }
-    setErrorMessage(null);
     savePath({
       newTitle: pathDetailsRef.current.title,
       newDescription: pathDetailsRef.current.description,
@@ -104,82 +101,56 @@ const EditLearningPath: React.FC = () => {
     });
   };
 
+  /* ───── render ───── */
+  const isLoading = lpLoading || loLoading;
+  const isError = lpError || loError;
+
   return (
     <div className="flex h-screen">
-      {/* Sidebar */}
-      <div
-        className={`p-4 space-y-3 max-w-[405px] w-full border rounded overflow-y-scroll`}
-      >
-        {/* path details */}
-        {isLoadingPath && !isCreateMode ? (
-          <p className="text-gray-500">
-            {t('edit_learning_path.loading_path_details')}
-          </p>
-        ) : isErrorPath ? (
-          <p>Error: {errorPath?.message}</p>
+      {/* ───── zijbalk ───── */}
+      <div className="p-4 space-y-3 max-w-[405px] w-full border rounded overflow-y-scroll">
+        {isLoading && !isCreateMode ? (
+          <p className="text-gray-500">{t('edit_learning_path.loading_path_details')}</p>
+        ) : isError ? (
+          <p>Error: {lpErr?.message || loErr?.message}</p>
         ) : (
           <LearningPathDetails
             pathDetailsRef={pathDetailsRef}
-            initialTitle={learningPathData?.title}
-            initialDescription={learningPathData?.description}
-            initialImage={learningPathData?.image}
+            initialTitle={lpData?.title}
+            initialDescription={lpData?.description}
+            initialImage={lpData?.image}
           />
         )}
 
         {errorMessage && (
-          <div
-            className="bg-red-100 border border-dwengo-red-dark text-dwengo-red-darker px-3 py-2 rounded relative mb-4"
-            role="alert"
-          >
-            <span className="block sm:inline text-sm cursor-default">
-              {errorMessage}
-            </span>
+          <div className="bg-red-100 border border-dwengo-red-dark text-dwengo-red-darker px-3 py-2 rounded relative mb-4">
+            <span className="block sm:inline text-sm">{errorMessage}</span>
             <span
-              className="absolute top-0 bottom-0 right-0 px-4 py-3 hover:cursor-pointer"
               onClick={() => setErrorMessage(null)}
+              className="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 20 20"
-                strokeWidth="2"
-                stroke="currentColor"
-                className="size-4"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18 18 6M6 6l12 12"
-                />
-              </svg>
+              ✕
             </span>
           </div>
         )}
 
         <div className="rounded-lg border border-gray-200 p-2.5 bg-white">
-          {isLoadingNodes ? (
+          {isLoading ? (
             <p>{t('edit_learning_path.loading_objects')}</p>
-          ) : isErrorNodes ? (
-            <p>Error: {errorNodes?.message}</p>
+          ) : isError ? (
+            <p>Error: {lpErr?.message || loErr?.message}</p>
           ) : orderedNodes.length === 0 ? (
-            <AddNodeButton
-              nodeIndex={0}
-              label={t('edit_learning_path.add_node')}
-            />
+            <AddNodeButton nodeIndex={0} label={t('edit_learning_path.add_node')} />
           ) : (
-            <NodeList
-              parentNodeId={null}
-              viaOptionIndex={null}
-              openBranchesDrawer={setBranchNode}
-            />
+            <NodeList parentNodeId={null} viaOptionIndex={null} openBranchesDrawer={setBranchNode} />
           )}
         </div>
       </div>
 
-      {/* LO selection screen */}
+      {/* ───── LO-keuze ───── */}
       {isAddingNode && <SelectLearningObject />}
 
-      {/* Branches drawer */}
+      {/* ───── Branches drawer ───── */}
       {branchNode && (
         <BranchesDrawer
           mcNode={branchNode}
@@ -188,21 +159,19 @@ const EditLearningPath: React.FC = () => {
         />
       )}
 
-      {/* Confirm / Cancel edit */}
+      {/* ───── bevestigen / annuleren ───── */}
       <div className="fixed bottom-0 right-0 flex gap-2.5 p-2.5 justify-end border-t border-gray-200 bg-white w-full">
         <button
-          className="px-6 h-10 font-bold rounded-md text-white bg-dwengo-green hover:bg-dwengo-green-dark hover:cursor-pointer"
           onClick={handleSavePath}
           disabled={isSavingPath}
+          className="px-6 h-10 font-bold rounded-md text-white bg-dwengo-green hover:bg-dwengo-green-dark"
         >
-          {isSavingPath
-            ? t('edit_learning_path.saving')
-            : t('edit_learning_path.confirm')}
+          {isSavingPath ? t('edit_learning_path.saving') : t('edit_learning_path.confirm')}
         </button>
         <button
-          className="px-6 h-10 font-bold rounded-md bg-dwengo-red-200 text-white hover:bg-dwengo-red-dark hover:cursor-pointer"
           disabled={isSavingPath}
           onClick={() => navigate(-1)}
+          className="px-6 h-10 font-bold rounded-md bg-dwengo-red-200 text-white hover:bg-dwengo-red-dark"
         >
           {t('edit_learning_path.cancel')}
         </button>
@@ -212,3 +181,120 @@ const EditLearningPath: React.FC = () => {
 };
 
 export default EditLearningPath;
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Util:   learningPath → orderedNodes (met draftId, parentNodeId, viaOptionIndex)
+   ──────────────────────────────────────────────────────────────────────────── */
+
+
+
+   
+function buildOrderedNodes(
+  lp: LearningPath,
+  learningObjects: LearningObject[],
+): Omit<DraftNode, '_visited'>[] {
+  // Map learningObjects by id
+  const loById = new Map<string, LearningObject>(
+    learningObjects.map(lo => [lo.id, lo])
+  );
+
+  // Prepare nodes
+  const nodeById = new Map<string, any>();
+  lp.nodes.forEach(n => {
+    nodeById.set(n.nodeId, {
+      nodeId: n.nodeId,
+      localLearningObjectId: n.localLearningObjectId,
+      draftId: 0,
+      parentNodeId: null as string | null,
+      viaOptionIndex: null as string | null,
+      learningObject: n.localLearningObjectId
+        ? loById.get(n.localLearningObjectId)
+        : undefined,
+      dwengoHruid: n.dwengoHruid,
+      _visited: false,
+    });
+  });
+
+  // Find root nodes (no inbound transitions)
+  const inboundIds = new Set(lp.transitions.map(t => t.nextNodeId));
+  const roots = lp.nodes
+    .filter(n => !inboundIds.has(n.nodeId))
+    .map(n => nodeById.get(n.nodeId));
+
+  let draftCounter = 1;
+  const orderedRaw: any[] = [];
+
+  // DFS traversal
+  const visit = (node: any, branchRoot: number | null) => {
+    if (!node || node._visited) return;
+    node._visited = true;
+    node.draftId = draftCounter++;
+    orderedRaw.push(node);
+
+    const isMC = !node.dwengoHruid && node.learningObject.contentType === 'EVAL_MULTIPLE_CHOICE';
+    const nextBranch = isMC ? node.draftId : branchRoot;
+
+    console.log("NEW NODE")
+    console.log(node)
+    console.log(isMC)
+    console.log(node.learningObject.contentType === 'EVAL_MULTIPLE_CHOICE')
+    console.log(!node.dwengoHruid)
+    console.log(nextBranch)
+    console.log(isMC)
+
+
+    lp.transitions
+      .filter(t => t.nodeId === node.nodeId)
+      .sort((a, b) => Number(a.condition) - Number(b.condition))
+      .forEach(t => {
+        const child = nodeById.get(t.nextNodeId);
+        if (child) {
+          child.parentNodeId = nextBranch !== null ? String(nextBranch) : null;
+              const idx = parseInt(t.condition, 10);
+              child.viaOptionIndex = Number.isNaN(idx) ? null : idx;
+          visit(child, nextBranch);
+        }
+      });
+  };
+
+  roots.forEach(root => visit(root, null));
+
+
+
+
+  // Sort by draftId and map to desired shape
+  // Sort by draftId and map to desired shape
+  return orderedRaw
+    .sort((a, b) => {
+      // 1) non-null parents eerst
+      if (a.parentNodeId === null && b.parentNodeId !== null) return 1;
+      if (a.parentNodeId !== null && b.parentNodeId === null) return -1;
+
+      // 2) beide non-null: op parentNodeId numeriek (of lexicaal) vergelijken
+      if (a.parentNodeId !== b.parentNodeId) {
+        return Number(a.parentNodeId) - Number(b.parentNodeId);
+      }
+
+      // 3) zelfde parent: viaOptionIndex vergelijken (hogere index eerst)
+      //    null treaten we als -Infinity zodat echte opties altijd eerder komen
+      const ia = a.viaOptionIndex !== null ? Number(a.viaOptionIndex) : -Infinity;
+      const ib = b.viaOptionIndex !== null ? Number(b.viaOptionIndex) : -Infinity;
+      return ib - ia;
+    })
+    .map(node => ({
+      draftId: node.draftId,
+      isExternal: !node.localLearningObjectId,
+      learningObject: {
+        title:
+          node.learningObject?.title ||
+          node.learningObject?.uuid ||
+          node.dwengoHruid ||
+          '',
+        contentType: node.learningObject?.contentType || 'UNKNOWN',
+      },
+      localLearningObjectId: node.localLearningObjectId || null,
+      parentNodeId: node.parentNodeId,
+      viaOptionIndex:
+        node.viaOptionIndex == 'null' ? null : node.viaOptionIndex,
+    }));
+};
