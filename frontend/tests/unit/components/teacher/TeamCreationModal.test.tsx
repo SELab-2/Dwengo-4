@@ -37,25 +37,31 @@ describe('TeamCreationModal', () => {
     const setTeams = vi.fn();
     render(<TeamCreationModal {...baseProps} teams={{}} setTeams={setTeams} />);
 
+    // selecteer beide studenten
     fireEvent.click(screen.getByText(/alice smith/i));
     fireEvent.click(screen.getByText(/bob jones/i));
-    // gebruik algemene create-knop
+    // klik op de create-knop
     fireEvent.click(screen.getByRole('button', { name: /create/i }));
 
     expect(setTeams).toHaveBeenCalledTimes(1);
     expect(setTeams).toHaveBeenCalledWith({
-      1: [
-        {
-          id: 'team-1',
-          students,
-        },
+      '1': [
+        expect.objectContaining({
+          assignmentId: 0,
+          teamId: 'team-1',
+          team: expect.objectContaining({
+            id: 'team-1',
+            teamname: 'team-1',
+            classId: '1',
+            students: [{ user: students[0] }, { user: students[1] }],
+          }),
+        }),
       ],
     });
   });
 
   it('kan in individual-modus studenten toggelen', () => {
-    /** we simuleren parent-state door na elke setter-call te rerenderen */
-    let currentState = { 1: [] as StudentItem[] };
+    let currentState = { '1': [] as StudentItem[] };
     const setIndividualStudents = vi.fn((newState) => {
       currentState = newState;
       rerender(
@@ -83,14 +89,14 @@ describe('TeamCreationModal', () => {
 
     const aliceNode = screen.getByText(/alice smith/i);
 
-    // select Alice
+    // selecteer Alice
     fireEvent.click(aliceNode);
     expect(setIndividualStudents).toHaveBeenLastCalledWith({
-      1: [students[0]],
+      '1': [students[0]],
     });
 
-    // deselect Alice
+    // deselecteer Alice
     fireEvent.click(aliceNode);
-    expect(setIndividualStudents).toHaveBeenLastCalledWith({ 1: [] });
+    expect(setIndividualStudents).toHaveBeenLastCalledWith({ '1': [] });
   });
 });

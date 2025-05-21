@@ -1,6 +1,6 @@
 import React from 'react';
-import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import NavStudent from '@/components/student/NavStudent';
 
@@ -21,7 +21,6 @@ vi.mock('react-i18next', () => ({
       const val = dict[key];
       return typeof val === 'function' ? val(opts ?? {}) : (val ?? key);
     },
-    /* belangrijke toevoeging ↓ */
     i18n: {
       language: 'en',
       changeLanguage: vi.fn(),
@@ -67,6 +66,7 @@ describe('NavStudent', () => {
 
   it('toont navigatie voor ingelogde student en voert logout uit', () => {
     localStorage.setItem('firstName', 'Piet');
+    localStorage.setItem('role', 'student');
     renderComponent();
 
     expect(screen.getByText('Home')).toBeInTheDocument();

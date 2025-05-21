@@ -39,17 +39,19 @@ describe('authStudent.ts', () => {
   });
 
   describe('getAuthToken', () => {
-    it('returns null if no token in storage', () => {
+    it('returns null if no token or wrong role in storage', () => {
       expect(getAuthToken()).toBeNull();
     });
 
     it('returns "EXPIRED" if token exists but expiration is missing', () => {
       localStorage.setItem('token', 'abc');
+      localStorage.setItem('role', 'student');
       expect(getAuthToken()).toBe('EXPIRED');
     });
 
     it('returns token when expiration is in the future', () => {
       localStorage.setItem('token', 'abc');
+      localStorage.setItem('role', 'student');
       const future = new Date(Date.now() + 5_000).toISOString();
       localStorage.setItem('expiration', future);
       expect(getAuthToken()).toBe('abc');
@@ -57,6 +59,7 @@ describe('authStudent.ts', () => {
 
     it('returns "EXPIRED" when expiration is in the past', () => {
       localStorage.setItem('token', 'abc');
+      localStorage.setItem('role', 'student');
       const past = new Date(Date.now() - 5_000).toISOString();
       localStorage.setItem('expiration', past);
       expect(getAuthToken()).toBe('EXPIRED');
@@ -66,6 +69,7 @@ describe('authStudent.ts', () => {
   describe('tokenLoader', () => {
     it('simply proxies getAuthToken', () => {
       localStorage.setItem('token', 'xyz');
+      localStorage.setItem('role', 'student');
       const future = new Date(Date.now() + 2_000).toISOString();
       localStorage.setItem('expiration', future);
       expect(tokenLoader()).toBe('xyz');
@@ -73,15 +77,16 @@ describe('authStudent.ts', () => {
   });
 
   describe('checkAuthLoader', () => {
-    it('redirects to login if no token', () => {
+    it('redirects to login if no token or wrong role', () => {
       const result = checkAuthLoader();
-      // redirect returns a 302 Response with Location header
+      // redirect returns a Response created by react-router-dom
       expect(result).toHaveProperty('status', 302);
       expect((result as Response).headers.get('Location')).toBe(LOGIN_PATH);
     });
 
     it('redirects to login if token is expired', () => {
       localStorage.setItem('token', 'abc');
+      localStorage.setItem('role', 'student');
       const past = new Date(Date.now() - 1_000).toISOString();
       localStorage.setItem('expiration', past);
 
@@ -92,6 +97,7 @@ describe('authStudent.ts', () => {
 
     it('returns undefined when token is valid', () => {
       localStorage.setItem('token', 'ok');
+      localStorage.setItem('role', 'student');
       const future = new Date(Date.now() + 3_000).toISOString();
       localStorage.setItem('expiration', future);
 

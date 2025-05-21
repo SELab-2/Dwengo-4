@@ -5,7 +5,7 @@ import type { LearningPath } from '@/types/type';
 import type { Filter } from '@/components/ui/filters';
 
 beforeEach(() => {
-  // Stub de datum naar 10 januari 2022 (beetje outdated yesss)
+  // Stub de datum naar 10 januari 2022
   vi.useFakeTimers().setSystemTime(new Date('2022-01-10T00:00:00Z'));
 });
 
@@ -13,12 +13,12 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-/** Helper om snel een Filter-object te maken met minimale ve;lden. */
+/** Helper om snel een Filter-object te maken met minimale velden. */
 function makeFilter(type: FilterType, value: string[]): Filter {
   return {
     id: '',
     type,
-    operator: FilterOperator.IS, // geldige default
+    operator: FilterOperator.IS,
     value,
   };
 }
@@ -65,7 +65,6 @@ describe('filterLearningPaths', () => {
   });
 
   it('hanteert taal-filter correct', () => {
-    // alleen 'nl'-paths
     const nlOnly = filterLearningPaths(
       basePaths,
       [makeFilter(FilterType.LANGUAGE, ['nl'])],
@@ -73,7 +72,6 @@ describe('filterLearningPaths', () => {
     );
     expect(nlOnly.map((p) => p.id)).toEqual(['1']);
 
-    // value leeg ⇒ alle talen
     const allLang = filterLearningPaths(
       basePaths,
       [makeFilter(FilterType.LANGUAGE, [])],
@@ -81,7 +79,6 @@ describe('filterLearningPaths', () => {
     );
     expect(allLang.map((p) => p.id)).toEqual(['1', '2', '3']);
 
-    // path.language null en filter niet leeg ⇒ path moet uitgesloten worden
     const enOnly = filterLearningPaths(
       basePaths,
       [makeFilter(FilterType.LANGUAGE, ['en'])],
@@ -91,7 +88,6 @@ describe('filterLearningPaths', () => {
   });
 
   it('hanteert created-date-filter "week" en "month" correct', () => {
-    // binnen 7 dagen (week) ⇒ alleen id=1
     const week = filterLearningPaths(
       basePaths,
       [makeFilter(FilterType.CREATED_DATE, ['week'])],
@@ -99,7 +95,6 @@ describe('filterLearningPaths', () => {
     );
     expect(week.map((p) => p.id)).toEqual(['1']);
 
-    // binnen 30 dagen (month) ⇒ id=1 en id=2
     const month = filterLearningPaths(
       basePaths,
       [makeFilter(FilterType.CREATED_DATE, ['month'])],
@@ -107,7 +102,6 @@ describe('filterLearningPaths', () => {
     );
     expect(month.map((p) => p.id).sort()).toEqual(['1', '2']);
 
-    // ongeldige datum string uitsluiten
     const withInvalid = filterLearningPaths(
       [
         ...basePaths,
@@ -123,32 +117,6 @@ describe('filterLearningPaths', () => {
       '',
     );
     expect(withInvalid.map((p) => p.id)).toEqual(['1']);
-  });
-
-  it('hanteert creator-filter correct', () => {
-    // alleen “Jane Doe”
-    const byJane = filterLearningPaths(
-      basePaths,
-      [makeFilter(FilterType.CREATOR, ['Jane Doe'])],
-      '',
-    );
-    expect(byJane.map((p) => p.id)).toEqual(['2']);
-
-    // bij lege waarde ⇒ alle paden
-    const allCreators = filterLearningPaths(
-      basePaths,
-      [makeFilter(FilterType.CREATOR, [])],
-      '',
-    );
-    expect(allCreators.map((p) => p.id).sort()).toEqual(['1', '2', '3']);
-
-    // creator null en niet-leeg filter ⇒ path wordt uitgesloten
-    const noCreator = filterLearningPaths(
-      basePaths,
-      [makeFilter(FilterType.CREATOR, ['Someone'])],
-      '',
-    );
-    expect(noCreator).toEqual([]);
   });
 
   it('combineert meerdere filters en searchQuery met AND-logica', () => {

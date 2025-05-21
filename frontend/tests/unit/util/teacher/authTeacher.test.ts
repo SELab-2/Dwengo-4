@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-
-// Mock react-router-dom.redirect to return a sekkntinel value
-vi.mock('react-router-dom', () => ({
-  redirect: vi.fn((to: string) => `REDIRECT:${to}`),
-}));
+import { redirect } from 'react-router-dom';
 
 import {
   getTokenDuration,
@@ -11,7 +7,11 @@ import {
   tokenLoader,
   checkAuthLoader,
 } from '@/util/teacher/authTeacher';
-import { redirect } from 'react-router-dom';
+
+// Mock react-router-dom.redirect
+vi.mock('react-router-dom', () => ({
+  redirect: vi.fn((to: string) => `REDIRECT:${to}`),
+}));
 
 describe('authTeacher utilities', () => {
   beforeEach(() => {
@@ -35,7 +35,6 @@ describe('authTeacher utilities', () => {
       localStorage.setItem('expiration', future);
       const duration = getTokenDuration();
       expect(duration).toBeGreaterThan(0);
-      // roughly 10 seconds
       expect(duration).toBeLessThanOrEqual(10000);
     });
 
@@ -48,24 +47,32 @@ describe('authTeacher utilities', () => {
   });
 
   describe('getAuthToken & tokenLoader', () => {
-    it('returns null when no token stored', () => {
+    it('returns null when no token or wrong role', () => {
+      // neither token nor role
       expect(getAuthToken()).toBeNull();
       expect(tokenLoader()).toBeNull();
+
+      // token present but no role
+      localStorage.setItem('token', 'abc');
+      expect(getAuthToken()).toBeNull();
     });
 
     it('returns "EXPIRED" when token present but expired', () => {
-      // set token and past expiration
+      localStorage.setItem('role', 'teacher');
       localStorage.setItem('token', 'abc');
       const past = new Date(Date.now() - 5000).toISOString();
       localStorage.setItem('expiration', past);
+
       expect(getAuthToken()).toBe('EXPIRED');
       expect(tokenLoader()).toBe('EXPIRED');
     });
 
     it('returns token when valid and not expired', () => {
-      const future = new Date(Date.now() + 5000).toISOString();
+      localStorage.setItem('role', 'teacher');
       localStorage.setItem('token', 'xyz');
+      const future = new Date(Date.now() + 5000).toISOString();
       localStorage.setItem('expiration', future);
+
       expect(getAuthToken()).toBe('xyz');
       expect(tokenLoader()).toBe('xyz');
     });
@@ -79,18 +86,22 @@ describe('authTeacher utilities', () => {
     });
 
     it('redirects when token expired', () => {
+      localStorage.setItem('role', 'teacher');
       localStorage.setItem('token', 't');
       const past = new Date(Date.now() - 1).toISOString();
       localStorage.setItem('expiration', past);
+
       const result = checkAuthLoader();
       expect(redirect).toHaveBeenCalledWith('/teacher/inloggen');
       expect(result).toBe('REDIRECT:/teacher/inloggen');
     });
 
     it('does nothing when token valid', () => {
+      localStorage.setItem('role', 'teacher');
       localStorage.setItem('token', 'ok');
       const future = new Date(Date.now() + 10000).toISOString();
       localStorage.setItem('expiration', future);
+
       const result = checkAuthLoader();
       expect(redirect).not.toHaveBeenCalled();
       expect(result).toBeUndefined();

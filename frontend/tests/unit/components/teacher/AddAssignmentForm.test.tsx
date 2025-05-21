@@ -8,16 +8,7 @@ import AddAssignmentForm from '@/components/teacher/assignment/AddAssignmentForm
 import * as learningPathModule from '@/util/shared/learningPath';
 import * as assignmentModule from '@/util/teacher/assignment';
 
-// Mock navigation
-vi.mock('react-router-dom', async () => {
-  const actual =
-    await vi.importActual<typeof import('react-router-dom')>(
-      'react-router-dom',
-    );
-  return { ...actual, useNavigate: () => vi.fn() };
-});
-
-// Mock translation
+// Mock translation om gewoon de key terug te geven
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
@@ -44,7 +35,6 @@ describe('AddAssignmentForm – teacher', () => {
     vi.spyOn(learningPathModule, 'fetchLearningPaths').mockResolvedValue(
       learningPaths,
     );
-    // Return undefined instead of any
     vi.spyOn(assignmentModule, 'postAssignment').mockResolvedValue(undefined);
     vi.spyOn(assignmentModule, 'updateAssignment').mockResolvedValue(undefined);
   });
@@ -52,27 +42,28 @@ describe('AddAssignmentForm – teacher', () => {
   it('voert géén API-call uit wanneer er geen klas is geselecteerd', async () => {
     renderWithProviders(<AddAssignmentForm classesData={classesData} />);
 
-    // wacht tot learning paths geladen zijn
+    // wachten tot de learning paths geladen zijn
     await screen.findByText('LP-1');
 
-    // velden invullen behalve klas
-    fireEvent.change(screen.getByLabelText(/assignments_form\.title/i), {
-      target: { value: 'Opdracht' },
-    });
-    fireEvent.change(screen.getByLabelText(/assignments_form\.description/i), {
-      target: { value: 'Beschrijving' },
-    });
+    // titel en beschrijving invullen via textbox-role
+    const [titleInput, descInput] = screen.getAllByRole('textbox');
+    fireEvent.change(titleInput, { target: { value: 'Opdracht' } });
+    fireEvent.change(descInput, { target: { value: 'Beschrijving' } });
+
+    // learning path select
     fireEvent.change(
       screen.getByLabelText(/assignments_form\.learning_path\.choose/i),
       { target: { value: 'lp1' } },
     );
+
+    // deadline invullen (morgen)
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     fireEvent.change(screen.getByLabelText(/assignments_form\.deadline/i), {
       target: { value: tomorrow.toISOString().slice(0, 10) },
     });
 
-    // submit
+    // submit klikken
     fireEvent.click(
       screen.getByRole('button', { name: /assignments_form\.submit/i }),
     );
@@ -82,7 +73,8 @@ describe('AddAssignmentForm – teacher', () => {
     );
   });
 
-  it('roept updateAssignment met correct payload in edit-modus', async () => {
+  it('roept updateAssignment met juist payload in edit-modus', async () => {
+    // We voegen nu teamAssignments toe zodat de component de teams‐state kan vullen
     const assignmentData = {
       id: 1,
       title: 'Bestaande opdracht',
@@ -105,6 +97,8 @@ describe('AddAssignmentForm – teacher', () => {
       classTeams: {
         10: [{ id: 'T-1', teamName: 'T-1', studentIds: [1, 2], students: [] }],
       },
+      // én teamAssignments zodat useEffect de interne teams state vult
+      teamAssignments: [{ team: { id: 'T-1', classId: 10, students: [] } }],
     };
 
     renderWithProviders(
@@ -115,7 +109,7 @@ describe('AddAssignmentForm – teacher', () => {
       />,
     );
 
-    // submit
+    // direct submit klikken
     fireEvent.click(
       screen.getByRole('button', { name: /assignments_form\.submit/i }),
     );
@@ -124,8 +118,7 @@ describe('AddAssignmentForm – teacher', () => {
       expect(assignmentModule.updateAssignment).toHaveBeenCalledTimes(1),
     );
 
-    const [payload] = vi.mocked(assignmentModule.updateAssignment).mock
-      .calls[0];
+    const [[payload]] = vi.mocked(assignmentModule.updateAssignment).mock.calls;
     expect(payload).toMatchObject({
       id: 1,
       title: 'Bestaande opdracht',
