@@ -328,12 +328,12 @@ const AddAssignmentForm = ({
     const action = isEditing ? updateAssignment : postAssignment;
 
     try {
-      await action(payload);
+      const returnValue = await action(payload);
 
       navigate(
         isEditing
           ? `/teacher/assignment/${assignmentData?.id}`
-          : `/teacher/classes/${classId}`,
+          : `/teacher/assignment/${returnValue?.id}`,
       );
     } catch (error: any) {
       console.error(

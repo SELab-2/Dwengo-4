@@ -29,7 +29,7 @@ const AssignmentsSection: React.FC<AssignmentsSectionProps> = ({
       <BoxBorder extraClasses="mxw-700 m-a g-20">
         <div className="flex justify-between items-center mb-4">
           <h2>Opdrachten</h2>
-          <Link to={`/teacher/classes/\${classId}/add-assignment`}>
+          <Link to={`/teacher/classes/${classId}/add-assignment`}>
             <PrimaryButton>Nieuwe Opdracht</PrimaryButton>
           </Link>
         </div>
@@ -62,7 +62,7 @@ const AssignmentsSection: React.FC<AssignmentsSectionProps> = ({
               {filtered.map((assignment: any) => (
                 <div
                   key={assignment.id}
-                  onClick={() => navigate(`/teacher/assignment/\${assignment.id}`)}
+                  onClick={() => navigate(`/teacher/assignment/${assignment.id}`)}
                   className="p-4 border rounded hover:bg-gray-50 cursor-pointer transition-colors"
                 >
                   <h3 className="font-bold">{assignment.title}</h3>
