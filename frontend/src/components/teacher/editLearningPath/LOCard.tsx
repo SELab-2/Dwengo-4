@@ -68,7 +68,7 @@ export const LOCard: React.FC<LOCardProps> = memo(
         </p>
 
         {/* TODO: knop “bekijk inhoud” */}
-        <p>todo: give option to view lo content</p>
+        {/* <p>todo: give option to view lo content</p> */}
 
         {isSelectedObject && (
           <button
