@@ -231,16 +231,11 @@ function buildOrderedNodes(
     node.draftId = draftCounter++;
     orderedRaw.push(node);
 
-    const isMC = !node.dwengoHruid && node.learningObject.contentType === 'EVAL_MULTIPLE_CHOICE';
+
+  
+    let isMC = !node.dwengoHruid && node.learningObject && node.learningObject.contentType === 'EVAL_MULTIPLE_CHOICE';
     const nextBranch = isMC ? node.draftId : branchRoot;
 
-    console.log("NEW NODE")
-    console.log(node)
-    console.log(isMC)
-    console.log(node.learningObject.contentType === 'EVAL_MULTIPLE_CHOICE')
-    console.log(!node.dwengoHruid)
-    console.log(nextBranch)
-    console.log(isMC)
 
 
     lp.transitions
