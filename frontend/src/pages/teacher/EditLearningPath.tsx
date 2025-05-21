@@ -209,7 +209,7 @@ function buildOrderedNodes(
       viaOptionIndex: null as string | null,
       learningObject: n.localLearningObjectId
         ? loById.get(n.localLearningObjectId)
-        : undefined,
+        : loById.get(n.dwengoHruid),
       dwengoHruid: n.dwengoHruid,
       _visited: false,
     });
@@ -237,13 +237,7 @@ function buildOrderedNodes(
     const nextBranch = isMC ? node.draftId : branchRoot;
 
 
-    console.log("NEW NODE")
-    console.log(node)
-    console.log(isMC)
-    console.log(node.learningObject.contentType === 'EVAL_MULTIPLE_CHOICE')
-    console.log(!node.dwengoHruid)
-    console.log(nextBranch)
-    console.log(isMC)
+    
     lp.transitions
       .filter(t => t.nodeId === node.nodeId)
       .sort((a, b) => Number(a.condition) - Number(b.condition))
