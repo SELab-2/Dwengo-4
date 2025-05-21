@@ -122,7 +122,7 @@ export async function postAssignment({
   classTeams,
   teamSize,
 }: AssignmentPayload): Promise<void> {
-  await apiRequest({
+  return await apiRequest({
     method: 'POST',
     endpoint: '/assignment/teacher/team',
     body: {
